@@ -1,0 +1,3 @@
+*.pdf !text !filter !merge !diff
+*.png !text !filter !merge !diff
+*.svg !text !filter !merge !diff
