@@ -17,5 +17,8 @@ model {
   sigma ~ normal(0.05, 0.1) T[0, ]; // 
 
   // Logistic function with fixed upper asymptote at 1
-  y ~ normal((1 - b) ./ (1 + exp(-k * (x - x0))) + b, sigma);
+  vector[N] logistic_part;
+  logistic_part = (1 - b) ./ (1 + exp(-k * (x - x0))) + b;
+  y ~ normal(logistic_part, sigma);
 }
+

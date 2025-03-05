@@ -16,7 +16,7 @@ parameters {
   real x0;
   real<lower=0> k;
   real<lower=0, upper=1> b;
-  real<lower=0,upper=1> sigma;
+  real<lower=0> sigma;
 }
 model {
   // Informative priors from culture+mesocosm posteriors
@@ -27,5 +27,7 @@ model {
 
   
   // Logistic function with fixed upper asymptote at 1
-  y ~ normal((1-b) ./ (1 + exp(-k * (x - x0))) + b, sigma);
+  vector[N] logistic_part;
+  logistic_part = (1 - b) ./ (1 + exp(-k * (x - x0))) + b;
+  y ~ normal(logistic_part, sigma);
 }

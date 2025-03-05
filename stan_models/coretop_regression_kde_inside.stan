@@ -30,6 +30,8 @@ model {
   b ~ normal(b_post[sample_idx_b], 0.05);
   sigma ~ normal(0.05, 0.1) T[0, ]; //
 
-  // Logistic function likelihood
-  y ~ normal((1 - b) ./ (1 + exp(-k * (x - x0))) + b, sigma);
+  // Logistic function with fixed upper asymptote at 1
+  vector[N] logistic_part;
+  logistic_part = (1 - b) ./ (1 + exp(-k * (x - x0))) + b;
+  y ~ normal(logistic_part, sigma);
 }
