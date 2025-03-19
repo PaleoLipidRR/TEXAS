@@ -14,7 +14,7 @@ model {
   x0 ~ normal(20, 20) T[-4, ];  // Truncated normal
   k ~ normal(0, 0.25);
   b ~ beta(2, 5);       // Lower bound (0,1)
-  sigma ~ normal(0.05, 0.1) T[0, ]; // 
+  sigma ~ normal(0.01, 0.1) T[0.01, ]; // 
 
   // Logistic function with fixed upper asymptote at 1
   vector[N] logistic_part;
