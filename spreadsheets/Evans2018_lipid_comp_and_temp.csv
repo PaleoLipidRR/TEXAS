@@ -1,0 +1,53 @@
+/* DATA DESCRIPTION:								
+Citation:	Evans, Thomas W; Könneke, Martin; Lipp, Julius S; Adhikari, Rishi Ram; Taubner, Heidi; Elvert, Marcus; Hinrichs, Kai-Uwe (2018): Lipid composition and calculated temperature of Nitrosopumilus maritimus incubation experiment [dataset]. PANGAEA, https://doi.org/10.1594/PANGAEA.896411, 							
+	In supplement to: Evans, TW et al. (2018): Lipid biosynthesis of Nitrosopumilus maritimus dissected by lipid specific radioisotope probing (lipid-RIP) under contrasting ammonium supply. Geochimica et Cosmochimica Acta, 242, 51-63, https://doi.org/10.1016/j.gca.2018.09.001							
+Project(s):	Center for Marine Environmental Sciences (MARUM) (URI: https://www.marum.de/en/)							
+Parameter(s):	Incubation duration [h] (Inc dur) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: Time after 14C addition							
+	Replicate (Repl) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net)							
+	Acyclic glycerol dialkyl glycerol tetraether [%] (GDGT-0) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: Low NH4+							
+	Acyclic glycerol dialkyl glycerol tetraether [%] (GDGT-0) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: High NH4+							
+	Monocyclic glycerol dialkyl glycerol tetraether [%] (GDGT-1) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: Low NH4+							
+	Monocyclic glycerol dialkyl glycerol tetraether [%] (GDGT-1) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: High NH4+							
+	Dicyclic glycerol dialkyl glycerol tetraether [%] (GDGT-2) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: Low NH4+							
+	Dicyclic glycerol dialkyl glycerol tetraether [%] (GDGT-2) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: High NH4+							
+	Tricyclic glycerol dialkyl glycerol tetraether [%] (GDGT-3) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: Low NH4+							
+	Tricyclic glycerol dialkyl glycerol tetraether [%] (GDGT-3) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: High NH4+							
+	Tetracyclic glycerol dialkyl glycerol tetraether [%] (GDGT-4) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: Low NH4+							
+	Tetracyclic glycerol dialkyl glycerol tetraether [%] (GDGT-4) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: High NH4+							
+	Pentacyclic glycerol dialkyl glycerol tetraether, fractional abundance (GDGT-5) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: Low NH4+							
+	Pentacyclic glycerol dialkyl glycerol tetraether, fractional abundance (GDGT-5) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: High NH4+							
+	Temperature, calculated [°C] (T cal) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * METHOD/DEVICE: Calculated from TEX86 (Kim et al., 2010) (URI: https://doi.org/10.1016/j.gca.2010.05.027) * COMMENT: Low NH4+, TEX86L							
+	Temperature, calculated [°C] (T cal) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * METHOD/DEVICE: Calculated from TEX86 (Kim et al., 2010) (URI: https://doi.org/10.1016/j.gca.2010.05.027) * COMMENT: High NH4+, TEX86L							
+	Ring index of glycerol dialkyl glycerol tetraethers (RI GDGTs) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: Low NH4+							
+	Ring index of glycerol dialkyl glycerol tetraethers (RI GDGTs) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: High NH4+							
+	Amount-of-substance ratio: archaeol to tetraether [%] (AR/T) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: Low NH4+							
+	Amount-of-substance ratio: archaeol to tetraether [%] (AR/T) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: High NH4+							
+	Amount-of-substance ratio: methoxy archaeol to archaeol [%] (MeO-AR/AR) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: Low NH4+							
+	Amount-of-substance ratio: methoxy archaeol to archaeol [%] (MeO-AR/AR) * PI: Evans, Thomas W (https://orcid.org/0000-0002-7596-1282, thomas.evans@gmx.net) * COMMENT: High NH4+							
+License:	Creative Commons Attribution 4.0 International (CC-BY-4.0) (URI: https://creativecommons.org/licenses/by/4.0/)							
+Size:	220 data points							
+*/								
+Inc dur [h] (Time after 14C addition)	Repl	GDGT-0 [%] (Low NH4+)	GDGT-1 [%] (Low NH4+)	GDGT-2 [%] (Low NH4+)	GDGT-3 [%] (Low NH4+)	GDGT-4 [%] (Low NH4+)	GDGT-5 (Low NH4+)	ammonia_conc_mmol_L
+0	A	0.051	0.06	0.135	0.031	0.03	0.693	0.27
+12	A	0.051	0.054	0.123	0.028	0.033	0.711	0.23
+24	A	0.037	0.047	0.132	0.024	0.03	0.729	0.15
+36	A	0.027	0.03	0.145	0.03	0.03	0.739	0.04
+48	A	0.03	0.035	0.156	0.03	0.024	0.726	0
+72	A	0.026	0.02	0.157	0.033	0.026	0.738	0
+12	B	0.041	0.038	0.125	0.033	0.033	0.729	0.08
+24	B	0.04	0.034	0.113	0.034	0.026	0.754	0.05
+36	B	0.029	0.039	0.166	0.029	0.011	0.726	0.05
+48	B	0.025	0.025	0.128	0.022	0.044	0.757	0
+0	A	0.051	0.06	0.135	0.031	0.03	0.693	1.27
+12	A	0.067	0.053	0.114	0.029	0.036	0.7	1.18
+24	A	0.101	0.054	0.108	0.028	0.04	0.67	1.05
+36	A	0.109	0.057	0.111	0.036	0.04	0.646	0.88
+48	A	0.12	0.076	0.107	0.037	0.037	0.622	0.67
+72	A	0.128	0.084	0.106	0.031	0.038	0.614	0.46
+12	B	0.061	0.053	0.123	0.042	0.029	0.692	1.02
+24	B	0.073	0.047	0.116	0.031	0.015	0.718	0.94
+36	B	0.073	0.051	0.099	0.035	0.031	0.71	0.87
+48	B	0.084	0.066	0.112	0.032	0.029	0.677	0.75
+								
+								
+		100						
