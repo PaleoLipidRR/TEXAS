@@ -23,7 +23,6 @@ parameters {
   real<lower=0>         k;       // shared steepness
   real<lower=0,upper=1> b;       // shared lower asymptote
 
-  real                  beta1; // intercept for dataset3 (coretop)
   real                  beta0;      // new slope for z3
   real<lower=0>         sigma1;  // noise DS1
   real<lower=0>         sigma2;  // noise DS2
@@ -37,7 +36,6 @@ model {
   b      ~ beta(2, 5);
 
   // prior on the linear term
-  beta1     ~ normal(0, 0.2);
   beta0     ~ normal(0, 0.2);
 
   // noise priors
@@ -51,14 +49,12 @@ model {
 
   // for dataset 3, add the linear term beta3 * z3
   vector[N3] mu3 = ((1 - b) * inv_logit(k * (x3 - x0)) + b)
-                  + beta0 * z3
-                  + beta1;
+                  + beta0 * z3;
 
   // Likelihoods
   y1 ~ normal(mu1, sigma1);
   y2 ~ normal(mu2, sigma2);
   y3 ~ normal(mu3, sigma3);
-
 }
 
 generated quantities {
