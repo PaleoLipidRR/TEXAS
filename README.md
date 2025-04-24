@@ -3,7 +3,7 @@ A repository for the development of culture-informed temperature calibration bas
 
 
 <iframe
-  src="scaledRI_vs_Temperature.html"
+  src="html_figures/scaledRI_vs_Temperature.html"
   width="100%"
   height="600"
   style="border:none;">
