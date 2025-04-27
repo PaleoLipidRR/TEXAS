@@ -1,13 +1,12 @@
-Metadata-Version: 2.2
+Metadata-Version: 2.1
 Name: culRIBayesian
 Version: 0.1.0
 Summary: Bayesian GDGT–temperature utilities
+Home-page: UNKNOWN
 Author: Ronnakrit Rattanasriampaipong (paleolipidrr)
-Requires-Python: >=3.10
-Requires-Dist: cmdstanpy>=1.0
-Requires-Dist: xarray>=2023.7
-Requires-Dist: numpy>=1.20
-Dynamic: author
-Dynamic: requires-dist
-Dynamic: requires-python
-Dynamic: summary
+License: UNKNOWN
+Platform: UNKNOWN
+Requires-Python: >=3.7
+
+UNKNOWN
+

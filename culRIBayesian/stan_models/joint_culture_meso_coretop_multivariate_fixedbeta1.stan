@@ -36,7 +36,7 @@ model {
   b      ~ beta(2, 5);
 
   // prior on the linear term
-  beta0     ~ normal(0, 0.2);
+  beta0     ~ normal(0, 0.01);
 
   // noise priors
   sigma1 ~ normal(0.01, 0.1) T[0.01, ];
