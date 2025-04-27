@@ -8,7 +8,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         "cmdstanpy>=1.0",
-        "xarray>=2023.7",
+        "xarray>=0.20",
         "numpy>=1.20",
     ],
     package_data={
@@ -16,5 +16,5 @@ setup(
         "culRIBayesian": ["stan_models/*.stan"],
     },
     include_package_data=True,
-    python_requires=">=3.9",
+    python_requires=">=3.7",
 )

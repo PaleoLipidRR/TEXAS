@@ -1,0 +1,92 @@
+/* DATA DESCRIPTION:
+Citation:	Huguet, Carme; Kim, Jung-Hyun; Sinninghe Damsté, Jaap S; Schouten, Stefan (2006): Sea surface temperature reconstruction for sediment core SO42-74KL [dataset]. PANGAEA, https://doi.org/10.1594/PANGAEA.861247
+Related to:	Ho, Sze Ling; Laepple, Thomas (2016): Flat meridional temperature gradient in the early Eocene in the subsurface rather than surface ocean. Nature Geoscience, https://doi.org/10.1038/ngeo2763
+	Huguet, Carme; Kim, Jung-Hyun; Sinninghe Damsté, Jaap S; Schouten, Stefan (2006): Reconstruction of sea surface temperature variations in the Arabian Sea over the last 23 kyr using organic proxies (TEX86 and UK'37). Paleoceanography, 21(3), PA3003, https://doi.org/10.1029/2005PA001215
+Coverage:	LATITUDE: 14.321000 * LONGITUDE: 57.347000
+	DATE/TIME START: 1986-05-24T00:00:00 * DATE/TIME END: 1986-05-24T00:00:00
+	MINIMUM ELEVATION: -3212.0 m * MAXIMUM ELEVATION: -3212.0 m
+Event(s):	SO42-74KL (KL-74, AS-12) * LATITUDE: 14.321000 * LONGITUDE: 57.347000 * DATE/TIME: 1986-05-24T00:00:00 * ELEVATION: -3212.0 m * Recovery: 3.16 m * LOCATION: Arabian Sea * CAMPAIGN: SO42 (URI: https://doi.org/10.48433/cr_so42) * BASIS: Sonne (URI: https://en.wikipedia.org/wiki/RV_Sonne) * METHOD/DEVICE: Kasten corer (KAL)
+Comment:	Dataset was corrected on 2018-05-29, columns for TEX86- and UK'37-temperatures were switched in the old version.
+Parameter(s):	AGE [ka BP] (Age) * GEOCODE * PI: Huguet, Carme (https://orcid.org/0000-0001-8025-2010)
+	Sea surface temperature, annual mean [°C] (SST (1-12)) * PI: Huguet, Carme (https://orcid.org/0000-0001-8025-2010) * METHOD/DEVICE: Calculated from UK'37 (Müller et al, 1998) (URI: https://doi.org/10.1016/S0016-7037(98)00097-0)
+	Sea surface temperature, annual mean [°C] (SST (1-12)) * PI: Huguet, Carme (https://orcid.org/0000-0001-8025-2010) * METHOD/DEVICE: Calculated according to Schouten et al. (2002) (URI: https://doi.org/10.1016/s0012-821x(02)00979-2)
+License:	Creative Commons Attribution 3.0 Unported (CC-BY-3.0) (URI: https://creativecommons.org/licenses/by/3.0/)
+Size:	151 data points
+*/
+Age [ka BP]	SST (1-12) [°C] (Calculated from UK'37 (Müller...)	SST (1-12) [°C] (Calculated according to Schou...)
+0.20	27.30	26.39
+0.40	27.36	27.47
+0.60	27.27	27.13
+0.82	27.36	26.82
+1.03	27.12	27.81
+1.25	27.21	26.95
+1.46	27.03	28.26
+1.68	27.12	27.55
+1.89	27.03	27.30
+2.10	26.91	27.80
+2.32	26.82	28.26
+2.53	27.15	28.85
+2.75	27.03	28.02
+2.96	27.18	27.78
+3.31	26.97	28.49
+3.65	26.88	27.81
+4.00	26.97	28.25
+4.34	27.03	29.24
+4.69	27.21	27.68
+5.04	27.09	28.45
+5.38	27.33	27.27
+5.73	27.24	29.28
+6.12	27.21	28.93
+6.92	26.70	28.47
+7.31	27.06	27.84
+7.71	26.82	27.72
+8.11	26.91	26.58
+8.37	26.97	27.63
+8.63	26.97	27.53
+8.88	26.64	27.11
+9.14	26.91	26.49
+9.47	26.70	26.91
+9.80	26.67	27.52
+10.14	26.70	27.23
+10.47	26.58	27.60
+10.80	26.70	27.90
+11.13	26.42	27.60
+11.46	26.55	27.56
+11.69	26.36	27.72
+11.92	26.33	
+12.15	26.21	29.57
+12.38	26.15	30.31
+12.61	26.18	29.47
+12.84	26.12	27.36
+13.08	26.21	28.01
+13.36	26.39	27.89
+13.65	26.15	27.19
+13.94	26.30	26.06
+14.23	26.15	26.15
+14.52	25.73	26.09
+14.80	25.85	27.97
+15.13	25.64	28.44
+15.35	25.55	30.25
+15.63	25.21	28.78
+15.90	25.24	30.56
+16.18	25.24	29.71
+16.54	25.12	30.63
+16.89	25.15	29.09
+17.25	24.97	28.29
+17.61	24.91	27.35
+17.96	24.85	25.84
+18.32	24.94	25.58
+18.68	25.00	24.45
+18.79	25.06	24.26
+18.91	25.18	24.12
+19.04	25.21	24.05
+19.16	25.06	24.44
+19.29	25.03	24.68
+19.42	25.12	24.19
+19.55	25.06	24.45
+19.68	24.94	24.46
+20.29	25.12	25.21
+20.90	24.85	23.93
+21.50	25.09	23.78
+22.11	25.15	25.02
+22.72	25.24	24.59
