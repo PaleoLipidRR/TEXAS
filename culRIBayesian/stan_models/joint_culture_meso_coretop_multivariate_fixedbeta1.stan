@@ -17,7 +17,6 @@ data {
   vector[N3]     z3;        // e.g. nutrient concentration or depth, etc.
 }
 
-
 parameters {
   real<lower=-4>        x0;      // shared inflection
   real<lower=0>         k;       // shared steepness
