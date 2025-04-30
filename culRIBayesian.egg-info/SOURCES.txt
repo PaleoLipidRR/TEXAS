@@ -11,6 +11,8 @@ culRIBayesian/stan_models/bernoulli.stan
 culRIBayesian/stan_models/coretop_combined.stan
 culRIBayesian/stan_models/coretop_regression_kde_inside.stan
 culRIBayesian/stan_models/coretop_regression_post_stats.stan
+culRIBayesian/stan_models/joint_all_full_multivariate.stan
+culRIBayesian/stan_models/joint_all_full_multivariate_fixedbeta1.stan
 culRIBayesian/stan_models/joint_culture_meso.stan
 culRIBayesian/stan_models/joint_culture_meso_coretop.stan
 culRIBayesian/stan_models/joint_culture_meso_coretop_multivariate.stan
