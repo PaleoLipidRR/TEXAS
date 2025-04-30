@@ -1,14 +1,16 @@
-// joint_culture_meso_coretop_multivariate_fixedbeta1.stan
+// joint_all_full_multivariate_fixedbeta1.stan
 data {
   // first dataset
   int<lower=1> N1;
   vector[N1] x1;
   vector[N1] y1;
+  vector[N1] z1;        // e.g. nutrient concentration or depth, etc.
 
   // second dataset
   int<lower=1> N2;
   vector[N2] x2;
   vector[N2] y2;
+  vector[N2] z2;        // e.g. nutrient concentration or depth, etc.
 
   // third dataset, now with an extra predictor z3
   int<lower=1>   N3;
@@ -43,11 +45,13 @@ model {
   sigma3 ~ normal(0.01, 0.1) T[0.01, ];
 
   // Logistic‐curve means (vectorized)
-  vector[N1] mu1 = (1 - b) * inv_logit(k * (x1 - x0)) + b;
-  vector[N2] mu2 = (1 - b) * inv_logit(k * (x2 - x0)) + b;
-
+  vector[N1] mu1 = ((1 - b) * inv_logit(k * (x1 - x0)) + b)
+                  + beta0 * z1;
+  vector[N2] mu2 = ((1 - b) * inv_logit(k * (x2 - x0)) + b)
+                  + beta0 * z2;
   // for dataset 3, add the linear term beta3 * z3
-  vector[N3] mu3 = (1 - b) * inv_logit(k * (x3 - x0)) + b + (beta0 * z3);
+  vector[N3] mu3 = ((1 - b) * inv_logit(k * (x3 - x0)) + b)
+                  + beta0 * z3;
 
   // Likelihoods
   y1 ~ normal(mu1, sigma1);

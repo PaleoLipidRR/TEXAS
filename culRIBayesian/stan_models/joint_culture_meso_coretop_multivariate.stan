@@ -1,4 +1,4 @@
-// joint_culture_meso_three.stan
+// joint_culture_meso_coretop_multivariate.stan
 data {
   // first dataset
   int<lower=1> N1;
@@ -36,7 +36,7 @@ model {
   b      ~ beta(2, 5);
 
   // prior on the linear term
-  beta1     ~ normal(0, 0.2);
+  beta1     ~ normal(0, 0.3);
   beta0     ~ normal(0, 0.01);
 
   // noise priors
