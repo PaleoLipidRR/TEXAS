@@ -1,221 +1,246 @@
 from pathlib import Path
-from typing import Union
+from typing import Union, Optional, Dict, List, Callable
+from typing_extensions import Literal
+from dataclasses import dataclass
 import numpy as np
 import xarray as xr
 from cmdstanpy import CmdStanModel
 
-def get_posteriors(data: dict,
-                   stan_filename: str,
-                   stan_models_dir: Union[Path, str] = None
-                  ) -> xr.Dataset:
+# ─── TYPES & HELPERS ───────────────────────────────────────────────────────────
+
+# Allowed model names
+ModelName = Literal[
+    "logistic_free_upper",
+    "logistic_fixed_upper",
+    "logistic_fixed_upper_multivariate",
+    "logistic_fixed_upper_multivariate_fixedbeta1",
+]
+
+def _ensure_numpy(x: Union[np.ndarray, xr.DataArray]) -> np.ndarray:
+    """Convert xarray.DataArray (or similar) to NumPy array."""
+    return x.values if hasattr(x, "values") else np.asarray(x)
+
+# ─── FORWARD / INVERSE LOGISTIC FUNCTIONS ────────────────────────────────────
+
+def pred_logistic(
+    x: np.ndarray, x0: np.ndarray, k: np.ndarray, L: np.ndarray, b: np.ndarray
+) -> np.ndarray:
+    """Forward logistic: temperature → scaled RI."""
+    x, x0, k, L, b = map(_ensure_numpy, (x, x0, k, L, b))
+    return L / (1 + np.exp(-k * (x[:, None] - x0))) + b
+
+def pred_logistic_multivariate(
+    x: np.ndarray,
+    z: np.ndarray,
+    x0: np.ndarray,
+    k: np.ndarray,
+    L: np.ndarray,
+    b: np.ndarray,
+    beta0: np.ndarray,
+    beta1: np.ndarray
+) -> np.ndarray:
+    """Forward multivariate: (temperature, z) → scaled RI."""
+    x, z = map(_ensure_numpy, (x, z))
+    x0, k, L, b, beta0, beta1 = map(_ensure_numpy, (x0, k, L, b, beta0, beta1))
+    base   = L / (1 + np.exp(-k * (x[:, None] - x0))) + b
+    linear = beta0 * z[:, None] + beta1
+    return base + linear
+
+def inv_logistic(
+    y: np.ndarray, x0: np.ndarray, k: np.ndarray, L: np.ndarray, b: np.ndarray
+) -> np.ndarray:
+    """Inverse logistic: scaled RI → temperature."""
+    y, x0, k, L, b = map(_ensure_numpy, (y, x0, k, L, b))
+    arg = L / (y[:, None] - b) - 1
+    return x0[None, :] - (1.0 / k[None, :]) * np.log(arg)
+
+def inv_logistic_multivariate(
+    y: np.ndarray,
+    z: np.ndarray,
+    x0: np.ndarray,
+    k: np.ndarray,
+    L: np.ndarray,
+    b: np.ndarray,
+    beta0: np.ndarray,
+    beta1: np.ndarray
+) -> np.ndarray:
+    """Inverse multivariate: (scaled RI, z) → temperature."""
+    y, z = map(_ensure_numpy, (y, z))
+    x0, k, L, b, beta0, beta1 = map(_ensure_numpy, (x0, k, L, b, beta0, beta1))
+    linear = beta0[None, :] * z[:, None] + beta1[None, :]
+    base   = y[:, None] - linear
+    arg    = L[None, :] / (base - b[None, :]) - 1.0
+    return x0[None, :] - (1.0 / k[None, :]) * np.log(arg)
+
+# ─── MODEL SPECIFICATION & CACHE ──────────────────────────────────────────────
+
+@dataclass
+class ModelSpec:
+    params:       List[str]    # names of parameters in the posterior dataset
+    fn:           Callable     # inv function (for make_ensemble)
+    needs_z:      bool = False # whether the model is multivariate
+    L_from_b:     bool = False # whether L should be computed as 1 - b
+    zero_beta1:   bool = False # whether beta1 should be forced to zero
+
+_MODEL_SPECS: Dict[ModelName, ModelSpec] = {
+    "logistic_free_upper": ModelSpec(
+        params=["x0","k","L","b"], fn=inv_logistic
+    ),
+    "logistic_fixed_upper": ModelSpec(
+        params=["x0","k","b"], fn=inv_logistic,
+        L_from_b=True
+    ),
+    "logistic_fixed_upper_multivariate": ModelSpec(
+        params=["x0","k","b","beta0","beta1"],
+        fn=inv_logistic_multivariate,
+        needs_z=True,
+        L_from_b=True
+    ),
+    "logistic_fixed_upper_multivariate_fixedbeta1": ModelSpec(
+        params=["x0","k","b","beta0"],
+        fn=inv_logistic_multivariate,
+        needs_z=True,
+        L_from_b=True,
+        zero_beta1=True
+    ),
+}
+
+# cache compiled Stan models
+_MODEL_CACHE: Dict[Path, CmdStanModel] = {}
+
+# ─── STAN INTERFACE ──────────────────────────────────────────────────────────
+
+def get_posteriors(
+    data: dict,
+    stan_filename: str,
+    stan_models_dir: Union[Path,str] = None,
+    chains: int = 4,
+    iter_warmup: int = 500,
+    iter_sampling: int = 1000,
+    seed: Optional[int] = 42
+) -> xr.Dataset:
     """
-    Compile & sample a CmdStan .stan file, then return the draws
-    as an xarray.Dataset with a single 'draw' dimension.
+    Compile (once) & sample a CmdStan .stan file, returning all draws
+    in an xarray.Dataset with a single 'draw' dimension.
     """
     if stan_models_dir is None:
         stan_models_dir = Path(__file__).parent / "stan_models"
     stan_models_dir = Path(stan_models_dir)
+    model_path = stan_models_dir / stan_filename
 
-    model = CmdStanModel(stan_file=str(stan_models_dir / stan_filename))
+    if model_path not in _MODEL_CACHE:
+        _MODEL_CACHE[model_path] = CmdStanModel(stan_file=str(model_path))
+    model = _MODEL_CACHE[model_path]
+
+    if seed is not None:
+        np.random.seed(seed)
     fit = model.sample(
         data=data,
-        chains=4,
-        iter_warmup=500,
-        iter_sampling=1000,
-        seed=42,
-        parallel_chains=4,
-        show_console=True,
+        chains=chains,
+        iter_warmup=iter_warmup,
+        iter_sampling=iter_sampling,
+        seed=seed,
+        parallel_chains=chains,
+        show_console=True
     )
 
     ds = xr.Dataset()
     for var in fit.stan_variables().keys():
-        arr = fit.stan_variable(var)  # shape (n_draws, ...)
-        ds[var] = xr.DataArray(arr,
-                               dims=("draw",) + arr.shape[1:],
-                               name=var)
+        arr = fit.stan_variable(var)
+        ds[var] = xr.DataArray(
+            arr,
+            dims=("draw",) + arr.shape[1:],
+            name=var
+        )
     return ds
 
+# ─── INVERSE ENSEMBLE (scaledRI → temperature) ───────────────────────────────
 
-def _ensure_numpy(x):
-    if hasattr(x, "values"):
-        return x.values
-    return np.asarray(x)
+def make_ensemble(
+    y:            np.ndarray,
+    posterior:    xr.Dataset,
+    model_name:   ModelName,
+    z:            Optional[np.ndarray] = None,
+    n_draws:      int = 1000,
+    seed:         Optional[int] = None
+) -> np.ndarray:
+    """
+    Draw n_draws samples from the posterior and invert:
+    - Univariate:  inv_logistic(y, x0,k,L,b)
+    - Multivariate: inv_logistic_multivariate(y,z,x0,k,L,b,beta0,beta1)
+    Returns array shape (n_draws, y.size).
+    """
+    spec = _MODEL_SPECS[model_name]
+    if seed is not None:
+        np.random.seed(seed)
 
+    sel = np.random.choice(posterior.dims["draw"], size=n_draws, replace=True)
+    P   = posterior.isel(draw=sel)[spec.params]
 
-def pred_logistic(x: np.ndarray,
-                  x0: np.ndarray,
-                  k:  np.ndarray,
-                  L:  np.ndarray,
-                  b:  np.ndarray
-                 ) -> np.ndarray:
-    x = _ensure_numpy(x)
-    x0, k, L, b = map(_ensure_numpy, (x0, k, L, b))
-    z = x[:, None] - x0
-    return L / (1 + np.exp(-k * z)) + b
+    # derive L if requested
+    if spec.L_from_b:
+        P["L"] = 1 - P["b"]
+    # zero beta1 if requested
+    if spec.zero_beta1:
+        P["beta1"] = xr.zeros_like(P["beta0"])
 
+    # build argument list
+    arg_names = list(spec.params)
+    if spec.L_from_b:
+        arg_names.append("L")
+    if spec.zero_beta1:
+        arg_names.append("beta1")
+    args = {p: P[p] for p in arg_names}
 
-def pred_logistic_multivariate(x: np.ndarray,
-                               z: np.ndarray,
-                               x0: np.ndarray,
-                               k:  np.ndarray,
-                               L:  np.ndarray,
-                               b:  np.ndarray,
-                               beta0: np.ndarray,
-                               beta1: np.ndarray
-                              ) -> np.ndarray:
-    x = _ensure_numpy(x)
-    x0, k, L, b, beta0, beta1 = map(_ensure_numpy,
-                                    (x0, k, L, b, beta0, beta1))
-    xx = x[:, None] - x0
-    base = L / (1 + np.exp(-k * xx)) + b
-    linear = beta0 * z[:, None] + beta1
-    return base + linear
+    if spec.needs_z:
+        if z is None:
+            raise ValueError(f"{model_name!r} requires 'z', but none was provided")
+        return spec.fn(y=y, z=z, **args)
+    return spec.fn(y=y, **args)
 
+# ─── FORWARD ENSEMBLE (temperature → scaledRI) ────────────────────────────────
 
-def inv_logistic(y: np.ndarray,
-                 x0: np.ndarray,
-                 k:  np.ndarray,
-                 L:  np.ndarray,
-                 b:  np.ndarray
-                ) -> np.ndarray:
-    y = _ensure_numpy(y)
-    x0, k, L, b = map(_ensure_numpy, (x0, k, L, b))
-    arg = L / (y[:, None] - b) - 1
-    return x0 - (1.0 / k) * np.log(arg)
+def make_forward_ensemble(
+    x:            np.ndarray,
+    posterior:    xr.Dataset,
+    model_name:   ModelName,
+    z:            Optional[np.ndarray] = None,
+    n_draws:      int = 1000,
+    seed:         Optional[int] = None
+) -> np.ndarray:
+    """
+    Draw n_draws samples from the posterior and forward‐predict:
+    - Univariate:  pred_logistic(x, x0,k,L,b)
+    - Multivariate: pred_logistic_multivariate(x,z,x0,k,L,b,beta0,beta1)
+    Returns array shape (n_draws, x.size).
+    """
+    spec = _MODEL_SPECS[model_name]
+    if seed is not None:
+        np.random.seed(seed)
 
+    sel = np.random.choice(posterior.dims["draw"], size=n_draws, replace=True)
+    P   = posterior.isel(draw=sel)[spec.params]
 
-def inv_logistic_multivariate(y: np.ndarray,
-                              z: np.ndarray,
-                              x0: np.ndarray,
-                              k:  np.ndarray,
-                              L:  np.ndarray,
-                              b:  np.ndarray,
-                              beta0: np.ndarray,
-                              beta1: np.ndarray
-                             ) -> np.ndarray:
-    y, z = map(_ensure_numpy, (y, z))
-    x0, k, L, b, beta0, beta1 = map(_ensure_numpy,
-                                    (x0, k, L, b, beta0, beta1))
-    linear = beta0[None, :] * z[:, None] + beta1[None, :]
-    base = y[:, None] - linear
-    arg = L[None, :] / (base - b[None, :]) - 1.0
-    return x0[None, :] - (1.0 / k[None, :]) * np.log(arg)
+    # derive L if requested
+    if spec.L_from_b:
+        P["L"] = 1 - P["b"]
+    # zero beta1 if requested
+    if spec.zero_beta1:
+        P["beta1"] = xr.zeros_like(P["beta0"])
 
+    arg_names = list(spec.params)
+    if spec.L_from_b:
+        arg_names.append("L")
+    if spec.zero_beta1:
+        arg_names.append("beta1")
+    args = {p: P[p] for p in arg_names}
 
-def temperature_ensemble_from_scaledRI(scaledRI: np.ndarray,
-                                       posterior_ds: xr.Dataset,
-                                       model_name: str = "logistic_free_upper"
-                                      ) -> np.ndarray:
-    np.random.seed(42)
-    draws = posterior_ds.dims["draw"]
-    sel = np.random.choice(draws, size=1000, replace=True)
+    if spec.needs_z:
+        if z is None:
+            raise ValueError(f"{model_name!r} requires 'z', but none was provided")
+        # broadcast z to match x if needed
+        if z.shape != x.shape:
+            z = np.broadcast_to(z, x.shape)
+        return pred_logistic_multivariate(x, z, **args)
 
-    if model_name == "logistic_free_upper":
-        P = posterior_ds.isel(draw=sel)[["x0","k","L","b"]]
-        return inv_logistic(
-            y=scaledRI, x0=P["x0"], k=P["k"],
-            L=P["L"], b=P["b"]
-        )
-
-    elif model_name == "logistic_fixed_upper":
-        P = posterior_ds.isel(draw=sel)[["x0","k","b"]]
-        L = 1 - P["b"]
-        return inv_logistic(
-            y=scaledRI, x0=P["x0"], k=P["k"],
-            L=L, b=P["b"]
-        )
-    else:
-        raise ValueError(f"Unrecognized model_name {model_name!r}")
-
-def temperature_ensemble_from_scaledRI_gdgt23ratio(scaledRI: np.ndarray,
-                                       gdgt23ratio: np.ndarray,
-                                       posterior_ds: xr.Dataset,
-                                       model_name: str = "logistic_fixed_upper_multivariate"
-                                      ) -> np.ndarray:
-    np.random.seed(42)
-    draws = posterior_ds.dims["draw"]
-    sel = np.random.choice(draws, size=1000, replace=True)
-
-    if model_name == "logistic_fixed_upper_multivariate":
-        P = posterior_ds.isel(draw=sel)[["x0","k","b","beta0","beta1"]]
-        L = 1 - P["b"]
-        return inv_logistic_multivariate(
-            y=scaledRI, z=gdgt23ratio,
-            x0=P["x0"], k=P["k"],
-            L=L, b=P["b"],
-            beta0=P["beta0"], beta1=P["beta1"]
-        )
-
-    elif model_name == "logistic_fixed_upper_multivariate_fixedbeta1":
-        P = posterior_ds.isel(draw=sel)[["x0","k","b","beta0"]]
-        L = 1 - P["b"]
-        beta1 = xr.zeros_like(P["beta0"])
-        return inv_logistic_multivariate(
-            y=scaledRI, z=gdgt23ratio,
-            x0=P["x0"], k=P["k"],
-            L=L, b=P["b"],
-            beta0=P["beta0"], beta1=beta1
-        )
-    else:
-        raise ValueError(f"Unrecognized model_name {model_name!r}")
-
-
-def scaledRI_ensemble_from_temperature(temperature: np.ndarray,
-                                       posterior_ds: xr.Dataset,
-                                       model_name: str = "logistic_free_upper"
-                                      ) -> np.ndarray:
-    np.random.seed(42)
-    draws = posterior_ds.dims["draw"]
-    sel = np.random.choice(draws, size=1000, replace=True)
-
-    if model_name == "logistic_free_upper":
-        P = posterior_ds.isel(draw=sel)[["x0","k","L","b"]]
-        return pred_logistic(
-            x=temperature, x0=P["x0"], k=P["k"],
-            L=P["L"], b=P["b"]
-        )
-
-    elif model_name == "logistic_fixed_upper":
-        P = posterior_ds.isel(draw=sel)[["x0","k","b"]]
-        L = 1 - P["b"]
-        return pred_logistic(
-            x=temperature, x0=P["x0"], k=P["k"],
-            L=L, b=P["b"]
-        )
-    
-    else:
-        raise ValueError(f"Unrecognized model_name {model_name!r}")
-
-
-def scaledRI_ensemble_from_temp_gdgt23ratio(temperature: np.ndarray,
-                                       gdgt23ratio: np.ndarray,
-                                       posterior_ds: xr.Dataset,
-                                       model_name: str = "logistic_fixed_upper_multivariate"
-                                      ) -> np.ndarray:
-    np.random.seed(42)
-    draws = posterior_ds.dims["draw"]
-    sel = np.random.choice(draws, size=1000, replace=True)
-    
-    if model_name == "logistic_fixed_upper_multivariate":
-        P = posterior_ds.isel(draw=sel)[["x0","k","b","beta0","beta1"]]
-        L = 1 - P["b"]
-        return pred_logistic_multivariate(
-            x=temperature, z=gdgt23ratio,
-            x0=P["x0"], k=P["k"],
-            L=L, b=P["b"],
-            beta0=P["beta0"], beta1=P["beta1"]
-        )
-
-    elif model_name == "logistic_fixed_upper_multivariate_fixedbeta1":
-        P = posterior_ds.isel(draw=sel)[["x0","k","b","beta0"]]
-        L = 1 - P["b"]
-        beta1 = xr.zeros_like(P["beta0"])
-        return pred_logistic_multivariate(
-            x=temperature, z=gdgt23ratio,
-            x0=P["x0"], k=P["k"],
-            L=L, b=P["b"],
-            beta0=P["beta0"], beta1=beta1
-        )
-
-    else:
-        raise ValueError(f"Unrecognized model_name {model_name!r}")
+    return pred_logistic(x, **args)

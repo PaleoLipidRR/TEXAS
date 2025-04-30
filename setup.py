@@ -7,14 +7,15 @@ setup(
     author="Ronnakrit Rattanasriampaipong (paleolipidrr)",
     packages=find_packages(),
     install_requires=[
+        "numpy>=1.18",
+        "xarray>=0.16",
         "cmdstanpy>=1.0",
-        "xarray>=0.20",
-        "numpy>=1.20",
+        "typing-extensions>=3.7.4",
     ],
+    python_requires=">=3.7",
     package_data={
         # Include all the .stan files you moved under your_pkg/stan_models/
         "culRIBayesian": ["stan_models/*.stan"],
     },
     include_package_data=True,
-    python_requires=">=3.7",
 )
