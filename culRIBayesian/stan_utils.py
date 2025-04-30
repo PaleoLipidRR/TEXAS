@@ -8,13 +8,6 @@ from cmdstanpy import CmdStanModel
 
 # ─── TYPES & HELPERS ───────────────────────────────────────────────────────────
 
-# Allowed model names
-ModelName = Literal[
-    "logistic_free_upper",
-    "logistic_fixed_upper",
-    "logistic_fixed_upper_multivariate",
-    "logistic_fixed_upper_multivariate_fixedbeta1",
-]
 
 def _ensure_numpy(x: Union[np.ndarray, xr.DataArray]) -> np.ndarray:
     """Convert xarray.DataArray (or similar) to NumPy array."""
@@ -73,6 +66,13 @@ def inv_logistic_multivariate(
     return x0[None, :] - (1.0 / k[None, :]) * np.log(arg)
 
 # ─── MODEL SPECIFICATION & CACHE ──────────────────────────────────────────────
+# Allowed model names
+ModelName = Literal[
+    "logistic_free_upper",
+    "logistic_fixed_upper",
+    "logistic_fixed_upper_multivariate",
+    "logistic_fixed_upper_multivariate_fixedbeta1",
+]
 
 @dataclass
 class ModelSpec:
