@@ -12,7 +12,7 @@ data {
 }
 
 parameters {
-  real<lower=-4>         x0;      // inflection point
+  real<lower=-1.8>         x0;      // inflection point
   real<lower=0>          k;       // steepness
   real<lower=0,upper=1>  b;       // lower asymptote
   
@@ -22,8 +22,8 @@ parameters {
 
 model {
   // Priors
-  x0     ~ normal(20, 20) T[-4, ];
-  k      ~ normal(0, 0.25);
+  x0    ~ normal(30, 10) T[-1.8, ];  // truncated normal
+  k     ~ normal(0, 0.25);
   b      ~ beta(2, 5);
   sigma1 ~ normal(0.01, 0.1) T[0.01, ];
   sigma2 ~ normal(0.01, 0.1) T[0.01, ];
