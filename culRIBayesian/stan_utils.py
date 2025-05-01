@@ -108,7 +108,6 @@ _MODEL_SPECS: Dict[ModelName, ModelSpec] = {
         params=["x0_3", "k_3", "b_3"],
         fn=inv_logistic,     # or pred_logistic for forward
         L_from_b=True,
-        zero_beta1=True,
     ),    
 }
 
@@ -184,15 +183,26 @@ def make_ensemble(
     sel = np.random.choice(posterior.dims["draw"], size=n_draws, replace=True)
     P   = posterior.isel(draw=sel)[spec.params]
 
+    if model_name == "hierarchical_coretop":
+        # P currently has vars ["x0_3","k_3","b_3"]
+        # rename them to ["x0","k","b"] before we compute L and call inv_logistic
+        P = P.rename_vars({"x0_3": "x0", "k_3": "k", "b_3": "b"})
+        params_list = ["x0","k","b"]
+    else:
+        params_list = spec.params
+
     # derive L if requested
     if spec.L_from_b:
-        P["L"] = 1 - P["b"]
+        try:
+            P["L"] = 1 - P["b"]
+        except KeyError:
+            raise ValueError(f"Model {model_name!r} requires 'b' to compute 'L', but 'b' is missing in the posterior dataset.")
     # zero beta1 if requested
     if spec.zero_beta1:
         P["beta1"] = xr.zeros_like(P["beta0"])
 
     # build argument list
-    arg_names = list(spec.params)
+    arg_names = list(params_list)
     if spec.L_from_b:
         arg_names.append("L")
     if spec.zero_beta1:
@@ -228,14 +238,25 @@ def make_forward_ensemble(
     sel = np.random.choice(posterior.dims["draw"], size=n_draws, replace=True)
     P   = posterior.isel(draw=sel)[spec.params]
 
+    if model_name == "hierarchical_coretop":
+        # P currently has vars ["x0_3","k_3","b_3"]
+        # rename them to ["x0","k","b"] before we compute L and call inv_logistic
+        P = P.rename_vars({"x0_3": "x0", "k_3": "k", "b_3": "b"})
+        params_list = ["x0","k","b"]
+    else:
+        params_list = spec.params
     # derive L if requested
+
     if spec.L_from_b:
-        P["L"] = 1 - P["b"]
+        try:
+            P["L"] = 1 - P["b"]
+        except KeyError:
+            raise ValueError(f"Model {model_name!r} requires 'b' to compute 'L', but 'b' is missing in the posterior dataset.")
     # zero beta1 if requested
     if spec.zero_beta1:
         P["beta1"] = xr.zeros_like(P["beta0"])
 
-    arg_names = list(spec.params)
+    arg_names = list(params_list)
     if spec.L_from_b:
         arg_names.append("L")
     if spec.zero_beta1:

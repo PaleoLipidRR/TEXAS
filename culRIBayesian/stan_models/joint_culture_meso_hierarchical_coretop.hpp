@@ -35,12 +35,12 @@ static constexpr std::array<const char*, 63> locations_array__ =
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 100, column 2 to column 29)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 101, column 2 to column 29)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 102, column 2 to column 29)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 105, column 2 to column 36)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 105, column 28 to column 32)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 106, column 2 to column 36)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 106, column 28 to column 32)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 107, column 2 to column 36)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 107, column 28 to column 32)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 105, column 2 to column 39)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 105, column 31 to column 35)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 106, column 2 to column 39)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 106, column 31 to column 35)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 107, column 2 to column 39)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 107, column 31 to column 35)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 110, column 9 to column 11)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 110, column 2 to column 64)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 111, column 9 to column 11)",
@@ -406,34 +406,34 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
         current_statement__ = 29;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(z_logit_b_3, 0, 1));
         current_statement__ = 30;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma1, 0, 0.1));
+        lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma1, 0.01, 0.1));
         current_statement__ = 31;
         if (stan::math::logical_lt(sigma1, 1e-6)) {
           current_statement__ = 31;
           lp_accum__.add(stan::math::negative_infinity());
         } else {
           current_statement__ = 31;
-          lp_accum__.add(-stan::math::normal_lccdf(1e-6, 0, 0.1));
+          lp_accum__.add(-stan::math::normal_lccdf(1e-6, 0.01, 0.1));
         }
         current_statement__ = 32;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma2, 0, 0.1));
+        lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma2, 0.01, 0.1));
         current_statement__ = 33;
         if (stan::math::logical_lt(sigma2, 1e-6)) {
           current_statement__ = 33;
           lp_accum__.add(stan::math::negative_infinity());
         } else {
           current_statement__ = 33;
-          lp_accum__.add(-stan::math::normal_lccdf(1e-6, 0, 0.1));
+          lp_accum__.add(-stan::math::normal_lccdf(1e-6, 0.01, 0.1));
         }
         current_statement__ = 34;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma3, 0, 0.1));
+        lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma3, 0.01, 0.1));
         current_statement__ = 35;
         if (stan::math::logical_lt(sigma3, 1e-6)) {
           current_statement__ = 35;
           lp_accum__.add(stan::math::negative_infinity());
         } else {
           current_statement__ = 35;
-          lp_accum__.add(-stan::math::normal_lccdf(1e-6, 0, 0.1));
+          lp_accum__.add(-stan::math::normal_lccdf(1e-6, 0.01, 0.1));
         }
         current_statement__ = 36;
         stan::math::validate_non_negative_index("mu1", "N1", N1);

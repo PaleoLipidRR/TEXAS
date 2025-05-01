@@ -6,36 +6,36 @@ using namespace stan::math;
 stan::math::profile_map profiles__;
 static constexpr std::array<const char*, 31> locations_array__ =
   {" (found before start of program)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 15, column 2 to column 28)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 16, column 2 to column 27)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 17, column 2 to column 27)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 19, column 2 to column 23)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 20, column 2 to column 23)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 49, column 2 to column 37)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 25, column 2 to column 34)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 25, column 29 to column 30)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 26, column 2 to column 27)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 27, column 2 to column 22)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 28, column 2 to column 39)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 28, column 31 to column 35)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 29, column 2 to column 39)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 29, column 31 to column 35)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 40, column 9 to column 11)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 40, column 2 to column 58)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 41, column 9 to column 11)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 41, column 2 to column 58)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 44, column 2 to column 27)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 45, column 2 to column 27)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 4, column 2 to column 18)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 5, column 9 to column 11)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 5, column 2 to column 16)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 6, column 9 to column 11)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 6, column 2 to column 16)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 9, column 2 to column 18)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 10, column 9 to column 11)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 10, column 2 to column 16)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 11, column 9 to column 11)",
-  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 11, column 2 to column 16)"};
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 15, column 2 to column 30)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 16, column 2 to column 27)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 17, column 2 to column 27)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 19, column 2 to column 23)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 20, column 2 to column 23)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 49, column 2 to column 37)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 25, column 2 to column 35)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 25, column 28 to column 31)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 26, column 2 to column 26)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 27, column 2 to column 22)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 28, column 2 to column 39)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 28, column 31 to column 35)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 29, column 2 to column 39)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 29, column 31 to column 35)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 40, column 9 to column 11)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 40, column 2 to column 58)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 41, column 9 to column 11)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 41, column 2 to column 58)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 44, column 2 to column 27)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 45, column 2 to column 27)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 4, column 2 to column 18)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 5, column 9 to column 11)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 5, column 2 to column 16)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 6, column 9 to column 11)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 6, column 2 to column 16)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 9, column 2 to column 18)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 10, column 9 to column 11)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 10, column 2 to column 16)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 11, column 9 to column 11)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso.stan', line 11, column 2 to column 16)"};
 class joint_culture_meso_model final : public model_base_crtp<joint_culture_meso_model> {
  private:
   int N1;
@@ -211,8 +211,8 @@ class joint_culture_meso_model final : public model_base_crtp<joint_culture_meso
     try {
       local_scalar_t__ x0 = DUMMY_VAR__;
       current_statement__ = 1;
-      x0 = in__.template read_constrain_lb<local_scalar_t__, jacobian__>(-4,
-             lp__);
+      x0 = in__.template read_constrain_lb<local_scalar_t__,
+             jacobian__>(-1.8, lp__);
       local_scalar_t__ k = DUMMY_VAR__;
       current_statement__ = 2;
       k = in__.template read_constrain_lb<local_scalar_t__, jacobian__>(0,
@@ -231,14 +231,14 @@ class joint_culture_meso_model final : public model_base_crtp<joint_culture_meso
                  jacobian__>(0, lp__);
       {
         current_statement__ = 7;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(x0, 20, 20));
+        lp_accum__.add(stan::math::normal_lpdf<propto__>(x0, 30, 10));
         current_statement__ = 8;
-        if (stan::math::logical_lt(x0, -4)) {
+        if (stan::math::logical_lt(x0, -1.8)) {
           current_statement__ = 8;
           lp_accum__.add(stan::math::negative_infinity());
         } else {
           current_statement__ = 8;
-          lp_accum__.add(-stan::math::normal_lccdf(-4, 20, 20));
+          lp_accum__.add(-stan::math::normal_lccdf(-1.8, 30, 10));
         }
         current_statement__ = 9;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(k, 0, 0.25));
@@ -330,8 +330,8 @@ class joint_culture_meso_model final : public model_base_crtp<joint_culture_meso
     try {
       double x0 = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 1;
-      x0 = in__.template read_constrain_lb<local_scalar_t__, jacobian__>(-4,
-             lp__);
+      x0 = in__.template read_constrain_lb<local_scalar_t__,
+             jacobian__>(-1.8, lp__);
       double k = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 2;
       k = in__.template read_constrain_lb<local_scalar_t__, jacobian__>(0,
@@ -388,7 +388,7 @@ class joint_culture_meso_model final : public model_base_crtp<joint_culture_meso
       local_scalar_t__ x0 = DUMMY_VAR__;
       current_statement__ = 1;
       x0 = in__.read<local_scalar_t__>();
-      out__.write_free_lb(-4, x0);
+      out__.write_free_lb(-1.8, x0);
       local_scalar_t__ k = DUMMY_VAR__;
       current_statement__ = 2;
       k = in__.read<local_scalar_t__>();
@@ -440,7 +440,7 @@ class joint_culture_meso_model final : public model_base_crtp<joint_culture_meso
       local_scalar_t__ x0 = DUMMY_VAR__;
       current_statement__ = 1;
       x0 = context__.vals_r("x0")[(1 - 1)];
-      out__.write_free_lb(-4, x0);
+      out__.write_free_lb(-1.8, x0);
       local_scalar_t__ k = DUMMY_VAR__;
       current_statement__ = 2;
       k = context__.vals_r("k")[(1 - 1)];
