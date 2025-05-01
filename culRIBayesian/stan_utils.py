@@ -72,6 +72,7 @@ ModelName = Literal[
     "logistic_fixed_upper",
     "logistic_fixed_upper_multivariate",
     "logistic_fixed_upper_multivariate_fixedbeta1",
+    "hierarchical_coretop",
 ]
 
 @dataclass
@@ -103,6 +104,12 @@ _MODEL_SPECS: Dict[ModelName, ModelSpec] = {
         L_from_b=True,
         zero_beta1=True
     ),
+    "hierarchical_coretop": ModelSpec(
+        params=["x0_3", "k_3", "b_3"],
+        fn=inv_logistic,     # or pred_logistic for forward
+        L_from_b=True,
+        zero_beta1=True,
+    ),    
 }
 
 # cache compiled Stan models
