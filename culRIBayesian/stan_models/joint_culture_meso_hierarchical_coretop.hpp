@@ -4,70 +4,59 @@ namespace joint_culture_meso_hierarchical_coretop_model_namespace {
 using stan::model::model_base_crtp;
 using namespace stan::math;
 stan::math::profile_map profiles__;
-static constexpr std::array<const char*, 63> locations_array__ =
+static constexpr std::array<const char*, 52> locations_array__ =
   {" (found before start of program)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 55, column 2 to column 29)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 56, column 2 to column 28)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 57, column 2 to column 22)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 60, column 2 to column 28)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 61, column 2 to column 27)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 62, column 2 to column 33)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 65, column 2 to column 26)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 66, column 2 to column 25)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 67, column 2 to column 19)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 70, column 2 to column 26)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 71, column 2 to column 26)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 72, column 2 to column 26)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 77, column 2 to column 47)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 80, column 2 to column 65)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 81, column 2 to column 64)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 82, column 2 to column 64)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 83, column 2 to column 51)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 121, column 2 to column 39)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 122, column 2 to column 39)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 88, column 2 to column 35)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 88, column 28 to column 31)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 89, column 2 to column 26)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 92, column 2 to column 51)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 95, column 2 to column 30)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 96, column 2 to column 30)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 97, column 2 to column 33)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 100, column 2 to column 29)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 101, column 2 to column 29)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 102, column 2 to column 29)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 105, column 2 to column 39)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 105, column 31 to column 35)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 106, column 2 to column 39)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 106, column 31 to column 35)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 107, column 2 to column 39)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 107, column 31 to column 35)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 110, column 9 to column 11)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 110, column 2 to column 64)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 111, column 9 to column 11)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 111, column 2 to column 64)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 112, column 9 to column 11)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 112, column 2 to column 66)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 114, column 2 to column 37)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 114, column 29 to column 33)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 115, column 2 to column 37)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 115, column 29 to column 33)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 116, column 2 to column 37)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 116, column 29 to column 33)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 40, column 2 to column 18)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 41, column 9 to column 11)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 41, column 2 to column 16)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 42, column 9 to column 11)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 42, column 2 to column 16)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 44, column 2 to column 18)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 45, column 9 to column 11)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 45, column 2 to column 16)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 46, column 9 to column 11)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 46, column 2 to column 16)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 48, column 2 to column 18)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 49, column 9 to column 11)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 49, column 2 to column 16)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 50, column 9 to column 11)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 50, column 2 to column 16)"};
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 21, column 2 to column 26)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 22, column 2 to column 26)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 23, column 2 to column 26)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 26, column 2 to column 28)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 27, column 2 to column 28)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 28, column 2 to column 28)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 31, column 2 to column 32)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 32, column 2 to column 31)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 33, column 2 to column 31)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 36, column 2 to column 30)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 37, column 2 to column 30)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 38, column 2 to column 30)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 77, column 2 to column 39)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 78, column 2 to column 39)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 43, column 2 to column 35)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 43, column 28 to column 31)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 44, column 2 to column 21)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 45, column 2 to column 21)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 48, column 2 to column 30)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 49, column 2 to column 30)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 50, column 2 to column 30)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 53, column 2 to column 29)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 54, column 2 to column 29)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 57, column 9 to column 11)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 57, column 2 to column 64)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 58, column 9 to column 11)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 58, column 2 to column 64)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 60, column 2 to column 27)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 61, column 2 to column 27)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 64, column 2 to column 31)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 65, column 2 to column 29)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 66, column 2 to column 29)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 69, column 9 to column 11)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 69, column 2 to column 66)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 70, column 2 to column 29)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 72, column 2 to column 27)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 6, column 2 to column 18)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 7, column 9 to column 11)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 7, column 2 to column 16)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 8, column 9 to column 11)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 8, column 2 to column 16)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 10, column 2 to column 18)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 11, column 9 to column 11)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 11, column 2 to column 16)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 12, column 9 to column 11)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 12, column 2 to column 16)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 14, column 2 to column 18)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 15, column 9 to column 11)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 15, column 2 to column 16)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 16, column 9 to column 11)",
+  " (in '/home/ronnie/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/joint_culture_meso_hierarchical_coretop.stan', line 16, column 2 to column 16)"};
 class joint_culture_meso_hierarchical_coretop_model final : public model_base_crtp<joint_culture_meso_hierarchical_coretop_model> {
  private:
   int N1;
@@ -109,17 +98,17 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
     try {
       int pos__ = std::numeric_limits<int>::min();
       pos__ = 1;
-      current_statement__ = 48;
+      current_statement__ = 37;
       context__.validate_dims("data initialization", "N1", "int",
         std::vector<size_t>{});
       N1 = std::numeric_limits<int>::min();
-      current_statement__ = 48;
+      current_statement__ = 37;
       N1 = context__.vals_i("N1")[(1 - 1)];
-      current_statement__ = 48;
+      current_statement__ = 37;
       stan::math::check_greater_or_equal(function__, "N1", N1, 1);
-      current_statement__ = 49;
+      current_statement__ = 38;
       stan::math::validate_non_negative_index("x1", "N1", N1);
-      current_statement__ = 50;
+      current_statement__ = 39;
       context__.validate_dims("data initialization", "x1", "double",
         std::vector<size_t>{static_cast<size_t>(N1)});
       x1_data__ = Eigen::Matrix<double,-1,1>::Constant(N1,
@@ -127,22 +116,22 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
       new (&x1) Eigen::Map<Eigen::Matrix<double,-1,1>>(x1_data__.data(), N1);
       {
         std::vector<local_scalar_t__> x1_flat__;
-        current_statement__ = 50;
+        current_statement__ = 39;
         x1_flat__ = context__.vals_r("x1");
-        current_statement__ = 50;
+        current_statement__ = 39;
         pos__ = 1;
-        current_statement__ = 50;
+        current_statement__ = 39;
         for (int sym1__ = 1; sym1__ <= N1; ++sym1__) {
-          current_statement__ = 50;
+          current_statement__ = 39;
           stan::model::assign(x1, x1_flat__[(pos__ - 1)],
             "assigning variable x1", stan::model::index_uni(sym1__));
-          current_statement__ = 50;
+          current_statement__ = 39;
           pos__ = (pos__ + 1);
         }
       }
-      current_statement__ = 51;
+      current_statement__ = 40;
       stan::math::validate_non_negative_index("y1", "N1", N1);
-      current_statement__ = 52;
+      current_statement__ = 41;
       context__.validate_dims("data initialization", "y1", "double",
         std::vector<size_t>{static_cast<size_t>(N1)});
       y1_data__ = Eigen::Matrix<double,-1,1>::Constant(N1,
@@ -150,30 +139,30 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
       new (&y1) Eigen::Map<Eigen::Matrix<double,-1,1>>(y1_data__.data(), N1);
       {
         std::vector<local_scalar_t__> y1_flat__;
-        current_statement__ = 52;
+        current_statement__ = 41;
         y1_flat__ = context__.vals_r("y1");
-        current_statement__ = 52;
+        current_statement__ = 41;
         pos__ = 1;
-        current_statement__ = 52;
+        current_statement__ = 41;
         for (int sym1__ = 1; sym1__ <= N1; ++sym1__) {
-          current_statement__ = 52;
+          current_statement__ = 41;
           stan::model::assign(y1, y1_flat__[(pos__ - 1)],
             "assigning variable y1", stan::model::index_uni(sym1__));
-          current_statement__ = 52;
+          current_statement__ = 41;
           pos__ = (pos__ + 1);
         }
       }
-      current_statement__ = 53;
+      current_statement__ = 42;
       context__.validate_dims("data initialization", "N2", "int",
         std::vector<size_t>{});
       N2 = std::numeric_limits<int>::min();
-      current_statement__ = 53;
+      current_statement__ = 42;
       N2 = context__.vals_i("N2")[(1 - 1)];
-      current_statement__ = 53;
+      current_statement__ = 42;
       stan::math::check_greater_or_equal(function__, "N2", N2, 1);
-      current_statement__ = 54;
+      current_statement__ = 43;
       stan::math::validate_non_negative_index("x2", "N2", N2);
-      current_statement__ = 55;
+      current_statement__ = 44;
       context__.validate_dims("data initialization", "x2", "double",
         std::vector<size_t>{static_cast<size_t>(N2)});
       x2_data__ = Eigen::Matrix<double,-1,1>::Constant(N2,
@@ -181,22 +170,22 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
       new (&x2) Eigen::Map<Eigen::Matrix<double,-1,1>>(x2_data__.data(), N2);
       {
         std::vector<local_scalar_t__> x2_flat__;
-        current_statement__ = 55;
+        current_statement__ = 44;
         x2_flat__ = context__.vals_r("x2");
-        current_statement__ = 55;
+        current_statement__ = 44;
         pos__ = 1;
-        current_statement__ = 55;
+        current_statement__ = 44;
         for (int sym1__ = 1; sym1__ <= N2; ++sym1__) {
-          current_statement__ = 55;
+          current_statement__ = 44;
           stan::model::assign(x2, x2_flat__[(pos__ - 1)],
             "assigning variable x2", stan::model::index_uni(sym1__));
-          current_statement__ = 55;
+          current_statement__ = 44;
           pos__ = (pos__ + 1);
         }
       }
-      current_statement__ = 56;
+      current_statement__ = 45;
       stan::math::validate_non_negative_index("y2", "N2", N2);
-      current_statement__ = 57;
+      current_statement__ = 46;
       context__.validate_dims("data initialization", "y2", "double",
         std::vector<size_t>{static_cast<size_t>(N2)});
       y2_data__ = Eigen::Matrix<double,-1,1>::Constant(N2,
@@ -204,30 +193,30 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
       new (&y2) Eigen::Map<Eigen::Matrix<double,-1,1>>(y2_data__.data(), N2);
       {
         std::vector<local_scalar_t__> y2_flat__;
-        current_statement__ = 57;
+        current_statement__ = 46;
         y2_flat__ = context__.vals_r("y2");
-        current_statement__ = 57;
+        current_statement__ = 46;
         pos__ = 1;
-        current_statement__ = 57;
+        current_statement__ = 46;
         for (int sym1__ = 1; sym1__ <= N2; ++sym1__) {
-          current_statement__ = 57;
+          current_statement__ = 46;
           stan::model::assign(y2, y2_flat__[(pos__ - 1)],
             "assigning variable y2", stan::model::index_uni(sym1__));
-          current_statement__ = 57;
+          current_statement__ = 46;
           pos__ = (pos__ + 1);
         }
       }
-      current_statement__ = 58;
+      current_statement__ = 47;
       context__.validate_dims("data initialization", "N3", "int",
         std::vector<size_t>{});
       N3 = std::numeric_limits<int>::min();
-      current_statement__ = 58;
+      current_statement__ = 47;
       N3 = context__.vals_i("N3")[(1 - 1)];
-      current_statement__ = 58;
+      current_statement__ = 47;
       stan::math::check_greater_or_equal(function__, "N3", N3, 1);
-      current_statement__ = 59;
+      current_statement__ = 48;
       stan::math::validate_non_negative_index("x3", "N3", N3);
-      current_statement__ = 60;
+      current_statement__ = 49;
       context__.validate_dims("data initialization", "x3", "double",
         std::vector<size_t>{static_cast<size_t>(N3)});
       x3_data__ = Eigen::Matrix<double,-1,1>::Constant(N3,
@@ -235,22 +224,22 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
       new (&x3) Eigen::Map<Eigen::Matrix<double,-1,1>>(x3_data__.data(), N3);
       {
         std::vector<local_scalar_t__> x3_flat__;
-        current_statement__ = 60;
+        current_statement__ = 49;
         x3_flat__ = context__.vals_r("x3");
-        current_statement__ = 60;
+        current_statement__ = 49;
         pos__ = 1;
-        current_statement__ = 60;
+        current_statement__ = 49;
         for (int sym1__ = 1; sym1__ <= N3; ++sym1__) {
-          current_statement__ = 60;
+          current_statement__ = 49;
           stan::model::assign(x3, x3_flat__[(pos__ - 1)],
             "assigning variable x3", stan::model::index_uni(sym1__));
-          current_statement__ = 60;
+          current_statement__ = 49;
           pos__ = (pos__ + 1);
         }
       }
-      current_statement__ = 61;
+      current_statement__ = 50;
       stan::math::validate_non_negative_index("y3", "N3", N3);
-      current_statement__ = 62;
+      current_statement__ = 51;
       context__.validate_dims("data initialization", "y3", "double",
         std::vector<size_t>{static_cast<size_t>(N3)});
       y3_data__ = Eigen::Matrix<double,-1,1>::Constant(N3,
@@ -258,16 +247,16 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
       new (&y3) Eigen::Map<Eigen::Matrix<double,-1,1>>(y3_data__.data(), N3);
       {
         std::vector<local_scalar_t__> y3_flat__;
-        current_statement__ = 62;
+        current_statement__ = 51;
         y3_flat__ = context__.vals_r("y3");
-        current_statement__ = 62;
+        current_statement__ = 51;
         pos__ = 1;
-        current_statement__ = 62;
+        current_statement__ = 51;
         for (int sym1__ = 1; sym1__ <= N3; ++sym1__) {
-          current_statement__ = 62;
+          current_statement__ = 51;
           stan::model::assign(y3, y3_flat__[(pos__ - 1)],
             "assigning variable y3", stan::model::index_uni(sym1__));
-          current_statement__ = 62;
+          current_statement__ = 51;
           pos__ = (pos__ + 1);
         }
       }
@@ -309,195 +298,120 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
              jacobian__>(-1.8, lp__);
       local_scalar_t__ k = DUMMY_VAR__;
       current_statement__ = 2;
-      k = in__.template read_constrain_lb<local_scalar_t__, jacobian__>(1e-6,
-            lp__);
-      local_scalar_t__ logit_b = DUMMY_VAR__;
+      k = in__.template read_constrain_lub<local_scalar_t__, jacobian__>(0,
+            1, lp__);
+      local_scalar_t__ b = DUMMY_VAR__;
       current_statement__ = 3;
-      logit_b = in__.template read<local_scalar_t__>();
-      local_scalar_t__ sigma_x0 = DUMMY_VAR__;
+      b = in__.template read_constrain_lub<local_scalar_t__, jacobian__>(0,
+            1, lp__);
+      local_scalar_t__ x0_3 = DUMMY_VAR__;
       current_statement__ = 4;
-      sigma_x0 = in__.template read_constrain_lb<local_scalar_t__,
-                   jacobian__>(1e-6, lp__);
-      local_scalar_t__ sigma_k = DUMMY_VAR__;
+      x0_3 = in__.template read_constrain_lb<local_scalar_t__,
+               jacobian__>(-1.8, lp__);
+      local_scalar_t__ k_3 = DUMMY_VAR__;
       current_statement__ = 5;
-      sigma_k = in__.template read_constrain_lb<local_scalar_t__,
-                  jacobian__>(1e-6, lp__);
-      local_scalar_t__ sigma_logit_b = DUMMY_VAR__;
+      k_3 = in__.template read_constrain_lub<local_scalar_t__, jacobian__>(0,
+              1, lp__);
+      local_scalar_t__ b_3 = DUMMY_VAR__;
       current_statement__ = 6;
-      sigma_logit_b = in__.template read_constrain_lb<local_scalar_t__,
-                        jacobian__>(1e-6, lp__);
-      local_scalar_t__ z_x0_3 = DUMMY_VAR__;
+      b_3 = in__.template read_constrain_lub<local_scalar_t__, jacobian__>(0,
+              1, lp__);
+      local_scalar_t__ sigma_x0 = DUMMY_VAR__;
       current_statement__ = 7;
-      z_x0_3 = in__.template read_constrain_lb<local_scalar_t__,
-                 jacobian__>(-1.8, lp__);
-      local_scalar_t__ z_k_3 = DUMMY_VAR__;
+      sigma_x0 = in__.template read_constrain_lb<local_scalar_t__,
+                   jacobian__>(0, lp__);
+      local_scalar_t__ sigma_k = DUMMY_VAR__;
       current_statement__ = 8;
-      z_k_3 = in__.template read_constrain_lb<local_scalar_t__,
-                jacobian__>(1e-6, lp__);
-      local_scalar_t__ z_logit_b_3 = DUMMY_VAR__;
+      sigma_k = in__.template read_constrain_lb<local_scalar_t__,
+                  jacobian__>(0, lp__);
+      local_scalar_t__ sigma_b = DUMMY_VAR__;
       current_statement__ = 9;
-      z_logit_b_3 = in__.template read<local_scalar_t__>();
+      sigma_b = in__.template read_constrain_lb<local_scalar_t__,
+                  jacobian__>(0, lp__);
       local_scalar_t__ sigma1 = DUMMY_VAR__;
       current_statement__ = 10;
       sigma1 = in__.template read_constrain_lb<local_scalar_t__,
-                 jacobian__>(1e-6, lp__);
+                 jacobian__>(0, lp__);
       local_scalar_t__ sigma2 = DUMMY_VAR__;
       current_statement__ = 11;
       sigma2 = in__.template read_constrain_lb<local_scalar_t__,
-                 jacobian__>(1e-6, lp__);
+                 jacobian__>(0, lp__);
       local_scalar_t__ sigma3 = DUMMY_VAR__;
       current_statement__ = 12;
       sigma3 = in__.template read_constrain_lb<local_scalar_t__,
-                 jacobian__>(1e-6, lp__);
-      local_scalar_t__ b = DUMMY_VAR__;
-      current_statement__ = 13;
-      b = stan::math::inv_logit(logit_b);
-      local_scalar_t__ x0_3 = DUMMY_VAR__;
-      current_statement__ = 14;
-      x0_3 = (x0 + (sigma_x0 * z_x0_3));
-      local_scalar_t__ k_3 = DUMMY_VAR__;
-      current_statement__ = 15;
-      k_3 = (k + (sigma_k * z_k_3));
-      local_scalar_t__ logit_b_3 = DUMMY_VAR__;
-      current_statement__ = 16;
-      logit_b_3 = (logit_b + (sigma_logit_b * z_logit_b_3));
-      local_scalar_t__ b_3 = DUMMY_VAR__;
-      current_statement__ = 17;
-      b_3 = stan::math::inv_logit(logit_b_3);
-      current_statement__ = 13;
-      stan::math::check_greater_or_equal(function__, "b", b, 0);
-      current_statement__ = 13;
-      stan::math::check_less_or_equal(function__, "b", b, 1);
-      current_statement__ = 14;
-      stan::math::check_greater_or_equal(function__, "x0_3", x0_3, -1.8);
-      current_statement__ = 15;
-      stan::math::check_greater_or_equal(function__, "k_3", k_3, 1e-6);
-      current_statement__ = 17;
-      stan::math::check_greater_or_equal(function__, "b_3", b_3, 0);
-      current_statement__ = 17;
-      stan::math::check_less_or_equal(function__, "b_3", b_3, 1);
+                 jacobian__>(0, lp__);
       {
-        current_statement__ = 20;
+        current_statement__ = 15;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(x0, 30, 10));
-        current_statement__ = 21;
+        current_statement__ = 16;
         if (stan::math::logical_lt(x0, -1.8)) {
-          current_statement__ = 21;
+          current_statement__ = 16;
           lp_accum__.add(stan::math::negative_infinity());
         } else {
-          current_statement__ = 21;
+          current_statement__ = 16;
           lp_accum__.add(-stan::math::normal_lccdf(-1.8, 30, 10));
         }
+        current_statement__ = 17;
+        lp_accum__.add(stan::math::beta_lpdf<propto__>(k, 2, 5));
+        current_statement__ = 18;
+        lp_accum__.add(stan::math::beta_lpdf<propto__>(b, 2, 5));
+        current_statement__ = 19;
+        lp_accum__.add(stan::math::cauchy_lpdf<propto__>(sigma_x0, 0, 1));
+        current_statement__ = 20;
+        lp_accum__.add(stan::math::cauchy_lpdf<propto__>(sigma_k, 0, 1));
+        current_statement__ = 21;
+        lp_accum__.add(stan::math::cauchy_lpdf<propto__>(sigma_b, 0, 1));
         current_statement__ = 22;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(k, 0, 0.25));
-        current_statement__ = 23;
-        lp_accum__.add((stan::math::beta_lpdf<false>(b, 2, 5) +
-          stan::math::log((b * (1 - b)))));
-        current_statement__ = 24;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma_x0, 0, 1));
-        current_statement__ = 25;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma_k, 0, 1));
-        current_statement__ = 26;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma_logit_b, 0,
-                         0.2));
-        current_statement__ = 27;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(z_x0_3, 0, 1));
-        current_statement__ = 28;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(z_k_3, 0, 1));
-        current_statement__ = 29;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(z_logit_b_3, 0, 1));
-        current_statement__ = 30;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma1, 0.01, 0.1));
-        current_statement__ = 31;
-        if (stan::math::logical_lt(sigma1, 1e-6)) {
-          current_statement__ = 31;
-          lp_accum__.add(stan::math::negative_infinity());
-        } else {
-          current_statement__ = 31;
-          lp_accum__.add(-stan::math::normal_lccdf(1e-6, 0.01, 0.1));
-        }
-        current_statement__ = 32;
+        current_statement__ = 23;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma2, 0.01, 0.1));
-        current_statement__ = 33;
-        if (stan::math::logical_lt(sigma2, 1e-6)) {
-          current_statement__ = 33;
-          lp_accum__.add(stan::math::negative_infinity());
-        } else {
-          current_statement__ = 33;
-          lp_accum__.add(-stan::math::normal_lccdf(1e-6, 0.01, 0.1));
-        }
-        current_statement__ = 34;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma3, 0.01, 0.1));
-        current_statement__ = 35;
-        if (stan::math::logical_lt(sigma3, 1e-6)) {
-          current_statement__ = 35;
-          lp_accum__.add(stan::math::negative_infinity());
-        } else {
-          current_statement__ = 35;
-          lp_accum__.add(-stan::math::normal_lccdf(1e-6, 0.01, 0.1));
-        }
-        current_statement__ = 36;
+        current_statement__ = 24;
         stan::math::validate_non_negative_index("mu1", "N1", N1);
         Eigen::Matrix<local_scalar_t__,-1,1> mu1 =
           Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N1, DUMMY_VAR__);
-        current_statement__ = 37;
+        current_statement__ = 25;
         stan::model::assign(mu1,
           stan::math::add(
             stan::math::multiply((1 - b),
               stan::math::inv_logit(
                 stan::math::multiply(k, stan::math::subtract(x1, x0)))), b),
           "assigning variable mu1");
-        current_statement__ = 38;
+        current_statement__ = 26;
         stan::math::validate_non_negative_index("mu2", "N2", N2);
         Eigen::Matrix<local_scalar_t__,-1,1> mu2 =
           Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N2, DUMMY_VAR__);
-        current_statement__ = 39;
+        current_statement__ = 27;
         stan::model::assign(mu2,
           stan::math::add(
             stan::math::multiply((1 - b),
               stan::math::inv_logit(
                 stan::math::multiply(k, stan::math::subtract(x2, x0)))), b),
           "assigning variable mu2");
-        current_statement__ = 40;
+        current_statement__ = 28;
+        lp_accum__.add(stan::math::normal_lpdf<propto__>(y1, mu1, sigma1));
+        current_statement__ = 29;
+        lp_accum__.add(stan::math::normal_lpdf<propto__>(y2, mu2, sigma2));
+        current_statement__ = 30;
+        lp_accum__.add(stan::math::normal_lpdf<propto__>(x0_3, x0, sigma_x0));
+        current_statement__ = 31;
+        lp_accum__.add(stan::math::normal_lpdf<propto__>(k_3, k, sigma_k));
+        current_statement__ = 32;
+        lp_accum__.add(stan::math::normal_lpdf<propto__>(b_3, b, sigma_b));
+        current_statement__ = 33;
         stan::math::validate_non_negative_index("mu3", "N3", N3);
         Eigen::Matrix<local_scalar_t__,-1,1> mu3 =
           Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N3, DUMMY_VAR__);
-        current_statement__ = 41;
+        current_statement__ = 34;
         stan::model::assign(mu3,
           stan::math::add(
             stan::math::multiply((1 - b_3),
               stan::math::inv_logit(
                 stan::math::multiply(k_3, stan::math::subtract(x3, x0_3)))),
             b_3), "assigning variable mu3");
-        current_statement__ = 42;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(y1, mu1, sigma1));
-        current_statement__ = 43;
-        if (stan::math::logical_lt(stan::math::min(y1), 1e-6)) {
-          current_statement__ = 43;
-          lp_accum__.add(stan::math::negative_infinity());
-        } else {
-          current_statement__ = 43;
-          lp_accum__.add(-stan::math::normal_lccdf(1e-6, mu1, sigma1));
-        }
-        current_statement__ = 44;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(y2, mu2, sigma2));
-        current_statement__ = 45;
-        if (stan::math::logical_lt(stan::math::min(y2), 1e-6)) {
-          current_statement__ = 45;
-          lp_accum__.add(stan::math::negative_infinity());
-        } else {
-          current_statement__ = 45;
-          lp_accum__.add(-stan::math::normal_lccdf(1e-6, mu2, sigma2));
-        }
-        current_statement__ = 46;
+        current_statement__ = 35;
+        lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma3, 0.01, 0.1));
+        current_statement__ = 36;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(y3, mu3, sigma3));
-        current_statement__ = 47;
-        if (stan::math::logical_lt(stan::math::min(y3), 1e-6)) {
-          current_statement__ = 47;
-          lp_accum__.add(stan::math::negative_infinity());
-        } else {
-          current_statement__ = 47;
-          lp_accum__.add(-stan::math::normal_lccdf(1e-6, mu3, sigma3));
-        }
       }
     } catch (const std::exception& e) {
       stan::lang::rethrow_located(e, locations_array__[current_statement__]);
@@ -542,60 +456,57 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
              jacobian__>(-1.8, lp__);
       double k = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 2;
-      k = in__.template read_constrain_lb<local_scalar_t__, jacobian__>(1e-6,
-            lp__);
-      double logit_b = std::numeric_limits<double>::quiet_NaN();
+      k = in__.template read_constrain_lub<local_scalar_t__, jacobian__>(0,
+            1, lp__);
+      double b = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 3;
-      logit_b = in__.template read<local_scalar_t__>();
-      double sigma_x0 = std::numeric_limits<double>::quiet_NaN();
+      b = in__.template read_constrain_lub<local_scalar_t__, jacobian__>(0,
+            1, lp__);
+      double x0_3 = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 4;
-      sigma_x0 = in__.template read_constrain_lb<local_scalar_t__,
-                   jacobian__>(1e-6, lp__);
-      double sigma_k = std::numeric_limits<double>::quiet_NaN();
+      x0_3 = in__.template read_constrain_lb<local_scalar_t__,
+               jacobian__>(-1.8, lp__);
+      double k_3 = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 5;
-      sigma_k = in__.template read_constrain_lb<local_scalar_t__,
-                  jacobian__>(1e-6, lp__);
-      double sigma_logit_b = std::numeric_limits<double>::quiet_NaN();
+      k_3 = in__.template read_constrain_lub<local_scalar_t__, jacobian__>(0,
+              1, lp__);
+      double b_3 = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 6;
-      sigma_logit_b = in__.template read_constrain_lb<local_scalar_t__,
-                        jacobian__>(1e-6, lp__);
-      double z_x0_3 = std::numeric_limits<double>::quiet_NaN();
+      b_3 = in__.template read_constrain_lub<local_scalar_t__, jacobian__>(0,
+              1, lp__);
+      double sigma_x0 = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 7;
-      z_x0_3 = in__.template read_constrain_lb<local_scalar_t__,
-                 jacobian__>(-1.8, lp__);
-      double z_k_3 = std::numeric_limits<double>::quiet_NaN();
+      sigma_x0 = in__.template read_constrain_lb<local_scalar_t__,
+                   jacobian__>(0, lp__);
+      double sigma_k = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 8;
-      z_k_3 = in__.template read_constrain_lb<local_scalar_t__,
-                jacobian__>(1e-6, lp__);
-      double z_logit_b_3 = std::numeric_limits<double>::quiet_NaN();
+      sigma_k = in__.template read_constrain_lb<local_scalar_t__,
+                  jacobian__>(0, lp__);
+      double sigma_b = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 9;
-      z_logit_b_3 = in__.template read<local_scalar_t__>();
+      sigma_b = in__.template read_constrain_lb<local_scalar_t__,
+                  jacobian__>(0, lp__);
       double sigma1 = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 10;
       sigma1 = in__.template read_constrain_lb<local_scalar_t__,
-                 jacobian__>(1e-6, lp__);
+                 jacobian__>(0, lp__);
       double sigma2 = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 11;
       sigma2 = in__.template read_constrain_lb<local_scalar_t__,
-                 jacobian__>(1e-6, lp__);
+                 jacobian__>(0, lp__);
       double sigma3 = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 12;
       sigma3 = in__.template read_constrain_lb<local_scalar_t__,
-                 jacobian__>(1e-6, lp__);
-      double b = std::numeric_limits<double>::quiet_NaN();
-      double x0_3 = std::numeric_limits<double>::quiet_NaN();
-      double k_3 = std::numeric_limits<double>::quiet_NaN();
-      double logit_b_3 = std::numeric_limits<double>::quiet_NaN();
-      double b_3 = std::numeric_limits<double>::quiet_NaN();
+                 jacobian__>(0, lp__);
       out__.write(x0);
       out__.write(k);
-      out__.write(logit_b);
+      out__.write(b);
+      out__.write(x0_3);
+      out__.write(k_3);
+      out__.write(b_3);
       out__.write(sigma_x0);
       out__.write(sigma_k);
-      out__.write(sigma_logit_b);
-      out__.write(z_x0_3);
-      out__.write(z_k_3);
-      out__.write(z_logit_b_3);
+      out__.write(sigma_b);
       out__.write(sigma1);
       out__.write(sigma2);
       out__.write(sigma3);
@@ -604,43 +515,14 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
             stan::math::primitive_value(emit_generated_quantities__)))) {
         return ;
       }
-      current_statement__ = 13;
-      b = stan::math::inv_logit(logit_b);
-      current_statement__ = 14;
-      x0_3 = (x0 + (sigma_x0 * z_x0_3));
-      current_statement__ = 15;
-      k_3 = (k + (sigma_k * z_k_3));
-      current_statement__ = 16;
-      logit_b_3 = (logit_b + (sigma_logit_b * z_logit_b_3));
-      current_statement__ = 17;
-      b_3 = stan::math::inv_logit(logit_b_3);
-      current_statement__ = 13;
-      stan::math::check_greater_or_equal(function__, "b", b, 0);
-      current_statement__ = 13;
-      stan::math::check_less_or_equal(function__, "b", b, 1);
-      current_statement__ = 14;
-      stan::math::check_greater_or_equal(function__, "x0_3", x0_3, -1.8);
-      current_statement__ = 15;
-      stan::math::check_greater_or_equal(function__, "k_3", k_3, 1e-6);
-      current_statement__ = 17;
-      stan::math::check_greater_or_equal(function__, "b_3", b_3, 0);
-      current_statement__ = 17;
-      stan::math::check_less_or_equal(function__, "b_3", b_3, 1);
-      if (emit_transformed_parameters__) {
-        out__.write(b);
-        out__.write(x0_3);
-        out__.write(k_3);
-        out__.write(logit_b_3);
-        out__.write(b_3);
-      }
       if (stan::math::logical_negation(emit_generated_quantities__)) {
         return ;
       }
       double sigma2_sigma1 = std::numeric_limits<double>::quiet_NaN();
-      current_statement__ = 18;
+      current_statement__ = 13;
       sigma2_sigma1 = (sigma2 / sigma1);
       double sigma3_sigma1 = std::numeric_limits<double>::quiet_NaN();
-      current_statement__ = 19;
+      current_statement__ = 14;
       sigma3_sigma1 = (sigma3 / sigma1);
       out__.write(sigma2_sigma1);
       out__.write(sigma3_sigma1);
@@ -671,47 +553,47 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
       local_scalar_t__ k = DUMMY_VAR__;
       current_statement__ = 2;
       k = in__.read<local_scalar_t__>();
-      out__.write_free_lb(1e-6, k);
-      local_scalar_t__ logit_b = DUMMY_VAR__;
+      out__.write_free_lub(0, 1, k);
+      local_scalar_t__ b = DUMMY_VAR__;
       current_statement__ = 3;
-      logit_b = in__.read<local_scalar_t__>();
-      out__.write(logit_b);
-      local_scalar_t__ sigma_x0 = DUMMY_VAR__;
+      b = in__.read<local_scalar_t__>();
+      out__.write_free_lub(0, 1, b);
+      local_scalar_t__ x0_3 = DUMMY_VAR__;
       current_statement__ = 4;
-      sigma_x0 = in__.read<local_scalar_t__>();
-      out__.write_free_lb(1e-6, sigma_x0);
-      local_scalar_t__ sigma_k = DUMMY_VAR__;
+      x0_3 = in__.read<local_scalar_t__>();
+      out__.write_free_lb(-1.8, x0_3);
+      local_scalar_t__ k_3 = DUMMY_VAR__;
       current_statement__ = 5;
-      sigma_k = in__.read<local_scalar_t__>();
-      out__.write_free_lb(1e-6, sigma_k);
-      local_scalar_t__ sigma_logit_b = DUMMY_VAR__;
+      k_3 = in__.read<local_scalar_t__>();
+      out__.write_free_lub(0, 1, k_3);
+      local_scalar_t__ b_3 = DUMMY_VAR__;
       current_statement__ = 6;
-      sigma_logit_b = in__.read<local_scalar_t__>();
-      out__.write_free_lb(1e-6, sigma_logit_b);
-      local_scalar_t__ z_x0_3 = DUMMY_VAR__;
+      b_3 = in__.read<local_scalar_t__>();
+      out__.write_free_lub(0, 1, b_3);
+      local_scalar_t__ sigma_x0 = DUMMY_VAR__;
       current_statement__ = 7;
-      z_x0_3 = in__.read<local_scalar_t__>();
-      out__.write_free_lb(-1.8, z_x0_3);
-      local_scalar_t__ z_k_3 = DUMMY_VAR__;
+      sigma_x0 = in__.read<local_scalar_t__>();
+      out__.write_free_lb(0, sigma_x0);
+      local_scalar_t__ sigma_k = DUMMY_VAR__;
       current_statement__ = 8;
-      z_k_3 = in__.read<local_scalar_t__>();
-      out__.write_free_lb(1e-6, z_k_3);
-      local_scalar_t__ z_logit_b_3 = DUMMY_VAR__;
+      sigma_k = in__.read<local_scalar_t__>();
+      out__.write_free_lb(0, sigma_k);
+      local_scalar_t__ sigma_b = DUMMY_VAR__;
       current_statement__ = 9;
-      z_logit_b_3 = in__.read<local_scalar_t__>();
-      out__.write(z_logit_b_3);
+      sigma_b = in__.read<local_scalar_t__>();
+      out__.write_free_lb(0, sigma_b);
       local_scalar_t__ sigma1 = DUMMY_VAR__;
       current_statement__ = 10;
       sigma1 = in__.read<local_scalar_t__>();
-      out__.write_free_lb(1e-6, sigma1);
+      out__.write_free_lb(0, sigma1);
       local_scalar_t__ sigma2 = DUMMY_VAR__;
       current_statement__ = 11;
       sigma2 = in__.read<local_scalar_t__>();
-      out__.write_free_lb(1e-6, sigma2);
+      out__.write_free_lb(0, sigma2);
       local_scalar_t__ sigma3 = DUMMY_VAR__;
       current_statement__ = 12;
       sigma3 = in__.read<local_scalar_t__>();
-      out__.write_free_lb(1e-6, sigma3);
+      out__.write_free_lb(0, sigma3);
     } catch (const std::exception& e) {
       stan::lang::rethrow_located(e, locations_array__[current_statement__]);
     }
@@ -734,25 +616,25 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
       context__.validate_dims("parameter initialization", "k", "double",
         std::vector<size_t>{});
       current_statement__ = 3;
-      context__.validate_dims("parameter initialization", "logit_b",
-        "double", std::vector<size_t>{});
+      context__.validate_dims("parameter initialization", "b", "double",
+        std::vector<size_t>{});
       current_statement__ = 4;
+      context__.validate_dims("parameter initialization", "x0_3", "double",
+        std::vector<size_t>{});
+      current_statement__ = 5;
+      context__.validate_dims("parameter initialization", "k_3", "double",
+        std::vector<size_t>{});
+      current_statement__ = 6;
+      context__.validate_dims("parameter initialization", "b_3", "double",
+        std::vector<size_t>{});
+      current_statement__ = 7;
       context__.validate_dims("parameter initialization", "sigma_x0",
         "double", std::vector<size_t>{});
-      current_statement__ = 5;
+      current_statement__ = 8;
       context__.validate_dims("parameter initialization", "sigma_k",
         "double", std::vector<size_t>{});
-      current_statement__ = 6;
-      context__.validate_dims("parameter initialization", "sigma_logit_b",
-        "double", std::vector<size_t>{});
-      current_statement__ = 7;
-      context__.validate_dims("parameter initialization", "z_x0_3", "double",
-        std::vector<size_t>{});
-      current_statement__ = 8;
-      context__.validate_dims("parameter initialization", "z_k_3", "double",
-        std::vector<size_t>{});
       current_statement__ = 9;
-      context__.validate_dims("parameter initialization", "z_logit_b_3",
+      context__.validate_dims("parameter initialization", "sigma_b",
         "double", std::vector<size_t>{});
       current_statement__ = 10;
       context__.validate_dims("parameter initialization", "sigma1", "double",
@@ -772,47 +654,47 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
       local_scalar_t__ k = DUMMY_VAR__;
       current_statement__ = 2;
       k = context__.vals_r("k")[(1 - 1)];
-      out__.write_free_lb(1e-6, k);
-      local_scalar_t__ logit_b = DUMMY_VAR__;
+      out__.write_free_lub(0, 1, k);
+      local_scalar_t__ b = DUMMY_VAR__;
       current_statement__ = 3;
-      logit_b = context__.vals_r("logit_b")[(1 - 1)];
-      out__.write(logit_b);
-      local_scalar_t__ sigma_x0 = DUMMY_VAR__;
+      b = context__.vals_r("b")[(1 - 1)];
+      out__.write_free_lub(0, 1, b);
+      local_scalar_t__ x0_3 = DUMMY_VAR__;
       current_statement__ = 4;
-      sigma_x0 = context__.vals_r("sigma_x0")[(1 - 1)];
-      out__.write_free_lb(1e-6, sigma_x0);
-      local_scalar_t__ sigma_k = DUMMY_VAR__;
+      x0_3 = context__.vals_r("x0_3")[(1 - 1)];
+      out__.write_free_lb(-1.8, x0_3);
+      local_scalar_t__ k_3 = DUMMY_VAR__;
       current_statement__ = 5;
-      sigma_k = context__.vals_r("sigma_k")[(1 - 1)];
-      out__.write_free_lb(1e-6, sigma_k);
-      local_scalar_t__ sigma_logit_b = DUMMY_VAR__;
+      k_3 = context__.vals_r("k_3")[(1 - 1)];
+      out__.write_free_lub(0, 1, k_3);
+      local_scalar_t__ b_3 = DUMMY_VAR__;
       current_statement__ = 6;
-      sigma_logit_b = context__.vals_r("sigma_logit_b")[(1 - 1)];
-      out__.write_free_lb(1e-6, sigma_logit_b);
-      local_scalar_t__ z_x0_3 = DUMMY_VAR__;
+      b_3 = context__.vals_r("b_3")[(1 - 1)];
+      out__.write_free_lub(0, 1, b_3);
+      local_scalar_t__ sigma_x0 = DUMMY_VAR__;
       current_statement__ = 7;
-      z_x0_3 = context__.vals_r("z_x0_3")[(1 - 1)];
-      out__.write_free_lb(-1.8, z_x0_3);
-      local_scalar_t__ z_k_3 = DUMMY_VAR__;
+      sigma_x0 = context__.vals_r("sigma_x0")[(1 - 1)];
+      out__.write_free_lb(0, sigma_x0);
+      local_scalar_t__ sigma_k = DUMMY_VAR__;
       current_statement__ = 8;
-      z_k_3 = context__.vals_r("z_k_3")[(1 - 1)];
-      out__.write_free_lb(1e-6, z_k_3);
-      local_scalar_t__ z_logit_b_3 = DUMMY_VAR__;
+      sigma_k = context__.vals_r("sigma_k")[(1 - 1)];
+      out__.write_free_lb(0, sigma_k);
+      local_scalar_t__ sigma_b = DUMMY_VAR__;
       current_statement__ = 9;
-      z_logit_b_3 = context__.vals_r("z_logit_b_3")[(1 - 1)];
-      out__.write(z_logit_b_3);
+      sigma_b = context__.vals_r("sigma_b")[(1 - 1)];
+      out__.write_free_lb(0, sigma_b);
       local_scalar_t__ sigma1 = DUMMY_VAR__;
       current_statement__ = 10;
       sigma1 = context__.vals_r("sigma1")[(1 - 1)];
-      out__.write_free_lb(1e-6, sigma1);
+      out__.write_free_lb(0, sigma1);
       local_scalar_t__ sigma2 = DUMMY_VAR__;
       current_statement__ = 11;
       sigma2 = context__.vals_r("sigma2")[(1 - 1)];
-      out__.write_free_lb(1e-6, sigma2);
+      out__.write_free_lb(0, sigma2);
       local_scalar_t__ sigma3 = DUMMY_VAR__;
       current_statement__ = 12;
       sigma3 = context__.vals_r("sigma3")[(1 - 1)];
-      out__.write_free_lb(1e-6, sigma3);
+      out__.write_free_lb(0, sigma3);
     } catch (const std::exception& e) {
       stan::lang::rethrow_located(e, locations_array__[current_statement__]);
     }
@@ -821,14 +703,10 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
   get_param_names(std::vector<std::string>& names__, const bool
                   emit_transformed_parameters__ = true, const bool
                   emit_generated_quantities__ = true) const {
-    names__ = std::vector<std::string>{"x0", "k", "logit_b", "sigma_x0",
-                "sigma_k", "sigma_logit_b", "z_x0_3", "z_k_3", "z_logit_b_3",
-                "sigma1", "sigma2", "sigma3"};
-    if (emit_transformed_parameters__) {
-      std::vector<std::string> temp{"b", "x0_3", "k_3", "logit_b_3", "b_3"};
-      names__.reserve(names__.size() + temp.size());
-      names__.insert(names__.end(), temp.begin(), temp.end());
-    }
+    names__ = std::vector<std::string>{"x0", "k", "b", "x0_3", "k_3", "b_3",
+                "sigma_x0", "sigma_k", "sigma_b", "sigma1", "sigma2",
+                "sigma3"};
+    if (emit_transformed_parameters__) {}
     if (emit_generated_quantities__) {
       std::vector<std::string> temp{"sigma2_sigma1", "sigma3_sigma1"};
       names__.reserve(names__.size() + temp.size());
@@ -846,14 +724,7 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
                 std::vector<size_t>{}, std::vector<size_t>{},
                 std::vector<size_t>{}, std::vector<size_t>{},
                 std::vector<size_t>{}};
-    if (emit_transformed_parameters__) {
-      std::vector<std::vector<size_t>>
-        temp{std::vector<size_t>{}, std::vector<size_t>{},
-             std::vector<size_t>{}, std::vector<size_t>{},
-             std::vector<size_t>{}};
-      dimss__.reserve(dimss__.size() + temp.size());
-      dimss__.insert(dimss__.end(), temp.begin(), temp.end());
-    }
+    if (emit_transformed_parameters__) {}
     if (emit_generated_quantities__) {
       std::vector<std::vector<size_t>>
         temp{std::vector<size_t>{}, std::vector<size_t>{}};
@@ -867,23 +738,17 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
                           emit_generated_quantities__ = true) const final {
     param_names__.emplace_back(std::string() + "x0");
     param_names__.emplace_back(std::string() + "k");
-    param_names__.emplace_back(std::string() + "logit_b");
+    param_names__.emplace_back(std::string() + "b");
+    param_names__.emplace_back(std::string() + "x0_3");
+    param_names__.emplace_back(std::string() + "k_3");
+    param_names__.emplace_back(std::string() + "b_3");
     param_names__.emplace_back(std::string() + "sigma_x0");
     param_names__.emplace_back(std::string() + "sigma_k");
-    param_names__.emplace_back(std::string() + "sigma_logit_b");
-    param_names__.emplace_back(std::string() + "z_x0_3");
-    param_names__.emplace_back(std::string() + "z_k_3");
-    param_names__.emplace_back(std::string() + "z_logit_b_3");
+    param_names__.emplace_back(std::string() + "sigma_b");
     param_names__.emplace_back(std::string() + "sigma1");
     param_names__.emplace_back(std::string() + "sigma2");
     param_names__.emplace_back(std::string() + "sigma3");
-    if (emit_transformed_parameters__) {
-      param_names__.emplace_back(std::string() + "b");
-      param_names__.emplace_back(std::string() + "x0_3");
-      param_names__.emplace_back(std::string() + "k_3");
-      param_names__.emplace_back(std::string() + "logit_b_3");
-      param_names__.emplace_back(std::string() + "b_3");
-    }
+    if (emit_transformed_parameters__) {}
     if (emit_generated_quantities__) {
       param_names__.emplace_back(std::string() + "sigma2_sigma1");
       param_names__.emplace_back(std::string() + "sigma3_sigma1");
@@ -895,33 +760,27 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
                             emit_generated_quantities__ = true) const final {
     param_names__.emplace_back(std::string() + "x0");
     param_names__.emplace_back(std::string() + "k");
-    param_names__.emplace_back(std::string() + "logit_b");
+    param_names__.emplace_back(std::string() + "b");
+    param_names__.emplace_back(std::string() + "x0_3");
+    param_names__.emplace_back(std::string() + "k_3");
+    param_names__.emplace_back(std::string() + "b_3");
     param_names__.emplace_back(std::string() + "sigma_x0");
     param_names__.emplace_back(std::string() + "sigma_k");
-    param_names__.emplace_back(std::string() + "sigma_logit_b");
-    param_names__.emplace_back(std::string() + "z_x0_3");
-    param_names__.emplace_back(std::string() + "z_k_3");
-    param_names__.emplace_back(std::string() + "z_logit_b_3");
+    param_names__.emplace_back(std::string() + "sigma_b");
     param_names__.emplace_back(std::string() + "sigma1");
     param_names__.emplace_back(std::string() + "sigma2");
     param_names__.emplace_back(std::string() + "sigma3");
-    if (emit_transformed_parameters__) {
-      param_names__.emplace_back(std::string() + "b");
-      param_names__.emplace_back(std::string() + "x0_3");
-      param_names__.emplace_back(std::string() + "k_3");
-      param_names__.emplace_back(std::string() + "logit_b_3");
-      param_names__.emplace_back(std::string() + "b_3");
-    }
+    if (emit_transformed_parameters__) {}
     if (emit_generated_quantities__) {
       param_names__.emplace_back(std::string() + "sigma2_sigma1");
       param_names__.emplace_back(std::string() + "sigma3_sigma1");
     }
   }
   inline std::string get_constrained_sizedtypes() const {
-    return std::string("[{\"name\":\"x0\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"k\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"logit_b\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma_x0\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma_k\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma_logit_b\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"z_x0_3\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"z_k_3\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"z_logit_b_3\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma1\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma2\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma3\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"b\",\"type\":{\"name\":\"real\"},\"block\":\"transformed_parameters\"},{\"name\":\"x0_3\",\"type\":{\"name\":\"real\"},\"block\":\"transformed_parameters\"},{\"name\":\"k_3\",\"type\":{\"name\":\"real\"},\"block\":\"transformed_parameters\"},{\"name\":\"logit_b_3\",\"type\":{\"name\":\"real\"},\"block\":\"transformed_parameters\"},{\"name\":\"b_3\",\"type\":{\"name\":\"real\"},\"block\":\"transformed_parameters\"},{\"name\":\"sigma2_sigma1\",\"type\":{\"name\":\"real\"},\"block\":\"generated_quantities\"},{\"name\":\"sigma3_sigma1\",\"type\":{\"name\":\"real\"},\"block\":\"generated_quantities\"}]");
+    return std::string("[{\"name\":\"x0\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"k\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"b\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"x0_3\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"k_3\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"b_3\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma_x0\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma_k\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma_b\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma1\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma2\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma3\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma2_sigma1\",\"type\":{\"name\":\"real\"},\"block\":\"generated_quantities\"},{\"name\":\"sigma3_sigma1\",\"type\":{\"name\":\"real\"},\"block\":\"generated_quantities\"}]");
   }
   inline std::string get_unconstrained_sizedtypes() const {
-    return std::string("[{\"name\":\"x0\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"k\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"logit_b\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma_x0\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma_k\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma_logit_b\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"z_x0_3\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"z_k_3\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"z_logit_b_3\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma1\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma2\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma3\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"b\",\"type\":{\"name\":\"real\"},\"block\":\"transformed_parameters\"},{\"name\":\"x0_3\",\"type\":{\"name\":\"real\"},\"block\":\"transformed_parameters\"},{\"name\":\"k_3\",\"type\":{\"name\":\"real\"},\"block\":\"transformed_parameters\"},{\"name\":\"logit_b_3\",\"type\":{\"name\":\"real\"},\"block\":\"transformed_parameters\"},{\"name\":\"b_3\",\"type\":{\"name\":\"real\"},\"block\":\"transformed_parameters\"},{\"name\":\"sigma2_sigma1\",\"type\":{\"name\":\"real\"},\"block\":\"generated_quantities\"},{\"name\":\"sigma3_sigma1\",\"type\":{\"name\":\"real\"},\"block\":\"generated_quantities\"}]");
+    return std::string("[{\"name\":\"x0\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"k\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"b\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"x0_3\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"k_3\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"b_3\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma_x0\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma_k\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma_b\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma1\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma2\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma3\",\"type\":{\"name\":\"real\"},\"block\":\"parameters\"},{\"name\":\"sigma2_sigma1\",\"type\":{\"name\":\"real\"},\"block\":\"generated_quantities\"},{\"name\":\"sigma3_sigma1\",\"type\":{\"name\":\"real\"},\"block\":\"generated_quantities\"}]");
   }
   // Begin method overload boilerplate
   template <typename RNG> inline void
@@ -932,8 +791,7 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
               pstream = nullptr) const {
     const size_t num_params__ = (((((((((((1 + 1) + 1) + 1) + 1) + 1) + 1) +
       1) + 1) + 1) + 1) + 1);
-    const size_t num_transformed = emit_transformed_parameters * (((((1 + 1)
-      + 1) + 1) + 1));
+    const size_t num_transformed = emit_transformed_parameters * (0);
     const size_t num_gen_quantities = emit_generated_quantities * ((1 + 1));
     const size_t num_to_write = num_params__ + num_transformed +
       num_gen_quantities;
@@ -951,8 +809,7 @@ class joint_culture_meso_hierarchical_coretop_model final : public model_base_cr
               pstream = nullptr) const {
     const size_t num_params__ = (((((((((((1 + 1) + 1) + 1) + 1) + 1) + 1) +
       1) + 1) + 1) + 1) + 1);
-    const size_t num_transformed = emit_transformed_parameters * (((((1 + 1)
-      + 1) + 1) + 1));
+    const size_t num_transformed = emit_transformed_parameters * (0);
     const size_t num_gen_quantities = emit_generated_quantities * ((1 + 1));
     const size_t num_to_write = num_params__ + num_transformed +
       num_gen_quantities;
