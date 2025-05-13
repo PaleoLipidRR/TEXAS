@@ -1,19 +1,15 @@
 from .stan_utils import (
     get_posteriors,
-    pred_logistic,
-    pred_logistic_multivariate,
-    inv_logistic,
-    inv_logistic_multivariate,
-    make_ensemble,
+    pred_logistic_general as pred_logistic,
+    inv_logistic_general as inv_logistic,
     make_forward_ensemble,
+    make_ensemble,
 )
 
 __all__ = [
     "get_posteriors",
     "pred_logistic",
-    "pred_logistic_multivariate",
     "inv_logistic",
-    "inv_logistic_multivariate",
-    "make_ensemble",
     "make_forward_ensemble",
+    "make_ensemble",
 ]
