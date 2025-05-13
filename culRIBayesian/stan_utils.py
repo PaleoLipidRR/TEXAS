@@ -1,143 +1,90 @@
 from pathlib import Path
-from typing import Union, Optional, Dict, List, Callable
-from typing_extensions import Literal
-from dataclasses import dataclass
+from typing import Union, Optional, Dict, List
 import numpy as np
 import xarray as xr
 from cmdstanpy import CmdStanModel
 
 # ─── TYPES & HELPERS ───────────────────────────────────────────────────────────
 
-
-def _ensure_numpy(x: Union[np.ndarray, xr.DataArray]) -> np.ndarray:
-    """Convert xarray.DataArray (or similar) to NumPy array."""
+def _ensure_numpy(x):
     return x.values if hasattr(x, "values") else np.asarray(x)
 
-# ─── FORWARD / INVERSE LOGISTIC FUNCTIONS ────────────────────────────────────
+# ─── FORWARD & INVERSE LOGISTIC (GENERALIZED) ─────────────────────────────────
 
-def pred_logistic(
-    x: np.ndarray, x0: np.ndarray, k: np.ndarray, L: np.ndarray, b: np.ndarray
-) -> np.ndarray:
-    """Forward logistic: temperature → scaled RI."""
-    x, x0, k, L, b = map(_ensure_numpy, (x, x0, k, L, b))
-    return L / (1 + np.exp(-k * (x[:, None] - x0))) + b
-
-def pred_logistic_multivariate(
+def pred_logistic_general(
     x: np.ndarray,
-    z: np.ndarray,
     x0: np.ndarray,
     k: np.ndarray,
-    L: np.ndarray,
     b: np.ndarray,
-    beta0: np.ndarray,
-    beta1: np.ndarray
+    L: np.ndarray,
+    betas: Dict[str, np.ndarray],
+    factors: Dict[str, np.ndarray]
 ) -> np.ndarray:
-    """Forward multivariate: (temperature, z) → scaled RI."""
-    x, z = map(_ensure_numpy, (x, z))
-    x0, k, L, b, beta0, beta1 = map(_ensure_numpy, (x0, k, L, b, beta0, beta1))
-    base   = L / (1 + np.exp(-k * (x[:, None] - x0))) + b
-    linear = beta0 * z[:, None] + beta1
-    return base + linear
+    """
+    Forward logistic with arbitrary linear factors:
+      y = logistic(x) + sum_j beta_j * factor_j
+    Returns array shape (n_draws, x.size).
+    """
+    x_arr = _ensure_numpy(x)
+    x0_arr, k_arr, b_arr, L_arr = map(_ensure_numpy, (x0, k, b, L))
+    # base logistic term
+    base = L_arr[:, None] / (1 + np.exp(-k_arr[:, None] * (x_arr[None, :] - x0_arr[:, None]))) + b_arr[:, None]
+    # add linear factors
+    lin = np.zeros_like(base)
+    for name, beta in betas.items():
+        fac = _ensure_numpy(factors[name])
+        beta_arr = _ensure_numpy(beta)
+        lin += beta_arr[:, None] * fac[None, :]
+    return base + lin
 
-def inv_logistic(
-    y: np.ndarray, x0: np.ndarray, k: np.ndarray, L: np.ndarray, b: np.ndarray
-) -> np.ndarray:
-    """Inverse logistic: scaled RI → temperature."""
-    y, x0, k, L, b = map(_ensure_numpy, (y, x0, k, L, b))
-    arg = L / (y[:, None] - b) - 1
-    return x0[None, :] - (1.0 / k[None, :]) * np.log(arg)
 
-def inv_logistic_multivariate(
+def inv_logistic_general(
     y: np.ndarray,
-    z: np.ndarray,
     x0: np.ndarray,
     k: np.ndarray,
-    L: np.ndarray,
     b: np.ndarray,
-    beta0: np.ndarray,
-    beta1: np.ndarray
+    L: np.ndarray,
+    betas: Dict[str, np.ndarray],
+    factors: Dict[str, np.ndarray]
 ) -> np.ndarray:
-    """Inverse multivariate: (scaled RI, z) → temperature."""
-    y, z = map(_ensure_numpy, (y, z))
-    x0, k, L, b, beta0, beta1 = map(_ensure_numpy, (x0, k, L, b, beta0, beta1))
-    linear = beta0[None, :] * z[:, None] + beta1[None, :]
-    base   = y[:, None] - linear
-    arg    = L[None, :] / (base - b[None, :]) - 1.0
-    return x0[None, :] - (1.0 / k[None, :]) * np.log(arg)
+    """
+    Inverse logistic with arbitrary linear factors:
+      y = logistic(x) + sum_j beta_j * factor_j
+    Returns array shape (n_draws, y.size).
+    """
+    y_arr = _ensure_numpy(y)
+    x0_arr, k_arr, b_arr, L_arr = map(_ensure_numpy, (x0, k, b, L))
+    # compute linear combination per draw & obs
+    lin = np.zeros((x0_arr.size, y_arr.size))
+    for name, beta in betas.items():
+        fac = _ensure_numpy(factors[name])
+        beta_arr = _ensure_numpy(beta)
+        lin += beta_arr[:, None] * fac[None, :]
+    # subtract linear terms
+    y_corr = y_arr[None, :] - lin
+    # invert logistic
+    arg = L_arr[:, None] / (y_corr - b_arr[:, None]) - 1
+    return x0_arr[:, None] - (1.0 / k_arr[:, None]) * np.log(arg)
 
-# ─── MODEL SPECIFICATION & CACHE ──────────────────────────────────────────────
-# Allowed model names
-ModelName = Literal[
-    "logistic_free_upper",
-    "logistic_fixed_upper",
-    "logistic_fixed_upper_multivariate",
-    "logistic_fixed_upper_multivariate_fixedbeta1",
-    "hierarchical_coretop",
-]
+# ─── STAN INTERFACE & CACHE ─────────────────────────────────────────────────
 
-@dataclass
-class ModelSpec:
-    params:       List[str]    # names of parameters in the posterior dataset
-    fn:           Callable     # inv function (for make_ensemble)
-    needs_z:      bool = False # whether the model is multivariate
-    L_from_b:     bool = False # whether L should be computed as 1 - b
-    zero_beta1:   bool = False # whether beta1 should be forced to zero
-
-_MODEL_SPECS: Dict[ModelName, ModelSpec] = {
-    "logistic_free_upper": ModelSpec(
-        params=["x0","k","L","b"], fn=inv_logistic
-    ),
-    "logistic_fixed_upper": ModelSpec(
-        params=["x0","k","b"], fn=inv_logistic,
-        L_from_b=True
-    ),
-    "logistic_fixed_upper_multivariate": ModelSpec(
-        params=["x0","k","b","beta0","beta1"],
-        fn=inv_logistic_multivariate,
-        needs_z=True,
-        L_from_b=True
-    ),
-    "logistic_fixed_upper_multivariate_fixedbeta1": ModelSpec(
-        params=["x0","k","b","beta0"],
-        fn=inv_logistic_multivariate,
-        needs_z=True,
-        L_from_b=True,
-        zero_beta1=True
-    ),
-    "hierarchical_coretop": ModelSpec(
-        params=["x0_3", "k_3", "b_3"],
-        fn=inv_logistic,     # or pred_logistic for forward
-        L_from_b=True,
-    ),    
-}
-
-# cache compiled Stan models
 _MODEL_CACHE: Dict[Path, CmdStanModel] = {}
-
-# ─── STAN INTERFACE ──────────────────────────────────────────────────────────
 
 def get_posteriors(
     data: dict,
     stan_filename: str,
-    stan_models_dir: Union[Path,str] = None,
+    stan_models_dir: Union[Path, str] = None,
     chains: int = 4,
     iter_warmup: int = 500,
     iter_sampling: int = 1000,
     seed: Optional[int] = 42
 ) -> xr.Dataset:
-    """
-    Compile (once) & sample a CmdStan .stan file, returning all draws
-    in an xarray.Dataset with a single 'draw' dimension.
-    """
     if stan_models_dir is None:
         stan_models_dir = Path(__file__).parent / "stan_models"
-    stan_models_dir = Path(stan_models_dir)
-    model_path = stan_models_dir / stan_filename
-
+    model_path = Path(stan_models_dir) / stan_filename
     if model_path not in _MODEL_CACHE:
         _MODEL_CACHE[model_path] = CmdStanModel(stan_file=str(model_path))
     model = _MODEL_CACHE[model_path]
-
     if seed is not None:
         np.random.seed(seed)
     fit = model.sample(
@@ -149,126 +96,69 @@ def get_posteriors(
         parallel_chains=chains,
         show_console=True
     )
-
     ds = xr.Dataset()
-    for var in fit.stan_variables().keys():
+    for var in fit.stan_variables():
         arr = fit.stan_variable(var)
-        ds[var] = xr.DataArray(
-            arr,
-            dims=("draw",) + arr.shape[1:],
-            name=var
-        )
+        dim_names = ["draw"] + [f"dim_{i}" for i in range(1, arr.ndim)]
+        coords = {name: np.arange(sz) for name, sz in zip(dim_names, arr.shape)}
+        ds[var] = xr.DataArray(data=arr, dims=dim_names, coords=coords, name=var)
     return ds
 
-# ─── INVERSE ENSEMBLE (scaledRI → temperature) ───────────────────────────────
+# ─── GENERAL ENSEMBLE FUNCTIONS ─────────────────────────────────────────────
 
 def make_ensemble(
-    y:            np.ndarray,
-    posterior:    xr.Dataset,
-    model_name:   ModelName,
-    z:            Optional[np.ndarray] = None,
-    n_draws:      int = 1000,
-    seed:         Optional[int] = None
+    y: np.ndarray,
+    posterior: xr.Dataset,
+    n_draws: int = 1000,
+    seed: Optional[int] = None,
+    **factors: np.ndarray
 ) -> np.ndarray:
     """
-    Draw n_draws samples from the posterior and invert:
-    - Univariate:  inv_logistic(y, x0,k,L,b)
-    - Multivariate: inv_logistic_multivariate(y,z,x0,k,L,b,beta0,beta1)
-    Returns array shape (n_draws, y.size).
+    Draw samples from a posterior with parameters: x0,k,b,L and any beta0_* keys,
+    then invert: x = inv_logistic_general(y, x0,k,b,L, betas, factors)
+    *factors: pass arrays named by suffix after 'beta0_', e.g. z3, aa3
     """
-    spec = _MODEL_SPECS[model_name]
     if seed is not None:
         np.random.seed(seed)
-
+    # bootstrap draws
     sel = np.random.choice(posterior.dims["draw"], size=n_draws, replace=True)
-    P   = posterior.isel(draw=sel)[spec.params]
+    P = posterior.isel(draw=sel)
+    # extract base params
+    x0 = P["x0"].values
+    k  = P["k"].values
+    b  = P["b"].values
+    # derive or extract L
+    L = P["L"].values if "L" in P else (1 - P["b"]).values
+    # collect beta arrays
+    betas = {name.replace("beta0_", ""): P[name].values
+             for name in P.data_vars if name.startswith("beta0_")}
+    # ensure factors provided for each beta
+    for name in betas:
+        if name not in factors:
+            raise ValueError(f"Missing factor array for beta0_{name}")
+    return inv_logistic_general(y=y, x0=x0, k=k, b=b, L=L,
+                                 betas=betas, factors=factors)
 
-    if model_name == "hierarchical_coretop":
-        # P currently has vars ["x0_3","k_3","b_3"]
-        # rename them to ["x0","k","b"] before we compute L and call inv_logistic
-        P = P.rename_vars({"x0_3": "x0", "k_3": "k", "b_3": "b"})
-        params_list = ["x0","k","b"]
-    else:
-        params_list = spec.params
-
-    # derive L if requested
-    if spec.L_from_b:
-        try:
-            P["L"] = 1 - P["b"]
-        except KeyError:
-            raise ValueError(f"Model {model_name!r} requires 'b' to compute 'L', but 'b' is missing in the posterior dataset.")
-    # zero beta1 if requested
-    if spec.zero_beta1:
-        P["beta1"] = xr.zeros_like(P["beta0"])
-
-    # build argument list
-    arg_names = list(params_list)
-    if spec.L_from_b:
-        arg_names.append("L")
-    if spec.zero_beta1:
-        arg_names.append("beta1")
-    args = {p: P[p] for p in arg_names}
-
-    if spec.needs_z:
-        if z is None:
-            raise ValueError(f"{model_name!r} requires 'z', but none was provided")
-        return spec.fn(y=y, z=z, **args)
-    return spec.fn(y=y, **args)
-
-# ─── FORWARD ENSEMBLE (temperature → scaledRI) ────────────────────────────────
 
 def make_forward_ensemble(
-    x:            np.ndarray,
-    posterior:    xr.Dataset,
-    model_name:   ModelName,
-    z:            Optional[np.ndarray] = None,
-    n_draws:      int = 1000,
-    seed:         Optional[int] = None
+    x: np.ndarray,
+    posterior: xr.Dataset,
+    n_draws: int = 1000,
+    seed: Optional[int] = None,
+    **factors: np.ndarray
 ) -> np.ndarray:
-    """
-    Draw n_draws samples from the posterior and forward‐predict:
-    - Univariate:  pred_logistic(x, x0,k,L,b)
-    - Multivariate: pred_logistic_multivariate(x,z,x0,k,L,b,beta0,beta1)
-    Returns array shape (n_draws, x.size).
-    """
-    spec = _MODEL_SPECS[model_name]
     if seed is not None:
         np.random.seed(seed)
-
     sel = np.random.choice(posterior.dims["draw"], size=n_draws, replace=True)
-    P   = posterior.isel(draw=sel)[spec.params]
-
-    if model_name == "hierarchical_coretop":
-        # P currently has vars ["x0_3","k_3","b_3"]
-        # rename them to ["x0","k","b"] before we compute L and call inv_logistic
-        P = P.rename_vars({"x0_3": "x0", "k_3": "k", "b_3": "b"})
-        params_list = ["x0","k","b"]
-    else:
-        params_list = spec.params
-    # derive L if requested
-
-    if spec.L_from_b:
-        try:
-            P["L"] = 1 - P["b"]
-        except KeyError:
-            raise ValueError(f"Model {model_name!r} requires 'b' to compute 'L', but 'b' is missing in the posterior dataset.")
-    # zero beta1 if requested
-    if spec.zero_beta1:
-        P["beta1"] = xr.zeros_like(P["beta0"])
-
-    arg_names = list(params_list)
-    if spec.L_from_b:
-        arg_names.append("L")
-    if spec.zero_beta1:
-        arg_names.append("beta1")
-    args = {p: P[p] for p in arg_names}
-
-    if spec.needs_z:
-        if z is None:
-            raise ValueError(f"{model_name!r} requires 'z', but none was provided")
-        # broadcast z to match x if needed
-        if z.shape != x.shape:
-            z = np.broadcast_to(z, x.shape)
-        return pred_logistic_multivariate(x, z, **args)
-
-    return pred_logistic(x, **args)
+    P = posterior.isel(draw=sel)
+    x0 = P["x0"].values
+    k  = P["k"].values
+    b  = P["b"].values
+    L = P["L"].values if "L" in P else (1 - P["b"]).values
+    betas = {name.replace("beta0_", ""): P[name].values
+             for name in P.data_vars if name.startswith("beta0_")}
+    for name in betas:
+        if name not in factors:
+            raise ValueError(f"Missing factor array for beta0_{name}")
+    return pred_logistic_general(x=x, x0=x0, k=k, b=b, L=L,
+                                 betas=betas, factors=factors)
