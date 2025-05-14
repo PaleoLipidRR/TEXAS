@@ -1,13 +1,186 @@
 from pathlib import Path
-from typing import Union, Optional, Dict, List
+from typing import Union, Optional, Dict, List, Tuple
 import numpy as np
 import xarray as xr
 from cmdstanpy import CmdStanModel
+import os
+
 
 # ─── TYPES & HELPERS ───────────────────────────────────────────────────────────
 
 def _ensure_numpy(x):
     return x.values if hasattr(x, "values") else np.asarray(x)
+
+# ─── BUILD CALIBRATION DATASET ──────────────────────────────────────────────
+def build_joint_calibration_data(
+    culture: dict,
+    mesocosm: dict,
+    coretop: dict,
+    predictors: Dict[str, Dict[str, np.ndarray]]
+) -> Tuple[dict, dict]:
+    """
+    Build Stan-compatible data and predictor usage flags for joint GDGT calibration.
+
+    Parameters:
+    ----------
+    culture, mesocosm, coretop : dict
+        Each must contain a key "scaledRI" corresponding to ring index observations.
+
+    predictors : dict of dict
+        Must contain:
+            "thermoT": {
+                "culture": array-like,
+                "mesocosm": array-like,
+                "coretop": array-like
+            }
+        Optional:
+            Any additional predictors (e.g., "gdgt23ratio") with only "coretop" values.
+
+    Returns:
+    -------
+    data : dict
+        Stan-ready data dictionary with appropriately named inputs.
+
+    use_flags : dict
+        Dictionary mapping optional predictor names to 1 (used) or 0 (not used).
+    """
+    OPTIONAL_PREDICTORS = ["gdgt23ratio", "depthIntg_thermoT_no3"]
+    data = {}
+    use_flags = {}
+
+    # ─── Required predictor: thermoT ──────────────────────
+    thermoT = predictors.get("thermoT")
+    if thermoT is None:
+        raise ValueError("Missing required predictor 'thermoT'")
+
+    data["N_cul"] = len(culture["scaledRI"])
+    data["scaledRI_cul"] = _ensure_numpy(culture["scaledRI"])
+    data["thermoT_cul"] = _ensure_numpy(thermoT["culture"])
+
+    data["N_meso"] = len(mesocosm["scaledRI"])
+    data["scaledRI_meso"] = _ensure_numpy(mesocosm["scaledRI"])
+    data["thermoT_meso"] = _ensure_numpy(thermoT["mesocosm"])
+
+    data["N_coretop"] = len(coretop["scaledRI"])
+    data["scaledRI_coretop"] = _ensure_numpy(coretop["scaledRI"])
+    data["thermoT_coretop"] = _ensure_numpy(thermoT["coretop"])
+
+    # ─── Optional predictors ──────────────────────────────
+    print("[build_joint_calibration_data] Building Stan data block...")
+    print("  ✓ Using required predictor: thermoT")
+
+    for pred_name in OPTIONAL_PREDICTORS:
+        if pred_name in predictors and "coretop" in predictors[pred_name]:
+            data[pred_name] = _ensure_numpy(predictors[pred_name]["coretop"])
+            data[f"use_{pred_name}"] = 1
+            use_flags[pred_name] = 1
+            print(f"  ✓ Using predictor: {pred_name}")
+        else:
+            data[pred_name] = np.zeros(data["N_coretop"])
+            data[f"use_{pred_name}"] = 0
+            use_flags[pred_name] = 0
+            print(f"  ✗ Predictor missing for coretop: {pred_name}")
+
+    return data, use_flags
+
+
+def build_inverse_data(
+    scaledRI: np.ndarray,
+    prior_mu_thermoT: np.ndarray,
+    prior_sigma_thermoT: float,
+    posterior: xr.Dataset,
+    predictors: Dict[str, np.ndarray],
+    use_flags: Optional[Dict[str, bool]] = None,
+    n_draws: int = 1000,
+    seed: Optional[int] = 42
+) -> Tuple[dict, dict]:
+    """
+    Build Stan-compatible data and use flags for inverse prediction model.
+
+    Parameters:
+    ----------
+    scaledRI : np.ndarray
+        Ring index values from coretops to invert.
+
+    prior_mu_thermoT : np.ndarray
+        Prior mean estimates of temperature (same length as scaledRI).
+
+    prior_sigma_thermoT : float
+        Prior standard deviation on thermoT.
+
+    posterior : xr.Dataset
+        Posterior output from calibration model containing parameters like
+        x0_coretop, k_coretop, b_coretop, sigma, and optional beta0_* terms.
+
+    predictors : dict
+        Dictionary of optional predictor arrays, e.g., {
+            "gdgt23ratio": <array>,
+            "depthIntg_thermoT_no3": <array>
+        }
+
+    use_flags : dict (optional)
+        Dict specifying whether to use each optional predictor. If None, use
+        the presence of predictor arrays to decide.
+
+    n_draws : int
+        Number of posterior draws to sample.
+
+    seed : int
+        Random seed for reproducibility.
+
+    Returns:
+    -------
+    data : dict
+        Dictionary formatted for Stan sampling.
+
+    use_flags : dict
+        Explicit flags for each optional predictor (1 = used, 0 = unused).
+    """
+    OPTIONAL_PREDICTORS = ["gdgt23ratio", "depthIntg_thermoT_no3"]
+
+    if seed is not None:
+        np.random.seed(seed)
+
+    sel = np.random.choice(posterior.dims["draw"], size=n_draws, replace=True)
+    P = posterior.isel(draw=sel)
+
+    N = len(scaledRI)
+    M = n_draws
+
+    data = {
+        "N": N,
+        "scaledRI": np.asarray(scaledRI),
+        "prior_mu_thermoT": np.asarray(prior_mu_thermoT),
+        "prior_sigma_thermoT": prior_sigma_thermoT,
+        "M": M,
+        "x0_coretop": P["x0_coretop"].values,
+        "k_coretop": P["k_coretop"].values,
+        "b_coretop": P["b_coretop"].values,
+        "sigma_coretop_scaledRI": P["sigma"].values,
+    }
+
+    if use_flags is None:
+        use_flags = {}
+
+    print("[build_inverse_data] Processing optional predictors...")
+    for name in OPTIONAL_PREDICTORS:
+        beta_name = f"beta0_{name}"
+        use = use_flags.get(name, name in predictors)
+        use_flags[name] = bool(use)
+
+        if use:
+            data[name] = np.asarray(predictors[name])
+            data[beta_name] = P[beta_name].values
+            print(f"  ✓ Using predictor: {name}")
+        else:
+            data[name] = np.zeros(N)
+            data[beta_name] = np.zeros(M)
+            print(f"  ✗ Skipping predictor: {name} (use_{name} = 0)")
+
+        data[f"use_{name}"] = int(use)
+
+    return data, use_flags
+
 
 # ─── FORWARD & INVERSE LOGISTIC (GENERALIZED) ─────────────────────────────────
 
@@ -70,7 +243,7 @@ def inv_logistic_general(
 
 _MODEL_CACHE: Dict[Path, CmdStanModel] = {}
 
-def get_posteriors(
+def get_posterior(
     data: dict,
     stan_filename: str,
     stan_models_dir: Union[Path, str] = None,
@@ -124,21 +297,23 @@ def make_ensemble(
     sel = np.random.choice(posterior.dims["draw"], size=n_draws, replace=True)
     P = posterior.isel(draw=sel)
     # extract base params
-    x0 = P["x0"].values
-    k  = P["k"].values
-    b  = P["b"].values
+    x0 = P["x0_coretop"].values
+    k  = P["k_coretop"].values
+    b  = P["b_coretop"].values
     # derive or extract L
-    L = P["L"].values if "L" in P else (1 - P["b"]).values
+    L = P["L"].values if "L" in P else (1 - P["b_coretop"]).values
     # collect beta arrays
-    betas = {name.replace("beta0_", ""): P[name].values
-             for name in P.data_vars if name.startswith("beta0_")}
+    betas = {}
+    for var in P.data_vars:
+        if var.startswith("beta0_"):
+            key = var.replace("beta0_", "")
+            betas[key] = P[var].values
     # ensure factors provided for each beta
     for name in betas:
         if name not in factors:
             raise ValueError(f"Missing factor array for beta0_{name}")
     return inv_logistic_general(y=y, x0=x0, k=k, b=b, L=L,
                                  betas=betas, factors=factors)
-
 
 def make_forward_ensemble(
     x: np.ndarray,
@@ -151,14 +326,46 @@ def make_forward_ensemble(
         np.random.seed(seed)
     sel = np.random.choice(posterior.dims["draw"], size=n_draws, replace=True)
     P = posterior.isel(draw=sel)
-    x0 = P["x0"].values
-    k  = P["k"].values
-    b  = P["b"].values
-    L = P["L"].values if "L" in P else (1 - P["b"]).values
-    betas = {name.replace("beta0_", ""): P[name].values
-             for name in P.data_vars if name.startswith("beta0_")}
+    x0 = P["x0_coretop"].values
+    k  = P["k_coretop"].values
+    b  = P["b_coretop"].values
+    L = P["L"].values if "L" in P else (1 - P["b_coretop"]).values
+    betas = {}
+    for var in P.data_vars:
+        if var.startswith("beta0_"):
+            key = var.replace("beta0_", "")
+            betas[key] = P[var].values
     for name in betas:
         if name not in factors:
             raise ValueError(f"Missing factor array for beta0_{name}")
     return pred_logistic_general(x=x, x0=x0, k=k, b=b, L=L,
                                  betas=betas, factors=factors)
+
+# ─── POSTERIOR LOADING ────────────────────────────────────────────────────
+def save_posterior(posterior: xr.Dataset, model_name: str, cache_dir='posterior_cache'):
+    base_dir = Path(__file__).parent.parent  # or adjust as needed to reach project root
+    output_dir = base_dir / cache_dir
+    output_dir.mkdir(parents=True, exist_ok=True)
+    filepath = output_dir / f"{model_name}.nc"
+
+    # Add metadata
+    posterior.attrs['model_name'] = model_name
+    posterior.attrs['generated_by'] = 'culRI-Bayesian'
+    posterior.attrs['version'] = '1.0.0'
+
+    encoding = {var: {"zlib": True} for var in posterior.data_vars}
+    posterior.to_netcdf(filepath, encoding=encoding)
+
+    print(f"Posterior saved to {filepath}")
+
+def load_posterior(model_name, cache_dir='posterior_cache'):
+    base_dir = Path(__file__).parent.parent  # or adjust as needed to reach project root
+    output_dir = base_dir / cache_dir
+    output_dir.mkdir(parents=True, exist_ok=True)    
+    filepath = output_dir / f"{model_name}.nc"
+
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(f"Posterior file not found: {filepath}")
+    return xr.load_dataset(filepath)
+
+
