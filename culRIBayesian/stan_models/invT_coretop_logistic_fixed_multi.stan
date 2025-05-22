@@ -1,6 +1,6 @@
 data {
   int<lower=1> N;
-  vector[N] scaledRI;
+  vector[N] scaledRI_coretop;
   vector[N] prior_mu_thermoT;
   real prior_sigma_thermoT;
 
@@ -37,6 +37,6 @@ model {
     if (use_depthIntg_thermoT_no3 == 1)
       mu_scaledRI += beta0_depthIntg_thermoT_no3[m] * depthIntg_thermoT_no3;
 
-    scaledRI ~ normal(mu_scaledRI, sigma_coretop_scaledRI[m]);
+    scaledRI_coretop ~ normal(mu_scaledRI, sigma_coretop_scaledRI[m]);
   }
 }
