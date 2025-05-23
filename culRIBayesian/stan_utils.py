@@ -110,7 +110,7 @@ def build_inverse_data(
 
     posterior : xr.Dataset
         Posterior output from calibration model containing parameters like
-        x0_coretop, k_coretop, b_coretop, sigma, and optional beta0_* terms.
+        t0_coretop, k_coretop, b_coretop, sigma, and optional beta0_* terms.
 
     predictors : dict
         Dictionary of optional predictor arrays, e.g., {
@@ -153,7 +153,7 @@ def build_inverse_data(
         "prior_mu_thermoT": np.asarray(prior_mu_thermoT),
         "prior_sigma_thermoT": prior_sigma_thermoT,
         "M": M,
-        "x0_coretop": P["x0_coretop"].values,
+        "t0_coretop": P["t0_coretop"].values,
         "k_coretop": P["k_coretop"].values,
         "b_coretop": P["b_coretop"].values,
         "sigma_coretop_scaledRI": P["sigma"].values,
@@ -186,7 +186,7 @@ def build_inverse_data(
 
 def pred_logistic_general(
     x: np.ndarray,
-    x0: np.ndarray,
+    t0: np.ndarray,
     k: np.ndarray,
     b: np.ndarray,
     L: np.ndarray,
@@ -199,9 +199,9 @@ def pred_logistic_general(
     Returns array shape (n_draws, x.size).
     """
     x_arr = _ensure_numpy(x)
-    x0_arr, k_arr, b_arr, L_arr = map(_ensure_numpy, (x0, k, b, L))
+    t0_arr, k_arr, b_arr, L_arr = map(_ensure_numpy, (t0, k, b, L))
     # base logistic term
-    base = L_arr[:, None] / (1 + np.exp(-k_arr[:, None] * (x_arr[None, :] - x0_arr[:, None]))) + b_arr[:, None]
+    base = L_arr[:, None] / (1 + np.exp(-k_arr[:, None] * (x_arr[None, :] - t0_arr[:, None]))) + b_arr[:, None]
     # add linear factors
     lin = np.zeros_like(base)
     for name, beta in betas.items():
@@ -213,7 +213,7 @@ def pred_logistic_general(
 
 def inv_logistic_general(
     y: np.ndarray,
-    x0: np.ndarray,
+    t0: np.ndarray,
     k: np.ndarray,
     b: np.ndarray,
     L: np.ndarray,
@@ -226,9 +226,9 @@ def inv_logistic_general(
     Returns array shape (n_draws, y.size).
     """
     y_arr = _ensure_numpy(y)
-    x0_arr, k_arr, b_arr, L_arr = map(_ensure_numpy, (x0, k, b, L))
+    t0_arr, k_arr, b_arr, L_arr = map(_ensure_numpy, (t0, k, b, L))
     # compute linear combination per draw & obs
-    lin = np.zeros((x0_arr.size, y_arr.size))
+    lin = np.zeros((t0_arr.size, y_arr.size))
     for name, beta in betas.items():
         fac = _ensure_numpy(factors[name])
         beta_arr = _ensure_numpy(beta)
@@ -237,7 +237,7 @@ def inv_logistic_general(
     y_corr = y_arr[None, :] - lin
     # invert logistic
     arg = L_arr[:, None] / (y_corr - b_arr[:, None]) - 1
-    return x0_arr[:, None] - (1.0 / k_arr[:, None]) * np.log(arg)
+    return t0_arr[:, None] - (1.0 / k_arr[:, None]) * np.log(arg)
 
 # ─── STAN INTERFACE & CACHE ─────────────────────────────────────────────────
 
@@ -287,8 +287,8 @@ def make_ensemble(
     **factors: np.ndarray
 ) -> np.ndarray:
     """
-    Draw samples from a posterior with parameters: x0,k,b,L and any beta0_* keys,
-    then invert: x = inv_logistic_general(y, x0,k,b,L, betas, factors)
+    Draw samples from a posterior with parameters: t0,k,b,L and any beta0_* keys,
+    then invert: x = inv_logistic_general(y, t0,k,b,L, betas, factors)
     *factors: pass arrays named by suffix after 'beta0_', e.g. z3, aa3
     """
     if seed is not None:
@@ -297,11 +297,38 @@ def make_ensemble(
     sel = np.random.choice(posterior.dims["draw"], size=n_draws, replace=True)
     P = posterior.isel(draw=sel)
     # extract base params
-    x0 = P["x0_coretop"].values
-    k  = P["k_coretop"].values
-    b  = P["b_coretop"].values
+    ### auto-detect t0 from all named params with "t0_" prefix
+    ### and use one with _coretop suffix if available
+    ### if not, use the last one found
+    ### "L_" is optional, but if not found, use (1 - b)
+    
+    search_key_list = ["t0_", "k_", "b_"]
+    for search_key in search_key_list:
+        keys = [key for key in P.data_vars if key.startswith(search_key)]
+        if not keys:
+            raise ValueError(f"No {search_key} parameters found in posterior dataset.")
+        if len(keys) > 1:
+            print(f'''Multiple {search_key} parameters found: {keys}. Use {search_key}_coretop by default.''')
+            ### check for _coretop suffix
+            coretop_keys = [key for key in keys if key.endswith("_coretop")]
+            if coretop_keys:
+                keys = coretop_keys
+            else:
+                ### use the last one found
+                keys = [keys[-1]]
+                
+        
+        key = keys[0]
+        if search_key == "t0_":
+            t0 = P[key]
+        elif search_key == "k_":
+            k = P[key]
+        elif search_key == "b_":
+            b = P[key]
+    
+
     # derive or extract L
-    L = P["L"].values if "L" in P else (1 - P["b_coretop"]).values
+    L = P["L"].values if "L" in P else (1 - b).values
     # collect beta arrays
     betas = {}
     for var in P.data_vars:
@@ -312,7 +339,7 @@ def make_ensemble(
     for name in betas:
         if name not in factors:
             raise ValueError(f"Missing factor array for beta0_{name}")
-    return inv_logistic_general(y=y, x0=x0, k=k, b=b, L=L,
+    return inv_logistic_general(y=y, t0=t0, k=k, b=b, L=L,
                                  betas=betas, factors=factors)
 
 def make_forward_ensemble(
@@ -326,7 +353,7 @@ def make_forward_ensemble(
         np.random.seed(seed)
     sel = np.random.choice(posterior.dims["draw"], size=n_draws, replace=True)
     P = posterior.isel(draw=sel)
-    x0 = P["x0_coretop"].values
+    t0 = P["t0_coretop"].values
     k  = P["k_coretop"].values
     b  = P["b_coretop"].values
     L = P["L"].values if "L" in P else (1 - P["b_coretop"]).values
@@ -338,7 +365,7 @@ def make_forward_ensemble(
     for name in betas:
         if name not in factors:
             raise ValueError(f"Missing factor array for beta0_{name}")
-    return pred_logistic_general(x=x, x0=x0, k=k, b=b, L=L,
+    return pred_logistic_general(x=x, t0=t0, k=k, b=b, L=L,
                                  betas=betas, factors=factors)
 
 # ─── POSTERIOR LOADING ────────────────────────────────────────────────────

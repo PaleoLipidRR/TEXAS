@@ -1,50 +1,44 @@
 // joint_culture_meso.stan
 data {
   // first dataset
-  int<lower=1> N1;       
-  vector[N1] x1;         
-  vector[N1] y1;         
+  int<lower=1> N_cul;       
+  vector[N_cul] t_cul;         
+  vector[N_cul] scaledRI_cul;         
 
   // second dataset
-  int<lower=1> N2;       
-  vector[N2] x2;         
-  vector[N2] y2;         
+  int<lower=1> N_meso;       
+  vector[N_meso] t_meso;         
+  vector[N_meso] scaledRI_meso;         
 }
 
 parameters {
-  real<lower=-1.8>         x0;      // inflection point
-  real<lower=0>          k;       // steepness
-  real<lower=0,upper=1>  b;       // lower asymptote
+  real<lower=-1.8>       t0_culmeso;      // inflection point
+  real<lower=0>          k_culmeso;       // steepness
+  real<lower=0,upper=1>  b_culmeso;       // lower asymptote
   
-  real<lower=0> sigma1;           // noise for dataset 1
-  real<lower=0> sigma2;           // noise for dataset 2
+  real<lower=0> sigma_cul;           // noise for dataset 1
+  real<lower=0> sigma_meso;           // noise for dataset 2
 }
 
 model {
   // Priors
-  x0    ~ normal(30, 10) T[-1.8, ];  // truncated normal
-  k     ~ normal(0, 0.25);
-  b      ~ beta(2, 5);
-  sigma1 ~ normal(0.01, 0.1) T[0.01, ];
-  sigma2 ~ normal(0.01, 0.1) T[0.01, ];
+  t0_culmeso    ~ normal(30, 10) T[-1.8, ];  // truncated normal
+  k_culmeso     ~ normal(0, 0.25);
+  b_culmeso     ~ beta(2, 5);
+  sigma_cul     ~ normal(0.01, 0.1) T[0.01, ];
+  sigma_meso    ~ normal(0.01, 0.1) T[0.01, ];
 
   // Logistic means using inv_logit for elementwise operations
-  // vector[N1] mu1 = (1 - b) ./ (1 + exp(-k * (x1 - x0))) + b;
-  // vector[N2] mu2 = (1 - b) ./ (1 + exp(-k * (x2 - x0))) + b;
+  // vector[N_cul] mu_cul = (1 - b_culmeso) ./ (1 + exp(-k_culmeso * (t_cul - t0_culmeso))) + b_culmeso;
+  // vector[N_meso] mu_meso = (1 - b_culmeso) ./ (1 + exp(-k_culmeso * (t_meso - t0_culmeso))) + b_culmeso;
 
-  // Solve
-  // (1 - b) * inv_logit(z) + b  
-  // = (1 - b) * (1 / (1 + exp(-z))) + b  
-  // = (1 - b) / (1 + exp(-z))         + b
 
-  vector[N1] mu1 = (1 - b) * inv_logit(k * (x1 - x0)) + b;
-  vector[N2] mu2 = (1 - b) * inv_logit(k * (x2 - x0)) + b;
+  vector[N_cul] mu_cul = (1 - b_culmeso) * inv_logit(k_culmeso * (t_cul - t0_culmeso)) + b_culmeso;
+  vector[N_meso] mu_meso = (1 - b_culmeso) * inv_logit(k_culmeso * (t_meso - t0_culmeso)) + b_culmeso;
 
   // Likelihoods
-  y1 ~ normal(mu1, sigma1);
-  y2 ~ normal(mu2, sigma2);
+  scaledRI_cul    ~ normal(mu_cul, sigma_cul);
+  scaledRI_meso   ~ normal(mu_meso, sigma_meso);
+
 }
 
-generated quantities {
-  real sigma_ratio = sigma2 / sigma1;
-}
