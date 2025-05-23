@@ -16,7 +16,10 @@ data {
 
     // optional predictors
     vector[N_coretop] gdgt23ratio_coretop;
+    int<lower=0, upper=1> use_gdgt23ratio;
+
     vector[N_coretop] no3_coretop;
+    int<lower=0, upper=1> use_no3;
 }
 
 parameters {
@@ -38,9 +41,9 @@ parameters {
     real<lower=0>        sigma_b_culmeso;
 
     // observation noise
-    real<lower=0>        sigma_cul;  // culture noise
-    real<lower=0>        sigma_meso;  // mesocosm noise
-    real<lower=0>        sigma_coretop;  // coretop noise
+    real<lower=0>        sigma_scaledRI_cul;  // culture noise
+    real<lower=0>        sigma_scaledRI_meso;  // mesocosm noise
+    real<lower=0>        sigma_scaledRI_coretop;  // coretop noise
 }
 
 
@@ -56,44 +59,36 @@ model {
     sigma_b_culmeso      ~ cauchy(0, 1);
 
     // 3 Priors for observation noise
-    sigma_cul ~ normal(0.01, 0.1);
-    sigma_meso ~ normal(0.01, 0.1);
+    sigma_scaledRI_cul ~ normal(0.01, 0.1);
+    sigma_scaledRI_meso ~ normal(0.01, 0.1);
 
     // 4 Likelihoods for culture and mesocosm
-    vector[N_cul] mu_cul = (1 - b_culmeso)   * inv_logit(k_culmeso   * (t_cul - t0_culmeso))   + b_culmeso;
-    vector[N_meso] mu_meso = (1 - b_culmeso)   * inv_logit(k_culmeso   * (t_meso - t0_culmeso))   + b_culmeso;
+    vector[N_cul] mu_scaledRI_cul = (1 - b_culmeso)   * inv_logit(k_culmeso   * (t_cul - t0_culmeso))   + b_culmeso;
+    vector[N_meso] mu_scaledRI_meso = (1 - b_culmeso)   * inv_logit(k_culmeso   * (t_meso - t0_culmeso))   + b_culmeso;
 
-    scaledRI_cul ~ normal(mu_cul, sigma_cul);
-    scaledRI_meso ~ normal(mu_meso, sigma_meso);
+    scaledRI_cul ~ normal(mu_scaledRI_cul, sigma_scaledRI_cul);
+    scaledRI_meso ~ normal(mu_scaledRI_meso, sigma_scaledRI_meso);
     
     // 5 Coretop priors 
     t0_coretop  ~ normal(t0_culmeso, sigma_t0_culmeso);
     k_coretop   ~ normal(k_culmeso, sigma_k_culmeso);
     b_coretop   ~ normal(b_culmeso, sigma_b_culmeso);
-    beta0_gdgt23ratio_coretop ~ normal(0, 0.05)  T[-1,0];
-    beta0_no3_coretop ~ normal(0, 0.05)  T[-1,0];
+    beta0_gdgt23ratio_coretop ~ normal(0, 0.05);
+    beta0_no3_coretop ~ normal(0, 0.05);
 
     // 6 Likelihoods for coretops
-
-    vector[N_coretop] mu_coretop;
+    vector[N_coretop] mu_scaledRI_coretop;
     for (i in 1:N_coretop) {
-        // base logistic + gdgt23ratio_coretop effect
-        real base_coretop = (1 - b_coretop) 
-                    * inv_logit(k_coretop * (t_coretop[i] - t0_coretop)) 
-                    + b_coretop 
-                    + beta0_gdgt23ratio_coretop * gdgt23ratio_coretop[i];
+        real base_scaledRI = (1 - b_coretop) * inv_logit(k_coretop * (t_coretop[i] - t0_coretop)) + b_coretop;
+        mu_scaledRI_coretop[i] = base_scaledRI;
 
-        if (no3_coretop[i] <= 2.7) {
-        // include no3_coretop effect only when no3_coretop ≤ 2.7
-        mu_coretop[i] = base_coretop + beta0_no3_coretop * log10(no3_coretop[i]);
-        } 
-        
-        else {
-        // drop no3_coretop effect for high no3_coretop values
-        mu_coretop[i] = base_coretop;
-        }
+        if (use_gdgt23ratio == 1)
+            mu_scaledRI_coretop[i] += beta0_gdgt23ratio_coretop * gdgt23ratio_coretop[i];
+
+        if (use_no3 == 1 && no3_coretop[i] <= 2.7)
+            mu_scaledRI_coretop[i] += beta0_no3_coretop * log10(no3_coretop[i]);
     }
 
-    sigma_coretop ~ normal(0.01, 0.1);
-    scaledRI_coretop ~ normal(mu_coretop, sigma_coretop);
+    sigma_scaledRI_coretop ~ normal(0.01, 0.1);
+    scaledRI_coretop ~ normal(mu_scaledRI_coretop, sigma_scaledRI_coretop);
 }
