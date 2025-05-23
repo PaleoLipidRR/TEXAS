@@ -32,7 +32,6 @@ model {
   // vector[N_cul] mu_cul = (1 - b_culmeso) ./ (1 + exp(-k_culmeso * (t_cul - t0_culmeso))) + b_culmeso;
   // vector[N_meso] mu_meso = (1 - b_culmeso) ./ (1 + exp(-k_culmeso * (t_meso - t0_culmeso))) + b_culmeso;
 
-
   vector[N_cul] mu_cul = (1 - b_culmeso) * inv_logit(k_culmeso * (t_cul - t0_culmeso)) + b_culmeso;
   vector[N_meso] mu_meso = (1 - b_culmeso) * inv_logit(k_culmeso * (t_meso - t0_culmeso)) + b_culmeso;
 
