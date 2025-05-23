@@ -29,9 +29,9 @@ parameters {
   real<lower=0>        sigma_b_culmeso;
 
   // observation noise
-  real<lower=0>        sigma_cul;  // culture noise
-  real<lower=0>        sigma_meso;  // mesocosm noise
-  real<lower=0>        sigma_coretop;  // coretop noise
+  real<lower=0>        sigma_scaledRI_cul;  // culture noise
+  real<lower=0>        sigma_scaledRI_meso;  // mesocosm noise
+  real<lower=0>        sigma_scaledRI_coretop;  // coretop noise
 }
 
 model {
@@ -46,15 +46,15 @@ model {
   sigma_b_culmeso      ~ cauchy(0, 1);
 
   // 3 Priors for observation noise
-  sigma_cul ~ normal(0.01, 0.1);
-  sigma_meso ~ normal(0.01, 0.1);
+  sigma_scaledRI_cul ~ normal(0.01, 0.1);
+  sigma_scaledRI_meso ~ normal(0.01, 0.1);
 
   // 4 Likelihoods for culture and mesocosm
-  vector[N_cul] mu_cul = (1 - b_culmeso)   * inv_logit(k_culmeso   * (t_cul - t0_culmeso))   + b_culmeso;
-  vector[N_meso] mu_meso = (1 - b_culmeso)   * inv_logit(k_culmeso   * (t_meso - t0_culmeso))   + b_culmeso;
+  vector[N_cul] mu_scaledRI_cul = (1 - b_culmeso)   * inv_logit(k_culmeso   * (t_cul - t0_culmeso))   + b_culmeso;
+  vector[N_meso] mu_scaledRI_meso = (1 - b_culmeso)   * inv_logit(k_culmeso   * (t_meso - t0_culmeso))   + b_culmeso;
 
-  scaledRI_cul ~ normal(mu_cul, sigma_cul);
-  scaledRI_meso ~ normal(mu_meso, sigma_meso);
+  scaledRI_cul ~ normal(mu_scaledRI_cul, sigma_scaledRI_cul);
+  scaledRI_meso ~ normal(mu_scaledRI_meso, sigma_scaledRI_meso);
   
   // 5 Coretop priors 
   t0_coretop  ~ normal(t0_culmeso, sigma_t0_culmeso);
@@ -62,8 +62,8 @@ model {
   b_coretop   ~ normal(b_culmeso, sigma_b_culmeso);
 
   // 6 Likelihoods for coretops
-  vector[N_coretop] mu_coretop = (1 - b_coretop) * inv_logit(k_coretop * (t_coretop - t0_coretop)) + b_coretop;
-  sigma_coretop ~ normal(0.01, 0.1);
+  vector[N_coretop] mu_scaledRI_coretop = (1 - b_coretop) * inv_logit(k_coretop * (t_coretop - t0_coretop)) + b_coretop;
+  sigma_scaledRI_coretop ~ normal(0.01, 0.1);
 
-  scaledRI_coretop ~ normal(mu_coretop, sigma_coretop);
+  scaledRI_coretop ~ normal(mu_scaledRI_coretop, sigma_scaledRI_coretop);
 }

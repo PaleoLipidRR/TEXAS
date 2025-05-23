@@ -4,6 +4,8 @@ import numpy as np
 import xarray as xr
 from cmdstanpy import CmdStanModel
 import os
+import time
+import re
 
 
 # ─── TYPES & HELPERS ───────────────────────────────────────────────────────────
@@ -250,40 +252,190 @@ def get_posterior(
     chains: int = 4,
     iter_warmup: int = 500,
     iter_sampling: int = 1000,
-    seed: Optional[int] = 42
+    seed: Optional[int] = 42,
+    verbose: bool = True
 ) -> xr.Dataset:
+    
+    start_time = time.time()
     if stan_models_dir is None:
         stan_models_dir = Path(__file__).parent / "stan_models"
     model_path = Path(stan_models_dir) / stan_filename
+
     if model_path not in _MODEL_CACHE:
         _MODEL_CACHE[model_path] = CmdStanModel(stan_file=str(model_path))
     model = _MODEL_CACHE[model_path]
+
+    # Optional predictors: only set if coretop data is present
+    if "N_coretop" in data:
+        # gdgt23ratio_coretop
+        if "gdgt23ratio_coretop" in data:
+            data["use_gdgt23ratio"] = 1
+        else:
+            data["gdgt23ratio_coretop"] = np.zeros(data["N_coretop"])
+            data["use_gdgt23ratio"] = 0
+
+        # no3_coretop
+        if "no3_coretop" in data:
+            data["use_no3"] = 1
+        else:
+            data["no3_coretop"] = np.zeros(data["N_coretop"])
+            data["use_no3"] = 0
+    else:
+        # If no coretop data, turn off optional predictors
+        data["use_gdgt23ratio"] = 0
+        data["use_no3"] = 0
+
     if seed is not None:
         np.random.seed(seed)
-    fit = model.sample(
-        data=data,
-        chains=chains,
-        iter_warmup=iter_warmup,
-        iter_sampling=iter_sampling,
-        seed=seed,
-        parallel_chains=chains,
-        show_console=True
-    )
+
+    try:
+        fit = model.sample(
+            data=data,
+            chains=chains,
+            iter_warmup=iter_warmup,
+            iter_sampling=iter_sampling,
+            seed=seed,
+            parallel_chains=chains,
+            show_console=True,
+            show_progress=False,
+            save_profile=True
+        )
+    except RuntimeError as e:
+        raise RuntimeError(f"Stan sampling failed: {e}")
+
+    # Optional: warn about divergent transitions
+    diagnostics = fit.diagnose()
+    if verbose:
+        print(f"Sampling completed in {time.time() - start_time:.1f} seconds")
+        if "divergent" in diagnostics:
+            print("⚠️ Sampling diagnostics warning:\n", diagnostics)
+
+    # Convert to xarray
     ds = xr.Dataset()
     for var in fit.stan_variables():
         arr = fit.stan_variable(var)
         dim_names = ["draw"] + [f"dim_{i}" for i in range(1, arr.ndim)]
         coords = {name: np.arange(sz) for name, sz in zip(dim_names, arr.shape)}
         ds[var] = xr.DataArray(data=arr, dims=dim_names, coords=coords, name=var)
-    return ds
+
+    return ds, diagnostics
+
+def get_invT_posterior(
+    data: dict,
+    stan_filename: str,
+    stan_models_dir: Union[Path, str] = None,
+    chains: int = 4,
+    iter_warmup: int = 500,
+    iter_sampling: int = 1000,
+    seed: Optional[int] = 42,
+    verbose: bool = True
+) -> xr.Dataset:
+    
+    import time
+    start_time = time.time()
+    if stan_models_dir is None:
+        stan_models_dir = Path(__file__).parent / "stan_models"
+    model_path = Path(stan_models_dir) / stan_filename
+
+    if model_path not in _MODEL_CACHE:
+        _MODEL_CACHE[model_path] = CmdStanModel(stan_file=str(model_path))
+    model = _MODEL_CACHE[model_path]
+
+    # Validate required core inputs
+    base_keys = ["N_downcore", "scaledRI_downcore", "prior_mu_t", "prior_sigma_t", "M"]
+    missing = [k for k in base_keys if k not in data]
+    if missing:
+        raise ValueError(f"Missing required keys for invT model: {missing}")
+
+    # Automatically find t0_*, k_*, b_*, sigma_*, beta0_gdgt23ratio_*, beta0_no3_* matching M
+    param_prefixes = ["t0", "k", "b", "sigma_scaledRI", "beta0_gdgt23ratio", "beta0_no3"]
+    dynamic_keys = {}
+
+    for prefix in param_prefixes:
+        matched_keys = [key for key in data if key.startswith(f"{prefix}_") and len(np.atleast_1d(data[key])) == data["M"]]
+        if len(matched_keys) > 1:
+            raise ValueError(f"Multiple keys found for {prefix}_*: {matched_keys}")
+        elif len(matched_keys) == 1:
+            dynamic_keys[prefix] = matched_keys[0]
+
+    # Inject standardized keys into data
+    for std_name, actual_name in dynamic_keys.items():
+        data[std_name] = data[actual_name]
+
+    # Optional predictor: gdgt23ratio
+    if "gdgt23ratio_downcore" in data:
+        data["use_gdgt23ratio"] = 1
+        if len(data["gdgt23ratio_downcore"]) != data["N_downcore"]:
+            raise ValueError("Length of gdgt23ratio_downcore must equal N_downcore")
+        if "beta0_gdgt23ratio" not in data:
+            data["beta0_gdgt23ratio"] = np.zeros(data["M"])
+    else:
+        data["gdgt23ratio_downcore"] = np.zeros(data["N_downcore"])
+        data["beta0_gdgt23ratio"] = np.zeros(data["M"])
+        data["use_gdgt23ratio"] = 0
+
+    # Optional predictor: no3
+    if "no3_downcore" in data:
+        data["use_no3"] = 1
+        if len(data["no3_downcore"]) != data["N_downcore"]:
+            raise ValueError("Length of no3_downcore must equal N_downcore")
+        if "beta0_no3" not in data:
+            data["beta0_no3"] = np.zeros(data["M"])
+    else:
+        data["no3_downcore"] = np.zeros(data["N_downcore"])
+        data["beta0_no3"] = np.zeros(data["M"])
+        data["use_no3"] = 0
+
+    if seed is not None:
+        np.random.seed(seed)
+
+    try:
+        fit = model.sample(
+            data=data,
+            chains=chains,
+            iter_warmup=iter_warmup,
+            iter_sampling=iter_sampling,
+            seed=seed,
+            parallel_chains=chains,
+            show_console=True,
+            show_progress=False,
+            save_profile=True
+        )
+    except RuntimeError as e:
+        raise RuntimeError(f"Stan sampling failed: {e}")
+
+    # Optional: check diagnostics
+    diagnostics = fit.diagnose()
+    if verbose:
+        print(f"Sampling completed in {time.time() - start_time:.1f} seconds")
+        if "divergent" in diagnostics:
+            print("⚠️ Sampling diagnostics warning:\n", diagnostics)
+
+    # Convert to xarray dataset
+    ds = xr.Dataset()
+    for var in fit.stan_variables():
+        arr = fit.stan_variable(var)
+        dim_names = ["draw"] + [f"dim_{i}" for i in range(1, arr.ndim)]
+        coords = {name: np.arange(sz) for name, sz in zip(dim_names, arr.shape)}
+        ds[var] = xr.DataArray(data=arr, dims=dim_names, coords=coords, name=var)
+
+    return ds, diagnostics
 
 # ─── GENERAL ENSEMBLE FUNCTIONS ─────────────────────────────────────────────
+
+# def make_ensemble(
+#     y: np.ndarray,
+#     posterior: xr.Dataset,
+#     n_draws: int = 1000,
+#     seed: Optional[int] = 42,
+#     pred_t_mu_prior: 
+#     **factors: np.ndarray
 
 def make_ensemble(
     y: np.ndarray,
     posterior: xr.Dataset,
     n_draws: int = 1000,
-    seed: Optional[int] = None,
+    seed: Optional[int] = 42,
     **factors: np.ndarray
 ) -> np.ndarray:
     """
@@ -346,7 +498,7 @@ def make_forward_ensemble(
     x: np.ndarray,
     posterior: xr.Dataset,
     n_draws: int = 1000,
-    seed: Optional[int] = None,
+    seed: Optional[int] = 42,
     **factors: np.ndarray
 ) -> np.ndarray:
     if seed is not None:
