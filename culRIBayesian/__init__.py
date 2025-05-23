@@ -1,5 +1,6 @@
 from .stan_utils import (
     get_posterior,
+    get_invT_posterior,
     pred_logistic_general as pred_logistic,
     inv_logistic_general as inv_logistic,
     make_forward_ensemble,
@@ -12,6 +13,7 @@ from .stan_utils import (
 
 __all__ = [
     "get_posterior",
+    "get_invT_posterior",
     "pred_logistic",
     "inv_logistic",
     "make_forward_ensemble",
