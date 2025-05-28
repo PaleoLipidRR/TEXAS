@@ -7,9 +7,9 @@ data {
   vector[N_meso] t_meso;
   vector[N_meso] scaledRI_meso;
 
-  int<lower=1> N_coretop;         // number of coretop observations
-  vector[N_coretop] t_coretop;
-  vector[N_coretop] scaledRI_coretop;
+  int<lower=1> N_crtp;         // number of coretop observations
+  vector[N_crtp] t_crtp;
+  vector[N_crtp] scaledRI_crtp;
 }
 
 parameters {
@@ -19,9 +19,9 @@ parameters {
   real<lower=0,upper=1> b_culmeso;    // lower asymptote (on [0,1] via beta prior)
 
   // logistic parameters for coretop
-  real<lower=-1.8>     t0_coretop;
-  real<lower=0,upper=1> k_coretop;
-  real<lower=0,upper=1> b_coretop;
+  real<lower=-1.8>     t0_crtp;
+  real<lower=0,upper=1> k_crtp;
+  real<lower=0,upper=1> b_crtp;
 
   // hierarchical scale parameters (hyperpriors)
   real<lower=0>        sigma_t0_culmeso;
@@ -31,7 +31,7 @@ parameters {
   // observation noise
   real<lower=0>        sigma_scaledRI_cul;  // culture noise
   real<lower=0>        sigma_scaledRI_meso;  // mesocosm noise
-  real<lower=0>        sigma_scaledRI_coretop;  // coretop noise
+  real<lower=0>        sigma_scaledRI_crtp;  // coretop noise
 }
 
 model {
@@ -57,13 +57,13 @@ model {
   scaledRI_meso ~ normal(mu_scaledRI_meso, sigma_scaledRI_meso);
   
   // 5 Coretop priors 
-  t0_coretop  ~ normal(t0_culmeso, sigma_t0_culmeso);
-  k_coretop   ~ normal(k_culmeso, sigma_k_culmeso);
-  b_coretop   ~ normal(b_culmeso, sigma_b_culmeso);
+  t0_crtp  ~ normal(t0_culmeso, sigma_t0_culmeso);
+  k_crtp   ~ normal(k_culmeso, sigma_k_culmeso);
+  b_crtp   ~ normal(b_culmeso, sigma_b_culmeso);
 
   // 6 Likelihoods for coretops
-  vector[N_coretop] mu_scaledRI_coretop = (1 - b_coretop) * inv_logit(k_coretop * (t_coretop - t0_coretop)) + b_coretop;
-  sigma_scaledRI_coretop ~ normal(0.01, 0.1);
+  vector[N_crtp] mu_scaledRI_crtp = (1 - b_crtp) * inv_logit(k_crtp * (t_crtp - t0_crtp)) + b_crtp;
+  sigma_scaledRI_crtp ~ normal(0.01, 0.1);
 
-  scaledRI_coretop ~ normal(mu_scaledRI_coretop, sigma_scaledRI_coretop);
+  scaledRI_crtp ~ normal(mu_scaledRI_crtp, sigma_scaledRI_crtp);
 }
