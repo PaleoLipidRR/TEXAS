@@ -7,9 +7,9 @@ data {
   vector[N_meso] t_meso;
   vector[N_meso] scaledRI_meso;
 
-  int<lower=1> N_coretop;         // number of coretop observations
-  vector[N_coretop] t_coretop;
-  vector[N_coretop] scaledRI_coretop;
+  int<lower=1> N_crtp;         // number of coretop observations
+  vector[N_crtp] t_crtp;
+  vector[N_crtp] scaledRI_crtp;
 }
 
 parameters {
@@ -19,7 +19,7 @@ parameters {
 
   real<lower=0> sigma_scaledRI_cul;          // noise for dataset 1
   real<lower=0> sigma_scaledRI_meso;          // noise for dataset 2
-  real<lower=0> sigma_scaledRI_coretop;          // noise for dataset 3
+  real<lower=0> sigma_scaledRI_crtp;          // noise for dataset 3
 }
 
 model {
@@ -29,15 +29,15 @@ model {
   b_culmesocore       ~ beta(2, 5);
   sigma_scaledRI_cul           ~ normal(0.01, 0.1) T[0.01, ];
   sigma_scaledRI_meso          ~ normal(0.01, 0.1) T[0.01, ];
-  sigma_scaledRI_coretop       ~ normal(0.01, 0.1) T[0.01, ];
+  sigma_scaledRI_crtp       ~ normal(0.01, 0.1) T[0.01, ];
 
   // Logistic‐curve means (vectorized)
   vector[N_cul] mu_scaledRI_cul = (1 - b_culmesocore) * inv_logit(k_culmesocore * (t_cul - t0_culmesocore)) + b_culmesocore;
   vector[N_meso] mu_scaledRI_meso = (1 - b_culmesocore) * inv_logit(k_culmesocore * (t_meso - t0_culmesocore)) + b_culmesocore;
-  vector[N_coretop] mu_scaledRI_coretop = (1 - b_culmesocore) * inv_logit(k_culmesocore * (t_coretop - t0_culmesocore)) + b_culmesocore;
+  vector[N_crtp] mu_scaledRI_crtp = (1 - b_culmesocore) * inv_logit(k_culmesocore * (t_crtp - t0_culmesocore)) + b_culmesocore;
 
   // Likelihoods
   scaledRI_cul      ~ normal(mu_scaledRI_cul, sigma_scaledRI_cul);
   scaledRI_meso     ~ normal(mu_scaledRI_meso, sigma_scaledRI_meso);
-  scaledRI_coretop  ~ normal(mu_scaledRI_coretop, sigma_scaledRI_coretop);
+  scaledRI_crtp  ~ normal(mu_scaledRI_crtp, sigma_scaledRI_crtp);
 }

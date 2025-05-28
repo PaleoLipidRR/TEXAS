@@ -1,10 +1,9 @@
 from .stan_utils import (
     get_posterior,
     get_invT_posterior,
+    get_invT_post_quantiles,
     pred_logistic_general as pred_logistic,
     inv_logistic_general as inv_logistic,
-    make_forward_ensemble,
-    make_ensemble,
     load_posterior,
     save_posterior,
     build_joint_calibration_data,
@@ -14,10 +13,9 @@ from .stan_utils import (
 __all__ = [
     "get_posterior",
     "get_invT_posterior",
+    "get_invT_post_quantiles",
     "pred_logistic",
     "inv_logistic",
-    "make_forward_ensemble",
-    "make_ensemble",
     "load_posterior",
     "save_posterior",
     "build_joint_calibration_data",
