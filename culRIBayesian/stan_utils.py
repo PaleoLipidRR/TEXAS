@@ -13,6 +13,21 @@ import re
 def _ensure_numpy(x):
     return x.values if hasattr(x, "values") else np.asarray(x)
 
+def extract_metadata(data: dict, exclude_keys: List[str] = None) -> dict:
+    exclude_keys = exclude_keys or []
+    metadata = {}
+    for key, value in data.items():
+        if key in exclude_keys:
+            continue
+        if np.isscalar(value) or (isinstance(value, (np.ndarray, list)) and len(value) <= 10):
+            metadata[key] = value if np.isscalar(value) else list(np.array(value).flatten())
+        elif isinstance(value, (np.ndarray, list)):
+            metadata[key] = f"<array len={len(value)}>"
+        else:
+            metadata[key] = str(value)
+    return metadata
+
+
 # ─── BUILD CALIBRATION DATASET ──────────────────────────────────────────────
 def build_joint_calibration_data(
     cul: dict,
@@ -323,6 +338,9 @@ def get_posterior(
         'generated_by': 'culRI-Bayesian',
         'version': '1.0.0'
     })
+
+    ds.attrs.update(extract_metadata(data, exclude_keys=["scaledRI_*", "gdgt23ratio_*", "no3_*"]))
+
     
     return ds, diagnostics
 
@@ -430,6 +448,9 @@ def get_invT_posterior(
         'generated_by': 'culRI-Bayesian',
         'version': '1.0.0'
     })
+
+    ds.attrs.update(extract_metadata(data, exclude_keys=["scaledRI_*", "gdgt23ratio_*", "no3_*"]))
+
     
     return ds, diagnostics
 
