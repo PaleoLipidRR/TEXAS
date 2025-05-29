@@ -14,7 +14,7 @@ data {
 parameters {
   real<lower=-1.8>       t0_culmeso;      // inflection point
   real<lower=0>          k_culmeso;       // steepness
-  real<lower=0,upper=1>  b_culmeso;       // lower asymptote
+  real<lower=0>          b_culmeso;       // lower asymptote
   
   real<lower=0> sigma_scaledRI_cul;           // noise for dataset 1
   real<lower=0> sigma_scaledRI_meso;           // noise for dataset 2
@@ -25,8 +25,8 @@ model {
   t0_culmeso    ~ normal(30, 10) T[-1.8, ];  // truncated normal
   k_culmeso     ~ normal(0, 0.25);
   b_culmeso     ~ beta(2, 5);
-  sigma_scaledRI_cul     ~ normal(0.01, 0.1) T[0.01, ];
-  sigma_scaledRI_meso    ~ normal(0.01, 0.1) T[0.01, ];
+  sigma_scaledRI_cul     ~ cauchy(0.01, 0.05);
+  sigma_scaledRI_meso    ~ cauchy(0.01, 0.05);
 
   // Logistic means using inv_logit for elementwise operations
   // vector[N_cul] mu_scaledRI_cul = (1 - b_culmeso) ./ (1 + exp(-k_culmeso * (t_cul - t0_culmeso))) + b_culmeso;

@@ -29,55 +29,68 @@ def extract_and_update_metadata(
         posteriors_used: Optional[List[str]] = None,
         version: str = "1.0.0"
 ) -> xr.Dataset:
+    from datetime import datetime
+
     direct_keys = [
         "calibration_model_name", "N_cul", "N_meso", "N_crtp", "N_downcore",
         "prior_mu_t", "prior_sigma_t", "M"
     ]
-    optional_predictors = ["gdgt23ratio", "no3", "depthIntg_t_no3"]
+    optional_predictors = ["gdgt23ratio", "no3"]
+    suffixes = ["cul", "meso", "crtp", "downcore"]
+
     metadata = {
-        "invT_model_name": stan_filename,
+        "stan_model_name": stan_filename+'.stan',
         "generated_by": "culRI-Bayesian",
         "version": version,
         "run_time": datetime.now().isoformat(),
         "run_duration (sec)": None,
     }
 
+    # Handle direct values
     for key in direct_keys:
         if key in data:
             val = data[key]
             if isinstance(val, (np.integer, int)): metadata[key] = int(val)
             elif isinstance(val, (np.floating, float)): metadata[key] = float(val)
-            elif isinstance(val, (list, np.ndarray)): metadata[key] = np.median(val)
+            elif isinstance(val, (list, np.ndarray)): metadata[key] = float(np.median(val))
             else: metadata[key] = val
 
-    # Always summarize scaledRI
-    arr = np.asarray(data["scaledRI_downcore"])
-    metadata.update({
-        "scaledRI_downcore_mean": float(np.mean(arr)),
-        "scaledRI_downcore_std": float(np.std(arr)),
-        "scaledRI_downcore_min": float(np.min(arr)),
-        "scaledRI_downcore_max": float(np.max(arr)),
-        "scaledRI_downcore_len": int(len(arr)),
-    })
-
-    # Conditionally summarize optional predictors if they are actually used
-    for key in optional_predictors:
-        if data.get(f"use_{key}", 0) == 1 and f"{key}_downcore" in data:
-            arr = np.asarray(data[f"{key}_downcore"])
+    # Summarize all available scaledRI_* arrays
+    for suf in suffixes:
+        key = f"scaledRI_{suf}"
+        if key in data:
+            arr = np.asarray(data[key])
             metadata.update({
-                f"{key}_downcore_mean": float(np.mean(arr)),
-                f"{key}_downcore_std": float(np.std(arr)),
-                f"{key}_downcore_min": float(np.min(arr)),
-                f"{key}_downcore_max": float(np.max(arr)),
-                f"{key}_downcore_len": int(len(arr)),
-                f"use_{key}": 1,
+                f"{key}_mean": float(np.mean(arr)),
+                f"{key}_std": float(np.std(arr)),
+                f"{key}_min": float(np.min(arr)),
+                f"{key}_max": float(np.max(arr)),
+                f"{key}_len": int(len(arr)),
             })
 
-    # Additional metadata directly from input
+    # Summarize all optional predictors per group, if used
+    for suf in suffixes:
+        for predictor in optional_predictors:
+            use_flag = f"use_{predictor}"
+            key = f"{predictor}_{suf}"
+            if data.get(use_flag, 0) == 1 and key in data:
+                arr = np.asarray(data[key])
+                metadata.update({
+                    f"{key}_mean": float(np.mean(arr)),
+                    f"{key}_std": float(np.std(arr)),
+                    f"{key}_min": float(np.min(arr)),
+                    f"{key}_max": float(np.max(arr)),
+                    f"{key}_len": int(len(arr)),
+                    use_flag: 1,
+                })
+
+    # Include custom metadata if available
     if "calibration_suffix_used" in data:
         metadata["calibration_suffix_used"] = data["calibration_suffix_used"]
 
-    if "posteriors_used" in data:
+    if posteriors_used is not None:
+        metadata["posteriors_used"] = posteriors_used
+    elif "posteriors_used" in data:
         metadata["posteriors_used"] = data["posteriors_used"]
 
     if site_name:
@@ -85,6 +98,35 @@ def extract_and_update_metadata(
 
     ds.attrs.update(metadata)
     return ds
+
+def extract_priors_from_stan(stan_path: Union[str, Path]) -> Dict[str, str]:
+    priors = {}
+    in_model_block = False
+    current_param = None
+
+    with open(stan_path, "r") as f:
+        for line in f:
+            stripped = line.strip()
+            
+            # Detect start of model block
+            if stripped.startswith("model"):
+                in_model_block = True
+                continue
+
+            if in_model_block:
+                if stripped.startswith("}"):  # End of model block
+                    break
+
+                # Match: parameter ~ distribution(...)
+                match = re.match(r"(\w+)\s*~\s*([a-zA-Z_]\w*)\s*\(([^)]*)\)(\s*T\[[^\]]+\])?", stripped)
+                if match:
+                    param, dist, args, trunc = match.groups()
+                    prior_str = f"{dist}({args})"
+                    if trunc:
+                        prior_str += f" {trunc.strip()}"
+                    priors[param] = prior_str
+
+    return priors
 
 # ─── BUILD DATA ────────────────────────────────────────────────────
 
@@ -309,7 +351,8 @@ def get_posterior(
             parallel_chains=chains,
             show_console=False,
             show_progress=True,
-            save_profile=True
+            save_profile=True, 
+            adapt_delta=0.999
         )
     except RuntimeError as e:
         raise RuntimeError(f"Stan sampling failed: {e}")
@@ -331,9 +374,13 @@ def get_posterior(
     
     ds = extract_and_update_metadata(ds, data, stan_filename)
     run_seconds = time.time() - start_time
-    ds.attrs["run_duration"] = round(run_seconds, 2)
-    
-    
+    ds.attrs["run_duration (sec)"] = round(run_seconds, 2)
+
+    prior_settings = extract_priors_from_stan(model_path)
+    if prior_settings:
+        ds.attrs["priors"] = [f"{k}: {v}" for k, v in prior_settings.items()]  # ← safe for NetCDF
+
+
     return ds, diagnostics
 
 def get_invT_posterior(
@@ -418,7 +465,8 @@ def get_invT_posterior(
             parallel_chains=chains,
             show_console=False,
             show_progress=True,
-            save_profile=True
+            save_profile=True, 
+            adapt_delta=0.999
         )
     except RuntimeError as e:
         raise RuntimeError(f"Stan sampling failed: {e}")
@@ -445,6 +493,14 @@ def get_invT_posterior(
         posteriors_used=posterior_suffixes
     )
     ds.attrs["run_duration (sec)"] = round(time.time() - start_time, 2)
+
+    # Save fixed priors passed via data (if present)
+    if "prior_mu_t" in data and "prior_sigma_t" in data:
+        mu_t_arr = np.asarray(data["prior_mu_t"])
+        mu_t_val = float(np.median(mu_t_arr)) if mu_t_arr.ndim > 0 else float(mu_t_arr)
+
+        # Convert dictionary to a NetCDF-safe string
+        ds.attrs["t_est_prior"] = f"normal({mu_t_val}, {data['prior_sigma_t']})"
 
     return ds, diagnostics
 
