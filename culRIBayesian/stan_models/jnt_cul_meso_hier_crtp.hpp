@@ -4,48 +4,41 @@ namespace jnt_cul_meso_hier_crtp_model_namespace {
 using stan::model::model_base_crtp;
 using namespace stan::math;
 stan::math::profile_map profiles__;
-static constexpr std::array<const char*, 57> locations_array__ =
+static constexpr std::array<const char*, 50> locations_array__ =
   {" (found before start of program)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 17, column 2 to column 47)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 18, column 2 to column 36)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 19, column 2 to column 36)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 22, column 2 to column 44)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 23, column 2 to column 33)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 24, column 2 to column 33)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 27, column 2 to column 44)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 28, column 2 to column 43)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 29, column 2 to column 43)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 32, column 2 to column 46)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 33, column 2 to column 47)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 34, column 2 to column 47)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 39, column 2 to column 46)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 39, column 41 to column 44)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 17, column 2 to column 34)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 18, column 2 to column 34)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 19, column 2 to column 34)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 22, column 2 to column 31)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 23, column 2 to column 31)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 24, column 2 to column 31)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 27, column 2 to column 40)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 28, column 2 to column 39)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 29, column 2 to column 39)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 32, column 2 to column 42)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 33, column 2 to column 43)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 34, column 2 to column 43)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 39, column 2 to column 43)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 39, column 36 to column 39)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 40, column 2 to column 29)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 41, column 2 to column 29)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 44, column 2 to column 45)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 44, column 36 to column 41)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 45, column 2 to column 49)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 45, column 40 to column 45)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 46, column 2 to column 49)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 46, column 40 to column 45)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 49, column 2 to column 53)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 49, column 44 to column 49)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 50, column 2 to column 54)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 50, column 45 to column 50)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 44, column 2 to column 38)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 45, column 2 to column 38)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 46, column 2 to column 38)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 49, column 2 to column 41)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 50, column 2 to column 42)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 53, column 9 to column 14)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 53, column 2 to column 131)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 53, column 2 to column 114)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 54, column 9 to column 15)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 54, column 2 to column 134)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 54, column 2 to column 117)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 56, column 2 to column 61)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 57, column 2 to column 64)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 60, column 2 to column 50)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 61, column 2 to column 48)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 62, column 2 to column 48)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 65, column 9 to column 15)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 65, column 2 to column 120)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 67, column 2 to column 54)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 67, column 45 to column 50)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 65, column 2 to column 99)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 66, column 2 to column 42)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 68, column 2 to column 64)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 2, column 2 to column 21)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan', line 3, column 9 to column 14)",
@@ -100,17 +93,17 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
     try {
       int pos__ = std::numeric_limits<int>::min();
       pos__ = 1;
-      current_statement__ = 42;
+      current_statement__ = 35;
       context__.validate_dims("data initialization", "N_cul", "int",
         std::vector<size_t>{});
       N_cul = std::numeric_limits<int>::min();
-      current_statement__ = 42;
+      current_statement__ = 35;
       N_cul = context__.vals_i("N_cul")[(1 - 1)];
-      current_statement__ = 42;
+      current_statement__ = 35;
       stan::math::check_greater_or_equal(function__, "N_cul", N_cul, 1);
-      current_statement__ = 43;
+      current_statement__ = 36;
       stan::math::validate_non_negative_index("t_cul", "N_cul", N_cul);
-      current_statement__ = 44;
+      current_statement__ = 37;
       context__.validate_dims("data initialization", "t_cul", "double",
         std::vector<size_t>{static_cast<size_t>(N_cul)});
       t_cul_data__ = Eigen::Matrix<double,-1,1>::Constant(N_cul,
@@ -119,22 +112,22 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
         Eigen::Map<Eigen::Matrix<double,-1,1>>(t_cul_data__.data(), N_cul);
       {
         std::vector<local_scalar_t__> t_cul_flat__;
-        current_statement__ = 44;
+        current_statement__ = 37;
         t_cul_flat__ = context__.vals_r("t_cul");
-        current_statement__ = 44;
+        current_statement__ = 37;
         pos__ = 1;
-        current_statement__ = 44;
+        current_statement__ = 37;
         for (int sym1__ = 1; sym1__ <= N_cul; ++sym1__) {
-          current_statement__ = 44;
+          current_statement__ = 37;
           stan::model::assign(t_cul, t_cul_flat__[(pos__ - 1)],
             "assigning variable t_cul", stan::model::index_uni(sym1__));
-          current_statement__ = 44;
+          current_statement__ = 37;
           pos__ = (pos__ + 1);
         }
       }
-      current_statement__ = 45;
+      current_statement__ = 38;
       stan::math::validate_non_negative_index("scaledRI_cul", "N_cul", N_cul);
-      current_statement__ = 46;
+      current_statement__ = 39;
       context__.validate_dims("data initialization", "scaledRI_cul",
         "double", std::vector<size_t>{static_cast<size_t>(N_cul)});
       scaledRI_cul_data__ = Eigen::Matrix<double,-1,1>::Constant(N_cul,
@@ -144,30 +137,30 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
         N_cul);
       {
         std::vector<local_scalar_t__> scaledRI_cul_flat__;
-        current_statement__ = 46;
+        current_statement__ = 39;
         scaledRI_cul_flat__ = context__.vals_r("scaledRI_cul");
-        current_statement__ = 46;
+        current_statement__ = 39;
         pos__ = 1;
-        current_statement__ = 46;
+        current_statement__ = 39;
         for (int sym1__ = 1; sym1__ <= N_cul; ++sym1__) {
-          current_statement__ = 46;
+          current_statement__ = 39;
           stan::model::assign(scaledRI_cul, scaledRI_cul_flat__[(pos__ - 1)],
             "assigning variable scaledRI_cul", stan::model::index_uni(sym1__));
-          current_statement__ = 46;
+          current_statement__ = 39;
           pos__ = (pos__ + 1);
         }
       }
-      current_statement__ = 47;
+      current_statement__ = 40;
       context__.validate_dims("data initialization", "N_meso", "int",
         std::vector<size_t>{});
       N_meso = std::numeric_limits<int>::min();
-      current_statement__ = 47;
+      current_statement__ = 40;
       N_meso = context__.vals_i("N_meso")[(1 - 1)];
-      current_statement__ = 47;
+      current_statement__ = 40;
       stan::math::check_greater_or_equal(function__, "N_meso", N_meso, 1);
-      current_statement__ = 48;
+      current_statement__ = 41;
       stan::math::validate_non_negative_index("t_meso", "N_meso", N_meso);
-      current_statement__ = 49;
+      current_statement__ = 42;
       context__.validate_dims("data initialization", "t_meso", "double",
         std::vector<size_t>{static_cast<size_t>(N_meso)});
       t_meso_data__ = Eigen::Matrix<double,-1,1>::Constant(N_meso,
@@ -176,23 +169,23 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
         Eigen::Map<Eigen::Matrix<double,-1,1>>(t_meso_data__.data(), N_meso);
       {
         std::vector<local_scalar_t__> t_meso_flat__;
-        current_statement__ = 49;
+        current_statement__ = 42;
         t_meso_flat__ = context__.vals_r("t_meso");
-        current_statement__ = 49;
+        current_statement__ = 42;
         pos__ = 1;
-        current_statement__ = 49;
+        current_statement__ = 42;
         for (int sym1__ = 1; sym1__ <= N_meso; ++sym1__) {
-          current_statement__ = 49;
+          current_statement__ = 42;
           stan::model::assign(t_meso, t_meso_flat__[(pos__ - 1)],
             "assigning variable t_meso", stan::model::index_uni(sym1__));
-          current_statement__ = 49;
+          current_statement__ = 42;
           pos__ = (pos__ + 1);
         }
       }
-      current_statement__ = 50;
+      current_statement__ = 43;
       stan::math::validate_non_negative_index("scaledRI_meso", "N_meso",
         N_meso);
-      current_statement__ = 51;
+      current_statement__ = 44;
       context__.validate_dims("data initialization", "scaledRI_meso",
         "double", std::vector<size_t>{static_cast<size_t>(N_meso)});
       scaledRI_meso_data__ = Eigen::Matrix<double,-1,1>::Constant(N_meso,
@@ -202,31 +195,31 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
         N_meso);
       {
         std::vector<local_scalar_t__> scaledRI_meso_flat__;
-        current_statement__ = 51;
+        current_statement__ = 44;
         scaledRI_meso_flat__ = context__.vals_r("scaledRI_meso");
-        current_statement__ = 51;
+        current_statement__ = 44;
         pos__ = 1;
-        current_statement__ = 51;
+        current_statement__ = 44;
         for (int sym1__ = 1; sym1__ <= N_meso; ++sym1__) {
-          current_statement__ = 51;
+          current_statement__ = 44;
           stan::model::assign(scaledRI_meso, scaledRI_meso_flat__[(pos__ -
             1)], "assigning variable scaledRI_meso",
             stan::model::index_uni(sym1__));
-          current_statement__ = 51;
+          current_statement__ = 44;
           pos__ = (pos__ + 1);
         }
       }
-      current_statement__ = 52;
+      current_statement__ = 45;
       context__.validate_dims("data initialization", "N_crtp", "int",
         std::vector<size_t>{});
       N_crtp = std::numeric_limits<int>::min();
-      current_statement__ = 52;
+      current_statement__ = 45;
       N_crtp = context__.vals_i("N_crtp")[(1 - 1)];
-      current_statement__ = 52;
+      current_statement__ = 45;
       stan::math::check_greater_or_equal(function__, "N_crtp", N_crtp, 1);
-      current_statement__ = 53;
+      current_statement__ = 46;
       stan::math::validate_non_negative_index("t_crtp", "N_crtp", N_crtp);
-      current_statement__ = 54;
+      current_statement__ = 47;
       context__.validate_dims("data initialization", "t_crtp", "double",
         std::vector<size_t>{static_cast<size_t>(N_crtp)});
       t_crtp_data__ = Eigen::Matrix<double,-1,1>::Constant(N_crtp,
@@ -235,23 +228,23 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
         Eigen::Map<Eigen::Matrix<double,-1,1>>(t_crtp_data__.data(), N_crtp);
       {
         std::vector<local_scalar_t__> t_crtp_flat__;
-        current_statement__ = 54;
+        current_statement__ = 47;
         t_crtp_flat__ = context__.vals_r("t_crtp");
-        current_statement__ = 54;
+        current_statement__ = 47;
         pos__ = 1;
-        current_statement__ = 54;
+        current_statement__ = 47;
         for (int sym1__ = 1; sym1__ <= N_crtp; ++sym1__) {
-          current_statement__ = 54;
+          current_statement__ = 47;
           stan::model::assign(t_crtp, t_crtp_flat__[(pos__ - 1)],
             "assigning variable t_crtp", stan::model::index_uni(sym1__));
-          current_statement__ = 54;
+          current_statement__ = 47;
           pos__ = (pos__ + 1);
         }
       }
-      current_statement__ = 55;
+      current_statement__ = 48;
       stan::math::validate_non_negative_index("scaledRI_crtp", "N_crtp",
         N_crtp);
-      current_statement__ = 56;
+      current_statement__ = 49;
       context__.validate_dims("data initialization", "scaledRI_crtp",
         "double", std::vector<size_t>{static_cast<size_t>(N_crtp)});
       scaledRI_crtp_data__ = Eigen::Matrix<double,-1,1>::Constant(N_crtp,
@@ -261,17 +254,17 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
         N_crtp);
       {
         std::vector<local_scalar_t__> scaledRI_crtp_flat__;
-        current_statement__ = 56;
+        current_statement__ = 49;
         scaledRI_crtp_flat__ = context__.vals_r("scaledRI_crtp");
-        current_statement__ = 56;
+        current_statement__ = 49;
         pos__ = 1;
-        current_statement__ = 56;
+        current_statement__ = 49;
         for (int sym1__ = 1; sym1__ <= N_crtp; ++sym1__) {
-          current_statement__ = 56;
+          current_statement__ = 49;
           stan::model::assign(scaledRI_crtp, scaledRI_crtp_flat__[(pos__ -
             1)], "assigning variable scaledRI_crtp",
             stan::model::index_uni(sym1__));
-          current_statement__ = 56;
+          current_statement__ = 49;
           pos__ = (pos__ + 1);
         }
       }
@@ -309,8 +302,8 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
     try {
       local_scalar_t__ t0_culmeso = DUMMY_VAR__;
       current_statement__ = 1;
-      t0_culmeso = in__.template read_constrain_lub<local_scalar_t__,
-                     jacobian__>(-1.8, 100, lp__);
+      t0_culmeso = in__.template read_constrain_lb<local_scalar_t__,
+                     jacobian__>(-1.8, lp__);
       local_scalar_t__ k_culmeso = DUMMY_VAR__;
       current_statement__ = 2;
       k_culmeso = in__.template read_constrain_lub<local_scalar_t__,
@@ -321,8 +314,8 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
                     jacobian__>(0, 1, lp__);
       local_scalar_t__ t0_crtp = DUMMY_VAR__;
       current_statement__ = 4;
-      t0_crtp = in__.template read_constrain_lub<local_scalar_t__,
-                  jacobian__>(-1.8, 100, lp__);
+      t0_crtp = in__.template read_constrain_lb<local_scalar_t__,
+                  jacobian__>(-1.8, lp__);
       local_scalar_t__ k_crtp = DUMMY_VAR__;
       current_statement__ = 5;
       k_crtp = in__.template read_constrain_lub<local_scalar_t__,
@@ -334,177 +327,115 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
       local_scalar_t__ sigma_t0_culmeso = DUMMY_VAR__;
       current_statement__ = 7;
       sigma_t0_culmeso = in__.template read_constrain_lb<local_scalar_t__,
-                           jacobian__>(0.001, lp__);
+                           jacobian__>(0, lp__);
       local_scalar_t__ sigma_k_culmeso = DUMMY_VAR__;
       current_statement__ = 8;
       sigma_k_culmeso = in__.template read_constrain_lb<local_scalar_t__,
-                          jacobian__>(0.001, lp__);
+                          jacobian__>(0, lp__);
       local_scalar_t__ sigma_b_culmeso = DUMMY_VAR__;
       current_statement__ = 9;
       sigma_b_culmeso = in__.template read_constrain_lb<local_scalar_t__,
-                          jacobian__>(0.001, lp__);
+                          jacobian__>(0, lp__);
       local_scalar_t__ sigma_scaledRI_cul = DUMMY_VAR__;
       current_statement__ = 10;
       sigma_scaledRI_cul = in__.template read_constrain_lb<local_scalar_t__,
-                             jacobian__>(0.001, lp__);
+                             jacobian__>(0, lp__);
       local_scalar_t__ sigma_scaledRI_meso = DUMMY_VAR__;
       current_statement__ = 11;
       sigma_scaledRI_meso = in__.template read_constrain_lb<local_scalar_t__,
-                              jacobian__>(0.001, lp__);
+                              jacobian__>(0, lp__);
       local_scalar_t__ sigma_scaledRI_crtp = DUMMY_VAR__;
       current_statement__ = 12;
       sigma_scaledRI_crtp = in__.template read_constrain_lb<local_scalar_t__,
-                              jacobian__>(0.001, lp__);
+                              jacobian__>(0, lp__);
       {
         current_statement__ = 13;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(t0_culmeso, 30, 10));
-        current_statement__ = 15;
+        current_statement__ = 14;
         if (stan::math::logical_lt(t0_culmeso, -1.8)) {
-          current_statement__ = 15;
+          current_statement__ = 14;
           lp_accum__.add(stan::math::negative_infinity());
         } else {
           current_statement__ = 14;
-          if (stan::math::logical_gt(t0_culmeso, 100)) {
-            current_statement__ = 14;
-            lp_accum__.add(stan::math::negative_infinity());
-          } else {
-            current_statement__ = 14;
-            lp_accum__.add(-stan::math::log_diff_exp(
-                              stan::math::normal_lcdf(100, 30, 10),
-                              stan::math::normal_lcdf(-1.8, 30, 10)));
-          }
+          lp_accum__.add(-stan::math::normal_lccdf(-1.8, 30, 10));
         }
-        current_statement__ = 16;
+        current_statement__ = 15;
         lp_accum__.add(stan::math::beta_lpdf<propto__>(k_culmeso, 2, 5));
-        current_statement__ = 17;
+        current_statement__ = 16;
         lp_accum__.add(stan::math::beta_lpdf<propto__>(b_culmeso, 2, 5));
+        current_statement__ = 17;
+        lp_accum__.add(stan::math::cauchy_lpdf<propto__>(sigma_t0_culmeso, 0,
+                         1));
         current_statement__ = 18;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma_t0_culmeso, 0,
+        lp_accum__.add(stan::math::cauchy_lpdf<propto__>(sigma_k_culmeso, 0,
                          1));
         current_statement__ = 19;
-        if (stan::math::logical_lt(sigma_t0_culmeso, 0.001)) {
-          current_statement__ = 19;
-          lp_accum__.add(stan::math::negative_infinity());
-        } else {
-          current_statement__ = 19;
-          lp_accum__.add(-stan::math::normal_lccdf(0.001, 0, 1));
-        }
+        lp_accum__.add(stan::math::cauchy_lpdf<propto__>(sigma_b_culmeso, 0,
+                         1));
         current_statement__ = 20;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma_k_culmeso,
-                         0.1, 0.05));
-        current_statement__ = 21;
-        if (stan::math::logical_lt(sigma_k_culmeso, 0.001)) {
-          current_statement__ = 21;
-          lp_accum__.add(stan::math::negative_infinity());
-        } else {
-          current_statement__ = 21;
-          lp_accum__.add(-stan::math::normal_lccdf(0.001, 0.1, 0.05));
-        }
-        current_statement__ = 22;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma_b_culmeso,
-                         0.1, 0.05));
-        current_statement__ = 23;
-        if (stan::math::logical_lt(sigma_b_culmeso, 0.001)) {
-          current_statement__ = 23;
-          lp_accum__.add(stan::math::negative_infinity());
-        } else {
-          current_statement__ = 23;
-          lp_accum__.add(-stan::math::normal_lccdf(0.001, 0.1, 0.05));
-        }
-        current_statement__ = 24;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma_scaledRI_cul,
-                         0.05, 0.01));
-        current_statement__ = 25;
-        if (stan::math::logical_lt(sigma_scaledRI_cul, 0.001)) {
-          current_statement__ = 25;
-          lp_accum__.add(stan::math::negative_infinity());
-        } else {
-          current_statement__ = 25;
-          lp_accum__.add(-stan::math::normal_lccdf(0.001, 0.05, 0.01));
-        }
-        current_statement__ = 26;
+                         0.01, 0.1));
+        current_statement__ = 21;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma_scaledRI_meso,
-                         0.05, 0.01));
-        current_statement__ = 27;
-        if (stan::math::logical_lt(sigma_scaledRI_meso, 0.001)) {
-          current_statement__ = 27;
-          lp_accum__.add(stan::math::negative_infinity());
-        } else {
-          current_statement__ = 27;
-          lp_accum__.add(-stan::math::normal_lccdf(0.001, 0.05, 0.01));
-        }
-        current_statement__ = 28;
+                         0.01, 0.1));
+        current_statement__ = 22;
         stan::math::validate_non_negative_index("mu_scaledRI_cul", "N_cul",
           N_cul);
         Eigen::Matrix<local_scalar_t__,-1,1> mu_scaledRI_cul =
           Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_cul, DUMMY_VAR__);
-        current_statement__ = 29;
+        current_statement__ = 23;
         stan::model::assign(mu_scaledRI_cul,
           stan::math::add(
             stan::math::multiply((1 - b_culmeso),
               stan::math::inv_logit(
-                stan::math::fmin(
-                  stan::math::fmax(
-                    stan::math::multiply(k_culmeso,
-                      stan::math::subtract(t_cul, t0_culmeso)), -30), 30))),
-            b_culmeso), "assigning variable mu_scaledRI_cul");
-        current_statement__ = 30;
+                stan::math::multiply(k_culmeso,
+                  stan::math::subtract(t_cul, t0_culmeso)))), b_culmeso),
+          "assigning variable mu_scaledRI_cul");
+        current_statement__ = 24;
         stan::math::validate_non_negative_index("mu_scaledRI_meso", "N_meso",
           N_meso);
         Eigen::Matrix<local_scalar_t__,-1,1> mu_scaledRI_meso =
           Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_meso, DUMMY_VAR__);
-        current_statement__ = 31;
+        current_statement__ = 25;
         stan::model::assign(mu_scaledRI_meso,
           stan::math::add(
             stan::math::multiply((1 - b_culmeso),
               stan::math::inv_logit(
-                stan::math::fmin(
-                  stan::math::fmax(
-                    stan::math::multiply(k_culmeso,
-                      stan::math::subtract(t_meso, t0_culmeso)), -30), 30))),
-            b_culmeso), "assigning variable mu_scaledRI_meso");
-        current_statement__ = 32;
+                stan::math::multiply(k_culmeso,
+                  stan::math::subtract(t_meso, t0_culmeso)))), b_culmeso),
+          "assigning variable mu_scaledRI_meso");
+        current_statement__ = 26;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(scaledRI_cul,
                          mu_scaledRI_cul, sigma_scaledRI_cul));
-        current_statement__ = 33;
+        current_statement__ = 27;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(scaledRI_meso,
                          mu_scaledRI_meso, sigma_scaledRI_meso));
-        current_statement__ = 34;
+        current_statement__ = 28;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(t0_crtp, t0_culmeso,
                          sigma_t0_culmeso));
-        current_statement__ = 35;
+        current_statement__ = 29;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(k_crtp, k_culmeso,
                          sigma_k_culmeso));
-        current_statement__ = 36;
+        current_statement__ = 30;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(b_crtp, b_culmeso,
                          sigma_b_culmeso));
-        current_statement__ = 37;
+        current_statement__ = 31;
         stan::math::validate_non_negative_index("mu_scaledRI_crtp", "N_crtp",
           N_crtp);
         Eigen::Matrix<local_scalar_t__,-1,1> mu_scaledRI_crtp =
           Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_crtp, DUMMY_VAR__);
-        current_statement__ = 38;
+        current_statement__ = 32;
         stan::model::assign(mu_scaledRI_crtp,
           stan::math::add(
             stan::math::multiply((1 - b_crtp),
               stan::math::inv_logit(
-                stan::math::fmin(
-                  stan::math::fmax(
-                    stan::math::multiply(k_crtp,
-                      stan::math::subtract(t_crtp, t0_crtp)), -30), 30))),
-            b_crtp), "assigning variable mu_scaledRI_crtp");
-        current_statement__ = 39;
+                stan::math::multiply(k_crtp,
+                  stan::math::subtract(t_crtp, t0_crtp)))), b_crtp),
+          "assigning variable mu_scaledRI_crtp");
+        current_statement__ = 33;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma_scaledRI_crtp,
-                         0.05, 0.01));
-        current_statement__ = 40;
-        if (stan::math::logical_lt(sigma_scaledRI_crtp, 0.001)) {
-          current_statement__ = 40;
-          lp_accum__.add(stan::math::negative_infinity());
-        } else {
-          current_statement__ = 40;
-          lp_accum__.add(-stan::math::normal_lccdf(0.001, 0.05, 0.01));
-        }
-        current_statement__ = 41;
+                         0.01, 0.1));
+        current_statement__ = 34;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(scaledRI_crtp,
                          mu_scaledRI_crtp, sigma_scaledRI_crtp));
       }
@@ -547,8 +478,8 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
     try {
       double t0_culmeso = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 1;
-      t0_culmeso = in__.template read_constrain_lub<local_scalar_t__,
-                     jacobian__>(-1.8, 100, lp__);
+      t0_culmeso = in__.template read_constrain_lb<local_scalar_t__,
+                     jacobian__>(-1.8, lp__);
       double k_culmeso = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 2;
       k_culmeso = in__.template read_constrain_lub<local_scalar_t__,
@@ -559,8 +490,8 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
                     jacobian__>(0, 1, lp__);
       double t0_crtp = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 4;
-      t0_crtp = in__.template read_constrain_lub<local_scalar_t__,
-                  jacobian__>(-1.8, 100, lp__);
+      t0_crtp = in__.template read_constrain_lb<local_scalar_t__,
+                  jacobian__>(-1.8, lp__);
       double k_crtp = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 5;
       k_crtp = in__.template read_constrain_lub<local_scalar_t__,
@@ -572,27 +503,27 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
       double sigma_t0_culmeso = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 7;
       sigma_t0_culmeso = in__.template read_constrain_lb<local_scalar_t__,
-                           jacobian__>(0.001, lp__);
+                           jacobian__>(0, lp__);
       double sigma_k_culmeso = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 8;
       sigma_k_culmeso = in__.template read_constrain_lb<local_scalar_t__,
-                          jacobian__>(0.001, lp__);
+                          jacobian__>(0, lp__);
       double sigma_b_culmeso = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 9;
       sigma_b_culmeso = in__.template read_constrain_lb<local_scalar_t__,
-                          jacobian__>(0.001, lp__);
+                          jacobian__>(0, lp__);
       double sigma_scaledRI_cul = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 10;
       sigma_scaledRI_cul = in__.template read_constrain_lb<local_scalar_t__,
-                             jacobian__>(0.001, lp__);
+                             jacobian__>(0, lp__);
       double sigma_scaledRI_meso = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 11;
       sigma_scaledRI_meso = in__.template read_constrain_lb<local_scalar_t__,
-                              jacobian__>(0.001, lp__);
+                              jacobian__>(0, lp__);
       double sigma_scaledRI_crtp = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 12;
       sigma_scaledRI_crtp = in__.template read_constrain_lb<local_scalar_t__,
-                              jacobian__>(0.001, lp__);
+                              jacobian__>(0, lp__);
       out__.write(t0_culmeso);
       out__.write(k_culmeso);
       out__.write(b_culmeso);
@@ -636,7 +567,7 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
       local_scalar_t__ t0_culmeso = DUMMY_VAR__;
       current_statement__ = 1;
       t0_culmeso = in__.read<local_scalar_t__>();
-      out__.write_free_lub(-1.8, 100, t0_culmeso);
+      out__.write_free_lb(-1.8, t0_culmeso);
       local_scalar_t__ k_culmeso = DUMMY_VAR__;
       current_statement__ = 2;
       k_culmeso = in__.read<local_scalar_t__>();
@@ -648,7 +579,7 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
       local_scalar_t__ t0_crtp = DUMMY_VAR__;
       current_statement__ = 4;
       t0_crtp = in__.read<local_scalar_t__>();
-      out__.write_free_lub(-1.8, 100, t0_crtp);
+      out__.write_free_lb(-1.8, t0_crtp);
       local_scalar_t__ k_crtp = DUMMY_VAR__;
       current_statement__ = 5;
       k_crtp = in__.read<local_scalar_t__>();
@@ -660,27 +591,27 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
       local_scalar_t__ sigma_t0_culmeso = DUMMY_VAR__;
       current_statement__ = 7;
       sigma_t0_culmeso = in__.read<local_scalar_t__>();
-      out__.write_free_lb(0.001, sigma_t0_culmeso);
+      out__.write_free_lb(0, sigma_t0_culmeso);
       local_scalar_t__ sigma_k_culmeso = DUMMY_VAR__;
       current_statement__ = 8;
       sigma_k_culmeso = in__.read<local_scalar_t__>();
-      out__.write_free_lb(0.001, sigma_k_culmeso);
+      out__.write_free_lb(0, sigma_k_culmeso);
       local_scalar_t__ sigma_b_culmeso = DUMMY_VAR__;
       current_statement__ = 9;
       sigma_b_culmeso = in__.read<local_scalar_t__>();
-      out__.write_free_lb(0.001, sigma_b_culmeso);
+      out__.write_free_lb(0, sigma_b_culmeso);
       local_scalar_t__ sigma_scaledRI_cul = DUMMY_VAR__;
       current_statement__ = 10;
       sigma_scaledRI_cul = in__.read<local_scalar_t__>();
-      out__.write_free_lb(0.001, sigma_scaledRI_cul);
+      out__.write_free_lb(0, sigma_scaledRI_cul);
       local_scalar_t__ sigma_scaledRI_meso = DUMMY_VAR__;
       current_statement__ = 11;
       sigma_scaledRI_meso = in__.read<local_scalar_t__>();
-      out__.write_free_lb(0.001, sigma_scaledRI_meso);
+      out__.write_free_lb(0, sigma_scaledRI_meso);
       local_scalar_t__ sigma_scaledRI_crtp = DUMMY_VAR__;
       current_statement__ = 12;
       sigma_scaledRI_crtp = in__.read<local_scalar_t__>();
-      out__.write_free_lb(0.001, sigma_scaledRI_crtp);
+      out__.write_free_lb(0, sigma_scaledRI_crtp);
     } catch (const std::exception& e) {
       stan::lang::rethrow_located(e, locations_array__[current_statement__]);
     }
@@ -737,7 +668,7 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
       local_scalar_t__ t0_culmeso = DUMMY_VAR__;
       current_statement__ = 1;
       t0_culmeso = context__.vals_r("t0_culmeso")[(1 - 1)];
-      out__.write_free_lub(-1.8, 100, t0_culmeso);
+      out__.write_free_lb(-1.8, t0_culmeso);
       local_scalar_t__ k_culmeso = DUMMY_VAR__;
       current_statement__ = 2;
       k_culmeso = context__.vals_r("k_culmeso")[(1 - 1)];
@@ -749,7 +680,7 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
       local_scalar_t__ t0_crtp = DUMMY_VAR__;
       current_statement__ = 4;
       t0_crtp = context__.vals_r("t0_crtp")[(1 - 1)];
-      out__.write_free_lub(-1.8, 100, t0_crtp);
+      out__.write_free_lb(-1.8, t0_crtp);
       local_scalar_t__ k_crtp = DUMMY_VAR__;
       current_statement__ = 5;
       k_crtp = context__.vals_r("k_crtp")[(1 - 1)];
@@ -761,27 +692,27 @@ class jnt_cul_meso_hier_crtp_model final : public model_base_crtp<jnt_cul_meso_h
       local_scalar_t__ sigma_t0_culmeso = DUMMY_VAR__;
       current_statement__ = 7;
       sigma_t0_culmeso = context__.vals_r("sigma_t0_culmeso")[(1 - 1)];
-      out__.write_free_lb(0.001, sigma_t0_culmeso);
+      out__.write_free_lb(0, sigma_t0_culmeso);
       local_scalar_t__ sigma_k_culmeso = DUMMY_VAR__;
       current_statement__ = 8;
       sigma_k_culmeso = context__.vals_r("sigma_k_culmeso")[(1 - 1)];
-      out__.write_free_lb(0.001, sigma_k_culmeso);
+      out__.write_free_lb(0, sigma_k_culmeso);
       local_scalar_t__ sigma_b_culmeso = DUMMY_VAR__;
       current_statement__ = 9;
       sigma_b_culmeso = context__.vals_r("sigma_b_culmeso")[(1 - 1)];
-      out__.write_free_lb(0.001, sigma_b_culmeso);
+      out__.write_free_lb(0, sigma_b_culmeso);
       local_scalar_t__ sigma_scaledRI_cul = DUMMY_VAR__;
       current_statement__ = 10;
       sigma_scaledRI_cul = context__.vals_r("sigma_scaledRI_cul")[(1 - 1)];
-      out__.write_free_lb(0.001, sigma_scaledRI_cul);
+      out__.write_free_lb(0, sigma_scaledRI_cul);
       local_scalar_t__ sigma_scaledRI_meso = DUMMY_VAR__;
       current_statement__ = 11;
       sigma_scaledRI_meso = context__.vals_r("sigma_scaledRI_meso")[(1 - 1)];
-      out__.write_free_lb(0.001, sigma_scaledRI_meso);
+      out__.write_free_lb(0, sigma_scaledRI_meso);
       local_scalar_t__ sigma_scaledRI_crtp = DUMMY_VAR__;
       current_statement__ = 12;
       sigma_scaledRI_crtp = context__.vals_r("sigma_scaledRI_crtp")[(1 - 1)];
-      out__.write_free_lb(0.001, sigma_scaledRI_crtp);
+      out__.write_free_lb(0, sigma_scaledRI_crtp);
     } catch (const std::exception& e) {
       stan::lang::rethrow_located(e, locations_array__[current_statement__]);
     }
