@@ -9,6 +9,13 @@ from .stan_utils import (
     build_invT_inputData,  # add if you use it
 )
 
+
+
+from .dataviz_utils import (
+    plot_prior_distributions,
+    # other functions here
+)
+
 __all__ = [
     "get_posterior",
     "get_invT_posterior",
@@ -18,4 +25,5 @@ __all__ = [
     "load_posterior",
     "save_posterior",
     "build_invT_inputData",
+    "plot_prior_distributions"
 ]

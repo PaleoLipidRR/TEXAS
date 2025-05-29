@@ -1,6 +1,7 @@
 README.md
 setup.py
 culRIBayesian/__init__.py
+culRIBayesian/dataviz_utils.py
 culRIBayesian/stan_utils.py
 culRIBayesian.egg-info/PKG-INFO
 culRIBayesian.egg-info/SOURCES.txt
@@ -12,5 +13,7 @@ culRIBayesian/stan_models/invT_logistic_fixed_univ.stan
 culRIBayesian/stan_models/jnt_cul_meso.stan
 culRIBayesian/stan_models/jnt_cul_meso_crtp.stan
 culRIBayesian/stan_models/jnt_cul_meso_hier_crtp.stan
+culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_archive.stan
 culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan
+culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv_archive.stan
 culRIBayesian/stan_models/jnt_culmeso_hier_crtp_logistic_fixed_multiv.stan
