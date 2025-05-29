@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Union, Optional, Dict, List, Tuple, Sequence
+from datetime import datetime
 import numpy as np
 import xarray as xr
 from cmdstanpy import CmdStanModel
@@ -8,194 +9,189 @@ import time
 import re
 
 
-# ─── TYPES & HELPERS ───────────────────────────────────────────────────────────
+# ─── TYPES & HELPERS ───────────────────────────────────────────────
 
 def _ensure_numpy(x):
     return x.values if hasattr(x, "values") else np.asarray(x)
 
-def extract_metadata(data: dict, exclude_keys: List[str] = None) -> dict:
-    exclude_keys = exclude_keys or []
-    metadata = {}
-    for key, value in data.items():
-        if key in exclude_keys:
-            continue
-        if np.isscalar(value) or (isinstance(value, (np.ndarray, list)) and len(value) <= 10):
-            metadata[key] = value if np.isscalar(value) else list(np.array(value).flatten())
-        elif isinstance(value, (np.ndarray, list)):
-            metadata[key] = f"<array len={len(value)}>"
-        else:
-            metadata[key] = str(value)
-    return metadata
+def filter_stan_compatible(data: dict) -> dict:
+    """Return a shallow copy of `data` containing only Stan-compatible types."""
+    allowed_types = (int, float, list, np.ndarray)
+    return {k: v for k, v in data.items() if isinstance(v, allowed_types)}
 
+# ─── METADATA EXTRACTION ────────────────────────────────────────────────────
 
-# ─── BUILD CALIBRATION DATASET ──────────────────────────────────────────────
-def build_joint_calibration_data(
-    cul: dict,
-    meso: dict,
-    crtp: dict,
-    predictors: Dict[str, Dict[str, np.ndarray]]
-) -> Tuple[dict, dict]:
+def extract_and_update_metadata(
+        ds: xr.Dataset, 
+        data: dict, 
+        stan_filename: str, 
+        site_name: Optional[str] = None,
+        posteriors_used: Optional[List[str]] = None,
+        version: str = "1.0.0"
+) -> xr.Dataset:
+    direct_keys = [
+        "calibration_model_name", "N_cul", "N_meso", "N_crtp", "N_downcore",
+        "prior_mu_t", "prior_sigma_t", "M"
+    ]
+    optional_predictors = ["gdgt23ratio", "no3", "depthIntg_t_no3"]
+    metadata = {
+        "invT_model_name": stan_filename,
+        "generated_by": "culRI-Bayesian",
+        "version": version,
+        "run_time": datetime.now().isoformat(),
+        "run_duration (sec)": None,
+    }
+
+    for key in direct_keys:
+        if key in data:
+            val = data[key]
+            if isinstance(val, (np.integer, int)): metadata[key] = int(val)
+            elif isinstance(val, (np.floating, float)): metadata[key] = float(val)
+            elif isinstance(val, (list, np.ndarray)): metadata[key] = np.median(val)
+            else: metadata[key] = val
+
+    # Always summarize scaledRI
+    arr = np.asarray(data["scaledRI_downcore"])
+    metadata.update({
+        "scaledRI_downcore_mean": float(np.mean(arr)),
+        "scaledRI_downcore_std": float(np.std(arr)),
+        "scaledRI_downcore_min": float(np.min(arr)),
+        "scaledRI_downcore_max": float(np.max(arr)),
+        "scaledRI_downcore_len": int(len(arr)),
+    })
+
+    # Conditionally summarize optional predictors if they are actually used
+    for key in optional_predictors:
+        if data.get(f"use_{key}", 0) == 1 and f"{key}_downcore" in data:
+            arr = np.asarray(data[f"{key}_downcore"])
+            metadata.update({
+                f"{key}_downcore_mean": float(np.mean(arr)),
+                f"{key}_downcore_std": float(np.std(arr)),
+                f"{key}_downcore_min": float(np.min(arr)),
+                f"{key}_downcore_max": float(np.max(arr)),
+                f"{key}_downcore_len": int(len(arr)),
+                f"use_{key}": 1,
+            })
+
+    # Additional metadata directly from input
+    if "calibration_suffix_used" in data:
+        metadata["calibration_suffix_used"] = data["calibration_suffix_used"]
+
+    if "posteriors_used" in data:
+        metadata["posteriors_used"] = data["posteriors_used"]
+
+    if site_name:
+        metadata["SiteName"] = site_name
+
+    ds.attrs.update(metadata)
+    return ds
+
+# ─── BUILD DATA ────────────────────────────────────────────────────
+
+def infer_posterior_suffixes(data_vars):
     """
-    Build Stan-compatible data and predictor usage flags for joint GDGT calibration.
-
-    Parameters:
-    ----------
-    cul, meso, coretop : dict
-        Each must contain a key "scaledRI" corresponding to ring index observations.
-
-    predictors : dict of dict
-        Must contain:
-            "thermoT": {
-                "cul": array-like,
-                "meso": array-like,
-                "crtp": array-like
-            }
-        Optional:
-            Any additional predictors (e.g., "gdgt23ratio") with only "crtp" values.
-
+    Infer the suffix used in t0/k/b parameters only (not enforcing sigma to match).
     Returns:
-    -------
-    data : dict
-        Stan-ready data dictionary with appropriately named inputs.
-
-    use_flags : dict
-        Dictionary mapping optional predictor names to 1 (used) or 0 (not used).
+        used_suffix (str or None): If consistent suffix is found across all t0/k/b.
+        suffix_map (dict): Mapping from param to detected suffix.
     """
-    OPTIONAL_PREDICTORS = ["gdgt23ratio", "depthIntg_thermoT_no3"]
-    data = {}
-    use_flags = {}
+    import re
+    core_params = ["t0", "k", "b"]
+    suffixes = {}
+    for param in core_params:
+        candidates = [v for v in data_vars if v.startswith(f"{param}_")]
+        for var in candidates:
+            match = re.match(f"{param}_(.+)", var)
+            if match:
+                suffix = match.group(1)
+                suffixes[param] = suffix
+                break  # Take the first valid one
+    if len(suffixes) == len(core_params) and len(set(suffixes.values())) == 1:
+        return list(suffixes.values())[0], suffixes
+    return None, suffixes
 
-    # ─── Required predictor: thermoT ──────────────────────
-    thermoT = predictors.get("thermoT")
-    if thermoT is None:
-        raise ValueError("Missing required predictor 'thermoT'")
-
-    data["N_cul"] = len(cul["scaledRI"])
-    data["scaledRI_cul"] = _ensure_numpy(cul["scaledRI"])
-    data["thermoT_cul"] = _ensure_numpy(thermoT["cul"])
-
-    data["N_meso"] = len(meso["scaledRI"])
-    data["scaledRI_meso"] = _ensure_numpy(meso["scaledRI"])
-    data["thermoT_meso"] = _ensure_numpy(thermoT["meso"])
-
-    data["N_crtp"] = len(crtp["scaledRI"])
-    data["scaledRI_crtp"] = _ensure_numpy(crtp["scaledRI"])
-    data["thermoT_crtp"] = _ensure_numpy(thermoT["crtp"])
-
-    # ─── Optional predictors ──────────────────────────────
-    print("[build_joint_calibration_data] Building Stan data block...")
-    print("  ✓ Using required predictor: thermoT")
-
-    for pred_name in OPTIONAL_PREDICTORS:
-        if pred_name in predictors and "crtp" in predictors[pred_name]:
-            data[pred_name] = _ensure_numpy(predictors[pred_name]["crtp"])
-            data[f"use_{pred_name}"] = 1
-            use_flags[pred_name] = 1
-            print(f"  ✓ Using predictor: {pred_name}")
-        else:
-            data[pred_name] = np.zeros(data["N_crtp"])
-            data[f"use_{pred_name}"] = 0
-            use_flags[pred_name] = 0
-            print(f"  ✗ Predictor missing for crtp: {pred_name}")
-
-    return data, use_flags
-
-
-def build_inverse_data(
+def build_invT_inputData(
     scaledRI: np.ndarray,
-    prior_mu_thermoT: np.ndarray,
-    prior_sigma_thermoT: float,
-    posterior: xr.Dataset,
-    predictors: Dict[str, np.ndarray],
+    prior_mu_t: Union[np.ndarray, float],
+    prior_sigma_t: float,
+    fwd_posterior_name: str,
+    predictors: Optional[Dict[str, np.ndarray]] = None,
     use_flags: Optional[Dict[str, bool]] = None,
-    n_draws: int = 1000,
+    n_draws: int = 100,
     seed: Optional[int] = 42
 ) -> Tuple[dict, dict]:
-    """
-    Build Stan-compatible data and use flags for inverse prediction model.
-
-    Parameters:
-    ----------
-    scaledRI : np.ndarray
-        Ring index values from crtps to invert.
-
-    prior_mu_thermoT : np.ndarray
-        Prior mean estimates of temperature (same length as scaledRI).
-
-    prior_sigma_thermoT : float
-        Prior standard deviation on thermoT.
-
-    posterior : xr.Dataset
-        Posterior output from calibration model containing parameters like
-        t0_crtp, k_crtp, b_crtp, sigma, and optional beta0_* terms.
-
-    predictors : dict
-        Dictionary of optional predictor arrays, e.g., {
-            "gdgt23ratio": <array>,
-            "depthIntg_thermoT_no3": <array>
-        }
-
-    use_flags : dict (optional)
-        Dict specifying whether to use each optional predictor. If None, use
-        the presence of predictor arrays to decide.
-
-    n_draws : int
-        Number of posterior draws to sample.
-
-    seed : int
-        Random seed for reproducibility.
-
-    Returns:
-    -------
-    data : dict
-        Dictionary formatted for Stan sampling.
-
-    use_flags : dict
-        Explicit flags for each optional predictor (1 = used, 0 = unused).
-    """
-    OPTIONAL_PREDICTORS = ["gdgt23ratio", "depthIntg_thermoT_no3"]
+    OPTIONAL_PREDICTORS = ["gdgt23ratio", "no3"]
+    PRIORITY_SUFFIXES = ["crtp", "culmesocore", "culmeso", "meso", "cul"]
 
     if seed is not None:
         np.random.seed(seed)
 
+    predictors = predictors or {}
+    posterior = load_posterior(model_name=fwd_posterior_name)
     sel = np.random.choice(posterior.dims["draw"], size=n_draws, replace=True)
     P = posterior.isel(draw=sel)
 
     N = len(scaledRI)
     M = n_draws
 
+    if np.isscalar(prior_mu_t):
+        prior_mu_t = np.full(N, prior_mu_t)
+    if len(prior_mu_t) != N:
+        raise ValueError(f"Length mismatch: prior_mu_t={len(prior_mu_t)} vs scaledRI={N}")
+
+    # Determine best available suffix for t0/k/b
+    def find_suffix_for_all_params(params, priority_suffixes):
+        for suffix in priority_suffixes:
+            if all(f"{p}_{suffix}" in P for p in params):
+                return suffix
+        return None
+
+    used_suffix = find_suffix_for_all_params(["t0", "k", "b"], PRIORITY_SUFFIXES)
+    if used_suffix is None:
+        raise ValueError("Could not determine consistent posterior suffix for t0/k/b")
+
+    # Required fields
     data = {
-        "N": N,
-        "scaledRI": np.asarray(scaledRI),
-        "prior_mu_thermoT": np.asarray(prior_mu_thermoT),
-        "prior_sigma_thermoT": prior_sigma_thermoT,
+        "N_downcore": N,
+        "scaledRI_downcore": np.asarray(scaledRI),
+        "prior_mu_t": np.asarray(prior_mu_t),
+        "prior_sigma_t": prior_sigma_t,
         "M": M,
-        "t0_crtp": P["t0_crtp"].values,
-        "k_crtp": P["k_crtp"].values,
-        "b_crtp": P["b_crtp"].values,
-        "sigma_crtp_scaledRI": P["sigma"].values,
+        "t0": P[f"t0_{used_suffix}"].values,
+        "k": P[f"k_{used_suffix}"].values,
+        "b": P[f"b_{used_suffix}"].values,
     }
 
-    if use_flags is None:
-        use_flags = {}
+    # Prioritize matching sigma_scaledRI_*
+    sigma_key = None
+    for suffix in PRIORITY_SUFFIXES:
+        candidate = f"sigma_scaledRI_{suffix}"
+        if candidate in P and len(P[candidate]) == M:
+            sigma_key = candidate
+            break
+    if sigma_key:
+        data["sigma_scaledRI"] = P[sigma_key].values
+    else:
+        data["sigma_scaledRI"] = np.ones(M) * 0.1  # fallback
 
-    print("[build_inverse_data] Processing optional predictors...")
+    posteriors_used = [f"t0_{used_suffix}", f"k_{used_suffix}", f"b_{used_suffix}"]
+    if sigma_key:
+        posteriors_used.append(sigma_key)
+
+    # Optional predictors
+    use_flags = use_flags or {}
     for name in OPTIONAL_PREDICTORS:
-        beta_name = f"beta0_{name}"
-        use = use_flags.get(name, name in predictors)
-        use_flags[name] = bool(use)
+        for suffix in PRIORITY_SUFFIXES:
+            beta_name = f"beta0_{name}_{suffix}"
+            if name in predictors and beta_name in P and not np.all(np.asarray(predictors[name]) == 0):
+                data[f"{name}_downcore"] = np.asarray(predictors[name])
+                data[f"beta0_{name}"] = P[beta_name].values
+                data[f"use_{name}"] = 1
+                posteriors_used.append(beta_name)
+                break
 
-        if use:
-            data[name] = np.asarray(predictors[name])
-            data[beta_name] = P[beta_name].values
-            print(f"  ✓ Using predictor: {name}")
-        else:
-            data[name] = np.zeros(N)
-            data[beta_name] = np.zeros(M)
-            print(f"  ✗ Skipping predictor: {name} (use_{name} = 0)")
-
-        data[f"use_{name}"] = int(use)
-
+    data["calibration_model_name"] = posterior.attrs.get("model_name", "unknown_model")
+    data["posteriors_used"] = posteriors_used
     return data, use_flags
 
 
@@ -333,14 +329,10 @@ def get_posterior(
         coords = {name: np.arange(sz) for name, sz in zip(dim_names, arr.shape)}
         ds[var] = xr.DataArray(data=arr, dims=dim_names, coords=coords, name=var)
     
-    ds.attrs.update({
-        'model_name': stan_filename,
-        'generated_by': 'culRI-Bayesian',
-        'version': '1.0.0'
-    })
-
-    ds.attrs.update(extract_metadata(data, exclude_keys=["scaledRI_*", "gdgt23ratio_*", "no3_*"]))
-
+    ds = extract_and_update_metadata(ds, data, stan_filename)
+    run_seconds = time.time() - start_time
+    ds.attrs["run_duration"] = round(run_seconds, 2)
+    
     
     return ds, diagnostics
 
@@ -348,15 +340,20 @@ def get_invT_posterior(
     data: dict,
     stan_filename: str,
     stan_models_dir: Union[Path, str] = None,
+    site_name: Optional[str] = None,
     chains: int = 4,
     iter_warmup: int = 500,
     iter_sampling: int = 1000,
     seed: Optional[int] = 42,
     verbose: bool = True
 ) -> xr.Dataset:
-    
+    """
+    Run Stan inverse model and return posterior samples as an xarray.Dataset.
+    Automatically infers and standardizes posterior parameter keys.
+    """
     import time
     start_time = time.time()
+
     if stan_models_dir is None:
         stan_models_dir = Path(__file__).parent / "stan_models"
     model_path = Path(stan_models_dir) / f"{stan_filename}.stan"
@@ -366,56 +363,54 @@ def get_invT_posterior(
     model = _MODEL_CACHE[model_path]
 
     # Validate required core inputs
-    base_keys = ["N_downcore", "scaledRI_downcore", "prior_mu_t", "prior_sigma_t", "M"]
-    missing = [k for k in base_keys if k not in data]
-    if missing:
-        raise ValueError(f"Missing required keys for invT model: {missing}")
+    required_keys = ["N_downcore", "scaledRI_downcore", "prior_mu_t", "prior_sigma_t", "M"]
+    missing_keys = [k for k in required_keys if k not in data]
+    if missing_keys:
+        raise ValueError(f"Missing required keys for invT model: {missing_keys}")
 
-    # Automatically find t0_*, k_*, b_*, sigma_*, beta0_gdgt23ratio_*, beta0_no3_* matching M
+    # Automatically match parameter keys like t0_*, k_*, etc. matching M
     param_prefixes = ["t0", "k", "b", "sigma_scaledRI", "beta0_gdgt23ratio", "beta0_no3"]
     dynamic_keys = {}
+    posterior_suffixes = []
 
     for prefix in param_prefixes:
-        matched_keys = [key for key in data if key.startswith(f"{prefix}_") and len(np.atleast_1d(data[key])) == data["M"]]
-        if len(matched_keys) > 1:
-            raise ValueError(f"Multiple keys found for {prefix}_*: {matched_keys}")
-        elif len(matched_keys) == 1:
-            dynamic_keys[prefix] = matched_keys[0]
+        candidates = [k for k in data if k.startswith(f"{prefix}_") and len(np.atleast_1d(data[k])) == data["M"]]
+        if len(candidates) > 1:
+            raise ValueError(f"Multiple keys found for {prefix}_*: {candidates}")
+        elif len(candidates) == 1:
+            dynamic_keys[prefix] = candidates[0]
+            posterior_suffixes.append(candidates[0])
 
-    # Inject standardized keys into data
-    for std_name, actual_name in dynamic_keys.items():
-        data[std_name] = data[actual_name]
+    for std_key, actual_key in dynamic_keys.items():
+        data[std_key] = data[actual_key]
 
-    # Optional predictor: gdgt23ratio
-    if "gdgt23ratio_downcore" in data:
-        data["use_gdgt23ratio"] = 1
-        if len(data["gdgt23ratio_downcore"]) != data["N_downcore"]:
-            raise ValueError("Length of gdgt23ratio_downcore must equal N_downcore")
-        if "beta0_gdgt23ratio" not in data:
-            data["beta0_gdgt23ratio"] = np.zeros(data["M"])
-    else:
+    # gdgt23ratio predictor handling
+    has_gdgt23 = "gdgt23ratio_downcore" in data and np.any(data["gdgt23ratio_downcore"])
+    data["use_gdgt23ratio"] = int(has_gdgt23)
+    if not has_gdgt23:
         data["gdgt23ratio_downcore"] = np.zeros(data["N_downcore"])
         data["beta0_gdgt23ratio"] = np.zeros(data["M"])
-        data["use_gdgt23ratio"] = 0
+    elif "beta0_gdgt23ratio" not in data:
+        data["beta0_gdgt23ratio"] = np.zeros(data["M"])
 
-    # Optional predictor: no3
-    if "no3_downcore" in data:
-        data["use_no3"] = 1
-        if len(data["no3_downcore"]) != data["N_downcore"]:
-            raise ValueError("Length of no3_downcore must equal N_downcore")
-        if "beta0_no3" not in data:
-            data["beta0_no3"] = np.zeros(data["M"])
-    else:
+    # no3 predictor handling
+    has_no3 = "no3_downcore" in data and np.any(data["no3_downcore"])
+    data["use_no3"] = int(has_no3)
+    if not has_no3:
         data["no3_downcore"] = np.zeros(data["N_downcore"])
         data["beta0_no3"] = np.zeros(data["M"])
-        data["use_no3"] = 0
+    elif "beta0_no3" not in data:
+        data["beta0_no3"] = np.zeros(data["M"])
 
     if seed is not None:
         np.random.seed(seed)
 
     try:
+        stan_data = filter_stan_compatible(data)
+        stan_data.pop("posteriors_used", None)  # Remove non-numeric metadata
+        stan_data.pop("calibration_model_name", None)  # Also remove if present
         fit = model.sample(
-            data=data,
+            data=stan_data,
             chains=chains,
             iter_warmup=iter_warmup,
             iter_sampling=iter_sampling,
@@ -428,14 +423,13 @@ def get_invT_posterior(
     except RuntimeError as e:
         raise RuntimeError(f"Stan sampling failed: {e}")
 
-    # Optional: check diagnostics
     diagnostics = fit.diagnose()
     if verbose:
         print(f"Sampling completed in {time.time() - start_time:.1f} seconds")
         if "divergent" in diagnostics:
             print("⚠️ Sampling diagnostics warning:\n", diagnostics)
 
-    # Convert to xarray dataset
+    # Convert to xarray.Dataset
     ds = xr.Dataset()
     for var in fit.stan_variables():
         arr = fit.stan_variable(var)
@@ -443,15 +437,15 @@ def get_invT_posterior(
         coords = {name: np.arange(sz) for name, sz in zip(dim_names, arr.shape)}
         ds[var] = xr.DataArray(data=arr, dims=dim_names, coords=coords, name=var)
 
-    ds.attrs.update({
-        'model_name': stan_filename,
-        'generated_by': 'culRI-Bayesian',
-        'version': '1.0.0'
-    })
+    ds = extract_and_update_metadata(
+        ds,
+        data,
+        stan_filename,
+        site_name=site_name,
+        posteriors_used=posterior_suffixes
+    )
+    ds.attrs["run_duration (sec)"] = round(time.time() - start_time, 2)
 
-    ds.attrs.update(extract_metadata(data, exclude_keys=["scaledRI_*", "gdgt23ratio_*", "no3_*"]))
-
-    
     return ds, diagnostics
 
 def get_invT_post_quantiles(

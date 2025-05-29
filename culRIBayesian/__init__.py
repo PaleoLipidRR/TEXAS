@@ -6,8 +6,7 @@ from .stan_utils import (
     inv_logistic_general as inv_logistic,
     load_posterior,
     save_posterior,
-    build_joint_calibration_data,
-    build_inverse_data,  # add if you use it
+    build_invT_inputData,  # add if you use it
 )
 
 __all__ = [
@@ -18,6 +17,5 @@ __all__ = [
     "inv_logistic",
     "load_posterior",
     "save_posterior",
-    "build_joint_calibration_data",
-    "build_inverse_data",
+    "build_invT_inputData",
 ]
