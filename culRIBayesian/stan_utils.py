@@ -232,7 +232,7 @@ def build_invT_inputData(
                 posteriors_used.append(beta_name)
                 break
 
-    data["calibration_model_name"] = posterior.attrs.get("model_name", "unknown_model")
+    data["calibration_model_name"] = posterior.attrs.get("stan_model_name", "unknown_model")
     data["posteriors_used"] = posteriors_used
     return data, use_flags
 
