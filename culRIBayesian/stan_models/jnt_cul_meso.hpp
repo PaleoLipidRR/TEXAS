@@ -4,7 +4,7 @@ namespace jnt_cul_meso_model_namespace {
 using stan::model::model_base_crtp;
 using namespace stan::math;
 stan::math::profile_map profiles__;
-static constexpr std::array<const char*, 32> locations_array__ =
+static constexpr std::array<const char*, 30> locations_array__ =
   {" (found before start of program)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso.stan', line 15, column 2 to column 36)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso.stan', line 16, column 2 to column 35)",
@@ -17,10 +17,8 @@ static constexpr std::array<const char*, 32> locations_array__ =
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso.stan', line 25, column 36 to column 39)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso.stan', line 26, column 2 to column 34)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso.stan', line 27, column 2 to column 29)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso.stan', line 28, column 2 to column 55)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso.stan', line 28, column 47 to column 51)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso.stan', line 29, column 2 to column 55)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso.stan', line 29, column 47 to column 51)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso.stan', line 28, column 2 to column 46)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso.stan', line 29, column 2 to column 46)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso.stan', line 35, column 9 to column 14)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso.stan', line 35, column 2 to column 108)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso.stan', line 36, column 9 to column 15)",
@@ -70,17 +68,17 @@ class jnt_cul_meso_model final : public model_base_crtp<jnt_cul_meso_model> {
     try {
       int pos__ = std::numeric_limits<int>::min();
       pos__ = 1;
-      current_statement__ = 22;
+      current_statement__ = 20;
       context__.validate_dims("data initialization", "N_cul", "int",
         std::vector<size_t>{});
       N_cul = std::numeric_limits<int>::min();
-      current_statement__ = 22;
+      current_statement__ = 20;
       N_cul = context__.vals_i("N_cul")[(1 - 1)];
-      current_statement__ = 22;
+      current_statement__ = 20;
       stan::math::check_greater_or_equal(function__, "N_cul", N_cul, 1);
-      current_statement__ = 23;
+      current_statement__ = 21;
       stan::math::validate_non_negative_index("t_cul", "N_cul", N_cul);
-      current_statement__ = 24;
+      current_statement__ = 22;
       context__.validate_dims("data initialization", "t_cul", "double",
         std::vector<size_t>{static_cast<size_t>(N_cul)});
       t_cul_data__ = Eigen::Matrix<double,-1,1>::Constant(N_cul,
@@ -89,22 +87,22 @@ class jnt_cul_meso_model final : public model_base_crtp<jnt_cul_meso_model> {
         Eigen::Map<Eigen::Matrix<double,-1,1>>(t_cul_data__.data(), N_cul);
       {
         std::vector<local_scalar_t__> t_cul_flat__;
-        current_statement__ = 24;
+        current_statement__ = 22;
         t_cul_flat__ = context__.vals_r("t_cul");
-        current_statement__ = 24;
+        current_statement__ = 22;
         pos__ = 1;
-        current_statement__ = 24;
+        current_statement__ = 22;
         for (int sym1__ = 1; sym1__ <= N_cul; ++sym1__) {
-          current_statement__ = 24;
+          current_statement__ = 22;
           stan::model::assign(t_cul, t_cul_flat__[(pos__ - 1)],
             "assigning variable t_cul", stan::model::index_uni(sym1__));
-          current_statement__ = 24;
+          current_statement__ = 22;
           pos__ = (pos__ + 1);
         }
       }
-      current_statement__ = 25;
+      current_statement__ = 23;
       stan::math::validate_non_negative_index("scaledRI_cul", "N_cul", N_cul);
-      current_statement__ = 26;
+      current_statement__ = 24;
       context__.validate_dims("data initialization", "scaledRI_cul",
         "double", std::vector<size_t>{static_cast<size_t>(N_cul)});
       scaledRI_cul_data__ = Eigen::Matrix<double,-1,1>::Constant(N_cul,
@@ -114,30 +112,30 @@ class jnt_cul_meso_model final : public model_base_crtp<jnt_cul_meso_model> {
         N_cul);
       {
         std::vector<local_scalar_t__> scaledRI_cul_flat__;
-        current_statement__ = 26;
+        current_statement__ = 24;
         scaledRI_cul_flat__ = context__.vals_r("scaledRI_cul");
-        current_statement__ = 26;
+        current_statement__ = 24;
         pos__ = 1;
-        current_statement__ = 26;
+        current_statement__ = 24;
         for (int sym1__ = 1; sym1__ <= N_cul; ++sym1__) {
-          current_statement__ = 26;
+          current_statement__ = 24;
           stan::model::assign(scaledRI_cul, scaledRI_cul_flat__[(pos__ - 1)],
             "assigning variable scaledRI_cul", stan::model::index_uni(sym1__));
-          current_statement__ = 26;
+          current_statement__ = 24;
           pos__ = (pos__ + 1);
         }
       }
-      current_statement__ = 27;
+      current_statement__ = 25;
       context__.validate_dims("data initialization", "N_meso", "int",
         std::vector<size_t>{});
       N_meso = std::numeric_limits<int>::min();
-      current_statement__ = 27;
+      current_statement__ = 25;
       N_meso = context__.vals_i("N_meso")[(1 - 1)];
-      current_statement__ = 27;
+      current_statement__ = 25;
       stan::math::check_greater_or_equal(function__, "N_meso", N_meso, 1);
-      current_statement__ = 28;
+      current_statement__ = 26;
       stan::math::validate_non_negative_index("t_meso", "N_meso", N_meso);
-      current_statement__ = 29;
+      current_statement__ = 27;
       context__.validate_dims("data initialization", "t_meso", "double",
         std::vector<size_t>{static_cast<size_t>(N_meso)});
       t_meso_data__ = Eigen::Matrix<double,-1,1>::Constant(N_meso,
@@ -146,23 +144,23 @@ class jnt_cul_meso_model final : public model_base_crtp<jnt_cul_meso_model> {
         Eigen::Map<Eigen::Matrix<double,-1,1>>(t_meso_data__.data(), N_meso);
       {
         std::vector<local_scalar_t__> t_meso_flat__;
-        current_statement__ = 29;
+        current_statement__ = 27;
         t_meso_flat__ = context__.vals_r("t_meso");
-        current_statement__ = 29;
+        current_statement__ = 27;
         pos__ = 1;
-        current_statement__ = 29;
+        current_statement__ = 27;
         for (int sym1__ = 1; sym1__ <= N_meso; ++sym1__) {
-          current_statement__ = 29;
+          current_statement__ = 27;
           stan::model::assign(t_meso, t_meso_flat__[(pos__ - 1)],
             "assigning variable t_meso", stan::model::index_uni(sym1__));
-          current_statement__ = 29;
+          current_statement__ = 27;
           pos__ = (pos__ + 1);
         }
       }
-      current_statement__ = 30;
+      current_statement__ = 28;
       stan::math::validate_non_negative_index("scaledRI_meso", "N_meso",
         N_meso);
-      current_statement__ = 31;
+      current_statement__ = 29;
       context__.validate_dims("data initialization", "scaledRI_meso",
         "double", std::vector<size_t>{static_cast<size_t>(N_meso)});
       scaledRI_meso_data__ = Eigen::Matrix<double,-1,1>::Constant(N_meso,
@@ -172,17 +170,17 @@ class jnt_cul_meso_model final : public model_base_crtp<jnt_cul_meso_model> {
         N_meso);
       {
         std::vector<local_scalar_t__> scaledRI_meso_flat__;
-        current_statement__ = 31;
+        current_statement__ = 29;
         scaledRI_meso_flat__ = context__.vals_r("scaledRI_meso");
-        current_statement__ = 31;
+        current_statement__ = 29;
         pos__ = 1;
-        current_statement__ = 31;
+        current_statement__ = 29;
         for (int sym1__ = 1; sym1__ <= N_meso; ++sym1__) {
-          current_statement__ = 31;
+          current_statement__ = 29;
           stan::model::assign(scaledRI_meso, scaledRI_meso_flat__[(pos__ -
             1)], "assigning variable scaledRI_meso",
             stan::model::index_uni(sym1__));
-          current_statement__ = 31;
+          current_statement__ = 29;
           pos__ = (pos__ + 1);
         }
       }
@@ -228,8 +226,8 @@ class jnt_cul_meso_model final : public model_base_crtp<jnt_cul_meso_model> {
                     jacobian__>(0, lp__);
       local_scalar_t__ b_culmeso = DUMMY_VAR__;
       current_statement__ = 3;
-      b_culmeso = in__.template read_constrain_lub<local_scalar_t__,
-                    jacobian__>(0, 1, lp__);
+      b_culmeso = in__.template read_constrain_lb<local_scalar_t__,
+                    jacobian__>(0, lp__);
       local_scalar_t__ sigma_scaledRI_cul = DUMMY_VAR__;
       current_statement__ = 4;
       sigma_scaledRI_cul = in__.template read_constrain_lb<local_scalar_t__,
@@ -254,33 +252,17 @@ class jnt_cul_meso_model final : public model_base_crtp<jnt_cul_meso_model> {
         current_statement__ = 11;
         lp_accum__.add(stan::math::beta_lpdf<propto__>(b_culmeso, 2, 5));
         current_statement__ = 12;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma_scaledRI_cul,
-                         0.01, 0.1));
+        lp_accum__.add(stan::math::cauchy_lpdf<propto__>(sigma_scaledRI_cul,
+                         0.01, 0.05));
         current_statement__ = 13;
-        if (stan::math::logical_lt(sigma_scaledRI_cul, 0.01)) {
-          current_statement__ = 13;
-          lp_accum__.add(stan::math::negative_infinity());
-        } else {
-          current_statement__ = 13;
-          lp_accum__.add(-stan::math::normal_lccdf(0.01, 0.01, 0.1));
-        }
+        lp_accum__.add(stan::math::cauchy_lpdf<propto__>(sigma_scaledRI_meso,
+                         0.01, 0.05));
         current_statement__ = 14;
-        lp_accum__.add(stan::math::normal_lpdf<propto__>(sigma_scaledRI_meso,
-                         0.01, 0.1));
-        current_statement__ = 15;
-        if (stan::math::logical_lt(sigma_scaledRI_meso, 0.01)) {
-          current_statement__ = 15;
-          lp_accum__.add(stan::math::negative_infinity());
-        } else {
-          current_statement__ = 15;
-          lp_accum__.add(-stan::math::normal_lccdf(0.01, 0.01, 0.1));
-        }
-        current_statement__ = 16;
         stan::math::validate_non_negative_index("mu_scaledRI_cul", "N_cul",
           N_cul);
         Eigen::Matrix<local_scalar_t__,-1,1> mu_scaledRI_cul =
           Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_cul, DUMMY_VAR__);
-        current_statement__ = 17;
+        current_statement__ = 15;
         stan::model::assign(mu_scaledRI_cul,
           stan::math::add(
             stan::math::multiply((1 - b_culmeso),
@@ -288,12 +270,12 @@ class jnt_cul_meso_model final : public model_base_crtp<jnt_cul_meso_model> {
                 stan::math::multiply(k_culmeso,
                   stan::math::subtract(t_cul, t0_culmeso)))), b_culmeso),
           "assigning variable mu_scaledRI_cul");
-        current_statement__ = 18;
+        current_statement__ = 16;
         stan::math::validate_non_negative_index("mu_scaledRI_meso", "N_meso",
           N_meso);
         Eigen::Matrix<local_scalar_t__,-1,1> mu_scaledRI_meso =
           Eigen::Matrix<local_scalar_t__,-1,1>::Constant(N_meso, DUMMY_VAR__);
-        current_statement__ = 19;
+        current_statement__ = 17;
         stan::model::assign(mu_scaledRI_meso,
           stan::math::add(
             stan::math::multiply((1 - b_culmeso),
@@ -301,10 +283,10 @@ class jnt_cul_meso_model final : public model_base_crtp<jnt_cul_meso_model> {
                 stan::math::multiply(k_culmeso,
                   stan::math::subtract(t_meso, t0_culmeso)))), b_culmeso),
           "assigning variable mu_scaledRI_meso");
-        current_statement__ = 20;
+        current_statement__ = 18;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(scaledRI_cul,
                          mu_scaledRI_cul, sigma_scaledRI_cul));
-        current_statement__ = 21;
+        current_statement__ = 19;
         lp_accum__.add(stan::math::normal_lpdf<propto__>(scaledRI_meso,
                          mu_scaledRI_meso, sigma_scaledRI_meso));
       }
@@ -355,8 +337,8 @@ class jnt_cul_meso_model final : public model_base_crtp<jnt_cul_meso_model> {
                     jacobian__>(0, lp__);
       double b_culmeso = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 3;
-      b_culmeso = in__.template read_constrain_lub<local_scalar_t__,
-                    jacobian__>(0, 1, lp__);
+      b_culmeso = in__.template read_constrain_lb<local_scalar_t__,
+                    jacobian__>(0, lp__);
       double sigma_scaledRI_cul = std::numeric_limits<double>::quiet_NaN();
       current_statement__ = 4;
       sigma_scaledRI_cul = in__.template read_constrain_lb<local_scalar_t__,
@@ -418,7 +400,7 @@ class jnt_cul_meso_model final : public model_base_crtp<jnt_cul_meso_model> {
       local_scalar_t__ b_culmeso = DUMMY_VAR__;
       current_statement__ = 3;
       b_culmeso = in__.read<local_scalar_t__>();
-      out__.write_free_lub(0, 1, b_culmeso);
+      out__.write_free_lb(0, b_culmeso);
       local_scalar_t__ sigma_scaledRI_cul = DUMMY_VAR__;
       current_statement__ = 4;
       sigma_scaledRI_cul = in__.read<local_scalar_t__>();
@@ -470,7 +452,7 @@ class jnt_cul_meso_model final : public model_base_crtp<jnt_cul_meso_model> {
       local_scalar_t__ b_culmeso = DUMMY_VAR__;
       current_statement__ = 3;
       b_culmeso = context__.vals_r("b_culmeso")[(1 - 1)];
-      out__.write_free_lub(0, 1, b_culmeso);
+      out__.write_free_lb(0, b_culmeso);
       local_scalar_t__ sigma_scaledRI_cul = DUMMY_VAR__;
       current_statement__ = 4;
       sigma_scaledRI_cul = context__.vals_r("sigma_scaledRI_cul")[(1 - 1)];
