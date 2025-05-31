@@ -159,7 +159,7 @@ def build_invT_inputData(
     fwd_posterior_name: str,
     predictors: Optional[Dict[str, np.ndarray]] = None,
     use_flags: Optional[Dict[str, bool]] = None,
-    n_draws: int = 100,
+    n_draws: int = 300,
     seed: Optional[int] = 42
 ) -> Tuple[dict, dict]:
     OPTIONAL_PREDICTORS = ["gdgt23ratio", "no3"]
@@ -303,8 +303,8 @@ def get_posterior(
     stan_filename: str,
     stan_models_dir: Union[Path, str] = None,
     chains: int = 4,
-    iter_warmup: int = 500,
-    iter_sampling: int = 1000,
+    iter_warmup: int = 200,
+    iter_sampling: int = 500,
     seed: Optional[int] = 42,
     verbose: bool = True
 ) -> xr.Dataset:
@@ -389,8 +389,8 @@ def get_invT_posterior(
     stan_models_dir: Union[Path, str] = None,
     site_name: Optional[str] = None,
     chains: int = 4,
-    iter_warmup: int = 500,
-    iter_sampling: int = 1000,
+    iter_warmup: int = 200,
+    iter_sampling: int = 500,
     seed: Optional[int] = 42,
     verbose: bool = True
 ) -> xr.Dataset:
