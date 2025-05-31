@@ -164,11 +164,11 @@ def plot_prior_distributions(
             if handles:
                 ax.legend(handles, labels_in_ax, loc='upper right', fontsize=8, ncol=1, frameon=False)
 
-    fig.tight_layout(rect=[0, 0.05, 1, 0.95])
+    fig.tight_layout(rect=[0, 0.05, 1, 0.90])
     if posterior_datasets:
         h, l = axes[0][0].get_legend_handles_labels()
         legend_labels = labels if labels else l
-        ncol = min(len(legend_labels), 3)
+        ncol = min(len(legend_labels), 5)
         fig.legend(handles=h, labels=legend_labels, loc='lower center', ncol=ncol, fontsize=10)
     if show_suptitle:
         fig.suptitle("Prior and Posterior Distributions", fontsize=14)
