@@ -8,7 +8,8 @@ data {
   // second dataset
   int<lower=1> N_meso;       
   vector[N_meso] t_meso;         
-  vector[N_meso] scaledRI_meso;         
+  vector[N_meso] scaledRI_meso;
+     
 }
 
 parameters {
@@ -41,11 +42,3 @@ model {
 
 }
 
-generated quantities {
-  real sigma_scaledRI_culmeso;
-
-  sigma_scaledRI_culmeso = sqrt(
-    (square(sigma_scaledRI_cul) * (N_cul - 1) + square(sigma_scaledRI_meso) * (N_meso - 1)) /
-    (N_cul + N_meso - 2)
-  );
-}
