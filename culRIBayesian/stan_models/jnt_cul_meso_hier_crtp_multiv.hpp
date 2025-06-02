@@ -4,54 +4,54 @@ namespace jnt_cul_meso_hier_crtp_multiv_model_namespace {
 using stan::model::model_base_crtp;
 using namespace stan::math;
 stan::math::profile_map profiles__;
-static constexpr std::array<const char*, 68> locations_array__ =
+static constexpr std::array<const char*, 69> locations_array__ =
   {" (found before start of program)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 27, column 4 to column 36)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 28, column 4 to column 36)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 29, column 4 to column 36)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 32, column 4 to column 33)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 30, column 4 to column 36)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 33, column 4 to column 33)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 34, column 4 to column 33)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 35, column 4 to column 50)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 36, column 4 to column 42)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 39, column 4 to column 42)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 40, column 4 to column 41)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 35, column 4 to column 33)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 36, column 4 to column 50)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 37, column 4 to column 42)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 40, column 4 to column 42)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 41, column 4 to column 41)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 44, column 4 to column 44)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 45, column 4 to column 45)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 42, column 4 to column 41)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 45, column 4 to column 44)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 46, column 4 to column 45)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 52, column 4 to column 45)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 52, column 38 to column 41)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 53, column 4 to column 31)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 47, column 4 to column 45)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 53, column 4 to column 45)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 53, column 38 to column 41)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 54, column 4 to column 31)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 57, column 4 to column 40)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 55, column 4 to column 31)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 58, column 4 to column 40)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 59, column 4 to column 40)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 62, column 4 to column 43)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 63, column 4 to column 44)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 66, column 11 to column 16)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 66, column 4 to column 116)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 67, column 11 to column 17)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 67, column 4 to column 119)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 69, column 4 to column 63)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 70, column 4 to column 66)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 73, column 4 to column 52)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 74, column 4 to column 50)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 60, column 4 to column 40)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 63, column 4 to column 43)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 64, column 4 to column 44)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 67, column 11 to column 16)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 67, column 4 to column 116)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 68, column 11 to column 17)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 68, column 4 to column 119)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 70, column 4 to column 63)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 71, column 4 to column 66)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 74, column 4 to column 52)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 75, column 4 to column 50)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 76, column 4 to column 45)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 77, column 4 to column 37)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 80, column 11 to column 17)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 80, column 4 to column 36)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 82, column 8 to column 95)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 83, column 8 to column 44)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 86, column 12 to column 80)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 85, column 8 to line 86, column 80)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 89, column 12 to column 71)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 88, column 8 to line 89, column 71)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 81, column 24 to line 90, column 5)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 81, column 4 to line 90, column 5)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 92, column 4 to column 44)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 93, column 4 to column 66)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 76, column 4 to column 50)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 77, column 4 to column 45)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 78, column 4 to column 37)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 81, column 11 to column 17)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 81, column 4 to column 36)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 83, column 8 to column 95)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 84, column 8 to column 44)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 87, column 12 to column 80)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 86, column 8 to line 87, column 80)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 90, column 12 to column 71)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 89, column 8 to line 90, column 71)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 82, column 24 to line 91, column 5)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 82, column 4 to line 91, column 5)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 93, column 4 to column 44)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 94, column 4 to column 66)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 3, column 4 to column 23)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 4, column 11 to column 16)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 4, column 4 to column 24)",
@@ -72,7 +72,8 @@ static constexpr std::array<const char*, 68> locations_array__ =
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 19, column 4 to column 42)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 21, column 11 to column 17)",
   " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 21, column 4 to column 28)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 22, column 4 to column 34)"};
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 22, column 4 to column 34)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/jnt_cul_meso_hier_crtp_multiv.stan', line 23, column 4 to column 29)"};
 class jnt_cul_meso_hier_crtp_multiv_model final : public model_base_crtp<jnt_cul_meso_hier_crtp_multiv_model> {
  private:
   int N_cul;
@@ -88,6 +89,7 @@ class jnt_cul_meso_hier_crtp_multiv_model final : public model_base_crtp<jnt_cul
   int use_gdgt23ratio;
   Eigen::Matrix<double,-1,1> no3_crtp_data__;
   int use_no3;
+  double no3_cutoff;
   Eigen::Map<Eigen::Matrix<double,-1,1>> t_cul{nullptr, 0};
   Eigen::Map<Eigen::Matrix<double,-1,1>> scaledRI_cul{nullptr, 0};
   Eigen::Map<Eigen::Matrix<double,-1,1>> t_meso{nullptr, 0};
@@ -368,6 +370,15 @@ class jnt_cul_meso_hier_crtp_multiv_model final : public model_base_crtp<jnt_cul
       stan::math::check_greater_or_equal(function__, "use_no3", use_no3, 0);
       current_statement__ = 67;
       stan::math::check_less_or_equal(function__, "use_no3", use_no3, 1);
+      current_statement__ = 68;
+      context__.validate_dims("data initialization", "no3_cutoff", "double",
+        std::vector<size_t>{});
+      no3_cutoff = std::numeric_limits<double>::quiet_NaN();
+      current_statement__ = 68;
+      no3_cutoff = context__.vals_r("no3_cutoff")[(1 - 1)];
+      current_statement__ = 68;
+      stan::math::check_greater_or_equal(function__, "no3_cutoff",
+        no3_cutoff, 0);
     } catch (const std::exception& e) {
       stan::lang::rethrow_located(e, locations_array__[current_statement__]);
     }
@@ -565,9 +576,9 @@ class jnt_cul_meso_hier_crtp_multiv_model final : public model_base_crtp<jnt_cul
           if ((stan::math::primitive_value(stan::math::logical_eq(use_no3, 1))
               &&
               stan::math::primitive_value(
-                stan::math::logical_gt(
+                stan::math::logical_lt(
                   stan::model::rvalue(no3_crtp, "no3_crtp",
-                    stan::model::index_uni(i)), 0)))) {
+                    stan::model::index_uni(i)), no3_cutoff)))) {
             current_statement__ = 41;
             stan::model::assign(mu_scaledRI_crtp,
               (stan::model::rvalue(mu_scaledRI_crtp, "mu_scaledRI_crtp",
