@@ -44,6 +44,7 @@ def extract_and_update_metadata(
         "version": version,
         "run_time": datetime.now().isoformat(),
         "run_duration (sec)": None,
+        "temptype": None,  # will be set later
     }
 
     # Handle direct values
@@ -83,6 +84,12 @@ def extract_and_update_metadata(
                     f"{key}_len": int(len(arr)),
                     use_flag: 1,
                 })
+                
+                if predictor == "no3":
+                    no3_cutoff = data.get("no3_cutoff", 0.0)
+                    if no3_cutoff < 0:
+                        raise ValueError("no3_cutoff must be a positive real number if no3 is used.")
+                    metadata["no3_cutoff"] = float(no3_cutoff)
 
     # Include custom metadata if available
     if "calibration_suffix_used" in data:
@@ -373,15 +380,21 @@ _MODEL_CACHE: Dict[Path, CmdStanModel] = {}
 def get_posterior(
     data: dict,
     stan_filename: str,
+    temptype: str = None,
     stan_models_dir: Union[Path, str] = None,
     chains: int = 4,
-    iter_warmup: int = 200,
-    iter_sampling: int = 500,
+    iter_warmup: int = 1000,
+    iter_sampling: int = 1000,
+    set_adapt_delta: float = 0.95,
     seed: Optional[int] = 42,
     verbose: bool = True
 ) -> xr.Dataset:
     
     start_time = time.time()
+    
+    if temptype not in {"thermoT","sst","cultureT"}:
+        raise ValueError(f"Unsupported temperature type: {temptype}. Expected 'thermoT' or 'sst' or 'cultureT.")
+    
     if stan_models_dir is None:
         stan_models_dir = Path(__file__).parent / "stan_models"
     model_path = Path(stan_models_dir) / f"{stan_filename}.stan"
@@ -402,6 +415,9 @@ def get_posterior(
         # no3_crtp
         if "no3_crtp" in data:
             data["use_no3"] = 1
+            if data["no3_cutoff"] < 0:
+                raise ValueError("no3_crtp provided but no3_cutoff is not set (positive real number).")
+                
         else:
             data["no3_crtp"] = np.zeros(data["N_crtp"])
             data["use_no3"] = 0
@@ -424,7 +440,7 @@ def get_posterior(
             show_console=False,
             show_progress=True,
             save_profile=True, 
-            adapt_delta=0.9
+            adapt_delta=set_adapt_delta
         )
     except RuntimeError as e:
         raise RuntimeError(f"Stan sampling failed: {e}")
@@ -447,6 +463,8 @@ def get_posterior(
     ds = extract_and_update_metadata(ds, data, stan_filename)
     run_seconds = time.time() - start_time
     ds.attrs["run_duration (sec)"] = round(run_seconds, 2)
+    ds.attrs["temptype"] = temptype
+    
 
     prior_settings = extract_priors_from_stan(model_path)
     if prior_settings:
@@ -463,6 +481,7 @@ def get_invT_posterior(
     chains: int = 4,
     iter_warmup: int = 200,
     iter_sampling: int = 500,
+    set_adapt_delta: float = 0.95,
     seed: Optional[int] = 42,
     verbose: bool = True
 ) -> xr.Dataset:
@@ -519,6 +538,7 @@ def get_invT_posterior(
         use_flag = f"use_{opt}"
         beta_std = f"beta0_{opt}"
         data[use_flag] = int(has_opt)
+        
 
         if not has_opt:
             data[opt] = np.zeros(data["N"])
@@ -551,7 +571,7 @@ def get_invT_posterior(
             show_console=False,
             show_progress=True,
             save_profile=True,
-            adapt_delta=0.9
+            adapt_delta=set_adapt_delta
         )
     except RuntimeError as e:
         raise RuntimeError(f"Stan sampling failed: {e}")
@@ -619,7 +639,6 @@ def get_invT_post_quantiles(
 # ─── POSTERIOR LOADING ────────────────────────────────────────────────────
 def save_posterior(
     posterior: xr.Dataset, 
-    filename: str, 
     cache_dir: Union[str, Path] = None,
     overwrite: bool = True
 ) -> Path:
@@ -639,13 +658,27 @@ def save_posterior(
         output_dir = Path(cache_dir)
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    filepath = output_dir / f"{filename}.nc"
+    stan_model_name = posterior.attrs.get('stan_model_name', 'unknown_model')
+    temptype = posterior.attrs.get('temptype', 'unknown')
+    use_gdgt23ratio = posterior.attrs.get('use_gdgt23ratio', 0)
+    use_no3 = posterior.attrs.get('use_no3', 0)
+    if use_gdgt23ratio or use_no3:
+        if use_gdgt23ratio:
+            temptype += "_gdgt23ratio"
+        if use_no3:
+            if posterior.attrs.get("no3_cutoff", None) is None:
+                # If no3 is used, ensure no3_cutoff is set
+                raise ValueError("no3_cutoff must be a positive real number if no3 is used.")
+            else:
+                set_no3 = posterior.attrs.get("no3_cutoff")
+                temptype += f"_no3_{set_no3}"
+    filepath = output_dir / f"{stan_model_name}_{temptype}.nc"
 
     if filepath.exists() and not overwrite:
         raise FileExistsError(f"{filepath} already exists and overwrite=False.")
 
     ## add filename to posterior attributes
-    posterior.attrs['filename'] = str(filename)
+    posterior.attrs['filename'] = str(f"{stan_model_name}_{temptype}")
     
     # Save with compression
     encoding = {var: {"zlib": True} for var in posterior.data_vars}
