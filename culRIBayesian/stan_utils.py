@@ -39,7 +39,7 @@ def extract_and_update_metadata(
     suffixes = ["cul", "meso", "crtp", "downcore"]
 
     metadata = {
-        "stan_model_name": stan_filename+'.stan',
+        "stan_model_name": stan_filename,
         "generated_by": "culRI-Bayesian",
         "version": version,
         "run_time": datetime.now().isoformat(),

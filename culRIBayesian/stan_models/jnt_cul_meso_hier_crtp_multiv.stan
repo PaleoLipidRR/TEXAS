@@ -20,7 +20,7 @@ data {
 
     vector[N_crtp] no3_crtp;
     int<lower=0, upper=1> use_no3;
-    real<lower=0> no3_cutoff;
+    real no3_cutoff;
 }
 
 parameters {
@@ -86,7 +86,7 @@ model {
         if (use_gdgt23ratio == 1)
             mu_scaledRI_crtp[i] += beta0_gdgt23ratio_crtp * gdgt23ratio_crtp[i];
 
-        if (use_no3 == 1 && no3_crtp[i] < no3_cutoff)
+        if (use_no3 == 1 && no3_cutoff > 0 && no3_crtp[i] < no3_cutoff)
             mu_scaledRI_crtp[i] += beta0_no3_crtp * log10(no3_crtp[i]);
     }
 
