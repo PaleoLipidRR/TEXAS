@@ -32,7 +32,7 @@ def extract_and_update_metadata(
     from datetime import datetime
 
     direct_keys = [
-        "calibration_model_name", "N_cul", "N_meso", "N_crtp", "N_downcore",
+        "calibration_model_name", "N_cul", "N_meso", "N_crtp", "N",
         "prior_mu_t", "prior_sigma_t", "M"
     ]
     optional_predictors = ["gdgt23ratio", "no3"]
@@ -152,6 +152,8 @@ def infer_posterior_suffixes(data_vars):
         return list(suffixes.values())[0], suffixes
     return None, suffixes
 
+
+
 def build_invT_inputData(
     scaledRI: np.ndarray,
     prior_mu_t: Union[np.ndarray, float],
@@ -159,32 +161,37 @@ def build_invT_inputData(
     fwd_posterior_name: str,
     predictors: Optional[Dict[str, np.ndarray]] = None,
     use_flags: Optional[Dict[str, bool]] = None,
-    n_draws: int = 300,
-    seed: Optional[int] = 42
+    n_draws: int = 100,
+    seed: Optional[int] = 42,
+    reduction: str = "mean",     # 'mean', 'median', or None
+    mode: str = "meanprior_bayes"  # 'meanprior_bayes' or 'ensemble'
 ) -> Tuple[dict, dict]:
+    """
+    Build Stan input data for inverse T model. Supports Bayesian meanprior and ensemble modes.
+    """
     OPTIONAL_PREDICTORS = ["gdgt23ratio", "no3"]
     PRIORITY_SUFFIXES = ["crtp", "culmesocore", "culmeso", "meso", "cul"]
+
+    if mode not in {"meanprior_bayes", "ensemble"}:
+        raise ValueError(f"Unsupported mode: {mode}")
 
     if seed is not None:
         np.random.seed(seed)
 
     predictors = predictors or {}
-    posterior = load_posterior(model_name=fwd_posterior_name)
-    sel = np.random.choice(posterior.dims["draw"], size=n_draws, replace=True)
-    P = posterior.isel(draw=sel)
+    use_flags = use_flags or {}
 
+    posterior = load_posterior(model_name=fwd_posterior_name)
     N = len(scaledRI)
-    M = n_draws
 
     if np.isscalar(prior_mu_t):
         prior_mu_t = np.full(N, prior_mu_t)
     if len(prior_mu_t) != N:
         raise ValueError(f"Length mismatch: prior_mu_t={len(prior_mu_t)} vs scaledRI={N}")
 
-    # Determine best available suffix for t0/k/b
     def find_suffix_for_all_params(params, priority_suffixes):
         for suffix in priority_suffixes:
-            if all(f"{p}_{suffix}" in P for p in params):
+            if all(f"{p}_{suffix}" in posterior for p in params):
                 return suffix
         return None
 
@@ -192,49 +199,114 @@ def build_invT_inputData(
     if used_suffix is None:
         raise ValueError("Could not determine consistent posterior suffix for t0/k/b")
 
-    # Required fields
-    data = {
-        "N_downcore": N,
-        "scaledRI_downcore": np.asarray(scaledRI),
-        "prior_mu_t": np.asarray(prior_mu_t),
-        "prior_sigma_t": prior_sigma_t,
-        "M": M,
-        "t0": P[f"t0_{used_suffix}"].values,
-        "k": P[f"k_{used_suffix}"].values,
-        "b": P[f"b_{used_suffix}"].values,
-    }
+    def summarize(var, method="mean"):
+        vals = posterior[var].values
+        return np.median(vals) if method == "median" else np.mean(vals)
 
-    # Prioritize matching sigma_scaledRI_*
-    sigma_key = None
-    for suffix in PRIORITY_SUFFIXES:
-        candidate = f"sigma_scaledRI_{suffix}"
-        if candidate in P and len(P[candidate]) == M:
-            sigma_key = candidate
-            break
-    if sigma_key:
-        data["sigma_scaledRI"] = P[sigma_key].values
-    else:
-        data["sigma_scaledRI"] = np.ones(M) * 0.1  # fallback
+    def summarize_std(var):
+        vals = posterior[var].values
+        std_val = np.std(vals)
+        if np.isnan(std_val) or std_val <= 0:
+            raise ValueError(f"Invalid std for {var}: {std_val}")
+        return std_val
 
-    posteriors_used = [f"t0_{used_suffix}", f"k_{used_suffix}", f"b_{used_suffix}"]
-    if sigma_key:
-        posteriors_used.append(sigma_key)
+    posteriors_used = []
 
-    # Optional predictors
-    use_flags = use_flags or {}
-    for name in OPTIONAL_PREDICTORS:
+    if mode == "meanprior_bayes":
+        data = {
+            "N": N,
+            "scaledRI": np.asarray(scaledRI),
+            "prior_mu_t": np.asarray(prior_mu_t),
+            "prior_sigma_t": prior_sigma_t,  # could be a vector in the future
+            "mu_t0": summarize(f"t0_{used_suffix}", reduction),
+            "mu_k": summarize(f"k_{used_suffix}", reduction),
+            "mu_b": summarize(f"b_{used_suffix}", reduction),
+            "std_t0": summarize_std(f"t0_{used_suffix}"),
+            "std_k": summarize_std(f"k_{used_suffix}"),
+            "std_b": summarize_std(f"b_{used_suffix}"),
+        }
+        sigma_key = f"sigma_scaledRI_{used_suffix}"
+        if sigma_key in posterior:
+            mu_sigma_scaledRI = summarize(sigma_key, reduction)
+            std_sigma_scaledRI = summarize_std(sigma_key)
+        else:
+            mu_sigma_scaledRI = 0.1
+            std_sigma_scaledRI = 0.05
+
+        data["mu_sigma_scaledRI"] = mu_sigma_scaledRI
+        data["std_sigma_scaledRI"] = std_sigma_scaledRI
+
+
+        posteriors_used.extend([
+            f"t0_{used_suffix}", f"k_{used_suffix}", f"b_{used_suffix}", f"sigma_scaledRI_{used_suffix}"
+        ])
+
+        for name in OPTIONAL_PREDICTORS:
+            for suffix in PRIORITY_SUFFIXES:
+                beta_name = f"beta0_{name}_{suffix}"
+                if name in predictors and beta_name in posterior:
+                    values = np.asarray(predictors[name])
+                    if not np.all(values == 0):
+                        data[name] = values
+                        data[f"mu_beta0_{name}"] = summarize(beta_name, reduction)
+                        data[f"std_beta0_{name}"] = summarize_std(beta_name)
+                        data[f"use_{name}"] = 1
+                        posteriors_used.append(beta_name)
+                        break
+            else:
+                data[name] = np.zeros(N)
+                data[f"mu_beta0_{name}"] = 0.0
+                data[f"std_beta0_{name}"] = 0.1  # fallback prior std
+                data[f"use_{name}"] = 0
+
+    elif mode == "ensemble":
+        sel = np.random.choice(posterior.dims["draw"], size=n_draws, replace=True)
+        P = posterior.isel(draw=sel)
+        M = n_draws
+
+        data = {
+            "N": N,
+            "scaledRI": np.asarray(scaledRI),
+            "prior_mu_t": np.asarray(prior_mu_t),
+            "prior_sigma_t": prior_sigma_t,
+            "M": M,
+            "t0": P[f"t0_{used_suffix}"].values,
+            "k": P[f"k_{used_suffix}"].values,
+            "b": P[f"b_{used_suffix}"].values,
+        }
+
+        sigma_key = None
         for suffix in PRIORITY_SUFFIXES:
-            beta_name = f"beta0_{name}_{suffix}"
-            if name in predictors and beta_name in P and not np.all(np.asarray(predictors[name]) == 0):
-                data[f"{name}_downcore"] = np.asarray(predictors[name])
-                data[f"beta0_{name}"] = P[beta_name].values
-                data[f"use_{name}"] = 1
-                posteriors_used.append(beta_name)
+            candidate = f"sigma_scaledRI_{suffix}"
+            if candidate in P and len(P[candidate]) == M:
+                sigma_key = candidate
+                data["sigma_scaledRI"] = P[sigma_key].values
                 break
+        if sigma_key is None:
+            data["sigma_scaledRI"] = np.ones(M) * 0.1
+
+        posteriors_used.extend([f"t0_{used_suffix}", f"k_{used_suffix}", f"b_{used_suffix}"])
+        if sigma_key:
+            posteriors_used.append(sigma_key)
+
+        for name in OPTIONAL_PREDICTORS:
+            for suffix in PRIORITY_SUFFIXES:
+                beta_name = f"beta0_{name}_{suffix}"
+                if name in predictors and beta_name in P:
+                    values = np.asarray(predictors[name])
+                    if not np.all(values == 0):
+                        data[name] = values
+                        data[f"beta0_{name}"] = P[beta_name].values
+                        data[f"use_{name}"] = 1
+                        posteriors_used.append(beta_name)
+                        break
 
     data["calibration_model_name"] = posterior.attrs.get("stan_model_name", "unknown_model")
     data["posteriors_used"] = posteriors_used
     return data, use_flags
+
+
+
 
 
 # ─── FORWARD & INVERSE LOGISTIC (GENERALIZED) ─────────────────────────────────
@@ -352,7 +424,7 @@ def get_posterior(
             show_console=False,
             show_progress=True,
             save_profile=True, 
-            adapt_delta=0.999
+            adapt_delta=0.9
         )
     except RuntimeError as e:
         raise RuntimeError(f"Stan sampling failed: {e}")
@@ -394,10 +466,6 @@ def get_invT_posterior(
     seed: Optional[int] = 42,
     verbose: bool = True
 ) -> xr.Dataset:
-    """
-    Run Stan inverse model and return posterior samples as an xarray.Dataset.
-    Automatically infers and standardizes posterior parameter keys.
-    """
     import time
     start_time = time.time()
 
@@ -409,53 +477,70 @@ def get_invT_posterior(
         _MODEL_CACHE[model_path] = CmdStanModel(stan_file=str(model_path))
     model = _MODEL_CACHE[model_path]
 
-    # Validate required core inputs
-    required_keys = ["N_downcore", "scaledRI_downcore", "prior_mu_t", "prior_sigma_t", "M"]
-    missing_keys = [k for k in required_keys if k not in data]
-    if missing_keys:
-        raise ValueError(f"Missing required keys for invT model: {missing_keys}")
-
-    # Automatically match parameter keys like t0_*, k_*, etc. matching M
-    param_prefixes = ["t0", "k", "b", "sigma_scaledRI", "beta0_gdgt23ratio", "beta0_no3"]
-    dynamic_keys = {}
-    posterior_suffixes = []
-
-    for prefix in param_prefixes:
-        candidates = [k for k in data if k.startswith(f"{prefix}_") and len(np.atleast_1d(data[k])) == data["M"]]
-        if len(candidates) > 1:
-            raise ValueError(f"Multiple keys found for {prefix}_*: {candidates}")
-        elif len(candidates) == 1:
-            dynamic_keys[prefix] = candidates[0]
-            posterior_suffixes.append(candidates[0])
-
-    for std_key, actual_key in dynamic_keys.items():
-        data[std_key] = data[actual_key]
-
-    # gdgt23ratio predictor handling
-    has_gdgt23 = "gdgt23ratio_downcore" in data and np.any(data["gdgt23ratio_downcore"])
-    data["use_gdgt23ratio"] = int(has_gdgt23)
-    if not has_gdgt23:
-        data["gdgt23ratio_downcore"] = np.zeros(data["N_downcore"])
-        data["beta0_gdgt23ratio"] = np.zeros(data["M"])
-    elif "beta0_gdgt23ratio" not in data:
-        data["beta0_gdgt23ratio"] = np.zeros(data["M"])
-
-    # no3 predictor handling
-    has_no3 = "no3_downcore" in data and np.any(data["no3_downcore"])
-    data["use_no3"] = int(has_no3)
-    if not has_no3:
-        data["no3_downcore"] = np.zeros(data["N_downcore"])
-        data["beta0_no3"] = np.zeros(data["M"])
-    elif "beta0_no3" not in data:
-        data["beta0_no3"] = np.zeros(data["M"])
-
     if seed is not None:
         np.random.seed(seed)
 
+    # Detect mode
+    is_ensemble_mode = "M" in data
+    is_bayes_meanprior = "mu_t0" in data and "std_t0" in data
+
+    if not is_ensemble_mode and not is_bayes_meanprior:
+        raise ValueError("Could not infer mode: expected either 'M' for ensemble or 'mu_t0'/'std_t0' for meanprior_bayes")
+
+    # Validate required keys
+    required_keys = ["N", "scaledRI", "prior_mu_t", "prior_sigma_t"]
+    if is_ensemble_mode:
+        required_keys += ["M", "t0", "k", "b", "sigma_scaledRI"]
+    elif is_bayes_meanprior:
+        required_keys += ["mu_t0", "std_t0", "mu_k", "std_k", "mu_b", "std_b", "mu_sigma_scaledRI", "std_sigma_scaledRI"]
+
+    missing = [k for k in required_keys if k not in data]
+    if missing:
+        raise ValueError(f"Missing required keys for invT model: {missing}")
+
+    # Standardize keys in ensemble mode
+    posterior_suffixes = []
+    if is_ensemble_mode:
+        param_prefixes = ["t0", "k", "b", "sigma_scaledRI", "beta0_gdgt23ratio", "beta0_no3"]
+        dynamic_keys = {}
+        for prefix in param_prefixes:
+            candidates = [k for k in data if k.startswith(f"{prefix}_") and len(np.atleast_1d(data[k])) == data["M"]]
+            if len(candidates) > 1:
+                raise ValueError(f"Multiple keys found for {prefix}_*: {candidates}")
+            elif len(candidates) == 1:
+                dynamic_keys[prefix] = candidates[0]
+                posterior_suffixes.append(candidates[0])
+        for std_key, actual_key in dynamic_keys.items():
+            data[std_key] = data[actual_key]
+
+    # Handle optional predictors
+    for opt in ["gdgt23ratio", "no3"]:
+        has_opt = opt in data and np.any(data[opt])
+        use_flag = f"use_{opt}"
+        beta_std = f"beta0_{opt}"
+        data[use_flag] = int(has_opt)
+
+        if not has_opt:
+            data[opt] = np.zeros(data["N"])
+            if is_ensemble_mode:
+                data[beta_std] = np.zeros(data["M"])
+            elif is_bayes_meanprior:
+                data[f"mu_{beta_std}"] = 0.0
+                data[f"std_{beta_std}"] = 0.1
+        else:
+            if is_ensemble_mode and beta_std not in data:
+                data[beta_std] = np.zeros(data["M"])
+            elif is_bayes_meanprior:
+                if f"mu_{beta_std}" not in data:
+                    data[f"mu_{beta_std}"] = 0.0
+                    data[f"std_{beta_std}"] = 0.1
+
+    # Run Stan
     try:
         stan_data = filter_stan_compatible(data)
-        stan_data.pop("posteriors_used", None)  # Remove non-numeric metadata
-        stan_data.pop("calibration_model_name", None)  # Also remove if present
+        stan_data.pop("posteriors_used", None)
+        stan_data.pop("calibration_model_name", None)
+
         fit = model.sample(
             data=stan_data,
             chains=chains,
@@ -465,8 +550,8 @@ def get_invT_posterior(
             parallel_chains=chains,
             show_console=False,
             show_progress=True,
-            save_profile=True, 
-            adapt_delta=0.999
+            save_profile=True,
+            adapt_delta=0.9
         )
     except RuntimeError as e:
         raise RuntimeError(f"Stan sampling failed: {e}")
@@ -494,15 +579,13 @@ def get_invT_posterior(
     )
     ds.attrs["run_duration (sec)"] = round(time.time() - start_time, 2)
 
-    # Save fixed priors passed via data (if present)
     if "prior_mu_t" in data and "prior_sigma_t" in data:
         mu_t_arr = np.asarray(data["prior_mu_t"])
         mu_t_val = float(np.median(mu_t_arr)) if mu_t_arr.ndim > 0 else float(mu_t_arr)
-
-        # Convert dictionary to a NetCDF-safe string
         ds.attrs["t_est_prior"] = f"normal({mu_t_val}, {data['prior_sigma_t']})"
 
     return ds, diagnostics
+
 
 def get_invT_post_quantiles(
     posterior: xr.Dataset,
@@ -531,7 +614,7 @@ def get_invT_post_quantiles(
     if not all(0.0 <= q <= 1.0 for q in quantiles):
         raise ValueError("All quantiles must be between 0 and 1.")
 
-    return posterior.quantile(quantiles, dim=["draw", "dim_2"], keep_attrs=True)
+    return posterior.quantile(quantiles, dim="draw", keep_attrs=True)
 
 # ─── POSTERIOR LOADING ────────────────────────────────────────────────────
 def save_posterior(
