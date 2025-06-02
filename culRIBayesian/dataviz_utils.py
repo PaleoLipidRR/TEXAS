@@ -19,10 +19,11 @@ def plot_prior_distributions(
     show_suptitle=True,
     kde_bw=0.3,
     focus_on_posterior=True,
-    labels=None,
     include_groups=["t0", "k", "b", "beta0_gdgt23ratio", "beta0_no3"],
     suffix_include: Optional[List[str]] = None,
-    use_linestyle_by_param=False
+    use_linestyle_by_param=False,
+    show_histogram=True,
+    set_linewidth=1.5,
 ):
     fig, axes = None, None
     parsed_priors = {}
@@ -58,6 +59,7 @@ def plot_prior_distributions(
         for ds in posterior_datasets:
             all_param_names.update(ds.data_vars)
 
+
     grouped = {key: [] for key in include_groups}
     for name in all_param_names:
         for prefix in include_groups:
@@ -67,7 +69,11 @@ def plot_prior_distributions(
     param_groups = [g for g in include_groups if grouped[g]]
     ncols = 3
     nrows = int(np.ceil(len(param_groups) / ncols))
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=(4 * ncols, 3.5 * nrows), squeeze=False, clear=True)
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, 
+                             figsize=(3 * ncols, 3.5 * nrows), 
+                             squeeze=False, clear=True,
+                             sharex=False, sharey=False,
+                             constrained_layout=True)
 
     for idx, base in enumerate(param_groups):
         row_idx, col_idx = divmod(idx, ncols)
@@ -117,7 +123,7 @@ def plot_prior_distributions(
             else:
                 continue
 
-            ax.plot(x, y, color='black', lw=2, label="Prior")
+            ax.plot(x, y, color='black', lw=set_linewidth, label="Prior")
 
         for name in param_names:
             if posterior_datasets:
@@ -125,14 +131,16 @@ def plot_prior_distributions(
                     if name not in ds:
                         continue
                     samples = ds[name].values.flatten()
-                    all_samples.append((samples, idx_ds, name))
+                    stan_model_labels = ds.attrs.get('stan_model_name', 'Unknown Model')
+                    all_samples.append((samples, idx_ds, name, stan_model_labels))
 
         default_colors = plt.cm.tab10.colors
         linestyles = ['-', '--', '-.', ':', (0, (3, 1, 1, 1))]
 
-        unique_param_names = sorted(set(pname for _, _, pname in all_samples))
+        unique_param_names = sorted(set(pname for _, _, pname, _ in all_samples))
 
-        for samples, idx_ds, param_label in all_samples:
+        model_labels = []
+        for samples, idx_ds, param_label, stan_model_label in all_samples:
             color = default_colors[idx_ds % len(default_colors)]
 
             if use_linestyle_by_param:
@@ -143,20 +151,22 @@ def plot_prior_distributions(
 
             kde = stats.gaussian_kde(samples, bw_method=kde_bw)
             kde_y = kde(x)
-            ax.plot(x, kde_y, color=color, lw=2, linestyle=linestyle, label=param_label)
-            ax.hist(samples, bins=100, density=True, alpha=0.2, color=color)
+            ax.plot(x, kde_y, color=color, lw=set_linewidth, linestyle=linestyle, label=param_label)
+            if show_histogram:
+                ax.hist(samples, bins=100, density=True, alpha=0.2, color=color)
+            model_labels.append(stan_model_label)
 
         if focus_on_posterior and all_samples:
-            combined = np.concatenate([s for s, _, _ in all_samples])
+            combined = np.concatenate([s for s, _, _, _ in all_samples])
             zoom_min, zoom_max = compute_sample_range(combined)
             if zoom_min is not None:
                 ax.set_xlim([zoom_min, zoom_max])
         else:
             ax.set_xlim([x_min, x_max])
 
-        ax.set_title(base, fontsize=10)
-        ax.set_xlabel("x")
-        ax.set_ylabel("Density")
+        # ax.set_title(base, fontsize=10)
+        ax.set_xlabel(f"{base}")
+        # ax.set_ylabel("Density")
         ax.grid(True)
 
         if all_samples:
@@ -164,13 +174,29 @@ def plot_prior_distributions(
             if handles:
                 ax.legend(handles, labels_in_ax, loc='upper right', fontsize=8, ncol=1, frameon=False)
 
-    fig.tight_layout(rect=[0, 0.05, 1, 0.90])
+    model_labels.insert(0, "Prior")
+    fig.tight_layout(
+        rect=[0, 0.1, 1, 0.92]  # [left, bottom, right, top] in relative figure coords
+        )
+    # fig.subplots_adjust(bottom=0.125)  # Adjust this value as needed
     if posterior_datasets:
         h, l = axes[0][0].get_legend_handles_labels()
-        legend_labels = labels if labels else l
-        ncol = min(len(legend_labels), 5)
-        fig.legend(handles=h, labels=legend_labels, loc='lower center', ncol=ncol, fontsize=10)
+        legend_labels = model_labels
+        ncol = min(len(legend_labels), 4)
+        fig.legend(handles=h, labels=legend_labels, loc='lower center', ncol=ncol, fontsize=10,
+                #    bbox_to_anchor=(0.5, -0.1), frameon=False
+                   )
     if show_suptitle:
         fig.suptitle("Prior and Posterior Distributions", fontsize=14)
+
+    axes[0][2].legend(loc='upper left', fontsize=8, ncol=1, frameon=False)
+    # axes[1][0].legend(loc='upper left', fontsize=8, ncol=1, frameon=False)
+    # axes[1][1].legend(loc='upper left', fontsize=8, ncol=1, frameon=False)
+    # Automatically hide empty subplots
+    for row in axes:
+        for ax in row:
+            if not ax.has_data():
+                ax.set_visible(False)
+                
 
     return fig, axes

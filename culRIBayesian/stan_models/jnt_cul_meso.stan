@@ -13,12 +13,13 @@ data {
 }
 
 parameters {
-  real<lower=-1.8>       t0_culmeso;      // inflection point
-  real<lower=0>          k_culmeso;       // steepness
-  real<lower=0>          b_culmeso;       // lower asymptote
+  real<lower=-1.8>    t0_culmeso;      // inflection point
+  real<lower=0>       k_culmeso;       // steepness
+  real<lower=0>       b_culmeso;       // lower asymptote
   
-  real<lower=0> sigma_scaledRI_cul;           // noise for dataset 1
-  real<lower=0> sigma_scaledRI_meso;           // noise for dataset 2
+  real<lower=0>       sigma_scaledRI_cul;           // noise for dataset 1
+  real<lower=0>       sigma_scaledRI_meso;           // noise for dataset 2
+
 }
 
 model {
@@ -41,4 +42,14 @@ model {
   scaledRI_meso   ~ normal(mu_scaledRI_meso, sigma_scaledRI_meso);
 
 }
+
+generated quantities {
+  real<lower=0> sigma_scaledRI_culmeso;
+
+  sigma_scaledRI_culmeso = sqrt(
+    (N_cul * square(sigma_scaledRI_cul) + N_meso * square(sigma_scaledRI_meso)) 
+    / (N_cul + N_meso)
+  );
+}
+
 
