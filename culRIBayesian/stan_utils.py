@@ -7,6 +7,24 @@ from cmdstanpy import CmdStanModel
 import os
 import time
 import re
+import warnings
+
+def check_tbb_env():
+    """
+    Check if TBB_CXX_TYPE is set correctly. Warn user if missing.
+    """
+    if "TBB_CXX_TYPE" not in os.environ:
+        warnings.warn(
+            "Environment variable TBB_CXX_TYPE is not set. "
+            "Stan model compilation may fail.\n"
+            "Recommended fix: Run `export TBB_CXX_TYPE=gcc` before launching Jupyter.\n"
+            "If you use clang++, set it to `clang` instead."
+        )
+        # Optional: Uncomment to raise an error instead
+        # raise EnvironmentError("TBB_CXX_TYPE must be set for Stan model compilation.")
+
+
+check_tbb_env()
 
 
 # ─── TYPES & HELPERS ───────────────────────────────────────────────
