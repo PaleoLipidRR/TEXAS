@@ -124,34 +124,54 @@ def extract_and_update_metadata(
     ds.attrs.update(metadata)
     return ds
 
-def extract_priors_from_stan(stan_path: Union[str, Path]) -> Dict[str, str]:
+def extract_priors_from_stan(stan_path: Union[str, Path], data: Optional[Dict[str, float]] = None) -> Dict[str, str]:
+    """
+    Extracts priors from a Stan file's model block.
+    If data is provided, replaces symbolic values (e.g., prior_mean_t0) with their numerical equivalents.
+    """
     priors = {}
     in_model_block = False
-    current_param = None
 
     with open(stan_path, "r") as f:
         for line in f:
             stripped = line.strip()
-            
-            # Detect start of model block
+
             if stripped.startswith("model"):
                 in_model_block = True
                 continue
 
             if in_model_block:
-                if stripped.startswith("}"):  # End of model block
+                if stripped.startswith("}"):
                     break
 
-                # Match: parameter ~ distribution(...)
                 match = re.match(r"(\w+)\s*~\s*([a-zA-Z_]\w*)\s*\(([^)]*)\)(\s*T\[[^\]]+\])?", stripped)
                 if match:
                     param, dist, args, trunc = match.groups()
-                    prior_str = f"{dist}({args})"
+                    args_parts = [a.strip() for a in args.split(",")]
+
+                    # Resolve symbols from `data` if provided
+                    if data is not None:
+                        resolved_parts = []
+                        for part in args_parts:
+                            if part in data:
+                                val = data[part]
+                                if isinstance(val, (float, int)):
+                                    resolved_parts.append(f"{val:.4g}")
+                                else:
+                                    resolved_parts.append(str(val))
+                            else:
+                                resolved_parts.append(part)
+                        args_str = ", ".join(resolved_parts)
+                    else:
+                        args_str = ", ".join(args_parts)
+
+                    prior_str = f"{dist}({args_str})"
                     if trunc:
                         prior_str += f" {trunc.strip()}"
                     priors[param] = prior_str
 
     return priors
+
 
 # ─── BUILD DATA ────────────────────────────────────────────────────
 
@@ -484,7 +504,7 @@ def get_posterior(
     ds.attrs["temptype"] = temptype
     
 
-    prior_settings = extract_priors_from_stan(model_path)
+    prior_settings = extract_priors_from_stan(model_path, data)
     if prior_settings:
         ds.attrs["priors"] = [f"{k}: {v}" for k, v in prior_settings.items()]  # ← safe for NetCDF
 
