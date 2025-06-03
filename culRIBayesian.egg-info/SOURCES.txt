@@ -8,8 +8,8 @@ culRIBayesian.egg-info/SOURCES.txt
 culRIBayesian.egg-info/dependency_links.txt
 culRIBayesian.egg-info/requires.txt
 culRIBayesian.egg-info/top_level.txt
-culRIBayesian/stan_models/hier_crtp_univ_prior_approx.stan
-culRIBayesian/stan_models/hier_crtp_univ_prior_logmixture.stan
+culRIBayesian/stan_models/hier_crtp_univ_priorApprox.stan
+culRIBayesian/stan_models/hier_crtp_univ_priorLogMixture.stan
 culRIBayesian/stan_models/invT_logistic_fixed_multiv.stan
 culRIBayesian/stan_models/invT_logistic_fixed_multiv_meanprior_bayes.stan
 culRIBayesian/stan_models/invT_logistic_fixed_univ.stan
