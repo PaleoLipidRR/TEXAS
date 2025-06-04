@@ -351,9 +351,6 @@ def build_invT_inputData(
     return data, use_flags
 
 
-
-
-
 # ─── FORWARD & INVERSE LOGISTIC (GENERALIZED) ─────────────────────────────────
 
 def pred_logistic_general(
@@ -421,9 +418,9 @@ def get_posterior(
     temptype: str = None,
     stan_models_dir: Union[Path, str] = None,
     chains: int = 4,
-    iter_warmup: int = 1000,
+    iter_warmup: int = 500,
     iter_sampling: int = 1000,
-    set_adapt_delta: float = 0.95,
+    set_adapt_delta: float = 0.99,
     seed: Optional[int] = 42,
     verbose: bool = True
 ) -> xr.Dataset:
@@ -517,9 +514,9 @@ def get_invT_posterior(
     stan_models_dir: Union[Path, str] = None,
     site_name: Optional[str] = None,
     chains: int = 4,
-    iter_warmup: int = 200,
-    iter_sampling: int = 500,
-    set_adapt_delta: float = 0.95,
+    iter_warmup: int = 500,
+    iter_sampling: int = 1000,
+    set_adapt_delta: float = 0.99,
     seed: Optional[int] = 42,
     verbose: bool = True
 ) -> xr.Dataset:
