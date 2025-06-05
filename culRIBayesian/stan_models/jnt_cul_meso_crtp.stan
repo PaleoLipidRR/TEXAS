@@ -41,3 +41,14 @@ model {
   scaledRI_meso     ~ normal(mu_scaledRI_meso, sigma_scaledRI_meso);
   scaledRI_crtp  ~ normal(mu_scaledRI_crtp, sigma_scaledRI_crtp);
 }
+
+generated quantities {
+  vector[N_crtp] scaledRI_hat = (1 - b_culmesocore) * inv_logit(k_culmesocore * (t_crtp - t0_culmesocore)) + b_culmesocore;
+  vector[N_crtp] log_lik_scaledRI;
+  vector[N_crtp] residual_scaledRI;
+
+  for (i in 1:N_crtp) {
+    log_lik_scaledRI[i] = normal_lpdf(scaledRI_crtp[i] | scaledRI_hat[i], sigma_scaledRI_crtp);
+    residual_scaledRI[i] = scaledRI_crtp[i] - scaledRI_hat[i];
+  }
+}
