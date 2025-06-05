@@ -67,3 +67,14 @@ model {
 
   scaledRI_crtp ~ normal(mu_scaledRI_crtp, sigma_scaledRI_crtp);
 }
+
+generated quantities {
+  vector[N_crtp] scaledRI_hat = mu_scaledRI_crtp;  // reuse forward model output
+  vector[N_crtp] log_lik_scaledRI;
+  vector[N_crtp] residual_scaledRI;
+
+  for (i in 1:N_crtp) {
+    log_lik_scaledRI[i] = normal_lpdf(scaledRI_crtp[i] | scaledRI_hat[i], sigma_scaledRI_crtp);
+    residual_scaledRI[i] = scaledRI_crtp[i] - scaledRI_hat[i];
+  }
+}
