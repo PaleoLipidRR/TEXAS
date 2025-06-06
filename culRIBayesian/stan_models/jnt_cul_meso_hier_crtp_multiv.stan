@@ -47,6 +47,20 @@ parameters {
     real<lower=0>        sigma_scaledRI_crtp;  // coretop noise
 }
 
+transformed parameters { // this is to allow mu_scaledRI_crtp can be used in generated quantities
+    // 6 Likelihoods for coretops 
+    vector[N_crtp] mu_scaledRI_crtp;
+    for (i in 1:N_crtp) {
+        real base_scaledRI = (1 - b_crtp) * inv_logit(k_crtp * (t_crtp[i] - t0_crtp)) + b_crtp;
+        mu_scaledRI_crtp[i] = base_scaledRI;
+
+        if (use_gdgt23ratio == 1)
+            mu_scaledRI_crtp[i] += beta0_gdgt23ratio_crtp * gdgt23ratio_crtp[i];
+
+        if (use_no3 == 1 && no3_cutoff > 0 && no3_crtp[i] > 0 && no3_crtp[i] < no3_cutoff)
+            mu_scaledRI_crtp[i] += beta0_no3_crtp * log10(no3_crtp[i]);
+    }
+}
 
 model {
     // 1 Priors for shared parameters for culture+mesocosm
@@ -77,19 +91,13 @@ model {
     beta0_gdgt23ratio_crtp ~ normal(0, 0.05);
     beta0_no3_crtp ~ normal(0, 0.05);
 
-    // 6 Likelihoods for coretops
-    vector[N_crtp] mu_scaledRI_crtp;
-    for (i in 1:N_crtp) {
-        real base_scaledRI = (1 - b_crtp) * inv_logit(k_crtp * (t_crtp[i] - t0_crtp)) + b_crtp;
-        mu_scaledRI_crtp[i] = base_scaledRI;
-
-        if (use_gdgt23ratio == 1)
-            mu_scaledRI_crtp[i] += beta0_gdgt23ratio_crtp * gdgt23ratio_crtp[i];
-
-        if (use_no3 == 1 && no3_cutoff > 0 && no3_crtp[i] < no3_cutoff)
-            mu_scaledRI_crtp[i] += beta0_no3_crtp * log10(no3_crtp[i]);
-    }
-
+    // see transformed parameters for the crtp likelihood
     sigma_scaledRI_crtp ~ normal(0.01, 0.1);
     scaledRI_crtp ~ normal(mu_scaledRI_crtp, sigma_scaledRI_crtp);
+}
+
+// ---------------------------------------------------------------
+generated quantities {
+  // Now mu_scaledRI_crtp is in scope (from transformed parameters)
+  vector[N_crtp] scaledRI_hat = mu_scaledRI_crtp;
 }
