@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Union, Optional, Dict, List, Tuple, Sequence
+import subprocess
 from datetime import datetime
 import numpy as np
 import xarray as xr
@@ -28,6 +29,74 @@ check_tbb_env()
 
 
 # ─── TYPES & HELPERS ───────────────────────────────────────────────
+
+# Module‐level cache of compiled models
+_MODEL_CACHE: dict = {}
+
+def refresh_stan_models(stan_models_dir: str = None, n_jobs: int = 4, clean: bool = True):
+    """
+    For every .stan file in stan_models_dir:
+      1) Delete any existing .hpp, .o, and executable with the same base name.
+      2) Clear the in‐memory CmdStanModel cache (_MODEL_CACHE).
+      3) Call CmdStanModel.compile() (with make_options) so that each .stan is
+         recompiled against the prebuilt CMDSTAN toolchain.
+
+    This assumes you have already set:
+      os.environ["CMDSTAN"] = "/home/.../.cmdstan/cmdstan-2.36.0"
+
+    Arguments
+    ---------
+    stan_models_dir : str
+        Path to the folder containing your .stan files. If None, defaults
+        to a "stan_models" subfolder next to this script.
+    n_jobs : int
+        Number of parallel jobs to pass to `make` via make_options.
+    clean : bool
+        If True, remove any old .hpp/.o/executable files before recompiling.
+    """
+    # 1) Resolve stan_models_dir
+    script_dir = Path(__file__).resolve().parent
+    stan_dir = Path(stan_models_dir or (script_dir / "stan_models")).resolve()
+    if not stan_dir.exists():
+        raise FileNotFoundError(f"Stan models directory not found: {stan_dir}")
+
+    stan_files = sorted(stan_dir.glob("*.stan"))
+    if not stan_files:
+        print("🔍 No .stan files found.")
+        return
+
+    # 2) Delete old artifacts (.hpp, .o, executable) if requested
+    for stan_file in stan_files:
+        stem = stan_file.stem  # e.g. "jnt_cul_meso"
+        hpp_path = stan_dir / f"{stem}.hpp"
+        o_path   = stan_dir / f"{stem}.o"
+        exe_path = stan_dir / stem
+
+        if clean:
+            for p in (hpp_path, o_path, exe_path):
+                try:
+                    if p.exists():
+                        p.unlink()
+                except Exception:
+                    pass  # ignore if it’s already gone
+
+    # 3) Clear the CmdStanModel cache so that compile() will rebuild each time
+    _MODEL_CACHE.clear()
+
+    print(f"🔧 (Re)compiling {len(stan_files)} Stan model(s) via CmdStanPy…")
+
+    # 4) Recompile each .stan using CmdStanModel.compile(make_options=[...])
+    for stan_file in stan_files:
+        try:
+            model = CmdStanModel(stan_file=str(stan_file))
+            # Pass make_options to tell `make` how many jobs (-j<n_jobs>) to use
+            model.compile(force=True)
+            print(f"✅ Compiled: {stan_file.name}")
+        except Exception as e:
+            print(f"❌ Failed to compile: {stan_file.name}")
+            print(str(e))
+
+    print("🚀 Done compiling Stan models.")
 
 def _ensure_numpy(x):
     return x.values if hasattr(x, "values") else np.asarray(x)
