@@ -24,6 +24,11 @@ model {
   b_crtp  ~ normal(prior_mean_b, prior_sd_b);
   sigma_scaledRI_crtp ~ normal(0.01, 0.1);
 
-  vector[N_crtp] mu = (1 - b_crtp) * inv_logit(k_crtp * (t_crtp - t0_crtp)) + b_crtp;
-  scaledRI_crtp ~ normal(mu, sigma_scaledRI_crtp);
+  vector[N_crtp] mu_scaledRI_crtp = (1 - b_crtp) * inv_logit(k_crtp * (t_crtp - t0_crtp)) + b_crtp;
+  scaledRI_crtp ~ normal(mu_scaledRI_crtp, sigma_scaledRI_crtp);
 }
+
+generated quantities {
+  vector[N_crtp] mu_scaledRI_crtp = (1 - b_crtp) * inv_logit(k_crtp * (t_crtp - t0_crtp)) + b_crtp;
+}
+

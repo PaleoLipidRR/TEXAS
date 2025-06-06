@@ -9,7 +9,9 @@ data {
   int<lower=1> N_meso;       
   vector[N_meso] t_meso;         
   vector[N_meso] scaledRI_meso;
-     
+
+  int<lower=1> N_crtp;         // number of coretop observations
+  vector[N_crtp] t_crtp;    
 }
 
 parameters {
@@ -27,8 +29,8 @@ model {
   t0_culmeso    ~ normal(30, 10) T[-1.8, ];  // truncated normal
   k_culmeso     ~ normal(0, 0.25);
   b_culmeso     ~ beta(2, 5);
-  sigma_scaledRI_cul     ~ cauchy(0.01, 0.05);
-  sigma_scaledRI_meso    ~ cauchy(0.01, 0.05);
+  sigma_scaledRI_cul     ~ cauchy(0, 0.1);
+  sigma_scaledRI_meso    ~ cauchy(0, 0.1);
 
   // Logistic means using inv_logit for elementwise operations
   // vector[N_cul] mu_scaledRI_cul = (1 - b_culmeso) ./ (1 + exp(-k_culmeso * (t_cul - t0_culmeso))) + b_culmeso;
@@ -44,6 +46,9 @@ model {
 }
 
 generated quantities {
+
+  vector[N_crtp] scaledRI_hat = (1 - b_culmeso) * inv_logit(k_culmeso * (t_crtp - t0_culmeso)) + b_culmeso;
+
   real<lower=0> sigma_scaledRI_culmeso;
 
   sigma_scaledRI_culmeso = sqrt(
