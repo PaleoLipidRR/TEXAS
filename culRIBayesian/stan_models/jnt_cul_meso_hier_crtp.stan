@@ -59,8 +59,8 @@ model {
   sigma_b_culmeso    ~ cauchy(0, 1);
 
   // 3. Priors for observation noise
-  sigma_scaledRI_cul  ~ normal(0.01, 0.1);
-  sigma_scaledRI_meso ~ normal(0.01, 0.1);
+  sigma_scaledRI_cul  ~ cauchy(0, 0.1);
+  sigma_scaledRI_meso ~ cauchy(0, 0.1);
 
   // 4. Likelihoods for culture and mesocosm
   {
@@ -85,12 +85,5 @@ model {
 // ---------------------------------------------------------------
 generated quantities {
   // Now mu_scaledRI_crtp is in scope (from transformed parameters)
-  vector[N_crtp] scaledRI_hat        = mu_scaledRI_crtp;
-  vector[N_crtp] log_lik_scaledRI;
-  vector[N_crtp] residual_scaledRI;
-
-  for (i in 1:N_crtp) {
-    log_lik_scaledRI[i]  = normal_lpdf(scaledRI_crtp[i] | mu_scaledRI_crtp[i], sigma_scaledRI_crtp);
-    residual_scaledRI[i] = scaledRI_crtp[i] - mu_scaledRI_crtp[i];
-  }
+  vector[N_crtp] scaledRI_hat = mu_scaledRI_crtp;
 }

@@ -278,7 +278,7 @@ def build_invT_inputData(
     n_draws: int = 100,
     seed: Optional[int] = 42,
     reduction: str = "mean",     # 'mean', 'median', or None
-    mode: str = "meanprior_bayes"  # 'meanprior_bayes' or 'ensemble'
+    mode: str = "meanprior_bayes"  # 'meanprior_bayes' or 'ensemble' 
 ) -> Tuple[dict, dict]:
     """
     Build Stan input data for inverse T model. Supports Bayesian meanprior and ensemble modes.
