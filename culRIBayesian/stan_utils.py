@@ -582,6 +582,7 @@ def get_invT_posterior(
     stan_filename: str,
     stan_models_dir: Union[Path, str] = None,
     site_name: Optional[str] = None,
+    temptype: str = None,
     chains: int = 4,
     iter_warmup: int = 500,
     iter_sampling: int = 1000,
@@ -701,6 +702,11 @@ def get_invT_posterior(
         site_name=site_name,
         posteriors_used=posterior_suffixes
     )
+    
+    if temptype is None:
+        print("Please specify the temptype (e.g., 'thermoT', 'sst', 'cultureT') to store as an attribute.")
+    
+    ds.attrs["temptype"] = temptype    
     ds.attrs["run_duration (sec)"] = round(time.time() - start_time, 2)
 
     if "prior_mu_t" in data and "prior_sigma_t" in data:
@@ -737,8 +743,16 @@ def get_invT_post_quantiles(
 
     if not all(0.0 <= q <= 1.0 for q in quantiles):
         raise ValueError("All quantiles must be between 0 and 1.")
-
-    return posterior.quantile(quantiles, dim="draw", keep_attrs=True)
+    
+    ### check dims
+    if "draw" not in posterior.dims:
+        raise ValueError("Posterior dataset must contain a 'draw' dimension.")
+    if len(posterior.dims) > 2:
+        dims = ["draw", "dim_2"]
+    else:
+        dims = ["draw"]
+    
+    return posterior.quantile(quantiles, dim=dims, keep_attrs=True)
 
 # ─── POSTERIOR LOADING ────────────────────────────────────────────────────
 def save_posterior(
@@ -834,6 +848,7 @@ def save_invT_posterior(
 
     output_dir.mkdir(parents=True, exist_ok=True)
     stan_model_name = posterior.attrs.get('stan_model_name', 'unknown_model')
+    site_name = posterior.attrs.get('SiteName', 'unknown_site')
     temptype = posterior.attrs.get('temptype', 'unknown')
     use_gdgt23ratio = posterior.attrs.get('use_gdgt23ratio', 0)
     use_no3 = posterior.attrs.get('use_no3', 0)
@@ -847,7 +862,7 @@ def save_invT_posterior(
             else:
                 set_no3 = posterior.attrs.get("no3_cutoff")
                 temptype += f"_no3_{set_no3}"
-    filepath = output_dir / f"{stan_model_name}_{temptype}.nc"
+    filepath = output_dir / f"{site_name}_{stan_model_name}_{temptype}.nc"
 
     if filepath.exists() and not overwrite:
         raise FileExistsError(f"{filepath} already exists and overwrite=False.")
