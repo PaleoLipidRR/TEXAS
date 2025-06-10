@@ -278,7 +278,8 @@ def build_invT_inputData(
     n_draws: int = 100,
     seed: Optional[int] = 42,
     reduction: str = "mean",     # 'mean', 'median', or None
-    mode: str = "meanprior_bayes"  # 'meanprior_bayes' or 'ensemble' 
+    mode: str = "meanprior_bayes",  # 'meanprior_bayes' or 'ensemble' 
+    no3_cutoff: Optional[float] = None,
 ) -> Tuple[dict, dict]:
     """
     Build Stan input data for inverse T model. Supports Bayesian meanprior and ensemble modes.
@@ -294,6 +295,19 @@ def build_invT_inputData(
 
     predictors = predictors or {}
     use_flags = use_flags or {}
+    
+    # After parsing use_flags (or wherever you know use_no3):
+    if use_flags.get("no3", False):
+        if no3_cutoff is None or no3_cutoff <= 0:
+            raise ValueError(
+                "You set use_no3=True, so you must supply a positive "
+                "no3_cutoff. If you really don’t want to filter, set "
+                "use_no3=False."
+            )
+    else:
+        # you won’t actually use the cutoff in Stan if use_no3 is 0,
+        # but Stan still needs *some* number. 100 is fine:
+        no3_cutoff = 0.0
 
     posterior = load_posterior(model_name=fwd_posterior_name)
     N = len(scaledRI)
@@ -339,6 +353,7 @@ def build_invT_inputData(
             "std_k": summarize_std(f"k_{used_suffix}"),
             "std_b": summarize_std(f"b_{used_suffix}"),
         }
+        data["no3_cutoff"] = no3_cutoff
         sigma_key = f"sigma_scaledRI_{used_suffix}"
         if sigma_key in posterior:
             mu_sigma_scaledRI = summarize(sigma_key, reduction)
@@ -388,6 +403,7 @@ def build_invT_inputData(
             "k": P[f"k_{used_suffix}"].values,
             "b": P[f"b_{used_suffix}"].values,
         }
+        data["no3_cutoff"] = no3_cutoff
 
         sigma_key = None
         for suffix in PRIORITY_SUFFIXES:
@@ -491,7 +507,8 @@ def get_posterior(
     iter_sampling: int = 1000,
     set_adapt_delta: float = 0.99,
     seed: Optional[int] = 42,
-    verbose: bool = True
+    verbose: bool = True,
+    no3_cutoff: Optional[float] = None,
 ) -> xr.Dataset:
     
     start_time = time.time()
@@ -525,10 +542,13 @@ def get_posterior(
         else:
             data["no3_crtp"] = np.zeros(data["N_crtp"])
             data["use_no3"] = 0
+        
     else:
         # If no coretop data, turn off optional predictors
         data["use_gdgt23ratio"] = 0
         data["use_no3"] = 0
+    
+    data["no3_cutoff"] = no3_cutoff if no3_cutoff is not None else 0.0
 
     if seed is not None:
         np.random.seed(seed)
@@ -780,16 +800,25 @@ def save_posterior(
     temptype = posterior.attrs.get('temptype', 'unknown')
     use_gdgt23ratio = posterior.attrs.get('use_gdgt23ratio', 0)
     use_no3 = posterior.attrs.get('use_no3', 0)
-    if use_gdgt23ratio or use_no3:
-        if use_gdgt23ratio:
-            temptype += "_gdgt23ratio"
-        if use_no3:
-            if posterior.attrs.get("no3_cutoff", None) is None:
-                # If no3 is used, ensure no3_cutoff is set
-                raise ValueError("no3_cutoff must be a positive real number if no3 is used.")
-            else:
-                set_no3 = posterior.attrs.get("no3_cutoff")
-                temptype += f"_no3_{set_no3}"
+    if use_gdgt23ratio:
+        temptype += "_gdgt23ratio"
+    else:
+        # If gdgt23ratio is not used, drop beta0_gdgt23ratio from variables
+        if "beta0_gdgt23ratio_crtp" in posterior:
+            posterior = posterior.drop_vars("beta0_gdgt23ratio_crtp")
+    
+        
+    if use_no3:
+        if posterior.attrs.get("no3_cutoff", None) is None:
+            # If no3 is used, ensure no3_cutoff is set
+            raise ValueError("no3_cutoff must be a positive real number if no3 is used.")
+        else:
+            set_no3 = posterior.attrs.get("no3_cutoff")
+            temptype += f"_no3_{set_no3}"
+    else:
+        # If no3 is not used, drop beta0_no3 from variables
+        if "beta0_no3_crtp" in posterior:
+            posterior = posterior.drop_vars("beta0_no3_crtp")
     filepath = output_dir / f"{stan_model_name}_{temptype}.nc"
 
     if filepath.exists() and not overwrite:
