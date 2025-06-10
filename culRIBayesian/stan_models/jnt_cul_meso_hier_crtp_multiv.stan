@@ -85,8 +85,10 @@ model {
         if (use_gdgt23ratio == 1)
             mu_scaledRI_crtp[i] += beta0_gdgt23ratio_crtp * gdgt23ratio_crtp[i];
 
-        if (use_no3 == 1 && no3_cutoff > 0 && no3_crtp[i] > 0 && no3_crtp[i] < no3_cutoff)
+        if (use_no3 == 1) {
+            if (no3_crtp[i] > 0 && no3_crtp[i] < no3_cutoff)
             mu_scaledRI_crtp[i] += beta0_no3_crtp * log10(no3_crtp[i]);
+        }
     }
     sigma_scaledRI_crtp ~ normal(0.01, 0.1);
     scaledRI_crtp ~ normal(mu_scaledRI_crtp, sigma_scaledRI_crtp);

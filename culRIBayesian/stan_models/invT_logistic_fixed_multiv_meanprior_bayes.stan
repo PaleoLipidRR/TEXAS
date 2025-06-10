@@ -26,6 +26,7 @@ data {
   real mu_beta0_no3;
   real<lower=0> std_beta0_no3;
   int<lower=0, upper=1> use_no3;
+  real<lower=0> no3_cutoff;
 }
 
 parameters {
@@ -51,13 +52,9 @@ model {
 
   if (use_gdgt23ratio == 1)
     beta0_gdgt23ratio ~ normal(mu_beta0_gdgt23ratio, std_beta0_gdgt23ratio);
-  else
-    beta0_gdgt23ratio ~ normal(0, 0.1); // tight prior near 0
 
   if (use_no3 == 1)
     beta0_no3 ~ normal(mu_beta0_no3, std_beta0_no3);
-  else
-    beta0_no3 ~ normal(0, 0.1);
 
   // Inverse temperature prior
   t_est ~ normal(prior_mu_t, prior_sigma_t);
@@ -66,8 +63,18 @@ model {
   mu_scaledRI = (1 - b) * inv_logit(k * (t_est - t0)) + b;
   if (use_gdgt23ratio == 1)
     mu_scaledRI += beta0_gdgt23ratio * gdgt23ratio;
-  if (use_no3 == 1)
-    mu_scaledRI += beta0_no3 * no3;
+
+  if (use_no3 == 1) {
+    // mask & log‐transform only those no3 in (0, no3_cutoff)
+    vector[N] log_no3;
+    for (n in 1:N) {
+      if (no3[n] > 0 && no3[n] < no3_cutoff)
+        log_no3[n] = log10(no3[n]);
+      else
+        log_no3[n] = 0;
+    }
+    mu_scaledRI += beta0_no3 * log_no3;
+  }
 
   scaledRI ~ normal(mu_scaledRI, sigma_scaledRI);
 }
