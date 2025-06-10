@@ -27,8 +27,3 @@ model {
   vector[N_crtp] mu_scaledRI_crtp = (1 - b_crtp) * inv_logit(k_crtp * (t_crtp - t0_crtp)) + b_crtp;
   scaledRI_crtp ~ normal(mu_scaledRI_crtp, sigma_scaledRI_crtp);
 }
-
-generated quantities {
-  vector[N_crtp] mu_scaledRI_crtp = (1 - b_crtp) * inv_logit(k_crtp * (t_crtp - t0_crtp)) + b_crtp;
-}
-
