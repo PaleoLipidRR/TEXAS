@@ -46,9 +46,6 @@ model {
 }
 
 generated quantities {
-
-  vector[N_crtp] scaledRI_hat = (1 - b_culmeso) * inv_logit(k_culmeso * (t_crtp - t0_culmeso)) + b_culmeso;
-
   real<lower=0> sigma_scaledRI_culmeso;
 
   sigma_scaledRI_culmeso = sqrt(

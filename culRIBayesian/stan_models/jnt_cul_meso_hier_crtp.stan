@@ -35,16 +35,6 @@ parameters {
   real<lower=0>          sigma_scaledRI_crtp;
 }
 
-// ---------------------------------------------------------------
-transformed parameters {
-  // Compute mu_scaledRI_crtp once, make it available elsewhere
-  vector[N_crtp] mu_scaledRI_crtp;
-  for (i in 1:N_crtp) {
-    mu_scaledRI_crtp[i] = (1 - b_crtp)
-                       * inv_logit(k_crtp * (t_crtp[i] - t0_crtp))
-                       + b_crtp;
-  }
-}
 
 // ---------------------------------------------------------------
 model {
@@ -79,11 +69,12 @@ model {
   b_crtp   ~ normal(b_culmeso, sigma_b_culmeso);
 
   // 6. Likelihood for coretop uses mu_scaledRI_crtp from transformed parameters
+  vector[N_crtp] mu_scaledRI_crtp;
+  for (i in 1:N_crtp) {
+    mu_scaledRI_crtp[i] = (1 - b_crtp)
+                       * inv_logit(k_crtp * (t_crtp[i] - t0_crtp))
+                       + b_crtp;
+  }
   scaledRI_crtp ~ normal(mu_scaledRI_crtp, sigma_scaledRI_crtp);
 }
 
-// ---------------------------------------------------------------
-generated quantities {
-  // Now mu_scaledRI_crtp is in scope (from transformed parameters)
-  vector[N_crtp] scaledRI_hat = mu_scaledRI_crtp;
-}
