@@ -361,4 +361,5 @@ dependencies:
       - baysparpy==0.0.3
       - baysplinepy==0.0.2
       - culribayesian==0.1.0
+      - setuptools-scm==8.3.1
 prefix: /home/ronnie-rattan/miniforge3/envs/culRI-Bayesian-py310
