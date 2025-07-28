@@ -9,9 +9,6 @@ data {
   int<lower=1> N_meso;       
   vector[N_meso] t_meso;         
   vector[N_meso] scaledRI_meso;
-
-  int<lower=1> N_crtp;         // number of coretop observations
-  vector[N_crtp] t_crtp;    
 }
 
 parameters {
