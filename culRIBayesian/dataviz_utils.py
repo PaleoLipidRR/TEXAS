@@ -19,12 +19,12 @@ def plot_prior_distributions(
     show_suptitle=True,
     kde_bw=0.3,
     focus_on_posterior=True,
-    include_groups=["t0", "k", "b", "beta0_gdgt23ratio", "beta0_no3"],
+    include_groups=["t0", "k", "b", "v", "Q", "beta0_gdgt23ratio", "beta0_no3"],
     suffix_include: Optional[List[str]] = None,
     use_linestyle_by_param=False,
     show_histogram=True,
     set_linewidth=1.5,
-    set_bottom_space=0.15,
+    set_bottom_space=0.2,
     set_fig_width_factor=3,
     set_fig_height_factor=3.5,
     set_leg_max_ncol=3,
@@ -70,6 +70,8 @@ def plot_prior_distributions(
         for prefix in include_groups:
             if name.startswith(prefix + "_"):
                 grouped[prefix].append(name)
+    # Add this to debug
+    print("Grouped param names:", grouped)
 
     param_groups = [g for g in include_groups if grouped[g]]
     print(param_groups)
@@ -127,6 +129,12 @@ def plot_prior_distributions(
                 x_max = a + 10 * b
                 x = np.linspace(x_min, x_max, 5000)
                 y = stats.cauchy.pdf(x, a, b)
+                
+            elif dist == "lognormal":
+                x_min = max(1e-6, np.exp(a - 4 * b))
+                x_max = np.exp(a + 4 * b)
+                x = np.linspace(x_min, x_max, 5000)
+                y = stats.lognorm.pdf(x, s=b, scale=np.exp(a))
 
             else:
                 continue
@@ -136,7 +144,7 @@ def plot_prior_distributions(
         for name in param_names:
             if posterior_datasets:
                 for idx_ds, ds in enumerate(posterior_datasets):
-                    if name not in ds:
+                    if name not in ds.data_vars:
                         continue
                     samples = ds[name].values.flatten()
                     stan_model_labels = ds.attrs.get('filename', 'Unknown Model')
@@ -182,11 +190,13 @@ def plot_prior_distributions(
         
 
 
-        if focus_on_posterior and all_samples:
+        if all_samples:
             combined = np.concatenate([s for s, _, _, _, _, _ in all_samples])
             zoom_min, zoom_max = compute_sample_range(combined)
-            if zoom_min is not None:
+            if focus_on_posterior and zoom_min is not None:
                 ax.set_xlim([zoom_min, zoom_max])
+            elif x_min is not None and x_max is not None:
+                ax.set_xlim([x_min, x_max])
         else:
             ax.set_xlim([x_min, x_max])
 
@@ -201,35 +211,59 @@ def plot_prior_distributions(
 
     model_labels.insert(0, "Prior")
 
-    fig.tight_layout(
-        rect=[0, set_bottom_space, 1, 0.92]  # [left, bottom, right, top] in relative figure coords
-        )
-    # fig.subplots_adjust(bottom=0.125)  # Adjust this value as needed
-    
     if posterior_datasets:
         h, l = axes[0][0].get_legend_handles_labels()
         legend_labels = model_labels
-        ncol = min(len(legend_labels), set_leg_max_ncol)
-        fig.legend(handles=h, labels=legend_labels, loc='lower center', ncol=ncol, fontsize=10,
-                #    bbox_to_anchor=(0.5, -0.1), frameon=False
-                   )
+        legend_rows = int(np.ceil(len(legend_labels) / set_leg_max_ncol))
+        # Dynamically adjust space based on number of rows — shrink when only 1 row
+        if legend_rows == 1:
+            bottom_padding = 0.06
+        elif legend_rows == 2:
+            bottom_padding = 0.10
+        else:
+            bottom_padding = 0.12 + 0.02 * (legend_rows - 2)
+
+        fig.tight_layout(rect=[0, bottom_padding, 1, 0.92])
+
+        fig.legend(
+            handles=h,
+            labels=legend_labels,
+            loc='lower center',
+            ncol=min(len(legend_labels), set_leg_max_ncol),
+            fontsize=10,
+            bbox_to_anchor=(0.5, bottom_padding - 0.05),
+            frameon=True,
+            borderaxespad=0.0,
+            handletextpad=0.6,
+            labelspacing=0.4
+        )
+    else:
+        fig.tight_layout(rect=[0, set_bottom_space, 1, 0.92])
+
+    
     if show_suptitle:
         fig.suptitle("Prior and Posterior Distributions", fontsize=14)
 
-    axes[0][2].legend(loc='upper left', fontsize=8, ncol=1, frameon=False)
-    
+    # axes[0][2].legend(loc='upper left', fontsize=8, ncol=1, frameon=False)
+    # Align legends for bottom row
+    for row in axes:
+        for ax in row:
+            if not ax.has_data():
+                ax.set_visible(False)
+                
     # detect if there are axes[1] then make all axs[1][:] to have legend loc='upper left'
     if axes.shape[0] > 1:
         for ax in axes[1]:
             handles, labels_in_ax = ax.get_legend_handles_labels()
             if handles:
-                ax.legend(loc='upper left', fontsize=8, ncol=1, frameon=False)
+                ax.legend(loc='upper right', fontsize=8, ncol=1, frameon=False)
     
-    # Automatically hide empty subplots
-    for row in axes:
-        for ax in row:
-            if not ax.has_data():
-                ax.set_visible(False)
+    # Top right and bottom left legends override if present
+    if axes.shape[0] > 1:
+        for ax in axes[1]:
+            handles, labels_in_ax = ax.get_legend_handles_labels()
+            if handles:
+                ax.legend(loc='upper right', fontsize=8, ncol=1, frameon=False)
                 
 
     return fig, axes

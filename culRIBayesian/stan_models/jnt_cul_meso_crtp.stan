@@ -24,7 +24,7 @@ parameters {
 
 model {
   // Priors
-  t0_culmesocore      ~ normal(20, 20) T[-4, ];
+  t0_culmesocore    ~ normal(30, 10) T[-1.8, ];
   k_culmesocore       ~ normal(0, 0.25);
   b_culmesocore       ~ beta(2, 5);
   sigma_scaledRI_cul        ~ cauchy(0, 0.1);

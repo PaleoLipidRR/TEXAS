@@ -29,3 +29,6 @@ __all__ = [
     "refresh_stan_models",
     "plot_prior_distributions"
 ]
+
+### version information
+__version__ = "0.1.0"
