@@ -14,12 +14,12 @@ def compute_sample_range(samples):
 
 
 def plot_prior_distributions(
-    priors_list,
+    priors_list: Union[List[str], Dict[str, str]],
     posterior_datasets=None,
     show_suptitle=True,
     kde_bw=0.3,
     focus_on_posterior=True,
-    include_groups=["t0", "k", "b", "v", "Q", "beta0_gdgt23ratio", "beta0_no3"],
+    include_groups=["t0", "k", "b", "v", "Q", "a", "beta0_gdgt23ratio", "beta0_no3"],
     suffix_include: Optional[List[str]] = None,
     use_linestyle_by_param=False,
     show_histogram=True,
@@ -28,6 +28,7 @@ def plot_prior_distributions(
     set_fig_width_factor=3,
     set_fig_height_factor=3.5,
     set_leg_max_ncol=3,
+    color_list: Optional[Sequence[str]] = None,
 ):
     fig, axes = None, None
     parsed_priors = {}
@@ -152,8 +153,25 @@ def plot_prior_distributions(
                     use_no3_check = ds.attrs.get('use_no3', 0)
                     all_samples.append((samples, idx_ds, name, stan_model_labels,
                                         use_gdgt23ratio_check, use_no3_check))
+        
+        # Determine number of distinct models (used to color by model)
+        if posterior_datasets:
+            num_models = len(posterior_datasets)
+        else:
+            num_models = 0
 
-        default_colors = plt.cm.tab10.colors
+        # Validate and assign plotting colors
+        if color_list is not None:
+            if len(color_list) != num_models:
+                raise ValueError(f"color_list must have exactly {num_models} colors to match the number of posterior datasets.")
+            default_colors = color_list
+        else:
+            # Use default tab10 colors; repeat if not enough
+            default_colors = plt.cm.tab10.colors
+            if num_models > len(default_colors):
+                from itertools import cycle, islice
+                default_colors = list(islice(cycle(default_colors), num_models))
+        
         linestyles = ['-', '--', '-.', ':', (0, (3, 1, 1, 1))]
 
         unique_param_names = sorted(set(pname for _, _, pname, _, _, _ in all_samples))
