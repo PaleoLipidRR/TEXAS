@@ -436,6 +436,638 @@ def build_invT_inputData(
     return data, use_flags
 
 
+# ─── ENSEMBLE GENERATION ─────────────────────────────────────────────────
+
+def generate_ensemble(
+    posterior_ds: xr.Dataset,
+    model_function,
+    x_vals: np.ndarray,
+    param_names: List[str],
+    suffix: Optional[str] = None,
+    n_draws: int = 500,
+    seed: Optional[int] = 42,
+    percentiles: List[float] = [5, 50, 95],
+    return_full_ensemble: bool = False,
+    # Multivariate model parameters
+    gdgt23ratio: Optional[np.ndarray] = None,
+    no3: Optional[np.ndarray] = None,
+    no3_cutoff: float = 50.0
+) -> Dict[str, np.ndarray]:
+    """
+    Generate an ensemble of curves from a posterior dataset using any model function.
+    
+    Parameters
+    ----------
+    posterior_ds : xr.Dataset
+        Posterior dataset containing parameter samples
+    model_function : callable
+        Function that takes (x_vals, **params) and returns model predictions
+    x_vals : np.ndarray
+        X values to evaluate the model at
+    param_names : List[str]
+        List of parameter names to extract from posterior (without suffix)
+    suffix : str, optional
+        Suffix to append to parameter names (e.g., 'culmesocore', 'crtp')
+        If None, will try to auto-detect from available parameters
+    n_draws : int, default 500
+        Number of draws to sample from posterior
+    seed : int, optional
+        Random seed for reproducible sampling
+    percentiles : List[float], default [5, 50, 95]
+        Percentiles to compute from ensemble
+    return_full_ensemble : bool, default False
+        If True, returns the full ensemble array in addition to percentiles
+    gdgt23ratio : np.ndarray, optional
+        GDGT-2/3 ratio values for multivariate models (same length as x_vals)
+    no3 : np.ndarray, optional
+        Nitrate concentration values for multivariate models (same length as x_vals)
+    no3_cutoff : float, default 50.0
+        Upper cutoff for nitrate values (for multivariate models)
+        
+    Returns
+    -------
+    Dict[str, np.ndarray]
+        Dictionary containing:
+        - 'p{percentile}': Arrays for each requested percentile
+        - 'ensemble': Full ensemble array (if return_full_ensemble=True)
+        - 'x_vals': Input x values
+        - 'metadata': Dictionary with generation metadata
+        
+    Examples
+    --------
+    # Basic usage with generalized logistic model
+    results = generate_ensemble(
+        posterior_ds=my_posterior,
+        model_function=generalized_logistic_model_fixed_upper,
+        x_vals=np.linspace(0, 100, 500),
+        param_names=['t0', 'b', 'k', 'v', 'Q'],
+        suffix='crtp',
+        n_draws=500
+    )
+    
+    # Multivariate model with gdgt23ratio and no3 corrections
+    results = generate_ensemble(
+        posterior_ds=my_posterior,
+        model_function=generalized_logistic_model_fixed_upper_multivariate,
+        x_vals=temp_vals,
+        param_names=['t0', 'b', 'k', 'v', 'Q', 'beta0_gdgt23ratio', 'beta0_no3'],
+        suffix='crtp',
+        gdgt23ratio=gdgt23_values,
+        no3=nitrate_values,
+        n_draws=500
+    )
+    """
+    if seed is not None:
+        np.random.seed(seed)
+    
+    # Auto-detect suffix if not provided
+    if suffix is None:
+        # Look for the most common suffix among the parameters
+        available_vars = list(posterior_ds.data_vars)
+        suffixes = {}
+        
+        # For multivariate models, prioritize suffix that has beta0_ parameters
+        multivariate_suffixes = set()
+        for var in available_vars:
+            if 'beta0_gdgt23ratio' in var or 'beta0_no3' in var:
+                suffix_part = var.split('_')[-1]
+                multivariate_suffixes.add(suffix_part)
+        
+        # Count suffix occurrences for base parameters
+        for param in param_names:
+            candidates = [var for var in available_vars if var.startswith(f"{param}_")]
+            if candidates:
+                # Extract suffix from first match
+                suffix_part = candidates[0].replace(f"{param}_", "")
+                suffixes[suffix_part] = suffixes.get(suffix_part, 0) + 1
+        
+        if suffixes:
+            # If this is a multivariate model request, prioritize multivariate suffix
+            if multivariate_suffixes and any('beta0_' in param for param in param_names):
+                # Find suffix that has both base params and multivariate params
+                for mv_suffix in multivariate_suffixes:
+                    if mv_suffix in suffixes:
+                        suffix = mv_suffix
+                        print(f"Auto-detected suffix: '{suffix}' (prioritized for multivariate)")
+                        break
+                else:
+                    # Fall back to most common suffix
+                    suffix = max(suffixes, key=suffixes.get)
+                    print(f"Auto-detected suffix: '{suffix}' (most common)")
+            else:
+                # Use the most common suffix
+                suffix = max(suffixes, key=suffixes.get)
+                print(f"Auto-detected suffix: '{suffix}'")
+        else:
+            raise ValueError(f"Could not auto-detect suffix for parameters {param_names}")
+    
+    # Build full parameter names
+    full_param_names = [f"{param}_{suffix}" for param in param_names]
+    
+    # Validate that all parameters exist
+    missing_params = [name for name in full_param_names if name not in posterior_ds.data_vars]
+    if missing_params:
+        available = [var for var in posterior_ds.data_vars if any(var.startswith(f"{p}_") for p in param_names)]
+        raise ValueError(
+            f"Missing parameters: {missing_params}\n"
+            f"Available parameter variants: {available}"
+        )
+    
+    # Check if this is a multivariate model by looking at dataset attributes first
+    use_gdgt23ratio = posterior_ds.attrs.get('use_gdgt23ratio', 0) == 1
+    use_no3 = posterior_ds.attrs.get('use_no3', 0) == 1
+    
+    # Fallback: if no use_* attributes, check for parameter existence (old behavior)
+    if 'use_gdgt23ratio' not in posterior_ds.attrs and 'use_no3' not in posterior_ds.attrs:
+        use_gdgt23ratio = f"beta0_gdgt23ratio_{suffix}" in posterior_ds.data_vars
+        use_no3 = f"beta0_no3_{suffix}" in posterior_ds.data_vars
+    
+    is_multivariate = use_gdgt23ratio or use_no3
+    
+    # Extract parameter data and sample draws
+    posterior_df = posterior_ds[full_param_names].to_dataframe().reset_index()
+    total_draws = len(posterior_df)
+    
+    if n_draws > total_draws:
+        print(f"Warning: Requested {n_draws} draws but only {total_draws} available. Using all available draws.")
+        n_draws = total_draws
+    
+    sampled_draws = posterior_df.sample(n=n_draws, replace=False, random_state=seed).reset_index(drop=True)
+    
+    # Initialize ensemble array
+    ensemble = np.zeros((n_draws, len(x_vals)))
+    
+    # Generate ensemble
+    for i in range(n_draws):
+        row = sampled_draws.iloc[i]
+        
+        # Extract parameters and remove suffix
+        params = {}
+        for full_name in full_param_names:
+            param_name = full_name.replace(f"_{suffix}", "")
+            params[param_name] = row[full_name]
+        
+        # Add multivariate parameters if this is a multivariate model
+        if is_multivariate:
+            if use_gdgt23ratio and gdgt23ratio is not None:
+                params['gdgt23ratio'] = gdgt23ratio
+            if use_no3 and no3 is not None:
+                params['no3'] = no3
+                params['no3_cutoff'] = no3_cutoff
+        
+        try:
+            # Call model function with parameters
+            ensemble[i, :] = model_function(x_vals, **params)
+        except Exception as e:
+            raise RuntimeError(f"Error calling model function at draw {i} with params {params}: {e}")
+    
+    # Compute percentiles
+    results = {
+        'x_vals': x_vals,
+        'metadata': {
+            'n_draws': n_draws,
+            'suffix': suffix,
+            'param_names': param_names,
+            'full_param_names': full_param_names,
+            'model_function': model_function.__name__ if hasattr(model_function, '__name__') else str(model_function),
+            'seed': seed,
+            'percentiles': percentiles,
+            'is_multivariate': is_multivariate,
+            'use_gdgt23ratio': use_gdgt23ratio,
+            'use_no3': use_no3,
+            'gdgt23ratio_provided': gdgt23ratio is not None,
+            'no3_provided': no3 is not None
+        }
+    }
+    
+    for percentile in percentiles:
+        key = f'p{int(percentile)}'
+        results[key] = np.percentile(ensemble, percentile, axis=0)
+    
+    if return_full_ensemble:
+        results['ensemble'] = ensemble
+    
+    return results
+
+
+def generalized_logistic_model_fixed_upper_multivariate(
+    x, t0=None, x0=None, b=None, k=None, v=None, Q=None,
+    beta0_gdgt23ratio=None, gdgt23ratio=None,
+    beta0_no3=None, no3=None, no3_cutoff=50.0
+):
+    """
+    Generalized logistic model with fixed upper asymptote at 1, including multivariate corrections.
+    
+    This function implements the same model as in the Stan code, including optional
+    corrections for gdgt23ratio and no3 (nitrate) variables.
+    
+    Parameters
+    ----------
+    x : array-like
+        Input values (e.g., temperature)
+    t0 : float, optional
+        Inflection point (alternative name for x0)
+    x0 : float, optional
+        Inflection point (alternative name for t0)
+    b : float
+        Lower asymptote (left asymptote)
+    k : float
+        Slope parameter
+    v : float
+        Shape parameter (nu)
+    Q : float
+        Exponent parameter
+    beta0_gdgt23ratio : float, optional
+        Coefficient for gdgt23ratio correction
+    gdgt23ratio : array-like, optional
+        GDGT-2/3 ratio values (same length as x)
+    beta0_no3 : float, optional
+        Coefficient for nitrate (log10) correction
+    no3 : array-like, optional
+        Nitrate concentration values (same length as x)
+    no3_cutoff : float, default 50.0
+        Upper cutoff for nitrate values (as in Stan model)
+        
+    Returns
+    -------
+    array-like
+        Model predictions with multivariate corrections applied
+        
+    Notes
+    -----
+    This function replicates the Stan model logic:
+    - Base scaled RI from generalized logistic function
+    - Optional gdgt23ratio correction: + beta0_gdgt23ratio * gdgt23ratio
+    - Optional no3 correction: + beta0_no3 * log10(no3) where 0 < no3 < no3_cutoff
+    """
+    # Handle both t0 and x0 parameter names for inflection point
+    inflection_point = t0 if t0 is not None else x0
+    if inflection_point is None:
+        raise ValueError("Either 't0' or 'x0' must be provided for the inflection point")
+    
+    # Base generalized logistic model
+    base_scaledRI = b + ((1 - b) / np.power(1 + Q * np.exp(-k * (x - inflection_point)), 1/v))
+    
+    # Start with base prediction
+    mu_scaledRI = base_scaledRI.copy() if hasattr(base_scaledRI, 'copy') else np.array(base_scaledRI)
+    
+    # Apply gdgt23ratio correction if provided
+    if beta0_gdgt23ratio is not None and gdgt23ratio is not None:
+        gdgt23ratio = np.array(gdgt23ratio)
+        if gdgt23ratio.shape != mu_scaledRI.shape:
+            raise ValueError(f"gdgt23ratio shape {gdgt23ratio.shape} doesn't match x shape {mu_scaledRI.shape}")
+        mu_scaledRI += beta0_gdgt23ratio * gdgt23ratio
+    
+    # Apply no3 correction if provided
+    if beta0_no3 is not None and no3 is not None:
+        no3 = np.array(no3)
+        if no3.shape != mu_scaledRI.shape:
+            raise ValueError(f"no3 shape {no3.shape} doesn't match x shape {mu_scaledRI.shape}")
+        
+        # Apply no3 correction where 0 < no3 < no3_cutoff (following Stan model logic)
+        valid_no3_mask = (no3 > 0) & (no3 < no3_cutoff)
+        mu_scaledRI[valid_no3_mask] += beta0_no3 * np.log10(no3[valid_no3_mask])
+    
+    return mu_scaledRI
+
+
+def generalized_logistic_model_fixed_upper(x, t0=None, x0=None, b=None, k=None, v=None, Q=None):
+    """
+    Generalized logistic model with fixed upper asymptote at 1 (univariate version).
+    
+    Parameters
+    ----------
+    x : array-like
+        Input values (e.g., temperature)
+    t0 : float, optional
+        Inflection point (alternative name for x0)
+    x0 : float, optional
+        Inflection point (alternative name for t0)
+    b : float
+        Lower asymptote (left asymptote)
+    k : float
+        Slope parameter
+    v : float
+        Shape parameter (nu)
+    Q : float
+        Exponent parameter
+        
+    Returns
+    -------
+    array-like
+        Model predictions
+    """
+    # Handle both t0 and x0 parameter names for inflection point
+    inflection_point = t0 if t0 is not None else x0
+    if inflection_point is None:
+        raise ValueError("Either 't0' or 'x0' must be provided for the inflection point")
+    
+    return b + ((1 - b) / np.power(1 + Q * np.exp(-k * (x - inflection_point)), 1/v))
+
+
+def simple_logistic_model_fixed_upper(x, t0=None, x0=None, b=None, k=None):
+    """
+    Simple logistic model with fixed upper asymptote at 1 (univariate version).
+    
+    This is the 3-parameter logistic model used in jnt_ and hier_ Stan models.
+    Formula: y = b + (1 - b) / (1 + exp(-k * (x - t0)))
+    
+    Parameters
+    ----------
+    x : array-like
+        Input values (e.g., temperature)
+    t0 : float, optional
+        Inflection point (alternative name for x0)
+    x0 : float, optional
+        Inflection point (alternative name for t0)
+    b : float
+        Lower asymptote (left asymptote)
+    k : float
+        Slope parameter
+        
+    Returns
+    -------
+    array-like
+        Model predictions
+    """
+    # Handle both t0 and x0 parameter names for inflection point
+    inflection_point = t0 if t0 is not None else x0
+    if inflection_point is None:
+        raise ValueError("Either 't0' or 'x0' must be provided for the inflection point")
+    
+    return b + ((1 - b) / (1 + np.exp(-k * (x - inflection_point))))
+
+
+def simple_logistic_model_fixed_upper_multivariate(
+    x, t0=None, x0=None, b=None, k=None,
+    beta0_gdgt23ratio=None, gdgt23ratio=None,
+    beta0_no3=None, no3=None, no3_cutoff=50.0
+):
+    """
+    Simple logistic model with fixed upper asymptote at 1, including multivariate corrections.
+    
+    This function implements the same model as in the jnt_/hier_ Stan code, including optional
+    gdgt23ratio and no3 corrections applied to the base simple logistic curve.
+    
+    Parameters
+    ----------
+    x : array-like
+        Input values (e.g., temperature)
+    t0 : float, optional
+        Inflection point (alternative name for x0)
+    x0 : float, optional
+        Inflection point (alternative name for t0)
+    b : float
+        Lower asymptote (left asymptote)
+    k : float
+        Slope parameter
+    beta0_gdgt23ratio : float, optional
+        Coefficient for gdgt23ratio correction
+    gdgt23ratio : array-like, optional
+        GDGT-2/3 ratio values (same length as x)
+    beta0_no3 : float, optional
+        Coefficient for nitrate (log10) correction
+    no3 : array-like, optional
+        Nitrate concentration values (same length as x)
+    no3_cutoff : float, default 50.0
+        Upper cutoff for nitrate values (as in Stan model)
+        
+    Returns
+    -------
+    array-like
+        Model predictions with multivariate corrections applied
+        
+    Notes
+    -----
+    This function replicates the Stan model logic:
+    - Base scaled RI from simple logistic function
+    - Optional gdgt23ratio correction: + beta0_gdgt23ratio * gdgt23ratio
+    - Optional no3 correction: + beta0_no3 * log10(no3) where 0 < no3 < no3_cutoff
+    """
+    # Handle both t0 and x0 parameter names for inflection point
+    inflection_point = t0 if t0 is not None else x0
+    if inflection_point is None:
+        raise ValueError("Either 't0' or 'x0' must be provided for the inflection point")
+    
+    # Base simple logistic model
+    base_scaledRI = b + ((1 - b) / (1 + np.exp(-k * (x - inflection_point))))
+    
+    # Start with base prediction
+    mu_scaledRI = base_scaledRI.copy() if hasattr(base_scaledRI, 'copy') else np.array(base_scaledRI)
+    
+    # Apply gdgt23ratio correction if provided
+    if beta0_gdgt23ratio is not None and gdgt23ratio is not None:
+        gdgt23ratio = np.array(gdgt23ratio)
+        if gdgt23ratio.shape != mu_scaledRI.shape:
+            raise ValueError(f"gdgt23ratio shape {gdgt23ratio.shape} doesn't match x shape {mu_scaledRI.shape}")
+        mu_scaledRI += beta0_gdgt23ratio * gdgt23ratio
+    
+    # Apply no3 correction if provided
+    if beta0_no3 is not None and no3 is not None:
+        no3 = np.array(no3)
+        if no3.shape != mu_scaledRI.shape:
+            raise ValueError(f"no3 shape {no3.shape} doesn't match x shape {mu_scaledRI.shape}")
+        
+        # Apply no3 correction where 0 < no3 < no3_cutoff (following Stan model logic)
+        valid_no3_mask = (no3 > 0) & (no3 < no3_cutoff)
+        mu_scaledRI[valid_no3_mask] += beta0_no3 * np.log10(no3[valid_no3_mask])
+    
+    return mu_scaledRI
+
+
+def generate_ensemble_auto(
+    posterior_ds: xr.Dataset,
+    x_vals: np.ndarray,
+    model_type: str = "auto",
+    gdgt23ratio: Optional[np.ndarray] = None,
+    no3: Optional[np.ndarray] = None,
+    no3_cutoff: float = 50.0,
+    **kwargs
+) -> Dict[str, np.ndarray]:
+    """
+    Automatically generate ensemble with auto-detected model types.
+    
+    Parameters
+    ----------
+    posterior_ds : xr.Dataset
+        Posterior dataset
+    x_vals : np.ndarray
+        X values to evaluate model at
+    model_type : str, default "auto"
+        Type of model to use:
+        - 'auto': Automatically detect model type from dataset
+        - 'generalized_logistic_fixed': Force generalized logistic model
+        - 'simple_logistic_fixed': Force simple logistic model
+    gdgt23ratio : np.ndarray, optional
+        GDGT-2/3 ratio values for multivariate models (same length as x_vals)
+    no3 : np.ndarray, optional
+        Nitrate concentration values for multivariate models (same length as x_vals)
+    no3_cutoff : float, default 50.0
+        Upper cutoff for nitrate values (for multivariate models)
+    **kwargs
+        Additional arguments passed to generate_ensemble()
+        
+    Returns
+    -------
+    Dict[str, np.ndarray]
+        Results from generate_ensemble()
+    """
+    
+    # Auto-detect model type if not specified
+    if model_type == "auto":
+        # Check dataset attributes or model name to determine model type
+        model_name = posterior_ds.attrs.get('stan_model_name', '')
+        available_vars = list(posterior_ds.data_vars)
+        
+        # Look for v and Q parameters to distinguish generalized vs simple logistic
+        has_v_param = any('v_' in var for var in available_vars)
+        has_Q_param = any('Q_' in var for var in available_vars)
+        
+        if has_v_param and has_Q_param:
+            detected_model_type = "generalized_logistic_fixed"
+        else:
+            detected_model_type = "simple_logistic_fixed"
+        
+        print(f"🔬 Auto-detected model type: {detected_model_type}")
+        print(f"   • Model name: {model_name}")
+        print(f"   • Has v parameter: {has_v_param}")
+        print(f"   • Has Q parameter: {has_Q_param}")
+    else:
+        detected_model_type = model_type
+    
+    # Process based on detected model type
+    if detected_model_type == "generalized_logistic_fixed":
+        return _process_generalized_logistic_model(posterior_ds, x_vals, gdgt23ratio, no3, no3_cutoff, **kwargs)
+    elif detected_model_type == "simple_logistic_fixed":
+        return _process_simple_logistic_model(posterior_ds, x_vals, gdgt23ratio, no3, no3_cutoff, **kwargs)
+    else:
+        raise ValueError(f"Unknown model_type: {detected_model_type}")
+
+
+def _process_generalized_logistic_model(
+    posterior_ds: xr.Dataset,
+    x_vals: np.ndarray,
+    gdgt23ratio: Optional[np.ndarray],
+    no3: Optional[np.ndarray],
+    no3_cutoff: float,
+    **kwargs
+) -> Dict[str, np.ndarray]:
+    """Process generalized logistic models (with v and Q parameters)."""
+    available_vars = list(posterior_ds.data_vars)
+    
+    # Check dataset attributes to see which corrections were actually used in Stan model
+    use_gdgt23ratio = posterior_ds.attrs.get('use_gdgt23ratio', 0) == 1
+    use_no3 = posterior_ds.attrs.get('use_no3', 0) == 1
+    
+    # Fallback: if no use_* attributes, check for parameter existence (old behavior)
+    if 'use_gdgt23ratio' not in posterior_ds.attrs and 'use_no3' not in posterior_ds.attrs:
+        print("   ⚠️  Warning: No use_* attributes found, falling back to parameter detection")
+        use_gdgt23ratio = any('beta0_gdgt23ratio' in var for var in available_vars)
+        use_no3 = any('beta0_no3' in var for var in available_vars)
+    
+    is_multivariate = use_gdgt23ratio or use_no3
+    
+    if is_multivariate:
+        print(f"🔬 Detected multivariate generalized logistic model:")
+        print(f"   • GDGT-2/3 ratio correction: {'✓' if use_gdgt23ratio else '✗'}")
+        print(f"   • NO3 correction: {'✓' if use_no3 else '✗'}")
+        
+        # Use multivariate model function and include additional parameters
+        param_names = ['t0', 'b', 'k', 'v', 'Q']
+        if use_gdgt23ratio:
+            param_names.append('beta0_gdgt23ratio')
+        if use_no3:
+            param_names.append('beta0_no3')
+            
+        # Validate multivariate data if corrections are available
+        if use_gdgt23ratio and gdgt23ratio is None:
+            print("   ⚠️  Warning: GDGT-2/3 ratio correction available but no gdgt23ratio data provided")
+        if use_no3 and no3 is None:
+            print("   ⚠️  Warning: NO3 correction available but no no3 data provided")
+        
+        return generate_ensemble(
+            posterior_ds=posterior_ds,
+            model_function=generalized_logistic_model_fixed_upper_multivariate,
+            x_vals=x_vals,
+            param_names=param_names,
+            gdgt23ratio=gdgt23ratio,
+            no3=no3,
+            no3_cutoff=no3_cutoff,
+            **kwargs
+        )
+    else:
+        print("🔬 Detected univariate generalized logistic model")
+        return generate_ensemble(
+            posterior_ds=posterior_ds,
+            model_function=generalized_logistic_model_fixed_upper,
+            x_vals=x_vals,
+            param_names=['t0', 'b', 'k', 'v', 'Q'],
+            **kwargs
+        )
+
+
+def _process_simple_logistic_model(
+    posterior_ds: xr.Dataset,
+    x_vals: np.ndarray,
+    gdgt23ratio: Optional[np.ndarray],
+    no3: Optional[np.ndarray],
+    no3_cutoff: float,
+    **kwargs
+) -> Dict[str, np.ndarray]:
+    """Process simple logistic models (without v and Q parameters)."""
+    available_vars = list(posterior_ds.data_vars)
+    
+    # Check dataset attributes to see which corrections were actually used in Stan model
+    use_gdgt23ratio = posterior_ds.attrs.get('use_gdgt23ratio', 0) == 1
+    use_no3 = posterior_ds.attrs.get('use_no3', 0) == 1
+    
+    # Fallback: if no use_* attributes, check for parameter existence (old behavior)
+    if 'use_gdgt23ratio' not in posterior_ds.attrs and 'use_no3' not in posterior_ds.attrs:
+        print("   ⚠️  Warning: No use_* attributes found, falling back to parameter detection")
+        use_gdgt23ratio = any('beta0_gdgt23ratio' in var for var in available_vars)
+        use_no3 = any('beta0_no3' in var for var in available_vars)
+    
+    is_multivariate = use_gdgt23ratio or use_no3
+    
+    if is_multivariate:
+        print(f"🔬 Detected multivariate simple logistic model:")
+        print(f"   • GDGT-2/3 ratio correction: {'✓' if use_gdgt23ratio else '✗'}")
+        print(f"   • NO3 correction: {'✓' if use_no3 else '✗'}")
+        
+        # Use multivariate model function and include additional parameters
+        param_names = ['t0', 'b', 'k']  # Simple logistic only has 3 base parameters
+        if use_gdgt23ratio:
+            param_names.append('beta0_gdgt23ratio')
+        if use_no3:
+            param_names.append('beta0_no3')
+            
+        # Validate multivariate data if corrections are available
+        if use_gdgt23ratio and gdgt23ratio is None:
+            print("   ⚠️  Warning: GDGT-2/3 ratio correction available but no gdgt23ratio data provided")
+        if use_no3 and no3 is None:
+            print("   ⚠️  Warning: NO3 correction available but no no3 data provided")
+        
+        return generate_ensemble(
+            posterior_ds=posterior_ds,
+            model_function=simple_logistic_model_fixed_upper_multivariate,
+            x_vals=x_vals,
+            param_names=param_names,
+            gdgt23ratio=gdgt23ratio,
+            no3=no3,
+            no3_cutoff=no3_cutoff,
+            **kwargs
+        )
+    else:
+        print("🔬 Detected univariate simple logistic model")
+        return generate_ensemble(
+            posterior_ds=posterior_ds,
+            model_function=simple_logistic_model_fixed_upper,
+            x_vals=x_vals,
+            param_names=['t0', 'b', 'k'],  # Simple logistic only has 3 parameters
+            **kwargs
+        )
+
+
 # ─── FORWARD & INVERSE LOGISTIC (GENERALIZED) ─────────────────────────────────
 
 def pred_logistic_general(
