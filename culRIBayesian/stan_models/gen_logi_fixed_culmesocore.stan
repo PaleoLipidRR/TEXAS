@@ -13,7 +13,7 @@ data {
 }
 
 parameters {
-  real<lower=-4> center_culmesocore;   // center of generalized logistic
+  real<lower=-4> t0_culmesocore;   // center of generalized logistic
   real<lower=0>  k_culmesocore;        // growth rate
   real<lower=0.01> Q_culmesocore;      // curve start factor (Q), must be > 0
   real<lower=0.1>  v_culmesocore;      // shape/asymmetry (ν), must be > 0
@@ -26,10 +26,10 @@ parameters {
 
 model {
   // Priors
-  center_culmesocore ~ normal(30, 10) T[-1.8, ];
-  k_culmesocore       ~ normal(0, 0.25);
-  Q_culmesocore       ~ lognormal(0, 1);
-  v_culmesocore       ~ lognormal(0, 0.5);
+  t0_culmesocore  ~ normal(30, 10) T[-1.8, ];
+  k_culmesocore       ~ normal(0, 0.5) T[0, ];
+  Q_culmesocore       ~ normal(1, 20) T[0, ]; 
+  v_culmesocore       ~ normal(1, 10) T[0, ]; 
   b_culmesocore       ~ beta(2, 5);
 
   sigma_scaledRI_cul  ~ cauchy(0, 0.1);
@@ -38,13 +38,13 @@ model {
 
   // Generalized logistic curve (fixed upper bound = 1)
   vector[N_cul] mu_scaledRI_cul = b_culmesocore 
-    + (1 - b_culmesocore) ./ pow(1 + Q_culmesocore * exp(-k_culmesocore * (t_cul - center_culmesocore)), 1 / v_culmesocore);
+    + (1 - b_culmesocore) ./ pow(1 + Q_culmesocore * exp(-k_culmesocore * (t_cul - t0_culmesocore)), 1 / v_culmesocore);
 
   vector[N_meso] mu_scaledRI_meso = b_culmesocore 
-    + (1 - b_culmesocore) ./ pow(1 + Q_culmesocore * exp(-k_culmesocore * (t_meso - center_culmesocore)), 1 / v_culmesocore);
+    + (1 - b_culmesocore) ./ pow(1 + Q_culmesocore * exp(-k_culmesocore * (t_meso - t0_culmesocore)), 1 / v_culmesocore);
 
   vector[N_crtp] mu_scaledRI_crtp = b_culmesocore 
-    + (1 - b_culmesocore) ./ pow(1 + Q_culmesocore * exp(-k_culmesocore * (t_crtp - center_culmesocore)), 1 / v_culmesocore);
+    + (1 - b_culmesocore) ./ pow(1 + Q_culmesocore * exp(-k_culmesocore * (t_crtp - t0_culmesocore)), 1 / v_culmesocore);
 
   // Likelihoods
   scaledRI_cul   ~ normal(mu_scaledRI_cul, sigma_scaledRI_cul);
@@ -54,5 +54,5 @@ model {
 
 generated quantities {
   real inflection_point;
-  inflection_point = center_culmesocore + log(v_culmesocore) / k_culmesocore;
+  inflection_point = t0_culmesocore + log(v_culmesocore) / k_culmesocore;
 }
