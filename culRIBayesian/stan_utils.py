@@ -1,7 +1,5 @@
 from pathlib import Path
 from typing import Union, Optional, Dict, List, Tuple, Sequence
-import subprocess
-from datetime import datetime
 import numpy as np
 import xarray as xr
 from cmdstanpy import CmdStanModel
@@ -573,7 +571,11 @@ def generate_ensemble(
             f"Available parameter variants: {available}"
         )
     
-    # Check if this is a multivariate model by looking at dataset attributes first
+    # Check if this is a multivariate model by checking model function name
+    model_func_name = model_function.__name__ if hasattr(model_function, '__name__') else str(model_function)
+    is_multivariate = 'multivariate' in model_func_name
+    
+    # For backwards compatibility, also check dataset attributes
     use_gdgt23ratio = posterior_ds.attrs.get('use_gdgt23ratio', 0) == 1
     use_no3 = posterior_ds.attrs.get('use_no3', 0) == 1
     
@@ -581,8 +583,6 @@ def generate_ensemble(
     if 'use_gdgt23ratio' not in posterior_ds.attrs and 'use_no3' not in posterior_ds.attrs:
         use_gdgt23ratio = f"beta0_gdgt23ratio_{suffix}" in posterior_ds.data_vars
         use_no3 = f"beta0_no3_{suffix}" in posterior_ds.data_vars
-    
-    is_multivariate = use_gdgt23ratio or use_no3
     
     # Extract parameter data and sample draws
     posterior_df = posterior_ds[full_param_names].to_dataframe().reset_index()
@@ -886,62 +886,111 @@ def generate_ensemble_auto(
 ) -> Dict[str, np.ndarray]:
     """
     Automatically generate ensemble with auto-detected model types.
+    Now supports both forward and inverse models.
     
     Parameters
     ----------
     posterior_ds : xr.Dataset
-        Posterior dataset
+        Posterior dataset from Stan model
     x_vals : np.ndarray
-        X values to evaluate model at
+        For forward models: temperature values
+        For inverse models: scaledRI values
     model_type : str, default "auto"
-        Type of model to use:
-        - 'auto': Automatically detect model type from dataset
-        - 'generalized_logistic_fixed': Force generalized logistic model
-        - 'simple_logistic_fixed': Force simple logistic model
+        Model type detection mode:
+        - "auto": Auto-detect forward vs inverse
+        - "forward": Force forward model detection
+        - "inverse": Force inverse model detection
     gdgt23ratio : np.ndarray, optional
-        GDGT-2/3 ratio values for multivariate models (same length as x_vals)
-    no3 : np.ndarray, optional
-        Nitrate concentration values for multivariate models (same length as x_vals)
+        GDGT-2/3 ratio values
+    no3 : np.ndarray, optional  
+        Nitrate concentration values
     no3_cutoff : float, default 50.0
-        Upper cutoff for nitrate values (for multivariate models)
+        Nitrate cutoff value
     **kwargs
-        Additional arguments passed to generate_ensemble()
+        Additional arguments
         
     Returns
     -------
     Dict[str, np.ndarray]
-        Results from generate_ensemble()
+        Ensemble results
+        
+    Examples
+    --------
+    >>> # Forward model (temperature -> scaledRI)
+    >>> temp_range = np.linspace(15, 45, 100)
+    >>> results = generate_ensemble_auto(
+    ...     posterior_ds=forward_posterior,
+    ...     x_vals=temp_range
+    ... )
+    >>> scaledRI_predictions = results['p50']
+    
+    >>> # Inverse model (scaledRI -> temperature)  
+    >>> scaledRI_obs = np.array([0.4, 0.5, 0.6])
+    >>> results = generate_ensemble_auto(
+    ...     posterior_ds=inverse_posterior,
+    ...     x_vals=scaledRI_obs
+    ... )
+    >>> temp_estimates = results['p50']
     """
     
-    # Auto-detect model type if not specified
-    if model_type == "auto":
-        # Check dataset attributes or model name to determine model type
-        model_name = posterior_ds.attrs.get('stan_model_name', '')
-        available_vars = list(posterior_ds.data_vars)
-        
-        # Look for v and Q parameters to distinguish generalized vs simple logistic
-        has_v_param = any('v_' in var for var in available_vars)
-        has_Q_param = any('Q_' in var for var in available_vars)
-        
-        if has_v_param and has_Q_param:
-            detected_model_type = "generalized_logistic_fixed"
-        else:
-            detected_model_type = "simple_logistic_fixed"
-        
-        print(f"🔬 Auto-detected model type: {detected_model_type}")
-        print(f"   • Model name: {model_name}")
-        print(f"   • Has v parameter: {has_v_param}")
-        print(f"   • Has Q parameter: {has_Q_param}")
-    else:
-        detected_model_type = model_type
+    # Check if this is an inverse T model
+    model_name = posterior_ds.attrs.get('stan_model_name', '')
+    is_inverse_model = 'invT_' in model_name or 't_est' in posterior_ds.data_vars
     
-    # Process based on detected model type
-    if detected_model_type == "generalized_logistic_fixed":
-        return _process_generalized_logistic_model(posterior_ds, x_vals, gdgt23ratio, no3, no3_cutoff, **kwargs)
-    elif detected_model_type == "simple_logistic_fixed":
-        return _process_simple_logistic_model(posterior_ds, x_vals, gdgt23ratio, no3, no3_cutoff, **kwargs)
+    if model_type == "auto":
+        if is_inverse_model:
+            print(f"🔬 Auto-detected inverse temperature model: {model_name}")
+            return generate_invT_ensemble(posterior_ds, x_vals, **kwargs)
+        else:
+            print(f"📈 Auto-detected forward model: {model_name}")
+            return _process_forward_model(posterior_ds, x_vals, gdgt23ratio, no3, no3_cutoff, **kwargs)
+    
+    elif model_type == "inverse":
+        if is_inverse_model:
+            return generate_invT_ensemble(posterior_ds, x_vals, **kwargs)
+        else:
+            raise ValueError(f"Model type forced to 'inverse' but dataset appears to be forward model: {model_name}")
+    
+    elif model_type == "forward":
+        if is_inverse_model:
+            raise ValueError(f"Model type forced to 'forward' but dataset appears to be inverse model: {model_name}")
+        else:
+            return _process_forward_model(posterior_ds, x_vals, gdgt23ratio, no3, no3_cutoff, **kwargs)
+    
     else:
-        raise ValueError(f"Unknown model_type: {detected_model_type}")
+        raise ValueError(f"Unknown model_type: {model_type}. Use 'auto', 'forward', or 'inverse'")
+
+
+def _process_forward_model(
+    posterior_ds: xr.Dataset,
+    x_vals: np.ndarray,
+    gdgt23ratio: Optional[np.ndarray],
+    no3: Optional[np.ndarray],
+    no3_cutoff: float,
+    **kwargs
+) -> Dict[str, np.ndarray]:
+    """
+    Process forward models (existing functionality).
+    """
+    # Auto-detect suffix
+    used_suffix, suffix_map = infer_posterior_suffixes(posterior_ds.data_vars)
+    if used_suffix is None:
+        raise ValueError("Could not determine consistent parameter suffix")
+    
+    # Auto-detect model type
+    model_detection = _detect_model_and_params(posterior_ds, used_suffix)
+    
+    return generate_ensemble(
+        posterior_ds=posterior_ds,
+        model_function=model_detection['model_function'],
+        x_vals=x_vals,
+        param_names=model_detection['param_names'],
+        suffix=used_suffix,
+        gdgt23ratio=gdgt23ratio,
+        no3=no3,
+        no3_cutoff=no3_cutoff,
+        **kwargs
+    )
 
 
 def _process_generalized_logistic_model(
@@ -1538,3 +1587,349 @@ def save_invT_posterior(
 
     print(f"Posterior saved to {filepath}")
     return filepath
+
+
+# ─── INVERSE TEMPERATURE ENSEMBLE FUNCTIONS ──────────────────────────────
+
+def generate_invT_ensemble(
+    posterior_ds: xr.Dataset,
+    scaledRI_vals: np.ndarray,
+    percentiles: List[float] = [5, 50, 95],
+    return_full_ensemble: bool = False,
+    **kwargs
+) -> Dict[str, np.ndarray]:
+    """
+    Generate temperature ensemble from inverse T model posteriors.
+    
+    This function works with inverse temperature models (invT_logistic_*) that
+    estimate temperature values (t_est) from given scaledRI observations.
+    
+    Parameters
+    ----------
+    posterior_ds : xr.Dataset
+        Posterior dataset from invT_logistic_* model
+    scaledRI_vals : np.ndarray
+        Scaled RI values corresponding to the t_est parameters
+    percentiles : List[float], default [5, 50, 95]
+        Percentiles to compute from ensemble
+    return_full_ensemble : bool, default False
+        If True, returns full t_est ensemble
+        
+    Returns
+    -------
+    Dict[str, np.ndarray]
+        Dictionary containing:
+        - 'p{percentile}': Temperature arrays for each percentile
+        - 'ensemble': Full t_est ensemble (if requested)
+        - 'scaledRI_vals': Input scaledRI values
+        - 'metadata': Generation metadata
+        
+    Examples
+    --------
+    >>> # Generate temperature estimates from inverse model
+    >>> scaledRI_obs = np.array([0.4, 0.5, 0.6, 0.7])
+    >>> results = generate_invT_ensemble(
+    ...     posterior_ds=invT_posterior,
+    ...     scaledRI_vals=scaledRI_obs
+    ... )
+    >>> temp_median = results['p50']
+    >>> temp_lower = results['p5']
+    >>> temp_upper = results['p95']
+    """
+    # Extract t_est from posterior
+    if 't_est' not in posterior_ds.data_vars:
+        raise ValueError("Posterior dataset must contain 't_est' variable")
+    
+    t_est_data = posterior_ds['t_est'].values  # Shape: (n_draws, n_observations)
+    n_draws, n_obs = t_est_data.shape
+    
+    if len(scaledRI_vals) != n_obs:
+        raise ValueError(f"Length mismatch: scaledRI_vals={len(scaledRI_vals)} vs t_est observations={n_obs}")
+    
+    # Compute percentiles
+    results = {
+        'scaledRI_vals': scaledRI_vals,
+        'metadata': {
+            'n_draws': n_draws,
+            'n_observations': n_obs,
+            'model_type': 'inverse_temperature',
+            'stan_model_name': posterior_ds.attrs.get('stan_model_name', 'unknown'),
+            'percentiles': percentiles,
+            'return_full_ensemble': return_full_ensemble
+        }
+    }
+    
+    for percentile in percentiles:
+        key = f'p{int(percentile)}'
+        results[key] = np.percentile(t_est_data, percentile, axis=0)
+    
+    if return_full_ensemble:
+        results['ensemble'] = t_est_data
+    
+    return results
+
+
+def generate_invT_ensemble_auto(
+    posterior_ds: xr.Dataset,
+    scaledRI_vals: np.ndarray,
+    **kwargs
+) -> Dict[str, np.ndarray]:
+    """
+    Auto-detect and generate inverse temperature ensemble.
+    
+    This function automatically detects inverse temperature models and
+    generates temperature estimates from scaledRI observations.
+    
+    Parameters
+    ----------
+    posterior_ds : xr.Dataset
+        Posterior dataset
+    scaledRI_vals : np.ndarray
+        Scaled RI values
+    **kwargs
+        Additional arguments passed to generate_invT_ensemble
+        
+    Returns
+    -------
+    Dict[str, np.ndarray]
+        Results from generate_invT_ensemble
+        
+    Examples
+    --------
+    >>> # Auto-detect inverse model and generate ensemble
+    >>> scaledRI_obs = np.array([0.4, 0.5, 0.6])
+    >>> results = generate_invT_ensemble_auto(
+    ...     posterior_ds=my_posterior,
+    ...     scaledRI_vals=scaledRI_obs
+    ... )
+    >>> estimated_temps = results['p50']
+    """
+    # Check if this is an inverse T model
+    model_name = posterior_ds.attrs.get('stan_model_name', '')
+    
+    if 'invT_' in model_name or 't_est' in posterior_ds.data_vars:
+        print(f"🔬 Detected inverse temperature model: {model_name}")
+        return generate_invT_ensemble(posterior_ds, scaledRI_vals, **kwargs)
+    else:
+        raise ValueError(f"Dataset does not appear to be from an inverse T model. Model: {model_name}")
+
+
+def generate_invT_from_forward_model(
+    forward_posterior_ds: xr.Dataset,
+    scaledRI_targets: np.ndarray,
+    param_suffix: str = "crtp",
+    n_draws: int = 500,
+    percentiles: List[float] = [5, 50, 95],
+    return_full_ensemble: bool = False,
+    temp_range: tuple = (0, 50),
+    **kwargs
+) -> Dict[str, np.ndarray]:
+    """
+    Generate temperature estimates by numerically inverting forward model predictions.
+    
+    This function takes a forward model posterior and numerically inverts it
+    to estimate temperatures that would produce the target scaledRI values.
+    
+    Parameters
+    ----------
+    forward_posterior_ds : xr.Dataset
+        Posterior dataset from a forward model (e.g., gen_logi_*, hier_*, jnt_*)
+    scaledRI_targets : np.ndarray
+        Target scaledRI values to invert
+    param_suffix : str, default "crtp"
+        Parameter suffix to use from posterior
+    n_draws : int, default 500
+        Number of posterior draws to sample
+    percentiles : List[float], default [5, 50, 95]
+        Percentiles to compute
+    return_full_ensemble : bool, default False
+        If True, returns full ensemble
+    temp_range : tuple, default (0, 50)
+        Temperature search range for numerical inversion
+    **kwargs
+        Additional arguments (gdgt23ratio, no3, etc.) for multivariate models
+        
+    Returns
+    -------
+    Dict[str, np.ndarray]
+        Dictionary containing:
+        - 'p{percentile}': Temperature arrays for each percentile
+        - 'ensemble': Full temperature ensemble (if requested)
+        - 'scaledRI_targets': Input scaledRI values
+        - 'metadata': Generation metadata
+        
+    Examples
+    --------
+    >>> # Invert forward model to estimate temperatures
+    >>> target_scaledRI = np.array([0.4, 0.6, 0.8])
+    >>> results = generate_invT_from_forward_model(
+    ...     forward_posterior_ds=my_forward_posterior,
+    ...     scaledRI_targets=target_scaledRI,
+    ...     param_suffix="crtp"
+    ... )
+    >>> estimated_temps = results['p50']
+    """
+    from scipy.optimize import minimize_scalar
+    
+    # Auto-detect model function and parameters
+    model_detection = _detect_model_and_params(forward_posterior_ds, param_suffix)
+    model_function = model_detection['model_function']
+    param_names = model_detection['param_names']
+    
+    # Detect multivariate usage
+    use_gdgt23ratio = forward_posterior_ds.attrs.get('use_gdgt23ratio', 0) == 1
+    use_no3 = forward_posterior_ds.attrs.get('use_no3', 0) == 1
+    
+    # Sample from posterior
+    full_param_names = [f"{param}_{param_suffix}" for param in param_names]
+    if use_gdgt23ratio:
+        full_param_names.append(f"beta0_gdgt23ratio_{param_suffix}")
+    if use_no3:
+        full_param_names.append(f"beta0_no3_{param_suffix}")
+    
+    posterior_df = forward_posterior_ds[full_param_names].to_dataframe().reset_index()
+    total_draws = len(posterior_df)
+    
+    if n_draws > total_draws:
+        print(f"Warning: Requested {n_draws} draws but only {total_draws} available. Using all available draws.")
+        n_draws = total_draws
+    
+    sampled_draws = posterior_df.sample(n=n_draws, replace=False, random_state=42).reset_index(drop=True)
+    
+    # Initialize ensemble array
+    n_targets = len(scaledRI_targets)
+    ensemble = np.zeros((n_draws, n_targets))
+    
+    # Define objective function for inversion
+    def objective(temp, target_scaledRI, model_params):
+        """Objective function: |predicted_scaledRI - target_scaledRI|"""
+        try:
+            predicted = model_function(np.array([temp]), **model_params)[0]
+            return abs(predicted - target_scaledRI)
+        except Exception:
+            return float('inf')
+    
+    # Perform numerical inversion for each draw and target
+    print(f"🔄 Inverting forward model for {n_draws} draws and {n_targets} targets...")
+    
+    for i in range(n_draws):
+        row = sampled_draws.iloc[i]
+        
+        # Extract parameters
+        model_params = {}
+        for param in param_names:
+            model_params[param] = row[f"{param}_{param_suffix}"]
+        
+        # Add multivariate parameters if present
+        if use_gdgt23ratio and 'gdgt23ratio' in kwargs:
+            model_params['beta0_gdgt23ratio'] = row[f"beta0_gdgt23ratio_{param_suffix}"]
+        if use_no3 and 'no3' in kwargs:
+            model_params['beta0_no3'] = row[f"beta0_no3_{param_suffix}"]
+            
+        # Add multivariate data
+        for key in ['gdgt23ratio', 'no3', 'no3_cutoff']:
+            if key in kwargs:
+                model_params[key] = kwargs[key]
+        
+        for j, target_scaledRI in enumerate(scaledRI_targets):
+            try:
+                # Use scalar minimization to find temperature
+                result = minimize_scalar(
+                    objective,
+                    args=(target_scaledRI, model_params),
+                    bounds=temp_range,
+                    method='bounded'
+                )
+                
+                if result.success:
+                    ensemble[i, j] = result.x
+                else:
+                    ensemble[i, j] = np.nan
+            except Exception:
+                ensemble[i, j] = np.nan
+    
+    # Check for failed inversions
+    failed_fraction = np.isnan(ensemble).mean()
+    if failed_fraction > 0.1:
+        warnings.warn(f"Warning: {failed_fraction*100:.1f}% of inversions failed. Consider adjusting temp_range.")
+    
+    # Compute percentiles
+    results = {
+        'scaledRI_targets': scaledRI_targets,
+        'metadata': {
+            'n_draws': n_draws,
+            'n_targets': n_targets,
+            'model_type': 'forward_model_inversion',
+            'forward_model_name': forward_posterior_ds.attrs.get('stan_model_name', 'unknown'),
+            'param_suffix': param_suffix,
+            'percentiles': percentiles,
+            'temp_range': temp_range,
+            'failed_fraction': failed_fraction,
+            'model_function': model_function.__name__ if hasattr(model_function, '__name__') else str(model_function),
+            'is_multivariate': use_gdgt23ratio or use_no3,
+            'use_gdgt23ratio': use_gdgt23ratio,
+            'use_no3': use_no3
+        }
+    }
+    
+    for percentile in percentiles:
+        key = f'p{int(percentile)}'
+        results[key] = np.nanpercentile(ensemble, percentile, axis=0)
+    
+    if return_full_ensemble:
+        results['ensemble'] = ensemble
+    
+    return results
+
+
+def _detect_model_and_params(posterior_ds: xr.Dataset, suffix: str):
+    """Helper function to detect model type and parameters."""
+    available_vars = list(posterior_ds.data_vars)
+    
+    # Check for v and Q parameters
+    has_v = f'v_{suffix}' in available_vars
+    has_Q = f'Q_{suffix}' in available_vars
+    
+    # Check for multivariate parameters - only include if they exist for this suffix
+    use_gdgt23ratio = posterior_ds.attrs.get('use_gdgt23ratio', 0) == 1
+    use_no3 = posterior_ds.attrs.get('use_no3', 0) == 1
+    
+    # Check if multivariate parameters actually exist for this suffix
+    has_gdgt23ratio_param = f'beta0_gdgt23ratio_{suffix}' in available_vars
+    has_no3_param = f'beta0_no3_{suffix}' in available_vars
+    
+    # Only use multivariate if both the global flag is set AND the parameter exists for this suffix
+    use_gdgt23ratio_for_suffix = use_gdgt23ratio and has_gdgt23ratio_param
+    use_no3_for_suffix = use_no3 and has_no3_param
+    
+    if has_v and has_Q:
+        # Generalized logistic
+        param_names = ['t0', 'k', 'b', 'v', 'Q']
+        if use_gdgt23ratio_for_suffix or use_no3_for_suffix:
+            model_function = generalized_logistic_model_fixed_upper_multivariate
+            if use_gdgt23ratio_for_suffix:
+                param_names.append('beta0_gdgt23ratio')
+            if use_no3_for_suffix:
+                param_names.append('beta0_no3')
+        else:
+            model_function = generalized_logistic_model_fixed_upper
+    else:
+        # Simple logistic
+        param_names = ['t0', 'k', 'b']
+        if use_gdgt23ratio_for_suffix or use_no3_for_suffix:
+            model_function = simple_logistic_model_fixed_upper_multivariate
+            if use_gdgt23ratio_for_suffix:
+                param_names.append('beta0_gdgt23ratio')
+            if use_no3_for_suffix:
+                param_names.append('beta0_no3')
+        else:
+            model_function = simple_logistic_model_fixed_upper
+    
+    return {
+        'model_function': model_function,
+        'param_names': param_names,
+        'has_v': has_v,
+        'has_Q': has_Q,
+        'use_gdgt23ratio': use_gdgt23ratio_for_suffix,
+        'use_no3': use_no3_for_suffix
+    }
