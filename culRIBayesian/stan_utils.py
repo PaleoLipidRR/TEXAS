@@ -588,7 +588,8 @@ def get_posterior(
     run_seconds = time.time() - start_time
     ds.attrs["run_duration (sec)"] = round(run_seconds, 2)
     ds.attrs["temptype"] = temptype
-    
+    ## add filename to posterior attributes
+    ds.attrs['filename'] = str(f"{stan_filename}_{temptype}")
 
     prior_settings = extract_priors_from_stan(model_path, data)
     if prior_settings:
