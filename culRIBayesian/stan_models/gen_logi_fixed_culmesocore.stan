@@ -28,7 +28,7 @@ model {
   // Priors
   t0_culmesocore  ~ normal(30, 10) T[-1.8, ];
   k_culmesocore       ~ normal(0, 0.5) T[0, ];
-  Q_culmesocore       ~ normal(1, 20) T[0, ]; 
+  Q_culmesocore       ~ normal(1, 30) T[0, ]; 
   v_culmesocore       ~ normal(1, 10) T[0, ]; 
   b_culmesocore       ~ beta(2, 5);
 

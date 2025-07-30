@@ -28,6 +28,7 @@ parameters {
     real<lower=-1.8>     t0_culmeso;    // inflection point
     real<lower=0,upper=1> k_culmeso;    // steepness
     real<lower=0,upper=1> b_culmeso;    // lower asymptote (on [0,1] via beta prior)
+    real
 
     // logistic parameters for coretop
     real<lower=-1.8>     t0_crtp;
