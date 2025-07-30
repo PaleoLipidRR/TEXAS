@@ -13,6 +13,102 @@ def compute_sample_range(samples):
     return p1 - 0.2 * span, p99 + 0.2 * span
 
 
+def compute_density_based_range(samples, kde_bw=0.3, density_threshold=0.01):
+    """
+    Compute a range based on meaningful density regions rather than just percentiles.
+    This is particularly useful for distributions with flat tails.
+    """
+    if len(samples) == 0:
+        return None, None
+    
+    # Get initial range using percentiles
+    p1, p99 = np.percentile(samples, [1, 99])
+    
+    # Create a fine grid for density estimation
+    x_range = np.linspace(p1, p99, 1000)
+    
+    # Compute KDE
+    kde = stats.gaussian_kde(samples, bw_method=kde_bw)
+    density = kde(x_range)
+    
+    # Find the maximum density
+    max_density = np.max(density)
+    
+    # Find regions where density is above the threshold (relative to max)
+    meaningful_density_mask = density > (density_threshold * max_density)
+    
+    if not np.any(meaningful_density_mask):
+        # Fallback to percentile-based range if no meaningful density found
+        return compute_sample_range(samples)
+    
+    # Find the range of meaningful density
+    meaningful_indices = np.where(meaningful_density_mask)[0]
+    density_min = x_range[meaningful_indices[0]]
+    density_max = x_range[meaningful_indices[-1]]
+    
+    # Add some padding
+    span = density_max - density_min
+    padding = 0.1 * span
+    
+    return density_min - padding, density_max + padding
+
+
+def compute_suffix_specific_range(all_samples, target_suffix):
+    """
+    Compute range based specifically on samples that contain the target suffix.
+    Uses P5-P95 percentiles for aggressive zooming on the relevant distributions.
+    """
+    # Filter samples to only include those with the target suffix
+    suffix_samples = []
+    for samples, idx_ds, param_label, stan_model_label, use_gdgt23ratio_check, use_no3_check in all_samples:
+        if target_suffix in param_label:
+            suffix_samples.append(samples)
+    
+    if not suffix_samples:
+        return None, None
+    
+    # Combine all suffix-specific samples
+    combined_suffix = np.concatenate(suffix_samples)
+    
+    if len(combined_suffix) == 0:
+        return None, None
+    
+    # Use P5-P95 for aggressive zooming
+    p5, p95 = np.percentile(combined_suffix, [5, 95])
+    span = p95 - p5
+    padding = 0.05 * span  # Small padding
+    
+    return p5 - padding, p95 + padding
+
+
+def compute_dataset_specific_range(all_samples, target_dataset_idx):
+    """
+    Compute range based specifically on samples from a specific posterior dataset.
+    Uses P5-P95 percentiles for aggressive zooming on the relevant distributions.
+    """
+    # Filter samples to only include those from the target dataset
+    dataset_samples = []
+    for samples, idx_ds, param_label, stan_model_label, use_gdgt23ratio_check, use_no3_check in all_samples:
+        if idx_ds == target_dataset_idx:
+            dataset_samples.append(samples)
+    
+    if not dataset_samples:
+        return None, None
+    
+    # Combine all dataset-specific samples
+    combined_dataset = np.concatenate(dataset_samples)
+    
+    if len(combined_dataset) == 0:
+        return None, None
+
+    # Use P1-P99 for aggressive zooming
+    p1, p99 = np.percentile(combined_dataset, [1, 99])
+    span = p99 - p1
+    padding = 0.05 * span  # Small padding
+
+    return p1 - padding, p99 + padding
+
+
 def plot_prior_distributions(
     priors_list: Union[List[str], Dict[str, str]],
     posterior_datasets=None,
@@ -21,6 +117,8 @@ def plot_prior_distributions(
     focus_on_posterior=True,
     include_groups=["t0", "k", "b", "v", "Q", "a", "beta0_gdgt23ratio", "beta0_no3"],
     suffix_include: Optional[List[str]] = None,
+    zoomin_suffix: Optional[List[str]] = None,
+    zoomin_dataset_idx: Optional[int] = None,
     use_linestyle_by_param=False,
     show_histogram=True,
     set_linewidth=1.5,
@@ -205,18 +303,62 @@ def plot_prior_distributions(
                 ax.plot(x, kde_y, color=color, lw=set_linewidth, linestyle=linestyle, label=param_label)
                 if show_histogram:
                     ax.hist(samples, bins=100, density=True, alpha=0.2, color=color)
-        
 
 
         if all_samples:
             combined = np.concatenate([s for s, _, _, _, _, _ in all_samples])
-            zoom_min, zoom_max = compute_sample_range(combined)
-            if focus_on_posterior and zoom_min is not None:
-                ax.set_xlim([zoom_min, zoom_max])
-            elif x_min is not None and x_max is not None:
-                ax.set_xlim([x_min, x_max])
+            
+            # Handle dataset-specific zooming (priority over suffix-based zooming)
+            if focus_on_posterior and zoomin_dataset_idx is not None:
+                zoom_min, zoom_max = compute_dataset_specific_range(all_samples, zoomin_dataset_idx)
+                if zoom_min is not None and zoom_max is not None:
+                    ax.set_xlim([zoom_min, zoom_max])
+                else:
+                    # Fallback to standard range if dataset-specific fails
+                    zoom_min, zoom_max = compute_sample_range(combined)
+                    if zoom_min is not None:
+                        ax.set_xlim([zoom_min, zoom_max])
+            else:
+                # Handle zoomin_suffix as either string or list (legacy behavior)
+                should_zoom = False
+                if focus_on_posterior and zoomin_suffix:
+                    if isinstance(zoomin_suffix, str):
+                        should_zoom = zoomin_suffix in base
+                    else:
+                        should_zoom = any(suffix in base for suffix in zoomin_suffix)
+                
+                if should_zoom:
+                    # For zoomin_suffix matches, use suffix-specific P5-P95 range for aggressive zooming
+                    if isinstance(zoomin_suffix, str):
+                        zoom_min, zoom_max = compute_suffix_specific_range(all_samples, zoomin_suffix)
+                    else:
+                        # For list of suffixes, try each one
+                        zoom_min, zoom_max = None, None
+                        for suffix in zoomin_suffix:
+                            if suffix in base:
+                                zoom_min, zoom_max = compute_suffix_specific_range(all_samples, suffix)
+                                break
+                    
+                    if zoom_min is not None and zoom_max is not None:
+                        ax.set_xlim([zoom_min, zoom_max])
+                    else:
+                        # Fallback to standard range if suffix-specific fails
+                        zoom_min, zoom_max = compute_sample_range(combined)
+                        if zoom_min is not None:
+                            ax.set_xlim([zoom_min, zoom_max])
+                elif focus_on_posterior:
+                    # For other cases, use the standard percentile-based range
+                    zoom_min, zoom_max = compute_sample_range(combined)
+                    if zoom_min is not None:
+                        if x_min is not None and x_max is not None:
+                            ax.set_xlim([max(x_min, zoom_min), min(x_max, zoom_max)])
+                        else:
+                            ax.set_xlim([zoom_min, zoom_max])
+                elif x_min is not None and x_max is not None:
+                    ax.set_xlim([x_min, x_max])
         else:
-            ax.set_xlim([x_min, x_max])
+            if x_min is not None and x_max is not None:
+                ax.set_xlim([x_min, x_max])
 
         
         ax.set_xlabel(f"{base}")
