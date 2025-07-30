@@ -30,8 +30,8 @@ model {
   t0_crtp ~ normal(prior_mean_t0, prior_sd_t0);
   k_crtp  ~ normal(prior_mean_k, prior_sd_k);
   b_crtp  ~ normal(prior_mean_b, prior_sd_b);
-  Q_crtp  ~ lognormal(prior_mean_Q, prior_sd_Q);
-  v_crtp  ~ lognormal(prior_mean_v, prior_sd_v);
+  Q_crtp  ~ normal(prior_mean_Q, prior_sd_Q);
+  v_crtp  ~ normal(prior_mean_v, prior_sd_v);
   sigma_scaledRI_crtp ~ normal(0.01, 0.1);
 
   // Generalized logistic mean (upper asymptote fixed at 1)
