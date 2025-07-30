@@ -24,11 +24,11 @@ parameters {
 model {
   // Priors
   t0_culmeso ~ normal(30, 10) T[-1.8, ];
-  k_culmeso      ~ normal(0, 0.25);
-  Q_culmeso      ~ normal(1, 10) T[0, ]; // normal(1, 5) T[0, ] OR lognormal(-0.2, 0.5)
-  v_culmeso      ~ normal(1, 10) T[0, ]; // normal(1, 5) T[0, ] OR lognormal(0.3, 0.4)
+  k_culmeso      ~ normal(0, 0.5) T[0, ];
+  Q_culmeso      ~ normal(1, 30) T[0, ]; 
+  v_culmeso      ~ normal(1, 10) T[0, ]; 
   b_culmeso      ~ beta(2, 5);
-  a_culmeso ~ normal(1,0.2) T[0, ];
+  a_culmeso      ~ normal(1, 0.2);
   sigma_scaledRI_cul  ~ cauchy(0, 0.1);
   sigma_scaledRI_meso ~ cauchy(0, 0.1);
 
