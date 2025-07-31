@@ -7,7 +7,9 @@ from .stan_utils import (
     load_posterior,
     save_posterior,
     build_invT_inputData,  # add if you use it
-    refresh_stan_models
+    refresh_stan_models,
+    generate_ensemble_auto,
+    generate_ensemble
 )
 
 
@@ -27,7 +29,9 @@ __all__ = [
     "save_posterior",
     "build_invT_inputData",
     "refresh_stan_models",
-    "plot_prior_distributions"
+    "plot_prior_distributions",
+    "generate_ensemble_auto",
+    "generate_ensemble"
 ]
 
 ### version information

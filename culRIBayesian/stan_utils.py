@@ -244,13 +244,51 @@ def extract_priors_from_stan(stan_path: Union[str, Path], data: Optional[Dict[st
 
 def infer_posterior_suffixes(data_vars):
     """
-    Infer the suffix used in t0/k/b parameters only (not enforcing sigma to match).
+    Infer the suffix used in t0/k/b parameters with priority-based selection.
+    Priority order: crtp > culmesocore > culmeso > others
+    
     Returns:
         used_suffix (str or None): If consistent suffix is found across all t0/k/b.
         suffix_map (dict): Mapping from param to detected suffix.
     """
     import re
+    
+    # Define suffix priority order
+    PRIORITY_SUFFIXES = ["crtp", "culmesocore", "culmeso", "meso", "cul"]
+    
     core_params = ["t0", "k", "b"]
+    
+    # Find all possible suffixes for each parameter
+    param_suffixes = {}
+    for param in core_params:
+        candidates = [v for v in data_vars if v.startswith(f"{param}_")]
+        param_suffixes[param] = []
+        for var in candidates:
+            match = re.match(f"{param}_(.+)", var)
+            if match:
+                suffix = match.group(1)
+                param_suffixes[param].append(suffix)
+    
+    # Find suffixes that are common to all parameters
+    if all(param_suffixes.values()):  # All parameters have at least one suffix
+        common_suffixes = set(param_suffixes[core_params[0]])
+        for param in core_params[1:]:
+            common_suffixes &= set(param_suffixes[param])
+        
+        if common_suffixes:
+            # Select suffix based on priority
+            for priority_suffix in PRIORITY_SUFFIXES:
+                if priority_suffix in common_suffixes:
+                    # Create suffix map
+                    suffix_map = {param: priority_suffix for param in core_params}
+                    return priority_suffix, suffix_map
+            
+            # If no priority suffix found, use the first common one
+            selected_suffix = sorted(common_suffixes)[0]
+            suffix_map = {param: selected_suffix for param in core_params}
+            return selected_suffix, suffix_map
+    
+    # Fallback to original logic if no common suffixes
     suffixes = {}
     for param in core_params:
         candidates = [v for v in data_vars if v.startswith(f"{param}_")]
@@ -260,8 +298,10 @@ def infer_posterior_suffixes(data_vars):
                 suffix = match.group(1)
                 suffixes[param] = suffix
                 break  # Take the first valid one
+    
     if len(suffixes) == len(core_params) and len(set(suffixes.values())) == 1:
         return list(suffixes.values())[0], suffixes
+    
     return None, suffixes
 
 
@@ -972,10 +1012,46 @@ def _process_forward_model(
     """
     Process forward models (existing functionality).
     """
+    # Ensure arrays are properly flattened 1D arrays
+    x_vals = np.asarray(x_vals).flatten()
+    
+    if gdgt23ratio is not None:
+        gdgt23ratio = np.asarray(gdgt23ratio).flatten()
+        if len(gdgt23ratio) != len(x_vals):
+            raise ValueError(f"gdgt23ratio length ({len(gdgt23ratio)}) must match x_vals length ({len(x_vals)})")
+    
+    if no3 is not None:
+        no3 = np.asarray(no3).flatten()
+        if len(no3) != len(x_vals):
+            raise ValueError(f"no3 length ({len(no3)}) must match x_vals length ({len(x_vals)})")
+    
     # Auto-detect suffix
     used_suffix, suffix_map = infer_posterior_suffixes(posterior_ds.data_vars)
     if used_suffix is None:
         raise ValueError("Could not determine consistent parameter suffix")
+    
+    # Handle mixed suffix case for multivariate models
+    # If multivariate data is provided, check if there's a different suffix for multivariate parameters
+    if gdgt23ratio is not None or no3 is not None:
+        available_vars = list(posterior_ds.data_vars)
+        
+        # Look for multivariate parameters with different suffixes
+        multivariate_suffixes = set()
+        for var in available_vars:
+            if 'beta0_gdgt23ratio' in var or 'beta0_no3' in var:
+                suffix_part = var.split('_')[-1]
+                multivariate_suffixes.add(suffix_part)
+        
+        # If multivariate parameters use a different suffix, use that instead
+        if multivariate_suffixes and used_suffix not in multivariate_suffixes:
+            # Check if the multivariate suffix also has the base parameters
+            for mv_suffix in multivariate_suffixes:
+                has_base_params = all(f"{param}_{mv_suffix}" in available_vars 
+                                    for param in ['t0', 'k', 'b'])
+                if has_base_params:
+                    print(f"🔄 Switching from suffix '{used_suffix}' to '{mv_suffix}' for multivariate model")
+                    used_suffix = mv_suffix
+                    break
     
     # Auto-detect model type
     model_detection = _detect_model_and_params(posterior_ds, used_suffix)
