@@ -112,6 +112,7 @@ def compute_dataset_specific_range(all_samples, target_dataset_idx):
 def plot_prior_distributions(
     priors_list: Union[List[str], Dict[str, str]],
     posterior_datasets=None,
+    posterior_labels_list: Optional[List[str]] = None,
     show_suptitle=True,
     kde_bw=0.3,
     focus_on_posterior=True,
@@ -174,7 +175,7 @@ def plot_prior_distributions(
 
     param_groups = [g for g in include_groups if grouped[g]]
     print(param_groups)
-    ncols = 3
+    ncols = 3 if len(param_groups) > 3 else len(param_groups)
     nrows = int(np.ceil(len(param_groups) / ncols))
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, 
                              figsize=(set_fig_width_factor * ncols, set_fig_height_factor * nrows), 
@@ -196,6 +197,8 @@ def plot_prior_distributions(
         x_min, x_max = None, None
 
         prior_key = next((k for k in parsed_priors if k.startswith(base)), None)
+        x = None  # Initialize x variable
+        
         if prior_key:
             prior_info = parsed_priors[prior_key]
             dist, a, b, trunc = prior_info["dist"], prior_info["a"], prior_info["b"], prior_info["trunc"]
@@ -240,17 +243,45 @@ def plot_prior_distributions(
 
             ax.plot(x, y, color='black', lw=set_linewidth, label="Prior")
 
+        # Collect all samples first to determine x range if no prior available
         for name in param_names:
             if posterior_datasets:
                 for idx_ds, ds in enumerate(posterior_datasets):
                     if name not in ds.data_vars:
                         continue
                     samples = ds[name].values.flatten()
-                    stan_model_labels = ds.attrs.get('filename', 'Unknown Model')
+                    if posterior_labels_list is not None:
+                        stan_model_labels = posterior_labels_list[idx_ds]
+                    else:
+                        # Fallback to dataset filename if labels not provided
+                        stan_model_labels = ds.attrs.get('filename', 'Unknown Model')
                     use_gdgt23ratio_check = ds.attrs.get('use_gdgt23ratio', 0)
                     use_no3_check = ds.attrs.get('use_no3', 0)
                     all_samples.append((samples, idx_ds, name, stan_model_labels,
                                         use_gdgt23ratio_check, use_no3_check))
+        
+        # If x was not defined by prior, create it from posterior data range
+        if x is None and all_samples:
+            # Get the combined range of all samples for this parameter group
+            all_param_samples = np.concatenate([s for s, _, _, _, _, _ in all_samples])
+            data_min, data_max = all_param_samples.min(), all_param_samples.max()
+            
+            # Robust padding calculation that works for any value range
+            data_range = data_max - data_min
+            if data_range > 0:
+                # Use 15% padding relative to data range
+                padding = 0.15 * data_range
+            else:
+                # If all values are identical, use absolute padding based on magnitude
+                abs_magnitude = abs(data_min) if data_min != 0 else 1.0
+                padding = 0.1 * abs_magnitude
+            
+            x_min = data_min - padding
+            x_max = data_max + padding
+            x = np.linspace(x_min, x_max, 5000)
+        elif x is None:
+            # Fallback: create a default range if no samples either
+            x = np.linspace(-1, 1, 5000)
         
         # Determine number of distinct models (used to color by model)
         if posterior_datasets:

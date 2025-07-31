@@ -1189,7 +1189,6 @@ def get_posterior(
     set_adapt_delta: float = 0.99,
     seed: Optional[int] = 42,
     verbose: bool = True,
-    no3_cutoff: Optional[float] = None,
 ) -> xr.Dataset:
     
     start_time = time.time()
@@ -1229,7 +1228,6 @@ def get_posterior(
         data["use_gdgt23ratio"] = 0
         data["use_no3"] = 0
     
-    data["no3_cutoff"] = no3_cutoff if no3_cutoff is not None else 0.0
 
     if seed is not None:
         np.random.seed(seed)
@@ -1507,6 +1505,7 @@ def save_posterior(
         raise FileExistsError(f"{filepath} already exists and overwrite=False.")
 
     ## add filename to posterior attributes
+    
     posterior.attrs['filename'] = str(f"{stan_model_name}_{temptype}")
     
     # Save with compression
@@ -1577,9 +1576,6 @@ def save_invT_posterior(
 
     if filepath.exists() and not overwrite:
         raise FileExistsError(f"{filepath} already exists and overwrite=False.")
-
-    ## add filename to posterior attributes
-    posterior.attrs['filename'] = str(f"{stan_model_name}_{temptype}")
 
     # Save with compression
     encoding = {var: {"zlib": True} for var in posterior.data_vars}
