@@ -28,15 +28,15 @@ parameters {
 model {
   // Priors
   t0_culmesocore      ~ normal(30, 10) T[-1.8, ];
-  k_culmesocore      ~ normal(0, 0.5) T[0, ];
+  k_culmesocore      ~ normal(0, 0.5) T[0, ];  // reverted - k is unbounded above in gen logistic
   Q_culmesocore      ~ normal(1, 30) T[0, ]; 
   v_culmesocore      ~ normal(1, 10) T[0, ]; 
   b_culmesocore       ~ beta(2, 5);
   a_culmesocore       ~ normal(1,0.2) T[0, ];
 
-  sigma_scaledRI_cul  ~ cauchy(0, 0.1);
-  sigma_scaledRI_meso ~ cauchy(0, 0.1);
-  sigma_scaledRI_crtp ~ cauchy(0, 0.1);
+  sigma_scaledRI_cul  ~ normal(0.01, 0.1);
+  sigma_scaledRI_meso ~ normal(0.01, 0.1);
+  sigma_scaledRI_crtp ~ normal(0.01, 0.1);
 
   // Generalized logistic curve (fixed upper bound = 1)
   vector[N_cul] mu_scaledRI_cul = b_culmesocore 
