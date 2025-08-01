@@ -56,18 +56,18 @@ parameters {
 
 model {
     // 1 Priors for shared parameters for culture+mesocosm
-    t0_culmeso    ~ normal(30, 10) T[-1.8, ];  // truncated normal
+    t0_culmeso    ~ normal(30, 10) T[10, 50];  // truncated normal to match parameter bounds
     k_culmeso     ~ beta(2, 5);
     b_culmeso     ~ beta(2, 5);
     Q_culmeso      ~ normal(1, 30) T[0, ]; 
     v_culmeso      ~ normal(1, 10) T[0, ]; 
 
-    // 2 Hyperpriors for scales (weakly informative)
-    sigma_t0_culmeso     ~ cauchy(0, 1);
-    sigma_k_culmeso      ~ cauchy(0, 1);
-    sigma_b_culmeso      ~ cauchy(0, 1);
-    sigma_Q_culmeso      ~ cauchy(0, 1);
-    sigma_v_culmeso      ~ cauchy(0, 1);
+    // 2 Hyperpriors for scales (more informative to allow reasonable hierarchical structure)
+    sigma_t0_culmeso     ~ normal(0, 5);  // allow more variation for temperature
+    sigma_k_culmeso      ~ normal(0, 0.2);  // k is bounded [0,1], so smaller scale
+    sigma_b_culmeso      ~ normal(0, 0.2);  // b is bounded [0,1], so smaller scale  
+    sigma_Q_culmeso      ~ normal(0, 2);    // allow reasonable variation for Q
+    sigma_v_culmeso      ~ normal(0, 2);    // allow reasonable variation for v
 
     // 3 Priors for observation noise
     sigma_scaledRI_cul ~ normal(0.01, 0.1);
@@ -82,12 +82,12 @@ model {
     scaledRI_cul ~ normal(mu_scaledRI_cul, sigma_scaledRI_cul);
     scaledRI_meso ~ normal(mu_scaledRI_meso, sigma_scaledRI_meso);
     
-    // 5 Coretop priors 
-    t0_crtp  ~ normal(t0_culmeso, sigma_t0_culmeso);
-    k_crtp   ~ normal(k_culmeso, sigma_k_culmeso);
-    b_crtp   ~ normal(b_culmeso, sigma_b_culmeso);
-    Q_crtp   ~ normal(Q_culmeso, sigma_Q_culmeso);
-    v_crtp   ~ normal(v_culmeso, sigma_v_culmeso)
+    // 5 Coretop hierarchical priors with proper truncation
+    t0_crtp  ~ normal(t0_culmeso, sigma_t0_culmeso) T[10, 50];  // truncated to match bounds
+    k_crtp   ~ normal(k_culmeso, sigma_k_culmeso) T[0, 1];     // truncated to match bounds
+    b_crtp   ~ normal(b_culmeso, sigma_b_culmeso) T[0, 1];     // truncated to match bounds
+    Q_crtp   ~ normal(Q_culmeso, sigma_Q_culmeso) T[0.01, ];   // truncated to match bounds
+    v_crtp   ~ normal(v_culmeso, sigma_v_culmeso) T[0.1, ];    // truncated to match bounds
     beta0_gdgt23ratio_crtp ~ normal(0, 0.05);
     beta0_no3_crtp ~ normal(0, 0.05);
 

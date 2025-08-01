@@ -27,9 +27,9 @@ model {
   t0_culmesocore    ~ normal(30, 10) T[-1.8, ];
   k_culmesocore       ~ normal(0, 0.25);
   b_culmesocore       ~ beta(2, 5);
-  sigma_scaledRI_cul        ~ cauchy(0, 0.1);
-  sigma_scaledRI_meso       ~ cauchy(0, 0.1);
-  sigma_scaledRI_crtp       ~ cauchy(0, 0.1);
+  sigma_scaledRI_cul        ~ normal(0.01, 0.1);
+  sigma_scaledRI_meso       ~ normal(0.01, 0.1);
+  sigma_scaledRI_crtp       ~ normal(0.01, 0.1);
 
   // Logistic‐curve means (vectorized)
   vector[N_cul] mu_scaledRI_cul = (1 - b_culmesocore) * inv_logit(k_culmesocore * (t_cul - t0_culmesocore)) + b_culmesocore;

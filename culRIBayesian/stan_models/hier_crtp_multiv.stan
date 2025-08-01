@@ -49,14 +49,14 @@ parameters {
 
 model {
     // 1 Priors for shared parameters for culture+mesocosm
-    t0_culmeso    ~ normal(30, 10) T[-1.8, ];  // truncated normal
+    t0_culmeso    ~ normal(30, 10) T[-1.8, ];  // truncated normal to match bounds
     k_culmeso     ~ beta(2, 5);
     b_culmeso     ~ beta(2, 5);
 
-    // 2 Hyperpriors for scales (weakly informative)
-    sigma_t0_culmeso     ~ cauchy(0, 1);
-    sigma_k_culmeso      ~ cauchy(0, 1);
-    sigma_b_culmeso      ~ cauchy(0, 1);
+    // 2 Hyperpriors for scales (more informative to allow reasonable hierarchical structure)
+    sigma_t0_culmeso     ~ normal(0, 5);  // allow more variation for temperature
+    sigma_k_culmeso      ~ normal(0, 0.2);  // k is bounded [0,1], so smaller scale
+    sigma_b_culmeso      ~ normal(0, 0.2);  // b is bounded [0,1], so smaller scale
 
     // 3 Priors for observation noise
     sigma_scaledRI_cul ~ normal(0.01, 0.1);
