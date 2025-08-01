@@ -23,12 +23,12 @@ parameters {
 model {
   // Priors
   t0_culmeso ~ normal(30, 10) T[-1.8, ];
-  k_culmeso      ~ normal(0, 0.5) T[0, ];
+  k_culmeso      ~ normal(0, 0.5) T[0, ];  // reverted - k is unbounded above in gen logistic
   Q_culmeso      ~ normal(1, 30) T[0, ]; 
   v_culmeso      ~ normal(1, 10) T[0, ]; 
   b_culmeso      ~ beta(2, 5);
-  sigma_scaledRI_cul  ~ cauchy(0, 0.1);
-  sigma_scaledRI_meso ~ cauchy(0, 0.1);
+  sigma_scaledRI_cul  ~ normal(0.01, 0.1);
+  sigma_scaledRI_meso ~ normal(0.01, 0.1);
 
   // Generalized logistic mean vectors
   vector[N_cul] mu_scaledRI_cul = b_culmeso + (1 - b_culmeso)
