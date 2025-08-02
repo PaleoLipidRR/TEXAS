@@ -14,11 +14,21 @@ dependencies = [
     "numpy>=1.18",
     "xarray>=0.16",
     "cmdstanpy>=1.0",
-    "typing-extensions>=3.7.4"
+    "typing-extensions>=3.7.4",
+    "scipy>=1.7",
+    "pandas",
 ]
-
 [project.optional-dependencies]
-dev = []
+plotting = [
+    "matplotlib",
+    "proplot",             # only if you want the proplot-based helpers
+]
+dev = [
+  "ipykernel",     # for running and testing in notebooks
+  "pytest",        # your test framework
+  "mkdocs",        # for building docs
+  # …other dev tools…
+]
 
 [tool.setuptools]
 packages = ["TEXAS"]
