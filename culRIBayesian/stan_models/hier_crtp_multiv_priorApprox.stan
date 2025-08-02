@@ -55,6 +55,6 @@ model {
             mu_scaledRI_crtp[i] += beta0_no3_crtp * log10(no3_crtp[i]);
         }
     }
-    sigma_scaledRI_crtp ~ normal(0.01, 0.1);
+    sigma_scaledRI_crtp ~ normal(0.01, 0.1) T[1e-6, ];
     scaledRI_crtp ~ normal(mu_scaledRI_crtp, sigma_scaledRI_crtp);
 }

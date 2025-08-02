@@ -53,10 +53,10 @@ model {
     k_culmeso     ~ beta(2, 5);
     b_culmeso     ~ beta(2, 5);
 
-    // 2 Hyperpriors for scales (more informative to allow reasonable hierarchical structure)
-    sigma_t0_culmeso     ~ normal(0, 5);  // allow more variation for temperature
-    sigma_k_culmeso      ~ normal(0, 0.2);  // k is bounded [0,1], so smaller scale
-    sigma_b_culmeso      ~ normal(0, 0.2);  // b is bounded [0,1], so smaller scale
+    // 2 Hyperpriors for scales (half-normal to prevent zero values)
+    sigma_t0_culmeso     ~ normal(0, 5) T[0, ];   // half-normal, prevents zero
+    sigma_k_culmeso      ~ normal(0, 0.2) T[0, ]; // half-normal, prevents zero
+    sigma_b_culmeso      ~ normal(0, 0.2) T[0, ]; // half-normal, prevents zero
 
     // 3 Priors for observation noise
     sigma_scaledRI_cul ~ normal(0.01, 0.1);
