@@ -8,7 +8,7 @@ from pathlib import Path
 from scipy.stats import truncnorm, beta, gaussian_kde
 import proplot as plot
 
-from culRIBayesian.stan_utils import (
+from TEXAS.stan_utils import (
     load_posterior,
     make_ensemble,
     make_forward_ensemble,

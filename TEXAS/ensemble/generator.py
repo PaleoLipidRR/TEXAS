@@ -1,12 +1,12 @@
-# culRIBayesian/ensemble/generator.py
+# TEXAS/ensemble/generator.py
 
 import numpy as np
 import xarray as xr
 from typing import Callable, List, Optional, Dict, Any
 
 from .detection import detect_model_and_params
-from culRIBayesian.stan.io import load_posterior
-from culRIBayesian.stan.sampler import StanSampler, StanCompiler
+from TEXAS.stan.io import load_posterior
+from TEXAS.stan.sampler import StanSampler, StanCompiler
 
 def generate_ensemble(
     posterior_ds: xr.Dataset,

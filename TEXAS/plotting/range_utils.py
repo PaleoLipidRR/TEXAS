@@ -1,4 +1,4 @@
-# culRIBayesian/plotting/range_utils.py
+# TEXAS/plotting/range_utils.py
 
 import numpy as np
 import scipy.stats as stats

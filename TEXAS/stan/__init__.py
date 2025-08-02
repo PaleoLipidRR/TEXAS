@@ -1,4 +1,4 @@
-# culRIBayesian/stan/__init__.py
+# TEXAS/stan/__init__.py
 
 from .compiler import StanCompiler
 from .sampler  import StanSampler, get_posterior, get_invT_posterior

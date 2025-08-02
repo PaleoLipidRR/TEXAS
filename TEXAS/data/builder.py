@@ -1,4 +1,4 @@
-# culRIBayesian/data/builder.py
+# TEXAS/data/builder.py
 
 from pathlib import Path
 from typing import (
@@ -9,8 +9,8 @@ from dataclasses import dataclass
 import numpy as np
 import xarray as xr
 
-from culRIBayesian.data.filter import ensure_numpy
-from culRIBayesian.stan.io import load_posterior
+from TEXAS.data.filter import ensure_numpy
+from TEXAS.stan.io import load_posterior
 
 # ─── Configuration ───────────────────────────────────────────────────────
 
