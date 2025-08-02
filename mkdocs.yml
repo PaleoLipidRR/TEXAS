@@ -1,0 +1,22 @@
+site_name: culRI-Bayesian
+
+theme:
+  name: material
+
+plugins:
+  - search
+  - mkdocstrings
+  
+nav:
+  - Quickstart: index.md
+  - API Reference:
+      - “culRIBayesian”: api.md
+
+plugins:
+  - search
+  - mkdocstrings
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - pymdownx.superfences
