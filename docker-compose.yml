@@ -1,0 +1,9 @@
+services:
+  docs:
+    build: .
+    volumes:
+      - ./:/docs
+    ports:
+      - "8000:8000"
+    # note: `mkdocs` is now the entrypoint, so just pass subcommand
+    command: ["serve", "--dev-addr=0.0.0.0:8000"]
