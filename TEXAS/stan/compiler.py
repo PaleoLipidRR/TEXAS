@@ -1,4 +1,4 @@
-# culRIBayesian/stan/compiler.py
+# TEXAS/stan/compiler.py
 
 from pathlib import Path
 import os

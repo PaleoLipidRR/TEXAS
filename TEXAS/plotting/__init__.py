@@ -1,4 +1,4 @@
-# culRIBayesian/plotting/__init__.py
+# TEXAS/plotting/__init__.py
 
 from .range_utils import (
     compute_sample_range,

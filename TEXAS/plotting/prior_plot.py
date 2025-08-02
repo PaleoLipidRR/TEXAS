@@ -1,4 +1,4 @@
-# culRIBayesian/plotting/prior_plot.py
+# TEXAS/plotting/prior_plot.py
 
 import re
 import numpy as np

@@ -1,4 +1,4 @@
-# culRIBayesian/ensemble/detection.py
+# TEXAS/ensemble/detection.py
 
 import xarray as xr
 from ..models.logistics import (
