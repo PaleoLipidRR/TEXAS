@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Union, Optional, Dict, List, Tuple, Sequence
 import numpy as np
+import pandas as pd
 import xarray as xr
 from cmdstanpy import CmdStanModel
 import os
@@ -1263,15 +1264,16 @@ def get_posterior(
     iter_warmup: int = 500,
     iter_sampling: int = 1000,
     set_adapt_delta: float = 0.99,
+    set_max_treedepth: int = 10,
     seed: Optional[int] = 42,
     verbose: bool = True,
-) -> xr.Dataset:
+) -> Tuple[xr.Dataset, str]:
     
     start_time = time.time()
     
-    if temptype not in {"thermoT","sst","cultureT"}:
-        raise ValueError(f"Unsupported temperature type: {temptype}. Expected 'thermoT' or 'sst' or 'cultureT.")
-    
+    if temptype not in {"thermoT", "sst", "cultureT"}:
+        raise ValueError(f"Unsupported temperature type: {temptype}. Expected 'thermoT', 'sst', or 'cultureT'.")
+
     if stan_models_dir is None:
         stan_models_dir = Path(__file__).parent / "stan_models"
     model_path = Path(stan_models_dir) / f"{stan_filename}.stan"
@@ -1280,30 +1282,18 @@ def get_posterior(
         _MODEL_CACHE[model_path] = CmdStanModel(stan_file=str(model_path))
     model = _MODEL_CACHE[model_path]
 
-    # Optional predictors: only set if coretop data is present
+    # Optional predictors (for coretop)
     if "N_crtp" in data:
-        # gdgt23ratio_crtp
-        if "gdgt23ratio_crtp" in data:
-            data["use_gdgt23ratio"] = 1
-        else:
-            data["gdgt23ratio_crtp"] = np.zeros(data["N_crtp"])
-            data["use_gdgt23ratio"] = 0
+        data["use_gdgt23ratio"] = int("gdgt23ratio_crtp" in data)
+        data["gdgt23ratio_crtp"] = data.get("gdgt23ratio_crtp", np.zeros(data["N_crtp"]))
 
-        # no3_crtp
-        if "no3_crtp" in data:
-            data["use_no3"] = 1
-            if data["no3_cutoff"] < 0:
-                raise ValueError("no3_crtp provided but no3_cutoff is not set (positive real number).")
-                
-        else:
-            data["no3_crtp"] = np.zeros(data["N_crtp"])
-            data["use_no3"] = 0
-        
+        data["use_no3"] = int("no3_crtp" in data)
+        data["no3_crtp"] = data.get("no3_crtp", np.zeros(data["N_crtp"]))
+        if data["use_no3"] and data.get("no3_cutoff", -1) < 0:
+            raise ValueError("no3_cutoff must be set to a positive value when using no3_crtp.")
     else:
-        # If no coretop data, turn off optional predictors
         data["use_gdgt23ratio"] = 0
         data["use_no3"] = 0
-    
 
     if seed is not None:
         np.random.seed(seed)
@@ -1318,13 +1308,13 @@ def get_posterior(
             parallel_chains=chains,
             show_console=False,
             show_progress=True,
-            save_profile=True, 
-            adapt_delta=set_adapt_delta
+            save_profile=True,
+            adapt_delta=set_adapt_delta,
+            max_treedepth=set_max_treedepth,
         )
     except RuntimeError as e:
         raise RuntimeError(f"Stan sampling failed: {e}")
 
-    # Optional: warn about divergent transitions
     diagnostics = fit.diagnose()
     if verbose:
         print(f"Sampling completed in {time.time() - start_time:.1f} seconds")
@@ -1338,18 +1328,26 @@ def get_posterior(
         dim_names = ["draw"] + [f"dim_{i}" for i in range(1, arr.ndim)]
         coords = {name: np.arange(sz) for name, sz in zip(dim_names, arr.shape)}
         ds[var] = xr.DataArray(data=arr, dims=dim_names, coords=coords, name=var)
-    
+
     ds = extract_and_update_metadata(ds, data, stan_filename)
     run_seconds = time.time() - start_time
     ds.attrs["run_duration (sec)"] = round(run_seconds, 2)
     ds.attrs["temptype"] = temptype
-    ## add filename to posterior attributes
-    ds.attrs['filename'] = str(f"{stan_filename}_{temptype}")
+    ds.attrs["filename"] = f"{stan_filename}_{temptype}"
 
     prior_settings = extract_priors_from_stan(model_path, data)
     if prior_settings:
-        ds.attrs["priors"] = [f"{k}: {v}" for k, v in prior_settings.items()]  # ← safe for NetCDF
+        ds.attrs["priors"] = [f"{k}: {v}" for k, v in prior_settings.items()]
 
+    # Add summarized diagnostics
+    try:
+        # from .diagnostics_utils import summarize_sampler_diagnostics_from_method_variables  # if stored separately
+        diag_summary = summarize_sampler_diagnostics_from_method_variables(fit)
+        for k, v in diag_summary.items():
+            ds.attrs[f"stan_diag_{k}"] = v
+    except Exception as e:
+        if verbose:
+            print(f"[WARNING] Failed to add diagnostics summary: {e}")
 
     return ds, diagnostics
 
@@ -2005,3 +2003,80 @@ def _detect_model_and_params(posterior_ds: xr.Dataset, suffix: str):
         'use_gdgt23ratio': use_gdgt23ratio_for_suffix,
         'use_no3': use_no3_for_suffix
     }
+
+def summarize_sampler_diagnostics_from_method_variables(fit):
+    """
+    Summarize CmdStanPy sampler diagnostics from method_variables and summary.
+    Returns a dictionary with key diagnostic metrics and PASS/FAIL flags.
+    """
+    import numpy as np
+
+    diag = {}
+    method_vars = fit.method_variables()
+
+    total_draws = method_vars["divergent__"].size
+
+    # Divergent transitions
+    n_divergent = int(np.sum(method_vars["divergent__"]))
+    diag["n_divergent"] = n_divergent
+    diag["pct_divergent"] = 100 * n_divergent / total_draws
+    diag["divergent_status"] = "PASS" if diag["pct_divergent"] < 1.0 else "FAIL"
+
+    # Treedepth
+    treedepth = method_vars["treedepth__"]
+    max_treedepth_setting = 10  # or make this a parameter if you modify it elsewhere
+    n_max_treedepth = int(np.sum(treedepth >= max_treedepth_setting))
+    diag["n_max_treedepth"] = n_max_treedepth
+    diag["pct_max_treedepth"] = 100 * n_max_treedepth / total_draws
+    diag["treedepth_status"] = "PASS" if diag["pct_max_treedepth"] < 5.0 else "FAIL"
+
+
+    # E-BFMI
+    try:
+        bfmi_vals = fit.bfmi if hasattr(fit, "bfmi") else fit.bfmi_
+    except Exception:
+        bfmi_vals = None
+    diag["min_ebfmi"] = float(np.min(bfmi_vals)) if bfmi_vals is not None else -1
+    diag["ebfmi_status"] = (
+        "PASS" if diag["min_ebfmi"] > 0.2 else "UNKNOWN"
+        if diag["min_ebfmi"] == -1 else "FAIL"
+        )
+
+    # R-hat and ESS
+    summary_df = fit.summary()
+    rhat_col = "R_hat"
+    ess_col = "ESS_bulk"
+    diag["max_rhat"] = float(summary_df[rhat_col].max())
+    diag["n_high_rhat"] = int((summary_df[rhat_col] > 1.01).sum())
+    diag["rhat_status"] = "PASS" if diag["max_rhat"] < 1.01 else "FAIL"
+
+    diag["min_ess_bulk"] = float(summary_df[ess_col].min())
+    diag["ess_status"] = "PASS" if diag["min_ess_bulk"] > 100 else "FAIL"
+
+    # Overall
+    checks = [k for k in ["divergent_status", "treedepth_status", "rhat_status", "ess_status"]
+          if diag.get(k) != "UNKNOWN"]
+    diag["overall_status"] = "PASS" if all(diag[k] == "PASS" for k in checks) else "FAIL"
+
+
+    return diag
+
+
+def create_diagnostics_summary_table_from_datasets(ds_list):
+    """
+    Create a pandas summary table of Stan diagnostics from a list of posterior xarray Datasets.
+    Assumes diagnostics are stored in .attrs as 'stan_diag_*' entries.
+    """
+    import pandas as pd
+
+    summary_rows = []
+
+    for ds in ds_list:
+        row = {"model": ds.attrs.get("filename", "unknown")}
+        for key, value in ds.attrs.items():
+            if key.startswith("stan_diag_"):
+                row[key.replace("stan_diag_", "")] = value
+        summary_rows.append(row)
+
+    df = pd.DataFrame(summary_rows)
+    return df
