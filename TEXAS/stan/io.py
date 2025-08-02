@@ -1,4 +1,4 @@
-# culRIBayesian/stan/io.py
+# TEXAS/stan/io.py
 
 from pathlib import Path
 from typing import Union, Optional
@@ -10,7 +10,7 @@ __all__ = [
     "save_invT_posterior",
 ]
 
-# By default, write into your repo under culRIBayesian/posterior_cache
+# By default, write into your repo under TEXAS/posterior_cache
 DEFAULT_FORWARD_DIR = Path(__file__).parent.parent / "posterior_cache"
 DEFAULT_INVT_DIR    = Path(__file__).parent.parent / "invT_posterior_cache"
 DEFAULT_FORWARD_DIR.mkdir(exist_ok=True, parents=True)
@@ -25,7 +25,7 @@ def save_posterior(
     """
     Save a forward-model posterior to disk as compressed NetCDF.
 
-    Default location: repo/.../culRIBayesian/posterior_cache/
+    Default location: repo/.../TEXAS/posterior_cache/
     """
     if not isinstance(posterior, xr.Dataset):
         raise TypeError("posterior must be an xarray.Dataset")
@@ -80,7 +80,7 @@ def save_invT_posterior(
     """
     Save an inverse-T posterior to disk as compressed NetCDF.
 
-    Default location: repo/.../culRIBayesian/invT_posterior_cache/
+    Default location: repo/.../TEXAS/invT_posterior_cache/
     """
     if not isinstance(posterior, xr.Dataset):
         raise TypeError("posterior must be an xarray.Dataset")

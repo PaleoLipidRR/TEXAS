@@ -1,4 +1,4 @@
-# culRIBayesian/stan/invT.py
+# TEXAS/stan/invT.py
 
 from typing import Union, Optional, Dict
 import numpy as np

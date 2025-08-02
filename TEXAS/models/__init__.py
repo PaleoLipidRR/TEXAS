@@ -1,4 +1,4 @@
-# culRIBayesian/models/__init__.py
+# TEXAS/models/__init__.py
 
 from .logistics import (
     logistic,

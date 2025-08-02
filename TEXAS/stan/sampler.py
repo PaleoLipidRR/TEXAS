@@ -1,4 +1,4 @@
-# culRIBayesian/stan/sampler.py
+# TEXAS/stan/sampler.py
 
 import time
 import numpy as np

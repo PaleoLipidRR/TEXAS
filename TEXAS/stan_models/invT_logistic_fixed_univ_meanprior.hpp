@@ -6,23 +6,23 @@ using namespace stan::math;
 stan::math::profile_map profiles__;
 static constexpr std::array<const char*, 18> locations_array__ =
   {" (found before start of program)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 15, column 2 to column 30)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 19, column 9 to column 10)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 19, column 2 to column 24)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 20, column 2 to column 44)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 21, column 2 to column 58)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 22, column 2 to column 49)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 3, column 2 to column 17)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 4, column 9 to column 10)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 4, column 2 to column 21)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 5, column 9 to column 10)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 5, column 2 to column 23)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 6, column 2 to column 21)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 8, column 2 to column 10)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 9, column 2 to column 9)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 10, column 2 to column 9)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 11, column 2 to column 22)",
-  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/culRIBayesian/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 15, column 21 to column 22)"};
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 15, column 2 to column 30)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 19, column 9 to column 10)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 19, column 2 to column 24)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 20, column 2 to column 44)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 21, column 2 to column 58)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 22, column 2 to column 49)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 3, column 2 to column 17)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 4, column 9 to column 10)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 4, column 2 to column 21)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 5, column 9 to column 10)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 5, column 2 to column 23)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 6, column 2 to column 21)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 8, column 2 to column 10)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 9, column 2 to column 9)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 10, column 2 to column 9)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 11, column 2 to column 22)",
+  " (in '/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/stan_models/invT_logistic_fixed_univ_meanprior.stan', line 15, column 21 to column 22)"};
 class invT_logistic_fixed_univ_meanprior_model final : public model_base_crtp<invT_logistic_fixed_univ_meanprior_model> {
  private:
   int N;

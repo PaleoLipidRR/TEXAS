@@ -10,7 +10,7 @@ plugins:
 nav:
   - Quickstart: index.md
   - API Reference:
-      - “culRIBayesian”: api.md
+      - “TEXAS”: api.md
 
 plugins:
   - search

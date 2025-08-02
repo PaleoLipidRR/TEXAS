@@ -3,11 +3,11 @@ requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "culRIBayesian"
+name = "TEXAS"
 version = "0.1.0"
 description = "Bayesian GDGT–temperature utilities"
 authors = [
-    {name = "Ronnakrit Rattanasriampaipong", email = "your.email@example.com"}
+    {name = "Ronnakrit Rattanasriampaipong", email = "rattanasriampaipong.r@gmail.com"}
 ]
 requires-python = ">=3.7"
 dependencies = [
@@ -21,7 +21,7 @@ dependencies = [
 dev = []
 
 [tool.setuptools]
-packages = ["culRIBayesian"]
+packages = ["TEXAS"]
 
 [tool.setuptools.package-data]
-culRIBayesian = ["stan_models/*.stan"]
+TEXAS = ["stan_models/*.stan"]

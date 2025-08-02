@@ -1,4 +1,4 @@
-# culRIBayesian/stan/metadata.py
+# TEXAS/stan/metadata.py
 
 import re
 from datetime import datetime

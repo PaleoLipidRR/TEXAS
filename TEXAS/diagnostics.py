@@ -1,4 +1,4 @@
-# culRIBayesian/diagnostics.py
+# TEXAS/diagnostics.py
 
 import numpy as np
 import pandas as pd

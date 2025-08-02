@@ -1,4 +1,4 @@
-# culRIBayesian/models/multivariate.py
+# TEXAS/models/multivariate.py
 
 import numpy as np
 from .logistics import (

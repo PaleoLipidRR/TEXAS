@@ -1,8 +1,8 @@
 # API Reference
 
-## culRIBayesian
+## TEXAS
 
-::: culRIBayesian
+::: TEXAS
     options:
       show_root_heading: false
       members: true
@@ -11,28 +11,28 @@
 
 ## stan sub-package
 
-::: culRIBayesian.stan
+::: TEXAS.stan
     options:
       show_root_heading: false
       members: true
 
 ## data sub-package
 
-::: culRIBayesian.data
+::: TEXAS.data
     options:
       show_root_heading: false
       members: true
 
 ## models sub-package
 
-::: culRIBayesian.models
+::: TEXAS.models
     options:
       show_root_heading: false
       members: true
 
 ## ensemble sub-package
 
-::: culRIBayesian.ensemble
+::: TEXAS.ensemble
     options:
       show_root_heading: false
       members: true

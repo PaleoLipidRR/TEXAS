@@ -1,4 +1,4 @@
-# culRIBayesian/data/__init__.py
+# TEXAS/data/__init__.py
 
 from .builder import (
     build_invT_inputData,
