@@ -105,6 +105,53 @@ def filter_stan_compatible(data: dict) -> dict:
     allowed_types = (int, float, list, np.ndarray)
     return {k: v for k, v in data.items() if isinstance(v, allowed_types)}
 
+# FUNCTIONAL FORMS
+def logistic(x, x0, k, L, b):
+    return L / (1 + np.exp(-k * (x - x0))) + b
+
+def logistic_fixed_upper(x, x0, k, b):
+    return (1-b) / (1 + np.exp(-k * (x - x0))) + b
+
+def inverse_logistic_fixed_upper(y, x0, k, b):
+    return x0 + (np.log((1 - b)/y - 1) / -k)
+
+
+def generalized_logistic_model(x, x0, a, b, k, v, Q):
+    """
+    Generalized logistic model function.
+
+    Parameters:
+    - x0: Inflection point
+    - a: Upper asymptote (right asymptote), default=1
+    - b: Lower asymptote (left asymptote)
+    - c: Typically takes a value of 1. Otherwise, the upper asymptote is A + (K - A) / C^(1/v).
+    - k: Slope
+    - v: Shape parameter
+    - Q: Exponent
+    Returns:
+    - Function that computes the generalized logistic model.
+    """
+    Y = b + ((a - b) / np.power(1 + Q * np.exp(-k * (x - x0)), 1/v))
+    return Y
+
+def generalized_logistic_model_fixed_upper(x, x0, b, k, v, Q):
+    """
+    Generalized logistic model function.
+
+    Parameters:
+    - x0: Inflection point
+    - a: Upper asymptote (right asymptote), default=1
+    - b: Lower asymptote (left asymptote)
+    - c: Typically takes a value of 1. Otherwise, the upper asymptote is A + (K - A) / C^(1/v).
+    - k: Slope
+    - v: Shape parameter
+    - Q: Exponent
+    Returns:
+    - Function that computes the generalized logistic model.
+    """
+    Y = b + ((1 - b) / np.power(1 + Q * np.exp(-k * (x - x0)), 1/v))
+    return Y
+
 # ─── METADATA EXTRACTION ────────────────────────────────────────────────────
 
 def extract_and_update_metadata(
@@ -317,13 +364,15 @@ def build_invT_inputData(
     n_draws: int = 100,
     seed: Optional[int] = 42,
     reduction: str = "mean",     # 'mean', 'median', or None
-    mode: str = "meanprior_bayes",  # 'meanprior_bayes' or 'ensemble' 
+    mode: str = "meanprior_bayes",  # 'meanprior_bayes' or 'ensemble'
     no3_cutoff: Optional[float] = None,
 ) -> Tuple[dict, dict]:
     """
     Build Stan input data for inverse T model. Supports Bayesian meanprior and ensemble modes.
     """
     OPTIONAL_PREDICTORS = ["gdgt23ratio", "no3"]
+    FORWARD_PARAMS = ["t0", "k", "b"]
+    EXTRA_PARAMS = ["v", "Q"]
     PRIORITY_SUFFIXES = ["crtp", "culmesocore", "culmeso", "meso", "cul"]
 
     if mode not in {"meanprior_bayes", "ensemble"}:
@@ -334,48 +383,43 @@ def build_invT_inputData(
 
     predictors = predictors or {}
     use_flags = use_flags or {}
-    
-    # After parsing use_flags (or wherever you know use_no3):
+
+    # ensure no3_cutoff is set when needed
     if use_flags.get("no3", False):
         if no3_cutoff is None or no3_cutoff <= 0:
-            raise ValueError(
-                "You set use_no3=True, so you must supply a positive "
-                "no3_cutoff. If you really don’t want to filter, set "
-                "use_no3=False."
-            )
+            raise ValueError("use_no3=True requires a positive no3_cutoff")
     else:
-        # you won’t actually use the cutoff in Stan if use_no3 is 0,
-        # but Stan still needs *some* number. 100 is fine:
-        no3_cutoff = 0.0
+        no3_cutoff = no3_cutoff or 0.0
 
     posterior = load_posterior(model_name=fwd_posterior_name)
     N = len(scaledRI)
 
+    # expand scalar prior_mu_t
     if np.isscalar(prior_mu_t):
         prior_mu_t = np.full(N, prior_mu_t)
     if len(prior_mu_t) != N:
-        raise ValueError(f"Length mismatch: prior_mu_t={len(prior_mu_t)} vs scaledRI={N}")
+        raise ValueError("Length mismatch: prior_mu_t vs scaledRI")
 
-    def find_suffix_for_all_params(params, priority_suffixes):
-        for suffix in priority_suffixes:
-            if all(f"{p}_{suffix}" in posterior for p in params):
-                return suffix
+    # find common suffix
+    def find_suffix(params):
+        for suf in PRIORITY_SUFFIXES:
+            if all(f"{p}_{suf}" in posterior for p in params):
+                return suf
         return None
-
-    used_suffix = find_suffix_for_all_params(["t0", "k", "b"], PRIORITY_SUFFIXES)
+    used_suffix = find_suffix(FORWARD_PARAMS)
     if used_suffix is None:
-        raise ValueError("Could not determine consistent posterior suffix for t0/k/b")
+        raise ValueError("Could not determine suffix for forward params")
 
-    def summarize(var, method="mean"):
+    # summarizers
+    def summarize(var, method):
         vals = posterior[var].values
         return np.median(vals) if method == "median" else np.mean(vals)
-
     def summarize_std(var):
         vals = posterior[var].values
-        std_val = np.std(vals)
-        if np.isnan(std_val) or std_val <= 0:
-            raise ValueError(f"Invalid std for {var}: {std_val}")
-        return std_val
+        std = np.std(vals)
+        if std <= 0 or np.isnan(std):
+            raise ValueError(f"Invalid std for {var}: {std}")
+        return std
 
     posteriors_used = []
 
@@ -384,95 +428,101 @@ def build_invT_inputData(
             "N": N,
             "scaledRI": np.asarray(scaledRI),
             "prior_mu_t": np.asarray(prior_mu_t),
-            "prior_sigma_t": prior_sigma_t,  # could be a vector in the future
-            "mu_t0": summarize(f"t0_{used_suffix}", reduction),
-            "mu_k": summarize(f"k_{used_suffix}", reduction),
-            "mu_b": summarize(f"b_{used_suffix}", reduction),
-            "std_t0": summarize_std(f"t0_{used_suffix}"),
-            "std_k": summarize_std(f"k_{used_suffix}"),
-            "std_b": summarize_std(f"b_{used_suffix}"),
+            "prior_sigma_t": prior_sigma_t,
         }
-        data["no3_cutoff"] = no3_cutoff
+        # forward model priors
+        for p in FORWARD_PARAMS:
+            key = f"{p}_{used_suffix}"
+            data[f"mu_{p}"] = summarize(key, reduction)
+            data[f"std_{p}"] = summarize_std(key)
+            posteriors_used.append(key)
+        # extra params if present
+        for p in EXTRA_PARAMS:
+            key = f"{p}_{used_suffix}"
+            if key in posterior:
+                data[f"mu_{p}"] = summarize(key, reduction)
+                data[f"std_{p}"] = summarize_std(key)
+                posteriors_used.append(key)
+        # sigma
         sigma_key = f"sigma_scaledRI_{used_suffix}"
         if sigma_key in posterior:
-            mu_sigma_scaledRI = summarize(sigma_key, reduction)
-            std_sigma_scaledRI = summarize_std(sigma_key)
+            data["mu_sigma_scaledRI"] = summarize(sigma_key, reduction)
+            data["std_sigma_scaledRI"] = summarize_std(sigma_key)
+            posteriors_used.append(sigma_key)
         else:
-            mu_sigma_scaledRI = 0.1
-            std_sigma_scaledRI = 0.05
+            data["mu_sigma_scaledRI"] = 0.1
+            data["std_sigma_scaledRI"] = 0.05
 
-        data["mu_sigma_scaledRI"] = mu_sigma_scaledRI
-        data["std_sigma_scaledRI"] = std_sigma_scaledRI
-
-
-        posteriors_used.extend([
-            f"t0_{used_suffix}", f"k_{used_suffix}", f"b_{used_suffix}", f"sigma_scaledRI_{used_suffix}"
-        ])
-
+        # optional predictors
         for name in OPTIONAL_PREDICTORS:
-            for suffix in PRIORITY_SUFFIXES:
-                beta_name = f"beta0_{name}_{suffix}"
-                if name in predictors and beta_name in posterior:
-                    values = np.asarray(predictors[name])
-                    if not np.all(values == 0):
-                        data[name] = values
-                        data[f"mu_beta0_{name}"] = summarize(beta_name, reduction)
-                        data[f"std_beta0_{name}"] = summarize_std(beta_name)
-                        data[f"use_{name}"] = 1
-                        posteriors_used.append(beta_name)
-                        break
-            else:
+            found = False
+            for suf in PRIORITY_SUFFIXES:
+                beta = f"beta0_{name}_{suf}"
+                if name in predictors and beta in posterior:
+                    vals = np.asarray(predictors[name])
+                    data[name] = vals
+                    data[f"mu_beta0_{name}"] = summarize(beta, reduction)
+                    data[f"std_beta0_{name}"] = summarize_std(beta)
+                    data[f"use_{name}"] = 1
+                    posteriors_used.append(beta)
+                    found = True
+                    break
+            if not found:
                 data[name] = np.zeros(N)
                 data[f"mu_beta0_{name}"] = 0.0
-                data[f"std_beta0_{name}"] = 0.1  # fallback prior std
+                data[f"std_beta0_{name}"] = 0.1
                 data[f"use_{name}"] = 0
 
-    elif mode == "ensemble":
+        data["no3_cutoff"] = no3_cutoff
+
+    else:  # ensemble
         sel = np.random.choice(posterior.dims["draw"], size=n_draws, replace=True)
         P = posterior.isel(draw=sel)
         M = n_draws
-
         data = {
             "N": N,
             "scaledRI": np.asarray(scaledRI),
             "prior_mu_t": np.asarray(prior_mu_t),
             "prior_sigma_t": prior_sigma_t,
             "M": M,
-            "t0": P[f"t0_{used_suffix}"].values,
-            "k": P[f"k_{used_suffix}"].values,
-            "b": P[f"b_{used_suffix}"].values,
         }
-        data["no3_cutoff"] = no3_cutoff
-
-        sigma_key = None
-        for suffix in PRIORITY_SUFFIXES:
-            candidate = f"sigma_scaledRI_{suffix}"
-            if candidate in P and len(P[candidate]) == M:
-                sigma_key = candidate
-                data["sigma_scaledRI"] = P[sigma_key].values
+        # draws for forward params
+        for p in FORWARD_PARAMS + EXTRA_PARAMS:
+            key = f"{p}_{used_suffix}"
+            if key in P:
+                data[p] = P[key].values
+                posteriors_used.append(key)
+        # sigma draws
+        for suf in PRIORITY_SUFFIXES:
+            skey = f"sigma_scaledRI_{suf}"
+            if skey in P and len(P[skey]) == M:
+                data["sigma_scaledRI"] = P[skey].values
+                posteriors_used.append(skey)
                 break
-        if sigma_key is None:
+        else:
             data["sigma_scaledRI"] = np.ones(M) * 0.1
-
-        posteriors_used.extend([f"t0_{used_suffix}", f"k_{used_suffix}", f"b_{used_suffix}"])
-        if sigma_key:
-            posteriors_used.append(sigma_key)
-
+        data["no3_cutoff"] = no3_cutoff
+        # optional predictors
         for name in OPTIONAL_PREDICTORS:
-            for suffix in PRIORITY_SUFFIXES:
-                beta_name = f"beta0_{name}_{suffix}"
-                if name in predictors and beta_name in P:
-                    values = np.asarray(predictors[name])
-                    if not np.all(values == 0):
-                        data[name] = values
-                        data[f"beta0_{name}"] = P[beta_name].values
-                        data[f"use_{name}"] = 1
-                        posteriors_used.append(beta_name)
-                        break
+            found = False
+            for suf in PRIORITY_SUFFIXES:
+                beta = f"beta0_{name}_{suf}"
+                if name in predictors and beta in P:
+                    data[name] = np.asarray(predictors[name])
+                    data[f"beta0_{name}"] = P[beta].values
+                    data[f"use_{name}"] = 1
+                    posteriors_used.append(beta)
+                    found = True
+                    break
+            if not found:
+                data[name] = np.zeros(N)
+                data[f"use_{name}"] = 0
 
+    # metadata
     data["calibration_model_name"] = posterior.attrs.get("stan_model_name", "unknown_model")
     data["posteriors_used"] = posteriors_used
     return data, use_flags
+
 
 
 # ─── ENSEMBLE GENERATION ─────────────────────────────────────────────────
@@ -1660,295 +1710,73 @@ def save_invT_posterior(
 
 
 # ─── INVERSE TEMPERATURE ENSEMBLE FUNCTIONS ──────────────────────────────
-
-def generate_invT_ensemble(
-    posterior_ds: xr.Dataset,
-    scaledRI_vals: np.ndarray,
-    percentiles: List[float] = [5, 50, 95],
-    return_full_ensemble: bool = False,
-    **kwargs
+def predict_temperature_from_RI(
+    scaledRI: np.ndarray,
+    prior_mu_t: Union[np.ndarray, float],
+    prior_sigma_t: float,
+    fwd_posterior_name: str,
+    predictors: Optional[Dict[str, np.ndarray]] = None,
+    use_flags: Optional[Dict[str, bool]] = None,
+    mode: str = "meanprior_bayes",
+    no3_cutoff: Optional[float] = None,
+    percentiles: Sequence[float] = (5, 50, 95),
+    chains: int = 4,
+    iter_warmup: int = 500,
+    iter_sampling: int = 1000,
+    seed: Optional[int] = 42,
 ) -> Dict[str, np.ndarray]:
     """
-    Generate temperature ensemble from inverse T model posteriors.
-    
-    This function works with inverse temperature models (invT_logistic_*) that
-    estimate temperature values (t_est) from given scaledRI observations.
-    
-    Parameters
-    ----------
-    posterior_ds : xr.Dataset
-        Posterior dataset from invT_logistic_* model
-    scaledRI_vals : np.ndarray
-        Scaled RI values corresponding to the t_est parameters
-    percentiles : List[float], default [5, 50, 95]
-        Percentiles to compute from ensemble
-    return_full_ensemble : bool, default False
-        If True, returns full t_est ensemble
-        
-    Returns
-    -------
-    Dict[str, np.ndarray]
-        Dictionary containing:
-        - 'p{percentile}': Temperature arrays for each percentile
-        - 'ensemble': Full t_est ensemble (if requested)
-        - 'scaledRI_vals': Input scaledRI values
-        - 'metadata': Generation metadata
-        
-    Examples
-    --------
-    >>> # Generate temperature estimates from inverse model
-    >>> scaledRI_obs = np.array([0.4, 0.5, 0.6, 0.7])
-    >>> results = generate_invT_ensemble(
-    ...     posterior_ds=invT_posterior,
-    ...     scaledRI_vals=scaledRI_obs
-    ... )
-    >>> temp_median = results['p50']
-    >>> temp_lower = results['p5']
-    >>> temp_upper = results['p95']
+    One‐call wrapper: from scaledRI → posterior t_est quantiles.
     """
-    # Extract t_est from posterior
-    if 't_est' not in posterior_ds.data_vars:
-        raise ValueError("Posterior dataset must contain 't_est' variable")
-    
-    t_est_data = posterior_ds['t_est'].values  # Shape: (n_draws, n_observations)
-    n_draws, n_obs = t_est_data.shape
-    
-    if len(scaledRI_vals) != n_obs:
-        raise ValueError(f"Length mismatch: scaledRI_vals={len(scaledRI_vals)} vs t_est observations={n_obs}")
-    
-    # Compute percentiles
-    results = {
-        'scaledRI_vals': scaledRI_vals,
-        'metadata': {
-            'n_draws': n_draws,
-            'n_observations': n_obs,
-            'model_type': 'inverse_temperature',
-            'stan_model_name': posterior_ds.attrs.get('stan_model_name', 'unknown'),
-            'percentiles': percentiles,
-            'return_full_ensemble': return_full_ensemble
-        }
-    }
-    
-    for percentile in percentiles:
-        key = f'p{int(percentile)}'
-        results[key] = np.percentile(t_est_data, percentile, axis=0)
-    
-    if return_full_ensemble:
-        results['ensemble'] = t_est_data
-    
-    return results
-
-
-def generate_invT_ensemble_auto(
-    posterior_ds: xr.Dataset,
-    scaledRI_vals: np.ndarray,
-    **kwargs
-) -> Dict[str, np.ndarray]:
-    """
-    Auto-detect and generate inverse temperature ensemble.
-    
-    This function automatically detects inverse temperature models and
-    generates temperature estimates from scaledRI observations.
-    
-    Parameters
-    ----------
-    posterior_ds : xr.Dataset
-        Posterior dataset
-    scaledRI_vals : np.ndarray
-        Scaled RI values
-    **kwargs
-        Additional arguments passed to generate_invT_ensemble
-        
-    Returns
-    -------
-    Dict[str, np.ndarray]
-        Results from generate_invT_ensemble
-        
-    Examples
-    --------
-    >>> # Auto-detect inverse model and generate ensemble
-    >>> scaledRI_obs = np.array([0.4, 0.5, 0.6])
-    >>> results = generate_invT_ensemble_auto(
-    ...     posterior_ds=my_posterior,
-    ...     scaledRI_vals=scaledRI_obs
-    ... )
-    >>> estimated_temps = results['p50']
-    """
-    # Check if this is an inverse T model
-    model_name = posterior_ds.attrs.get('stan_model_name', '')
-    
-    if 'invT_' in model_name or 't_est' in posterior_ds.data_vars:
-        print(f"🔬 Detected inverse temperature model: {model_name}")
-        return generate_invT_ensemble(posterior_ds, scaledRI_vals, **kwargs)
+    # 1) build the stan‐data
+    data, flags = build_invT_inputData(
+        scaledRI=scaledRI,
+        prior_mu_t=prior_mu_t,
+        prior_sigma_t=prior_sigma_t,
+        fwd_posterior_name=fwd_posterior_name,
+        predictors=predictors,
+        use_flags=use_flags,
+        mode=mode,
+        no3_cutoff=no3_cutoff,
+        seed=seed,
+    )
+    # 2) pick the right stan file
+    #    (you could encode this logic in a small helper if you like)
+    is_ensemble = "M" in data
+    has_bayes  = "mu_t0" in data
+    use_vQ     = any(k in data for k in ("mu_v","v"))
+    if is_ensemble:
+        # ensemble‐only stans
+        stan_file = (
+            "invT_gen_logi_fixed_multiv_meanprior_bayes" if use_vQ else
+            "invT_logistic_fixed_multiv_meanprior_bayes"
+        )
     else:
-        raise ValueError(f"Dataset does not appear to be from an inverse T model. Model: {model_name}")
-
-
-def generate_invT_from_forward_model(
-    forward_posterior_ds: xr.Dataset,
-    scaledRI_targets: np.ndarray,
-    param_suffix: str = "crtp",
-    n_draws: int = 500,
-    percentiles: List[float] = [5, 50, 95],
-    return_full_ensemble: bool = False,
-    temp_range: tuple = (0, 50),
-    **kwargs
-) -> Dict[str, np.ndarray]:
-    """
-    Generate temperature estimates by numerically inverting forward model predictions.
-    
-    This function takes a forward model posterior and numerically inverts it
-    to estimate temperatures that would produce the target scaledRI values.
-    
-    Parameters
-    ----------
-    forward_posterior_ds : xr.Dataset
-        Posterior dataset from a forward model (e.g., gen_logi_*, hier_*, jnt_*)
-    scaledRI_targets : np.ndarray
-        Target scaledRI values to invert
-    param_suffix : str, default "crtp"
-        Parameter suffix to use from posterior
-    n_draws : int, default 500
-        Number of posterior draws to sample
-    percentiles : List[float], default [5, 50, 95]
-        Percentiles to compute
-    return_full_ensemble : bool, default False
-        If True, returns full ensemble
-    temp_range : tuple, default (0, 50)
-        Temperature search range for numerical inversion
-    **kwargs
-        Additional arguments (gdgt23ratio, no3, etc.) for multivariate models
-        
-    Returns
-    -------
-    Dict[str, np.ndarray]
-        Dictionary containing:
-        - 'p{percentile}': Temperature arrays for each percentile
-        - 'ensemble': Full temperature ensemble (if requested)
-        - 'scaledRI_targets': Input scaledRI values
-        - 'metadata': Generation metadata
-        
-    Examples
-    --------
-    >>> # Invert forward model to estimate temperatures
-    >>> target_scaledRI = np.array([0.4, 0.6, 0.8])
-    >>> results = generate_invT_from_forward_model(
-    ...     forward_posterior_ds=my_forward_posterior,
-    ...     scaledRI_targets=target_scaledRI,
-    ...     param_suffix="crtp"
-    ... )
-    >>> estimated_temps = results['p50']
-    """
-    from scipy.optimize import minimize_scalar
-    
-    # Auto-detect model function and parameters
-    model_detection = _detect_model_and_params(forward_posterior_ds, param_suffix)
-    model_function = model_detection['model_function']
-    param_names = model_detection['param_names']
-    
-    # Detect multivariate usage
-    use_gdgt23ratio = forward_posterior_ds.attrs.get('use_gdgt23ratio', 0) == 1
-    use_no3 = forward_posterior_ds.attrs.get('use_no3', 0) == 1
-    
-    # Sample from posterior
-    full_param_names = [f"{param}_{param_suffix}" for param in param_names]
-    if use_gdgt23ratio:
-        full_param_names.append(f"beta0_gdgt23ratio_{param_suffix}")
-    if use_no3:
-        full_param_names.append(f"beta0_no3_{param_suffix}")
-    
-    posterior_df = forward_posterior_ds[full_param_names].to_dataframe().reset_index()
-    total_draws = len(posterior_df)
-    
-    if n_draws > total_draws:
-        print(f"Warning: Requested {n_draws} draws but only {total_draws} available. Using all available draws.")
-        n_draws = total_draws
-    
-    sampled_draws = posterior_df.sample(n=n_draws, replace=False, random_state=42).reset_index(drop=True)
-    
-    # Initialize ensemble array
-    n_targets = len(scaledRI_targets)
-    ensemble = np.zeros((n_draws, n_targets))
-    
-    # Define objective function for inversion
-    def objective(temp, target_scaledRI, model_params):
-        """Objective function: |predicted_scaledRI - target_scaledRI|"""
-        try:
-            predicted = model_function(np.array([temp]), **model_params)[0]
-            return abs(predicted - target_scaledRI)
-        except Exception:
-            return float('inf')
-    
-    # Perform numerical inversion for each draw and target
-    print(f"🔄 Inverting forward model for {n_draws} draws and {n_targets} targets...")
-    
-    for i in range(n_draws):
-        row = sampled_draws.iloc[i]
-        
-        # Extract parameters
-        model_params = {}
-        for param in param_names:
-            model_params[param] = row[f"{param}_{param_suffix}"]
-        
-        # Add multivariate parameters if present
-        if use_gdgt23ratio and 'gdgt23ratio' in kwargs:
-            model_params['beta0_gdgt23ratio'] = row[f"beta0_gdgt23ratio_{param_suffix}"]
-        if use_no3 and 'no3' in kwargs:
-            model_params['beta0_no3'] = row[f"beta0_no3_{param_suffix}"]
-            
-        # Add multivariate data
-        for key in ['gdgt23ratio', 'no3', 'no3_cutoff']:
-            if key in kwargs:
-                model_params[key] = kwargs[key]
-        
-        for j, target_scaledRI in enumerate(scaledRI_targets):
-            try:
-                # Use scalar minimization to find temperature
-                result = minimize_scalar(
-                    objective,
-                    args=(target_scaledRI, model_params),
-                    bounds=temp_range,
-                    method='bounded'
-                )
-                
-                if result.success:
-                    ensemble[i, j] = result.x
-                else:
-                    ensemble[i, j] = np.nan
-            except Exception:
-                ensemble[i, j] = np.nan
-    
-    # Check for failed inversions
-    failed_fraction = np.isnan(ensemble).mean()
-    if failed_fraction > 0.1:
-        warnings.warn(f"Warning: {failed_fraction*100:.1f}% of inversions failed. Consider adjusting temp_range.")
-    
-    # Compute percentiles
-    results = {
-        'scaledRI_targets': scaledRI_targets,
-        'metadata': {
-            'n_draws': n_draws,
-            'n_targets': n_targets,
-            'model_type': 'forward_model_inversion',
-            'forward_model_name': forward_posterior_ds.attrs.get('stan_model_name', 'unknown'),
-            'param_suffix': param_suffix,
-            'percentiles': percentiles,
-            'temp_range': temp_range,
-            'failed_fraction': failed_fraction,
-            'model_function': model_function.__name__ if hasattr(model_function, '__name__') else str(model_function),
-            'is_multivariate': use_gdgt23ratio or use_no3,
-            'use_gdgt23ratio': use_gdgt23ratio,
-            'use_no3': use_no3
-        }
-    }
-    
-    for percentile in percentiles:
-        key = f'p{int(percentile)}'
-        results[key] = np.nanpercentile(ensemble, percentile, axis=0)
-    
-    if return_full_ensemble:
-        results['ensemble'] = ensemble
-    
+        # mean-prior
+        stan_file = (
+            "invT_gen_logi_fixed_univ_meanprior_bayes" if use_vQ else
+            "invT_logistic_fixed_univ_meanprior_bayes"
+        )
+    # 3) sample
+    post_ds, _ = get_invT_posterior(
+        data=data,
+        stan_filename=stan_file,
+        chains=chains,
+        iter_warmup=iter_warmup,
+        iter_sampling=iter_sampling,
+        seed=seed,
+    )
+    # 4) extract the quantiles
+    temps = post_ds["t_est"].values   # shape (draws, N_obs)
+    results = {"scaledRI": scaledRI, "metadata": {
+        "stan_model": stan_file,
+        "mode": mode,
+        "use_vQ": use_vQ,
+        "n_draws": temps.shape[0],
+        "percentiles": percentiles,
+    }}
+    for p in percentiles:
+        results[f"p{int(p)}"] = np.percentile(temps, p, axis=0)
     return results
 
 
@@ -2080,3 +1908,4 @@ def create_diagnostics_summary_table_from_datasets(ds_list):
 
     df = pd.DataFrame(summary_rows)
     return df
+
