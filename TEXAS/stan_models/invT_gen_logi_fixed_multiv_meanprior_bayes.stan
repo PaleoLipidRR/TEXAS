@@ -59,8 +59,7 @@ model {
   for (n in 1:N) {
     // Generalized logistic (fixed upper = 1)
     mu_scaledRI[n] = b
-      + ((1 - b)
-         ./ pow(1 + Q * exp(-k * (t_est[n] - t0)), 1.0 / v)
+      + ((1 - b) / pow(1 + Q * exp(-k * (t_est[n] - t0)), 1.0 / v)
         );
 
     if (use_gdgt23ratio == 1)

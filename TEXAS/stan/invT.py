@@ -43,9 +43,14 @@ def get_invT_posterior(
 
     # 2) pick Stan file name based on data + config
     stan_file = _select_invT_stan_file(data, cfg)
+    
+    # 🔍 Debug: print which Stan file will be used and what data keys it sees
+    print("🔍 Stan file selected:", stan_file)
+    print("📦 Data keys:", list(data.keys()))
 
     # 3) sample
-    ds, _ = _default_sampler.sample(data, stan_file, **sampler_kwargs)
+    ds, _ = _default_sampler.sample(data, stan_file, **sampler_kwargs,
+                                    show_console=True)
 
     # 4) parse/attach priors
     #    (optional, but often handy)
@@ -128,6 +133,7 @@ def predict_temperature_from_RI(
         mode=mode,
         no3_cutoff=no3_cutoff
     )
+
 
     # 1) Run posterior sampling
     post_ds = get_invT_posterior(
