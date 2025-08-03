@@ -7,14 +7,10 @@ from typing import Optional, Dict, Any, List, Union
 
 import numpy as np
 import xarray as xr
+from TEXAS.constants import OPTIONAL_PREDICTORS, DEFAULT_SUFFIXES, DIRECT_KEYS
 
 # ——— module‐level defaults —————————————————————————————————————————
-_DEFAULT_SUFFIXES = ["cul", "meso", "crtp", "downcore"]
-_OPTIONAL_PREDICTORS = ["gdgt23ratio", "no3"]
-_DIRECT_KEYS = [
-    "calibration_model_name", "N_cul", "N_meso", "N_crtp", "N",
-    "prior_mu_t", "prior_sigma_t", "M"
-]
+
 _PRIOR_REGEX = re.compile(
     r"(\w+)\s*~\s*([A-Za-z_]\w*)\s*\(([^)]*)\)(\s*T\[[^\]]+\])?"
 )
@@ -50,8 +46,8 @@ def extract_and_update_metadata(
     direct_keys : list of str, optional
       Which scalar or array keys to pull directly from `data`.
     """
-    suffixes   = suffixes   or _DEFAULT_SUFFIXES
-    direct_keys = direct_keys or _DIRECT_KEYS
+    suffixes   = suffixes   or DEFAULT_SUFFIXES
+    direct_keys = direct_keys or DIRECT_KEYS
 
     # 1) base metadata
     metadata: Dict[str, Any] = {
@@ -88,7 +84,7 @@ def extract_and_update_metadata(
         metadata.update(_summarize_array(arr_key, arr))
 
     # 4) summarize optional predictors if flagged
-    for pred in _OPTIONAL_PREDICTORS:
+    for pred in OPTIONAL_PREDICTORS:
         use_flag = f"use_{pred}"
         if not data.get(use_flag, 0):
             continue
@@ -174,3 +170,17 @@ def extract_priors_from_stan(
             priors[param] = prior
 
     return priors
+
+def infer_use_flags_from_attrs(attrs: Dict[str, Any]) -> Dict[str, bool]:
+    """
+    Infer optional predictor use_flags (like use_gdgt23ratio, use_no3)
+    from the attributes of a posterior xarray.Dataset.
+
+    Returns a dict like:
+    {"gdgt23ratio": True, "no3": False}
+    """
+    return {
+        pred: attrs.get(f"use_{pred}", 0) == 1
+        for pred in OPTIONAL_PREDICTORS
+        if f"use_{pred}" in attrs
+    }

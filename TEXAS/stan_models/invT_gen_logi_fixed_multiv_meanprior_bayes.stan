@@ -10,6 +10,7 @@ data {
   real mu_b;   real<lower=0> std_b;
   real mu_v;   real<lower=0> std_v;
   real mu_Q;   real<lower=0> std_Q;
+  real mu_sigma_scaledRI; real<lower=0> std_sigma_scaledRI;
 
   // optional predictors as before…
   vector[N] gdgt23ratio;  int<lower=0,upper=1> use_gdgt23ratio;
@@ -33,7 +34,7 @@ parameters {
   real beta0_gdgt23ratio;
   real beta0_no3;
 }
-
+ 
 model {
   vector[N] mu_scaledRI;
 

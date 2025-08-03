@@ -7,7 +7,7 @@ from .stan.compiler import StanCompiler
 from .stan.sampler import (
     StanSampler,
     get_posterior,
-    get_invT_posterior,
+    sampler_invT_posterior,
 )
 from .stan.io import (
     load_posterior,
