@@ -1,6 +1,5 @@
 # TEXAS/stan/sampler.py
 
-from random import seed
 import time
 import numpy as np
 import xarray as xr
@@ -49,6 +48,7 @@ class StanSampler:
         temptype: Optional[str] = None,
         version: str = "1.0.0",
         recompile: bool = False,
+        chains: int = 4,
         **sampling_kwargs
     ) -> Tuple[xr.Dataset, str]:
         """
@@ -62,13 +62,21 @@ class StanSampler:
 
         # 🚀 Sample
         t0 = time.time()
-        seed = sampling_kwargs.pop("seed", 42)  # default seed if none provided
+        rng_seed = sampling_kwargs.pop("seed", 42)  # default seed if none provided
         # Drop any keys that are not valid args for model.sample
         illegal_keys = ["use_no3", "use_gdgt23ratio", "no3_cutoff"]
         for key in illegal_keys:
             sampling_kwargs.pop(key, None)
             
-        fit = model.sample(data=data, seed=seed, **sampling_kwargs)
+        fit = model.sample(
+                        data=data,
+                        chains=chains,
+                        parallel_chains=chains,
+                        seed=rng_seed,
+                        chain_ids=list(range(1, chains+1)),
+                        **sampling_kwargs
+                    )
+        
         duration = time.time() - t0
 
         # 📊 Diagnostics
@@ -98,7 +106,7 @@ class StanSampler:
         ds = xr.Dataset()
         for var in fit.stan_variables():
             arr = fit.stan_variable(var)  # numpy ndarray
-            dims = ["draw"] + [f"dim_{i}" for i in range(1, arr.ndim)]
+            dims = ["draw"] if arr.ndim == 1 else ["draw"] + [f"dim_{i}" for i in range(1, arr.ndim)]
             coords = {dim: np.arange(sz) for dim, sz in zip(dims, arr.shape)}
             ds[var] = xr.DataArray(arr, dims=dims, coords=coords, name=var)
         return ds
@@ -116,8 +124,8 @@ def get_posterior(
     **kwargs
 ) -> Tuple[xr.Dataset, str]:
     
-    seed = kwargs.get("seed", 42)  # Ensure reproducibility 
-    np.random.seed(seed)
+    rng_seed = kwargs.get("seed", 42)  # Ensure reproducibility 
+    np.random.seed(rng_seed)
     
     compiler = StanCompiler()
     sampler = StanSampler(compiler)
@@ -129,7 +137,7 @@ def get_posterior(
         iter_warmup=iter_warmup,
         iter_sampling=iter_sampling,
         recompile=recompile,
-        seed=seed,
+        seed=rng_seed,
         **kwargs
     )
 
@@ -145,8 +153,8 @@ def sampler_invT_posterior(
     **kwargs
 ) -> Tuple[xr.Dataset, str]:
     
-    seed = kwargs.get("seed", 42)  # Ensure reproducibility 
-    np.random.seed(seed)
+    rng_seed = kwargs.get("seed", 42)  # Ensure reproducibility 
+    np.random.seed(rng_seed)
     
     compiler = StanCompiler()
     sampler = StanSampler(compiler)
@@ -159,6 +167,6 @@ def sampler_invT_posterior(
         iter_warmup=iter_warmup,
         iter_sampling=iter_sampling,
         recompile=recompile,
-        seed=seed,
+        seed=rng_seed,
         **kwargs
     )

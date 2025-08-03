@@ -54,7 +54,7 @@ def build_invT_inputData(
     fwd_posterior_name: str,
     predictors: Optional[Dict[str, np.ndarray]] = None,
     config: Optional[InvTConfig] = None,
-) -> Tuple[Dict[str, Union[int, float, np.ndarray]], Dict[str, bool]]:
+) -> Tuple[Dict[str, Union[int, float, np.ndarray]], Dict[str, any]]:
     config = config or InvTConfig()
 
     np.random.seed(config.seed)
@@ -181,11 +181,18 @@ def build_invT_inputData(
     data["posteriors_used"] = used_posts
     data["calibration_model_name"] = post.attrs.get("stan_model_name", "")
 
-    use_flags = infer_optional_predictor_usage(data)
+    # Build sampler kwargs from config
+    sampler_kwargs = {
+        "chains": 4,
+        "iter_warmup": 500,
+        "iter_sampling": 1000,
+        "seed": config.seed,
+    }
 
+    # Clean up data for Stan compatibility
     for pred in OPTIONAL_PREDICTORS:
         use_key = f"use_{pred}"
         if use_key in data and not data.get(use_key):
             del data[use_key]
 
-    return data, use_flags
+    return data, sampler_kwargs
