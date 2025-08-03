@@ -1,5 +1,6 @@
 # TEXAS/stan/sampler.py
 
+from random import seed
 import time
 import numpy as np
 import xarray as xr
@@ -61,7 +62,13 @@ class StanSampler:
 
         # 🚀 Sample
         t0 = time.time()
-        fit = model.sample(data=data, **sampling_kwargs)
+        seed = sampling_kwargs.pop("seed", 42)  # default seed if none provided
+        # Drop any keys that are not valid args for model.sample
+        illegal_keys = ["use_no3", "use_gdgt23ratio", "no3_cutoff"]
+        for key in illegal_keys:
+            sampling_kwargs.pop(key, None)
+            
+        fit = model.sample(data=data, seed=seed, **sampling_kwargs)
         duration = time.time() - t0
 
         # 📊 Diagnostics
@@ -80,7 +87,7 @@ class StanSampler:
 
         diag_summary = summarize_sampler_diagnostics(fit)
         for key, val in diag_summary.items():
-            ds.attrs[f"stan_diag_{key}"] = val
+            ds.attrs[key] = val
 
         return ds, diag_str
 
@@ -108,6 +115,10 @@ def get_posterior(
     recompile: bool = False,
     **kwargs
 ) -> Tuple[xr.Dataset, str]:
+    
+    seed = kwargs.get("seed", 42)  # Ensure reproducibility 
+    np.random.seed(seed)
+    
     compiler = StanCompiler()
     sampler = StanSampler(compiler)
     return sampler.sample(
@@ -118,10 +129,11 @@ def get_posterior(
         iter_warmup=iter_warmup,
         iter_sampling=iter_sampling,
         recompile=recompile,
+        seed=seed,
         **kwargs
     )
 
-def get_invT_posterior(
+def sampler_invT_posterior(
     data: dict,
     stan_file: str,
     site_name: Optional[str] = None,
@@ -132,6 +144,10 @@ def get_invT_posterior(
     recompile: bool = False,
     **kwargs
 ) -> Tuple[xr.Dataset, str]:
+    
+    seed = kwargs.get("seed", 42)  # Ensure reproducibility 
+    np.random.seed(seed)
+    
     compiler = StanCompiler()
     sampler = StanSampler(compiler)
     return sampler.sample(
@@ -143,5 +159,6 @@ def get_invT_posterior(
         iter_warmup=iter_warmup,
         iter_sampling=iter_sampling,
         recompile=recompile,
+        seed=seed,
         **kwargs
     )

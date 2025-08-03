@@ -31,7 +31,7 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str):
     if has_v and has_Q:
         # generalized logistic
         if has_gdz or has_no3:
-            model_fn   = generalized_logistic_multivariate
+            model_fn   = generalized_logistic_fixed_upper_multivariate
             params     = ["t0", "b", "k", "v", "Q"]
             if has_gdz:  params.append("beta0_gdgt23ratio")
             if has_no3:  params.append("beta0_no3")
@@ -41,12 +41,12 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str):
     else:
         # simple logistic
         if has_gdz or has_no3:
-            model_fn   = simple_logistic_multivariate
+            model_fn   = simple_logistic_fixed_upper_multivariate
             params     = ["t0", "b", "k"]
             if has_gdz:  params.append("beta0_gdgt23ratio")
             if has_no3:  params.append("beta0_no3")
         else:
-            model_fn   = simple_logistic_model_fixed_upper
+            model_fn   = logistic_fixed_upper
             params     = ["t0", "b", "k"]
 
     return {

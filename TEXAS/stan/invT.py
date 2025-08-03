@@ -1,6 +1,6 @@
 # TEXAS/stan/invT.py
 
-from typing import Union, Optional, Dict
+from typing import Union, Optional, Dict, Sequence
 import numpy as np
 import xarray as xr
 
@@ -38,19 +38,14 @@ def get_invT_posterior(
         prior_sigma_t=prior_sigma_t,
         fwd_posterior_name=fwd_posterior_name,
         predictors=predictors,
-        use_flags=use_flags,
-        n_draws=cfg.n_draws,
-        seed=cfg.seed,
-        reduction=cfg.reduction,
-        mode=cfg.mode,
-        no3_cutoff=cfg.no3_cutoff,
+        config=cfg,
     )
 
     # 2) pick Stan file name based on data + config
     stan_file = _select_invT_stan_file(data, cfg)
 
     # 3) sample
-    ds = _default_sampler.sample(data, stan_file, **sampler_kwargs)
+    ds, _ = _default_sampler.sample(data, stan_file, **sampler_kwargs)
 
     # 4) parse/attach priors
     #    (optional, but often handy)
@@ -67,26 +62,27 @@ def get_invT_posterior(
 def _select_invT_stan_file(data: dict, cfg: InvTConfig) -> str:
     """
     Given the built data dict and your InvTConfig, choose the appropriate
-    .stan filename.
+    .stan filename. Uses both data structure and forward model metadata.
     """
     is_ensemble = "M" in data
-    has_vQ      = any(k in data for k in ("v", "Q"))
+    has_vQ      = any(k in data for k in ("v", "Q", "mu_v", "mu_Q"))
     multiv      = bool(data.get("use_gdgt23ratio", 0) or data.get("use_no3", 0))
+    
+    # Try to infer gen_logi structure from metadata
+    model_name = data.get("calibration_model_name", "").lower()
 
+    if "gen_logi" in model_name or has_vQ:
+        if is_ensemble:
+            return "invT_gen_logi_fixed_multiv_ensemble" if multiv else "invT_gen_logi_fixed_univ_ensemble"
+        else:
+            return "invT_gen_logi_fixed_multiv_meanprior_bayes" if multiv else "invT_gen_logi_fixed_univ_meanprior_bayes"
+    
+    # Fallback to original logic if no gen_logi in name or structure
     if is_ensemble:
-        if multiv:
-            return "invT_logistic_fixed_multiv_ensemble"
-        else:
-            return "invT_logistic_fixed_univ_ensemble"
+        return "invT_logistic_fixed_multiv_ensemble" if multiv else "invT_logistic_fixed_univ_ensemble"
     else:
-        # meanprior_bayes
-        if multiv:
-            return "invT_logistic_fixed_multiv_meanprior_bayes"
-        else:
-            if has_vQ:
-                return "invT_gen_logi_fixed_univ_meanprior_bayes"
-            else:
-                return "invT_logistic_fixed_univ_meanprior_bayes"
+        return "invT_logistic_fixed_multiv_meanprior_bayes" if multiv else "invT_logistic_fixed_univ_meanprior_bayes"
+
 
 
 def get_invT_post_quantiles(
@@ -106,3 +102,58 @@ def get_invT_post_quantiles(
         raise KeyError("Dataset does not contain 't_est'")
 
     return posterior["t_est"].quantile(qs, dim="draw", keep_attrs=True)
+
+def predict_temperature_from_RI(
+    scaledRI: np.ndarray,
+    prior_mu_t: Union[np.ndarray, float],
+    prior_sigma_t: float,
+    fwd_posterior_name: str,
+    predictors: Optional[Dict[str, np.ndarray]] = None,
+    use_flags: Optional[Dict[str, bool]] = None,
+    mode: str = "meanprior_bayes",
+    no3_cutoff: Optional[float] = None,
+    percentiles: Sequence[float] = (5, 50, 95),
+    chains: int = 4,
+    iter_warmup: int = 500,
+    iter_sampling: int = 1000,
+    seed: Optional[int] = 42,
+) -> Dict[str, np.ndarray]:
+    """
+    One‐call wrapper: from scaledRI → posterior t_est quantiles.
+    """
+    config = InvTConfig(
+        n_draws=chains * iter_sampling,
+        seed=seed,
+        reduction="none",
+        mode=mode,
+        no3_cutoff=no3_cutoff
+    )
+
+    # 1) Run posterior sampling
+    post_ds = get_invT_posterior(
+        scaledRI=scaledRI,
+        prior_mu_t=prior_mu_t,
+        prior_sigma_t=prior_sigma_t,
+        fwd_posterior_name=fwd_posterior_name,
+        predictors=predictors,
+        use_flags=use_flags,
+        config=config
+    )
+
+    # 2) Extract posterior draws of temperature
+    temps = post_ds["t_est"].values   # shape (draws, N_obs)
+    results = {
+        "scaledRI": scaledRI,
+        "metadata": {
+            "stan_model": post_ds.attrs.get("model", "unknown"),
+            "mode": mode,
+            "use_vQ": "v" in post_ds or "Q" in post_ds,
+            "n_draws": temps.shape[0],
+            "percentiles": percentiles,
+        }
+    }
+
+    for p in percentiles:
+        results[f"p{int(p)}"] = np.percentile(temps, p, axis=0)
+
+    return results
