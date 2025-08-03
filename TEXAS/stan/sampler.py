@@ -8,31 +8,10 @@ from typing import Tuple, Optional
 from .compiler import StanCompiler
 from .io import save_posterior, load_posterior, save_invT_posterior
 from .metadata import extract_and_update_metadata
+from .utils import patch_optional_predictors
 from ..diagnostics import summarize_sampler_diagnostics
 
-# ─── OPTIONAL PREDICTOR PATCH ───────────────────────────────────────────────
 
-def patch_optional_predictors(data: dict) -> dict:
-    """
-    Auto-infer and fill in optional predictor fields like use_gdgt23ratio and use_no3.
-    """
-    if "N_crtp" in data:
-        N = data["N_crtp"]
-        if "gdgt23ratio_crtp" not in data:
-            data["gdgt23ratio_crtp"] = np.zeros(N)
-        data["use_gdgt23ratio"] = int(np.any(data["gdgt23ratio_crtp"]))
-
-        if "no3_crtp" not in data:
-            data["no3_crtp"] = np.zeros(N)
-        data["use_no3"] = int(np.any(data["no3_crtp"]))
-
-        if data["use_no3"] and "no3_cutoff" not in data:
-            raise ValueError("no3_cutoff must be set when using no3_crtp.")
-    else:
-        data["use_gdgt23ratio"] = 0
-        data["use_no3"] = 0
-
-    return data
 
 # ─── SAMPLER CLASS ─────────────────────────────────────────────────────────
 
@@ -63,10 +42,10 @@ class StanSampler:
         # 🚀 Sample
         t0 = time.time()
         rng_seed = sampling_kwargs.pop("seed", 42)  # default seed if none provided
-        # Drop any keys that are not valid args for model.sample
-        illegal_keys = ["use_no3", "use_gdgt23ratio", "no3_cutoff"]
-        for key in illegal_keys:
-            sampling_kwargs.pop(key, None)
+        # # Drop any keys that are not valid args for model.sample
+        # illegal_keys = ["use_no3", "use_gdgt23ratio", "no3_cutoff"]
+        # for key in illegal_keys:
+        #     sampling_kwargs.pop(key, None)
             
         fit = model.sample(
                         data=data,

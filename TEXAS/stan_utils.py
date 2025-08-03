@@ -1642,7 +1642,7 @@ def save_posterior(
 
 def load_posterior(
     model_name: str, 
-    cache_dir: str = 'posterior_cache'
+    cache_dir: str = 'TEXAS/posterior_cache'
 ) -> xr.Dataset:
     try:
         base_dir = Path(__file__).parent.parent
