@@ -7,7 +7,7 @@ import xarray as xr
 from .compiler import StanCompiler
 from .sampler import StanSampler
 from .metadata import extract_priors_from_stan
-
+from .utils import patch_optional_predictors
 from ..data.builder import build_invT_inputData, InvTConfig
 
 # instantiate once (you can override in tests or higher‐level code)
@@ -40,13 +40,19 @@ def get_invT_posterior(
         predictors=predictors,
         config=cfg,
     )
+    print("data after built:", data)
 
     # 2) pick Stan file name based on data + config
+    data = patch_optional_predictors(data)  # ← Add this line here!
     stan_file = _select_invT_stan_file(data, cfg)
     
     # 🔍 Debug: print which Stan file will be used and what data keys it sees
     print("🔍 Stan file selected:", stan_file)
-    print("📦 Data keys:", list(data.keys()))
+    print("📦 Data keys before run:", list(data.keys()))
+    print("Data before sampling:", data)
+    print("DEBUG no3:", data.get("use_no3"), "no3" in data, "no3_cutoff" in data)
+    print("DEBUG gdgt23ratio:", data.get("use_gdgt23ratio"), "gdgt23ratio" in data)
+    print("Using Stan file:", stan_file)
 
     # 3) sample
     ds, _ = _default_sampler.sample(data, stan_file, **sampler_kwargs,

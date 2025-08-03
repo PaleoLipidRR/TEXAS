@@ -89,6 +89,17 @@ def plot_prior_distributions(
                 grouped[prefix].append(name)
     # Add this to debug
     print("Grouped param names:", grouped)
+    
+    # # rebuild grouped dict
+    # grouped = {key: [] for key in include_groups}
+    # for name in all_param_names:
+    #     for prefix in include_groups:
+    #         # match either "prefix" or "prefix_anything"
+    #         if re.match(rf"^{prefix}(?:_|$)", name):
+    #             grouped[prefix].append(name)
+
+    # debug
+    print("Grouped param names:", grouped)
 
     param_groups = [g for g in include_groups if grouped[g]]
     print(param_groups)
