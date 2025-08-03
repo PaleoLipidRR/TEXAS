@@ -81,7 +81,8 @@ def build_invT_inputData(
     def _std(name: str) -> float:
         sd = float(np.std(post[name].values))
         if sd <= 0 or np.isnan(sd):
-            raise ValueError(f"Invalid std for {name}")
+            warnings.warn(f"[WARN] std for {name} is {sd}, resetting to default=0.1")
+            return 0.1  # small positive fallback
         return sd
 
     data = {

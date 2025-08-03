@@ -12,12 +12,18 @@ data {
   real mu_Q;   real<lower=0> std_Q;
   real mu_sigma_scaledRI; real<lower=0> std_sigma_scaledRI;
 
-  // optional predictors as before…
-  vector[N] gdgt23ratio;  int<lower=0,upper=1> use_gdgt23ratio;
-  real mu_beta0_gdgt23ratio;  real<lower=0> std_beta0_gdgt23ratio;
 
-  vector[N] no3;          int<lower=0,upper=1> use_no3;
-  real mu_beta0_no3;      real<lower=0> std_beta0_no3;
+
+    // Optional predictors
+  vector[N] gdgt23ratio;
+  real mu_beta0_gdgt23ratio;
+  real<lower=0> std_beta0_gdgt23ratio;
+  int<lower=0, upper=1> use_gdgt23ratio;
+
+  vector[N] no3;
+  real mu_beta0_no3;
+  real<lower=0> std_beta0_no3;
+  int<lower=0, upper=1> use_no3;
   real<lower=0> no3_cutoff;
 }
 
@@ -58,9 +64,7 @@ model {
   // Forward model + optional terms
   for (n in 1:N) {
     // Generalized logistic (fixed upper = 1)
-    mu_scaledRI[n] = b
-      + ((1 - b) / pow(1 + Q * exp(-k * (t_est[n] - t0)), 1.0 / v)
-        );
+    mu_scaledRI[n] = b + ((1 - b) / pow(1 + Q * exp(-k * (t_est[n] - t0)), 1.0 / v));
 
     if (use_gdgt23ratio == 1)
       mu_scaledRI[n] += beta0_gdgt23ratio * gdgt23ratio[n];
