@@ -12,9 +12,7 @@ data {
   real mu_Q;   real<lower=0> std_Q;
   real mu_sigma_scaledRI; real<lower=0> std_sigma_scaledRI;
 
-
-
-    // Optional predictors
+  // Optional predictors
   vector[N] gdgt23ratio;
   real mu_beta0_gdgt23ratio;
   real<lower=0> std_beta0_gdgt23ratio;
@@ -37,8 +35,8 @@ parameters {
   real<lower=0> Q;      // new
   real<lower=0> sigma_scaledRI;
 
-  real beta0_gdgt23ratio;
-  real beta0_no3;
+  real<lower=-0.01,upper=0> beta0_gdgt23ratio;
+  real<lower=-0.01,upper=0> beta0_no3;
 }
  
 model {
@@ -62,19 +60,23 @@ model {
   t_est ~ normal(prior_mu_t, prior_sigma_t);
 
   // Forward model + optional terms
-  for (n in 1:N) {
-    // Generalized logistic (fixed upper = 1)
-    mu_scaledRI[n] = b + ((1 - b) / pow(1 + Q * exp(-k * (t_est[n] - t0)), 1.0 / v));
+  
+  // Generalized logistic (fixed upper = 1)
+  mu_scaledRI = b + ((1 - b) / pow(1 + Q * exp(-k * (t_est - t0)), 1.0 / v));
 
-    if (use_gdgt23ratio == 1)
-      mu_scaledRI[n] += beta0_gdgt23ratio * gdgt23ratio[n];
+  if (use_gdgt23ratio == 1)
+    mu_scaledRI += beta0_gdgt23ratio * gdgt23ratio;
 
-    if (use_no3 == 1) {
-      real log_term = 0;
+  if (use_no3 == 1) {
+    // mask & log‐transform only those no3 in (0, no3_cutoff)
+    vector[N] log_no3;
+    for (n in 1:N) {
       if (no3[n] > 0 && no3[n] < no3_cutoff)
-        log_term = log10(no3[n]);
-      mu_scaledRI[n] += beta0_no3 * log_term;
+        log_no3[n] = log10(no3[n]);
+      else
+        log_no3[n] = 0;
     }
+    mu_scaledRI += beta0_no3 * log_no3;
   }
 
   // Likelihood
