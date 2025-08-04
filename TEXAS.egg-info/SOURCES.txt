@@ -1,6 +1,7 @@
 README.md
 pyproject.toml
 TEXAS/__init__.py
+TEXAS/constants.py
 TEXAS/dataviz_utils.py
 TEXAS/diagnostics.py
 TEXAS/stan_utils.py
@@ -23,6 +24,8 @@ TEXAS/stan_models/hier_crtp_multiv_priorApprox.stan
 TEXAS/stan_models/hier_crtp_univ.stan
 TEXAS/stan_models/hier_crtp_univ_priorApprox.stan
 TEXAS/stan_models/invT_gen_logi_fixed_multiv_meanprior_bayes.stan
+TEXAS/stan_models/invT_gen_logi_fixed_multiv_meanprior_bayes_fixedQv.stan
+TEXAS/stan_models/invT_gen_logi_fixed_multiv_meanprior_bayes_fixedk.stan
 TEXAS/stan_models/invT_gen_logi_fixed_univ_meanprior_bayes.stan
 TEXAS/stan_models/invT_logistic_fixed_multiv.stan
 TEXAS/stan_models/invT_logistic_fixed_multiv_meanprior_bayes.stan
