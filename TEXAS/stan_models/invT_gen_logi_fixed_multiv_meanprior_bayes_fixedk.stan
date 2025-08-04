@@ -4,17 +4,13 @@ data {
   vector[N] prior_mu_t;
   real<lower=0> prior_sigma_t;
 
-  // Prior means
-  real mu_t0;
+  // ensemble priors for t0, k, b, plus new v & Q
+  real mu_t0;  real<lower=0> std_t0;
   real mu_k;
-  real mu_b;
-  real mu_sigma_scaledRI;
-
-  // Prior stds
-  real<lower=0> std_t0;
-  real<lower=0> std_k;
-  real<lower=0> std_b;
-  real<lower=0> std_sigma_scaledRI;
+  real mu_b;   real<lower=0> std_b;
+  real mu_v;   real<lower=0> std_v;
+  real mu_Q;   real<lower=0> std_Q;
+  real mu_sigma_scaledRI; real<lower=0> std_sigma_scaledRI;
 
   // Optional predictors
   vector[N] gdgt23ratio;
@@ -32,35 +28,40 @@ data {
 parameters {
   vector<lower=-1.8>[N] t_est;
 
-  real t0;
-  real<lower=0> k;
-  real<lower=0, upper=1> b;
+  real   t0;
+  real<lower=0,upper=1> b;
+  real<lower=0> v;      // new
+  real<lower=0> Q;      // new
   real<lower=0> sigma_scaledRI;
 
-  real<lower=-0.1,upper=0> beta0_gdgt23ratio;
-  real<lower=-0.1,upper=0> beta0_no3;
+  real<lower=-0.01,upper=0> beta0_gdgt23ratio;
+  real<lower=-0.01,upper=0> beta0_no3;
 }
-
+ 
 model {
   vector[N] mu_scaledRI;
 
-  // Priors from ensemble
-  t0 ~ normal(mu_t0, std_t0);
-  k  ~ normal(mu_k, std_k);
-  b  ~ normal(mu_b, std_b);
+  // Priors for logistic parameters
+  t0             ~ normal(mu_t0, std_t0);
+  b              ~ normal(mu_b, std_b);
+  v              ~ normal(mu_v, std_v);
+  Q              ~ normal(mu_Q, std_Q);
   sigma_scaledRI ~ normal(mu_sigma_scaledRI, std_sigma_scaledRI);
 
+  // Priors for optional predictors
   if (use_gdgt23ratio == 1)
     beta0_gdgt23ratio ~ normal(mu_beta0_gdgt23ratio, std_beta0_gdgt23ratio);
-
   if (use_no3 == 1)
-    beta0_no3 ~ normal(mu_beta0_no3, std_beta0_no3);
+    beta0_no3        ~ normal(mu_beta0_no3, std_beta0_no3);
 
-  // Inverse temperature prior
+  // Prior for inverse temperature
   t_est ~ normal(prior_mu_t, prior_sigma_t);
 
-  // Likelihood
-  mu_scaledRI = (1 - b) * inv_logit(k * (t_est - t0)) + b;
+  // Forward model + optional terms
+  
+  // Generalized logistic (fixed upper = 1)
+  mu_scaledRI = b + ((1 - b) / pow(1 + Q * exp(-mu_k * (t_est - t0)), 1.0 / v));
+
   if (use_gdgt23ratio == 1)
     mu_scaledRI += beta0_gdgt23ratio * gdgt23ratio;
 
@@ -76,5 +77,6 @@ model {
     mu_scaledRI += beta0_no3 * log_no3;
   }
 
+  // Likelihood
   scaledRI ~ normal(mu_scaledRI, sigma_scaledRI);
 }

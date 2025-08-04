@@ -1676,7 +1676,7 @@ def save_invT_posterior(
 
     # Set default if not provided
     if cache_dir is None:
-        output_dir = base_dir / 'invT_posterior_cache'
+        output_dir = Path("/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/invT_posterior_cache")
     else:
         output_dir = Path(cache_dir)
 
