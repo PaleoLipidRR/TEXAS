@@ -4,7 +4,6 @@ cmdstanpy>=1.0
 typing-extensions>=3.7.4
 scipy>=1.7
 pandas
-matplotlib
 
 [dev]
 ipykernel
@@ -12,4 +11,5 @@ pytest
 mkdocs
 
 [plotting]
+matplotlib
 proplot
