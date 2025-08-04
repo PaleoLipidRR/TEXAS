@@ -31,7 +31,6 @@ parameters {
 }
 
 model {
-  vector[N] mu_scaledRI;
 
   // Hyperpriors from ensemble
   t0             ~ normal(mu_t0, std_t0);
@@ -41,18 +40,13 @@ model {
   Q              ~ normal(mu_Q, std_Q);
   sigma_scaledRI ~ normal(mu_sigma_scaledRI, std_sigma_scaledRI);
 
+  vector[N] mu_scaledRI;
+
   // Prior for inverse temperature
   t_est ~ normal(prior_mu_t, prior_sigma_t);
 
   // Forward: generalized logistic (fixed upper=1)
-  for (n in 1:N) {
-    mu_scaledRI[n] = b
-      + ((1 - b)
-         / pow(1
-               + Q * exp(-k * (t_est[n] - t0)),
-               1.0 / v)
-        );
-  }
+  mu_scaledRI = b + ((1 - b) / pow(1 + Q * exp(-k * (t_est - t0)), 1.0 / v));
 
   // Likelihood
   scaledRI ~ normal(mu_scaledRI, sigma_scaledRI);
