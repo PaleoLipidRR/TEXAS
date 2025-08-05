@@ -76,11 +76,20 @@ def plot_prior_distributions(
         }
 
     all_param_names = set(parsed_priors.keys())
-    
+    _use_gdgt23ratio_detection = 0
+    _use_no3_detection = 0
     if posterior_datasets:
         for ds in posterior_datasets:
             all_param_names.update(ds.data_vars)
-
+            
+            # collect "use_gdgt23ratio" and "use_no3" from all datasets
+            if "use_gdgt23ratio" in ds.attrs:
+                print("DEBUG: use_gdgt23ratio detected")
+                _use_gdgt23ratio_detection += 1
+            
+            if "use_no3" in ds.attrs:
+                print("DEBUG: use_no3 detected")
+                _use_no3_detection += 1
 
     grouped = {key: [] for key in include_groups}
     for name in all_param_names:
@@ -90,21 +99,28 @@ def plot_prior_distributions(
     # Add this to debug
     print("Grouped param names:", grouped)
     
-    # # rebuild grouped dict
-    # grouped = {key: [] for key in include_groups}
-    # for name in all_param_names:
-    #     for prefix in include_groups:
-    #         # match either "prefix" or "prefix_anything"
-    #         if re.match(rf"^{prefix}(?:_|$)", name):
-    #             grouped[prefix].append(name)
+    
+    
 
     # debug
     print("Grouped param names:", grouped)
 
     param_groups = [g for g in include_groups if grouped[g]]
-    print(param_groups)
+    print("Param groups: ", param_groups)
     ncols = 3 if len(param_groups) > 3 else len(param_groups)
+    
+    ### pop param_groups
+    if ('beta0_gdgt23ratio' in param_groups) and (_use_gdgt23ratio_detection == 0):
+        param_groups.pop(param_groups.index('beta0_gdgt23ratio'))
+
+    if ('beta0_no3' in param_groups) and (_use_no3_detection == 0):
+        param_groups.pop(param_groups.index('beta0_no3'))
+
+    
     nrows = int(np.ceil(len(param_groups) / ncols))
+    print(f"figure nrows, ncols: {nrows}, {ncols}")
+    
+    
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, 
                              figsize=(set_fig_width_factor * ncols, set_fig_height_factor * nrows), 
                              squeeze=False, clear=True,
@@ -336,109 +352,33 @@ def plot_prior_distributions(
         legend_labels = model_labels
         legend_rows = int(np.ceil(len(legend_labels) / set_leg_max_ncol))
 
-        # Set legend vertical position independently of tight_layout padding
-        legend_y_lookup = {
-            1: 0.12,
-            2: 0.145,
-            3: 0.25,
-            4: 0.195
-        }
-        legend_y = legend_y_lookup.get(legend_rows, 0.175)  # default to 3-row spacing
-
-        # Set a more compact bottom_padding to remove excess white space
+        # # Set a more compact bottom_padding to remove excess white space
         tight_layout_bottom_lookup = {
-            1: 0.09,
-            2: 0.11,
-            3: 0.001,
-            4: 0.14
+            1: 0.12,
+            2: 0.1,
+            3: 0.08,
+            4: 0.06
         }
-        bottom_padding = tight_layout_bottom_lookup.get(legend_rows, 0.13)  # default for 3 rows
 
-        # Apply layout adjustment
-        fig.tight_layout(rect=[0, bottom_padding, 1, 0.92])
-
-        # Place legend above bottom
+        
         fig.legend(
             handles=h,
             labels=legend_labels,
             loc='lower center',
             ncol=min(len(legend_labels), set_leg_max_ncol),
             fontsize=10,
-            bbox_to_anchor=(0.5, legend_y),  # ← visually tuned per row count
+            bbox_to_anchor=(0.5, 0.01),  # ← position of legend box relative to the figure plotting space
             frameon=True,
             borderaxespad=0.0,
             handletextpad=0.4,
             labelspacing=0.3
         )
-
-        # # Step 1: Dynamically determine space needed
-        # legend_labels = model_labels
-        # legend_rows = int(np.ceil(len(legend_labels) / set_leg_max_ncol))
-
-        # # Reserve enough space for legend (but don't place it here)
-        # if legend_rows == 1:
-        #     bottom_padding = 0.10
-        # elif legend_rows == 2:
-        #     bottom_padding = 0.13
-        # else:
-        #     bottom_padding = 0.15 + 0.02 * (legend_rows - 2)
-
-        # # Apply tight_layout using that reserved space
-        # fig.tight_layout(rect=[0, bottom_padding, 1, 0.92])
-
-
-        # # Step 2: Place legend higher, inside the padding area
-        # legend_y = bottom_padding + {
-        #     1: 0.015,
-        #     2: 0.025,
-        #     3: 0.175, ## <--- I change this
-        #     4: 0.035
-        # }.get(legend_rows, 0.04)
-        # print("legend rows", legend_rows)
-        # fig.legend(
-        #     handles=h,
-        #     labels=legend_labels,
-        #     loc='lower center',
-        #     ncol=min(len(legend_labels), set_leg_max_ncol),
-        #     fontsize=10,
-        #     bbox_to_anchor=(0.5, legend_y),  # ← This is key
-        #     frameon=True,
-        #     borderaxespad=0.0,
-        #     handletextpad=0.4,
-        #     labelspacing=0.3
-        # )
-
-
-
-        # legend_labels = model_labels
-        # legend_rows = int(np.ceil(len(legend_labels) / set_leg_max_ncol))
-
-        # # Dynamically reserve more space if more legend rows
-        # if legend_rows == 1:
-        #     bottom_padding = 0.06
-        # elif legend_rows == 2:
-        #     bottom_padding = 0.10
-        # else:
-        #     bottom_padding = 0.12 + 0.02 * (legend_rows - 2)
-
-        # # Use tight_layout to shrink subplots upward
-        # fig.tight_layout(rect=[0, bottom_padding, 1, 0.92])
-
-        # # Set the legend a bit higher than the exact bottom
-        # legend_y = bottom_padding + 0.015 * legend_rows  # ← adaptive shift upward
-
-        # fig.legend(
-        #     handles=h,
-        #     labels=legend_labels,
-        #     loc='lower center',
-        #     ncol=min(len(legend_labels), set_leg_max_ncol),
-        #     fontsize=10,
-        #     bbox_to_anchor=(0.5, legend_y),
-        #     frameon=True,
-        #     borderaxespad=0.0,
-        #     handletextpad=0.4,
-        #     labelspacing=0.3
-        # )
+        ### rect=[0,0,1,1] is the default for tight_layout() --> meaning that all axes plotting spaces will fill the whole figure space (ignoring legend boxes and titiles)
+        fig.tight_layout(rect=[
+            0,
+            tight_layout_bottom_lookup.get(nrows,0.1),
+            1,
+            0.95])
             
     if show_suptitle:
         fig.suptitle("Prior and Posterior Distributions", fontsize=14)
