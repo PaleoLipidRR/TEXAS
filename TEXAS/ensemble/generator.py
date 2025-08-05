@@ -9,7 +9,7 @@ from TEXAS.stan.io import load_posterior
 from TEXAS.stan.sampler import StanSampler, StanCompiler
 
 def generate_ensemble(
-    posterior_ds: xr.Dataset,
+    post_ds: xr.Dataset,
     model_function: Callable[..., np.ndarray],
     x_vals: np.ndarray,
     param_names: List[str],
@@ -32,7 +32,7 @@ def generate_ensemble(
 
     # 1) auto-detect suffix if needed
     if suffix is None:
-        available = list(posterior_ds.data_vars)
+        available = list(post_ds.data_vars)
         counts = {}
         multi_sufs = {v.split("_")[-1] for v in available if "beta0_" in v}
         for p in param_names:
@@ -53,24 +53,24 @@ def generate_ensemble(
 
     # 2) build full var names & check
     full_vars = [f"{p}_{suffix}" for p in param_names]
-    missing = [v for v in full_vars if v not in posterior_ds.data_vars]
+    missing = [v for v in full_vars if v not in post_ds.data_vars]
     if missing:
-        avail = [v for v in posterior_ds.data_vars if any(v.startswith(f"{p}_") for p in param_names)]
+        avail = [v for v in post_ds.data_vars if any(v.startswith(f"{p}_") for p in param_names)]
         raise ValueError(f"Missing parameters {missing}, available: {avail}")
 
     # 3) detect multivariate
     name = model_function.__name__
     is_multi = "multivariate" in name
-    use_gdgt = posterior_ds.attrs.get("use_gdgt23ratio",False)
-    use_no3 = posterior_ds.attrs.get("use_no3",False)
+    use_gdgt = post_ds.attrs.get("use_gdgt23ratio",False)
+    use_no3 = post_ds.attrs.get("use_no3",False)
     # fallback if attrs missing:
-    if "use_gdgt23ratio" not in posterior_ds.attrs:
-        use_gdgt = any(v.startswith("beta0_gdgt23ratio_") for v in posterior_ds.data_vars)
-    if "use_no3" not in posterior_ds.attrs:
-        use_no3 = any(v.startswith("beta0_no3_") for v in posterior_ds.data_vars)
+    if "use_gdgt23ratio" not in post_ds.attrs:
+        use_gdgt = any(v.startswith("beta0_gdgt23ratio_") for v in post_ds.data_vars)
+    if "use_no3" not in post_ds.attrs:
+        use_no3 = any(v.startswith("beta0_no3_") for v in post_ds.data_vars)
 
     # 4) sample draws
-    df = posterior_ds[full_vars].to_dataframe().reset_index()
+    df = post_ds[full_vars].to_dataframe().reset_index()
     total = len(df)
     if n_draws > total:
         print(f"Warning: only {total} draws available, returning those")
@@ -116,7 +116,7 @@ def generate_ensemble(
     return out
 
 def generate_ensemble_auto(
-    posterior_ds: xr.Dataset,
+    post_ds: xr.Dataset,
     x_vals: np.ndarray,
     model_type: str = "auto",
     gdgt23ratio: Optional[np.ndarray] = None,
@@ -129,15 +129,15 @@ def generate_ensemble_auto(
     (Exact port of your old stan_utils.py version.)
     """
     # detect inverse‐T vs forward
-    model_name = posterior_ds.attrs.get("stan_model_name","")
-    is_inv = ("invT_" in model_name) or ("t_est" in posterior_ds.data_vars)
+    model_name = post_ds.attrs.get("stan_model_name","")
+    is_inv = ("invT_" in model_name) or ("t_est" in post_ds.data_vars)
 
     if model_type in ("auto","inverse") and is_inv:
         # dispatch to invT Stan code
         # we assume you have written a helper for inverse‐T ensembles:
         from .invT import generate_invT_ensemble  # you’ll need to implement this
         return generate_invT_ensemble(
-            posterior_ds, x_vals,
+            post_ds, x_vals,
             gdgt23ratio=gdgt23ratio,
             no3=no3,
             no3_cutoff=no3_cutoff,
@@ -145,9 +145,9 @@ def generate_ensemble_auto(
         )
     elif model_type in ("auto","forward") and not is_inv:
         # dispatch to forward pipeline
-        det = detect_model_and_params(posterior_ds, suffix=kwargs.get("suffix"))
+        det = detect_model_and_params(post_ds, suffix=kwargs.get("suffix"))
         return generate_ensemble(
-            posterior_ds=posterior_ds,
+            post_ds=post_ds,
             model_function=det["model_function"],
             x_vals=x_vals,
             param_names=det["param_names"],
