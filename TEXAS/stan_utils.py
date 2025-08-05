@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Union, Optional, Dict, List, Tuple, Sequence
+from typing import Union, Optional, Dict, List, Tuple, Sequence, Any
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -8,6 +8,7 @@ import os
 import time
 import re
 import warnings
+from TEXAS.stan.utils import get_repo_root  # or import from shared location
 
 def check_tbb_env():
     """
@@ -32,78 +33,111 @@ check_tbb_env()
 # Module‐level cache of compiled models
 _MODEL_CACHE: dict = {}
 
-def refresh_stan_models(stan_models_dir: str = None, n_jobs: int = 4, clean: bool = True):
-    """
-    For every .stan file in stan_models_dir:
-      1) Delete any existing .hpp, .o, and executable with the same base name.
-      2) Clear the in‐memory CmdStanModel cache (_MODEL_CACHE).
-      3) Call CmdStanModel.compile() (with make_options) so that each .stan is
-         recompiled against the prebuilt CMDSTAN toolchain.
+# def refresh_stan_models(stan_models_dir: str = None, n_jobs: int = 4, clean: bool = True):
+#     """
+#     For every .stan file in stan_models_dir:
+#       1) Delete any existing .hpp, .o, and executable with the same base name.
+#       2) Clear the in‐memory CmdStanModel cache (_MODEL_CACHE).
+#       3) Call CmdStanModel.compile() (with make_options) so that each .stan is
+#          recompiled against the prebuilt CMDSTAN toolchain.
 
-    This assumes you have already set:
-      os.environ["CMDSTAN"] = "/home/.../.cmdstan/cmdstan-2.36.0"
+#     This assumes you have already set:
+#       os.environ["CMDSTAN"] = "/home/.../.cmdstan/cmdstan-2.36.0"
 
-    Arguments
-    ---------
-    stan_models_dir : str
-        Path to the folder containing your .stan files. If None, defaults
-        to a "stan_models" subfolder next to this script.
-    n_jobs : int
-        Number of parallel jobs to pass to `make` via make_options.
-    clean : bool
-        If True, remove any old .hpp/.o/executable files before recompiling.
-    """
-    # 1) Resolve stan_models_dir
-    script_dir = Path(__file__).resolve().parent
-    stan_dir = Path(stan_models_dir or (script_dir / "stan_models")).resolve()
-    if not stan_dir.exists():
-        raise FileNotFoundError(f"Stan models directory not found: {stan_dir}")
+#     Arguments
+#     ---------
+#     stan_models_dir : str
+#         Path to the folder containing your .stan files. If None, defaults
+#         to a "stan_models" subfolder next to this script.
+#     n_jobs : int
+#         Number of parallel jobs to pass to `make` via make_options.
+#     clean : bool
+#         If True, remove any old .hpp/.o/executable files before recompiling.
+#     """
+#     # 1) Resolve stan_models_dir
+#     script_dir = Path(__file__).resolve().parent
+#     stan_dir = Path(stan_models_dir or (script_dir / "stan_models")).resolve()
+#     if not stan_dir.exists():
+#         raise FileNotFoundError(f"Stan models directory not found: {stan_dir}")
 
-    stan_files = sorted(stan_dir.glob("*.stan"))
-    if not stan_files:
-        print("🔍 No .stan files found.")
-        return
+#     stan_files = sorted(stan_dir.glob("*.stan"))
+#     if not stan_files:
+#         print("🔍 No .stan files found.")
+#         return
 
-    # 2) Delete old artifacts (.hpp, .o, executable) if requested
-    for stan_file in stan_files:
-        stem = stan_file.stem  # e.g. "jnt_cul_meso"
-        hpp_path = stan_dir / f"{stem}.hpp"
-        o_path   = stan_dir / f"{stem}.o"
-        exe_path = stan_dir / stem
+#     # 2) Delete old artifacts (.hpp, .o, executable) if requested
+#     for stan_file in stan_files:
+#         stem = stan_file.stem  # e.g. "jnt_cul_meso"
+#         hpp_path = stan_dir / f"{stem}.hpp"
+#         o_path   = stan_dir / f"{stem}.o"
+#         exe_path = stan_dir / stem
 
+#         if clean:
+#             for p in (hpp_path, o_path, exe_path):
+#                 try:
+#                     if p.exists():
+#                         p.unlink()
+#                 except Exception:
+#                     pass  # ignore if it’s already gone
+
+#     # 3) Clear the CmdStanModel cache so that compile() will rebuild each time
+#     _MODEL_CACHE.clear()
+
+#     print(f"🔧 (Re)compiling {len(stan_files)} Stan model(s) via CmdStanPy…")
+
+#     # 4) Recompile each .stan using CmdStanModel.compile(make_options=[...])
+#     for stan_file in stan_files:
+#         try:
+#             model = CmdStanModel(stan_file=str(stan_file))
+#             # Pass make_options to tell `make` how many jobs (-j<n_jobs>) to use
+#             model.compile(force=True)
+#             print(f"✅ Compiled: {stan_file.name}")
+#         except Exception as e:
+#             print(f"❌ Failed to compile: {stan_file.name}")
+#             print(str(e))
+
+#     print("🚀 Done compiling Stan models.")
+
+def refresh_stan_models(
+    stan_models_dir: Union[str, Path] = None, 
+    n_jobs: int = 4, 
+    clean: bool = True):
+
+    if stan_models_dir is None:
+        stan_models_dir = get_repo_root() / "TEXAS" / "stan_models"
+
+    from joblib import Parallel, delayed
+    from cmdstanpy import CmdStanModel
+
+    stan_model_path = Path(stan_models_dir)
+
+    def compile_model(model_file: Path):
         if clean:
-            for p in (hpp_path, o_path, exe_path):
-                try:
-                    if p.exists():
-                        p.unlink()
-                except Exception:
-                    pass  # ignore if it’s already gone
+            exe_file = model_file.with_suffix('')
+            if exe_file.exists():
+                exe_file.unlink()
+        return CmdStanModel(stan_file=str(model_file))
 
-    # 3) Clear the CmdStanModel cache so that compile() will rebuild each time
-    _MODEL_CACHE.clear()
 
-    print(f"🔧 (Re)compiling {len(stan_files)} Stan model(s) via CmdStanPy…")
-
-    # 4) Recompile each .stan using CmdStanModel.compile(make_options=[...])
-    for stan_file in stan_files:
-        try:
-            model = CmdStanModel(stan_file=str(stan_file))
-            # Pass make_options to tell `make` how many jobs (-j<n_jobs>) to use
-            model.compile(force=True)
-            print(f"✅ Compiled: {stan_file.name}")
-        except Exception as e:
-            print(f"❌ Failed to compile: {stan_file.name}")
-            print(str(e))
-
-    print("🚀 Done compiling Stan models.")
+    try:
+        stan_files = list(stan_model_path.glob("*.stan"))
+        Parallel(n_jobs=n_jobs)(delayed(compile_model)(f) for f in stan_files)
+        print(f"✅ Compiled all stan files")
+    except Exception as e:
+        print(f"❌ Failed to compile stan files")
+        print(str(e))
 
 def _ensure_numpy(x):
     return x.values if hasattr(x, "values") else np.asarray(x)
 
-def filter_stan_compatible(data: dict) -> dict:
-    """Return a shallow copy of `data` containing only Stan-compatible types."""
-    allowed_types = (int, float, list, np.ndarray)
-    return {k: v for k, v in data.items() if isinstance(v, allowed_types)}
+def filter_stan_compatible(data: Dict[str, Any]) -> Dict[str, Any]:
+    out = {}
+    for k, v in data.items():
+        if isinstance(v, (int, float, str, list, np.ndarray)):
+            out[k] = v
+        elif isinstance(v, np.generic):
+            out[k] = np.asscalar(v)
+    return out
 
 # FUNCTIONAL FORMS
 def logistic(x, x0, k, L, b):
@@ -365,7 +399,7 @@ def build_invT_inputData(
     seed: Optional[int] = 42,
     reduction: str = "mean",     # 'mean', 'median', or None
     mode: str = "meanprior_bayes",  # 'meanprior_bayes' or 'ensemble'
-    no3_cutoff: Optional[float] = None,
+    no3_cutoff: Optional[float] = -1,
 ) -> Tuple[dict, dict]:
     """
     Build Stan input data for inverse T model. Supports Bayesian meanprior and ensemble modes.
@@ -388,8 +422,10 @@ def build_invT_inputData(
     if use_flags.get("no3", False):
         if no3_cutoff is None or no3_cutoff <= 0:
             raise ValueError("use_no3=True requires a positive no3_cutoff")
+        data["no3_cutoff"] = float(no3_cutoff)
     else:
-        no3_cutoff = no3_cutoff or 0.0
+        # Don't include it at all if not used
+        no3_cutoff = -1  # fallback for metadata consistency
 
     posterior = load_posterior(model_name=fwd_posterior_name)
     N = len(scaledRI)
@@ -1339,8 +1375,10 @@ def get_posterior(
 
         data["use_no3"] = int("no3_crtp" in data)
         data["no3_crtp"] = data.get("no3_crtp", np.zeros(data["N_crtp"]))
-        if data["use_no3"] and data.get("no3_cutoff", -1) < 0:
-            raise ValueError("no3_cutoff must be set to a positive value when using no3_crtp.")
+        cutoff = data.get("no3_cutoff", -1)
+        if data.get("use_no3", 0) == 1 and (cutoff is None or not isinstance(cutoff, (float, int)) or cutoff <= 0):
+            raise ValueError("no3_cutoff must be a positive number if use_no3=1")
+
     else:
         data["use_gdgt23ratio"] = 0
         data["use_no3"] = 0
@@ -1413,12 +1451,11 @@ def get_invT_posterior(
     set_adapt_delta: float = 0.99,
     seed: Optional[int] = 42,
     verbose: bool = True
-) -> xr.Dataset:
-    import time
+) -> Tuple[xr.Dataset, str]:
     start_time = time.time()
 
     if stan_models_dir is None:
-        stan_models_dir = Path(__file__).parent / "stan_models"
+        stan_models_dir = get_repo_root() / "TEXAS" / "stan_models"
     model_path = Path(stan_models_dir) / f"{stan_filename}.stan"
 
     if model_path not in _MODEL_CACHE:
@@ -1428,14 +1465,12 @@ def get_invT_posterior(
     if seed is not None:
         np.random.seed(seed)
 
-    # Detect mode
     is_ensemble_mode = "M" in data
     is_bayes_meanprior = "mu_t0" in data and "std_t0" in data
 
     if not is_ensemble_mode and not is_bayes_meanprior:
         raise ValueError("Could not infer mode: expected either 'M' for ensemble or 'mu_t0'/'std_t0' for meanprior_bayes")
 
-    # Validate required keys
     required_keys = ["N", "scaledRI", "prior_mu_t", "prior_sigma_t"]
     if is_ensemble_mode:
         required_keys += ["M", "t0", "k", "b", "sigma_scaledRI"]
@@ -1446,7 +1481,6 @@ def get_invT_posterior(
     if missing:
         raise ValueError(f"Missing required keys for invT model: {missing}")
 
-    # Standardize keys in ensemble mode
     posterior_suffixes = []
     if is_ensemble_mode:
         param_prefixes = ["t0", "k", "b", "sigma_scaledRI", "beta0_gdgt23ratio", "beta0_no3"]
@@ -1461,13 +1495,11 @@ def get_invT_posterior(
         for std_key, actual_key in dynamic_keys.items():
             data[std_key] = data[actual_key]
 
-    # Handle optional predictors
     for opt in ["gdgt23ratio", "no3"]:
         has_opt = opt in data and np.any(data[opt])
         use_flag = f"use_{opt}"
         beta_std = f"beta0_{opt}"
         data[use_flag] = int(has_opt)
-        
 
         if not has_opt:
             data[opt] = np.zeros(data["N"])
@@ -1484,12 +1516,13 @@ def get_invT_posterior(
                     data[f"mu_{beta_std}"] = 0.0
                     data[f"std_{beta_std}"] = 0.1
 
-    # Run Stan
     try:
-        stan_data = filter_stan_compatible(data)
+        # stan_data = filter_stan_compatible(data)
+        stan_data = data
         stan_data.pop("posteriors_used", None)
         stan_data.pop("calibration_model_name", None)
-
+        # print(stan_data)
+        
         fit = model.sample(
             data=stan_data,
             chains=chains,
@@ -1497,7 +1530,7 @@ def get_invT_posterior(
             iter_sampling=iter_sampling,
             seed=seed,
             parallel_chains=chains,
-            show_console=False,
+            show_console=True,
             show_progress=True,
             save_profile=True,
             adapt_delta=set_adapt_delta
@@ -1511,7 +1544,6 @@ def get_invT_posterior(
         if "divergent" in diagnostics:
             print("⚠️ Sampling diagnostics warning:\n", diagnostics)
 
-    # Convert to xarray.Dataset
     ds = xr.Dataset()
     for var in fit.stan_variables():
         arr = fit.stan_variable(var)
@@ -1526,11 +1558,10 @@ def get_invT_posterior(
         site_name=site_name,
         posteriors_used=posterior_suffixes
     )
-    
+
     if temptype is None:
         print("Please specify the temptype (e.g., 'thermoT', 'sst', 'cultureT') to store as an attribute.")
-    
-    ds.attrs["temptype"] = temptype    
+    ds.attrs["temptype"] = temptype
     ds.attrs["run_duration (sec)"] = round(time.time() - start_time, 2)
 
     if "prior_mu_t" in data and "prior_sigma_t" in data:
@@ -1661,51 +1692,43 @@ def load_posterior(
     return ds
 
 def save_invT_posterior(
-    posterior: xr.Dataset, 
+    posterior: xr.Dataset,
     cache_dir: Union[str, Path] = None,
     overwrite: bool = True
 ) -> Path:
     if not isinstance(posterior, xr.Dataset):
         raise TypeError("posterior must be an xarray.Dataset")
 
-    # Determine base directory (repo or notebook)
-    try:
-        base_dir = Path(__file__).parent.parent
-    except NameError:
-        base_dir = Path.cwd()  # e.g., notebook or REPL
-
-    # Set default if not provided
     if cache_dir is None:
-        output_dir = Path("/home/ronnie-rattan/Documents/GitHub/culRI-Bayesian/TEXAS/invT_posterior_cache")
+        output_dir = get_repo_root() / "TEXAS" / "invT_posterior_cache"
     else:
-        output_dir = Path(cache_dir)
+        output_dir = Path(cache_dir).resolve()
 
     output_dir.mkdir(parents=True, exist_ok=True)
+
     stan_model_name = posterior.attrs.get('stan_model_name', 'unknown_model')
     site_name = posterior.attrs.get('SiteName', 'unknown_site')
     temptype = posterior.attrs.get('temptype', 'unknown')
     use_gdgt23ratio = posterior.attrs.get('use_gdgt23ratio', 0)
     use_no3 = posterior.attrs.get('use_no3', 0)
-    if use_gdgt23ratio or use_no3:
-        if use_gdgt23ratio:
-            temptype += "_gdgt23ratio"
-        if use_no3:
-            if posterior.attrs.get("no3_cutoff", None) is None:
-                # If no3 is used, ensure no3_cutoff is set
-                raise ValueError("no3_cutoff must be a positive real number if no3 is used.")
-            else:
-                set_no3 = posterior.attrs.get("no3_cutoff")
-                temptype += f"_no3_{set_no3}"
+
+    if use_gdgt23ratio:
+        temptype += "_gdgt23ratio"
+    if use_no3:
+        no3_cutoff = posterior.attrs.get("no3_cutoff")
+        if no3_cutoff is None:
+            raise ValueError("no3_cutoff must be set if no3 is used.")
+        temptype += f"_no3_{no3_cutoff}"
+
     filepath = output_dir / f"{site_name}_{stan_model_name}_{temptype}.nc"
 
     if filepath.exists() and not overwrite:
         raise FileExistsError(f"{filepath} already exists and overwrite=False.")
 
-    # Save with compression
     encoding = {var: {"zlib": True} for var in posterior.data_vars}
     posterior.to_netcdf(filepath, encoding=encoding)
 
-    print(f"Posterior saved to {filepath}")
+    print(f"✅ Posterior saved to {filepath}")
     return filepath
 
 
@@ -1718,7 +1741,7 @@ def predict_temperature_from_RI(
     predictors: Optional[Dict[str, np.ndarray]] = None,
     use_flags: Optional[Dict[str, bool]] = None,
     mode: str = "meanprior_bayes",
-    no3_cutoff: Optional[float] = None,
+    no3_cutoff: Optional[float] = -1,
     percentiles: Sequence[float] = (5, 50, 95),
     chains: int = 4,
     iter_warmup: int = 500,
@@ -1909,3 +1932,16 @@ def create_diagnostics_summary_table_from_datasets(ds_list):
     df = pd.DataFrame(summary_rows)
     return df
 
+def load_invT_posterior(
+    site_name: str, 
+    stan_model_name: str, 
+    temptype: str, 
+    cache_dir: Optional[Union[str, Path]] = None
+) -> xr.Dataset:
+    if cache_dir is None:
+        cache_dir = get_repo_root() / "TEXAS" / "invT_posterior_cache"
+
+    path = Path(cache_dir) / f"{site_name}_{stan_model_name}_{temptype}.nc"
+    if not path.exists():
+        raise FileNotFoundError(f"Posterior file not found at: {path}")
+    return xr.load_dataset(path)
