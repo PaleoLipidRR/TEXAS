@@ -5,6 +5,7 @@ import numpy as np
 import re
 from typing import Dict, Any
 from TEXAS.constants import OPTIONAL_PREDICTORS
+from pathlib import Path
 
 def check_tbb_env():
     if "TBB_CXX_TYPE" not in os.environ:
@@ -64,3 +65,7 @@ def patch_optional_predictors(data: dict) -> dict:
         data["use_no3"] = 0
 
     return data
+
+def get_repo_root() -> Path:
+    return Path(__file__).resolve().parents[2]
+
