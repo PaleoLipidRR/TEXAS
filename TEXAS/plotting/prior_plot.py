@@ -332,34 +332,114 @@ def plot_prior_distributions(
 
     if posterior_datasets:
         h, l = axes[0][0].get_legend_handles_labels()
+
         legend_labels = model_labels
         legend_rows = int(np.ceil(len(legend_labels) / set_leg_max_ncol))
-        # Dynamically adjust space based on number of rows — shrink when only 1 row
-        if legend_rows == 1:
-            bottom_padding = 0.06
-        elif legend_rows == 2:
-            bottom_padding = 0.10
-        else:
-            bottom_padding = 0.12 + 0.02 * (legend_rows - 2)
 
+        # Set legend vertical position independently of tight_layout padding
+        legend_y_lookup = {
+            1: 0.12,
+            2: 0.145,
+            3: 0.25,
+            4: 0.195
+        }
+        legend_y = legend_y_lookup.get(legend_rows, 0.175)  # default to 3-row spacing
+
+        # Set a more compact bottom_padding to remove excess white space
+        tight_layout_bottom_lookup = {
+            1: 0.09,
+            2: 0.11,
+            3: 0.001,
+            4: 0.14
+        }
+        bottom_padding = tight_layout_bottom_lookup.get(legend_rows, 0.13)  # default for 3 rows
+
+        # Apply layout adjustment
         fig.tight_layout(rect=[0, bottom_padding, 1, 0.92])
 
+        # Place legend above bottom
         fig.legend(
             handles=h,
             labels=legend_labels,
             loc='lower center',
             ncol=min(len(legend_labels), set_leg_max_ncol),
             fontsize=10,
-            bbox_to_anchor=(0.5, bottom_padding - 0.05),
+            bbox_to_anchor=(0.5, legend_y),  # ← visually tuned per row count
             frameon=True,
             borderaxespad=0.0,
-            handletextpad=0.6,
-            labelspacing=0.4
+            handletextpad=0.4,
+            labelspacing=0.3
         )
-    else:
-        fig.tight_layout(rect=[0, set_bottom_space, 1, 0.92])
 
-    
+        # # Step 1: Dynamically determine space needed
+        # legend_labels = model_labels
+        # legend_rows = int(np.ceil(len(legend_labels) / set_leg_max_ncol))
+
+        # # Reserve enough space for legend (but don't place it here)
+        # if legend_rows == 1:
+        #     bottom_padding = 0.10
+        # elif legend_rows == 2:
+        #     bottom_padding = 0.13
+        # else:
+        #     bottom_padding = 0.15 + 0.02 * (legend_rows - 2)
+
+        # # Apply tight_layout using that reserved space
+        # fig.tight_layout(rect=[0, bottom_padding, 1, 0.92])
+
+
+        # # Step 2: Place legend higher, inside the padding area
+        # legend_y = bottom_padding + {
+        #     1: 0.015,
+        #     2: 0.025,
+        #     3: 0.175, ## <--- I change this
+        #     4: 0.035
+        # }.get(legend_rows, 0.04)
+        # print("legend rows", legend_rows)
+        # fig.legend(
+        #     handles=h,
+        #     labels=legend_labels,
+        #     loc='lower center',
+        #     ncol=min(len(legend_labels), set_leg_max_ncol),
+        #     fontsize=10,
+        #     bbox_to_anchor=(0.5, legend_y),  # ← This is key
+        #     frameon=True,
+        #     borderaxespad=0.0,
+        #     handletextpad=0.4,
+        #     labelspacing=0.3
+        # )
+
+
+
+        # legend_labels = model_labels
+        # legend_rows = int(np.ceil(len(legend_labels) / set_leg_max_ncol))
+
+        # # Dynamically reserve more space if more legend rows
+        # if legend_rows == 1:
+        #     bottom_padding = 0.06
+        # elif legend_rows == 2:
+        #     bottom_padding = 0.10
+        # else:
+        #     bottom_padding = 0.12 + 0.02 * (legend_rows - 2)
+
+        # # Use tight_layout to shrink subplots upward
+        # fig.tight_layout(rect=[0, bottom_padding, 1, 0.92])
+
+        # # Set the legend a bit higher than the exact bottom
+        # legend_y = bottom_padding + 0.015 * legend_rows  # ← adaptive shift upward
+
+        # fig.legend(
+        #     handles=h,
+        #     labels=legend_labels,
+        #     loc='lower center',
+        #     ncol=min(len(legend_labels), set_leg_max_ncol),
+        #     fontsize=10,
+        #     bbox_to_anchor=(0.5, legend_y),
+        #     frameon=True,
+        #     borderaxespad=0.0,
+        #     handletextpad=0.4,
+        #     labelspacing=0.3
+        # )
+            
     if show_suptitle:
         fig.suptitle("Prior and Posterior Distributions", fontsize=14)
 

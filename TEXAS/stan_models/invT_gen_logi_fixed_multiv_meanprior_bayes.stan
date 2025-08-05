@@ -69,12 +69,12 @@ model {
 
   if (use_no3 == 1) {
     // mask & log‐transform only those no3 in (0, no3_cutoff)
-    vector[N] log_no3;
+    vector[N] log_no3 = rep_vector(0, N);  
+
     for (n in 1:N) {
       if (no3[n] > 0 && no3[n] < no3_cutoff)
         log_no3[n] = log10(no3[n]);
-      else
-        log_no3[n] = 0;
+      // else: keep as 0
     }
     mu_scaledRI += beta0_no3 * log_no3;
   }
