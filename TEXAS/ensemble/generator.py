@@ -146,6 +146,7 @@ def generate_ensemble_auto(
     elif model_type in ("auto","forward") and not is_inv:
         # dispatch to forward pipeline
         det = detect_model_and_params(post_ds, suffix=kwargs.get("suffix"))
+        print("DEBUG: Detected model and params",det)
         return generate_ensemble(
             post_ds=post_ds,
             model_function=det["model_function"],
