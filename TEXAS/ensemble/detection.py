@@ -40,8 +40,8 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
     # Detect presence of optional parameters
     has_v   = f"v_{suffix}" in vars_
     has_Q   = f"Q_{suffix}" in vars_
-    has_gdz = f"beta0_gdgt23ratio_{suffix}" in vars_
-    has_no3 = f"beta0_no3_{suffix}" in vars_
+    has_gdz = (f"beta0_gdgt23ratio_{suffix}" in vars_) and ("use_gdgt23ratio" in posterior_ds.attrs)
+    has_no3 = f"beta0_no3_{suffix}" in vars_ and ("use_no3" in posterior_ds.attrs)
 
     # Build param list and select model
     if has_v and has_Q:

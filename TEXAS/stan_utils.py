@@ -253,7 +253,7 @@ def extract_and_update_metadata(
                 })
                 
                 if predictor == "no3":
-                    no3_cutoff = data.get("no3_cutoff", 0.0)
+                    no3_cutoff = data.get("no3_cutoff", 0)
                     if no3_cutoff < 0:
                         raise ValueError("no3_cutoff must be a positive real number if no3 is used.")
                     metadata["no3_cutoff"] = float(no3_cutoff)
@@ -399,7 +399,7 @@ def build_invT_inputData(
     seed: Optional[int] = 42,
     reduction: str = "mean",     # 'mean', 'median', or None
     mode: str = "meanprior_bayes",  # 'meanprior_bayes' or 'ensemble'
-    no3_cutoff: Optional[float] = -1,
+    no3_cutoff: Optional[float] = 0,
 ) -> Tuple[dict, dict]:
     """
     Build Stan input data for inverse T model. Supports Bayesian meanprior and ensemble modes.
@@ -420,12 +420,12 @@ def build_invT_inputData(
 
     # ensure no3_cutoff is set when needed
     if use_flags.get("no3", False):
-        if no3_cutoff is None or no3_cutoff <= 0:
+        if no3_cutoff is None or no3_cutoff < 0:
             raise ValueError("use_no3=True requires a positive no3_cutoff")
         data["no3_cutoff"] = float(no3_cutoff)
     else:
         # Don't include it at all if not used
-        no3_cutoff = -1  # fallback for metadata consistency
+        no3_cutoff = 0  # fallback for metadata consistency
 
     posterior = load_posterior(model_name=fwd_posterior_name)
     N = len(scaledRI)
@@ -780,7 +780,7 @@ def generate_ensemble(
 def generalized_logistic_model_fixed_upper_multivariate(
     x, t0=None, x0=None, b=None, k=None, v=None, Q=None,
     beta0_gdgt23ratio=None, gdgt23ratio=None,
-    beta0_no3=None, no3=None, no3_cutoff=50.0
+    beta0_no3=None, no3=None, no3_cutoff=0
 ):
     """
     Generalized logistic model with fixed upper asymptote at 1, including multivariate corrections.
@@ -928,7 +928,7 @@ def simple_logistic_model_fixed_upper(x, t0=None, x0=None, b=None, k=None):
 def simple_logistic_model_fixed_upper_multivariate(
     x, t0=None, x0=None, b=None, k=None,
     beta0_gdgt23ratio=None, gdgt23ratio=None,
-    beta0_no3=None, no3=None, no3_cutoff=50.0
+    beta0_no3=None, no3=None, no3_cutoff=0
 ):
     """
     Simple logistic model with fixed upper asymptote at 1, including multivariate corrections.
@@ -1008,7 +1008,7 @@ def generate_ensemble_auto(
     model_type: str = "auto",
     gdgt23ratio: Optional[np.ndarray] = None,
     no3: Optional[np.ndarray] = None,
-    no3_cutoff: float = 50.0,
+    no3_cutoff: float = 0,
     **kwargs
 ) -> Dict[str, np.ndarray]:
     """
@@ -1375,7 +1375,7 @@ def get_posterior(
 
         data["use_no3"] = int("no3_crtp" in data)
         data["no3_crtp"] = data.get("no3_crtp", np.zeros(data["N_crtp"]))
-        cutoff = data.get("no3_cutoff", -1)
+        cutoff = data.get("no3_cutoff", 0)
         if data.get("use_no3", 0) == 1 and (cutoff is None or not isinstance(cutoff, (float, int)) or cutoff <= 0):
             raise ValueError("no3_cutoff must be a positive number if use_no3=1")
 
@@ -1741,7 +1741,7 @@ def predict_temperature_from_RI(
     predictors: Optional[Dict[str, np.ndarray]] = None,
     use_flags: Optional[Dict[str, bool]] = None,
     mode: str = "meanprior_bayes",
-    no3_cutoff: Optional[float] = -1,
+    no3_cutoff: Optional[float] = 0,
     percentiles: Sequence[float] = (5, 50, 95),
     chains: int = 4,
     iter_warmup: int = 500,
