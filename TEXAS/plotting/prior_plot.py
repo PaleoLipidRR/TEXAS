@@ -376,7 +376,7 @@ def plot_prior_distributions(
         ### rect=[0,0,1,1] is the default for tight_layout() --> meaning that all axes plotting spaces will fill the whole figure space (ignoring legend boxes and titiles)
         fig.tight_layout(rect=[
             0,
-            tight_layout_bottom_lookup.get(nrows,0.1),
+            tight_layout_bottom_lookup.get(nrows,0.1) + (0.02 if legend_rows > 3 else 0),
             1,
             0.95])
             
