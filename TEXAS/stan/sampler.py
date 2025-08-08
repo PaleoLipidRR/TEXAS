@@ -53,6 +53,7 @@ class StanSampler:
                         parallel_chains=chains,
                         seed=rng_seed,
                         chain_ids=list(range(1, chains+1)),
+                        show_console=True,
                         **sampling_kwargs
                     )
         
