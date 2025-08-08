@@ -102,7 +102,7 @@ def get_invT_posterior(
     sampler_kwargs.setdefault("iter_sampling", 1000)
 
     # Run sampling
-    ds, _ = _default_sampler.sample(data, stan_file, **sampler_kwargs, show_console=False)
+    ds, _ = _default_sampler.sample(data, stan_file, **sampler_kwargs)
 
     # Extract priors
     stan_path = _default_compiler.resolve_stan_path(stan_file)

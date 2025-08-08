@@ -1,0 +1,34 @@
+# Python cache and build files
+__pycache__/
+*.pyc
+build/
+TEXAS.egg-info/
+site/
+
+# Stan/CmdStanPy compiled models and temporary files
+TEXAS/stan_models/*[!.stan]
+notebooks/*[!.stan]
+/tmp/
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+
+# Data and Cache (these should not be in Git)
+*.nc
+*.csv
+*.xlsx
+*.pkl
+*.npz
+/TEXAS/posterior_cache/
+/TEXAS/invT_posterior_cache/
+/spreadsheets/
+/nc_files/
+
+# Dask temporary files
+/notebooks/dask-worker-space/
+
+# Figures (optional, but good practice to generate from code)
+/figures/
+/html_figures/
