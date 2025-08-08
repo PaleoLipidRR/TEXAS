@@ -43,51 +43,55 @@ def infer_optional_predictor_usage(data: dict) -> dict:
     return flags
 
 # ─── OPTIONAL PREDICTOR PATCH ───────────────────────────────────────────────
-
 def patch_optional_predictors(data: dict) -> dict:
     """
-    Ensure gdgt23ratio and no3 exist with shape (N,) and corresponding use_* flags,
-    and (for ensemble mode) ensure beta arrays exist with shape (M,).
+    Ensure gdgt23ratio and no3 exist with shape (N,) for each dataset,
+    and corresponding use_* flags, and (for ensemble mode) beta arrays with shape (M,).
+    Works for both single ("N") and multi-group ("N_cul", "N_meso", ...) setups.
     """
-    N = int(data["N"])
+    # Find all N keys
+    N_keys = [k for k in data.keys() if k == "N" or k.startswith("N_")]
     M = int(data["M"]) if "M" in data else None
 
-    for name in ("gdgt23ratio", "no3"):
-        use_key = f"use_{name}"
-        beta_name = f"beta0_{name}"
+    for N_key in N_keys:
+        N = int(data[N_key])
+        suffix = "" if N_key == "N" else N_key[1:]  # "" or "_cul", "_meso", etc.
 
-        # ---- values (always 1D length N) ----
-        v = data.get(name, None)
-        if v is None or (np.isscalar(v) or np.asarray(v).ndim == 0):
-            data[name] = np.zeros(N, dtype=float)
-        else:
-            arr = np.asarray(v, dtype=float)
-            if arr.shape != (N,):
-                raise ValueError(f"{name} must have shape ({N},), got {arr.shape}")
-            data[name] = arr
+        for name in ("gdgt23ratio", "no3"):
+            arr_key = f"{name}{suffix}"
+            use_key = f"use_{name}{suffix}"
+            beta_name = f"beta0_{name}{suffix}"
 
-        # ---- flags ----
-        # If caller explicitly set a flag, respect it; otherwise infer from non‑zero input.
-        if use_key not in data:
-            data[use_key] = int(np.any(data[name] != 0))
+            # ---- values (always 1D length N) ----
+            v = data.get(arr_key, None)
+            if v is None or (np.isscalar(v) or np.asarray(v).ndim == 0):
+                data[arr_key] = np.zeros(N, dtype=float)
+            else:
+                arr = np.asarray(v, dtype=float)
+                if arr.shape != (N,):
+                    raise ValueError(f"{arr_key} must have shape ({N},), got {arr.shape}")
+                data[arr_key] = arr
 
-        # ---- betas ----
-        if M is not None:
-            # Ensemble mode: sampler expects a draw-by-draw vector for beta if used
-            if beta_name not in data:
-                data[beta_name] = np.zeros(M, dtype=float)
+            # ---- flags ----
+            if use_key not in data:
+                data[use_key] = int(np.any(data[arr_key] != 0))
 
-        else:
-            # Mean‑prior mode: sampler expects mu_* and std_* if used
-            mu_key, sd_key = f"mu_{beta_name}", f"std_{beta_name}"
-            data.setdefault(mu_key, 0.0)
-            data.setdefault(sd_key, 0.1)
+            # ---- betas ----
+            if M is not None:
+                if beta_name not in data:
+                    data[beta_name] = np.zeros(M, dtype=float)
+            else:
+                mu_key, sd_key = f"mu_{beta_name}", f"std_{beta_name}"
+                data.setdefault(mu_key, 0.0)
+                data.setdefault(sd_key, 0.1)
 
-    # If NO3 is used, ensure a positive cutoff is present
-    if int(data.get("use_no3", 0)) == 1:
-        cutoff = data.get("no3_cutoff", None)
-        if cutoff is None or float(cutoff) <= 0:
-            data["no3_cutoff"] = 0  # sensible default
+        # If NO3 is used, ensure a positive cutoff is present
+        use_no3_key = f"use_no3{suffix}"
+        no3_cutoff_key = f"no3_cutoff{suffix}"
+        if int(data.get(use_no3_key, 0)) == 1:
+            cutoff = data.get(no3_cutoff_key, None)
+            if cutoff is None or float(cutoff) <= 0:
+                data[no3_cutoff_key] = 0
 
     return data
 

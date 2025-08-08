@@ -1,10 +1,32 @@
-# Dockerfile
-FROM squidfunk/mkdocs-material:latest
+# Use official Python 3.10 slim image as base
+FROM python:3.10-slim
 
-# install mkdocstrings plugin (and any others you need)
-RUN pip install mkdocstrings mkdocstrings-python
+# Install system dependencies needed by scientific/plotting Python packages
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    git \
+    && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /docs
+# Set working directory
+WORKDIR /app
 
-# by default this image has mkdocs in PATH
-ENTRYPOINT ["mkdocs"]
+# Copy your package code into the image
+COPY TEXAS /app/TEXAS
+
+# Copy requirements.txt into the image
+COPY requirements.txt /app/
+
+# Install Python packages
+RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# (Optional) Copy any main script or entry point
+# COPY streamlit_app.py /app/
+# Or copy notebooks/scripts as needed
+
+# Default: start Python interactive shell
+# (Change this to run your script, start Jupyter, or Streamlit as desired)
+CMD ["python"]
