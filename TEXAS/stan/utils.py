@@ -46,23 +46,48 @@ def infer_optional_predictor_usage(data: dict) -> dict:
 
 def patch_optional_predictors(data: dict) -> dict:
     """
-    Auto-infer and fill in optional predictor fields like use_gdgt23ratio and use_no3.
+    Ensure gdgt23ratio and no3 exist with shape (N,) and corresponding use_* flags,
+    and (for ensemble mode) ensure beta arrays exist with shape (M,).
     """
-    if "N_crtp" in data:
-        N = data["N_crtp"]
-        if "gdgt23ratio_crtp" not in data:
-            data["gdgt23ratio_crtp"] = np.zeros(N)
-        data["use_gdgt23ratio"] = int(np.any(data["gdgt23ratio_crtp"]))
+    N = int(data["N"])
+    M = int(data["M"]) if "M" in data else None
 
-        if "no3_crtp" not in data:
-            data["no3_crtp"] = np.zeros(N)
-        data["use_no3"] = int(np.any(data["no3_crtp"]))
+    for name in ("gdgt23ratio", "no3"):
+        use_key = f"use_{name}"
+        beta_name = f"beta0_{name}"
 
-        if data["use_no3"] and "no3_cutoff" not in data:
-            raise ValueError("no3_cutoff must be set when using no3_crtp.")
-    else:
-        data["use_gdgt23ratio"] = 0
-        data["use_no3"] = 0
+        # ---- values (always 1D length N) ----
+        v = data.get(name, None)
+        if v is None or (np.isscalar(v) or np.asarray(v).ndim == 0):
+            data[name] = np.zeros(N, dtype=float)
+        else:
+            arr = np.asarray(v, dtype=float)
+            if arr.shape != (N,):
+                raise ValueError(f"{name} must have shape ({N},), got {arr.shape}")
+            data[name] = arr
+
+        # ---- flags ----
+        # If caller explicitly set a flag, respect it; otherwise infer from non‑zero input.
+        if use_key not in data:
+            data[use_key] = int(np.any(data[name] != 0))
+
+        # ---- betas ----
+        if M is not None:
+            # Ensemble mode: sampler expects a draw-by-draw vector for beta if used
+            if beta_name not in data:
+                data[beta_name] = np.zeros(M, dtype=float)
+
+        else:
+            # Mean‑prior mode: sampler expects mu_* and std_* if used
+            mu_key, sd_key = f"mu_{beta_name}", f"std_{beta_name}"
+            data.setdefault(mu_key, 0.0)
+            data.setdefault(sd_key, 0.1)
+
+    # If NO3 is used, ensure a positive cutoff is present
+    if int(data.get("use_no3", 0)) == 1:
+        cutoff = data.get("no3_cutoff", None)
+        if cutoff is None or float(cutoff) <= 0:
+            data["no3_cutoff"] = 0  # sensible default
 
     return data
 
