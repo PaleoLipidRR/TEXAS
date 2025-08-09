@@ -6,8 +6,13 @@ TEXAS.egg-info/
 site/
 
 # Stan/CmdStanPy compiled models and temporary files
-TEXAS/stan_models/*[!.stan]
-notebooks/*[!.stan]
+TEXAS/stan_models/**
+!TEXAS/stan_models/**/*.stan
+
+notebooks/**
+!notebooks/**/*.ipynb
+!notebooks/**/*.stan
+
 /tmp/
 
 # IDE and OS files
