@@ -31,24 +31,22 @@ def generate_ensemble(
         np.random.seed(seed)
 
     # 1) require suffix from detector or explicit arg
-if suffix is None:
-    raise ValueError(
-        "Suffix must be specified explicitly or via detect_model_and_params()."
-    )
+    if suffix is None:
+        raise ValueError(
+            "Suffix must be specified explicitly or via detect_model_and_params()."
+        )
 
-# 2) build full var names & check
+    # 2) build full var names & check
     full_vars = [f"{p}_{suffix}" for p in param_names]
     missing = [v for v in full_vars if v not in post_ds.data_vars]
     if missing:
-    expected = full_vars
-    avail = [v for v in post_ds.data_vars if any(v.startswith(f"{p}_") or v == p for p in param_names)]
-    raise ValueError(
-        f"Missing parameters: {missing}. Suffix='{suffix}'.
-"
-        f"Expected: {expected}
-"
-        f"Available (matching): {sorted(avail)}"
-    )
+        expected = full_vars
+        avail = [v for v in post_ds.data_vars if any(v.startswith(f"{p}_") or v == p for p in param_names)]
+        raise ValueError(
+            f"Missing parameters: {missing}. Suffix='{suffix}'.\n"
+            f"Expected: {expected}\n"
+            f"Available (matching): {sorted(avail)}"
+        )
 
     # 3) detect multivariate
     name = model_function.__name__
@@ -89,22 +87,22 @@ if suffix is None:
     out: Dict[str, Any] = {"x_vals": x}
     for q in percentiles:
         out[f"p{int(q)}"] = np.percentile(ensemble, q, axis=0)
+        
     if return_full_ensemble:
         out["ensemble"] = ensemble
-
-    out["metadata"] = {
-        "n_draws": n_draws,
-        "suffix": suffix,
-        "param_names": param_names,
-        "model_function": name,
-        "seed": seed,
-        "percentiles": percentiles,
-        "is_multivariate": is_multi,
-        "use_gdgt23ratio": bool(use_gdgt),
-        "use_no3": bool(use_no3),
-        "gdgt23ratio_provided": gdgt23ratio is not None,
-        "no3_provided": no3 is not None,
-    }
+        out["metadata"] = {
+            "n_draws": n_draws,
+            "suffix": suffix,
+            "param_names": param_names,
+            "model_function": name,
+            "seed": seed,
+            "percentiles": percentiles,
+            "is_multivariate": is_multi,
+            "use_gdgt23ratio": bool(use_gdgt),
+            "use_no3": bool(use_no3),
+            "gdgt23ratio_provided": gdgt23ratio is not None,
+            "no3_provided": no3 is not None,
+        }
     return out
 
 def generate_ensemble_auto(
