@@ -24,6 +24,7 @@ RUN micromamba install -y -n base -c conda-forge --strict-channel-priority \
     jupyterlab ipywidgets tqdm geopy plotly shapely cartopy "pyproj<3.6" \
     duckdb pyarrow sqlalchemy pydantic anywidget ipylab pygwalker \
     cmdstanpy typing-extensions libstdcxx-ng libgcc-ng freetype libpng \
+    netcdf4 h5netcdf cftime \
  && micromamba clean -a -y
 
 # Build CmdStan under /opt/cmdstan
