@@ -5,46 +5,47 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "TEXAS"
 version = "0.1.0"
-authors = [
-    {name = "Ronnakrit Rattanasriampaipong", email = "rattanasriampaipong.r@gmail.com"}
-]
+authors = [{ name = "Ronnakrit Rattanasriampaipong", email = "rattanasriampaipong.r@gmail.com" }]
 description = "Bayesian GDGT–temperature utilities"
-readme = "README.md"
-requires-python = ">=3.7"
+readme = "README.md"                    # ensure this file exists
+requires-python = ">=3.8"
+license = { text = "MIT" }              # SPDX expression or text to avoid deprecation warning
 classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
 ]
-# These are the Python packages your code IMPORTS.
-# Non-Python dependencies like TBB and CmdStan must be installed separately.
+
+# runtime deps
 dependencies = [
-    "numpy>=1.18",
-    "xarray>=0.16",
-    "cmdstanpy>=1.0",
-    "typing-extensions>=3.7.4",
-    "scipy>=1.7",
-    "pandas",
+  "numpy>=1.18",
+  "xarray>=0.16",
+  "cmdstanpy>=1.0",
+  "typing-extensions>=3.7.4",
+  "scipy>=1.7",
+  "pandas",
+  "baysparpy",
+  "baysplinepy"
 ]
 
 [project.optional-dependencies]
 plotting = [
-    "matplotlib",
-    "proplot",
+    "matplotlib<3.5",
+    "proplot==0.9.7",
+    "cmocean",
+    "setuptools<81"
 ]
+
 dev = [
-    "ipykernel",
-    "pytest",
-    "mkdocs",
+  "ipykernel",
+  "pytest",
+  "mkdocs"
 ]
 
 [tool.setuptools]
-# This tells setuptools to find the TEXAS package automatically.
-# Make sure your main code is in a directory named TEXAS.
 packages = ["TEXAS"]
 
 [tool.setuptools.package-data]
-# This is perfect! It ensures your .stan files are included in the installation.
 TEXAS = ["stan_models/*.stan"]
 
 [project.urls]
