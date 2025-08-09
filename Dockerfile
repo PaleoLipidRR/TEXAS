@@ -43,7 +43,7 @@ USER root
 
 # Runtime libs only
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libglib2.0-0 libsm6 libxrender1 pkg-config libgfortran5 \
+    libglib2.0-0 libsm6 libxrender1 pkg-config libgfortran5 git\
  && rm -rf /var/lib/apt/lists/*
 
 # Make sure conda libs win over system libs

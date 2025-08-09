@@ -2,7 +2,7 @@
   "name": "TEXAS Project Environment",
   "image": "texas-dev:latest",
 
-  // Set workspace folder inside user's home
+  // Work in the mounted repo
   "workspaceFolder": "/home/micromamba/app",
 
   "customizations": {
@@ -19,15 +19,20 @@
   },
 
   "mounts": [
-    // Mount local repo to /home/micromamba/app in the container
+    // Mount local repo -> container
     "source=${localWorkspaceFolder},target=/home/micromamba/app,type=bind,consistency=cached",
 
-    // Mount local OneDrive folder
+    // OneDrive mount (optional)
     "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached"
   ],
 
-  // Run as micromamba to avoid extra UID remap layer
+  // We already baked UID/GID=1000 into the image — no wrapper needed
   "remoteUser": "micromamba",
-  "updateRemoteUserUID": true
-}
+  "updateRemoteUserUID": false,
 
+  // After the mount, re-do the editable install so Python sees the live code
+  "postCreateCommand": "python -m pip install -e .",
+
+  // Optional: quick sanity print in the terminal when it starts
+  "postStartCommand": "echo Using Python: $(which python) && python -c \"import TEXAS,sys;print('TEXAS import OK from', TEXAS.__file__)\""
+}
