@@ -25,18 +25,18 @@ P(\theta \mid D) = \frac{P(D \mid \theta) \, P(\theta)}{P(D)}
 $$
 
 Where:
-- $ \theta $ = parameters we want to estimate (e.g., S-curve shape parameters, nutrient effect coefficients).
-- $ D $ = observed data (e.g., GDGT fractions, Ring Index values).
-- $ P(\theta \mid D) $ = **posterior** — our updated beliefs about parameters given the data.
-- $ P(D \mid \theta) $ = **likelihood** — how well a given set of parameters explains the data.
-- $ P(\theta) $ = **prior** — what we believed about parameters before seeing the data.
-- $ P(D) $ = **evidence** — a normalization constant ensuring probabilities sum to 1.
+- $$ \theta $$ = parameters we want to estimate (e.g., S-curve shape parameters, nutrient effect coefficients).
+- $$ D $$ = observed data (e.g., GDGT fractions, Ring Index values).
+- $$ P(\theta \mid D) $$ = **posterior** — our updated beliefs about parameters given the data.
+- $$ P(D \mid \theta) $$ = **likelihood** — how well a given set of parameters explains the data.
+- $$ P(\theta) $$ = **prior** — what we believed about parameters before seeing the data.
+- $$ P(D) $$ = **evidence** — a normalization constant ensuring probabilities sum to 1.
 
 ---
 
 ## 3. Forward Model (Environmental Variables → Proxy Values)
 
-The forward model predicts **scaled Ring Index** ($ RI_{\text{scaled}} $) from environmental predictors.
+The forward model predicts **scaled Ring Index** ($$ RI_{\text{scaled}} $$) from environmental predictors.
 
 Example for a **generalized logistic forward model**:
 
@@ -45,11 +45,11 @@ RI_{\text{scaled}}(T, X) = t_0 + \frac{L}{\left( 1 + Q \cdot e^{-k (T - T_{0})} 
 $$
 
 Where:
-- $ T $ = temperature.
-- $ X_j $ = additional predictors (e.g., GDGT-2/GDGT-3 ratio, nitrate concentration).
-- $ t_0, L, Q, k, v $ = logistic curve parameters (control inflection point, steepness, shape).
-- $ \beta_j $ = coefficients for optional predictors.
-- $ RI_{\text{scaled}} $ is normalized between 0 and 1 for comparability.
+- $$ T $$ = temperature.
+- $$ X_j $$ = additional predictors (e.g., GDGT-2/GDGT-3 ratio, nitrate concentration).
+- $$ t_0, L, Q, k, v $$ = logistic curve parameters (control inflection point, steepness, shape).
+- $$ \beta_j $$ = coefficients for optional predictors.
+- $$ RI_{\text{scaled}} $$ is normalized between 0 and 1 for comparability.
 
 **Forward Model Role:**  
 Given **true environmental conditions**, the model produces a distribution of possible GDGT-based proxy values, including natural variability and measurement noise.
@@ -66,9 +66,9 @@ $$
 P(T \mid RI_{\text{obs}}) \propto P(RI_{\text{obs}} \mid T) \, P(T)
 $$
 
-- $ P(T) $ — **prior temperature distribution** (e.g., from regional climate models, modern analogs, or culture constraints).
-- $ P(RI_{\text{obs}} \mid T) $ — **likelihood** from the forward model.
-- The result $ P(T \mid RI_{\text{obs}}) $ is the **posterior** distribution of temperatures consistent with the observation.
+- $$ P(T) $$ — **prior temperature distribution** (e.g., from regional climate models, modern analogs, or culture constraints).
+- $$ P(RI_{\text{obs}} \mid T) $$ — **likelihood** from the forward model.
+- The result $$ P(T \mid RI_{\text{obs}}) $$ is the **posterior** distribution of temperatures consistent with the observation.
 
 ---
 
@@ -80,15 +80,15 @@ $$
 P(RI_{\text{obs}} \mid T, \theta) = \mathcal{N} \left( RI_{\text{obs}} \,\middle|\, RI_{\text{pred}}(T, X; \theta), \sigma_{RI} \right)
 $$
 
-- $ RI_{\text{pred}} $ — forward model prediction.
-- $ \sigma_{RI} $ — residual standard deviation (accounts for unmodeled variability).
+- $$ RI_{\text{pred}} $$ — forward model prediction.
+- $$ \sigma_{RI} $$ — residual standard deviation (accounts for unmodeled variability).
 
 ---
 
 ### 4.2 Priors
 
-- **From cultures** — tightly constrain curve shape parameters ($ t_0, k, v, Q $) for known archaeal clades.
-- **From core-tops** — set broader priors for environmental effects ($ \beta_j $).
+- **From cultures** — tightly constrain curve shape parameters ($$ t_0, k, v, Q $$) for known archaeal clades.
+- **From core-tops** — set broader priors for environmental effects ($$ \beta_j $$).
 
 Example prior for the temperature:
 
@@ -96,7 +96,7 @@ $$
 T \sim \mathcal{N}(\mu_T, \sigma_T)
 $$
 
-Where $\mu_T$ and $\sigma_T$ come from prior knowledge (e.g., modern climatology).
+Where $$\mu_T$$ and $$\sigma_T$$ come from prior knowledge (e.g., modern climatology).
 
 ---
 
