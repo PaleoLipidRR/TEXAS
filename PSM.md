@@ -20,9 +20,9 @@ Bayesian inference provides a natural way to:
 
 The heart of Bayesian statistics is **Bayes' Theorem**:
 
-\[
+$$
 P(\theta \mid D) = \frac{P(D \mid \theta) \, P(\theta)}{P(D)}
-\]
+$$
 
 Where:
 - \( \theta \) = parameters we want to estimate (e.g., S-curve shape parameters, nutrient effect coefficients).
@@ -40,9 +40,9 @@ The forward model predicts **scaled Ring Index** (\( RI_{\text{scaled}} \)) from
 
 Example for a **generalized logistic forward model**:
 
-\[
+$$
 RI_{\text{scaled}}(T, X) = t_0 + \frac{L}{\left( 1 + Q \cdot e^{-k (T - T_{0})} \right)^{1/v}} + \sum_{j} \beta_j X_j
-\]
+$$
 
 Where:
 - \( T \) = temperature.
@@ -62,9 +62,9 @@ The inverse problem is: *Given an observed proxy value (e.g., RI), what is the m
 
 Using Bayes’ theorem:
 
-\[
+$$
 P(T \mid RI_{\text{obs}}) \propto P(RI_{\text{obs}} \mid T) \, P(T)
-\]
+$$
 
 - \( P(T) \) — **prior temperature distribution** (e.g., from regional climate models, modern analogs, or culture constraints).
 - \( P(RI_{\text{obs}} \mid T) \) — **likelihood** from the forward model.
@@ -76,9 +76,9 @@ P(T \mid RI_{\text{obs}}) \propto P(RI_{\text{obs}} \mid T) \, P(T)
 
 The likelihood assumes a statistical error model:
 
-\[
+$$
 P(RI_{\text{obs}} \mid T, \theta) = \mathcal{N} \left( RI_{\text{obs}} \,\middle|\, RI_{\text{pred}}(T, X; \theta), \sigma_{RI} \right)
-\]
+$$
 
 - \( RI_{\text{pred}} \) — forward model prediction.
 - \( \sigma_{RI} \) — residual standard deviation (accounts for unmodeled variability).
@@ -92,9 +92,9 @@ P(RI_{\text{obs}} \mid T, \theta) = \mathcal{N} \left( RI_{\text{obs}} \,\middle
 
 Example prior for the temperature:
 
-\[
+$$
 T \sim \mathcal{N}(\mu_T, \sigma_T)
-\]
+$$
 
 Where \(\mu_T\) and \(\sigma_T\) come from prior knowledge (e.g., modern climatology).
 
@@ -129,19 +129,19 @@ Where \(\mu_T\) and \(\sigma_T\) come from prior knowledge (e.g., modern climato
 ## 7. Key Equations Summary
 
 1. **Bayes' Theorem**
-\[
+$$
 P(\theta \mid D) = \frac{P(D \mid \theta) \, P(\theta)}{P(D)}
-\]
+$$
 
 2. **Forward Logistic Model**
-\[
+$$
 RI_{\text{scaled}}(T, X) = t_0 + \frac{L}{\left( 1 + Q \cdot e^{-k (T - T_{0})} \right)^{1/v}} + \sum_{j} \beta_j X_j
-\]
+$$
 
 3. **Likelihood**
-\[
+$$
 P(RI_{\text{obs}} \mid T, \theta) = \mathcal{N} \left( RI_{\text{obs}} \,\middle|\, RI_{\text{pred}}, \sigma_{RI} \right)
-\]
+$$
 
 ---
 
