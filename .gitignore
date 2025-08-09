@@ -1,39 +1,43 @@
-# Python cache and build files
+# ───── Python cache / build artifacts ─────
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.so
+*.egg-info/
 build/
-TEXAS.egg-info/
-site/
+dist/
 
-# Stan/CmdStanPy compiled models and temporary files
+# ───── Stan compiled models (keep only .stan source) ─────
 TEXAS/stan_models/**
 !TEXAS/stan_models/**/*.stan
 
-notebooks/**
+# ───── Notebooks ─────
+# Track all notebooks, but ignore temp dirs
 !notebooks/**/*.ipynb
-!notebooks/**/*.stan
+/notebooks/dask-worker-space/
 
-/tmp/
-
-# IDE and OS files
+# ───── Temporary / OS / IDE files ─────
 .vscode/
 .idea/
 .DS_Store
 
-# Data and Cache (these should not be in Git)
+# ───── Large or generated data files ─────
 *.nc
 *.csv
 *.xlsx
 *.pkl
 *.npz
-/TEXAS/posterior_cache/
-/TEXAS/invT_posterior_cache/
-/spreadsheets/
-/nc_files/
 
-# Dask temporary files
-/notebooks/dask-worker-space/
-
-# Figures (optional, but good practice to generate from code)
+# ───── Generated figures ─────
 /figures/
 /html_figures/
+
+# ───── Posterior caches ─────
+/TEXAS/posterior_cache/
+/TEXAS/invT_posterior_cache/
+
+# ───── Other project data dirs ─────
+/spreadsheets/
+/nc_files/
+/tmp/
