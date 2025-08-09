@@ -30,33 +30,25 @@ def generate_ensemble(
     if seed is not None:
         np.random.seed(seed)
 
-    # 1) auto-detect suffix if needed
-    if suffix is None:
-        available = list(post_ds.data_vars)
-        counts = {}
-        multi_sufs = {v.split("_")[-1] for v in available if "beta0_" in v}
-        for p in param_names:
-            for var in available:
-                if var.startswith(f"{p}_"):
-                    suf = var.split(f"{p}_",1)[1]
-                    counts[suf] = counts.get(suf, 0) + 1
-        if not counts:
-            raise ValueError(f"Could not auto-detect suffix for {param_names}")
-        # if multivariate, prioritize multi_sufs
-        if multi_sufs and any(p.startswith("beta0_") for p in param_names):
-            for s in multi_sufs:
-                if counts.get(s):
-                    suffix = s
-                    break
-        if suffix is None:
-            suffix = max(counts, key=counts.get)
+    # 1) require suffix from detector or explicit arg
+if suffix is None:
+    raise ValueError(
+        "Suffix must be specified explicitly or via detect_model_and_params()."
+    )
 
-    # 2) build full var names & check
+# 2) build full var names & check
     full_vars = [f"{p}_{suffix}" for p in param_names]
     missing = [v for v in full_vars if v not in post_ds.data_vars]
     if missing:
-        avail = [v for v in post_ds.data_vars if any(v.startswith(f"{p}_") for p in param_names)]
-        raise ValueError(f"Missing parameters {missing}, available: {avail}")
+    expected = full_vars
+    avail = [v for v in post_ds.data_vars if any(v.startswith(f"{p}_") or v == p for p in param_names)]
+    raise ValueError(
+        f"Missing parameters: {missing}. Suffix='{suffix}'.
+"
+        f"Expected: {expected}
+"
+        f"Available (matching): {sorted(avail)}"
+    )
 
     # 3) detect multivariate
     name = model_function.__name__

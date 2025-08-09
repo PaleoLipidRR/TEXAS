@@ -28,7 +28,7 @@
 
   // We already baked UID/GID=1000 into the image — no wrapper needed
   "remoteUser": "micromamba",
-  "updateRemoteUserUID": false,
+  "updateRemoteUserUID": true,
 
   // After the mount, re-do the editable install so Python sees the live code
   "postCreateCommand": "python -m pip install -e .",
