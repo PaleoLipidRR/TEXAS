@@ -42,8 +42,9 @@ dev = [
   "mkdocs"
 ]
 
-[tool.setuptools]
-packages = ["TEXAS"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["TEXAS*"]
 
 [tool.setuptools.package-data]
 TEXAS = ["stan_models/*.stan"]
