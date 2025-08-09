@@ -38,9 +38,27 @@ def get_repo_root(target_dir_name: str = "TEXAS") -> Path:
             return cand
     raise RuntimeError(f"Could not locate '{target_dir_name}' above {cwd}")
 
+def get_project_root() -> Path:
+    """Top-level repo folder (contains .git or pyproject.toml)."""
+    cwd = Path.cwd()
+    try:
+        top = subprocess.check_output(
+            ["git", "rev-parse", "--show-toplevel"], cwd=str(cwd)
+        ).decode().strip()
+        return Path(top)
+    except Exception:
+        pass
+    for parent in [cwd, *cwd.parents]:
+        if (parent / ".git").exists() or (parent / "pyproject.toml").exists():
+            return parent
+    return get_repo_root("TEXAS").parent
+
+PROJECT_ROOT = get_project_root()          # e.g., /home/micromamba/app
+PACKAGE_ROOT  = PROJECT_ROOT / "TEXAS"     # e.g., /home/micromamba/app/TEXAS
+REPO_ROOT = PROJECT_ROOT                   # back-compat alias
+STAN_MODELS_DIR = (PACKAGE_ROOT / "stan_models").resolve()
+
 HOME = Path.home()
 CMDSTAN_DIR = find_cmdstan("2.36.0")
-REPO_ROOT = get_repo_root("TEXAS")
 DOCUMENTS = HOME / "Documents"
-ONEDRIVE = Path("/mnt/onedrive") if Path("/mnt/onedrive").exists() else HOME/"OneDrive"
-STAN_MODELS_DIR = (REPO_ROOT / "TEXAS" / "stan_models").resolve()
+ONEDRIVE = Path("/mnt/onedrive") if Path("/mnt/onedrive").exists() else HOME / "OneDrive"
