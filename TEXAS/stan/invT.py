@@ -12,7 +12,7 @@ from .sampler import StanSampler
 from .metadata import extract_priors_from_stan
 from .utils import patch_optional_predictors
 from ..data.builder import build_invT_inputData, InvTConfig
-from TEXAS.stan.utils import get_repo_root 
+from TEXAS.utils import get_repo_root 
 from TEXAS.stan.io import load_posterior
 
 # Instantiate once
