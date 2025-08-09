@@ -28,6 +28,6 @@
 
   // Run as micromamba to avoid extra UID remap layer
   "remoteUser": "micromamba",
-  "updateRemoteUserUID": false
+  "updateRemoteUserUID": true
 }
 
