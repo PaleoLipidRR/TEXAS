@@ -60,6 +60,12 @@ class StanCompiler:
 
             print(f"🔧 Compiling Stan model: {path.name}")
             os.environ["MAKEFLAGS"] = f"-j{n_jobs}"
+            
+            # --- FIX: Add this line ---
+            # This tells CmdStan's makefile that the C++ compiler is a 'gcc' type,
+            # which is required for TBB (threading) support in Conda environments.
+            if 'TBB_CXX_TYPE' not in os.environ:
+                os.environ['TBB_CXX_TYPE'] = 'gcc'
             exe_path = compile_stan_file(str(path), force=True)
             model = CmdStanModel(stan_file=str(path), exe_file=exe_path)
             _MODEL_CACHE[path] = model

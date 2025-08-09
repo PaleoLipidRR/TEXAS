@@ -1,0 +1,33 @@
+{
+  "name": "TEXAS Project Environment",
+  "image": "texas-dev:latest",
+
+  // Set workspace folder inside user's home
+  "workspaceFolder": "/home/micromamba/app",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-toolsai.jupyter"
+      ]
+    }
+  },
+
+  "settings": {
+    "python.defaultInterpreterPath": "/opt/conda/bin/python"
+  },
+
+  "mounts": [
+    // Mount local repo to /home/micromamba/app in the container
+    "source=${localWorkspaceFolder},target=/home/micromamba/app,type=bind,consistency=cached",
+
+    // Mount local OneDrive folder
+    "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached"
+  ],
+
+  // Run as micromamba to avoid extra UID remap layer
+  "remoteUser": "micromamba",
+  "updateRemoteUserUID": false
+}
+

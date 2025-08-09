@@ -44,7 +44,8 @@ model {
       vector[N] logno3;
       for (n in 1:N) {
         if (no3[n] > 0.0 && no3[n] < no3_cutoff)
-          logno3[n] = log10(no3[n]);
+          logno3[n] = log10(no3[n] + 1e-9); // Add a small epsilon to avoid log(0). This prevents the calculation from resulting in -inf if no3[n] is zero.
+
         else
           logno3[n] = 0.0;
       }

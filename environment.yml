@@ -1,0 +1,38 @@
+name: texas-env
+channels:
+  - conda-forge
+  - defaults
+channel_priority: strict
+dependencies:
+  # Core Python
+  - python=3.10
+  - pip
+
+  # Pinned for Proplot compatibility
+  - matplotlib=3.4.*
+  - proplot=0.9.7
+  - cmocean
+
+  # Scientific stack
+  - numpy
+  - pandas
+  - xarray
+  - scipy
+  - scikit-learn
+  - seaborn
+  - jupyterlab
+  - ipywidgets
+  - tqdm
+  - geopy
+  - plotly
+  - shapely
+
+  # Stan interface
+  - cmdstanpy
+  - typing-extensions
+
+  # Extra packages via pip (PyPI only)
+  - pip:
+      - baysplinepy
+      - baysparpy
+      - pygwalker
