@@ -20,11 +20,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN micromamba install -y -n base -c conda-forge --strict-channel-priority \
     python=3.10 pip \
     "matplotlib=3.4.*" "proplot=0.9.7" "setuptools<81" cmocean \
-    numpy pandas xarray scipy scikit-learn seaborn \
+    numpy pandas xarray dask distributed zarr scipy scikit-learn seaborn \
     jupyterlab ipywidgets tqdm geopy plotly shapely cartopy "pyproj<3.6" \
     duckdb pyarrow sqlalchemy pydantic anywidget ipylab pygwalker \
     cmdstanpy typing-extensions libstdcxx-ng libgcc-ng freetype libpng \
-    netcdf4 h5netcdf cftime \
+    netcdf4 h5netcdf cftime openpyxl \
  && micromamba clean -a -y
 
 # Build CmdStan under /opt/cmdstan
