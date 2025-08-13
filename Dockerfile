@@ -21,11 +21,12 @@ RUN micromamba install -y -n base -c conda-forge --strict-channel-priority \
     python=3.10 pip \
     "matplotlib=3.4.*" "proplot=0.9.7" "setuptools<81" cmocean \
     numpy pandas xarray dask distributed zarr scipy scikit-learn seaborn \
-    jupyterlab ipywidgets tqdm geopy plotly shapely cartopy "pyproj<3.6" \
+    jupyterlab ipywidgets jupyterlab_widgets ipympl tqdm \
+    geopy plotly shapely cartopy "pyproj<3.6" \
     duckdb pyarrow sqlalchemy pydantic anywidget ipylab pygwalker \
     cmdstanpy typing-extensions libstdcxx-ng libgcc-ng freetype libpng \
     netcdf4 h5netcdf cftime openpyxl \
-    geopandas rtree fiona gdal \
+    geopandas rtree fiona gdal pyogrio mapclassify \
  && micromamba clean -a -y
 
 # Build CmdStan under /opt/cmdstan
