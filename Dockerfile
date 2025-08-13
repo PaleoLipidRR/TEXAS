@@ -25,6 +25,7 @@ RUN micromamba install -y -n base -c conda-forge --strict-channel-priority \
     duckdb pyarrow sqlalchemy pydantic anywidget ipylab pygwalker \
     cmdstanpy typing-extensions libstdcxx-ng libgcc-ng freetype libpng \
     netcdf4 h5netcdf cftime openpyxl \
+    geopandas rtree fiona gdal \
  && micromamba clean -a -y
 
 # Build CmdStan under /opt/cmdstan
