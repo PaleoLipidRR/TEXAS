@@ -2,37 +2,34 @@
   "name": "TEXAS Project Environment",
   "image": "texas-dev:latest",
 
-  // Work in the mounted repo
   "workspaceFolder": "/home/micromamba/app",
 
   "customizations": {
-    "vscode": {
-      "extensions": [
-        "ms-python.python",
-        "ms-toolsai.jupyter"
-      ]
-    }
+    "vscode": { "extensions": ["ms-python.python", "ms-toolsai.jupyter"] }
   },
 
   "settings": {
-    "python.defaultInterpreterPath": "/opt/conda/bin/python"
+    "python.defaultInterpreterPath": "/opt/conda/bin/python",
+    "jupyter.stopJupyterServerOnClose": false,
+    "jupyter.logging.level": "debug"
   },
 
-  "mounts": [
-    // Mount local repo -> container
-    "source=${localWorkspaceFolder},target=/home/micromamba/app,type=bind,consistency=cached",
+  "runArgs": [
+    "--init",             // adds tini to reap zombies
+    "--shm-size=8g"
+  ],
 
-    // OneDrive mount (optional)
+  "overrideCommand": true,
+  "shutdownAction": "none",
+
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/home/micromamba/app,type=bind,consistency=cached",
     "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached"
   ],
 
-  // We already baked UID/GID=1000 into the image — no wrapper needed
-  "remoteUser": "micromamba",
-  "updateRemoteUserUID": true,
+  "remoteUser": "micromamba"
 
-  // After the mount, re-do the editable install so Python sees the live code
-  "postCreateCommand": "python -m pip install -e .",
-
-  // Optional: quick sanity print in the terminal when it starts
-  "postStartCommand": "echo Using Python: $(which python) && python -c \"import TEXAS,sys;print('TEXAS import OK from', TEXAS.__file__)\""
+  // Re-enable these later once it's stable:
+  // "postCreateCommand": "python -m pip install -e .",
+  // "postStartCommand": "echo Using Python: $(which python)"
 }
