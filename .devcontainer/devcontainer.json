@@ -25,7 +25,6 @@
   "mounts": [
     "source=${localWorkspaceFolder},target=/home/micromamba/app,type=bind,consistency=cached",
     "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached",
-    "type=volume,src=jupyter-runtime-texas,dst=/home/micromamba/.local/share/jupyter"
   ],
 
   "remoteUser": "micromamba",
