@@ -15,7 +15,7 @@
   },
 
   "runArgs": [
-    "--init",             // adds tini to reap zombies
+    "--init",
     "--shm-size=8g"
   ],
 
@@ -24,12 +24,9 @@
 
   "mounts": [
     "source=${localWorkspaceFolder},target=/home/micromamba/app,type=bind,consistency=cached",
-    "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached"
+    "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached",
+    "type=volume,src=jupyter-runtime-texas,dst=/home/micromamba/.local/share/jupyter"
   ],
 
-  "remoteUser": "micromamba"
-
-  // Re-enable these later once it's stable:
-  // "postCreateCommand": "python -m pip install -e .",
-  // "postStartCommand": "echo Using Python: $(which python)"
+  "remoteUser": "micromamba",
 }
