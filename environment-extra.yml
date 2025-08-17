@@ -1,46 +1,15 @@
 name: texas-env
+
+# Add these two lines
 channels:
   - conda-forge
 channel_priority: strict
 
 dependencies:
-  # --- Core & Environment ---
-  - python=3.10
-  - pip
-  - jupyterlab
-  - ipywidgets
-  - tqdm
-
-  # --- Core Scientific Stack ---
-  - numpy
-  - pandas
-  - scipy
-  - scikit-learn
-  - statsmodels
-  - seaborn
-  
-  # --- Core Data Handling ---
-  - xarray
-  - dask
-  - distributed
-  - zarr
-  - netcdf4
-  - h5netcdf
-  - cftime
-
-  # --- Plotting (Stable Pinned Versions) ---
-  - matplotlib<3.5
-  - proplot=0.9.7
-  - setuptools<81
-  - cmocean
-  - plotly
-  
   # --- Geo Stack (Complex Dependencies) ---
-  - geopandas=0.13.*
-  - shapely<2
-  - pyproj=3.4.*
-  - cartopy=0.21.*
-  - pyshp=2.3.*
+  - geopandas
+  - shapely
+  - cartopy
   - "pyproj<3.6"
   - rtree
   - pyogrio
@@ -65,7 +34,6 @@ dependencies:
   - pyarrow
   - sqlalchemy
   - pydantic
-  - importlib-metadata<5.0
 
   # --- Pip-only packages & Local Install ---
   - pip:
