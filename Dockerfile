@@ -1,7 +1,8 @@
 # syntax=docker/dockerfile:1.7
 
 ########## Stage 1: builder (root only) ##########
-FROM mambaorg/micromamba:1.5.8-bullseye AS builder
+# Newer image helps avoid older libsolv crashes
+FROM mambaorg/micromamba:1.5.10-bookworm AS builder
 SHELL ["/bin/bash", "-lc"]
 ENV MAMBA_DOCKERFILE_ACTIVATE=1
 WORKDIR /app
@@ -16,20 +17,40 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     fonts-texgyre \
  && rm -rf /var/lib/apt/lists/*
 
-# Conda env (root-owned here; ownership fixed at COPY time)
+# ---- Ensure python/pip in base (modify existing env; DON'T create) ----
 RUN micromamba install -y -n base -c conda-forge --strict-channel-priority \
     python=3.10 pip \
-    "matplotlib=3.4.*" "proplot=0.9.7" "setuptools<81" cmocean \
-    numpy pandas xarray dask distributed zarr scipy scikit-learn seaborn \
-    jupyterlab ipywidgets jupyterlab_widgets ipympl tqdm \
-    geopy plotly shapely cartopy "pyproj<3.6" \
-    duckdb pyarrow sqlalchemy pydantic anywidget ipylab pygwalker \
-    cmdstanpy typing-extensions libstdcxx-ng libgcc-ng freetype libpng \
-    netcdf4 h5netcdf cftime openpyxl \
-    geopandas rtree fiona gdal pyogrio mapclassify \
  && micromamba clean -a -y
 
-# Build CmdStan under /opt/cmdstan
+# ---- Core scientific stack ----
+RUN micromamba install -y -n base -c conda-forge --strict-channel-priority \
+    "matplotlib=3.4.*" "proplot=0.9.7" "setuptools<81" cmocean \
+    numpy pandas scipy scikit-learn xarray dask distributed zarr \
+    jupyterlab ipywidgets jupyterlab_widgets ipympl tqdm \
+    duckdb pyarrow sqlalchemy pydantic typing-extensions \
+    libstdcxx-ng libgcc-ng freetype libpng openpyxl \
+ && micromamba clean -a -y
+
+# ---- Geo stack (without GDAL/Fiona) ----
+RUN micromamba install -y -n base -c conda-forge --strict-channel-priority \
+    shapely cartopy "pyproj<3.6" \
+    geopandas rtree pyogrio mapclassify \
+    geopy plotly anywidget ipylab pygwalker \
+ && micromamba clean -a -y
+
+# ---- NetCDF/HDF + xesmf + pinned ESMF/MPI/HDF5/libnetcdf ----
+RUN micromamba install -y -n base -c conda-forge --strict-channel-priority \
+    netcdf4 h5netcdf cftime \
+    xesmf esmpy=8.9.0 esmf=8.9.0 mpich=4.3.1 hdf5=1.14.6 libnetcdf=4.9.2 \
+ && micromamba clean -a -y
+
+# Fail fast if imports break
+RUN micromamba run -n base python - <<'PY'
+import esmpy, xesmf, numpy, xarray, geopandas, pyogrio
+print("OK: esmpy", esmpy.__version__, "xesmf", xesmf.__version__)
+PY
+
+# ---- Build CmdStan under /opt/cmdstan ----
 RUN mkdir -p /opt/cmdstan \
  && cd /opt/cmdstan \
  && wget -q https://github.com/stan-dev/cmdstan/releases/download/v${CMDSTAN_VERSION}/cmdstan-${CMDSTAN_VERSION}.tar.gz \
@@ -40,12 +61,12 @@ RUN mkdir -p /opt/cmdstan \
 
 
 ########## Stage 2: final (non-root runtime) ##########
-FROM mambaorg/micromamba:1.5.8-bullseye
+FROM mambaorg/micromamba:1.5.10-bookworm
 USER root
 
 # Runtime libs only
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libglib2.0-0 libsm6 libxrender1 pkg-config libgfortran5 git\
+    libglib2.0-0 libsm6 libxrender1 pkg-config libgfortran5 git \
  && rm -rf /var/lib/apt/lists/*
 
 # Make sure conda libs win over system libs
@@ -63,14 +84,13 @@ COPY --link --from=builder --chown=micromamba:micromamba /opt/cmdstan /opt/cmdst
 USER micromamba
 
 # CmdStan env
-ENV CMDSTAN=/opt/cmdstan/cmdstan-2.36.0
+ENV CMDSTAN=/opt/cmdsan/cmdstan-2.36.0
 ENV PATH="$CMDSTAN/bin:$PATH"
 ENV PIP_NO_CACHE_DIR=1
 
 # Copy in just what's needed to install first (better cache)
 COPY --chown=micromamba:micromamba pyproject.toml .
-# If your build reads README.md, uncomment the next line:
-# COPY --chown=micromamba:micromamba README.md .
+# COPY --chown=micromamba:micromamba README.md .   # if your build reads it
 
 COPY --chown=micromamba:micromamba TEXAS/ ./TEXAS/
 

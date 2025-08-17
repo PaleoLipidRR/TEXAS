@@ -2,7 +2,7 @@
 
 import numpy as np
 import xarray as xr
-from typing import Callable, List, Optional, Dict, Any
+from typing import Callable, List, Optional, Dict, Any, Literal
 
 from .detection import detect_model_and_params
 from TEXAS.stan.io import load_posterior
@@ -21,7 +21,11 @@ def generate_ensemble(
     # Multivariate model parameters
     gdgt23ratio: Optional[np.ndarray] = None,
     no3: Optional[np.ndarray] = None,
-    no3_cutoff: float = 50.0
+    no3_cutoff: Optional[float] = None,
+    # NEW authoritative hints from detector
+    is_multivariate: Optional[bool] = None,
+    use_gdgt23ratio_flag: Optional[bool] = None,
+    use_no3_flag: Optional[bool] = None,
 ) -> Dict[str, np.ndarray]:
     """
     Generate an ensemble of curves from a posterior dataset using any model function.
@@ -48,16 +52,34 @@ def generate_ensemble(
             f"Available (matching): {sorted(avail)}"
         )
 
-    # 3) detect multivariate
-    name = model_function.__name__
-    is_multi = "multivariate" in name
-    use_gdgt = post_ds.attrs.get("use_gdgt23ratio",False)
-    use_no3 = post_ds.attrs.get("use_no3",False)
-    # fallback if attrs missing:
-    if "use_gdgt23ratio" not in post_ds.attrs:
-        use_gdgt = any(v.startswith("beta0_gdgt23ratio_") for v in post_ds.data_vars)
-    if "use_no3" not in post_ds.attrs:
-        use_no3 = any(v.startswith("beta0_no3_") for v in post_ds.data_vars)
+    # 3) decide multivariate & use_* flags (prefer caller hints)
+    if is_multivariate is None:
+        is_multi = "multivariate" in model_function.__name__
+    else:
+        is_multi = bool(is_multivariate)
+
+    # STRICT attr-based flags only (no data_vars scanning)
+    if use_gdgt23ratio_flag is None:
+        # apply only if the attr exists and is truthy
+        use_gdgt = bool(post_ds.attrs.get("use_gdgt23ratio", False))
+    else:
+        use_gdgt = bool(use_gdgt23ratio_flag)
+
+    if use_no3_flag is None:
+        # apply only if the attr exists and is truthy
+        use_no3 = bool(post_ds.attrs.get("use_no3", False))
+    else:
+        use_no3 = bool(use_no3_flag)
+
+    # Resolve cutoff only if NO3 correction is enabled by attrs/flag
+    if use_no3:
+        eff_no3_cutoff = (
+            no3_cutoff
+            if no3_cutoff is not None
+            else post_ds.attrs.get("no3_cutoff", 0.0)
+        )
+    else:
+        eff_no3_cutoff = 0.0
 
     # 4) sample draws
     df = post_ds[full_vars].to_dataframe().reset_index()
@@ -77,7 +99,7 @@ def generate_ensemble(
                 params["gdgt23ratio"] = gdgt23ratio
             if use_no3 and no3 is not None:
                 params["no3"] = no3
-                params["no3_cutoff"] = no3_cutoff
+                params["no3_cutoff"] = eff_no3_cutoff
         try:
             ensemble[i] = model_function(x, **params)
         except Exception as e:
@@ -94,7 +116,7 @@ def generate_ensemble(
             "n_draws": n_draws,
             "suffix": suffix,
             "param_names": param_names,
-            "model_function": name,
+            "model_function": model_function.__name__,
             "seed": seed,
             "percentiles": percentiles,
             "is_multivariate": is_multi,
@@ -102,41 +124,44 @@ def generate_ensemble(
             "use_no3": bool(use_no3),
             "gdgt23ratio_provided": gdgt23ratio is not None,
             "no3_provided": no3 is not None,
+            "no3_cutoff_effective": float(eff_no3_cutoff),
         }
     return out
 
 def generate_ensemble_auto(
     post_ds: xr.Dataset,
     x_vals: np.ndarray,
-    model_type: str = "auto",
+    model_type: Literal["auto","forward","inverse"] = "auto",
     gdgt23ratio: Optional[np.ndarray] = None,
     no3: Optional[np.ndarray] = None,
-    no3_cutoff: float = 50.0,
+    no3_cutoff: Optional[float] = None,
+    return_full_ensemble: bool = False,
+    suffix: Optional[str] = None,
     **kwargs
 ) -> Dict[str, np.ndarray]:
     """
     Automatically generate ensemble with auto‐detected model types.
-    (Exact port of your old stan_utils.py version.)
     """
-    # detect inverse‐T vs forward
-    model_name = post_ds.attrs.get("stan_model_name","")
+    model_name = post_ds.attrs.get("stan_model_name", "")
     is_inv = ("invT_" in model_name) or ("t_est" in post_ds.data_vars)
 
-    if model_type in ("auto","inverse") and is_inv:
-        # dispatch to invT Stan code
-        # we assume you have written a helper for inverse‐T ensembles:
-        from .invT import generate_invT_ensemble  # you’ll need to implement this
+    if model_type in ("auto", "inverse") and is_inv:
+        from .invT import generate_invT_ensemble
         return generate_invT_ensemble(
-            post_ds, x_vals,
+            post_ds,
+            x_vals,
             gdgt23ratio=gdgt23ratio,
             no3=no3,
-            no3_cutoff=no3_cutoff,
+            no3_cutoff=no3_cutoff,               # <-- pass through user arg (None allowed)
+            return_full_ensemble=return_full_ensemble,
             **kwargs
         )
-    elif model_type in ("auto","forward") and not is_inv:
-        # dispatch to forward pipeline
-        det = detect_model_and_params(post_ds, suffix=kwargs.get("suffix"))
-        print("DEBUG: Detected model and params",det)
+
+    elif model_type in ("auto", "forward") and not is_inv:
+        det = detect_model_and_params(post_ds, suffix=suffix)  # <-- use explicit suffix
+        # precedence: arg > detector > None (resolved inside generate_ensemble)
+        resolved_no3_cutoff = no3_cutoff if no3_cutoff is not None else det.get("no3_cutoff")
+
         return generate_ensemble(
             post_ds=post_ds,
             model_function=det["model_function"],
@@ -145,7 +170,11 @@ def generate_ensemble_auto(
             suffix=det.get("suffix"),
             gdgt23ratio=gdgt23ratio,
             no3=no3,
-            no3_cutoff=no3_cutoff,
+            no3_cutoff=resolved_no3_cutoff,
+            is_multivariate=det.get("is_multivariate"),
+            use_gdgt23ratio_flag=det.get("use_gdgt23ratio"),
+            use_no3_flag=det.get("use_no3"),
+            return_full_ensemble=return_full_ensemble,
             **kwargs
         )
     else:
