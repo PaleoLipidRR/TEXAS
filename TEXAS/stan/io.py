@@ -21,6 +21,7 @@ def save_posterior(
     posterior: xr.Dataset,
     cache_dir: Optional[Union[str, Path]] = None,
     overwrite: bool = True,
+    filename_suffix: str = "",
 ) -> Path:
     """
     Save a forward-model posterior to disk as compressed NetCDF.
@@ -43,13 +44,15 @@ def save_posterior(
             raise ValueError("no3_cutoff must be set when use_no3=1")
         ttype += f"_no3_{cutoff}"
 
-    outpath = outdir / f"{name}_{ttype}.nc"
+    # sanitize suffix
+    if filename_suffix:
+        filename_suffix = f"_{filename_suffix.strip('_')}"
+
+    outpath = outdir / f"{name}_{ttype}{filename_suffix}.nc"
     if outpath.exists() and not overwrite:
         raise FileExistsError(f"{outpath} exists and overwrite=False")
 
-    # record the filename in attrs
     posterior.attrs["filename"] = outpath.name
-
     encoding = {var: {"zlib": True} for var in posterior.data_vars}
     posterior.to_netcdf(outpath, encoding=encoding)
     print(f"Saved forward posterior to {outpath}")
