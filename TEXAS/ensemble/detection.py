@@ -53,6 +53,7 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
     Uses a shared suffix priority via choose_suffix().
     """
     vars_ = set(posterior_ds.data_vars)
+    attrs_ = set(posterior_ds.attrs)
 
     # Detect presence of optional parameter groups without assuming attrs
     has_v_any   = ("v" in vars_) or any(v.startswith("v_") for v in vars_)
@@ -75,8 +76,12 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
     # Now, re-evaluate presence WITH the chosen suffix
     has_v   = (f"v_{suffix}" in vars_) or (suffix == "" and "v" in vars_)
     has_Q   = (f"Q_{suffix}" in vars_) or (suffix == "" and "Q" in vars_)
-    has_gdz = (f"beta0_gdgt23ratio_{suffix}" in vars_) or (suffix == "" and "beta0_gdgt23ratio" in vars_)
-    has_no3 = (f"beta0_no3_{suffix}" in vars_) or (suffix == "" and "beta0_no3" in vars_)
+    has_gdz = ("use_gdgt23ratio" in attrs_) 
+    has_no3 = ("use_no3" in attrs_) 
+    detected_no3_cutoff = 0.0
+    if has_no3:
+        # prefer attrs; ignore if missing
+        detected_no3_cutoff = posterior_ds.attrs.get("no3_cutoff", 0.0)
 
     # Build param list and select model
     if has_v and has_Q:
@@ -102,4 +107,8 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
         "model_function": model_fn,
         "param_names": params,
         "suffix": suffix,
+        "is_multivariate": bool(has_gdz or has_no3),
+        "use_gdgt23ratio": bool(has_gdz),
+        "use_no3": bool(has_no3),
+        "no3_cutoff": detected_no3_cutoff,
     }
