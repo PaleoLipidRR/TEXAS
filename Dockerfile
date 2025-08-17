@@ -1,56 +1,31 @@
 # syntax=docker/dockerfile:1.7
 
 ########## Stage 1: builder (root only) ##########
-# Newer image helps avoid older libsolv crashes
 FROM mambaorg/micromamba:1.5.10-bookworm AS builder
 SHELL ["/bin/bash", "-lc"]
 ENV MAMBA_DOCKERFILE_ACTIVATE=1
-WORKDIR /app
 USER root
 
 ARG CMDSTAN_VERSION=2.36.0
 
-# Build deps
+# System build dependencies for CmdStan and other packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential gfortran make wget tar git \
-    libglib2.0-0 libsm6 libxrender1 pkg-config \
-    fonts-texgyre \
  && rm -rf /var/lib/apt/lists/*
 
-# ---- Ensure python/pip in base (modify existing env; DON'T create) ----
-RUN micromamba install -y -n base -c conda-forge --strict-channel-priority \
-    python=3.10 pip \
- && micromamba clean -a -y
+COPY --chown=micromamba:micromamba conda-lock.yml /app/
+COPY --chown=micromamba:micromamba . /app/
+WORKDIR /app
 
-# ---- Core scientific stack ----
-RUN micromamba install -y -n base -c conda-forge --strict-channel-priority \
-    "matplotlib=3.4.*" "proplot=0.9.7" "setuptools<81" cmocean \
-    numpy pandas scipy scikit-learn xarray dask distributed zarr \
-    jupyterlab ipywidgets jupyterlab_widgets ipympl tqdm \
-    duckdb pyarrow sqlalchemy pydantic typing-extensions \
-    libstdcxx-ng libgcc-ng freetype libpng openpyxl \
- && micromamba clean -a -y
+# 1. Create the environment from the lock file (this will be fast)
+RUN micromamba create -n texas-env -f conda-lock.yml
 
-# ---- Geo stack (without GDAL/Fiona) ----
-RUN micromamba install -y -n base -c conda-forge --strict-channel-priority \
-    shapely cartopy "pyproj<3.6" \
-    geopandas rtree pyogrio mapclassify \
-    geopy plotly anywidget ipylab pygwalker \
+# 2. Install your local package into the new environment
+RUN micromamba run -n texas-env pip install --no-build-isolation --no-deps -e . \
  && micromamba clean -a -y
-
-# ---- NetCDF/HDF + xesmf + pinned ESMF/MPI/HDF5/libnetcdf ----
-RUN micromamba install -y -n base -c conda-forge --strict-channel-priority \
-    netcdf4 h5netcdf cftime \
-    xesmf esmpy=8.9.0 esmf=8.9.0 mpich=4.3.1 hdf5=1.14.6 libnetcdf=4.9.2 \
- && micromamba clean -a -y
-
-# Fail fast if imports break
-RUN micromamba run -n base python - <<'PY'
-import esmpy, xesmf, numpy, xarray, geopandas, pyogrio
-print("OK: esmpy", esmpy.__version__, "xesmf", xesmf.__version__)
-PY
 
 # ---- Build CmdStan under /opt/cmdstan ----
+# This still needs to be done manually as it's a special build step
 RUN mkdir -p /opt/cmdstan \
  && cd /opt/cmdstan \
  && wget -q https://github.com/stan-dev/cmdstan/releases/download/v${CMDSTAN_VERSION}/cmdstan-${CMDSTAN_VERSION}.tar.gz \
@@ -59,47 +34,44 @@ RUN mkdir -p /opt/cmdstan \
  && cd cmdstan-${CMDSTAN_VERSION} \
  && make TBB_CXX_TYPE=gcc build -j4
 
-
 ########## Stage 2: final (non-root runtime) ##########
 FROM mambaorg/micromamba:1.5.10-bookworm
 USER root
 
-# Runtime libs only
+# Install only runtime system libraries needed
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libglib2.0-0 libsm6 libxrender1 pkg-config libgfortran5 git \
+    build-essential libgfortran5 git \
+    # Add these libraries for graphics and plotting
+    libglib2.0-0 libsm6 libxrender1 libfreetype6 libpng16-16 \
  && rm -rf /var/lib/apt/lists/*
 
-# Make sure conda libs win over system libs
-ENV LD_LIBRARY_PATH=/opt/conda/lib:$LD_LIBRARY_PATH
-
-# Create runtime user and working dir in home (writable)
+# Create runtime user and working dir
 RUN useradd -ms /bin/bash micromamba \
  && install -d -o micromamba -g micromamba /home/micromamba/app
 WORKDIR /home/micromamba/app
 
-# Copy env + cmdstan with correct ownership (fast; no chown -R)
+# Copy the entire conda environment and the compiled CmdStan from the builder
 COPY --link --from=builder --chown=micromamba:micromamba /opt/conda /opt/conda
 COPY --link --from=builder --chown=micromamba:micromamba /opt/cmdstan /opt/cmdstan
+COPY --link --from=builder --chown=micromamba:micromamba /app /home/micromamba/app
 
 USER micromamba
 
-# CmdStan env
-ENV CMDSTAN=/opt/cmdsan/cmdstan-2.36.0
+# Set Environment Variables
+ENV MAMBA_DOCKERFILE_ACTIVATE=1
+ENV MAMBA_DEFAULT_ENV=texas-env
+ENV MAMBA_ROOT_PREFIX=/opt/conda
+ENV MAMBA_EXE=/bin/micromamba
+ENV PATH="/opt/conda/envs/texas-env/bin:$PATH"
+ENV CMDSTAN=/opt/cmdstan/cmdstan-2.36.0
 ENV PATH="$CMDSTAN/bin:$PATH"
-ENV PIP_NO_CACHE_DIR=1
 
-# Copy in just what's needed to install first (better cache)
-COPY --chown=micromamba:micromamba pyproject.toml .
-# COPY --chown=micromamba:micromamba README.md .   # if your build reads it
-
-COPY --chown=micromamba:micromamba TEXAS/ ./TEXAS/
-
-# Install inside the conda env (no login shell)
-RUN micromamba run -n base python -m pip install --no-deps -e . \
- && micromamba run -n base python -m pip install --no-deps baysplinepy baysparpy \
- && rm -rf ~/.cache/pip
-
-# Bring in the rest last to maximize cache hits
-COPY --chown=micromamba:micromamba . .
+# ---- FIXES FOR RUNTIME ERRORS ----
+# 1. Point PROJ to its data directory to fix geospatial library errors
+ENV PROJ_LIB=/opt/conda/envs/texas-env/share/proj
+# 2. Add the project's source code to Python's path to fix ModuleNotFoundError
+ENV PYTHONPATH=/home/micromamba/app
+# 3. Point ESMF to its make file to fix xesmf import error
+ENV ESMFMKFILE=/opt/conda/envs/texas-env/lib/esmf.mk
 
 CMD ["bash"]
