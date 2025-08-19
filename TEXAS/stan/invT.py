@@ -197,6 +197,7 @@ def predict_temperature_from_RI(
     use_opencl: bool = False,
     threads_per_chain: Optional[int] = None,
     stan_model_path: Optional[Union[str, Path]] = None,
+    
 ) -> Dict[str, Any]:
     """High-level wrapper to run the inverse model and get temperature percentiles."""
     post_ds = get_invT_posterior(
