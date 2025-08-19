@@ -1,81 +1,51 @@
-# TEXAS/stan/compiler.py
+# TEXAS/stan/compiler.py (Corrected)
 
 from pathlib import Path
-import os
-from cmdstanpy import CmdStanModel, compile_stan_file
-from typing import Union, Optional
-
-_MODEL_CACHE = {}
+from typing import Dict, Optional, Union
+from cmdstanpy import CmdStanModel
+from TEXAS.utils import get_repo_root
 
 class StanCompiler:
-    """
-    Compile and cache Stan models via CmdStanPy.
+    """A simple wrapper for compiling Stan models with caching."""
+    def __init__(self, model_dir: Optional[Union[str, Path]] = None):
+        if model_dir is None:
+            self.model_dir = get_repo_root() / "TEXAS" / "stan_models"
+        else:
+            self.model_dir = Path(model_dir)
+        self.cache = {}
 
-    Use `get_model(stan_file, recompile=True)` to force recompilation.
-    """
-
-    def __init__(
-        self,
-        cmdstan_path: Optional[str] = None,
-        stan_models_dir: Optional[Union[str, Path]] = None,
-    ):
-        if cmdstan_path:
-            os.environ["CMDSTAN"] = os.path.expanduser(cmdstan_path)
-
-        self.stan_models_dir = (
-            Path(stan_models_dir).expanduser().resolve()
-            if stan_models_dir
-            else Path(__file__).parent.parent / "stan_models"
-        )
-
-        if not self.stan_models_dir.exists():
-            raise FileNotFoundError(f"Stan models directory not found: {self.stan_models_dir}")
+    def resolve_stan_path(self, stan_file: Union[str, Path]) -> Path:
+        """
+        Resolves the full path to a Stan model file, ensuring it has the .stan extension.
+        """
+        # --- THIS IS THE FIX ---
+        p = Path(stan_file)
+        if p.suffix != '.stan':
+            p = p.with_suffix('.stan')
+        return self.model_dir / p
+        # --- END FIX ---
 
     def get_model(
         self,
         stan_file: Union[str, Path],
-        recompile: bool = False,
-        n_jobs: int = 4
+        cpp_options: Optional[Dict] = None,
     ) -> CmdStanModel:
         """
-        Return a compiled CmdStanModel for the given .stan file, compiling if necessary.
+        Compile a Stan model, using a cache to avoid re-compilation.
+        
+        Args:
+            stan_file (str): The name of the .stan file in the model directory.
+            cpp_options (dict, optional): Options for the Stan compiler.
         """
-        path = Path(stan_file)
-        if path.suffix != ".stan":
-            path = self.stan_models_dir / f"{stan_file}.stan"
-        path = path.expanduser().resolve()
+        stan_path = self.resolve_stan_path(stan_file)
+        # Create a unique cache key based on filename and options
+        cache_key = str(stan_path) + str(sorted(cpp_options.items()) if cpp_options else "{}")
 
-        if not path.exists():
-            raise FileNotFoundError(f"Stan file not found: {path}")
+        if cache_key in self.cache:
+            return self.cache[cache_key]
 
-        if recompile or path not in _MODEL_CACHE:
-            stem = path.stem
-            for ext in [".hpp", ".o", ""]:  # "" → executable
-                try:
-                    p = path.with_suffix(ext)
-                    if p.exists():
-                        p.unlink()
-                except Exception:
-                    pass
-
-            print(f"🔧 Compiling Stan model: {path.name}")
-            os.environ["MAKEFLAGS"] = f"-j{n_jobs}"
-            
-            # --- FIX: Add this line ---
-            # This tells CmdStan's makefile that the C++ compiler is a 'gcc' type,
-            # which is required for TBB (threading) support in Conda environments.
-            if 'TBB_CXX_TYPE' not in os.environ:
-                os.environ['TBB_CXX_TYPE'] = 'gcc'
-            exe_path = compile_stan_file(str(path), force=True)
-            model = CmdStanModel(stan_file=str(path), exe_file=exe_path)
-            _MODEL_CACHE[path] = model
-            print(f"✅ Compiled: {path.name}")
-
-        return _MODEL_CACHE[path]
-
-    def resolve_stan_path(self, name: str) -> Path:
-        """Return the absolute .stan filepath for a given model name."""
-        p = self.stan_models_dir / f"{name}.stan"
-        if not p.exists():
-            raise FileNotFoundError(f"Stan file not found: {p}")
-        return p
+        print(f"🔧 Compiling Stan model: {stan_path.name}")
+        model = CmdStanModel(stan_file=stan_path, cpp_options=cpp_options)
+        self.cache[cache_key] = model
+        print(f"✅ Compiled: {stan_path.name}")
+        return model

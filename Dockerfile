@@ -8,24 +8,29 @@ USER root
 
 ARG CMDSTAN_VERSION=2.36.0
 
-# System build dependencies for CmdStan and other packages
+# System build dependencies (rarely changes)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential gfortran make wget tar git \
  && rm -rf /var/lib/apt/lists/*
 
-COPY --chown=micromamba:micromamba conda-lock.yml /app/
-COPY --chown=micromamba:micromamba . /app/
 WORKDIR /app
 
-# 1. Create the environment from the lock file (this will be fast)
-RUN micromamba create -n texas-env -f conda-lock.yml
+# --- OPTIMIZED ORDER ---
+# 1. Copy only the dependency file first
+COPY --chown=micromamba:micromamba conda-lock.yml .
 
-# 2. Install your local package into the new environment
-RUN micromamba run -n texas-env pip install --no-build-isolation --no-deps -e . \
+# 2. Create the environment. This step now only re-runs if conda-lock.yml changes.
+RUN micromamba create -n texas-env -f conda-lock.yml \
  && micromamba clean -a -y
 
+# 3. Now, copy the rest of your application source code
+COPY --chown=micromamba:micromamba . .
+
+# 4. Install your local package. This is much faster than recreating the whole environment.
+RUN micromamba run -n texas-env pip install --no-build-isolation --no-deps -e .
+# --- END OPTIMIZED ORDER ---
+
 # ---- Build CmdStan under /opt/cmdstan ----
-# This still needs to be done manually as it's a special build step
 RUN mkdir -p /opt/cmdstan \
  && cd /opt/cmdstan \
  && wget -q https://github.com/stan-dev/cmdstan/releases/download/v${CMDSTAN_VERSION}/cmdstan-${CMDSTAN_VERSION}.tar.gz \
@@ -40,7 +45,7 @@ USER root
 
 # Install only runtime system libraries needed
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential libgfortran5 git \
+    build-essential libgfortran5 git sudo \
     # Add these libraries for graphics and plotting
     libglib2.0-0 libsm6 libxrender1 libfreetype6 libpng16-16 \
  && rm -rf /var/lib/apt/lists/*
@@ -48,6 +53,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Create runtime user and working dir
 RUN useradd -ms /bin/bash micromamba \
  && install -d -o micromamba -g micromamba /home/micromamba/app
+ 
+# ADD THIS LINE to give the micromamba user passwordless sudo access
+RUN echo "micromamba ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/micromamba-nopasswd
+
+
 WORKDIR /home/micromamba/app
 
 # Copy the entire conda environment and the compiled CmdStan from the builder
