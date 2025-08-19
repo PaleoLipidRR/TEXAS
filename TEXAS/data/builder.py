@@ -42,7 +42,7 @@ def build_invT_inputData(
     post: xr.Dataset = load_posterior(fwd_posterior_name)
     vars_ = list(post.data_vars)
 
-    # --- THIS BLOCK IS NOW MORE ROBUST ---
+    
     # Flatten chains and draws if they exist, otherwise identify the draw dimension.
     if "chain" in post.dims:
         post = post.stack(sample=("chain", "draw")).reset_index("sample")
@@ -55,7 +55,7 @@ def build_invT_inputData(
             draw_dim_name = "draw"
         else:
             raise ValueError("Could not find a 'draw' or 'sample' dimension in the posterior file.")
-    # --- END CORRECTION ---
+    
 
     # ------------------ Prepare core inputs ------------------
     y = np.asarray(scaledRI, dtype=float)
@@ -96,6 +96,7 @@ def build_invT_inputData(
     }
 
     used_posts: List[str] = []
+    
     # These arrays will now be correctly shaped (M,) from the start.
     for p in _FORWARD_PARAMS:
         key = f"{p}_{used_suffix}"
@@ -140,8 +141,22 @@ def build_invT_inputData(
         if np.allclose(data["no3"], 0):
             data["no3_cutoff"] = 0.0
         else:
-            fallback_cutoff = float(post.attrs.get("no3_cutoff", 50.0))
-            data["no3_cutoff"] = config.no3_cutoff if config.no3_cutoff is not None else fallback_cutoff
+            # 1. Prioritize the cutoff from the forward posterior's attributes.
+            cutoff_from_attrs = post.attrs.get("no3_cutoff")
+            
+            if cutoff_from_attrs is not None:
+                final_cutoff = float(cutoff_from_attrs)
+                print(f"💡 Using no3_cutoff from forward posterior attributes: {final_cutoff}")
+            # 2. Fallback to the InvTConfig object if not found in attributes.
+            elif config.no3_cutoff is not None:
+                final_cutoff = config.no3_cutoff
+                print(f"💡 Using no3_cutoff from InvTConfig: {final_cutoff}")
+            # 3. If neither is available, use a default and warn the user.
+            else:
+                final_cutoff = 0.0
+                print(f"⚠️ no3_cutoff not specified. Using default value: {final_cutoff}")
+            
+            data["no3_cutoff"] = final_cutoff
     else:
         data["no3_cutoff"] = 0.0
 

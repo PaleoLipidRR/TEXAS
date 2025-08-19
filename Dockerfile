@@ -28,6 +28,9 @@ COPY --chown=micromamba:micromamba . .
 
 # 4. Install your local package. This is much faster than recreating the whole environment.
 RUN micromamba run -n texas-env pip install --no-build-isolation --no-deps -e .
+
+# 5. NEW: Enable the JupyterLab widget extension
+RUN micromamba run -n texas-env jupyter labextension enable @jupyter-widgets/jupyterlab-manager
 # --- END OPTIMIZED ORDER ---
 
 # ---- Build CmdStan under /opt/cmdstan ----
