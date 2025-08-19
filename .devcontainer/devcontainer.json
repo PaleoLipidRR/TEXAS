@@ -1,7 +1,10 @@
 {
   "name": "TEXAS Project Environment",
-  "image": "texas-dev:latest",
-
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "context": ".."
+  },
+  
   "workspaceFolder": "/home/micromamba/app",
 
   "customizations": {
@@ -28,4 +31,5 @@
   ],
 
   "remoteUser": "micromamba",
+  "postCreateCommand": "sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan"
 }
