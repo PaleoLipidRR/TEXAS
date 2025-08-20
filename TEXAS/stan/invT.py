@@ -15,6 +15,7 @@ from .utils import patch_optional_predictors
 from ..data.builder import build_invT_inputData, InvTConfig
 from TEXAS.utils import get_repo_root
 from TEXAS.stan.io import load_posterior
+import time
 
 # Instantiate once
 _default_compiler = StanCompiler()
@@ -64,6 +65,8 @@ def get_invT_posterior(
     """
     Run the inverse-T model and return the posterior Dataset with metadata.
     """
+    start_time = time.perf_counter()
+    
     cfg = config or InvTConfig()
     predictors = predictors or {}
 
@@ -126,6 +129,9 @@ def get_invT_posterior(
         ds.attrs["temptype"] = "unknown_temptype"
 
     post_ds = get_invT_post_quantiles(ds)
+    
+    post_ds.attrs["runtime_seconds"] = runtime
+    post_ds.attrs["runtime_minutes"] = runtime / 60.0
 
     if save:
         _save_invT_posterior(
@@ -234,6 +240,7 @@ def predict_temperature_from_RI(
         use_opencl=use_opencl,
         threads_per_chain=threads_per_chain,
         stan_model_path=stan_model_path,
+        use_marginal=use_marginal
     )
 
     metadata = {
