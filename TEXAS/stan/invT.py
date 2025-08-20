@@ -93,6 +93,14 @@ def get_invT_posterior(
         cpp_options["STAN_THREADS"] = True
         sampler_kwargs["threads_per_chain"] = threads_per_chain
         data["grainsize"] = 1
+    if use_marginal:
+        N = data["N"]
+        if threads_per_chain:
+            # When using threading, use grainsize=1 for maximum parallelization
+            data["grainsize"] = 1
+        else:
+            # When not using threading, use a reasonable chunk size
+            data["grainsize"] = max(1, min(10, N // 4))
 
     meta = sampler_kwargs.pop("_metadata", {})
 

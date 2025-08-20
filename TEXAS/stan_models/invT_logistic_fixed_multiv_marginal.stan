@@ -1,50 +1,51 @@
-// invT_logistic_fixed_multiv_marginal.stan
+// invT_logistic_fixed_multiv_marginal.stan (UPDATED reduce_sum API)
 
 functions {
-  real ll_chunk(int start, int end,
-                vector T, vector scaledRI,
-                vector prior_mu_t, real prior_sigma_t,
-                // optional predictors
-                int use_gd, int use_no3,
-                vector gd, vector no3, real no3_cutoff,
-                // forward posterior draws
-                vector t0, vector k, vector b,
-                vector beta_gd, vector beta_no3,
-                vector sigma) {
+  real ll_chunk(
+      array[] int slice_indices,  // NEW API: array of indices for this chunk
+      int start, int end,
+      vector scaledRI,                 // full vector; slice inside
+      vector T, vector prior_mu_t, real prior_sigma_t,
+      int use_gd, int use_no3,
+      vector gd, vector no3, real no3_cutoff,
+      vector t0, vector k, vector b,
+      vector beta_gd, vector beta_no3,
+      vector sigma
+  ) {
     int M = rows(t0);
+    int n_chunk = end - start + 1;
     real lp = 0;
 
-    // prior contribution for this chunk
-    lp += normal_lpdf(T[start:end] | prior_mu_t[start:end], prior_sigma_t);
+    // slice inputs for this chunk
+    vector[n_chunk] y      = segment(scaledRI,  start, n_chunk);
+    vector[n_chunk] T_seg  = segment(T,         start, n_chunk);
+    vector[n_chunk] mu_seg = segment(prior_mu_t,start, n_chunk);
+    vector[n_chunk] gd_seg = segment(gd,        start, n_chunk);
+    vector[n_chunk] n3_seg = segment(no3,       start, n_chunk);
 
-    // loop over observations in this chunk
-    for (n in start:end) {
+    // prior
+    lp += normal_lpdf(T_seg | mu_seg, prior_sigma_t);
+
+    // likelihood (marginalize over ensemble m = 1..M)
+    for (i in 1:n_chunk) {
       vector[M] llk;
-
-      // loop over ensemble members
       for (m in 1:M) {
-        // base logistic
-        real mu = b[m] + (1 - b[m]) / (1 + exp(-k[m] * (T[n] - t0[m])));
+        real lin = b[m];
 
-        // optional gdgt23ratio correction
-        if (use_gd == 1) {
-          mu += beta_gd[m] * gd[n];
-        }
+        if (use_gd == 1)
+          lin += beta_gd[m] * gd_seg[i];
 
-        // optional nitrate correction w/ cutoff
         if (use_no3 == 1) {
           real logno3 = 0.0;
-          if (no3[n] > 0.0 && no3[n] < no3_cutoff) {
-            logno3 = log10(no3[n] + 1e-9);  // epsilon to avoid log(0)
-          }
-          mu += beta_no3[m] * logno3;
+          if (n3_seg[i] > 0 && n3_seg[i] < no3_cutoff)
+            logno3 = log10(n3_seg[i] + 1e-9);
+          lin += beta_no3[m] * logno3;
         }
 
-        // likelihood for this (n,m)
-        llk[m] = normal_lpdf(scaledRI[n] | mu, sigma[m]);
+        // logistic mean (L = 1)
+        real mu = lin + (1 - b[m]) / (1 + exp(-k[m] * (T_seg[i] - t0[m])));
+        llk[m] = normal_lpdf(y[i] | mu, sigma[m]);
       }
-
-      // average across ensemble members (marginalization)
       lp += log_sum_exp(llk) - log(M);
     }
     return lp;
@@ -58,22 +59,20 @@ data {
   vector[N] prior_mu_t;
   real<lower=0> prior_sigma_t;
 
-  // Optional predictors: pass zeros if unused
   int<lower=0,upper=1> use_gdgt23ratio;
   int<lower=0,upper=1> use_no3;
   vector[N] gdgt23ratio;
   vector[N] no3;
-  real<lower=0> no3_cutoff; 
+  real<lower=0> no3_cutoff;
 
-  // Forward posterior draws (length M each)
   vector[M] t0;
   vector[M] k;
   vector[M] b;
-  vector[M] beta0_gdgt23ratio;  // zeros if unused
-  vector[M] beta0_no3;          // zeros if unused
+  vector[M] beta0_gdgt23ratio;
+  vector[M] beta0_no3;
   vector[M] sigma_scaledRI;
 
-  int<lower=1> grainsize;       // for reduce_sum
+  int<lower=1> grainsize;
 }
 
 parameters {
@@ -81,12 +80,14 @@ parameters {
 }
 
 model {
+  // NEW API: Create array of indices to pass to reduce_sum
+  array[N] int indices = linspaced_int_array(N, 1, N);
+  
+  // NEW API: array of indices as second argument, grainsize as third argument
   target += reduce_sum(
-    ll_chunk, 1, N, grainsize,
-    t_est, scaledRI,
-    prior_mu_t, prior_sigma_t,
-    use_gdgt23ratio, use_no3,
-    gdgt23ratio, no3, no3_cutoff,
+    ll_chunk, indices, grainsize,
+    scaledRI, t_est, prior_mu_t, prior_sigma_t,
+    use_gdgt23ratio, use_no3, gdgt23ratio, no3, no3_cutoff,
     t0, k, b, beta0_gdgt23ratio, beta0_no3, sigma_scaledRI
   );
 }
