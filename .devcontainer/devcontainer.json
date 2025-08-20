@@ -1,10 +1,25 @@
 {
-  "name": " (Default)",
-  "build": { "dockerfile": "../Dockerfile", "context": ".." },
-  "extends": "./base.json",
-
-  // This default config doesn't require a GPU
+  "name": "TEXAS Project",
+  "build": { 
+    "dockerfile": "../Dockerfile", 
+    "context": ".." 
+  },
+  "workspaceFolder": "/home/micromamba/app",
+  "customizations": {
+    "vscode": { "extensions": ["ms-python.python", "ms-toolsai.jupyter"] }
+  },
+  "settings": {
+    "python.defaultInterpreterPath": "/opt/conda/envs/texas-env/bin/python"
+  },
+  "runArgs": ["--init", "--shm-size=8g"],
+  "remoteUser": "micromamba",
+  "postCreateCommand": "sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan",
+  "postStartCommand": "clinfo || true",
   "hostRequirements": {
     "gpu": "optional"
-  }
+  },
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/home/micromamba/app,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached"
+  ]
 }
