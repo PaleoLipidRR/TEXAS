@@ -36,6 +36,7 @@ def _attach_invT_metadata(
     else:
         ds.attrs["no3_cutoff"] = 0.0
     ds.attrs["SiteName"] = site_name or "unknown_site"
+    ds.attrs["use_marginal"] = 1 if "marginal" in stan_file else 0
     return ds
 
 # -------------------------------------------------------------------------
@@ -57,7 +58,8 @@ def get_invT_posterior(
     seed: Optional[int] = None,
     use_opencl: bool = False,
     threads_per_chain: Optional[int] = None,
-    stan_model_path: Optional[Union[str, Path]] = None,
+    stan_model_path: Optional[Union[str, Path]] = None, 
+    use_marginal: bool = False
 ) -> xr.Dataset:
     """
     Run the inverse-T model and return the posterior Dataset with metadata.
@@ -97,7 +99,10 @@ def get_invT_posterior(
     else:
         data = patch_optional_predictors(data)
         predictor_usage = meta.get("predictor_usage", {})
-        stan_file = _select_invT_stan_file(data, predictor_usage, use_threading=bool(threads_per_chain))
+        stan_file = _select_invT_stan_file(
+            data, predictor_usage, 
+            use_threading=bool(threads_per_chain),
+            use_marginal=use_marginal)
         print(f"🔍 Automatically selected Stan file: {stan_file}")
     
     print(f"| M={data.get('M')} N={data.get('N')}")
@@ -132,16 +137,28 @@ def get_invT_posterior(
     return post_ds
 
 # -------------------------------------------------------------------------
-def _select_invT_stan_file(data: Dict, predictor_usage: Dict[str, bool], use_threading: bool = False) -> str:
+def _select_invT_stan_file(
+    data: Dict, 
+    predictor_usage: Dict[str, bool], 
+    use_threading: bool = False,
+    use_marginal: bool = False) -> str:
     """Choose the correct Stan model file based on data structure."""
     if "M" not in data:
         raise ValueError("Only ensemble mode is supported.")
     has_vQ = ("v" in data) or ("Q" in data)
     multiv = any(predictor_usage.values())
+    
     base = "invT_gen_logi_fixed" if has_vQ else "invT_logistic_fixed"
     suffix = "_multiv" if multiv else "_univ"
-    threading_suffix = "_reduce_sum" if use_threading else ""
-    return f"{base}{suffix}{threading_suffix}"
+    
+    if use_marginal:
+        return f"{base}{suffix}_marginal.stan"
+    else:
+        # fallback to the older replicate models
+        fname = f"{base}{suffix}.stan"
+        if use_threading:
+            fname = fname.replace(".stan", "_reduce_sum.stan")
+        return fname
 
 # -------------------------------------------------------------------------
 def get_invT_post_quantiles(
@@ -150,33 +167,31 @@ def get_invT_post_quantiles(
                                   0.6, 0.75, 0.84, 0.9, 0.95, 0.99),
 ) -> xr.Dataset:
     """
-    Calculate quantiles for the posterior draws. For `t_est`, this function
-    summarizes across chains, draws, and the M-dimension ensemble.
-    """
-    # --- THIS IS THE FIX ---
-    # For each variable, we want to summarize over the MCMC dimensions.
-    # For the 't_est' variable specifically, which has shape (chain, draw, N, M),
-    # we must also summarize over the M-dimension to get a single
-    # temperature distribution for each of the N data points.
+    Calculate quantiles for the posterior draws. 
     
+    Special handling for `t_est`:
+    - Ensemble models: shape (chain, draw, N, M) → reduce over chain, draw, and M.
+    - Marginal models: shape (chain, draw, N) → reduce over chain and draw.
+    
+    Other variables: reduce over available MCMC dims (chain, draw).
+    """
     processed_vars = {}
     for var_name, data_array in posterior.data_vars.items():
-        if var_name == 't_est':
-            # For t_est, reduce over chain, draw, and the M-dimension (t_est_dim_1)
-            # while keeping the N-dimension (t_est_dim_0)
-            dims_to_reduce = ['chain', 'draw', 't_est_dim_1']
+        if var_name == "t_est":
+            if "t_est_dim_1" in data_array.dims:   # Ensemble case
+                dims_to_reduce = ["chain", "draw", "t_est_dim_1"]
+            else:  # Marginal case
+                dims_to_reduce = ["chain", "draw"]
             processed_vars[var_name] = data_array.quantile(quantiles, dim=dims_to_reduce)
         else:
-            # For other parameters, just reduce over chain and draw
-            dims_to_reduce = ['chain', 'draw']
-            # Filter out dimensions that don't exist in the variable
-            dims_to_reduce = [d for d in dims_to_reduce if d in data_array.dims]
+            dims_to_reduce = [d for d in ["chain", "draw"] if d in data_array.dims]
             if dims_to_reduce:
                 processed_vars[var_name] = data_array.quantile(quantiles, dim=dims_to_reduce)
             else:
-                processed_vars[var_name] = data_array
+                processed_vars[var_name] = data_array  # leave unchanged if no MCMC dims
 
     return xr.Dataset(processed_vars, attrs=posterior.attrs)
+
 # -------------------------------------------------------------------------
 def predict_temperature_from_RI(
     scaledRI: Union[np.ndarray, List[float]],
@@ -197,6 +212,7 @@ def predict_temperature_from_RI(
     use_opencl: bool = False,
     threads_per_chain: Optional[int] = None,
     stan_model_path: Optional[Union[str, Path]] = None,
+    use_marginal: bool = False,
     
 ) -> Dict[str, Any]:
     """High-level wrapper to run the inverse model and get temperature percentiles."""
