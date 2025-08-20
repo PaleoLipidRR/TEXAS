@@ -1,10 +1,7 @@
 {
   "name": "TEXAS Project Environment",
-  "build": {
-    "dockerfile": "../Dockerfile",
-    "context": ".."
-  },
-  
+  "build": { "dockerfile": "../Dockerfile", "context": ".." },
+
   "workspaceFolder": "/home/micromamba/app",
 
   "customizations": {
@@ -17,19 +14,19 @@
     "jupyter.logging.level": "debug"
   },
 
-  "runArgs": [
-    "--init",
-    "--shm-size=8g"
-  ],
+  "runArgs": ["--init", "--shm-size=8g", "--gpus", "all"],
+  "hostRequirements": { "gpu": "optional" },
 
   "overrideCommand": true,
   "shutdownAction": "none",
 
   "mounts": [
     "source=${localWorkspaceFolder},target=/home/micromamba/app,type=bind,consistency=cached",
-    "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached",
+    "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached"
   ],
 
   "remoteUser": "micromamba",
-  "postCreateCommand": "sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan"
+
+  "postCreateCommand": "sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan",
+  "postStartCommand": "clinfo || true"
 }
