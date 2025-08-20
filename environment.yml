@@ -56,7 +56,7 @@ dependencies:
   - libnetcdf
 
   # --- Stan & Other Tools ---
-  - cmdstanpy>=1.2.2
+  - cmdstanpy>=1.0
   - stanio
   - typing-extensions
   - anywidget
