@@ -11,8 +11,7 @@ ARG CMDSTAN_VERSION=2.36.0
 # System build dependencies (rarely changes)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential gfortran make wget tar git \
-    opencl-headers ocl-icd-opencl-dev \
-&& rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
@@ -52,9 +51,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libgfortran5 git sudo \
     # Add these libraries for graphics and plotting
     libglib2.0-0 libsm6 libxrender1 libfreetype6 libpng16-16 \
-    # packages for openCL
-    ocl-icd-libopencl1 clinfo \
-&& rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/*
 
 # Create runtime user and working dir
 RUN useradd -ms /bin/bash micromamba \
@@ -89,7 +86,5 @@ ENV PROJ_LIB=/opt/conda/envs/texas-env/share/proj
 ENV PYTHONPATH=/home/micromamba/app
 # 3. Point ESMF to its make file to fix xesmf import error
 ENV ESMFMKFILE=/opt/conda/envs/texas-env/lib/esmf.mk
-# 4. Ensure OpenCL + conda libs are found at runtime (extra-safe)
-ENV LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:/opt/conda/envs/texas-env/lib:${LD_LIBRARY_PATH}"
 
 CMD ["bash"]
