@@ -130,6 +130,7 @@ def get_invT_posterior(
 
     post_ds = get_invT_post_quantiles(ds)
     
+    runtime = time.perf_counter() - start_time
     post_ds.attrs["runtime_seconds"] = runtime
     post_ds.attrs["runtime_minutes"] = runtime / 60.0
 
