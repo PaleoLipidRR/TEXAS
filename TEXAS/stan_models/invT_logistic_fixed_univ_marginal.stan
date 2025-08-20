@@ -14,7 +14,7 @@ data {
 }
 
 parameters {
-  vector[N] t_est;
+  vector<lower=-1.8>[N] t_est;
 }
 
 model {
