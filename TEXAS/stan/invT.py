@@ -82,10 +82,8 @@ def get_invT_posterior(
     if use_opencl and threads_per_chain:
         raise ValueError("Cannot use both OpenCL and threading simultaneously.")
     if use_opencl:
-        # Set OpenCL flags during compilation, not sampling
         cpp_options["STAN_OPENCL"] = True
-        cpp_options["OPENCL_DEVICE_ID"] = 0
-        cpp_options["OPENCL_PLATFORM_ID"] = 0
+        sampler_kwargs["opencl_ids"] = [0, 0]
     if threads_per_chain:
         cpp_options["STAN_THREADS"] = True
         sampler_kwargs["threads_per_chain"] = threads_per_chain

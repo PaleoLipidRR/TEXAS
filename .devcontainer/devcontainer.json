@@ -1,25 +1,32 @@
 {
-  "name": "TEXAS Project",
-  "build": { 
-    "dockerfile": "../Dockerfile", 
-    "context": ".." 
-  },
+  "name": "TEXAS Project Environment",
+  "build": { "dockerfile": "../Dockerfile", "context": ".." },
+
   "workspaceFolder": "/home/micromamba/app",
+
   "customizations": {
     "vscode": { "extensions": ["ms-python.python", "ms-toolsai.jupyter"] }
   },
+
   "settings": {
-    "python.defaultInterpreterPath": "/opt/conda/envs/texas-env/bin/python"
+    "python.defaultInterpreterPath": "/opt/conda/bin/python",
+    "jupyter.stopJupyterServerOnClose": false,
+    "jupyter.logging.level": "debug"
   },
-  "runArgs": ["--init", "--shm-size=8g"],
-  "remoteUser": "micromamba",
-  "postCreateCommand": "sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan",
-  "postStartCommand": "clinfo || true",
-  "hostRequirements": {
-    "gpu": "optional"
-  },
+
+  "runArgs": ["--init", "--shm-size=8g", "--gpus", "all"],
+  "hostRequirements": { "gpu": "optional" },
+
+  "overrideCommand": true,
+  "shutdownAction": "none",
+
   "mounts": [
     "source=${localWorkspaceFolder},target=/home/micromamba/app,type=bind,consistency=cached",
     "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached"
-  ]
+  ],
+
+  "remoteUser": "micromamba",
+
+  "postCreateCommand": "sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan",
+  "postStartCommand": "clinfo || true"
 }
