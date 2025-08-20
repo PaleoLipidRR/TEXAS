@@ -1,36 +1,10 @@
 {
-  "name": "TEXAS Project Environment",
+  "name": " (Default)",
   "build": { "dockerfile": "../Dockerfile", "context": ".." },
+  "extends": "./base.json",
 
-  "workspaceFolder": "/home/micromamba/app",
-
-  "customizations": {
-    "vscode": { "extensions": ["ms-python.python", "ms-toolsai.jupyter"] }
-  },
-
-  "settings": {
-    "python.defaultInterpreterPath": "/opt/conda/envs/texas-env/bin/python",
-    "jupyter.stopJupyterServerOnClose": false,
-    "jupyter.logging.level": "debug"
-  },
-
-  "runArgs": ["--init", "--shm-size=8g"],
-  "containerEnv": {
-    "NVIDIA_VISIBLE_DEVICES": "all",
-    "NVIDIA_DRIVER_CAPABILITIES": "compute,utility"
-  },
-  "hostRequirements": { "gpu": "optional" },
-
-  "overrideCommand": true,
-  "shutdownAction": "none",
-
-  "mounts": [
-    "source=${localWorkspaceFolder},target=/home/micromamba/app,type=bind,consistency=cached",
-    "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached"
-  ],
-
-  "remoteUser": "micromamba",
-
-  "postCreateCommand": "sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan",
-  "postStartCommand": "echo '[clinfo first lines]'; clinfo | sed -n '1,40p' || true"
+  // This default config doesn't require a GPU
+  "hostRequirements": {
+    "gpu": "optional"
+  }
 }
