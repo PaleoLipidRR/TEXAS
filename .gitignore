@@ -41,3 +41,6 @@ TEXAS/stan_models/**
 /spreadsheets/
 /nc_files/
 /tmp/
+
+# machine-specific json file
+.devcontainer/devcontainer.gpu-fix.json
