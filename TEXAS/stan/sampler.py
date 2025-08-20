@@ -3,7 +3,7 @@
 import time
 import numpy as np
 import xarray as xr
-from typing import Tuple, Optional, Dict, Tuple, Any
+from typing import Tuple, Optional, Dict, Tuple, Any, Literal
 from cmdstanpy import CmdStanModel, CmdStanMCMC 
 
 from .compiler import StanCompiler
@@ -27,8 +27,14 @@ class StanSampler:
         **kwargs,
     ) -> xr.Dataset:
         """Runs the sampler from a pre-compiled CmdStanModel object."""
-        fit = model.sample(data=data, **kwargs)
-        return fit.draws_xr()
+        try:
+            print(f"Starting Stan sampling with {data.get('N', '?')} observations...")
+            fit = model.sample(data=data, **kwargs)
+            print("✅ Stan sampling completed successfully")
+            return fit.draws_xr()
+        except Exception as e:
+            print(f"❌ Stan sampling failed: {e}")
+            raise
 
     def sample(
         self,
@@ -109,9 +115,17 @@ def sampler_invT_posterior(
     stan_file: str,
     site_name: Optional[str] = None,
     temptype: Optional[str] = None,
+    model_type: Literal["direct", "ensemble"] = "direct",  # ADD: if this function uses model selection
     **kwargs
 ) -> Tuple[xr.Dataset, str]:
+    """
+    Sample from invT posterior with updated model_type parameter.
     
+    Args:
+        model_type: 
+            - "direct": Use direct sampling models (more efficient, supports threading)
+            - "ensemble": Use traditional ensemble models
+    """
     rng_seed = kwargs.setdefault("seed", 42)
     np.random.seed(rng_seed)
     
@@ -123,5 +137,6 @@ def sampler_invT_posterior(
         stan_file=stan_file,
         site_name=site_name,
         temptype=temptype,
+        model_type=model_type,  # PASS: if needed
         **kwargs
     )
