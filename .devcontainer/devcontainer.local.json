@@ -1,0 +1,3 @@
+{
+  "runArgs": ["--init", "--shm-size=8g", "--gpus", "all"]
+}
