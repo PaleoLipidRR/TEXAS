@@ -9,12 +9,16 @@
   },
 
   "settings": {
-    "python.defaultInterpreterPath": "/opt/conda/bin/python",
+    "python.defaultInterpreterPath": "/opt/conda/envs/texas-env/bin/python",
     "jupyter.stopJupyterServerOnClose": false,
     "jupyter.logging.level": "debug"
   },
 
-  "runArgs": ["--init", "--shm-size=8g", "--gpus", "all"],
+  "runArgs": ["--init", "--shm-size=8g"],
+  "containerEnv": {
+    "NVIDIA_VISIBLE_DEVICES": "all",
+    "NVIDIA_DRIVER_CAPABILITIES": "compute,utility"
+  },
   "hostRequirements": { "gpu": "optional" },
 
   "overrideCommand": true,
@@ -28,5 +32,5 @@
   "remoteUser": "micromamba",
 
   "postCreateCommand": "sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan",
-  "postStartCommand": "clinfo || true"
+  "postStartCommand": "echo '[clinfo first lines]'; clinfo | sed -n '1,40p' || true"
 }

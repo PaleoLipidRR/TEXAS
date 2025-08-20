@@ -49,11 +49,11 @@ USER root
 
 # Install only runtime system libraries needed
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential libgfortran5 git sudo \
+    libgfortran5 git sudo \
     # Add these libraries for graphics and plotting
     libglib2.0-0 libsm6 libxrender1 libfreetype6 libpng16-16 \
     # packages for openCL
-    ocl-icd-opencl-dev ocl-icd-libopencl1 clinfo \
+    ocl-icd-libopencl1 clinfo \
 && rm -rf /var/lib/apt/lists/*
 
 # Create runtime user and working dir
