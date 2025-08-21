@@ -1,4 +1,4 @@
-// invT_logistic_fixed_multiv_marginal.stan (UPDATED reduce_sum API)
+// invT_logistic_fixed_multiv_marginal_unconstained.stan (UPDATED reduce_sum API)
 
 functions {
   real ll_chunk(
@@ -76,7 +76,7 @@ data {
 }
 
 parameters {
-  vector<lower=-1.8>[N] t_est;
+  vector[N] t_est;
 }
 
 model {

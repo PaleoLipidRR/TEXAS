@@ -1,4 +1,4 @@
-// invT_gen_logi_fixed_multiv_marginal.stan  (L fixed = 1) - UPDATED reduce_sum API
+// invT_gen_logi_fixed_multiv_marginal_unconstrained.stan  (L fixed = 1) - UPDATED reduce_sum API
 
 functions {
   real ll_chunk(array[] int slice_indices,  // NEW API: array of indices for this chunk
@@ -74,7 +74,7 @@ data {
 }
 
 parameters {
-  vector<lower=-1.8>[N] t_est;
+  vector<lower=-3>[N] t_est;
 }
 
 model {
