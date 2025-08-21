@@ -80,7 +80,8 @@ def get_invT_posterior(
     use_opencl: bool = False,
     threads_per_chain: Optional[int] = None,
     stan_model_path: Optional[Union[str, Path]] = None, 
-    model_type: Literal["direct", "ensemble"] = "direct"  # CHANGED: was use_marginal
+    model_type: Literal["direct", "ensemble"] = "direct",
+    constraint_type: Literal["unconstrained", "hard_constraint", "reparameterized", "soft"] = "unconstrained",
 ) -> xr.Dataset:
     """
     Run the inverse-T model and return the posterior Dataset with metadata.
@@ -143,7 +144,8 @@ def get_invT_posterior(
         stan_file = _select_invT_stan_file(
             data, predictor_usage, 
             threads_per_chain=threads_per_chain,
-            model_type=model_type)
+            model_type=model_type,
+            constraint_type=constraint_type)
         print(f"🔧 Automatically selected Stan file: {stan_file}")
     
     print(f"| M={data.get('M')} N={data.get('N')}")
@@ -217,7 +219,8 @@ def _select_invT_stan_file(
     data: Dict, 
     predictor_usage: Dict[str, bool], 
     threads_per_chain: Optional[int] = None,
-    model_type: Literal["direct", "ensemble"] = "direct"  # CHANGED: was use_marginal
+    model_type: Literal["direct", "ensemble"] = "direct",
+    constraint_type: Literal["unconstrained", "hard_constraint", "reparameterized", "soft"] = "unconstrained"
 ) -> str:
     """
     Choose the correct Stan model file based on data structure.
@@ -226,6 +229,11 @@ def _select_invT_stan_file(
         model_type: 
             - "direct": Use direct sampling models (more efficient, supports threading)
             - "ensemble": Use traditional ensemble models
+        constraint_type:
+            - "unconstrained": No temperature constraints
+            - "hard_constraint": Hard lower bound at -1.8°C
+            - "reparameterized": Exponential transformation approach
+            - "soft": Soft penalty for temperatures below -1.8°C
     """
     if "M" not in data:
         raise ValueError("Only ensemble mode is supported.")
@@ -235,18 +243,23 @@ def _select_invT_stan_file(
     base = "invT_gen_logi_fixed" if has_vQ else "invT_logistic_fixed"
     suffix = "_multiv" if multiv else "_univ"
     
-    # CHANGED: Updated logic
+    # Build model name based on model_type
     if model_type == "direct":
-        return f"{base}{suffix}_marginal.stan"
+        model_name = f"{base}{suffix}_marginal"
     elif model_type == "ensemble":
         # Fallback to regular (ensemble) models
         if threads_per_chain:
             print("⚠️  Threading requires model_type='direct'. Switching to direct sampling model.")
-            return f"{base}{suffix}_marginal.stan"
-        return f"{base}{suffix}.stan"
+            model_name = f"{base}{suffix}_marginal"
+        else:
+            model_name = f"{base}{suffix}"
     else:
         raise ValueError(f"Unknown model_type: {model_type}. Use 'direct' or 'ensemble'.")
-
+    
+    # ALWAYS add constraint suffix (including unconstrained)
+    model_name += f"_{constraint_type}"
+    
+    return f"{model_name}.stan"
 # -------------------------------------------------------------------------
 def get_invT_post_quantiles(
     posterior: xr.Dataset,
@@ -299,7 +312,8 @@ def predict_temperature_from_RI(
     use_opencl: bool = False,
     threads_per_chain: Optional[int] = None,
     stan_model_path: Optional[Union[str, Path]] = None,
-    model_type: Literal["direct", "ensemble"] = "direct",  # CHANGED: was use_marginal
+    model_type: Literal["direct", "ensemble"] = "direct",
+    constraint_type: Literal["unconstrained", "hard_constraint", "reparameterized", "soft"] = "unconstrained",
 ) -> Dict[str, Any]:
     """
     High-level wrapper to run the inverse model and get temperature percentiles.
@@ -327,17 +341,14 @@ def predict_temperature_from_RI(
         use_opencl=use_opencl,
         threads_per_chain=threads_per_chain,
         stan_model_path=stan_model_path,
-        model_type=model_type  # CHANGED: was use_marginal
+        model_type=model_type,
+        constraint_type=constraint_type,
     )
 
     metadata = {
-        "stan_model": post_ds.attrs.get("stan_model_name", "unknown"),
-        "site_name": post_ds.attrs.get("SiteName", "unknown_site"),
-        "temptype": post_ds.attrs.get("temptype", "unknown_temptype"),
         "fwd_posterior_name": fwd_posterior_name,
         "filename_tag": filename_tag,
-        **{k: post_ds.attrs.get(k) for k in post_ds.attrs if k.startswith("use_")},
-        "no3_cutoff": post_ds.attrs.get("no3_cutoff"),
+        **post_ds.attrs
     }
     
     results = {
@@ -400,7 +411,13 @@ def _generate_filename_base(meta: Dict[str, Any], filename_tag: Optional[Union[s
     # NEW: Put model_type at the END
     return f"{site_name}_{clean_stan_model}_{temptype_str}{tag_segment}_{model_type}"
 
-def _save_invT_posterior(posterior: xr.Dataset, cache_dir: Optional[Union[str, Path]] = None, overwrite: bool = True, filename_tag: Optional[Union[str, Sequence[str]]] = None) -> Path:
+def _save_invT_posterior(
+    posterior: xr.Dataset, 
+    cache_dir: Optional[Union[str, Path]] = None, 
+    overwrite: bool = True, 
+    filename_tag: Optional[Union[str, Sequence[str]]] = None
+    ) -> Path:
+    
     output_dir = Path(cache_dir) if cache_dir else get_repo_root() / "TEXAS" / "invT_posterior_cache"
     output_dir.mkdir(parents=True, exist_ok=True)
     base = _generate_filename_base(posterior.attrs, filename_tag)
