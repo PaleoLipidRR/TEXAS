@@ -25,6 +25,11 @@
     "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached"
   ],
 
+    "extensions": [
+    "ms-python.python",
+    "ms-python.pylint"
+  ],
+
   "remoteUser": "micromamba",
 
   "postCreateCommand": "sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan",
