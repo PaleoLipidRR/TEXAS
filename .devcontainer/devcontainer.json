@@ -1,6 +1,6 @@
 {
   "name": "TEXAS Project Environment",
-  "build": { "dockerfile": "../Dockerfile", "context": ".." },
+  "build": { "dockerfile": "../docker/Dockerfile", "context": ".." },
 
   "workspaceFolder": "/home/micromamba/app",
 
