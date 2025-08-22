@@ -54,7 +54,7 @@ def get_project_root() -> Path:
     return get_repo_root("TEXAS").parent
 
 PROJECT_ROOT = get_project_root()          # e.g., /home/micromamba/app
-PACKAGE_ROOT  = PROJECT_ROOT / "TEXAS"     # e.g., /home/micromamba/app/TEXAS
+PACKAGE_ROOT = PROJECT_ROOT / "src" / "TEXAS"     # e.g., /home/micromamba/app/TEXAS
 REPO_ROOT = PROJECT_ROOT                   # back-compat alias
 STAN_MODELS_DIR = (PACKAGE_ROOT / "stan_models").resolve()
 
@@ -62,3 +62,9 @@ HOME = Path.home()
 CMDSTAN_DIR = find_cmdstan("2.36.0")
 DOCUMENTS = HOME / "Documents"
 ONEDRIVE = Path("/mnt/onedrive") if Path("/mnt/onedrive").exists() else HOME / "OneDrive"
+
+# Cache directories for new structure
+DATA_DIR = PROJECT_ROOT / "data"
+CACHE_DIR = DATA_DIR / "cache"
+POSTERIOR_CACHE_DIR = CACHE_DIR / "TEXAS_posterior_cache"
+INVT_CACHE_DIR = CACHE_DIR / "TEXAS_invT_posterior_cache"
