@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import Union, Optional
+from ..utils.paths import POSTERIOR_CACHE_DIR, INVT_CACHE_DIR
 import xarray as xr
 
 __all__ = [
@@ -11,8 +12,8 @@ __all__ = [
 ]
 
 # By default, write into your repo under TEXAS/posterior_cache
-DEFAULT_FORWARD_DIR = Path(__file__).parent.parent / "posterior_cache"
-DEFAULT_INVT_DIR    = Path(__file__).parent.parent / "invT_posterior_cache"
+DEFAULT_FORWARD_DIR = POSTERIOR_CACHE_DIR
+DEFAULT_INVT_DIR = INVT_CACHE_DIR
 DEFAULT_FORWARD_DIR.mkdir(exist_ok=True, parents=True)
 DEFAULT_INVT_DIR.mkdir(exist_ok=True, parents=True)
 

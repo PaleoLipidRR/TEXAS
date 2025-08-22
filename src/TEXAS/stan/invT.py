@@ -1,4 +1,5 @@
 # TEXAS/stan/invT.py (Revised 08/18/2025)
+from ..utils.paths import INVT_CACHE_DIR
 
 from typing import Union, Optional, Dict, Sequence, List, Any, Literal
 import numpy as np
@@ -433,7 +434,7 @@ def _save_invT_posterior(
     filename_tag: Optional[Union[str, Sequence[str]]] = None
     ) -> Path:
     
-    output_dir = Path(cache_dir) if cache_dir else get_repo_root() / "TEXAS" / "invT_posterior_cache"
+    output_dir = Path(cache_dir) if cache_dir else INVT_CACHE_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
     base = _generate_filename_base(posterior.attrs, filename_tag)
     filepath = output_dir / f"{base}.nc"
@@ -448,7 +449,7 @@ def _save_invT_posterior(
 def _save_invT_results(results: Dict[str, Any], path: Optional[Union[str, Path]] = None, overwrite: bool = True) -> Path:
     meta = results.get("metadata", {})
     if path is None:
-        output_dir = get_repo_root() / "TEXAS" / "invT_posterior_cache"
+        output_dir = INVT_CACHE_DIR
         output_dir.mkdir(parents=True, exist_ok=True)
         filename_tag = meta.get("filename_tag")
         base = _generate_filename_base(meta, filename_tag)
