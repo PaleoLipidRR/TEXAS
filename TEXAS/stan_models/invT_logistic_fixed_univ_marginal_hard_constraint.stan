@@ -11,10 +11,12 @@ data {
   vector[M] k;
   vector[M] b;
   vector[M] sigma_scaledRI;
+
+  real min_temp;
 }
 
 parameters {
-  vector<lower=-3>[N] t_est;
+  vector<lower=min_temp>[N] t_est;
 }
 
 model {
