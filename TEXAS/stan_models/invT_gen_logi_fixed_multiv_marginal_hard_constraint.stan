@@ -71,10 +71,11 @@ data {
   vector[M] sigma_scaledRI;
 
   int<lower=1> grainsize;
+  real min_temp;
 }
 
 parameters {
-  vector<lower=-3>[N] t_est;
+  vector<lower=min_temp>[N] t_est;
 }
 
 model {

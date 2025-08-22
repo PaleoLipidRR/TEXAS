@@ -58,8 +58,8 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
     # Detect presence of optional parameter groups without assuming attrs
     has_v_any   = ("v" in vars_) or any(v.startswith("v_") for v in vars_)
     has_Q_any   = ("Q" in vars_) or any(v.startswith("Q_") for v in vars_)
-    has_gdz_any = ("beta0_gdgt23ratio" in vars_) or any(v.startswith("beta0_gdgt23ratio_") for v in vars_)
-    has_no3_any = ("beta0_no3" in vars_) or any(v.startswith("beta0_no3_") for v in vars_)
+    has_gdz_any = ("use_gdgt23ratio" in attrs_) 
+    has_no3_any = ("use_no3" in attrs_) 
 
     # Build candidate basenames up-front for suffix selection
     basenames = ["t0", "b", "k"]
