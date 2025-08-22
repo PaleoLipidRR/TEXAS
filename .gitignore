@@ -1,46 +1,38 @@
-# ───── Python cache / build artifacts ─────
+# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
 *.so
-*.egg-info/
-build/
-dist/
+.Python
+env/
+venv/
+.venv/
+.env
 
-# ───── Stan compiled models (keep only .stan source) ─────
-TEXAS/stan_models/**
-!TEXAS/stan_models/**/*.stan
+# Jupyter
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
 
-# ───── Notebooks ─────
-# Track all notebooks, but ignore temp dirs
-!notebooks/**/*.ipynb
-/notebooks/dask-worker-space/
-
-# ───── Temporary / OS / IDE files ─────
-.vscode/
-.idea/
-.DS_Store
-
-# ───── Large or generated data files ─────
-*.nc
+# Data files (usually too large for git)
 *.csv
 *.xlsx
-*.pkl
+*.nc
 *.npz
+*.pkl
+*.h5
 
-# ───── Generated figures ─────
-/figures/
-/html_figures/
+# Model cache and outputs
+*_cache/
+posterior_cache/
+invT_posterior_cache/
+outputs/
+site/
+html_figures/
 
-# ───── Posterior caches ─────
-/TEXAS/posterior_cache/
-/TEXAS/invT_posterior_cache/
+# IDE
+.vscode/
+.idea/
 
-# ───── Other project data dirs ─────
-/spreadsheets/
-/nc_files/
-/tmp/
-
-# machine-specific json file
-.devcontainer/devcontainer.gpu-fix.json
+# OS
+.DS_Store
+Thumbs.db
