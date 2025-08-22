@@ -8,26 +8,16 @@ env/
 venv/
 .venv/
 .env
+TEXAS.egg-info/
 
 # Jupyter
 .ipynb_checkpoints/
 */.ipynb_checkpoints/*
 
-# Data files (usually too large for git)
-*.csv
-*.xlsx
-*.nc
-*.npz
-*.pkl
-*.h5
-
-# Model cache and outputs
-*_cache/
-posterior_cache/
-invT_posterior_cache/
-outputs/
-site/
-html_figures/
+# Model cache in old locations (still ignore these)
+src/**/*_cache/
+src/**/posterior_cache/
+src/**/invT_posterior_cache/
 
 # IDE
 .vscode/
@@ -36,3 +26,16 @@ html_figures/
 # OS
 .DS_Store
 Thumbs.db
+
+# Temporary files
+*.tmp
+*.log
+
+# Build artifacts
+build/
+dist/
+
+# Generated outputs (but not data/cache which we want to track)
+outputs/
+site/
+html_figures/
