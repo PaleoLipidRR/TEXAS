@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import Dict, Optional, Union
+from ..utils.paths import STAN_MODELS_DIR
 from cmdstanpy import CmdStanModel
 from TEXAS.utils import get_repo_root
 
@@ -9,7 +10,7 @@ class StanCompiler:
     """A simple wrapper for compiling Stan models with caching."""
     def __init__(self, model_dir: Optional[Union[str, Path]] = None):
         if model_dir is None:
-            self.model_dir = get_repo_root() / "TEXAS" / "stan_models"
+            self.model_dir = STAN_MODELS_DIR
         else:
             self.model_dir = Path(model_dir)
         self.cache = {}
