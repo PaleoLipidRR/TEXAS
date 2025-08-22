@@ -82,6 +82,7 @@ def get_invT_posterior(
     stan_model_path: Optional[Union[str, Path]] = None, 
     model_type: Literal["direct", "ensemble"] = "direct",
     constraint_type: Literal["unconstrained", "hard_constraint", "reparameterized", "soft"] = "unconstrained",
+    min_temp: Optional[float] = None,
 ) -> xr.Dataset:
     """
     Run the inverse-T model and return the posterior Dataset with metadata.
@@ -133,6 +134,18 @@ def get_invT_posterior(
             data["grainsize"] = max(1, min(10, N // 4))
 
     meta = sampler_kwargs.pop("_metadata", {})
+    
+    if constraint_type == "hard_constraint":
+        if min_temp is None:
+            raise ValueError(
+                "min_temp must be provided when constraint_type='hard_constraint'. "
+                "Example: min_temp=-1.8 for seawater freezing point."
+            )
+        data["min_temp"] = float(min_temp)
+    elif min_temp is not None:
+        print(f"⚠️ Warning: min_temp={min_temp} provided but constraint_type='{constraint_type}'. "
+              f"min_temp will be ignored.")
+        pass
 
     if stan_model_path:
         stan_file = Path(stan_model_path).name
@@ -314,6 +327,7 @@ def predict_temperature_from_RI(
     stan_model_path: Optional[Union[str, Path]] = None,
     model_type: Literal["direct", "ensemble"] = "direct",
     constraint_type: Literal["unconstrained", "hard_constraint", "reparameterized", "soft"] = "unconstrained",
+    min_temp: Optional[float] = None,
 ) -> Dict[str, Any]:
     """
     High-level wrapper to run the inverse model and get temperature percentiles.
@@ -343,6 +357,7 @@ def predict_temperature_from_RI(
         stan_model_path=stan_model_path,
         model_type=model_type,
         constraint_type=constraint_type,
+        min_temp=min_temp
     )
 
     metadata = {
