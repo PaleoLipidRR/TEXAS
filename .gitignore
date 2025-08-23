@@ -24,7 +24,7 @@ notebooks/dask-worker-space/
 .idea/
 
 # Streamlit
-.streamlit/
+# .streamlit/
 
 # OS
 .DS_Store
