@@ -56,7 +56,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 # Create runtime user and working dir
 RUN useradd -ms /bin/bash micromamba \
- && install -d -o micromamba -g micromamba /home/micromamba/app
+ && install -d -o micromamba -g micromamba /home/micromamba/app/src
  
 # ADD THIS LINE to give the micromamba user passwordless sudo access
 RUN echo "micromamba ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/micromamba-nopasswd
@@ -84,7 +84,7 @@ ENV PATH="$CMDSTAN/bin:$PATH"
 # 1. Point PROJ to its data directory to fix geospatial library errors
 ENV PROJ_LIB=/opt/conda/envs/texas-env/share/proj
 # 2. Add the project's source code to Python's path to fix ModuleNotFoundError
-ENV PYTHONPATH=/home/micromamba/app
+ENV PYTHONPATH=/home/micromamba/app/src
 # 3. Point ESMF to its make file to fix xesmf import error
 ENV ESMFMKFILE=/opt/conda/envs/texas-env/lib/esmf.mk
 
