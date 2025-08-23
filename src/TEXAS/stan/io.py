@@ -1,7 +1,7 @@
 # TEXAS/stan/io.py
 
 from pathlib import Path
-from typing import Union, Optional
+from typing import Union, Optional, Literal
 from ..utils.paths import POSTERIOR_CACHE_DIR, INVT_CACHE_DIR
 import xarray as xr
 
@@ -62,17 +62,47 @@ def save_posterior(
 
 def load_posterior(
     model_name: str,
+    model_type: Literal["forward", "invT"] = "forward",
     cache_dir: Optional[Union[str, Path]] = None,
 ) -> xr.Dataset:
     """
-    Load a forward-model posterior from disk: `{model_name}.nc` in the default repo folder.
+    Load a posterior from disk: `{model_name}.nc` in the appropriate cache directory.
+    
+    Args:
+        model_name: Name of the model file (without .nc extension)
+        model_type: Type of posterior ("forward" or "invT")
+        cache_dir: Custom cache directory (overrides default locations)
+    
+    Returns:
+        xarray.Dataset containing the posterior
+        
+    Raises:
+        FileNotFoundError: If the posterior file doesn't exist
     """
-    indir = Path(cache_dir) if cache_dir else DEFAULT_FORWARD_DIR
+    # Determine cache directory
+    if cache_dir:
+        indir = Path(cache_dir)
+    elif model_type == "forward":
+        indir = DEFAULT_FORWARD_DIR
+    elif model_type == "invT":
+        indir = DEFAULT_INVT_DIR
+    else:
+        # This shouldn't happen due to type hints, but just in case
+        raise ValueError(f"Invalid model_type: {model_type}. Must be 'forward' or 'invT'")
+    
+    # Ensure directory exists
     indir.mkdir(exist_ok=True, parents=True)
-
+    
+    # Construct file path
     fpath = indir / f"{model_name}.nc"
+    
+    # Check if file exists and load
     if not fpath.exists():
-        raise FileNotFoundError(f"No forward posterior at {fpath}")
+        raise FileNotFoundError(
+            f"No {model_type} posterior found at {fpath}. "
+            f"Available files: {list(indir.glob('*.nc'))}"
+        )
+    
     return xr.load_dataset(fpath)
 
 

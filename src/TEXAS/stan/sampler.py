@@ -3,7 +3,7 @@
 import time
 import numpy as np
 import xarray as xr
-from typing import Tuple, Optional, Dict, Tuple, Any, Literal
+from typing import Tuple, Optional, Dict, Any, Literal
 from cmdstanpy import CmdStanModel, CmdStanMCMC 
 
 from .compiler import StanCompiler
@@ -28,7 +28,11 @@ class StanSampler:
     ) -> xr.Dataset:
         """Runs the sampler from a pre-compiled CmdStanModel object."""
         try:
-            print(f"Starting Stan sampling with {data.get('N', '?')} observations...")
+            n_generic = (data.get("N") or
+                        data.get("N_crtp") or
+                        data.get("N_meso") or
+                        data.get("N_cul") or "?")
+            print(f"Starting Stan sampling with {n_generic} observations...")
             fit = model.sample(data=data, **kwargs)
             print("✅ Stan sampling completed successfully")
             return fit.draws_xr()
@@ -56,7 +60,8 @@ class StanSampler:
         
         # Compile and sample
         model = self.compiler.get_model(stan_file, cpp_options=cpp_options)
-        fit = model.sample(data=data, **kwargs)
+        fit = model.sample(data=data, 
+                           **kwargs)
         
         duration = time.time() - t0
 
@@ -93,22 +98,150 @@ def get_posterior(
     data: dict,
     stan_file: str,
     temptype: str,
+    *,
+    iter_warmup: Optional[int] = None,
+    iter_sampling: Optional[int] = None,
+    threads_per_chain: Optional[int] = None,
+    chains: Optional[int] = None,
+    parallel_chains: Optional[int] = None,
+    adapt_delta: Optional[float] = None,
+    max_treedepth: Optional[int] = None,
     **kwargs
 ) -> Tuple[xr.Dataset, str]:
-    
+    """
+    Get posterior with auto-detection of predictors.
+    """
     rng_seed = kwargs.setdefault("seed", 42)
     np.random.seed(rng_seed)
-    
+
+    # Normalize/auto-complete predictors & flags
+    data = auto_detect_predictors(data)
+
+    # Push explicit sampling args to CmdStanPy via kwargs
+    if iter_warmup is not None:
+        kwargs["iter_warmup"] = iter_warmup
+    if iter_sampling is not None:
+        kwargs["iter_sampling"] = iter_sampling
+    if threads_per_chain is not None:
+        kwargs["threads_per_chain"] = threads_per_chain
+    if chains is not None:
+        kwargs["chains"] = chains
+    if parallel_chains is not None:
+        kwargs["parallel_chains"] = parallel_chains
+    if adapt_delta is not None:
+        kwargs["adapt_delta"] = adapt_delta
+    if max_treedepth is not None:
+        kwargs["max_treedepth"] = max_treedepth
+
+    kwargs.setdefault("show_console", True)
+
     compiler = StanCompiler()
     sampler = StanSampler(compiler)
-    
-    # This function now correctly passes all arguments to the comprehensive .sample() method
+
     return sampler.sample(
         data=data,
         stan_file=stan_file,
         temptype=temptype,
         **kwargs
     )
+
+def find_index_with_priority(items, priorities):
+    """Return the index of the first item whose string contains any priority (in order)."""
+    low_items = [str(x).lower() for x in items]
+    for p in priorities:
+        for i, x in enumerate(low_items):
+            if p in x:
+                return i
+    return None  # nothing matched
+
+
+def _ensure_lenN_vector(enh: dict, key: str, N: int, fill: float = 0.0):
+    """Guarantee enh[key] is a 1D float list of length N (coerce scalar/wrong shape to zeros)."""
+    val = enh.get(key, None)
+    if val is None or np.isscalar(val):
+        enh[key] = [fill] * N
+        return
+    arr = np.asarray(val, dtype=float).ravel()
+    if arr.ndim != 1 or arr.size != N:
+        enh[key] = [fill] * N
+    else:
+        enh[key] = arr.tolist()
+
+
+def auto_detect_predictors(data: dict) -> dict:
+    """Smart predictor detection with data validation (suffix-prioritized)."""
+    enhanced = data.copy()
+
+    # 1) pick the N_* key using priority order
+    N_keys = [k for k in enhanced.keys() if k.startswith("N_")]
+    if not N_keys:
+        # nothing to do
+        return enhanced
+
+    priorities = ["crtp", "culmesocore", "meso", "cul"]
+    idx = find_index_with_priority(N_keys, priorities)
+    chosen_key = N_keys[idx] if idx is not None else N_keys[0]
+
+    # suffix and length
+    # e.g., "N_crtp" -> "crtp"
+    suffix = chosen_key.split("_", 1)[1]
+    data_len = int(enhanced[chosen_key])
+
+    # 2) if flags already set manually, respect them (but still coerce arrays if present)
+    manual_use_gd = "use_gdgt23ratio" in enhanced
+    manual_use_no3 = "use_no3" in enhanced
+
+    # 3) Detect presence (case-insensitive) of any gdgt23 / no3 keys
+    #    NOTE: this detects across the whole dict, not just current suffix
+    gdgt23_keys = [k for k in enhanced.keys() if "gdgt23" in k.lower()]
+    no3_keys    = [k for k in enhanced.keys() if "no3" in k.lower()]
+
+    gdgt23_detected = any(
+        isinstance(enhanced[k], (list, tuple, np.ndarray))
+        and np.asarray(enhanced[k]).size > 0
+        and not np.all(np.isnan(np.asarray(enhanced[k])))
+        for k in gdgt23_keys
+    )
+    no3_detected = any(
+        isinstance(enhanced[k], (list, tuple, np.ndarray))
+        and np.asarray(enhanced[k]).size > 0
+        and not np.all(np.isnan(np.asarray(enhanced[k])))
+        for k in no3_keys
+    )
+
+    # 4) Ensure the *suffix-specific* arrays exist and have correct length
+    gd_key = f"gdgt23ratio_{suffix}"
+    no3_key = f"no3_{suffix}"
+
+    if gd_key not in enhanced and not gdgt23_detected:
+        print("No gdgt23ratio data passing for multivariate model; injecting zeros.")
+    _ensure_lenN_vector(enhanced, gd_key, data_len, 0.0)
+
+    if no3_key not in enhanced and not no3_detected:
+        print("No no3 data passing for multivariate model; injecting zeros.")
+    _ensure_lenN_vector(enhanced, no3_key, data_len, 0.0)
+
+    # 5) Set flags only if not provided manually
+    if not manual_use_gd:
+        arr = np.asarray(enhanced.get(gd_key, []), float)
+        enhanced["use_gdgt23ratio"] = int(arr.size > 0 and not (np.all(np.isnan(arr)) or np.all(arr == 0.0)))
+
+    if not manual_use_no3:
+        arr = np.asarray(enhanced.get(no3_key, []), float)
+        enhanced["use_no3"] = int(arr.size > 0 and not (np.all(np.isnan(arr)) or np.all(arr == 0.0)))
+
+    # 6) Provide a harmless default for no3_cutoff if missing
+    enhanced.setdefault("no3_cutoff", 1.0)
+
+    # 7) Logging
+    print("🔍 Predictor auto-detection:")
+    print(f"   Chosen group: {suffix} (from {chosen_key}, N={data_len})")
+    print(f"   GDGT23 keys in data: {gdgt23_keys} → use_gdgt23ratio = {enhanced['use_gdgt23ratio']}")
+    print(f"   NO3 keys in data:    {no3_keys} → use_no3 = {enhanced['use_no3']}")
+
+    return enhanced
+
+######################
 
 def sampler_invT_posterior(
     data: dict,
