@@ -3,7 +3,7 @@ requires = ["setuptools>=64", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "TEXAS"
+name = "texas-psm"
 version = "0.1.0"
 authors = [{ name = "Ronnakrit Rattanasriampaipong", email = "rattanasriampaipong.r@gmail.com" }]
 description = "Bayesian GDGT–temperature utilities"
@@ -25,17 +25,7 @@ dependencies = [
   "pandas>=1.3",
   "baysparpy>=0.0.2",
   "baysplinepy>=0.0.1",
-  "stanio",
-  "geopandas",
-  "shapely",
-  "cartopy",
-  "pyproj<3.6",
-  "rtree",
-  "pyogrio",
-  "mapclassify",
-  "geopy",
-  "xesmf",
-  "esmpy"
+  "stanio"
 ]
 
 [project.optional-dependencies]
@@ -62,11 +52,24 @@ dev = [
   "pydantic"
 ]
 
-all = [
-    "TEXAS[plotting]",
-    "TEXAS[dev]",
+regrid = [
+  "geopandas",
+  "shapely",
+  "cartopy",
+  "pyproj<3.6",
+  "rtree",
+  "pyogrio",
+  "mapclassify",
+  "geopy",
+  "xesmf",
+  "esmpy"
 ]
 
+all = [
+  "texas-psm[plotting]",
+  "texas-psm[dev]",
+  "texas-psm[regrid]"
+]
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["TEXAS*"]

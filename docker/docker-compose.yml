@@ -1,9 +1,40 @@
+version: "3.9"
+
 services:
-  docs:
-    build: .
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.streamlit
+    container_name: texas_gui
+    ports:
+      - "8503:8501"    # host:container
+    environment:
+      TEXAS_INV_CACHE: "/app/data/cache/TEXAS_invT_posterior_cache"
+      TEXAS_FWD_CACHE: "/app/data/cache/TEXAS_posterior_cache"
     volumes:
-      - ./:/docs
+      - ../data:/app/data:ro
+      - ../spreadsheets:/app/spreadsheets:ro
+    restart: unless-stopped
+    profiles: ["app"]
+
+  docs:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.docs
+    container_name: texas_docs
+    volumes:
+      - ..:/docs
     ports:
       - "8000:8000"
-    # note: `mkdocs` is now the entrypoint, so just pass subcommand
     command: ["serve", "--dev-addr=0.0.0.0:8000"]
+    profiles: ["docs"]
+
+  full:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: texas_full
+    command: bash
+    volumes:
+      - ..:/home/micromamba/app
+    profiles: ["full"]
