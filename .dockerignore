@@ -1,0 +1,11 @@
+.git
+**/__pycache__/
+**/*.ipynb_checkpoints
+notebooks/
+outputs/
+figures/
+legacy_*.tar.gz
+stan_models_explanation_v2.pdf
+*.nc
+data/raw/*
+data/external/*

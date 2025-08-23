@@ -1,0 +1,1 @@
+# pages/__init__.py - Page module initialization

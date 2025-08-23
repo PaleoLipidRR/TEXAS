@@ -1,0 +1,15 @@
+# streamlit_app/requirements.streamlit.txt - Requirements for the Streamlit GUI
+
+streamlit>=1.33
+pandas>=1.5
+numpy>=1.23
+xarray>=2023.7.0
+matplotlib>=3.7
+scipy>=1.10
+netcdf4>=1.6
+h5netcdf>=1.2
+
+# TEXAS is your local package; install it in editable mode if you want to expose Stan/posterior functions:
+# pip install -e /path/to/TEXAS
+# Optional if you plan to sample within notebooks outside the app:
+cmdstanpy>=1.2
