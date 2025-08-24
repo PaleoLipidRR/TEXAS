@@ -1,3 +1,4 @@
+
 # Python
 __pycache__/
 *.py[cod]
@@ -9,6 +10,11 @@ venv/
 .venv/
 .env
 *.egg-info/
+*.egg
+.eggs/
+.coverage
+.pytest_cache/
+.mypy_cache/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -18,7 +24,6 @@ notebooks/dask-worker-space/
 # Model caches (ignore old/stray locations, keep data/cache)
 **/posterior_cache/
 **/invT_posterior_cache/
-
 # IDE
 .vscode/
 .idea/
