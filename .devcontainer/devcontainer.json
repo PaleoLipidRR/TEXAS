@@ -32,6 +32,6 @@
 
   "remoteUser": "micromamba",
 
-  "postCreateCommand": "sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan && sudo apt update && sudo apt install -y git-lfs && git lfs install",
+  "postCreateCommand": "sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan && sudo apt update && sudo apt install -y git-lfs && git lfs update --force",
   "postStartCommand": "echo '[clinfo first lines]'; clinfo | sed -n '1,40p' || true"
 }
