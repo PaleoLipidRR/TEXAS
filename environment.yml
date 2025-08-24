@@ -29,6 +29,7 @@ dependencies:
   - cftime
 
   # --- Plotting (Stable Pinned Versions) ---
+  # NOTE: Multiple pins here increase solver complexity.
   - matplotlib<3.5
   - proplot=0.9.7
   - setuptools<81
@@ -36,22 +37,21 @@ dependencies:
   - plotly
   
   # --- Geo Stack (Complex Dependencies) ---
-  - geopandas=0.13.*
-  - shapely<2
-  - pyproj=3.4.*
-  - cartopy=0.21.*
-  - pyshp=2.3.*
-  - "pyproj<3.6"
-  - rtree
+  # NOTE: shapely<2 is a major constraint.
+  - geopandas
+  - shapely
+  - pyproj
+  - cartopy
   - pyogrio
   - mapclassify
+  - rtree
   - geopy
+  - pyshp=2.3.*
 
   # --- xESMF Stack (Complex Dependencies) ---
   - xesmf
   - esmpy
   - esmf
-  - mpich
   - hdf5
   - libnetcdf
 
@@ -66,10 +66,13 @@ dependencies:
   - sqlalchemy
   - pydantic
   - importlib-metadata<5.0
+  - biopython
 
   # --- Pip-only packages & Local Install ---
   - pip:
     - baysplinepy
     - baysparpy
     - pygwalker
+    # NOTE: conda-lock ignores the following line.
+    # You must run 'pip install -e .' manually after creating the environment.
     - -e .

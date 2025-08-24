@@ -1,0 +1,31 @@
+FROM mambaorg/micromamba:1.5.10-bookworm
+
+# Switch to root for system packages
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    wget curl git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Switch back to micromamba user (this user exists in the base image)
+USER $MAMBA_USER
+WORKDIR /app
+
+# Set shell for micromamba commands
+SHELL ["/usr/local/bin/_dockerfile_shell.sh"]
+ENTRYPOINT ["/usr/local/bin/_entrypoint.sh"]
+
+# Create environment with phylogenetic tools
+RUN micromamba create -n phylo-env -c bioconda -c conda-forge \
+    python=3.11 \
+    mafft \
+    iqtree \
+    biopython \
+    ete3 \
+    pandas \
+    matplotlib \
+    seaborn \
+    && micromamba clean -a -y
+
+# Set environment variables
+ENV MAMBA_DOCKERFILE_ACTIVATE=1
+ENV MAMBA_DEFAULT_ENV=phylo-env
