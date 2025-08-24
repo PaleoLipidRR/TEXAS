@@ -1,0 +1,48 @@
+ARCHAEAL PHYLOGENETIC ANALYSIS REPORT - IMPROVED VERSION
+========================================================
+Date: Sun Aug 24 18:56:21 UTC 2025
+Email: rattanasriampaipong.r@gmail.com
+
+IMPROVEMENTS IN THIS VERSION:
+- Added 4 additional GDGT-producing species (10 total vs 6)
+- Fixed incorrect accession numbers
+- Enhanced Thaumarchaeota coverage (3 species vs 1)
+- Better temperature range representation (4°C to 103°C)
+- Improved ecological diversity (marine, soil, extreme environments)
+
+PIPELINE SUMMARY:
+- Downloaded 16S rRNA sequences for GDGT-producing archaea
+- Aligned sequences using MAFFT
+- Built phylogenetic tree using IQ-TREE with model selection
+- Bootstrap analysis: 1000 replicates
+
+FILES GENERATED:
+- Sequences: /app/data/phylo/sequences/archaeal_16S.fasta
+- Alignment: /app/data/phylo/alignments/archaeal_16S_aligned.fasta  
+- Tree: /app/data/phylo/trees/archaeal_tree.treefile
+- Full results: /app/data/phylo/trees/archaeal_tree.*
+
+SPECIES INCLUDED:
+Thaumarchaeota (TEX86 producers):
+- Nitrosopumilus maritimus
+- Candidatus Nitrosopelagicus brevis
+
+Euryarchaeota (diverse GDGT producers):
+- Archaeoglobus fulgidus
+- Pyrococcus furiosus
+- Thermococcus kodakarensis
+- Methanobrevibacter smithii
+- Methanosarcina barkeri
+
+Crenarchaeota (branched GDGT producers):
+- Sulfolobus solfataricus
+
+Bacterial outgroup:
+- Escherichia coli
+
+NEXT STEPS FOR TEXAS PROJECT:
+1. Load tree in analysis environment: Tree('/app/data/phylo/trees/archaeal_tree.treefile')
+2. Integrate with GDGT temperature calibration data
+3. Use phylogenetic context in Bayesian models
+4. Create publication figures
+

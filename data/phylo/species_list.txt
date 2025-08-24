@@ -1,0 +1,20 @@
+# Custom GDGT Species List for TEXAS Project
+# Format: species_name,ncbi_accession_number
+# Lines starting with # are comments
+
+# Your mesocosm isolates
+My_mesocosm_isolate_1,ACCESSION_NUMBER_1
+My_mesocosm_isolate_2,ACCESSION_NUMBER_2
+
+# Reference species for comparison
+Nitrosopumilus_maritimus,NR_102904.1
+Candidatus_Nitrosopelagicus_brevis,NR_118077.1
+Nitrososphaera_viennensis,NR_109709.1
+Methanobrevibacter_smithii,NR_074174.1
+Methanosarcina_barkeri,NR_028237.1
+
+# Add more species as needed
+# New_species_name,ACCESSION_NUMBER
+
+# Bacterial outgroup (always needed)
+Escherichia_coli,NR_024570.1
