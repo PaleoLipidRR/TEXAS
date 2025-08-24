@@ -1,0 +1,98 @@
+#nexus
+
+BEGIN Taxa;
+DIMENSIONS ntax=12;
+TAXLABELS
+[1] 'Nitrosopumilus_maritimus'
+[2] 'Nitrosopumilus_adriaticus'
+[3] 'Nitrosopumilus_piranensis'
+[4] 'Nitrosopumilus_ureiphilus'
+[5] 'Nitrosoarchaeum_koreensis'
+[6] 'Nitrosotenuis_chungbukensis'
+[7] 'Candidatus_Nitrosopelagicus_brevis'
+[8] 'Acidilobus_saccharovorans'
+[9] 'Desulfurococcus_mucosus'
+[10] 'Saccharolobus_solfataricus'
+[11] 'Picrophilus_torridus'
+[12] 'Escherichia_coli'
+;
+END; [Taxa]
+
+BEGIN Splits;
+DIMENSIONS ntax=12 nsplits=71;
+FORMAT labels=no weights=yes confidences=no intervals=no;
+MATRIX
+	100	 2,
+	100	 7,
+	100	 2 7,
+	100	 12,
+	91	 2 7 12,
+	100	 10,
+	100	 11,
+	96	 10 11,
+	45	 2 7 10 11 12,
+	100	 6,
+	70	 1 3 4 5 8 9,
+	100	 4,
+	100	 9,
+	62	 4 9,
+	61	 1 3 5 8,
+	100	 3,
+	99	 1 5 8,
+	100	 5,
+	100	 8,
+	75	 5 8,
+	100	 1,
+	16	 1 3 4 5 8,
+	11	 1 4 5 8,
+	27	 6 10 11,
+	11	 1 4 5 6 8 9,
+	17	 1 5 6 8,
+	6	 1 3 5 6 8,
+	16	 2 3 7 12,
+	5	 3 4 9,
+	21	 1 8,
+	12	 1 4 5 8 9,
+	2	 1 5 6 8 10 11,
+	13	 2 6 7 12,
+	5	 1 5,
+	4	 2 3 7,
+	6	 3 12,
+	3	 4 10,
+	3	 4 10 11,
+	5	 1 5 6 8 9,
+	7	 1 3 5 8 9,
+	1	 3 4 6 9,
+	3	 3 4,
+	1	 1 3,
+	2	 3 9,
+	0	 2 3 7 9 12,
+	0	 3 11,
+	1	 3 10 11,
+	1	 1 3 5 6 8 9,
+	1	 4 6 9,
+	2	 1 3 5 8 10 11,
+	1	 1 5 8 9,
+	0	 1 5 8 10 11,
+	0	 3 4 6,
+	1	 2 4 7 9 12,
+	0	 6 9,
+	0	 6 12,
+	0	 2 3 4 7 12,
+	0	 2 4 7 12,
+	0	 2 3 6 7 12,
+	0	 2 6 7 9 12,
+	0	 4 6,
+	0	 2 4 6 7 12,
+	1	 1 3 5 8 11,
+	0	 3 6,
+	0	 1 4,
+	0	 3 5,
+	0	 1 4 5 6 8,
+	0	 1 3 4 5 6 8,
+	0	 2 3,
+	0	 3 7,
+	0	 1 3 5 8 10,
+;
+END; [Splits]
+
