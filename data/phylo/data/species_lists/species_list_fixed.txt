@@ -1,0 +1,13 @@
+Nitrosopumilus_maritimus,NR_102904.1
+Nitrosopumilus_adriaticus,NR_118078.1
+Nitrosopumilus_piranensis,NR_134235.1
+Nitrosopumilus_ureiphilus,NR_134236.1
+Nitrosoarchaeum_koreensis,NR_102915.1
+Nitrososphaera_viennensis,NR_109709.1
+Nitrosotenuis_chungbukensis,NR_134774.1
+Candidatus_Nitrosopelagicus_brevis,NR_118077.1
+Acidilobus_saccharovorans,NR_074260.1
+Desulfurococcus_mucosus,NR_074259.1
+Saccharolobus_solfataricus,NR_074171.1
+Picrophilus_torridus,NR_074254.1
+Escherichia_coli,NR_024570.1

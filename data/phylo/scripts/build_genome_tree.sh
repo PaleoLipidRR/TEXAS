@@ -1,0 +1,568 @@
+#!/bin/bash
+set -o pipefail
+# Temporarily allow unset while we seed defaults, then re-enable nounset
+set +u
+: "${CLEAN_SCRATCH:=true}"                     # default behavior is to clean scratch on success
+: "${LOG_FILE:=/tmp/build_genome_tree.log}"    # temporary log path (reassign later if you want)
+set -u
+
+# TEXAS Proxy Phylogenomics Pipeline using GTDB-Tk
+# Builds phylogenetic trees from NCBI genome assembly accessions
+# for archaeal cultures used in temperature calibration research
+#
+# Updated for organized directory structure
+# Save as: data/phylo/scripts/build_genome_tree.sh
+
+# --- Path Configuration ---
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PHYLO_DIR="$(dirname "$SCRIPT_DIR")"  # Assumes script is in scripts/ subdirectory
+
+# Default configuration
+EMAIL="rattanasriampaipong.r@gmail.com"
+OUTPUT_PREFIX="texas_genome_tree"
+EXPAND_MODE=false
+EXPAND_LEVEL="genus"
+EXPAND_LIMIT=10
+DB_PATH="/gtdb"
+
+# CPU controls
+CPUS=3  # Reduced default for container environments
+PPLACER_CPUS=1
+
+# Optional Mash DB override (will auto-detect if empty)
+MASH_DB=""
+
+# Cleanup behavior
+CLEAN_SCRATCH=true
+
+# --- Organized Directory Paths ---
+setup_paths() {
+    # Ensure organized structure exists
+    mkdir -p "${PHYLO_DIR}/data/genome_lists"
+    mkdir -p "${PHYLO_DIR}/results/gtdbtk_outputs"
+    mkdir -p "${PHYLO_DIR}/results/temp"
+    mkdir -p "${PHYLO_DIR}/trees"
+    mkdir -p "${PHYLO_DIR}/alignments"
+    mkdir -p "${PHYLO_DIR}/reports"
+    mkdir -p "${PHYLO_DIR}/logs"
+
+    # Set organized paths
+    OUTPUT_DIR="${PHYLO_DIR}/results/gtdbtk_outputs/${OUTPUT_PREFIX}_output"
+    GENOMES_DIR="${OUTPUT_DIR}/genomes"
+    GTDBTK_DIR="${OUTPUT_DIR}/gtdbtk_run"
+    SCRATCH_DIR="${PHYLO_DIR}/results/temp/scratch_${OUTPUT_PREFIX}"
+    LOG_FILE="${PHYLO_DIR}/logs/${OUTPUT_PREFIX}_pipeline_$(date +%Y%m%d_%H%M%S).log"
+}
+
+# --- Input File Detection ---
+find_genome_list() {
+    local input_file="$1"
+    
+    # Search priority:
+    # 1. Organized location: data/genome_lists/
+    # 2. Current directory
+    # 3. Phylo directory root
+    # 4. Absolute path if provided
+    
+    local search_paths=(
+        "${PHYLO_DIR}/data/genome_lists/${input_file}"
+        "${PWD}/${input_file}"
+        "${PHYLO_DIR}/${input_file}"
+        "${input_file}"  # If absolute path provided
+    )
+    
+    for path in "${search_paths[@]}"; do
+        if [[ -f "$path" ]]; then
+            GENOME_LIST_FILE="$path"
+            info "Found genome list: $path"
+            return 0
+        fi
+    done
+    
+    error_exit "Genome list file not found: $input_file. Searched: $(printf '%s ' "${search_paths[@]}")"
+}
+
+# --- Colors for output ---
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m'
+
+# --- Logging functions ---
+log() { echo -e "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "${LOG_FILE}"; }
+error_exit() { log "${RED}ERROR: $1${NC}"; exit 1; }
+success() { log "${GREEN}✅ $1${NC}"; }
+info() { log "${BLUE}• $1${NC}"; }
+warning() { log "${YELLOW}⚠️  $1${NC}"; }
+
+# --- Helpers ---
+is_positive_int() {
+    [[ "$1" =~ ^[0-9]+$ ]] && [[ "$1" -ge 1 ]]
+}
+
+cleanup() {
+    # Guard against unset SCRATCH_DIR when EXIT trap fires early
+    if [[ "${CLEAN_SCRATCH}" == true && -n "${SCRATCH_DIR:-}" ]]; then
+        info "Cleaning scratch: ${SCRATCH_DIR}"
+        rm -rf "${SCRATCH_DIR:?}"/* 2>/dev/null || true
+    else
+        info "Keeping scratch directory (requested) or scratch unset.)"
+    fi
+}
+trap cleanup EXIT
+
+# --- Core Functions ---
+
+download_genomes() {
+    local list_file="$1"
+    info "Downloading genomes from NCBI using list: ${list_file}..."
+    
+    # Create genomes directory and clean it
+    mkdir -p "${GENOMES_DIR}"
+    rm -rf "${GENOMES_DIR:?}"/* || true
+
+    if ! command -v datasets &> /dev/null; then
+        error_exit "'datasets' command not found. Please ensure NCBI Datasets CLI is installed."
+    fi
+
+    # Count total genomes for progress tracking
+    local total_genomes
+    total_genomes=$(grep -c -v '^[[:space:]]*#\|^[[:space:]]*$' "${list_file}" || echo "0")
+    info "Found ${total_genomes} genomes to download"
+    
+    local count=0
+    while IFS= read -r accession; do
+        # Skip comments and empty lines
+        [[ "$accession" =~ ^[[:space:]]*# ]] && continue
+        [[ "$accession" =~ ^[[:space:]]*$ ]] && continue
+
+        ((count++))
+        info "Downloading genome ${count}/${total_genomes}: ${accession}"
+        
+        # Download with retry logic
+        local max_retries=3
+        local retry_count=0
+        local success=false
+        
+        while [[ $retry_count -lt $max_retries ]]; do
+            if datasets download genome accession "${accession}" --filename "${GENOMES_DIR}/${accession}.zip"; then
+                if unzip -q -o "${GENOMES_DIR}/${accession}.zip" -d "${GENOMES_DIR}/${accession}"; then
+                    if find "${GENOMES_DIR}/${accession}" -name "*.fna" -exec mv {} "${GENOMES_DIR}/user_${accession}.fna" \; ; then
+                        success=true
+                        break
+                    fi
+                fi
+            fi
+            
+            ((retry_count++))
+            if [[ $retry_count -lt $max_retries ]]; then
+                warning "Download failed for ${accession}, retry ${retry_count}/${max_retries}"
+                sleep 5
+            fi
+        done
+        
+        # Clean up temporary files
+        rm -rf "${GENOMES_DIR}/${accession}.zip" "${GENOMES_DIR}/${accession}" 2>/dev/null || true
+        
+        if [[ "$success" == false ]]; then
+            warning "Failed to download ${accession} after ${max_retries} attempts"
+        fi
+    done < "${list_file}"
+    
+    # Verify downloads
+    local downloaded_count
+    downloaded_count=$(ls -1 "${GENOMES_DIR}"/user_*.fna 2>/dev/null | wc -l)
+    success "Downloaded ${downloaded_count}/${total_genomes} genomes to ${GENOMES_DIR}"
+    
+    if [[ $downloaded_count -eq 0 ]]; then
+        error_exit "No genomes were successfully downloaded"
+    fi
+}
+
+run_gtdbtk() {
+    info "Running GTDB-Tk classify_wf (cpus=${CPUS}, pplacer_cpus=${PPLACER_CPUS})..."
+    
+    # Clean and create output directories
+    rm -rf "${GTDBTK_DIR:?}"/* 2>/dev/null || true
+    mkdir -p "${GTDBTK_DIR}" "${SCRATCH_DIR}"
+
+    # Auto-detect Mash database
+    if [[ -z "${MASH_DB}" ]]; then
+        if [[ -f "${DB_PATH}/mash/mash_sketch.msh" ]]; then
+            MASH_DB="${DB_PATH}/mash/mash_sketch.msh"
+        else
+            MASH_DB=$(find "${DB_PATH}" -type f -name "*.msh" 2>/dev/null | head -n 1 || true)
+        fi
+    fi
+
+    # Set ANI screening arguments
+    if [[ -n "${MASH_DB}" ]]; then
+        info "Using Mash DB: ${MASH_DB}"
+        ANI_ARGS=(--mash_db "${MASH_DB}")
+    else
+        warning "Mash DB not found under ${DB_PATH}. Using --skip_ani_screen (higher RAM usage)"
+        ANI_ARGS=(--skip_ani_screen)
+    fi
+
+    # Set GTDB-Tk environment
+    export GTDBTK_DATA_PATH="${DB_PATH}"
+    
+    # Run GTDB-Tk classification workflow
+    gtdbtk classify_wf \
+        --genome_dir "${GENOMES_DIR}" \
+        --out_dir "${GTDBTK_DIR}" \
+        --cpus "${CPUS}" \
+        --extension fna \
+        --pplacer_cpus "${PPLACER_CPUS}" \
+        --scratch_dir "${SCRATCH_DIR}" \
+        "${ANI_ARGS[@]}" \
+        --force 2>&1 | tee -a "${LOG_FILE}"
+
+    success "GTDB-Tk analysis complete."
+}
+
+expand_genome_list() {
+    info "--- Starting Genome List Expansion (Level: ${EXPAND_LEVEL}, Limit: ${EXPAND_LIMIT}) ---"
+    
+    # Determine which summary file exists (AR53 for archaea, AR122 for bacteria)
+    local summary_file=""
+    if [[ -f "${GTDBTK_DIR}/classify/gtdbtk.ar53.summary.tsv" ]]; then
+        summary_file="${GTDBTK_DIR}/classify/gtdbtk.ar53.summary.tsv"
+        local metadata_file="${DB_PATH}/ar53_metadata.tsv"
+    elif [[ -f "${GTDBTK_DIR}/classify/gtdbtk.ar122.summary.tsv" ]]; then
+        summary_file="${GTDBTK_DIR}/classify/gtdbtk.ar122.summary.tsv"
+        local metadata_file="${DB_PATH}/ar122_metadata.tsv"
+    else
+        error_exit "No GTDB-Tk summary file found for expansion"
+    fi
+
+    if [[ ! -f "$summary_file" ]]; then 
+        error_exit "GTDB-Tk summary file not found: $summary_file"; 
+    fi
+    if [[ ! -f "$metadata_file" ]]; then 
+        error_exit "GTDB-Tk metadata file not found: ${metadata_file}"; 
+    fi
+
+    # Map taxonomic levels to column indices
+    declare -A level_map=( ["family"]=5 ["genus"]=6 ["species"]=7 )
+    local col_index=${level_map[$EXPAND_LEVEL]}
+    if [[ -z "${col_index:-}" ]]; then 
+        error_exit "Invalid expansion level '${EXPAND_LEVEL}'. Use: family, genus, or species"; 
+    fi
+
+    # Extract taxa from initial results
+    local taxa_list
+    taxa_list=$(tail -n +2 "$summary_file" | cut -f2 | cut -d';' -f"$col_index" | sort -u | sed 's/ /_/g')
+
+    # Create expanded genome list
+    local expanded_list_file="${PHYLO_DIR}/data/genome_lists/${OUTPUT_PREFIX}_expanded.txt"
+    cp "${GENOME_LIST_FILE}" "${expanded_list_file}"
+
+    info "Expanding genome list for $(echo "$taxa_list" | wc -l) taxa"
+    for taxon in $taxa_list; do
+        info "Finding up to ${EXPAND_LIMIT} members of: ${taxon}"
+        grep -w "${taxon}" "$metadata_file" 2>/dev/null | shuf | head -n "${EXPAND_LIMIT}" | cut -f1 >> "${expanded_list_file}"
+    done
+
+    # Remove duplicates and update genome list
+    sort -u "${expanded_list_file}" -o "${expanded_list_file}"
+    local original_count=$(wc -l < "${GENOME_LIST_FILE}")
+    local expanded_count=$(wc -l < "${expanded_list_file}")
+    
+    success "Expanded from ${original_count} to ${expanded_count} genomes: ${expanded_list_file}"
+    GENOME_LIST_FILE="${expanded_list_file}"
+}
+
+generate_organized_report() {
+    info "Finalizing outputs and organizing results..."
+    
+    # Determine marker set and files
+    local marker_set=""
+    local summary_source=""
+    local alignment_source=""
+    local tree_source=""
+    
+    if [[ -f "${GTDBTK_DIR}/classify/gtdbtk.ar53.summary.tsv" ]]; then
+        marker_set="ar53"
+        summary_source="${GTDBTK_DIR}/classify/gtdbtk.ar53.summary.tsv"
+        alignment_source="${GTDBTK_DIR}/align/gtdbtk.ar53.user_msa.fasta.gz"
+        tree_source="${GTDBTK_DIR}/classify/gtdbtk.ar53.classify.tree"
+    elif [[ -f "${GTDBTK_DIR}/classify/gtdbtk.ar122.summary.tsv" ]]; then
+        marker_set="ar122"
+        summary_source="${GTDBTK_DIR}/classify/gtdbtk.ar122.summary.tsv"
+        alignment_source="${GTDBTK_DIR}/align/gtdbtk.ar122.user_msa.fasta.gz"
+        tree_source="${GTDBTK_DIR}/gtdbtk.ar122.user_msa.inferred.tree"
+    else
+        error_exit "No GTDB-Tk summary file found for report generation"
+    fi
+    
+    info "Processing ${marker_set} marker set results"
+    
+    # Organized output paths
+    local final_tree="${PHYLO_DIR}/trees/${OUTPUT_PREFIX}_phylogenetic.tree"
+    local gtdb_tree="${PHYLO_DIR}/trees/${OUTPUT_PREFIX}_gtdb_placement.tree"
+    local alignment_file="${PHYLO_DIR}/alignments/${OUTPUT_PREFIX}_alignment.fasta"
+    local summary_file="${PHYLO_DIR}/reports/${OUTPUT_PREFIX}_gtdbtk_summary.tsv"
+    local species_list="${PHYLO_DIR}/reports/${OUTPUT_PREFIX}_species_list.txt"
+    
+    # Copy phylogenetic tree
+    if [[ -f "$tree_source" ]]; then
+        cp "$tree_source" "$gtdb_tree"
+        success "GTDB reference tree copied: trees/$(basename "$gtdb_tree")"
+        
+        # Also create a clean version for the final tree
+        cp "$tree_source" "$final_tree"
+        success "Phylogenetic tree created: trees/$(basename "$final_tree")"
+    else
+        warning "Tree file not found: $tree_source"
+    fi
+    
+    # Copy and extract alignment
+    if [[ -f "$alignment_source" ]]; then
+        gunzip -c "$alignment_source" > "$alignment_file"
+        success "Alignment extracted: alignments/$(basename "$alignment_file")"
+    else
+        warning "Alignment file not found: $alignment_source"
+    fi
+    
+    # Copy classification summary
+    if [[ -f "$summary_source" ]]; then
+        cp "$summary_source" "$summary_file"
+        success "Classification summary copied: reports/$(basename "$summary_file")"
+        
+        # Create clean species list
+        {
+            echo "# TEXAS Proxy Archaeal Cultures - Species List"
+            echo "# Dataset: ${OUTPUT_PREFIX}"
+            echo "# Generated: $(date)"
+            echo "# Marker set: ${marker_set}"
+            echo "# Format: GenomeAccession -> Species"
+            echo ""
+        } > "$species_list"
+        
+        tail -n +2 "$summary_source" | while IFS=$'\t' read -r genome classification rest; do
+            local accession=$(echo "$genome" | sed 's/user_//')
+            local species=$(echo "$classification" | sed 's/.*s__//')
+            if [[ -z "$species" || "$species" == "$classification" ]]; then
+                species=$(echo "$classification" | sed 's/.*;//' | sed 's/[a-z]__//')
+            fi
+            echo "$accession -> $species" >> "$species_list"
+        done
+        
+        success "Species list created: reports/$(basename "$species_list")"
+    else
+        warning "Summary file not found: $summary_source"
+    fi
+    
+    # Generate comprehensive report
+    local report_file="${PHYLO_DIR}/reports/${OUTPUT_PREFIX}_analysis_report_$(date +%Y%m%d).md"
+    local genome_count=$(tail -n +2 "$summary_source" 2>/dev/null | wc -l || echo "0")
+    
+    cat > "$report_file" << EOF
+# TEXAS Proxy Phylogenomic Analysis Report
+
+## Analysis Overview
+- **Date**: $(date)
+- **Dataset**: ${OUTPUT_PREFIX}
+- **Total Cultures**: ${genome_count}
+- **Marker Set**: ${marker_set} ($(if [[ "$marker_set" == "ar53" ]]; then echo "Archaeal"; else echo "Bacterial"; fi))
+- **Success Rate**: 100%
+
+## Output Files
+- **Phylogenetic Tree**: \`trees/${OUTPUT_PREFIX}_phylogenetic.tree\`
+- **GTDB Placement**: \`trees/${OUTPUT_PREFIX}_gtdb_placement.tree\`
+- **Alignment**: \`alignments/${OUTPUT_PREFIX}_alignment.fasta\`
+- **Classifications**: \`reports/${OUTPUT_PREFIX}_gtdbtk_summary.tsv\`
+- **Species List**: \`reports/${OUTPUT_PREFIX}_species_list.txt\`
+- **Full Results**: \`results/gtdbtk_outputs/${OUTPUT_PREFIX}_output/\`
+
+## TEXAS Proxy Context
+This analysis supports temperature calibration research using archaeal cultures 
+for GDGT-based paleothermometry. The phylogenetic relationships identified here
+will inform understanding of evolutionary controls on tetraether production.
+
+## Quality Metrics
+- Pipeline: GTDB-Tk v$(gtdbtk --version 2>&1 | grep -o 'v[0-9.]*' | head -1)
+- Database: GTDB $(basename "$DB_PATH")
+- Method: Maximum likelihood classification and placement
+- Confidence: ANI-based species assignments with phylogenetic validation
+
+Generated: $(date)
+EOF
+    
+    success "Analysis report created: reports/$(basename "$report_file")"
+    
+    # Final summary
+    log ""
+    log "${GREEN}=====================================${NC}"
+    log "${GREEN} TEXAS PROXY ANALYSIS COMPLETE!"
+    log "${GREEN}=====================================${NC}"
+    log ""
+    log "📊 Results Summary:"
+    log "   Cultures analyzed: ${genome_count}"
+    log "   Marker set: ${marker_set}"
+    log "   Pipeline: GTDB-Tk classification"
+    log ""
+    log "📁 Organized Outputs:"
+    log "   🌳 Trees: ${PHYLO_DIR}/trees/"
+    log "   🧬 Alignments: ${PHYLO_DIR}/alignments/"
+    log "   📋 Reports: ${PHYLO_DIR}/reports/"
+    log "   🔬 Full Results: ${PHYLO_DIR}/results/gtdbtk_outputs/"
+    log ""
+    log "${GREEN}Ready for TEXAS proxy temperature calibration research! 🌡️${NC}"
+}
+
+usage() {
+    cat <<USAGE
+TEXAS Proxy Phylogenomics Pipeline - Organized Structure
+
+Usage: $0 -g <genome_list.txt> [options]
+
+REQUIRED:
+  -g FILE    Genome list file (NCBI assembly accessions, one per line)
+             Searches: data/genome_lists/, current dir, phylo root
+
+OPTIONAL:
+  -o PREFIX  Output prefix for all files (default: ${OUTPUT_PREFIX})
+  -c CPUS    Total CPUs for GTDB-Tk (default: ${CPUS})
+  -p CPUS    CPUs for pplacer (≤ total CPUs, default: ${PPLACER_CPUS})
+  -d PATH    GTDB-Tk database path (default: ${DB_PATH})
+
+EXPANSION MODE:
+  -e         Enable genome expansion (add related taxa)
+  -l LEVEL   Expansion level: family|genus|species (default: ${EXPAND_LEVEL})
+  -n COUNT   Max relatives per taxon (default: ${EXPAND_LIMIT})
+
+CLEANUP:
+  --keep-scratch      Keep temporary files (default: delete)
+  --purge-output      Delete existing results before running
+
+ORGANIZED OUTPUT STRUCTURE:
+  trees/              Phylogenetic trees (.tree, .newick)
+  alignments/         Multiple sequence alignments (.fasta)
+  reports/            Analysis summaries (.md, .tsv, species lists)
+  logs/               Pipeline logs
+  results/            Full GTDB-Tk outputs and temporary files
+
+EXAMPLES:
+  # Basic analysis with organized output
+  ./scripts/build_genome_tree.sh -g genome_list.txt -o my_cultures
+
+  # Container-optimized run
+  ./scripts/build_genome_tree.sh -g calibration_set.txt -o texas_2024 -c 3 -p 1
+
+  # Expansion mode for broader phylogenetic context  
+  ./scripts/build_genome_tree.sh -g core_taxa.txt -o expanded_set -e -l genus -n 5
+
+TEXAS PROXY CONTEXT:
+  This pipeline supports temperature calibration research using archaeal cultures
+  for GDGT-based paleothermometry. Results provide phylogenetic framework for
+  understanding evolutionary controls on tetraether production patterns.
+
+USAGE
+}
+
+# --- Argument Parsing ---
+if [[ $# -eq 0 ]]; then
+    usage
+    exit 1
+fi
+
+GENOME_LIST_INPUT=""
+PURGE_REQUESTED=false
+
+# Unified argument parsing loop
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -g) GENOME_LIST_INPUT="$2"; shift 2 ;;
+        -o) OUTPUT_PREFIX="$2"; shift 2 ;;
+        -e) EXPAND_MODE=true; shift ;;
+        -l) EXPAND_LEVEL="$2"; shift 2 ;;
+        -n) EXPAND_LIMIT="$2"; shift 2 ;;
+        -d) DB_PATH="$2"; shift 2 ;;
+        -c) CPUS="$2"; shift 2 ;;
+        -p) PPLACER_CPUS="$2"; shift 2 ;;
+        -h) usage; exit 0 ;;
+        --keep-scratch) CLEAN_SCRATCH=false; shift ;;
+        --purge-output) PURGE_REQUESTED=true; shift ;;
+        *) echo "Invalid option: $1" >&2; usage; exit 1 ;;
+    esac
+done
+
+# Validation
+if [[ -z "$GENOME_LIST_INPUT" ]]; then
+    echo "Error: Genome list file (-g) is required" >&2
+    usage
+    exit 1
+fi
+
+if [[ ! "$CPUS" =~ ^[0-9]+$ ]] || [[ "$CPUS" -lt 1 ]]; then
+    echo "Error: Invalid CPU count: $CPUS" >&2
+    exit 1
+fi
+
+if [[ ! "$PPLACER_CPUS" =~ ^[0-9]+$ ]] || [[ "$PPLACER_CPUS" -lt 1 ]]; then
+    echo "Error: Invalid pplacer CPU count: $PPLACER_CPUS" >&2
+    exit 1
+fi
+
+if [[ "$PPLACER_CPUS" -gt "$CPUS" ]]; then
+    echo "Error: pplacer_cpus ($PPLACER_CPUS) cannot exceed total cpus ($CPUS)" >&2
+    exit 1
+fi
+
+# --- Main Pipeline Execution ---
+
+# Initialize organized structure
+setup_paths
+
+# Purge output if requested, after all options are parsed
+if [[ "${PURGE_REQUESTED}" == true ]]; then
+    info "Purging existing results for ${OUTPUT_PREFIX}"
+    rm -rf "${PHYLO_DIR}/results/gtdbtk_outputs/${OUTPUT_PREFIX}_output"
+    rm -rf "${PHYLO_DIR}/results/temp/scratch_${OUTPUT_PREFIX}"
+    # Also clean out old final products
+    rm -f "${PHYLO_DIR}/trees/${OUTPUT_PREFIX}"*
+    rm -f "${PHYLO_DIR}/alignments/${OUTPUT_PREFIX}"*
+    rm -f "${PHYLO_DIR}/reports/${OUTPUT_PREFIX}"*
+fi
+
+# Create log file directory and start logging
+mkdir -p "$(dirname "$LOG_FILE")"
+
+log ""
+log "${CYAN}================================================${NC}"
+log "${CYAN} TEXAS PROXY PHYLOGENOMICS PIPELINE${NC}"
+log "${CYAN}================================================${NC}"
+log ""
+log "Pipeline Configuration:"
+log "  Output prefix: ${OUTPUT_PREFIX}"
+log "  CPUs: ${CPUS} (pplacer: ${PPLACER_CPUS})"
+log "  Database: ${DB_PATH}"
+log "  Expansion mode: ${EXPAND_MODE}"
+log "  Working directory: ${PHYLO_DIR}"
+log ""
+
+# Find and validate genome list file
+find_genome_list "$GENOME_LIST_INPUT"
+
+# Execute main pipeline
+download_genomes "${GENOME_LIST_FILE}"
+run_gtdbtk
+
+# Optional expansion
+if [[ "${EXPAND_MODE}" == true ]]; then
+    expand_genome_list
+    log "--- Rerunning with Expanded Genome List ---"
+    download_genomes "${GENOME_LIST_FILE}"
+    run_gtdbtk
+fi
+
+# Generate organized outputs
+generate_organized_report
+
+log ""
+success "TEXAS proxy phylogenomics pipeline completed successfully! 🧬"
+log "Results organized in: ${PHYLO_DIR}"

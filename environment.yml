@@ -14,6 +14,7 @@ dependencies:
   # --- Core Scientific Stack ---
   - numpy
   - pandas
+  - openpyxl
   - scipy
   - scikit-learn
   - statsmodels
