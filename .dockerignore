@@ -1,3 +1,5 @@
+# TEXAS Project .dockerignore
+# Existing exclusions
 .git
 **/__pycache__/
 **/*.ipynb_checkpoints
@@ -9,3 +11,48 @@ stan_models_explanation_v2.pdf
 *.nc
 data/raw/*
 data/external/*
+
+# === PHYLOGENOMICS EXCLUSIONS (ADDED) ===
+# Large GTDB database files (40+ GB) - mount as volumes instead
+**/release220/
+**/release*/
+data/phylo/release220/
+**/*.msh
+**/*.db
+**/gtdb*/
+
+# Large phylogenomics result directories
+data/phylo/genome_tree_output/
+data/phylo/results/gtdbtk_outputs/
+data/phylo/results/temp/
+data/phylo/scratch/
+**/gtdbtk_run/
+**/scratch/
+
+# Large sequence and alignment files
+**/*.fasta.gz
+**/*.msa.gz
+**/*.msa
+**/alignments/*.fasta
+data/phylo/sequences/*.fasta
+
+# Temporary phylo files
+**/*.tmp
+**/*.temp
+**/*.log
+data/phylo/logs/*.log
+
+# Backup files
+*.backup
+*.bak
+*.old
+
+# OS files  
+.DS_Store
+Thumbs.db
+*~
+
+# Additional cache and temp
+**/temp/
+**/tmp/
+**/.cache/
