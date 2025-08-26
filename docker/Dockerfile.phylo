@@ -1,40 +1,30 @@
 # docker/Dockerfile.phylo
 FROM mambaorg/micromamba:1.5.10-bookworm
 
-# Switch to root to install system dependencies like unzip
+# Need unzip for NCBI datasets zips (and core utils are already present)
 USER root
 RUN apt-get update && apt-get install -y unzip && rm -rf /var/lib/apt/lists/*
-# Switch back to the default non-root user
 USER mambauser
 
-# Create and populate a "phylo" env with bioconda tools
 RUN micromamba create -y -n phylo -c conda-forge -c bioconda \
     python=3.10 \
-    gtdbtk=2.* \
+    gtdbtk=2.4.1 \
     ncbi-datasets-cli \
-    pplacer \
-    hmmer \
-    prodigal \
-    fasttree \
-    mafft \
-    trimal \
-    iqtree \
-    && micromamba clean -a -y
+    pplacer hmmer prodigal fasttree mafft trimal iqtree \
+    mash skani \
+ && micromamba run -n phylo pip install --no-cache-dir "gtdbtk==2.4.1" \
+ && micromamba clean -a -y
 
-# Make the phylo env the default on container start
 SHELL ["/bin/bash", "-lc"]
 ENV MAMBA_DEFAULT_ENV=phylo
 ENV PATH=/opt/conda/envs/phylo/bin:$PATH
 
-# Create a workspace and copy in the pipeline script and data
+# Defaults so GTDB-Tk finds the DB & pplacer uses a fast/safe scratch
+ENV GTDBTK_DATA_PATH=/gtdb
+ENV TMPDIR=/app/data/phylo/scratch
+
+# Workspace
 WORKDIR /workspace
-# Use --chown to ensure the mambauser owns the copied files
-COPY --chown=mambauser:mambauser data/phylo/build_genome_tree.sh data/phylo/genome_list.txt ./
-RUN chmod +x build_genome_tree.sh
 
-# Basic smoke test at build time (prints versions in the build logs)
-# We activate the environment directly to ensure the commands are found.
-RUN micromamba run -n phylo bash -c "pplacer --version && fasttree -help | head -n 1 && gtdbtk --version"
 
-# Default command drops you into the env
 CMD ["/bin/bash"]
