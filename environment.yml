@@ -36,6 +36,11 @@ dependencies:
   - setuptools<81
   - cmocean
   - plotly
+  - pygmt
+  ### Google Map/Google Earth
+  - geetools
+  - simplekml
+  - salem
   
   # --- Geo Stack (Complex Dependencies) ---
   # NOTE: shapely<2 is a major constraint.
