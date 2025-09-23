@@ -14,7 +14,7 @@
     "jupyter.logging.level": "debug"
   },
 
-  "runArgs": ["--init", "--shm-size=8g"],
+  "runArgs": ["--init", "--shm-size=8g", "--runtime=runc"],
   "hostRequirements": { "gpu": "optional" },
 
   "overrideCommand": true,
@@ -33,5 +33,5 @@
   "remoteUser": "micromamba",
 
   "postCreateCommand": "sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan && sudo apt update && sudo apt install -y git-lfs && git lfs update --force",
-  "postStartCommand": "echo '[clinfo first lines]'; clinfo | sed -n '1,40p' || true"
+  "postStartCommand": "sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan && sudo apt update && sudo apt install -y git-lfs && git lfs update --force && echo '[clinfo first lines]'; (clinfo | sed -n '1,40p' 2>/dev/null || echo 'No OpenCL devices detected - continuing without GPU support')"
 }
