@@ -1,0 +1,4 @@
+baysplinepy
+baysparpy
+pygwalker
+-e .

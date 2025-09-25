@@ -5,11 +5,12 @@
   "workspaceFolder": "/home/micromamba/app",
 
   "customizations": {
-    "vscode": { "extensions": ["ms-python.python", "ms-toolsai.jupyter"] }
+    "vscode": { "extensions": ["ms-python.python", "ms-toolsai.jupyter", "ms-python.pylint"] }
   },
 
   "settings": {
     "python.defaultInterpreterPath": "/opt/conda/envs/texas-env/bin/python",
+    "python.terminal.activateEnvironment": false,
     "jupyter.stopJupyterServerOnClose": false,
     "jupyter.logging.level": "debug"
   },
@@ -25,13 +26,9 @@
     "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached"
   ],
 
-    "extensions": [
-    "ms-python.python",
-    "ms-python.pylint"
-  ],
-
   "remoteUser": "micromamba",
 
-  "postCreateCommand": "sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan && sudo apt update && sudo apt install -y git-lfs && git lfs update --force",
-  "postStartCommand": "sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan && sudo apt update && sudo apt install -y git-lfs && git lfs update --force && echo '[clinfo first lines]'; (clinfo | sed -n '1,40p' 2>/dev/null || echo 'No OpenCL devices detected - continuing without GPU support')"
+  "postCreateCommand": "bash .devcontainer/devcontainer-postcreate.sh",
+  "postStartCommand": "sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan && \\ 
+    echo '[clinfo first lines]'; (clinfo | sed -n '1,40p' 2>/dev/null || echo 'No OpenCL devices detected - continuing without GPU support')"
 }

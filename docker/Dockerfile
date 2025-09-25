@@ -8,32 +8,29 @@ USER root
 
 ARG CMDSTAN_VERSION=2.36.0
 
-# System build dependencies (rarely changes)
+# System build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential gfortran make wget tar git \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# --- OPTIMIZED ORDER ---
-# 1. Copy only the dependency file first
+RUN useradd -ms /bin/bash micromamba
+
+# Copy lock file and create env
 COPY --chown=micromamba:micromamba conda-lock.yml .
+RUN micromamba create -n texas-env -f conda-lock.yml && micromamba clean -a -y
 
-# 2. Create the environment. This step now only re-runs if conda-lock.yml changes.
-RUN micromamba create -n texas-env -f conda-lock.yml \
- && micromamba clean -a -y
+# # Step 1: Install PyPI packages first
+# RUN micromamba run -n texas-env pip install --no-cache-dir baysplinepy baysparpy pygwalker
 
-# 3. Now, copy the rest of your application source code
-COPY --chown=micromamba:micromamba . .
+# # Step 2: Copy the TEXAS package
+# COPY --chown=micromamba:micromamba ./src/TEXAS /home/micromamba/TEXAS
 
-# 4. Install your local package. This is much faster than recreating the whole environment.
-RUN micromamba run -n texas-env pip install --no-build-isolation --no-deps -e .
+# # Step 3: Install TEXAS in editable mode
+# RUN micromamba run -n texas-env pip install --no-cache-dir -e /home/micromamba/TEXAS
 
-# 5. NEW: Enable the JupyterLab widget extension
-RUN micromamba run -n texas-env jupyter labextension enable @jupyter-widgets/jupyterlab-manager
-# --- END OPTIMIZED ORDER ---
-
-# ---- Build CmdStan under /opt/cmdstan ----
+# ---- Build CmdStan ----
 RUN mkdir -p /opt/cmdstan \
  && cd /opt/cmdstan \
  && wget -q https://github.com/stan-dev/cmdstan/releases/download/v${CMDSTAN_VERSION}/cmdstan-${CMDSTAN_VERSION}.tar.gz \
@@ -46,32 +43,30 @@ RUN mkdir -p /opt/cmdstan \
 FROM mambaorg/micromamba:1.5.10-bookworm
 USER root
 
-# Install only runtime system libraries needed
+# Runtime system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential libgfortran5 git sudo \
-    # Add these libraries for graphics and plotting
     libglib2.0-0 libsm6 libxrender1 libfreetype6 libpng16-16 \
     ocl-icd-libopencl1 clinfo \
  && rm -rf /var/lib/apt/lists/*
 
-# Create runtime user and working dir
+# Create runtime user and working directories
 RUN useradd -ms /bin/bash micromamba \
- && install -d -o micromamba -g micromamba /home/micromamba/app/src
- 
-# ADD THIS LINE to give the micromamba user passwordless sudo access
-RUN echo "micromamba ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/micromamba-nopasswd
+ && mkdir -p /home/micromamba/app/src \
+ && chown -R micromamba:micromamba /home/micromamba/app
 
+# Allow passwordless sudo
+RUN echo "micromamba ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/micromamba-nopasswd
 
 WORKDIR /home/micromamba/app
 
-# Copy the entire conda environment and the compiled CmdStan from the builder
-COPY --link --from=builder --chown=micromamba:micromamba /opt/conda /opt/conda
-COPY --link --from=builder --chown=micromamba:micromamba /opt/cmdstan /opt/cmdstan
-COPY --link --from=builder --chown=micromamba:micromamba /app /home/micromamba/app
+# Copy environment, CmdStan, and source code
+COPY --from=builder --chown=micromamba:micromamba /opt/conda /opt/conda
+COPY --from=builder --chown=micromamba:micromamba /opt/cmdstan /opt/cmdstan
 
 USER micromamba
 
-# Set Environment Variables
+# Environment variables
 ENV MAMBA_DOCKERFILE_ACTIVATE=1
 ENV MAMBA_DEFAULT_ENV=texas-env
 ENV MAMBA_ROOT_PREFIX=/opt/conda
@@ -80,12 +75,9 @@ ENV PATH="/opt/conda/envs/texas-env/bin:$PATH"
 ENV CMDSTAN=/opt/cmdstan/cmdstan-2.36.0
 ENV PATH="$CMDSTAN/bin:$PATH"
 
-# ---- FIXES FOR RUNTIME ERRORS ----
-# 1. Point PROJ to its data directory to fix geospatial library errors
+# Runtime fixes
 ENV PROJ_LIB=/opt/conda/envs/texas-env/share/proj
-# 2. Add the project's source code to Python's path to fix ModuleNotFoundError
 ENV PYTHONPATH=/home/micromamba/app/src
-# 3. Point ESMF to its make file to fix xesmf import error
 ENV ESMFMKFILE=/opt/conda/envs/texas-env/lib/esmf.mk
 
 CMD ["bash"]
