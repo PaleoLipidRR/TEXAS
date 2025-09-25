@@ -10,6 +10,7 @@ dependencies:
   - jupyterlab
   - ipywidgets
   - tqdm
+  - ipykernel
 
   # --- Core Scientific Stack ---
   - numpy
@@ -73,12 +74,3 @@ dependencies:
   - pydantic
   - importlib-metadata<5.0
   - biopython
-
-  # --- Pip-only packages & Local Install ---
-  - pip:
-    - baysplinepy
-    - baysparpy
-    - pygwalker
-    # NOTE: conda-lock ignores the following line.
-    # You must run 'pip install -e .' manually after creating the environment.
-    - -e .
