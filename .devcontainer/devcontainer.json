@@ -29,6 +29,8 @@
   "remoteUser": "micromamba",
 
   "postCreateCommand": "bash .devcontainer/devcontainer-postcreate.sh",
-  "postStartCommand": "sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan && \\ 
-    echo '[clinfo first lines]'; (clinfo | sed -n '1,40p' 2>/dev/null || echo 'No OpenCL devices detected - continuing without GPU support')"
+  "postStartCommand": [
+    "/bin/sh", "-c",
+    "sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan && echo '[clinfo first lines]' && (clinfo | sed -n '1,40p' 2>/dev/null || echo 'No OpenCL devices detected - continuing without GPU support')"
+  ]
 }
