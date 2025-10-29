@@ -2,7 +2,7 @@
 
 functions {
   real ll_chunk(
-      array[] int slice_indices,  // NEW API: array of indices for this chunk
+      array[] int slice_indices,  // array of indices for this chunk
       int start, int end,
       vector scaledRI,                 // full vector; slice inside
       vector T, vector prior_mu_t, real prior_sigma_t,
@@ -81,10 +81,10 @@ parameters {
 }
 
 model {
-  // NEW API: Create array of indices to pass to reduce_sum
+  // Create array of indices to pass to reduce_sum
   array[N] int indices = linspaced_int_array(N, 1, N);
   
-  // NEW API: array of indices as second argument, grainsize as third argument
+  // array of indices as second argument, grainsize as third argument
   target += reduce_sum(
     ll_chunk, indices, grainsize,
     scaledRI, t_est, prior_mu_t, prior_sigma_t,
