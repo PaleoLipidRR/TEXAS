@@ -24,7 +24,7 @@ data {
 }
 
 parameters {
-  matrix<lower=-1.8>[N, M] t_est;
+  matrix[N, M] t_est;
 }
 
 model {
