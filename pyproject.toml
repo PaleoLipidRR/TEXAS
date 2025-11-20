@@ -62,7 +62,8 @@ regrid = [
   "mapclassify",
   "geopy",
   "xesmf",
-  "esmpy"
+  "esmpy",
+  "gsw>=3.3"
 ]
 
 all = [
