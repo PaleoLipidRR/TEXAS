@@ -22,8 +22,10 @@
   "shutdownAction": "none",
 
   "mounts": [
-    "source=${localWorkspaceFolder},target=/home/micromamba/app,type=bind,consistency=cached",
-    // "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached"
+    "source=${localWorkspaceFolder},target=/home/micromamba/app,type=bind,consistency=cached"
+    // Optional OneDrive mount - configure 
+    "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached" // for Linux hosts with OneDrive
+    // "source=/mnt/c/Users/ratta/OneDrive - University of Arizona,target=/mnt/onedrive,type=bind,consistency=cached" // for Windows hosts with OneDrive
   ],
 
   "remoteUser": "micromamba",
