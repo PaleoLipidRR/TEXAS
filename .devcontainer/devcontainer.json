@@ -23,7 +23,7 @@
 
   "mounts": [
     "source=${localWorkspaceFolder},target=/home/micromamba/app,type=bind,consistency=cached",
-    "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached"
+    // "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached"
   ],
 
   "remoteUser": "micromamba",
