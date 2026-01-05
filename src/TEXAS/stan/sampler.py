@@ -53,15 +53,18 @@ class StanSampler:
         # Pop application-specific arguments that aren't for cmdstanpy
         temptype = kwargs.pop('temptype', None)
         site_name = kwargs.pop('site_name', None)
-        version = kwargs.pop('version', '1.0.0') # Set a default version
-        kwargs.pop('recompile', None) # Not used by the new compiler logic
+        version = kwargs.pop('version', '1.0.0')
+        recompile = kwargs.pop('recompile', False)  # ← CHANGE: capture instead of ignoring
 
         t0 = time.time()
         
         # Compile and sample
-        model = self.compiler.get_model(stan_file, cpp_options=cpp_options)
-        fit = model.sample(data=data, 
-                           **kwargs)
+        model = self.compiler.get_model(
+            stan_file, 
+            cpp_options=cpp_options,
+            force=recompile  # ← CHANGE: pass to compiler
+        )
+        fit = model.sample(data=data, **kwargs)
         
         duration = time.time() - t0
 
