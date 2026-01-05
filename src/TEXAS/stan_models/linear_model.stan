@@ -14,8 +14,8 @@ parameters {
 
 model {
     // Priors
-    slope   ~ normal(0,0.25)T[0,];
-    intercept ~ normal(0,0.25);
+    slope   ~ normal(0,0.5)T[0,];
+    intercept ~ normal(0,1);
 
     sigma_proxy_vals ~ normal(0.01, 0.1);
 
