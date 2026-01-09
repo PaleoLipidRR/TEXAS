@@ -27,15 +27,15 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="in"
-     inkscape:zoom="0.82582346"
-     inkscape:cx="-159.84046"
-     inkscape:cy="-99.29483"
+     inkscape:zoom="4.6243596"
+     inkscape:cx="261.8741"
+     inkscape:cy="247.60185"
      inkscape:window-width="2560"
      inkscape:window-height="1371"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="g16"
+     inkscape:current-layer="layer1"
      inkscape:export-bgcolor="#ffffffff">
     <inkscape:page
        x="0"
@@ -23180,7 +23180,9 @@
          id="tspan1491-2-2-0-3-3-3"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.12435px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.260363"
          x="54.134842"
-         y="105.62105">?</tspan></text>
+         y="105.62105">TEX<tspan
+   style="font-size:65%;baseline-shift:sub"
+   id="tspan1">86</tspan> residuals</tspan></text>
     <text
        id="text1491-6-9-2-7"
        xml:space="preserve"
@@ -23200,7 +23202,7 @@
        transform="translate(-17.228782,12.984038)"><tspan
          x="43.908085"
          y="78.501266"
-         id="tspan3">SST</tspan></text>
+         id="tspan2">SST</tspan></text>
     <rect
        style="fill:#87cdde;fill-opacity:1;stroke:none;stroke-width:0.367905;stroke-dasharray:none"
        id="rect16-8"
@@ -23217,7 +23219,7 @@
        transform="translate(-23.624801,20.11718)"><tspan
          x="43.908085"
          y="78.501266"
-         id="tspan4">AOA ecology</tspan></text>
+         id="tspan3">AOA ecology</tspan></text>
     <rect
        style="fill:#87deaa;fill-opacity:1;stroke:none;stroke-width:0.367905;stroke-dasharray:none"
        id="rect16-2"
@@ -23234,7 +23236,7 @@
        transform="translate(-19.817535,27.132688)"><tspan
          x="43.908085"
          y="78.501266"
-         id="tspan5">Nutrient</tspan></text>
+         id="tspan4">Nutrient</tspan></text>
     <g
        id="g23"
        transform="translate(2.122011,0.66312848)" />
