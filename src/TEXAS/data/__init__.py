@@ -9,9 +9,12 @@ from .filter import (
     ensure_numpy,
 )
 
+from .screening import MahalanobisOutlierDetector
+
 __all__ = [
     "build_invT_inputData",
     "InvTConfig",
     "filter_stan_compatible",
-    "ensure_numpy"
+    "ensure_numpy",
+    'MahalanobisOutlierDetector'
 ]
