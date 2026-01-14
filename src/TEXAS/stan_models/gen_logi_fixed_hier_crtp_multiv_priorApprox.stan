@@ -53,6 +53,7 @@ model {
     // Likelihoods for coretops 
     vector[N_crtp] mu_scaledRI_crtp;
     for (i in 1:N_crtp) {
+        //temperature term
         real base_scaledRI = b_crtp + (1 - b_crtp) 
         ./ pow(1 + Q_crtp * exp(-k_crtp * (t_crtp[i] - t0_crtp)), 1 / v_crtp);
         mu_scaledRI_crtp[i] = base_scaledRI;
@@ -67,9 +68,4 @@ model {
     }
     sigma_scaledRI_crtp ~ normal(0.01, 0.1);
     scaledRI_crtp ~ normal(mu_scaledRI_crtp, sigma_scaledRI_crtp);
-}
-
-generated quantities {
-  real inflection_point;
-  inflection_point = t0_crtp + log(v_crtp) / k_crtp;
 }

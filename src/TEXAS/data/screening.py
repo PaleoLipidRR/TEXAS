@@ -242,7 +242,9 @@ class MahalanobisOutlierDetector:
         if exclude_condition is None:
             # Default: exclude high RI + high TEX86 samples
             if 'ringIndex' in df.columns and 'TEX86' in df.columns:
-                exclude_condition = (df['ringIndex'] > 3) & (df['TEX86'] > 0.7)
+                exclude_condition = (df['ringIndex'] > 3.2) & (df['TEX86'] > 0.8)
+            elif 'scaledRI' in df.columns and 'TEX86' in df.columns:
+                exclude_condition = (df['scaledRI'] > 0.8) & (df['TEX86'] > 0.8)
             else:
                 exclude_condition = pd.Series(False, index=df.index)
         
