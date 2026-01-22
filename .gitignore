@@ -52,3 +52,4 @@ site/
 html_figures/
 # figures/   # ← uncomment if you want to ignore generated plots too
 data/cache/
+*.xlsx
