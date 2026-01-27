@@ -50,9 +50,11 @@ dist/
 outputs/
 site/
 html_figures/
-# figures/   # ← uncomment if you want to ignore generated plots too
+figures/   # ← uncomment if you want to ignore generated plots too
 data/cache/
+data/spreadsheets/
 *.xlsx
+*.csv
 data/spreadsheets/*.xlsx
 data/spreadsheets/*.csv
 data/*.xlsx
