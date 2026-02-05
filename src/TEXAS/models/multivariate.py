@@ -66,11 +66,18 @@ def generalized_logistic_fixed_upper_multivariate(
     y = b + (1 - b) / (1 + Q*exp(-k*(x - inf)))^(1/v)
         + beta0_gdgt23ratio * gdgt23ratio 
         + beta0_no3 * log10(no3) [only where 0 < no3 < no3_cutoff]
+    
+    If v or Q are None, they default to 1.0 (reducing to simpler forms).
     """
     inf = t0 if t0 is not None else x0
     if inf is None:
         raise ValueError("Missing required parameter: t0 (or x0).")
-    mu = generalized_logistic_fixed_upper(x, t0=inf, b=b, k=k, v=v, Q=Q)
+    
+    # Default v and Q to 1.0 if not provided (allows fixing them)
+    v_val = v if v is not None else 1.0
+    Q_val = Q if Q is not None else 1.0
+    
+    mu = generalized_logistic_fixed_upper(x, t0=inf, b=b, k=k, v=v_val, Q=Q_val)
     mu = np.array(mu, copy=True)
 
     # GDGT-2/3 ratio correction

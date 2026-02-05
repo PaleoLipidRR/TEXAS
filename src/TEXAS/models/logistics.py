@@ -75,7 +75,16 @@ def inverse_logistic_fixed_upper(y, t0=None, x0=None, k=None, b=None):
     return inflection + np.log((1 - b)/y - 1) / -k
 
 
-def generalized_logistic(x, t0=None, x0=None, a=None, b=None, k=None, v=None, Q=None):
+def generalized_logistic(
+    x: np.ndarray, 
+    t0: float = None, 
+    x0: float = None, 
+    a: float = None, 
+    b: float = None, 
+    k: float = None, 
+    v: float = None, 
+    Q: float = None
+):
     """
     Generalized logistic function.
 
@@ -98,23 +107,32 @@ def generalized_logistic(x, t0=None, x0=None, a=None, b=None, k=None, v=None, Q=
     return b + ((a - b) / np.power(1 + Q * np.exp(-k * (x - inflection)), 1/v))
 
 
-def generalized_logistic_fixed_upper(x, t0=None, x0=None, b=None, k=None, v=None, Q=None):
+def generalized_logistic_fixed_upper(
+    x: np.ndarray,
+    t0: float = None,
+    x0: float = None,
+    b: float = None,
+    k: float = None,
+    v: float = None,
+    Q: float = None
+) -> np.ndarray:
     """
-    Generalized logistic with upper asymptote = 1.
-
-    Parameters
-    ----------
-    x : array-like
-    t0, x0 : float
-    b : float
-    k, v, Q : float
-
-    Returns
-    -------
-    y : np.ndarray
+    5-parameter generalized logistic with upper asymptote fixed at 1.
+    y = b + (1 - b) / (1 + Q*exp(-k*(x - inflection)))^(1/v)
+    
+    If v or Q are None, they default to 1.0.
     """
     inflection = t0 if t0 is not None else x0
-    if inflection is None or b is None or k is None or v is None or Q is None:
-        raise ValueError("Missing required parameters: t0 (or x0), b, k, v, Q")
+    
+    # Check required parameters
+    if inflection is None or b is None or k is None:
+        raise ValueError("Missing required parameters: t0 (or x0), b, k")
+    
+    # Default v and Q to 1.0 if not provided (allows fixing them)
+    v_val = v if v is not None else 1.0
+    Q_val = Q if Q is not None else 1.0
+    
     x = np.asarray(x).squeeze()
-    return b + ((1 - b) / np.power(1 + Q * np.exp(-k * (x - inflection)), 1/v))
+    exponent = -k * (x - inflection)
+    denominator = 1 + Q_val * np.exp(exponent)
+    return b + (1 - b) / (denominator ** (1 / v_val))
