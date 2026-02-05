@@ -63,8 +63,10 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
 
     # Build candidate basenames up-front for suffix selection
     basenames = ["t0", "b", "k"]
-    if has_v_any and has_Q_any:
-        basenames += ["v", "Q"]
+    if has_v_any:
+        basenames.append("v")
+    if has_Q_any:
+        basenames.append("Q")
     if has_gdz_any:
         basenames += ["beta0_gdgt23ratio"]
     if has_no3_any:
@@ -80,14 +82,23 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
     has_no3 = ("use_no3" in attrs_) 
     detected_no3_cutoff = 0.0
     if has_no3:
-        # prefer attrs; ignore if missing
         detected_no3_cutoff = posterior_ds.attrs.get("no3_cutoff", 0.0)
 
     # Build param list and select model
-    if has_v and has_Q:
-        params = ["t0", "b", "k", "v", "Q"]
-        if has_gdz: params.append("beta0_gdgt23ratio")
-        if has_no3: params.append("beta0_no3")
+    # Use generalized logistic if v OR Q are present
+    is_generalized = has_v or has_Q
+    
+    if is_generalized:
+        params = ["t0", "b", "k"]
+        if has_v:
+            params.append("v")
+        if has_Q:
+            params.append("Q")
+        if has_gdz:
+            params.append("beta0_gdgt23ratio")
+        if has_no3:
+            params.append("beta0_no3")
+        
         model_fn = (
             generalized_logistic_fixed_upper_multivariate
             if has_gdz or has_no3 else
@@ -95,8 +106,11 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
         )
     else:
         params = ["t0", "b", "k"]
-        if has_gdz: params.append("beta0_gdgt23ratio")
-        if has_no3: params.append("beta0_no3")
+        if has_gdz:
+            params.append("beta0_gdgt23ratio")
+        if has_no3:
+            params.append("beta0_no3")
+        
         model_fn = (
             simple_logistic_fixed_upper_multivariate
             if has_gdz or has_no3 else
