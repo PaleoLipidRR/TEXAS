@@ -123,7 +123,7 @@ def plot_prior_distributions(
     
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, 
                              figsize=(set_fig_width_factor * ncols, set_fig_height_factor * nrows), 
-                             squeeze=False, clear=True,
+                             squeeze=True, clear=True,
                              sharex=False, sharey=False,
                              constrained_layout=True)
 
@@ -336,13 +336,56 @@ def plot_prior_distributions(
                 ax.set_xlim([x_min, x_max])
 
         
-        ax.set_xlabel(f"{base}")
-        ax.grid(True)
+        ### Modified labels in ax
+        ax_legends_labels_dict = {
+            "t0_crtp": r"T$_0$",
+            "k_crtp": "k",
+            "b_crtp": "b",
+            "v_crtp": r"$\nu$",
+            "Q_crtp": "Q",
+            "a_crtp": "a",
+            "beta0_gdgt23ratio_crtp": r"$\beta_{G_{2/3}}$",
+            "beta0_no3_crtp": r"$\beta_{NO_3}$",
+            
+            "t0_culmeso": r"T$_{0, culmeso}$",
+            "k_culmeso": r"k$_{culmeso}$",
+            "b_culmeso": r"b$_{culmeso}$",
+            "v_culmeso": r"$\nu_{culmeso}$",
+            "Q_culmeso": r"Q$_{culmeso}$",
+            "a_culmeso": r"a$_{culmeso}$",
+            "beta0_gdgt23ratio_culmeso": r"$\beta_{G_{2/3},culmeso}$",
+            "beta0_no3_culmeso": r"$\beta_{NO_3,culmeso}$",
+
+        }
 
         if all_samples:
             handles, labels_in_ax = ax.get_legend_handles_labels()
+            revised_labels_in_ax = []
+            for lbl in labels_in_ax:
+                revised_lbl = lbl
+                for key, val in ax_legends_labels_dict.items():
+                    if key in lbl:
+                        ### strip with "_" before replacing both prefix and suffix
+                        revised_lbl = val + revised_lbl.replace(key, "")
+                        break
+                revised_labels_in_ax.append(revised_lbl)
             if handles:
-                ax.legend(handles, labels_in_ax, loc='upper right', fontsize=8, ncol=1, frameon=False)
+                ax.legend(handles, revised_labels_in_ax, loc='upper right', fontsize=8, ncol=1, frameon=False)
+                
+        revised_base_dict = {
+            "t0": r"T$_0$",
+            "k": "k",
+            "b": "b",
+            "v": r"$\nu$",
+            "Q": "Q",
+            "a": "a",
+            "beta0_gdgt23ratio": r"$\beta_{G_{2/3}}$",
+            "beta0_no3": r"$\beta_{NO_3}$",
+        }
+        revised_base = revised_base_dict.get(base, base)
+                
+        ax.set_xlabel(f"{revised_base}")
+        ax.grid(True)
 
     model_labels.insert(0, "Prior")
 
@@ -364,10 +407,11 @@ def plot_prior_distributions(
         fig.legend(
             handles=h,
             labels=legend_labels,
-            loc='lower center',
+            loc='lower right',
             ncol=min(len(legend_labels), set_leg_max_ncol),
             fontsize=10,
-            bbox_to_anchor=(0.5, 0.01),  # ← position of legend box relative to the figure plotting space
+            bbox_to_anchor=(0.85, 0.15),  # ← position of legend box relative to the figure plotting space
+
             frameon=True,
             borderaxespad=0.0,
             handletextpad=0.4,
@@ -394,13 +438,31 @@ def plot_prior_distributions(
     if axes.shape[0] > 1:
         for ax in axes[1]:
             handles, labels_in_ax = ax.get_legend_handles_labels()
+            
+            revised_labels_in_ax = []
+            for lbl in labels_in_ax:
+                revised_lbl = lbl
+                for key, val in ax_legends_labels_dict.items():
+                    if key in lbl:
+                        revised_lbl = val + revised_lbl.replace(key, "")
+                        break
+                revised_labels_in_ax.append(revised_lbl)
             if handles:
-                ax.legend(loc='upper right', fontsize=8, ncol=1, frameon=False)
+                ax.legend(handles, revised_labels_in_ax, loc='upper right', fontsize=8, ncol=1, frameon=False)
     
     # Top right and bottom left legends override if present
     if axes.shape[0] > 1:
         for ax in axes[1]:
             handles, labels_in_ax = ax.get_legend_handles_labels()
+            revised_labels_in_ax = []
+            for lbl in labels_in_ax:
+                revised_lbl = lbl
+                for key, val in ax_legends_labels_dict.items():
+                    if key in lbl:
+                        revised_lbl = val + revised_lbl.replace(key, "")
+                        break
+                revised_labels_in_ax.append(revised_lbl)
             if handles:
-                ax.legend(loc='upper right', fontsize=8, ncol=1, frameon=False)
+                ax.legend(handles, revised_labels_in_ax, loc='upper right', fontsize=8, ncol=1, frameon=False)
+                
     return fig, axes
