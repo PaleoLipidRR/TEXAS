@@ -27,6 +27,7 @@ def plot_prior_distributions(
     zoomin_dataset_idx: Optional[int] = None,
     use_linestyle_by_param: bool = False,
     show_histogram: bool = True,
+    show_median: bool = True,
     set_linewidth: float = 1.5,
     set_fig_width_factor: float = 3,
     set_fig_height_factor: float = 3.5,
@@ -248,8 +249,7 @@ def plot_prior_distributions(
         linestyles = ['-', '--', '-.', ':', (0, (3, 1, 1, 1))]
 
         unique_param_names = sorted(set(pname for _, _, pname, _, _, _ in all_samples))
-
-        for samples, idx_ds, param_label, stan_model_label, use_gdgt23ratio_check, use_no3_check in all_samples:
+        for iiii, (samples, idx_ds, param_label, stan_model_label, use_gdgt23ratio_check, use_no3_check) in enumerate(all_samples):
             color = default_colors[idx_ds % len(default_colors)]
 
             if param_label.split("_")[0] == "t0":
@@ -269,15 +269,31 @@ def plot_prior_distributions(
                     ax.plot(x, kde_y, color=color, lw=set_linewidth, linestyle=linestyle, label=param_label)
                     if show_histogram:
                         ax.hist(samples, bins=100, density=True, alpha=0.2, color=color)
+                    if show_median:
+                        median_val = np.median(samples)
+                        ypos_shift = iiii * 0.025  # Shift text up for each subsequent model
+                        ax.text(0.02,0.98 - ypos_shift, f"{median_val:.4f}", transform=ax.transAxes, 
+                                fontsize=9, va='top', ha='left', color=color)
+                        
             elif param_label.startswith("beta0_no3"):
                 if use_no3_check == 1:
                     ax.plot(x, kde_y, color=color, lw=set_linewidth, linestyle=linestyle, label=param_label)
                     if show_histogram:
                         ax.hist(samples, bins=100, density=True, alpha=0.2, color=color)
+                    if show_median:
+                        median_val = np.median(samples)
+                        ypos_shift = iiii * 0.05  # Shift text up for each subsequent model
+                        ax.text(0.02,0.98 - ypos_shift, f"{median_val:.3f}", transform=ax.transAxes, 
+                                fontsize=9, va='top', ha='left', color=color)
             else:
                 ax.plot(x, kde_y, color=color, lw=set_linewidth, linestyle=linestyle, label=param_label)
                 if show_histogram:
                     ax.hist(samples, bins=100, density=True, alpha=0.2, color=color)
+                if show_median:
+                    median_val = np.median(samples)
+                    ypos_shift = iiii * 0.05  # Shift text up for each subsequent model
+                    ax.text(0.02,0.98 - ypos_shift, f"{median_val:.3f}", transform=ax.transAxes, 
+                            fontsize=9, va='top', ha='left', color=color)
 
 
         if all_samples:
@@ -355,7 +371,6 @@ def plot_prior_distributions(
             "a_culmeso": r"a$_{culmeso}$",
             "beta0_gdgt23ratio_culmeso": r"$\beta_{G_{2/3},culmeso}$",
             "beta0_no3_culmeso": r"$\beta_{NO_3,culmeso}$",
-
         }
 
         if all_samples:
@@ -448,7 +463,7 @@ def plot_prior_distributions(
                         break
                 revised_labels_in_ax.append(revised_lbl)
             if handles:
-                ax.legend(handles, revised_labels_in_ax, loc='upper right', fontsize=8, ncol=1, frameon=False)
+                ax.legend(handles, revised_labels_in_ax, loc='upper right', fontsize=9, ncol=1, frameon=False)
     
     # Top right and bottom left legends override if present
     if axes.shape[0] > 1:
@@ -463,6 +478,6 @@ def plot_prior_distributions(
                         break
                 revised_labels_in_ax.append(revised_lbl)
             if handles:
-                ax.legend(handles, revised_labels_in_ax, loc='upper right', fontsize=8, ncol=1, frameon=False)
+                ax.legend(handles, revised_labels_in_ax, loc='upper right', fontsize=9, ncol=1, frameon=False)
                 
     return fig, axes
