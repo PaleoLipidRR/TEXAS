@@ -4592,12 +4592,12 @@
      inkscape:pageopacity="0.0"
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
-     inkscape:zoom="1.9427843"
-     inkscape:cx="317.58543"
-     inkscape:cy="400.45619"
+     inkscape:zoom="1.373756"
+     inkscape:cx="473.8833"
+     inkscape:cy="310.09875"
      inkscape:window-width="2560"
      inkscape:window-height="1371"
-     inkscape:window-x="0"
+     inkscape:window-x="2560"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="g1"
@@ -9420,17 +9420,7 @@
          style="font-variant:normal;font-weight:normal;font-size:12.0122px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333"
          x="60.369404"
          dx="0 -0.24024399 -1.20122 -0.48048797 0 -0.96097594 0 0 0 0 -0.36036599"
-         y="470.57553">BAYSPAR SST (P25-75) | Tierney et al. 2014</tspan></text>
-    <text
-       id="text1446-3"
-       xml:space="preserve"
-       x="97.480034"
-       y="449.26761"
-       style="font-size:16px;stroke-width:1.33333"><tspan
-         id="tspan1447-0"
-         style="font-variant:normal;font-weight:normal;font-size:12.0122px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333"
-         x="97.480034"
-         y="449.26761">| Kim et al. 2010</tspan></text>
+         y="470.57553">BAYSPAR SST | P25-75</tspan></text>
     <path
        id="path1447"
        d="M 30.342817,483.97719 H 54.357483"
@@ -9452,7 +9442,7 @@
          style="font-variant:normal;font-weight:bold;font-size:12.0122px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.33333"
          x="60.369404"
          dx="0 0 0 0 0 0 0 0 -0.30030501 0 0 0 0 -0.36036599"
-         y="487.76254">TEXAS-Bay (SST + G23)</tspan></text>
+         y="487.76254">TEXAS-Bay (SST + G23) | P25-75</tspan></text>
     <text
        id="text1449-0"
        xml:space="preserve"
