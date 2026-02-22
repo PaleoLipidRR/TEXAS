@@ -66,8 +66,8 @@ data {
   vector[M] b;
   vector[M] Q;
   vector[M] v;
-  vector[M] beta0_gdgt23ratio;  // zeros if unused
-  vector[M] beta0_no3;          // zeros if unused
+  vector[M] beta_G23;  // zeros if unused
+  vector[M] beta_NO3;          // zeros if unused
   vector[M] sigma_scaledRI;
 
   int<lower=1> grainsize;
@@ -88,6 +88,6 @@ model {
     scaledRI, t_est, prior_mu_t, prior_sigma_t,
     use_gdgt23ratio, use_no3, gdgt23ratio, no3, no3_cutoff,
     t0, k, b, Q, v,
-    beta0_gdgt23ratio, beta0_no3, sigma_scaledRI
+    beta_G23, beta_NO3, sigma_scaledRI
   );
 }

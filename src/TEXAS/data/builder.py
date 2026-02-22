@@ -17,7 +17,7 @@ from dataclasses import dataclass
 import numpy as np
 import xarray as xr
 
-from TEXAS.constants import OPTIONAL_PREDICTORS
+from TEXAS.constants import OPTIONAL_PREDICTORS, PREDICTOR_BETA_NAMES
 from TEXAS.data.filter import ensure_numpy
 from TEXAS.stan.io import load_posterior
 
@@ -83,7 +83,7 @@ def build_invT_inputData(
     # This loads the .nc file produced by your forward TEXAS-Bay calibration.
     # Expected structure: xr.Dataset with dims (chain, draw) and data_vars like:
     #   - t0_crtp, k_crtp, b_crtp, v_crtp, Q_crtp, sigma_scaledRI_crtp
-    #   - beta0_gdgt23ratio_crtp, beta0_no3_crtp (if multivariate)
+    #   - beta_G23_crtp, beta_NO3_crtp (if multivariate)
     # ───────────────────────────────────────────────────────────────────────────
     post: xr.Dataset = load_posterior(fwd_posterior_name)
     vars_ = list(post.data_vars)
@@ -242,10 +242,11 @@ def build_invT_inputData(
         
         if use_flag:
             # Extract the coefficient from forward posterior
-            beta_key = f"beta0_{pred}_{used_suffix}"  # e.g., "beta0_gdgt23ratio_crtp"
+            beta_name = PREDICTOR_BETA_NAMES[pred]          # e.g., "beta_G23"
+            beta_key = f"{beta_name}_{used_suffix}"          # e.g., "beta_G23_crtp"
             if beta_key not in P:
                 raise ValueError(f"Expected '{beta_key}' in forward posterior but not found.")
-            data[f"beta0_{pred}"] = np.asarray(P[beta_key].values, dtype=float)  # Shape: (M,)
+            data[beta_name] = np.asarray(P[beta_key].values, dtype=float)  # Shape: (M,)
             used_posts.append(beta_key)
 
     # ═══════════════════════════════════════════════════════════════════════════

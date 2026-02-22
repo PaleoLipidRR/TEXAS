@@ -14,11 +14,11 @@ data {
   // optional predictors
   int<lower=0,upper=1> use_gdgt23ratio;
   vector[N] gdgt23ratio;
-  vector[M] beta0_gdgt23ratio;
+  vector[M] beta_G23;
 
   int<lower=0,upper=1> use_no3;
   vector[N] no3;
-  vector[M] beta0_no3;
+  vector[M] beta_NO3;
   real no3_cutoff;
 }
 
@@ -36,7 +36,7 @@ model {
 
     // 3 Optional GDGT23Ratio term
     if (use_gdgt23ratio == 1) {
-      mu_scaledRI += beta0_gdgt23ratio[m] * gdgt23ratio;
+      mu_scaledRI += beta_G23[m] * gdgt23ratio;
     }
 
     // 4 Optional nitrate term (only where 0 < no3 < cutoff)
@@ -49,7 +49,7 @@ model {
         else
           logno3[n] = 0.0;
       }
-      mu_scaledRI += beta0_no3[m] * logno3;
+      mu_scaledRI += beta_NO3[m] * logno3;
     }
 
     // 5 Likelihood
