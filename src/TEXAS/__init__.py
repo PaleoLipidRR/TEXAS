@@ -15,6 +15,7 @@ from .stan.io import (
     save_invT_posterior,
 )
 from .stan.invT import get_invT_posterior, predict_temperature_from_RI
+from .predict import predict_RI_from_T, predict_T_from_RI
 
 # ─── Data builder for inverse‐T models ──────────────────────────────────
 from .data.builder import build_invT_inputData, InvTConfig
@@ -61,6 +62,9 @@ __all__ = [
     # stan — inverse temperature
     "get_invT_posterior",
     "predict_temperature_from_RI",
+    # high-level prediction API
+    "predict_RI_from_T",
+    "predict_T_from_RI",
     # data builder
     "build_invT_inputData",
     "InvTConfig",
