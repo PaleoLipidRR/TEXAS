@@ -1,8 +1,11 @@
 # TEXAS/stan/io.py
 
 from pathlib import Path
-from typing import Union, Optional, Literal
+from typing import Union, Optional, Literal, Sequence, Any, Dict
 from ..utils.paths import POSTERIOR_CACHE_DIR, INVT_CACHE_DIR
+import json
+import re
+import numpy as np
 import xarray as xr
 
 __all__ = [
@@ -142,3 +145,120 @@ def save_invT_posterior(
     posterior.to_netcdf(outpath, encoding=encoding)
     print(f"Saved inverse-T posterior to {outpath}")
     return outpath
+
+
+# ─── Private helpers for invT I/O ──────────────────────────────────────────
+
+def _slug(x: str) -> str:
+    s = str(x).strip().lower().replace(" ", "-")
+    return re.sub(r"[^a-z0-9._-]+", "", s)
+
+
+def _generate_filename_base(
+    meta: Dict[str, Any],
+    filename_tag: Optional[Union[str, Sequence[str]]],
+) -> str:
+    """
+    Generate the base filename for saving invT results.
+
+    Format: {site}_{model}_{temptype}_{tags}_{model_type}
+    Model type (direct/ensemble) goes at the end for easy identification.
+    """
+    site_name = meta.get("SiteName", meta.get("site_name", "unknown_site"))
+    stan_model = meta.get("stan_model_name", meta.get("stan_model", "unknown_model"))
+    temptype = meta.get("temptype", "unknown_temptype")
+
+    if "marginal" in stan_model:
+        model_type = "direct"
+        clean_stan_model = stan_model.replace("_marginal", "")
+    else:
+        model_type = "ensemble"
+        clean_stan_model = stan_model
+
+    temp_parts = [temptype]
+    if int(meta.get("use_gdgt23ratio", 0)) == 1:
+        temp_parts.append("gdgt23ratio")
+    if int(meta.get("use_no3", 0)) == 1:
+        no3_cutoff = meta.get("no3_cutoff")
+        if no3_cutoff is None:
+            raise ValueError("no3_cutoff missing but use_no3=1.")
+        temp_parts.append(f"no3_{no3_cutoff}")
+    temptype_str = "_".join(temp_parts)
+
+    tag_segment = ""
+    if filename_tag:
+        tags = [filename_tag] if isinstance(filename_tag, str) else filename_tag
+        tag_segment = "_" + "+".join(_slug(t) for t in tags if t)
+
+    return f"{site_name}_{clean_stan_model}_{temptype_str}{tag_segment}_{model_type}"
+
+
+def _sanitize_attrs_for_netcdf(ds: xr.Dataset) -> xr.Dataset:
+    """Convert posterior attrs to NetCDF-compatible types."""
+    clean_attrs = {}
+    for k, v in ds.attrs.items():
+        if v is None:
+            continue
+        elif isinstance(v, bool):
+            clean_attrs[k] = int(v)
+        elif isinstance(v, (str, bytes, int, float, np.number)):
+            clean_attrs[k] = v
+        elif isinstance(v, (list, tuple, np.ndarray)):
+            arr = np.asarray(v)
+            if arr.dtype == bool:
+                clean_attrs[k] = arr.astype(int).tolist()
+            else:
+                clean_attrs[k] = arr.tolist()
+        else:
+            try:
+                clean_attrs[k] = json.dumps(v)
+            except TypeError:
+                clean_attrs[k] = str(v)
+
+    ds_copy = ds.copy()
+    ds_copy.attrs = clean_attrs
+    return ds_copy
+
+
+def _save_invT_posterior(
+    posterior: xr.Dataset,
+    cache_dir: Optional[Union[str, Path]] = None,
+    overwrite: bool = True,
+    filename_tag: Optional[Union[str, Sequence[str]]] = None,
+) -> Path:
+    """Save an invT posterior with detailed auto-generated filename."""
+    output_dir = Path(cache_dir) if cache_dir else DEFAULT_INVT_DIR
+    output_dir.mkdir(parents=True, exist_ok=True)
+    base = _generate_filename_base(posterior.attrs, filename_tag)
+    filepath = output_dir / f"{base}.nc"
+    if filepath.exists() and not overwrite:
+        raise FileExistsError(f"{filepath} already exists and overwrite=False.")
+    encoding = {var: {"zlib": True} for var in posterior.data_vars}
+    sanitized = _sanitize_attrs_for_netcdf(posterior)
+    sanitized.to_netcdf(filepath, encoding=encoding)
+    print(f"✅ Posterior saved to {filepath}")
+    return filepath
+
+
+def _save_invT_results(
+    results: Dict[str, Any],
+    path: Optional[Union[str, Path]] = None,
+    overwrite: bool = True,
+) -> Path:
+    """Save invT quantile results dict as a compressed .npz file."""
+    meta = results.get("metadata", {})
+    if path is None:
+        output_dir = DEFAULT_INVT_DIR
+        output_dir.mkdir(parents=True, exist_ok=True)
+        filename_tag = meta.get("filename_tag")
+        base = _generate_filename_base(meta, filename_tag)
+        path = output_dir / f"{base}.npz"
+    else:
+        path = Path(path)
+    if path.exists() and not overwrite:
+        raise FileExistsError(f"{path} already exists and overwrite=False.")
+    savez_dict = {k: np.asarray(v) for k, v in results.items() if k != "metadata"}
+    savez_dict["__metadata__"] = np.array([json.dumps(meta)])
+    np.savez(path, **savez_dict)
+    print(f"✅ invT results saved: {path}")
+    return path
