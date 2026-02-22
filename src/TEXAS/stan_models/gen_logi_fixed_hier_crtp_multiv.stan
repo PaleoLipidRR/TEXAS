@@ -38,8 +38,8 @@ parameters {
     real<lower=0.01>            Q_crtp;      // curve start factor (Q), must be > 0
     real<lower=0.1>             v_crtp;      // shape/asymmetry (ν), must be > 0
     
-    real<lower=-1,upper=0> beta0_gdgt23ratio_crtp;
-    real<lower=-1,upper=0> beta0_no3_crtp;
+    real<lower=-1,upper=0> beta_G23_crtp;
+    real<lower=-1,upper=0> beta_NO3_crtp;
 
     // hierarchical scale parameters (hyperpriors)
     real<lower=0>        sigma_t0_culmeso;
@@ -88,8 +88,8 @@ model {
     b_crtp   ~ normal(b_culmeso, sigma_b_culmeso) T[0, 1];     // truncated to match bounds
     Q_crtp   ~ normal(Q_culmeso, sigma_Q_culmeso) T[0.01, ];   // truncated to match bounds
     v_crtp   ~ normal(v_culmeso, sigma_v_culmeso) T[0.1, ];    // truncated to match bounds
-    beta0_gdgt23ratio_crtp ~ normal(0, 0.05);
-    beta0_no3_crtp ~ normal(0, 0.05);
+    beta_G23_crtp ~ normal(0, 0.05);
+    beta_NO3_crtp ~ normal(0, 0.05);
 
     // 6 Likelihoods for coretops 
     vector[N_crtp] mu_scaledRI_crtp;
@@ -99,11 +99,11 @@ model {
         mu_scaledRI_crtp[i] = base_scaledRI;
 
         if (use_gdgt23ratio == 1)
-            mu_scaledRI_crtp[i] += beta0_gdgt23ratio_crtp * gdgt23ratio_crtp[i];
+            mu_scaledRI_crtp[i] += beta_G23_crtp * gdgt23ratio_crtp[i];
 
         if (use_no3 == 1) {
             if (no3_crtp[i] > 0 && no3_crtp[i] < no3_cutoff)
-            mu_scaledRI_crtp[i] += beta0_no3_crtp * log10(no3_crtp[i]);
+            mu_scaledRI_crtp[i] += beta_NO3_crtp * log10(no3_crtp[i]);
         }
     }
     sigma_scaledRI_crtp ~ normal(0.01, 0.1);

@@ -68,9 +68,9 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
     if has_Q_any:
         basenames.append("Q")
     if has_gdz_any:
-        basenames += ["beta0_gdgt23ratio"]
+        basenames += ["beta_G23"]
     if has_no3_any:
-        basenames += ["beta0_no3"]
+        basenames += ["beta_NO3"]
 
     # Choose suffix by priority (or validate preferred)
     suffix = choose_suffix(posterior_ds, basenames, preferred=suffix)
@@ -95,9 +95,9 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
         if has_Q:
             params.append("Q")
         if has_gdz:
-            params.append("beta0_gdgt23ratio")
+            params.append("beta_G23")
         if has_no3:
-            params.append("beta0_no3")
+            params.append("beta_NO3")
         
         model_fn = (
             generalized_logistic_fixed_upper_multivariate
@@ -107,9 +107,9 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
     else:
         params = ["t0", "b", "k"]
         if has_gdz:
-            params.append("beta0_gdgt23ratio")
+            params.append("beta_G23")
         if has_no3:
-            params.append("beta0_no3")
+            params.append("beta_NO3")
         
         model_fn = (
             simple_logistic_fixed_upper_multivariate
