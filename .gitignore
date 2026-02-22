@@ -21,8 +21,8 @@ venv/
 */.ipynb_checkpoints/*
 notebooks/dask-worker-space/
 
-# Data
-data/phylo/release220
+# Data — large external datasets (download separately, see data/README.md)
+data/external/
 
 # Model caches (ignore old/stray locations, keep data/cache)
 **/posterior_cache/

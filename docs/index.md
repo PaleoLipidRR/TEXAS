@@ -1,25 +1,24 @@
-# culRI-Bayesian
+# TEXAS
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)  
-[![PyPI version](https://img.shields.io/pypi/v/TEXAS.svg)](https://pypi.org/project/TEXAS)
+**TEX86 And ring-index Bayesian cAlibration Software**
 
-A Python package for **culture-informed Ring-Index Bayesian** temperature calibration.
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/PaleoLipidRR/TEXAS/blob/main/LICENSE)
+
+A Python package for **Bayesian GDGT–temperature calibration** using Stan.
+TEXAS implements a two-stage workflow — forward calibration (Ring Index → temperature) followed
+by inverse temperature reconstruction — via hierarchical generalized-logistic Stan models.
 
 ---
 
-## 🚀 Quickstart
+## Documentation
 
-### From PyPI
+- [Proxy System Model description](PSM.md) — statistical framework and model equations
+- [Stan model guide](stan_models_explanation_v2.md) — annotated walkthrough of the Stan models
+- [API Reference](api.md) — full Python API documentation
+- [Root README](https://github.com/PaleoLipidRR/TEXAS) — quickstart, installation, and usage examples
 
-```bash
-pip install TEXAS
+## Further reading
 
-
-### From this repo
-git clone https://github.com/PaleoLipidRR/culRI-Bayesian.git
-cd culRI-Bayesian
-pip install .
-
-## 🔌 API
-
-See our [API Reference](api.md) for full documentation of classes and functions.
+- [Marginalization explainer](marginalization_explainer.md) — why TEXAS marginalizes over parameter draws
+- [reduce_sum for geologists](reduce_sum_for_geologists.md) — visual guide to Stan's parallel log-likelihood
+- [Prior choice: Normal vs. Cauchy](Prior_Choice_Normal_vs_Cauchy.md) — prior sensitivity discussion
