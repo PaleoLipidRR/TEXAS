@@ -1,89 +1,103 @@
+// ═══════════════════════════════════════════════════════════════════════════════
 // invT_gen_logi_fixed_univ_marginal_unconstrained.stan
-// 
-// Inverse temperature prediction from Ring Index (RI) using Bayesian marginalization
-// over forward calibration uncertainty. This model predicts temperatures from observed
-// RI values by integrating over M posterior samples from the forward calibration model.
+//
+// PURPOSE: Bayesian paleotemperature reconstruction from observed Ring Index
+//          values. Given scaledRI observations and a forward calibration
+//          posterior, infers the posterior distribution of temperature for
+//          each sample.
+//
+// APPROACH — "Marginal" (direct sampling):
+//   The forward calibration introduces uncertainty in the RI–T curve parameters
+//   θ = {T₀, k, b, Q, ν, σ}. We marginalize (integrate) over this uncertainty:
+//
+//     p(RI_obs | T) = ∫ p(RI_obs | T, θ) · p(θ | calib. data) dθ
+//                   ≈ (1/M) Σ_{m=1}^{M}  Normal(RI_obs | f(T; θ_m), σ_m)
+//
+//   where θ_m is the m-th draw from the forward calibration posterior.
+//   This is a Monte Carlo approximation of the integral using M pre-sampled
+//   calibration curves. The only free parameter in this Stan model is T.
+//
+//   Compare to the ENSEMBLE approach (invT_gen_logi_fixed_univ.stan) which
+//   instead estimates N×M temperatures simultaneously — much slower.
+//
+// CRITICAL: ALL PARAMETERS MUST USE THE SAME DRAW INDEX m
+//   {T₀_m, k_m, b_m, Q_m, ν_m, σ_m} are all indexed by m in the inner loop.
+//   Mixing indices across parameters would break their posterior correlations
+//   and artificially inflate calibration uncertainty.
+//   This constraint is enforced in build_invT_inputData() (Python side).
+//
+// TEMPERATURE CONSTRAINT: "unconstrained" variant
+//   t_est has no lower bound — temperatures can be reconstructed below 0°C.
+//   Use the "_hard_constraint" variant for a physical lower bound (e.g., -1.8°C).
+// ═══════════════════════════════════════════════════════════════════════════════
 
 data {
-  // ═══════════════════════════════════════════════════════════════════════════
-  // OBSERVATIONS TO PREDICT
-  // ═══════════════════════════════════════════════════════════════════════════
-  int<lower=1> N;              // Number of observations (e.g., coretop samples)
-  vector[N] scaledRI;          // Observed Ring Index values (target proxy data)
-  
-  // ═══════════════════════════════════════════════════════════════════════════
-  // TEMPERATURE PRIORS (Informative constraints on plausible temperature range)
-  // ═══════════════════════════════════════════════════════════════════════════
-  vector[N] prior_mu_t;        // Prior mean temperature for each observation
-                               // (e.g., 20°C for tropical sites, 5°C for high-latitude)
-  real prior_sigma_t;          // Prior standard deviation (e.g., 10°C for wide uncertainty)
-  
-  // ═══════════════════════════════════════════════════════════════════════════
-  // FORWARD CALIBRATION POSTERIOR (M samples from forward model)
-  // These are FIXED values loaded from your forward calibration results.
-  // Each [m] represents one plausible calibration curve from p(θ | coretop_data)
-  // ═══════════════════════════════════════════════════════════════════════════
-  int<lower=1> M;              // Number of posterior samples from forward calibration
-                               // (e.g., M=1000 samples from 4 chains × 250 draws)
-  
-  // Generalized logistic function parameters (one value per posterior sample):
-  vector[M] t0;                // Inflection point temperature (°C)
-  vector[M] k;                 // Growth rate (steepness of sigmoid)
-  vector[M] b;                 // Lower asymptote (baseline RI at cold temperatures)
-  vector[M] Q;                 // Asymmetry parameter (fixed at 1 for standard logistic)
-  vector[M] v;                 // Affects near-asymptote behavior
-  vector[M] sigma_scaledRI;    // Residual error in RI predictions
+    // ─── Proxy observations to reconstruct ────────────────────────────────────
+    int<lower=1> N;            // Number of sediment samples (downcore or coretop)
+    vector[N] scaledRI;        // Observed scaled Ring Index for each sample (∈ [0,1])
+
+    // ─── Prior on paleotemperature ─────────────────────────────────────────────
+    // A normal prior T ~ Normal(prior_mu_t, prior_sigma_t) encodes any independent
+    // knowledge about the expected temperature range (e.g., from site location,
+    // foram assemblages, or Mg/Ca). Use prior_sigma_t = 10°C for a diffuse prior.
+    vector[N] prior_mu_t;      // Prior mean temperature for each sample (°C)
+    real prior_sigma_t;        // Prior SD (shared across all samples) (°C)
+
+    // ─── Forward calibration posterior — M draws of all curve parameters ───────
+    // Loaded from the forward calibration .nc file by build_invT_inputData().
+    // Increasing M improves the integral approximation at the cost of O(N×M)
+    // likelihood evaluations per HMC step. Typical range: M = 100–500.
+    //
+    // IMPORTANT: each vector below has length M. Row m contains ONE complete,
+    // self-consistent parameter set from the forward posterior. Using all
+    // parameters at index [m] preserves their joint correlations.
+    int<lower=1> M;
+    vector[M] t0;              // T₀_m: reference temperature of each calibration draw (°C)
+    vector[M] k;               // k_m: steepness
+    vector[M] b;               // b_m: lower asymptote
+    vector[M] Q;               // Q_m: asymmetry; Q=1 → standard logistic
+    vector[M] v;               // ν_m: shape
+    vector[M] sigma_scaledRI;  // σ_m: residual calibration noise
 }
 
 parameters {
-  // ═══════════════════════════════════════════════════════════════════════════
-  // PARAMETERS TO ESTIMATE
-  // ═══════════════════════════════════════════════════════════════════════════
-  vector[N] t_est;             // Estimated temperature for each observation
-                               // This is the ONLY parameter being sampled
-                               // (vs. ensemble models that sample N×M parameters)
+    // ─── Paleotemperature estimates ───────────────────────────────────────────
+    // One temperature per sample — the ONLY parameter block in this model.
+    // "Unconstrained" means no lower bound; Stan samples over all of ℝ.
+    vector[N] t_est;
 }
 
 model {
-  // ═══════════════════════════════════════════════════════════════════════════
-  // PRIOR: Informative constraint on plausible temperature range
-  // ═══════════════════════════════════════════════════════════════════════════
-  t_est ~ normal(prior_mu_t, prior_sigma_t);
-  
-  // ═══════════════════════════════════════════════════════════════════════════
-  // LIKELIHOOD: Marginalizing over forward calibration uncertainty
-  // 
-  // For each observation n, we compute:
-  //   p(RI[n] | T[n]) = ∫ p(RI[n] | T[n], θ) p(θ | coretop_data) dθ
-  //                   ≈ (1/M) Σ_{m=1}^M p(RI[n] | T[n], θ_m)
-  //
-  // This integrates out uncertainty in the calibration parameters by averaging
-  // over all M posterior samples from the forward model.
-  // ═══════════════════════════════════════════════════════════════════════════
-  
-  for (n in 1:N) {  // Loop over each observation
-    vector[M] lp;   // Log-probabilities for each calibration sample
-    
-    for (m in 1:M) {  // Loop over each forward posterior sample
-      
-      // ─────────────────────────────────────────────────────────────────────
-      // STEP 1: Compute expected RI using the m-th calibration curve
-      // Generalized logistic function: RI = f(T; t0, k, b, Q, v)
-      // ─────────────────────────────────────────────────────────────────────
-      real mu = b[m] + (1 - b[m]) / pow(1 + Q[m] * exp(-k[m] * (t_est[n] - t0[m])), 1.0 / v[m]);
-      
-      // ─────────────────────────────────────────────────────────────────────
-      // STEP 2: Evaluate likelihood of observed RI given this calibration
-      // p(RI[n] | T[n], θ_m) ~ Normal(μ_m, σ_m)
-      // ─────────────────────────────────────────────────────────────────────
-      lp[m] = normal_lpdf(scaledRI[n] | mu, sigma_scaledRI[m]);
+    // ─── Prior ────────────────────────────────────────────────────────────────
+    t_est ~ normal(prior_mu_t, prior_sigma_t);
+
+    // ─── Likelihood: Monte Carlo marginalization over calibration uncertainty ──
+    // For each sample n, we average the Normal likelihood over all M calibration
+    // curves. The log-sum-exp trick computes this average in log-space:
+    //
+    //   log p(RI_n | T_n) ≈ log[ (1/M) Σ_m exp(log N(RI_n | μ_m, σ_m)) ]
+    //                     = log_sum_exp(lp_1, …, lp_M) - log(M)
+    //
+    // log_sum_exp is numerically stable (avoids floating-point underflow/overflow
+    // that would occur from taking exp of very negative log-probabilities).
+
+    real log_M = log(M);  // Precomputed once; used N times in the loop below
+
+    for (n in 1:N) {
+        vector[M] lp;   // Log-likelihood of RI_n under each of the M calibration draws
+
+        for (m in 1:M) {
+            // Compute expected RI using the m-th calibration curve (Eq. 1).
+            // ALL parameters use the same draw index [m] to preserve correlations.
+            real mu = b[m] + (1 - b[m])
+                / pow(1 + Q[m] * exp(-k[m] * (t_est[n] - t0[m])), 1.0 / v[m]);
+
+            // Log-likelihood: how well does this calibration curve explain RI_n?
+            lp[m] = normal_lpdf(scaledRI[n] | mu, sigma_scaledRI[m]);
+        }
+
+        // Average over all M calibration draws (marginalization).
+        // Equivalent to: log[ (1/M) Σ_m exp(lp[m]) ]
+        target += log_sum_exp(lp) - log_M;
     }
-    
-    // ───────────────────────────────────────────────────────────────────────
-    // STEP 3: Monte Carlo integration via log-sum-exp trick
-    // Computes: log[ (1/M) Σ exp(lp[m]) ] = log(Σ exp(lp[m])) - log(M)
-    // This is numerically stable averaging in log-space
-    // ───────────────────────────────────────────────────────────────────────
-    target += log_sum_exp(lp) - log(M);
-  }
 }
