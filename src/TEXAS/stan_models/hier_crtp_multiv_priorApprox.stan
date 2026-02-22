@@ -25,8 +25,8 @@ parameters {
     real<lower=-1.8>     t0_crtp;
     real<lower=0,upper=1> k_crtp;
     real<lower=0,upper=1> b_crtp;
-    real<lower=-1,upper=0> beta0_gdgt23ratio_crtp;
-    real<lower=-1,upper=0> beta0_no3_crtp;
+    real<lower=-1,upper=0> beta_G23_crtp;
+    real<lower=-1,upper=0> beta_NO3_crtp;
 
     // observation noise
     real<lower=0>        sigma_scaledRI_crtp;  // coretop noise
@@ -38,8 +38,8 @@ model {
     t0_crtp ~ normal(prior_mean_t0, prior_sd_t0);
     k_crtp  ~ normal(prior_mean_k, prior_sd_k);
     b_crtp  ~ normal(prior_mean_b, prior_sd_b);
-    beta0_gdgt23ratio_crtp ~ normal(0, 0.05);
-    beta0_no3_crtp ~ normal(0, 0.05);
+    beta_G23_crtp ~ normal(0, 0.05);
+    beta_NO3_crtp ~ normal(0, 0.05);
 
     // 6 Likelihoods for coretops 
     vector[N_crtp] mu_scaledRI_crtp;
@@ -48,11 +48,11 @@ model {
         mu_scaledRI_crtp[i] = base_scaledRI;
 
         if (use_gdgt23ratio == 1)
-            mu_scaledRI_crtp[i] += beta0_gdgt23ratio_crtp * gdgt23ratio_crtp[i];
+            mu_scaledRI_crtp[i] += beta_G23_crtp * gdgt23ratio_crtp[i];
 
         if (use_no3 == 1) {
             if (no3_crtp[i] > 0 && no3_crtp[i] < no3_cutoff)
-            mu_scaledRI_crtp[i] += beta0_no3_crtp * log10(no3_crtp[i]);
+            mu_scaledRI_crtp[i] += beta_NO3_crtp * log10(no3_crtp[i]);
         }
     }
     sigma_scaledRI_crtp ~ normal(0.01, 0.1) T[1e-6, ];

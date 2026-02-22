@@ -21,7 +21,7 @@ def plot_prior_distributions(
     show_suptitle: bool = True,
     kde_bw: float = 0.3,
     focus_on_posterior: bool = True,
-    include_groups: Sequence[str] = ("t0","k","b","v","Q","a","beta0_gdgt23ratio","beta0_no3"),
+    include_groups: Sequence[str] = ("t0","k","b","v","Q","a","beta_G23","beta_NO3"),
     suffix_include: Optional[List[str]] = None,
     zoomin_suffix: Optional[Union[str,List[str]]] = None,
     zoomin_dataset_idx: Optional[int] = None,
@@ -111,11 +111,11 @@ def plot_prior_distributions(
     ncols = 3 if len(param_groups) > 3 else len(param_groups)
     
     ### pop param_groups
-    if ('beta0_gdgt23ratio' in param_groups) and (_use_gdgt23ratio_detection == 0):
-        param_groups.pop(param_groups.index('beta0_gdgt23ratio'))
+    if ('beta_G23' in param_groups) and (_use_gdgt23ratio_detection == 0):
+        param_groups.pop(param_groups.index('beta_G23'))
 
-    if ('beta0_no3' in param_groups) and (_use_no3_detection == 0):
-        param_groups.pop(param_groups.index('beta0_no3'))
+    if ('beta_NO3' in param_groups) and (_use_no3_detection == 0):
+        param_groups.pop(param_groups.index('beta_NO3'))
 
     
     nrows = int(np.ceil(len(param_groups) / ncols))
@@ -264,7 +264,7 @@ def plot_prior_distributions(
             kde = stats.gaussian_kde(samples, bw_method=kde_bw)
             kde_y = kde(x)
             
-            if param_label.startswith("beta0_gdgt23ratio"):
+            if param_label.startswith("beta_G23"):
                 if use_gdgt23ratio_check == 1:
                     ax.plot(x, kde_y, color=color, lw=set_linewidth, linestyle=linestyle, label=param_label)
                     if show_histogram:
@@ -275,7 +275,7 @@ def plot_prior_distributions(
                         ax.text(0.02,0.98 - ypos_shift, f"{median_val:.4f}", transform=ax.transAxes, 
                                 fontsize=9, va='top', ha='left', color=color)
                         
-            elif param_label.startswith("beta0_no3"):
+            elif param_label.startswith("beta_NO3"):
                 if use_no3_check == 1:
                     ax.plot(x, kde_y, color=color, lw=set_linewidth, linestyle=linestyle, label=param_label)
                     if show_histogram:
@@ -360,8 +360,8 @@ def plot_prior_distributions(
             "v_crtp": r"$\nu$",
             "Q_crtp": "Q",
             "a_crtp": "a",
-            "beta0_gdgt23ratio_crtp": r"$\beta_{G_{2/3}}$",
-            "beta0_no3_crtp": r"$\beta_{NO_3}$",
+            "beta_G23_crtp": r"$\beta_{G_{2/3}}$",
+            "beta_NO3_crtp": r"$\beta_{NO_3}$",
             
             "t0_culmeso": r"T$_{0, culmeso}$",
             "k_culmeso": r"k$_{culmeso}$",
@@ -369,8 +369,8 @@ def plot_prior_distributions(
             "v_culmeso": r"$\nu_{culmeso}$",
             "Q_culmeso": r"Q$_{culmeso}$",
             "a_culmeso": r"a$_{culmeso}$",
-            "beta0_gdgt23ratio_culmeso": r"$\beta_{G_{2/3},culmeso}$",
-            "beta0_no3_culmeso": r"$\beta_{NO_3,culmeso}$",
+            "beta_G23_culmeso": r"$\beta_{G_{2/3},culmeso}$",
+            "beta_NO3_culmeso": r"$\beta_{NO_3,culmeso}$",
         }
 
         if all_samples:
@@ -394,8 +394,8 @@ def plot_prior_distributions(
             "v": r"$\nu$",
             "Q": "Q",
             "a": "a",
-            "beta0_gdgt23ratio": r"$\beta_{G_{2/3}}$",
-            "beta0_no3": r"$\beta_{NO_3}$",
+            "beta_G23": r"$\beta_{G_{2/3}}$",
+            "beta_NO3": r"$\beta_{NO_3}$",
         }
         revised_base = revised_base_dict.get(base, base)
                 

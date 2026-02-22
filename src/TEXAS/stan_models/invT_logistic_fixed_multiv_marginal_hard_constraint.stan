@@ -68,8 +68,8 @@ data {
   vector[M] t0;
   vector[M] k;
   vector[M] b;
-  vector[M] beta0_gdgt23ratio;
-  vector[M] beta0_no3;
+  vector[M] beta_G23;
+  vector[M] beta_NO3;
   vector[M] sigma_scaledRI;
 
   int<lower=1> grainsize;
@@ -89,6 +89,6 @@ model {
     ll_chunk, indices, grainsize,
     scaledRI, t_est, prior_mu_t, prior_sigma_t,
     use_gdgt23ratio, use_no3, gdgt23ratio, no3, no3_cutoff,
-    t0, k, b, beta0_gdgt23ratio, beta0_no3, sigma_scaledRI
+    t0, k, b, beta_G23, beta_NO3, sigma_scaledRI
   );
 }
