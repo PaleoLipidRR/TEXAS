@@ -1,0 +1,127 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## What This Project Is
+
+**TEXAS** (`texas-psm`) is a Python package for **Bayesian GDGT–temperature calibration** using Stan models. It implements a two-stage workflow:
+
+1. **Forward calibration**: Fit a generalized logistic curve (Ring Index → temperature) using hierarchical Bayesian Stan models, producing posterior samples stored as `.nc` files.
+2. **Inverse temperature (invT) reconstruction**: Predict paleotemperatures from new Ring Index observations by marginalizing over M parameter sets sampled from the forward posterior.
+
+The proxy system is TEX86/Ring Index (isoGDGT-based paleothermometers), with optional non-thermal predictors (GDGT-2/3 ratio, NO3).
+
+## Environment Setup
+
+```bash
+# Create conda environment (primary method)
+conda env create -f environment.yml
+conda activate texas-env
+
+# Install package in editable mode
+pip install -e .
+
+# Or install with all extras
+pip install -e ".[all]"
+```
+
+CmdStan 2.36.0 must be installed and discoverable. `TEXAS/utils/paths.py::find_cmdstan()` searches `~/.cmdstan/`, `/opt/cmdstan/`, and the `CMDSTAN` environment variable.
+
+## Common Commands
+
+```bash
+# Run tests
+pytest
+
+# Build docs
+mkdocs serve  # from docs/
+
+# Run Streamlit app (from streamlit_app/ directory)
+streamlit run main.py
+
+# Build Docker image (for isolated Stan compilation)
+docker compose up
+```
+
+## Architecture
+
+### Package layout (`src/TEXAS/`)
+
+| Module | Purpose |
+|---|---|
+| `stan/compiler.py` | `StanCompiler`: wraps `CmdStanModel` with in-memory + disk caching; `force=True` clears binary |
+| `stan/sampler.py` | `StanSampler` + functional API `get_posterior()` / `sampler_invT_posterior()`; auto-detects optional predictors |
+| `stan/io.py` | `save_posterior()` / `load_posterior()` / `save_invT_posterior()` — persists xarray.Dataset as compressed NetCDF |
+| `stan/metadata.py` | Extracts and attaches metadata + prior strings to posterior datasets |
+| `data/builder.py` | `build_invT_inputData()` + `InvTConfig` — bridges forward → inverse by sampling M parameter sets from a forward posterior |
+| `data/filter.py` / `data/screening.py` | Data cleaning and Mahalanobis screening |
+| `models/logistics.py` | Pure-Python logistic / generalized-logistic functions |
+| `models/multivariate.py` | Multivariate variants (GDGT23ratio, NO3 corrections) |
+| `models/calibration.py` | `TEX86Calibration` + `CalibrationRegistry` — classical (non-Bayesian) TEX86 calibrations |
+| `ensemble/generator.py` | `generate_ensemble()` / `generate_ensemble_auto()` — samples draws from a posterior and computes calibration curve percentiles |
+| `ensemble/detection.py` | `detect_model_and_params()` — infers suffix, model function, and flags from posterior attributes |
+| `diagnostics.py` | `summarize_sampler_diagnostics()` — divergences, R-hat, ESS, E-BFMI; attaches as `stan_diag_*` attrs |
+| `plotting/` | Range utilities and prior distribution plots |
+| `utils/paths.py` | All path constants (`STAN_MODELS_DIR`, `POSTERIOR_CACHE_DIR`, `INVT_CACHE_DIR`, etc.) |
+| `constants.py` | `OPTIONAL_PREDICTORS`, `DEFAULT_SUFFIXES` |
+
+### Stan models (`src/TEXAS/stan_models/`)
+
+Model names follow a naming convention: `{transform}_{curve}_{params}_{datasources}_{variant}.stan`
+
+- **Transform prefix**: `invT_` = inverse temperature model; no prefix = forward calibration model
+- **Curve type**: `gen_logi` = generalized logistic; `logistic` = standard logistic; `linear` = linear
+- **Params**: `fixed` = fixed upper asymptote; `free` = free upper asymptote
+- **Data sources**: `culmeso` = culture+mesocosm; `culmesocore` = culture+mesocosm+coretop; `crtp` = coretop-only
+- **Variants**: `hier_crtp` = hierarchical coretop; `multiv` = multivariate (GDGT23/NO3); `priorApprox` = prior approximation; `marginal_*` = marginalized variants; `reduce_sum` = parallelized with `reduce_sum`
+
+### Parameter suffix convention
+
+Posterior variables carry a suffix indicating which dataset they were estimated from:
+
+- `crtp` — coretop only (highest priority for invT reconstruction)
+- `culmesocore` — culture + mesocosm + coretop
+- `culmeso` — culture + mesocosm
+- `meso` — mesocosm only
+- `cul` — culture only
+
+Example: `t0_crtp`, `k_crtp`, `b_crtp`, `sigma_scaledRI_crtp`.
+
+### Posterior caching
+
+Posteriors are saved as compressed NetCDF (`.nc`) in:
+- `data/cache/TEXAS_posterior_cache/` — forward calibration posteriors
+- `data/cache/TEXAS_invT_posterior_cache/` — inverse temperature posteriors
+
+Filenames are auto-generated from model name + temptype + optional predictor flags.
+
+### Streamlit app (`streamlit_app/`)
+
+Three-tab GUI:
+1. **Predict**: upload CSV → run invT reconstruction
+2. **Explore**: upload NetCDF posterior → plot distributions
+3. **Compute**: run forward calibration in-browser (limited; heavy jobs should use notebooks)
+
+Entry point: `streamlit_app/main.py`. Config (cache dir resolution, plot defaults): `streamlit_app/config.py`.
+
+### Notebooks
+
+- `notebooks/current/` — active analysis notebooks
+- `notebooks/manuscripts/` — finalized figure-generation notebooks for papers
+
+## Key Patterns
+
+**Optional predictor auto-detection**: `auto_detect_predictors()` in `stan/sampler.py` inspects the data dict for GDGT23/NO3 arrays and sets `use_gdgt23ratio` / `use_no3` integer flags for Stan. Explicit flags in the data dict override auto-detection.
+
+**Posterior metadata**: After sampling, `extract_and_update_metadata()` attaches run info (model name, temptype, priors, duration, diagnostic summary) as `xr.Dataset.attrs`. Downstream code reads these attrs for decisions (e.g., `ensemble/detection.py` reads `stan_model_name` and `use_gdgt23ratio`).
+
+**Forward → inverse pipeline**:
+```python
+# 1. Forward calibration
+post, diag = get_posterior(data, "gen_logi_fixed_hier_crtp_multiv", temptype="SST")
+save_posterior(post)
+
+# 2. Inverse reconstruction
+data_inv, kwargs = build_invT_inputData(scaledRI, prior_mu_t, prior_sigma_t, fwd_posterior_name="...")
+post_inv, diag = sampler_invT_posterior(data_inv, "invT_gen_logi_fixed_multiv", **kwargs)
+```
