@@ -84,12 +84,10 @@ def plot_prior_distributions(
             all_param_names.update(ds.data_vars)
             
             # collect "use_gdgt23ratio" and "use_no3" from all datasets
-            if "use_gdgt23ratio" in ds.attrs:
-                print("DEBUG: use_gdgt23ratio detected")
+            if ds.attrs.get("use_gdgt23ratio", 0) == 1:
                 _use_gdgt23ratio_detection += 1
-            
-            if "use_no3" in ds.attrs:
-                print("DEBUG: use_no3 detected")
+
+            if ds.attrs.get("use_no3", 0) == 1:
                 _use_no3_detection += 1
 
     grouped = {key: [] for key in include_groups}
@@ -97,17 +95,7 @@ def plot_prior_distributions(
         for prefix in include_groups:
             if name.startswith(prefix + "_"):
                 grouped[prefix].append(name)
-    # Add this to debug
-    print("Grouped param names:", grouped)
-    
-    
-    
-
-    # debug
-    print("Grouped param names:", grouped)
-
     param_groups = [g for g in include_groups if grouped[g]]
-    print("Param groups: ", param_groups)
     ncols = 3 if len(param_groups) > 3 else len(param_groups)
     
     ### pop param_groups
@@ -119,7 +107,6 @@ def plot_prior_distributions(
 
     
     nrows = int(np.ceil(len(param_groups) / ncols))
-    print(f"figure nrows, ncols: {nrows}, {ncols}")
     
     
     fig, axes = plt.subplots(nrows=nrows, ncols=ncols, 
