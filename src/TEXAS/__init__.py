@@ -14,6 +14,7 @@ from .stan.io import (
     save_posterior,
     save_invT_posterior,
 )
+from .stan.invT import get_invT_posterior, predict_temperature_from_RI
 
 # ─── Data builder for inverse‐T models ──────────────────────────────────
 from .data.builder import build_invT_inputData, InvTConfig
@@ -50,25 +51,27 @@ from .plotting import (
 __all__ = [
     # version
     "__version__",
-    # stan
+    # stan — calibration
     "StanCompiler",
     "StanSampler",
     "get_posterior",
-    "get_invT_posterior",
     "load_posterior",
     "save_posterior",
     "save_invT_posterior",
+    # stan — inverse temperature
+    "get_invT_posterior",
+    "predict_temperature_from_RI",
     # data builder
     "build_invT_inputData",
     "InvTConfig",
-    # models
+    # models — logistic curves
     "logistic",
     "logistic_fixed_upper",
     "inverse_logistic_fixed_upper",
-    "generalized_logistic_model",
+    "generalized_logistic",
     "generalized_logistic_fixed_upper",
-    "generalized_logistic_multivariate",
-    "simple_logistic_model_fixed_upper_multivariate",
+    "generalized_logistic_fixed_upper_multivariate",
+    "simple_logistic_fixed_upper_multivariate",
     # ensemble
     "generate_ensemble",
     "generate_ensemble_auto",
