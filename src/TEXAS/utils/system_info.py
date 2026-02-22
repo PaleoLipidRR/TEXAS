@@ -11,6 +11,9 @@ import platform
 import psutil
 import subprocess
 import sys
+import gc
+import tracemalloc
+import multiprocessing
 from datetime import datetime
 import json
 
@@ -244,14 +247,62 @@ def save_system_summary(filepath=None):
     """Save system summary to JSON file"""
     import json
     from datetime import datetime
-    
+
     summary = generate_system_summary()
-    
+
     if filepath is None:
         filepath = f"system_config_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    
+
     with open(filepath, 'w') as f:
         json.dump(summary, f, indent=2)
-    
+
     print(f"✅ System configuration saved to: {filepath}")
     return filepath
+
+
+def simple_memory_check():
+    """Simple memory tracking using tracemalloc (must be started before calling)."""
+    gc.collect()
+    if tracemalloc.is_tracing():
+        current, peak = tracemalloc.get_traced_memory()
+        return {
+            'current_mb': current / 1024 / 1024,
+            'peak_mb': peak / 1024 / 1024,
+        }
+    return {'current_mb': 0, 'peak_mb': 0}
+
+
+def get_system_info():
+    """Collect system information dict for embedding in posterior metadata."""
+    try:
+        cpu_freq = psutil.cpu_freq()
+        cpu_freq_current = cpu_freq.current if cpu_freq else None
+        cpu_freq_max = cpu_freq.max if cpu_freq else None
+    except (AttributeError, OSError):
+        cpu_freq_current = None
+        cpu_freq_max = None
+
+    try:
+        memory = psutil.virtual_memory()
+        total_memory_gb = memory.total / (1024 ** 3)
+        available_memory_gb = memory.available / (1024 ** 3)
+    except Exception:
+        total_memory_gb = None
+        available_memory_gb = None
+
+    return {
+        'system': platform.system(),
+        'platform': platform.platform(),
+        'architecture': platform.architecture()[0],
+        'processor': platform.processor(),
+        'hostname': platform.node(),
+        'cpu_count_logical': multiprocessing.cpu_count(),
+        'cpu_count_physical': psutil.cpu_count(logical=False) if hasattr(psutil, 'cpu_count') else None,
+        'cpu_freq_current_mhz': round(cpu_freq_current) if cpu_freq_current else None,
+        'cpu_freq_max_mhz': round(cpu_freq_max) if cpu_freq_max else None,
+        'total_memory_gb': round(total_memory_gb, 1) if total_memory_gb else None,
+        'available_memory_gb': round(available_memory_gb, 1) if available_memory_gb else None,
+        'python_version': platform.python_version(),
+        'python_implementation': platform.python_implementation(),
+        'run_timestamp': datetime.now().isoformat(),
+    }
