@@ -76,24 +76,37 @@ TEXAS will search for CmdStan in `~/.cmdstan/`, `/opt/cmdstan/`, or the `CMDSTAN
 ## Example usage
 
 ```python
-from TEXAS.stan.sampler import get_posterior, sampler_invT_posterior
+import numpy as np
+from TEXAS import predict_RI_from_T, predict_T_from_RI
+from TEXAS.stan.sampler import get_posterior
 from TEXAS.stan.io import save_posterior
-from TEXAS.data.builder import build_invT_inputData
 
 # 1. Forward calibration — fit logistic curve to training data
 posterior, diagnostics = get_posterior(
     data,
-    model_name="gen_logi_fixed_hier_crtp",
+    model_name="gen_logi_fixed_hier_crtp_multiv",
     temptype="SST",
 )
 save_posterior(posterior)
 
-# 2. Inverse reconstruction — predict temperature from new Ring Index observations
-data_inv, kwargs = build_invT_inputData(
-    scaledRI, prior_mu_t, prior_sigma_t,
-    fwd_posterior_name="gen_logi_fixed_hier_crtp_SST",
+# 2. Forward prediction — evaluate the calibration curve at 20–30 °C
+result = predict_RI_from_T(
+    temperatures=np.linspace(20, 30, 50),
+    posterior="gen_logi_fixed_hier_crtp_multiv_SST",
 )
-post_inv, diag = sampler_invT_posterior(data_inv, "invT_gen_logi_fixed", **kwargs)
+result["p50"]   # median calibration curve
+
+# 3. Inverse reconstruction — predict temperature from new Ring Index observations
+result = predict_T_from_RI(
+    scaledRI=my_ri_array,
+    prior_mu_t=15.0,        # prior mean temperature (°C)
+    prior_sigma_t=10.0,     # prior uncertainty (°C)
+    fwd_posterior_name="gen_logi_fixed_hier_crtp_multiv_SST",
+    temptype="SST",
+)
+result["p50"]   # median temperature reconstruction (°C)
+result["p5"]    # 5th percentile
+result["p95"]   # 95th percentile
 ```
 
 ---
@@ -102,14 +115,16 @@ post_inv, diag = sampler_invT_posterior(data_inv, "invT_gen_logi_fixed", **kwarg
 
 ```
 src/TEXAS/
-  stan/             Sampler, compiler, and NetCDF I/O
+  predict.py        High-level API: predict_RI_from_T / predict_T_from_RI
+  stan/             Sampler, compiler, I/O, and invT orchestration
   stan_models/      Stan model files (.stan)
   data/             Input data builders, filters, and screening
-  ensemble/         Posterior ensemble generation and detection
+  ensemble/         Posterior ensemble generation and model detection
   models/           Logistic curve functions and classical calibrations
+  plotting/         Prior/posterior distribution plots and range utilities
+  utils/            Path constants, system info
 notebooks/
   manuscripts/      Finalized analysis notebooks for the paper
-  current/          Active development notebooks
 streamlit_app/      Drag-and-drop web interface (Streamlit)
 docker/             Dockerfile and compose configuration
 docs/               MkDocs documentation source
