@@ -51,7 +51,23 @@ Then open JupyterLab at `http://localhost:8888` and run the notebooks in `notebo
 
 ---
 
-### Option C — conda + pip (for development)
+### Option C — pip install (Python users)
+
+```bash
+pip install texas-psm
+```
+
+**One-time CmdStan install** (required; sets a flag for the conda C++ compiler on Linux/macOS):
+
+```bash
+TBB_CXX_TYPE=gcc python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.36.0')"
+```
+
+TEXAS will search for CmdStan in `~/.cmdstan/`, `/opt/cmdstan/`, or the `CMDSTAN` environment variable.
+
+---
+
+### Option D — conda + pip from source (for development)
 
 ```bash
 git clone https://github.com/PaleoLipidRR/TEXAS.git
@@ -63,13 +79,7 @@ conda activate texas-env
 pip install -e .
 ```
 
-**One-time CmdStan install** (required; sets a flag for the conda C++ compiler on Linux/macOS):
-
-```bash
-TBB_CXX_TYPE=gcc python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.36.0')"
-```
-
-TEXAS will search for CmdStan in `~/.cmdstan/`, `/opt/cmdstan/`, or the `CMDSTAN` environment variable.
+Then install CmdStan as shown in Option C above.
 
 ---
 
