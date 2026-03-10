@@ -1,0 +1,35 @@
+cff-version: 1.2.0
+title: "TEXAS: Temperature Estimation via a Bayesian Approach with Stan"
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+authors:
+  - family-names: Rattanasriampaipong
+    given-names: Ronnakrit
+version: 0.1.0
+date-released: "2026-03-10"
+license: MIT
+repository-code: "https://github.com/PaleoLipidRR/TEXAS"
+# doi: 10.5281/zenodo.XXXXXXX  # add upon Zenodo upload
+abstract: >
+  TEXAS (texas-psm) is a Python package for Bayesian GDGT-temperature calibration
+  using Stan. It implements a two-stage workflow: forward calibration of a
+  generalized logistic curve (Ring Index to temperature) using hierarchical
+  Bayesian Stan models, and inverse temperature reconstruction from new Ring Index
+  observations with full posterior uncertainty.
+keywords:
+  - paleoceanography
+  - paleothermometry
+  - GDGT
+  - TEX86
+  - Bayesian statistics
+  - Stan
+  - Python
+references:
+  - type: article
+    authors:
+      - family-names: Rattanasriampaipong
+        given-names: Ronnakrit
+    title: "TEXAS: Bayesian GDGT-temperature calibration using Stan"
+    journal: "AGU Paleoceanography and Paleoclimatology"
+    year: 2026
+    notes: "in prep"

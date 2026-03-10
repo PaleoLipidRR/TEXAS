@@ -132,6 +132,24 @@ docs/               MkDocs documentation source
 
 ---
 
+## API at a glance
+
+| Function | Description |
+|---|---|
+| `predict_RI_from_T(temperatures, posterior, ...)` | Forward prediction: temperature → Ring Index (pure Python, wraps `generate_ensemble_auto`) |
+| `predict_T_from_RI(scaledRI, prior_mu_t, prior_sigma_t, fwd_posterior_name, ...)` | Inverse reconstruction: Ring Index → temperature with full posterior uncertainty (runs Stan) |
+| `get_posterior(data, model_name, temptype, ...)` | Run forward calibration Stan sampling |
+| `save_posterior(ds)` / `load_posterior(name)` | Persist / load forward posterior as compressed NetCDF |
+| `get_invT_posterior(...)` | Run inverse-T sampling and return full posterior xr.Dataset |
+| `predict_temperature_from_RI(...)` | Run inverse-T and return `{p5, p50, p95, scaledRI, metadata}` |
+| `generate_ensemble_auto(temperatures, posterior, ...)` | Sample draws from a posterior and compute calibration-curve percentiles |
+| `summarize_sampler_diagnostics(fit)` | Compute divergences, R-hat, ESS, E-BFMI from a CmdStanMCMC fit |
+| `plot_prior_distributions(posterior)` | Plot prior distributions from posterior metadata |
+
+Full API reference: [https://paleolipidRR.github.io/TEXAS](https://paleolipidRR.github.io/TEXAS) *(coming soon)*
+
+---
+
 ## Documentation
 
 Full API reference and method details: [https://paleolipidRR.github.io/TEXAS](https://paleolipidRR.github.io/TEXAS) *(coming soon)*
