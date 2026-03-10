@@ -6,15 +6,13 @@ theme:
 plugins:
   - search
   - mkdocstrings
-  
+
 nav:
   - Quickstart: index.md
   - API Reference:
-      - “TEXAS”: api.md
-
-plugins:
-  - search
-  - mkdocstrings
+      - "TEXAS": api.md
+  - Guides:
+      - Publishing to PyPI: publishing.md
 
 markdown_extensions:
   - admonition

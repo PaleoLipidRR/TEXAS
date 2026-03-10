@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(ls /home/ronnie-rattan/Documents/GitHub/TEXAS/src/TEXAS/stan_models/*.stan | sort && echo \"---\" && ls /home/ronnie-rattan/Documents/GitHub/TEXAS/data/ 2>/dev/null | head -10 && echo \"---\" && find /home/ronnie-rattan/Documents/GitHub/TEXAS -name \"legacy_TEXAS*\" -o -name \"SI_code2_data_processing.ipynb\" 2>/dev/null)",
+      "Bash(python3:*)",
+      "Bash(cd:*)",
+      "Bash(chmod +x:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(conda run:*)"
+    ]
+  }
+}

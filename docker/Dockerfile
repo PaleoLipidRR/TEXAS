@@ -21,14 +21,15 @@ RUN useradd -ms /bin/bash micromamba
 COPY --chown=micromamba:micromamba conda-lock.yml .
 RUN micromamba create -n texas-env -f conda-lock.yml && micromamba clean -a -y
 
-# # Step 1: Install PyPI packages first
-# RUN micromamba run -n texas-env pip install --no-cache-dir baysplinepy baysparpy pygwalker
+# Step 1: Install PyPI packages first
+RUN micromamba run -n texas-env pip install --no-cache-dir baysplinepy baysparpy pygwalker
 
-# # Step 2: Copy the TEXAS package
-# COPY --chown=micromamba:micromamba ./src/TEXAS /home/micromamba/TEXAS
+# Step 2: Copy the TEXAS package (pyproject.toml + src together so pip can resolve the project)
+COPY --chown=micromamba:micromamba pyproject.toml /home/micromamba/texas-pkg/
+COPY --chown=micromamba:micromamba ./src/TEXAS /home/micromamba/texas-pkg/src/TEXAS
 
-# # Step 3: Install TEXAS in editable mode
-# RUN micromamba run -n texas-env pip install --no-cache-dir -e /home/micromamba/TEXAS
+# Step 3: Install TEXAS (regular install — editable makes no sense in an image)
+RUN micromamba run -n texas-env pip install --no-cache-dir /home/micromamba/texas-pkg
 
 # ---- Build CmdStan ----
 RUN mkdir -p /opt/cmdstan \
@@ -77,7 +78,6 @@ ENV PATH="$CMDSTAN/bin:$PATH"
 
 # Runtime fixes
 ENV PROJ_LIB=/opt/conda/envs/texas-env/share/proj
-ENV PYTHONPATH=/home/micromamba/app/src
 ENV ESMFMKFILE=/opt/conda/envs/texas-env/lib/esmf.mk
 
 CMD ["bash"]

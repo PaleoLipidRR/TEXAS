@@ -1,3 +1,4 @@
+# DEPRECATED: Not used by any active code path. Kept for reference only.
 # src/TEXAS/utils/cache_search.py
 """
 Cache file search and filtering utilities for TEXAS package.

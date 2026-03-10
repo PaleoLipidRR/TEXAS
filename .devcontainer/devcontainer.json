@@ -11,6 +11,7 @@
   "settings": {
     "python.defaultInterpreterPath": "/opt/conda/envs/texas-env/bin/python",
     "python.terminal.activateEnvironment": false,
+    "python.terminal.useEnvFile": true,
     "jupyter.stopJupyterServerOnClose": false,
     "jupyter.logging.level": "debug"
   },
@@ -22,10 +23,37 @@
   "shutdownAction": "none",
 
   "mounts": [
-    "source=${localWorkspaceFolder},target=/home/micromamba/app,type=bind,consistency=cached"
-    // Optional OneDrive mount - configure 
-    "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached" // for Linux hosts with OneDrive
-    // "source=/mnt/c/Users/ratta/OneDrive - University of Arizona,target=/mnt/onedrive,type=bind,consistency=cached" // for Windows hosts with OneDrive
+    // Repo root → /home/micromamba/app (always active)
+    "source=${localWorkspaceFolder},target=/home/micromamba/app,type=bind,consistency=cached",
+
+    // ── Cloud drive mounts ──────────────────────────────────────────────────
+    // Uncomment ONE block below that matches your setup, then
+    // run "Dev Containers: Rebuild Container" in VS Code (Ctrl+Shift+P).
+    //
+    // The mounted folder appears inside the container at /mnt/onedrive.
+    // Access it from notebooks with: pd.read_csv("/mnt/onedrive/my_file.csv")
+    //
+    // IMPORTANT: The local path must already exist on your machine
+    // (OneDrive must be locally synced, not cloud-only).
+
+    // Linux — OneDrive via rclone or onedrive client (~/OneDrive)
+    "source=${localEnv:HOME}/OneDrive,target=/mnt/onedrive,type=bind,consistency=cached",
+
+    // macOS — OneDrive personal
+    // "source=${localEnv:HOME}/Library/CloudStorage/OneDrive-Personal,target=/mnt/onedrive,type=bind,consistency=cached",
+
+    // macOS — OneDrive for Business / university account (adjust folder name)
+    // "source=${localEnv:HOME}/Library/CloudStorage/OneDrive-UniversityofArizona,target=/mnt/onedrive,type=bind,consistency=cached",
+
+    // Windows (WSL2) — adjust username
+    // "source=/mnt/c/Users/ratta/OneDrive - University of Arizona,target=/mnt/onedrive,type=bind,consistency=cached",
+
+    // ── Google Drive ────────────────────────────────────────────────────────
+    // Linux — Google Drive via rclone or google-drive-ocamlfuse (~/GoogleDrive)
+    // "source=${localEnv:HOME}/GoogleDrive,target=/mnt/gdrive,type=bind,consistency=cached",
+
+    // macOS — Google Drive desktop client
+    // "source=${localEnv:HOME}/Google Drive/My Drive,target=/mnt/gdrive,type=bind,consistency=cached"
   ],
 
   "remoteUser": "micromamba",
