@@ -1,3 +1,4 @@
+# DEPRECATED: Only used by stan/auto.py (also deprecated). Kept for reference only.
 # TEXAS/utils/hw.py
 from __future__ import annotations
 import os, shutil, subprocess, logging

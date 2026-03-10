@@ -1,3 +1,4 @@
+# DEPRECATED: OpenCL variant of predict_temperature_from_RI. Not used by any active workflow. Kept for reference only.
 # TEXAS/stan/auto.py
 from __future__ import annotations
 import os, shutil, logging
