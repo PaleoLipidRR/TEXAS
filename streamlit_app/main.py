@@ -23,6 +23,11 @@ except Exception as e:
 from pages.prediction import render_prediction_tab
 from pages.exploration import render_exploration_tab
 from pages.computation import render_computation_tab
+_render_calibration_tab = None
+try:
+    from pages.calibration_data import render_calibration_tab as _render_calibration_tab
+except Exception as e:
+    _import_errors.append(("pages.calibration_data", repr(e)))
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Main App Configuration
@@ -32,7 +37,12 @@ st.set_page_config(page_title="TEXAS GUI", layout="wide")
 st.title("TEXAS GUI")
 st.caption("Drop a CSV to get **t_est** or upload a NetCDF to **explore posteriors**.")
 
-tabs = st.tabs(["Predict temperature from RI", "Explore posterior distributions", "Compute posteriors (advanced)"])
+tabs = st.tabs([
+    "Predict temperature from RI",
+    "Explore posterior distributions",
+    "Compute posteriors (advanced)",
+    "Calibration dataset",
+])
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Sidebar
@@ -66,5 +76,11 @@ with tabs[1]:
 
 with tabs[2]:
     render_computation_tab(_get_post_fn)
+
+with tabs[3]:
+    if _render_calibration_tab is not None:
+        _render_calibration_tab(FWD_CACHE_DIR)
+    else:
+        st.error("Calibration tab failed to load. Check the sidebar for import errors.")
 
 st.caption("Note: Heavy sampling is best run in batch or notebooks. This GUI provides an ergonomic front end but won't manage long jobs.")
