@@ -92,5 +92,5 @@ else
     docker compose --profile full run --rm \
         --service-ports \
         "${VOLUMES[@]+"${VOLUMES[@]}"}" \
-        texas_full
+        full
 fi

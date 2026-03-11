@@ -33,17 +33,28 @@ Upload a CSV and get paleotemperature reconstructions in your browser — no Pyt
 
 ### Option B — Docker (recommended for reproducibility)
 
-No Stan setup required — CmdStan and all dependencies are pre-installed.
+No Stan or conda setup required — CmdStan and all dependencies are pre-installed in the image.
 
 ```bash
 git clone https://github.com/PaleoLipidRR/TEXAS.git
 cd TEXAS
-docker compose up
+
+# Interactive launcher — prompts for profile and optional cloud drive mounts
+./run.sh
 ```
 
-Then open JupyterLab at `http://localhost:8888` and run the notebooks in `notebooks/manuscripts/`.
+Select profile `full` to launch JupyterLab at `http://localhost:8888`.
+Or launch directly with:
 
-> **Pre-built image on GHCR coming soon.** Until then, the image is built locally from `docker/Dockerfile`.
+```bash
+docker compose --profile full up
+```
+
+Then open the notebooks in `notebooks/manuscripts/`.
+
+> **Pre-built image on GHCR coming soon.** Until then, the image is built locally from `docker/Dockerfile` on first run (takes ~10 minutes).
+
+**Forward posteriors in Docker**: the container bind-mounts your local `data/` directory, so posteriors cached at `data/cache/TEXAS_posterior_cache/` are available automatically inside JupyterLab. Download them first — see [Data and posteriors](#data-and-posteriors) below.
 
 ---
 
