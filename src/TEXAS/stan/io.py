@@ -99,13 +99,24 @@ def load_posterior(
     # Construct file path
     fpath = indir / f"{model_name}.nc"
     
-    # Check if file exists and load
+    # Check if file exists; if not, attempt auto-download from Zenodo (Option 1)
     if not fpath.exists():
-        raise FileNotFoundError(
-            f"No {model_type} posterior found at {fpath}. "
-            f"Available files: {list(indir.glob('*.nc'))}"
-        )
-    
+        if model_type == "forward":
+            try:
+                from ..utils.download import download_posterior
+                download_posterior(model_name, cache_dir=indir)
+            except (KeyError, RuntimeError) as e:
+                raise FileNotFoundError(
+                    f"No forward posterior found at {fpath}.\n"
+                    f"Available local files: {list(indir.glob('*.nc'))}\n"
+                    f"Auto-download: {e}"
+                ) from None
+        else:
+            raise FileNotFoundError(
+                f"No {model_type} posterior found at {fpath}. "
+                f"Available files: {list(indir.glob('*.nc'))}"
+            )
+
     return xr.load_dataset(fpath)
 
 
