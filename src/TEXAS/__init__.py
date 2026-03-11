@@ -1,6 +1,6 @@
 # TEXAS/__init__.py
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 # ─── Stan interface ──────────────────────────────────────────────────────
 from .stan.compiler import StanCompiler
@@ -39,6 +39,9 @@ from .ensemble.detection import detect_model_and_params
 
 # ─── Diagnostics utilities ─────────────────────────────────────────────
 from .diagnostics import summarize_sampler_diagnostics, create_summary_table
+
+# ─── Posterior download utilities ───────────────────────────────────────
+from .utils.download import download_posterior, download_posteriors, POSTERIOR_REGISTRY
 
 # ─── Plotting / dataviz ─────────────────────────────────────────────────
 from .plotting import (
@@ -83,6 +86,10 @@ __all__ = [
     # diagnostics
     "summarize_sampler_diagnostics",
     "create_summary_table",
+    # download utilities
+    "download_posterior",
+    "download_posteriors",
+    "POSTERIOR_REGISTRY",
     # plotting
     "compute_sample_range",
     "compute_density_based_range",

@@ -46,33 +46,45 @@ def build_invT_inputData(
     scaledRI: Union[np.ndarray, List[float]],
     prior_mu_t: Union[np.ndarray, float],
     prior_sigma_t: float,
-    fwd_posterior_name: str,
+    fwd_posterior_name: Optional[str] = None,
     predictors: Optional[Dict[str, np.ndarray]] = None,
     config: Optional[InvTConfig] = None,
+    fwd_posterior: Optional[xr.Dataset] = None,
 ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """
     Build the `data` dictionary for Stan's inverse model and sampler configuration.
-    
+
     WORKFLOW:
     ─────────
-    1. Load forward calibration posterior from .nc file
+    1. Load forward calibration posterior from .nc file (or accept a pre-loaded Dataset)
     2. Randomly sample M parameter sets from that posterior
     3. Extract calibration curve parameters (t0, k, b, Q, v, sigma)
     4. Package optional environmental predictors (GDGT-2/3, NO3) if used
     5. Return data dict (for Stan) + sampler_kwargs (for CmdStanPy)
-    
+
     Args:
         scaledRI: Observed Ring Index values to predict temperature from (length N)
         prior_mu_t: Prior mean temperature (scalar or array of length N)
         prior_sigma_t: Prior temperature uncertainty (e.g., 10°C)
-        fwd_posterior_name: Name of saved forward calibration (without .nc extension)
+        fwd_posterior_name: Name of saved forward calibration (without .nc extension).
+            Not required when fwd_posterior is supplied directly.
         predictors: Optional environmental covariates {'gdgt23ratio': array, 'no3': array}
         config: Configuration object controlling M, seed, etc.
-    
+        fwd_posterior: Pre-loaded forward posterior xr.Dataset. When provided,
+            fwd_posterior_name is ignored and no file I/O is performed. Useful
+            when running from Google Colab or any pip-install context where the
+            posterior cache is not available.
+
     Returns:
         data: Dictionary for Stan's data block
         sampler_kwargs: Dictionary for CmdStanPy sampling configuration
     """
+    if fwd_posterior is None and fwd_posterior_name is None:
+        raise ValueError(
+            "Provide either fwd_posterior_name (cache lookup) "
+            "or fwd_posterior (pre-loaded xr.Dataset)."
+        )
+
     config = config or InvTConfig()
     np.random.seed(config.seed)  # Ensure reproducible M-sample selection
     predictors = predictors or {}
@@ -80,12 +92,15 @@ def build_invT_inputData(
     # ═══════════════════════════════════════════════════════════════════════════
     # STEP 1: LOAD FORWARD CALIBRATION POSTERIOR
     # ═══════════════════════════════════════════════════════════════════════════
-    # This loads the .nc file produced by your forward TEXAS-Bay calibration.
+    # Accept a pre-loaded Dataset (fwd_posterior) or load from the cache by name.
     # Expected structure: xr.Dataset with dims (chain, draw) and data_vars like:
     #   - t0_crtp, k_crtp, b_crtp, v_crtp, Q_crtp, sigma_scaledRI_crtp
     #   - beta_G23_crtp, beta_NO3_crtp (if multivariate)
     # ───────────────────────────────────────────────────────────────────────────
-    post: xr.Dataset = load_posterior(fwd_posterior_name)
+    if fwd_posterior is not None:
+        post: xr.Dataset = fwd_posterior
+    else:
+        post: xr.Dataset = load_posterior(fwd_posterior_name)
     vars_ = list(post.data_vars)
 
     # ═══════════════════════════════════════════════════════════════════════════
