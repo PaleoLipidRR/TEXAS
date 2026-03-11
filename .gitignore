@@ -42,7 +42,7 @@ src/TEXAS/stan_models/linear_*
 # to make them public by adding negation rules below, e.g.:
 #   !docs/index.md
 #   !docs/reduce_sum_for_geologists.md
-docs/
+# docs/
 
 # IDE
 .vscode/
