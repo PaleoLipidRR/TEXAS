@@ -60,7 +60,7 @@ def get_invT_posterior(
     scaledRI: Union[np.ndarray, List[float]],
     prior_mu_t: Union[np.ndarray, float],
     prior_sigma_t: float,
-    fwd_posterior_name: str,
+    fwd_posterior_name: Optional[str] = None,
     site_name: Optional[str] = None,
     temptype: Optional[str] = None,
     predictors: Optional[Dict[str, np.ndarray]] = None,
@@ -78,6 +78,7 @@ def get_invT_posterior(
     model_type: Literal["direct", "ensemble"] = "direct",
     constraint_type: Literal["unconstrained", "hard_constraint", "reparameterized", "soft"] = "unconstrained",
     min_temp: Optional[float] = None,
+    fwd_posterior: Optional[xr.Dataset] = None,
 ) -> xr.Dataset:
     """
     Run the inverse-T model and return the posterior Dataset with metadata.
@@ -97,6 +98,7 @@ def get_invT_posterior(
     data, sampler_kwargs = build_invT_inputData(
         scaledRI=scaledRI, prior_mu_t=prior_mu_t, prior_sigma_t=prior_sigma_t,
         fwd_posterior_name=fwd_posterior_name, predictors=predictors, config=cfg,
+        fwd_posterior=fwd_posterior,
     )
 
     if chains is not None: sampler_kwargs["chains"] = chains
@@ -191,12 +193,13 @@ def get_invT_posterior(
     if model_type == "direct" and threads_per_chain:
         ds.attrs["grainsize"] = data.get("grainsize", 0)
 
+    _name_hint = fwd_posterior_name or (fwd_posterior.attrs.get("stan_model_name", "") if fwd_posterior is not None else "")
     if temptype:
         ds.attrs["temptype"] = temptype
-    elif 'thermoT' in fwd_posterior_name:
+    elif 'thermoT' in _name_hint:
         ds.attrs["temptype"] = "thermoT"
-    elif 'sst' in fwd_posterior_name:
-        ds.attrs["temptype"] = "sst"
+    elif 'sst' in _name_hint.lower():
+        ds.attrs["temptype"] = "SST"
     else:
         ds.attrs["temptype"] = "unknown_temptype"
 
@@ -296,7 +299,7 @@ def predict_temperature_from_RI(
     scaledRI: Union[np.ndarray, List[float]],
     prior_mu_t: Union[np.ndarray, float],
     prior_sigma_t: float,
-    fwd_posterior_name: str,
+    fwd_posterior_name: Optional[str] = None,
     site_name: Optional[str] = None,
     temptype: Optional[str] = None,
     predictors: Optional[Dict[str, np.ndarray]] = None,
@@ -314,6 +317,7 @@ def predict_temperature_from_RI(
     model_type: Literal["direct", "ensemble"] = "direct",
     constraint_type: Literal["unconstrained", "hard_constraint", "reparameterized", "soft"] = "unconstrained",
     min_temp: Optional[float] = None,
+    fwd_posterior: Optional[xr.Dataset] = None,
 ) -> Dict[str, Any]:
     """
     High-level wrapper to run the inverse model and get temperature percentiles.
@@ -344,6 +348,7 @@ def predict_temperature_from_RI(
         model_type=model_type,
         constraint_type=constraint_type,
         min_temp=min_temp,
+        fwd_posterior=fwd_posterior,
     )
 
     metadata = {

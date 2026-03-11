@@ -131,8 +131,9 @@ def predict_T_from_RI(
     scaledRI: Union[np.ndarray, List[float]],
     prior_mu_t: Union[np.ndarray, float],
     prior_sigma_t: float,
-    fwd_posterior_name: str,
+    fwd_posterior_name: Optional[str] = None,
     *,
+    fwd_posterior: Optional[xr.Dataset] = None,
     temptype: Optional[str] = None,
     site_name: Optional[str] = None,
     predictors: Optional[Dict[str, np.ndarray]] = None,
@@ -168,9 +169,15 @@ def predict_T_from_RI(
     prior_sigma_t : float
         Prior temperature uncertainty (°C).  Use a diffuse value (e.g. 10)
         when little prior information is available.
-    fwd_posterior_name : str
+    fwd_posterior_name : str, optional
         Name of the saved forward calibration posterior (without ``.nc``
-        extension) stored in the posterior cache.
+        extension) stored in the posterior cache.  Not required when
+        *fwd_posterior* is supplied directly.
+    fwd_posterior : xr.Dataset, optional
+        Pre-loaded forward posterior Dataset.  When provided, no file I/O or
+        Zenodo download is attempted.  Useful in Google Colab or any context
+        where the posterior cache is unavailable — load the ``.nc`` yourself
+        (e.g. from Google Drive) and pass it here.
     temptype : str, optional
         Temperature type: ``"SST"`` or ``"thermoT"``.  Used for metadata
         and output file naming.
@@ -220,6 +227,7 @@ def predict_T_from_RI(
         prior_mu_t=prior_mu_t,
         prior_sigma_t=prior_sigma_t,
         fwd_posterior_name=fwd_posterior_name,
+        fwd_posterior=fwd_posterior,
         site_name=site_name,
         temptype=temptype,
         predictors=predictors,
