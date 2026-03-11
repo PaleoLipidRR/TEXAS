@@ -21,7 +21,7 @@ def find_cmdstan(version: str = "2.36.0") -> Path:
 
     return Path(cmdstan_path())
 
-def get_repo_root(target_dir_name: str = "TEXAS") -> Path:
+def get_repo_root(target_dir_name: str = "TEXAS") -> Path | None:
     cwd = Path.cwd()
     try:
         top = subprocess.check_output(
@@ -36,10 +36,14 @@ def get_repo_root(target_dir_name: str = "TEXAS") -> Path:
         cand = parent/target_dir_name
         if cand.is_dir():
             return cand
-    raise RuntimeError(f"Could not locate '{target_dir_name}' above {cwd}")
+    return None
 
 def get_project_root() -> Path:
-    """Top-level repo folder (contains .git or pyproject.toml)."""
+    """Top-level repo folder (contains .git or pyproject.toml).
+
+    Falls back to ~/.texas/ when the package is pip-installed outside a repo
+    (e.g. Google Colab, pip install texas-psm).
+    """
     cwd = Path.cwd()
     try:
         top = subprocess.check_output(
@@ -51,11 +55,16 @@ def get_project_root() -> Path:
     for parent in [cwd, *cwd.parents]:
         if (parent / ".git").exists() or (parent / "pyproject.toml").exists():
             return parent
-    return get_repo_root("TEXAS").parent
+    # Pip-installed (no repo): use ~/.texas/ as the project root for caches
+    fallback = Path.home() / ".texas"
+    fallback.mkdir(parents=True, exist_ok=True)
+    return fallback
 
-PROJECT_ROOT = get_project_root()          # e.g., /home/micromamba/app
-PACKAGE_ROOT = PROJECT_ROOT / "src" / "TEXAS"     # e.g., /home/micromamba/app/TEXAS
-REPO_ROOT = PROJECT_ROOT                   # back-compat alias
+# PACKAGE_ROOT: always the installed TEXAS/ package directory, regardless of
+# whether the package was pip-installed or run from source.
+PACKAGE_ROOT = Path(__file__).parent.parent  # utils/ -> TEXAS/
+PROJECT_ROOT = get_project_root()
+REPO_ROOT = PROJECT_ROOT                      # back-compat alias
 STAN_MODELS_DIR = (PACKAGE_ROOT / "stan_models").resolve()
 
 HOME = Path.home()
@@ -63,8 +72,7 @@ CMDSTAN_DIR = find_cmdstan("2.36.0")
 DOCUMENTS = HOME / "Documents"
 ONEDRIVE = Path("/mnt/onedrive") if Path("/mnt/onedrive").exists() else HOME / "OneDrive"
 
-# Cache directories for new structure
-DATA_DIR = PROJECT_ROOT / "data"
-CACHE_DIR = DATA_DIR / "cache"
+# Cache directories — inside repo when running from source, else ~/.texas/cache/
+CACHE_DIR = PROJECT_ROOT / "data" / "cache"
 POSTERIOR_CACHE_DIR = CACHE_DIR / "TEXAS_posterior_cache"
 INVT_CACHE_DIR = CACHE_DIR / "TEXAS_invT_posterior_cache"
