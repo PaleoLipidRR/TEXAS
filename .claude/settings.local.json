@@ -8,7 +8,20 @@
       "Bash(chmod +x:*)",
       "Bash(head:*)",
       "Bash(tail:*)",
-      "Bash(conda run:*)"
+      "Bash(conda run:*)",
+      "Bash(python -m twine check dist/*)",
+      "Bash(python -m build --no-isolation 2>&1 | tail -10)",
+      "Bash(python -m zipfile -l dist/texas_psm-0.1.0-py3-none-any.whl 2>/dev/null | head -60)",
+      "Bash(curl -s https://pypi.org/pypi/texas-psm/json 2>/dev/null | python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('EXISTS on PyPI:', d['info']['version']\\)\" 2>/dev/null || echo \"Not found on PyPI \\(name is available\\)\")",
+      "Bash(rm -rf dist/ build/ && python -m build 2>&1)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git tag:*)",
+      "Bash(git push:*)",
+      "Read(//tmp/**)",
+      "Bash(python -c \":*)",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)"
     ]
   }
 }
