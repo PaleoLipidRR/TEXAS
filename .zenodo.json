@@ -1,0 +1,45 @@
+{
+  "title": "TEXAS: Temperature Estimation via a Bayesian Approach with Stan (texas-psm)",
+  "description": "<p>TEXAS (<code>texas-psm</code>) is a Python package for Bayesian GDGT–temperature calibration using Stan. It implements a two-stage workflow:</p><ol><li><strong>Forward calibration</strong>: Fit a generalized logistic curve (Ring Index → temperature) to culture, mesocosm, and coretop isoGDGT data using hierarchical Bayesian Stan models. Outputs a compressed posterior <code>.nc</code> file.</li><li><strong>Inverse reconstruction (invT)</strong>: Predict paleotemperatures from new Ring Index observations by marginalising over posterior parameter draws. Returns a full posterior temperature distribution per sample.</li></ol><p>Optional non-thermal corrections for GDGT-2/3 ratio and NO₃ concentration are supported. The package ships 20 Stan models covering univariate and multivariate variants, direct (marginal) and ensemble sampling, and hard/unconstrained temperature constraints.</p>",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "MIT",
+  "creators": [
+    {
+      "name": "Rattanasriampaipong, Ronnakrit",
+      "affiliation": "The University of Texas at Austin",
+      "orcid": ""
+    }
+  ],
+  "keywords": [
+    "paleoceanography",
+    "paleothermometry",
+    "GDGT",
+    "TEX86",
+    "Ring Index",
+    "Bayesian statistics",
+    "Stan",
+    "CmdStanPy",
+    "Python",
+    "paleotemperature",
+    "proxy system model",
+    "hierarchical model",
+    "isoGDGTs"
+  ],
+  "related_identifiers": [
+    {
+      "scheme": "url",
+      "identifier": "https://pypi.org/project/texas-psm/",
+      "relation": "isSupplementTo",
+      "resource_type": "software"
+    },
+    {
+      "scheme": "url",
+      "identifier": "https://github.com/PaleoLipidRR/TEXAS",
+      "relation": "isSupplementTo",
+      "resource_type": "software"
+    }
+  ],
+  "language": "eng",
+  "notes": "Pre-computed forward calibration posteriors (.nc files) are available in the companion data record on Zenodo. Install via pip: pip install texas-psm"
+}
