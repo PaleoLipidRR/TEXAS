@@ -38,6 +38,12 @@ src/TEXAS/stan_models/gen_logi_*
 src/TEXAS/stan_models/invT_*
 src/TEXAS/stan_models/logistic_*
 src/TEXAS/stan_models/linear_*
+# Docs — gitignored by default; selectively un-ignore specific files when ready
+# to make them public by adding negation rules below, e.g.:
+#   !docs/index.md
+#   !docs/reduce_sum_for_geologists.md
+docs/
+
 # IDE
 .vscode/
 .idea/
