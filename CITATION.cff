@@ -5,11 +5,11 @@ type: software
 authors:
   - family-names: Rattanasriampaipong
     given-names: Ronnakrit
-version: 0.1.0
-date-released: "2026-03-10"
+version: 0.1.2
+date-released: "2026-03-11"
 license: MIT
 repository-code: "https://github.com/PaleoLipidRR/TEXAS"
-# doi: 10.5281/zenodo.XXXXXXX  # add upon Zenodo upload
+doi: 10.5281/zenodo.XXXXXXX
 abstract: >
   TEXAS (texas-psm) is a Python package for Bayesian GDGT-temperature calibration
   using Stan. It implements a two-stage workflow: forward calibration of a
