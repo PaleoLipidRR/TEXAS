@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
+[![PyPI](https://img.shields.io/pypi/v/texas-psm.svg)](https://pypi.org/project/texas-psm/)
 
 **TEXAS** (`texas-psm`) is a Python package for **Bayesian GDGT–temperature calibration**. It fits hierarchical generalized-logistic models to isoGDGT proxy data (TEX86 / Ring Index) using Stan, then reconstructs paleotemperatures from new sediment records with full posterior uncertainty.
 
@@ -28,8 +29,6 @@ Upload a CSV and get paleotemperature reconstructions in your browser — no Pyt
 
 > **Streamlit deployment coming soon.**
 
-The app accepts a CSV with Ring Index columns and returns downloadable posterior temperature estimates with uncertainty.
-
 ---
 
 ### Option B — Docker (recommended for reproducibility)
@@ -37,11 +36,8 @@ The app accepts a CSV with Ring Index columns and returns downloadable posterior
 No Stan setup required — CmdStan and all dependencies are pre-installed.
 
 ```bash
-# Clone the repo
 git clone https://github.com/PaleoLipidRR/TEXAS.git
 cd TEXAS
-
-# Build and start the container
 docker compose up
 ```
 
@@ -57,7 +53,7 @@ Then open JupyterLab at `http://localhost:8888` and run the notebooks in `notebo
 pip install texas-psm
 ```
 
-**One-time CmdStan install** (required; sets a flag for the conda C++ compiler on Linux/macOS):
+**One-time CmdStan install** (required for any Stan sampling — forward calibration or inverse reconstruction):
 
 ```bash
 TBB_CXX_TYPE=gcc python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.36.0')"
@@ -72,10 +68,8 @@ TEXAS will search for CmdStan in `~/.cmdstan/`, `/opt/cmdstan/`, or the `CMDSTAN
 ```bash
 git clone https://github.com/PaleoLipidRR/TEXAS.git
 cd TEXAS
-
 conda env create -f environment.yml
 conda activate texas-env
-
 pip install -e .
 ```
 
@@ -83,40 +77,102 @@ Then install CmdStan as shown in Option C above.
 
 ---
 
+## Data and posteriors
+
+TEXAS separates **code** (this repository) from **data** (hosted on Zenodo). Here is what you need depending on your goal:
+
+| Goal | What you need | Where to get it |
+|---|---|---|
+| Forward prediction (`predict_RI_from_T`) | Pre-computed forward posterior `.nc` | Zenodo data record *(link upon publication)* |
+| Inverse reconstruction (`predict_T_from_RI`) | Pre-computed forward posterior `.nc` | Zenodo data record *(link upon publication)* |
+| Re-run forward calibration from scratch | GDGT training database | Zenodo data record *(link upon publication)* |
+
+**You do not need to download any data just to install the package.** The Stan model files (`.stan`) are bundled inside the pip package and are found automatically.
+
+### Downloading the forward posteriors
+
+The forward calibration posteriors are the pre-computed Bayesian parameter distributions required for both forward and inverse predictions. Once the Zenodo data record is published, you can fetch them in one line:
+
+```python
+import TEXAS
+TEXAS.download_posteriors()   # downloads all standard posteriors to ~/.texas/
+```
+
+Or download a single posterior:
+
+```python
+TEXAS.download_posterior("gen_logi_fixed_hier_crtp_multiv_SST")
+```
+
+Posteriors are cached at `~/.texas/data/cache/TEXAS_posterior_cache/` and are found automatically on subsequent calls — no repeated downloads.
+
+> **Zenodo data record coming upon paper submission.** Until then, contact the authors or generate posteriors yourself with `get_posterior()` (see Example usage below).
+
+### Google Colab / no internet access
+
+If you have a posterior `.nc` file on Google Drive (or anywhere on disk), load it directly — no Zenodo download needed:
+
+```python
+import xarray as xr
+
+# Mount Google Drive first (Colab), then:
+ds = xr.load_dataset("/content/drive/MyDrive/posteriors/gen_logi_fixed_hier_crtp_multiv_SST.nc")
+
+# Pass the dataset directly — no cache lookup, no download
+result = predict_RI_from_T(temperatures=np.linspace(5, 35, 100), posterior=ds)
+result = predict_T_from_RI(scaledRI=my_ri, prior_mu_t=15.0, prior_sigma_t=10.0,
+                            fwd_posterior=ds, temptype="SST")
+```
+
+---
+
 ## Example usage
 
 ```python
 import numpy as np
+import xarray as xr
 from TEXAS import predict_RI_from_T, predict_T_from_RI
-from TEXAS.stan.sampler import get_posterior
-from TEXAS.stan.io import save_posterior
 
-# 1. Forward calibration — fit logistic curve to training data
-posterior, diagnostics = get_posterior(
-    data,
-    model_name="gen_logi_fixed_hier_crtp_multiv",
-    temptype="SST",
-)
-save_posterior(posterior)
-
-# 2. Forward prediction — evaluate the calibration curve at 20–30 °C
+# ── Option 1: use a posterior by name (auto-downloads from Zenodo if needed) ──
 result = predict_RI_from_T(
-    temperatures=np.linspace(20, 30, 50),
+    temperatures=np.linspace(5, 35, 100),
     posterior="gen_logi_fixed_hier_crtp_multiv_SST",
 )
-result["p50"]   # median calibration curve
+result["p50"]   # median calibration curve (scaled RI)
+result["p5"]    # 5th percentile
+result["p95"]   # 95th percentile
 
-# 3. Inverse reconstruction — predict temperature from new Ring Index observations
+# ── Option 2: load a posterior from disk and pass directly ────────────────────
+ds = xr.load_dataset("/path/to/gen_logi_fixed_hier_crtp_multiv_SST.nc")
+
+result = predict_RI_from_T(temperatures=np.linspace(5, 35, 100), posterior=ds)
+
 result = predict_T_from_RI(
     scaledRI=my_ri_array,
     prior_mu_t=15.0,        # prior mean temperature (°C)
     prior_sigma_t=10.0,     # prior uncertainty (°C)
-    fwd_posterior_name="gen_logi_fixed_hier_crtp_multiv_SST",
+    fwd_posterior=ds,       # pre-loaded dataset — no file I/O
     temptype="SST",
 )
 result["p50"]   # median temperature reconstruction (°C)
 result["p5"]    # 5th percentile
 result["p95"]   # 95th percentile
+```
+
+### Running forward calibration from scratch
+
+Only needed if you want to re-fit the model to your own data or reproduce the published calibration.
+Requires CmdStan and the GDGT training database (see [Data and posteriors](#data-and-posteriors) above).
+
+```python
+from TEXAS import get_posterior, save_posterior
+
+posterior, diagnostics = get_posterior(
+    data,                                       # your GDGT data dict
+    model_name="gen_logi_fixed_hier_crtp_multiv",
+    temptype="SST",
+)
+save_posterior(posterior)   # saves to ~/.texas/ (or repo cache/ if running from source)
 ```
 
 ---
@@ -127,17 +183,19 @@ result["p95"]   # 95th percentile
 src/TEXAS/
   predict.py        High-level API: predict_RI_from_T / predict_T_from_RI
   stan/             Sampler, compiler, I/O, and invT orchestration
-  stan_models/      Stan model files (.stan)
+  stan_models/      Stan model files (.stan) — bundled in the pip package
   data/             Input data builders, filters, and screening
   ensemble/         Posterior ensemble generation and model detection
   models/           Logistic curve functions and classical calibrations
   plotting/         Prior/posterior distribution plots and range utilities
-  utils/            Path constants, system info
+  utils/            Path constants, system info, Zenodo download utilities
 notebooks/
-  manuscripts/      Finalized analysis notebooks for the paper
+  manuscripts/      Finalized SI notebooks for the paper
+  colab_quickstart.ipynb   Google Colab quickstart
 streamlit_app/      Drag-and-drop web interface (Streamlit)
 docker/             Dockerfile and compose configuration
 docs/               MkDocs documentation source
+tests/              Unit tests
 ```
 
 ---
@@ -146,23 +204,18 @@ docs/               MkDocs documentation source
 
 | Function | Description |
 |---|---|
-| `predict_RI_from_T(temperatures, posterior, ...)` | Forward prediction: temperature → Ring Index (pure Python, wraps `generate_ensemble_auto`) |
-| `predict_T_from_RI(scaledRI, prior_mu_t, prior_sigma_t, fwd_posterior_name, ...)` | Inverse reconstruction: Ring Index → temperature with full posterior uncertainty (runs Stan) |
+| `predict_RI_from_T(temperatures, posterior, ...)` | Forward prediction: temperature → Ring Index (pure Python) |
+| `predict_T_from_RI(scaledRI, prior_mu_t, prior_sigma_t, ...)` | Inverse reconstruction: Ring Index → temperature with full uncertainty (runs Stan) |
+| `download_posteriors(names, ...)` | Download all standard forward posteriors from Zenodo |
+| `download_posterior(name, ...)` | Download a single forward posterior from Zenodo |
 | `get_posterior(data, model_name, temptype, ...)` | Run forward calibration Stan sampling |
 | `save_posterior(ds)` / `load_posterior(name)` | Persist / load forward posterior as compressed NetCDF |
 | `get_invT_posterior(...)` | Run inverse-T sampling and return full posterior xr.Dataset |
-| `predict_temperature_from_RI(...)` | Run inverse-T and return `{p5, p50, p95, scaledRI, metadata}` |
 | `generate_ensemble_auto(temperatures, posterior, ...)` | Sample draws from a posterior and compute calibration-curve percentiles |
 | `summarize_sampler_diagnostics(fit)` | Compute divergences, R-hat, ESS, E-BFMI from a CmdStanMCMC fit |
 | `plot_prior_distributions(posterior)` | Plot prior distributions from posterior metadata |
 
 Full API reference: [https://paleolipidRR.github.io/TEXAS](https://paleolipidRR.github.io/TEXAS) *(coming soon)*
-
----
-
-## Documentation
-
-Full API reference and method details: [https://paleolipidRR.github.io/TEXAS](https://paleolipidRR.github.io/TEXAS) *(coming soon)*
 
 ---
 
@@ -172,7 +225,7 @@ If you use TEXAS in your research, please cite:
 
 > Rattanasriampaipong, R. et al. (in prep). *TEXAS: Bayesian GDGT–temperature calibration using Stan.* AGU Paleoceanography and Paleoclimatology.
 
-A `CITATION.cff` and software DOI will be added upon submission.
+See [`CITATION.cff`](CITATION.cff) for machine-readable citation metadata. A Zenodo software DOI will be added upon submission.
 
 ---
 
