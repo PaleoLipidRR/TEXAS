@@ -25,9 +25,11 @@ from TEXAS.stan.io import load_posterior
 class InvTConfig:
     """Configuration for the inverse-T Stan data builder."""
     mode: str = "ensemble"        # Only 'ensemble' is supported (historical artifact)
-    n_draws: int = 100            # Number of posterior samples to use (M)
-                                  # Larger M → better approximation of integral
-                                  # but slower inference
+    n_draws: Optional[int] = None # Number of forward posterior samples (M).
+                                  # None → auto: min(available_draws, 300).
+                                  # Larger M → better marginal likelihood approximation
+                                  # (error ∝ 1/√M) but proportionally slower inference.
+                                  # Recommended: 100 (quick), 300 (default), 500 (publication).
     seed: int = 42                # For reproducible sampling of M draws
     no3_cutoff: Optional[float] = 0.0
     suffix: Optional[str] = None   # Force a specific fwd parameter suffix (e.g., 'crtp')
@@ -174,9 +176,29 @@ def build_invT_inputData(
     # The inverse model will average predictions across all M draws, naturally
     # accounting for calibration uncertainty.
     # ───────────────────────────────────────────────────────────────────────────
-    draw_indices = np.random.choice(post.dims[draw_dim_name], config.n_draws, replace=True)
+    total_available = post.dims[draw_dim_name]
+
+    if config.n_draws is None:
+        # Auto-select M: use up to 25% of available draws, bounded [100, 500].
+        # 300 is the ceiling for typical runs (4 chains × 1000 = 4000 draws →
+        # M=300 gives ~5.8% Monte Carlo error; sufficient for publication quality).
+        M = min(500, max(100, total_available // 4))
+        print(
+            f"⚙️  Auto M={M} ({total_available} posterior draws available; "
+            f"approx. error ≈ {100/M**0.5:.1f}%). "
+            f"Override with InvTConfig(n_draws=...)."
+        )
+    else:
+        M = config.n_draws
+        if M > total_available:
+            print(
+                f"⚠️  n_draws={M} exceeds available draws ({total_available}); "
+                f"sampling with replacement (draws will repeat)."
+            )
+
+    draw_indices = np.random.choice(total_available, M, replace=True)
     P = post.isel({draw_dim_name: draw_indices})  # Subset to M samples
-    # Now P has shape (sample=M, ...) instead of (sample=4000, ...)
+    # Now P has shape (sample=M, ...) instead of (sample=total_available, ...)
 
     # ═══════════════════════════════════════════════════════════════════════════
     # STEP 6: INITIALIZE DATA DICTIONARY FOR STAN
@@ -186,7 +208,7 @@ def build_invT_inputData(
         "scaledRI": y,              # Observed Ring Index values
         "prior_mu_t": mu_t,         # Prior temperature mean
         "prior_sigma_t": float(prior_sigma_t),  # Prior temperature uncertainty
-        "M": int(config.n_draws),   # Number of forward posterior samples
+        "M": M,                     # Number of forward posterior samples
     }
 
     used_posts: List[str] = []  # Track which parameters were extracted
@@ -229,7 +251,7 @@ def build_invT_inputData(
         used_posts.append(sigma_key)
     else:
         # Fallback to constant error if not estimated in forward model
-        data["sigma_scaledRI"] = np.full(config.n_draws, 0.1, dtype=float)
+        data["sigma_scaledRI"] = np.full(M, 0.1, dtype=float)
 
     # ═══════════════════════════════════════════════════════════════════════════
     # STEP 10: PROCESS OPTIONAL ENVIRONMENTAL PREDICTORS
@@ -255,14 +277,20 @@ def build_invT_inputData(
         data[pred] = arr  # Observed predictor values: shape (N,)
         data[f"use_{pred}"] = 1 if use_flag else 0  # Flag for Stan conditional logic
         
+        # Stan always expects beta_G23 and beta_NO3 as vector[M], even when the
+        # predictor is disabled (use_* = 0). Provide zeros when not used so the
+        # data block dimensions match regardless of which predictors are active.
+        beta_name = PREDICTOR_BETA_NAMES[pred]          # e.g., "beta_G23"
         if use_flag:
             # Extract the coefficient from forward posterior
-            beta_name = PREDICTOR_BETA_NAMES[pred]          # e.g., "beta_G23"
             beta_key = f"{beta_name}_{used_suffix}"          # e.g., "beta_G23_crtp"
             if beta_key not in P:
                 raise ValueError(f"Expected '{beta_key}' in forward posterior but not found.")
             data[beta_name] = np.asarray(P[beta_key].values, dtype=float)  # Shape: (M,)
             used_posts.append(beta_key)
+        else:
+            # Predictor unused → pass zeros so Stan's vector[M] declaration is satisfied
+            data[beta_name] = np.zeros(M, dtype=float)  # Shape: (M,)
 
     # ═══════════════════════════════════════════════════════════════════════════
     # STEP 11: HANDLE NITRATE CUTOFF (Special case for NO3 predictor)

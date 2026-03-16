@@ -260,6 +260,37 @@ def save_system_summary(filepath=None):
     return filepath
 
 
+def suggest_stan_sampling_kwargs() -> dict:
+    """
+    Return optimized Stan sampling kwargs for the current machine.
+
+    Strategy:
+    - ``chains``: always 4 (standard for convergence diagnostics).
+    - ``parallel_chains``: min(4, physical_cores) — run chains concurrently,
+      no recompilation needed.
+    - ``threads_per_chain``: physical_cores // 4, only when physical_cores > 4.
+      Exploits ``reduce_sum`` within each chain (STAN_THREADS compilation is
+      handled automatically by ``get_invT_posterior``).
+
+    Returns a dict containing only the keys that differ from CmdStanPy defaults,
+    so callers can safely merge it with their own kwargs.
+    """
+    physical = psutil.cpu_count(logical=False) or 1
+
+    chains = 4
+    parallel_chains = min(chains, physical)
+    threads_per_chain = physical // chains  # 0 when physical < 4
+
+    result: dict = {
+        "chains": chains,
+        "parallel_chains": parallel_chains,
+    }
+    if threads_per_chain > 1:
+        result["threads_per_chain"] = threads_per_chain
+
+    return result
+
+
 def simple_memory_check():
     """Simple memory tracking using tracemalloc (must be started before calling)."""
     gc.collect()

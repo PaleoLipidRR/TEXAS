@@ -143,7 +143,7 @@ def predict_T_from_RI(
     iter_sampling: int = 1000,
     seed: int = 42,
     constraint_type: Literal[
-        "unconstrained", "hard_constraint", "reparameterized", "soft"
+        "unconstrained", "hard_constraint", "truncated_prior", "reparameterized", "soft"
     ] = "unconstrained",
     min_temp: Optional[float] = None,
     threads_per_chain: Optional[int] = None,
@@ -200,11 +200,20 @@ def predict_T_from_RI(
         Random seed.  Default 42.
     constraint_type : str
         Temperature constraint applied in the Stan model:
-        ``"unconstrained"`` (default), ``"hard_constraint"`` (requires
-        ``min_temp``), ``"reparameterized"``, or ``"soft"``.
+
+        - ``"unconstrained"`` (default): no lower bound; P5 can be unrealistically cold
+          near the calibration curve's lower asymptote.
+        - ``"hard_constraint"``: hard lower bound via ``<lower=min_temp>``; prevents
+          sub-freezing samples but the Jacobian biases P50 warm for polar sites.
+        - ``"truncated_prior"`` (recommended when ``min_temp`` is set): proper
+          truncated Normal prior via inverse-CDF reparameterization — P50 is
+          data-driven and P5 is bounded at ``min_temp`` without warm bias.
+        - ``"reparameterized"``, ``"soft"``: experimental variants.
     min_temp : float, optional
-        Lower temperature bound (°C) when ``constraint_type="hard_constraint"``.
-        Typically −1.8 (seawater freezing point).
+        Lower temperature bound (°C). Required for ``"hard_constraint"`` and
+        ``"truncated_prior"``. Typically −1.8 (seawater freezing point).
+        When provided without an explicit ``constraint_type``, automatically
+        selects ``"truncated_prior"``.
     threads_per_chain : int, optional
         Enable within-chain parallelism via Stan's ``reduce_sum``.
     save_results : bool
