@@ -22,7 +22,7 @@ COPY --chown=micromamba:micromamba conda-lock.yml .
 RUN micromamba create -n texas-env -f conda-lock.yml && micromamba clean -a -y
 
 # Step 1: Install PyPI packages first
-RUN micromamba run -n texas-env pip install --no-cache-dir baysplinepy baysparpy pygwalker
+RUN micromamba run -n texas-env pip install --no-cache-dir baysplinepy baysparpy pygwalker pykrige
 
 # Step 2: Copy the TEXAS package (pyproject.toml + src together so pip can resolve the project)
 COPY --chown=micromamba:micromamba pyproject.toml /home/micromamba/texas-pkg/

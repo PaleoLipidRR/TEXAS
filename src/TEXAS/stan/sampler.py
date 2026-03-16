@@ -4,13 +4,15 @@ import time
 import numpy as np
 import xarray as xr
 from typing import Tuple, Optional, Dict, Any, Literal
-from cmdstanpy import CmdStanModel, CmdStanMCMC 
+from cmdstanpy import CmdStanModel, CmdStanMCMC
+import cmdstanpy as _cmdstanpy
 
 from .compiler import StanCompiler
 from .io import save_posterior, load_posterior, save_invT_posterior
 from .metadata import extract_and_update_metadata, extract_priors_from_stan
 from .utils import patch_optional_predictors
 from ..diagnostics import summarize_sampler_diagnostics
+from ..utils.system_info import suggest_stan_sampling_kwargs
 
 
 
@@ -27,16 +29,34 @@ class StanSampler:
         **kwargs,
     ) -> xr.Dataset:
         """Runs the sampler from a pre-compiled CmdStanModel object."""
+        n_generic = (data.get("N") or
+                    data.get("N_crtp") or
+                    data.get("N_meso") or
+                    data.get("N_cul") or "?")
+        print(f"Starting Stan sampling with {n_generic} observations...")
         try:
-            n_generic = (data.get("N") or
-                        data.get("N_crtp") or
-                        data.get("N_meso") or
-                        data.get("N_cul") or "?")
-            print(f"Starting Stan sampling with {n_generic} observations...")
             fit = model.sample(data=data, **kwargs)
             print("✅ Stan sampling completed successfully")
             return fit.draws_xr()
-        except Exception as e:
+        except RuntimeError as e:
+            # Exit code 127 means the compiled binary is incompatible with the
+            # current runtime (e.g. TBB version mismatch between Docker image and
+            # host/conda env). Recompile from source and retry once.
+            if "retcodes=[127" in str(e):
+                print(
+                    "⚠️  Stan binary incompatible with current environment (exit 127 — "
+                    "likely a shared-library version mismatch, e.g. TBB).\n"
+                    "    Recompiling Stan model from source and retrying..."
+                )
+                _cmdstanpy.compile_stan_file(model.stan_file, force=True)
+                # Evict stale entry from the compiler's in-memory cache
+                model_path = str(model.stan_file)
+                for key in list(self.compiler.cache.keys()):
+                    if model_path in key:
+                        del self.compiler.cache[key]
+                fit = model.sample(data=data, **kwargs)
+                print("✅ Stan sampling completed after recompilation")
+                return fit.draws_xr()
             print(f"❌ Stan sampling failed: {e}")
             raise
 
@@ -120,17 +140,46 @@ def get_posterior(
     # Normalize/auto-complete predictors & flags
     data = auto_detect_predictors(data)
 
+    # Auto-detect optimal CPU settings for this machine.
+    # parallel_chains: always apply (CmdStanPy already does min(chains, cpu_count)
+    #   but being explicit avoids surprises).
+    # threads_per_chain: only beneficial for reduce_sum model variants; the
+    #   standard forward models are single-threaded per chain.
+    _auto = suggest_stan_sampling_kwargs()
+    _uses_reduce_sum = "reduce_sum" in str(stan_file)
+
     # Push explicit sampling args to CmdStanPy via kwargs
     if iter_warmup is not None:
         kwargs["iter_warmup"] = iter_warmup
     if iter_sampling is not None:
         kwargs["iter_sampling"] = iter_sampling
-    if threads_per_chain is not None:
-        kwargs["threads_per_chain"] = threads_per_chain
     if chains is not None:
         kwargs["chains"] = chains
     if parallel_chains is not None:
         kwargs["parallel_chains"] = parallel_chains
+    else:
+        kwargs.setdefault("parallel_chains", _auto["parallel_chains"])
+
+    # threads_per_chain requires STAN_THREADS compilation; only auto-enable for
+    # reduce_sum variants where it actually helps.
+    cpp_options: Dict = {}
+    if threads_per_chain is not None:
+        kwargs["threads_per_chain"] = threads_per_chain
+        cpp_options["STAN_THREADS"] = True
+    elif _uses_reduce_sum and "threads_per_chain" in _auto:
+        threads_per_chain = _auto["threads_per_chain"]
+        kwargs["threads_per_chain"] = threads_per_chain
+        cpp_options["STAN_THREADS"] = True
+        print(
+            f"⚙️  Auto CPU config: {_auto['parallel_chains']} parallel chains, "
+            f"{threads_per_chain} threads/chain (reduce_sum model detected)"
+        )
+    else:
+        print(
+            f"⚙️  Auto CPU config: {_auto['parallel_chains']} parallel chains "
+            f"(single-threaded per chain)"
+        )
+
     if adapt_delta is not None:
         kwargs["adapt_delta"] = adapt_delta
     if max_treedepth is not None:
@@ -145,6 +194,7 @@ def get_posterior(
         data=data,
         stan_file=stan_file,
         temptype=temptype,
+        cpp_options=cpp_options or None,
         **kwargs
     )
 

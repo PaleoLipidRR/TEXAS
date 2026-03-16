@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "TEXAS: Temperature Estimation via a Bayesian Approach with Stan"
+title: "texas-psm: a python package for TEXAS (A proxy system model for TetraEther indeX of Ammonia oxidizerS)"
 message: "If you use this software, please cite it using the metadata from this file."
 type: software
 authors:
@@ -29,6 +29,7 @@ references:
     authors:
       - family-names: Rattanasriampaipong
         given-names: Ronnakrit
+        orcid: "https://orcid.org/0000-0002-1425-8737"
     title: "TEXAS: Bayesian GDGT-temperature calibration using Stan"
     journal: "AGU Paleoceanography and Paleoclimatology"
     year: 2026
