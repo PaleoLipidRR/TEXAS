@@ -1,6 +1,51 @@
-// invT_gen_logi_fixed_multiv_marginal_unconstrained.stan  (L fixed = 1) - UPDATED reduce_sum API
+// ═══════════════════════════════════════════════════════════════════════════════
+// invT_gen_logi_fixed_multiv_marginal_hard_constraint.stan
+//
+// PURPOSE: Bayesian paleotemperature reconstruction with non-thermal corrections
+//          (GDGT-2/3 ratio and/or NO₃), parallelized via Stan's reduce_sum.
+//          Multivariate counterpart of invT_gen_logi_fixed_univ_marginal_hard_constraint.stan.
+//
+// APPROACH — same marginal (log-sum-exp) strategy as the univariate model:
+//   For each sample n, average the Normal likelihood over M calibration draws:
+//     p(RI_n | T_n) ≈ (1/M) Σ_m Normal(RI_n | f(T_n; θ_m) + corrections_m, σ_m)
+//
+// PARALLELIZATION via reduce_sum:
+//   The outer loop over N samples is the bottleneck. reduce_sum splits those N
+//   observations into chunks processed on separate CPU threads (within-chain
+//   parallelism). The grainsize data variable controls chunk size:
+//     grainsize = 1  → maximum parallelism (best with many cores)
+//     grainsize = N  → no parallelism (single-threaded, same as plain loop)
+//   Requires compilation with STAN_THREADS=True and threads_per_chain > 1.
+//
+// KEY DESIGN: prior is INSIDE ll_chunk, not in the model block.
+//   reduce_sum distributes work by splitting the N-element index array.
+//   Because the prior p(T_n | prior_mu_t_n) depends on n, it must also be
+//   computed inside ll_chunk so each chunk handles its own subset of samples.
+//   The total log-probability is the sum across all chunks — mathematically
+//   identical to computing prior + likelihood in a single non-parallel loop.
+//
+// TEMPERATURE CONSTRAINT: "hard_constraint" variant
+//   t_est is declared as vector<lower=min_temp>[N], which imposes a strict
+//   physical lower bound on all reconstructed temperatures. Stan enforces this
+//   via an internal change-of-variables (log-Jacobian adjustment), so HMC
+//   never proposes temperatures below min_temp.
+//   Typical value: min_temp = -1.8°C (seawater freezing point).
+//   Use the "_unconstrained" variant if no lower bound is needed.
+// ═══════════════════════════════════════════════════════════════════════════════
 
 functions {
+  // ─── ll_chunk: log-probability for a chunk of N observations ──────────────
+  // Called by reduce_sum for each parallel chunk of indices [start, end].
+  //
+  // Arguments:
+  //   slice_indices — subarray of {1, 2, …, N} for this chunk (used by
+  //                   reduce_sum to determine which observations to process;
+  //                   the function uses start/end to slice shared vectors)
+  //   start, end    — first and last observation indices in this chunk
+  //   (remaining)   — shared data passed through from the model block
+  //
+  // Returns: sum of (prior + likelihood) log-probabilities for this chunk.
+
   real ll_chunk(array[] int slice_indices,  // NEW API: array of indices for this chunk
                 int start, int end,
                 vector scaledRI,             // full vector; slice inside function
@@ -13,33 +58,50 @@ functions {
     real lp = 0;
     int n_chunk = end - start + 1;
 
-    // slice inputs for this chunk
-    vector[n_chunk] t_seg = segment(t_est, start, n_chunk);
+    // Extract the subset of vectors relevant to this chunk.
+    // segment(v, start, length) returns v[start : start+length-1].
+    vector[n_chunk] t_seg  = segment(t_est,      start, n_chunk);
     vector[n_chunk] mu_seg = segment(prior_mu_t, start, n_chunk);
-    vector[n_chunk] gd_seg = segment(gd, start, n_chunk);
-    vector[n_chunk] n3_seg = segment(no3, start, n_chunk);
-    vector[n_chunk] y_seg = segment(scaledRI, start, n_chunk);
+    vector[n_chunk] gd_seg = segment(gd,         start, n_chunk);
+    vector[n_chunk] n3_seg = segment(no3,        start, n_chunk);
+    vector[n_chunk] y_seg  = segment(scaledRI,   start, n_chunk);
 
-    // prior contribution for this chunk
+    // Prior contribution for this chunk: T_n ~ Normal(prior_mu_t_n, prior_sigma_t)
     lp += normal_lpdf(t_seg | mu_seg, prior_sigma_t);
 
-    // likelihood contribution
+    // Likelihood contribution: marginalize over M calibration draws for each n.
     for (i in 1:n_chunk) {
-      int n = start + i - 1;  // original index
-      vector[M] llk;
+      vector[M] llk;  // Log-likelihood under each of the M calibration draws
+
       for (m in 1:M) {
-        real lin = b[m];
-        if (use_gd == 1)  lin += beta_gd[m] * gd_seg[i];
+        // Base thermal term (Eq. 1): Richards curve evaluated at T = t_seg[i].
+        // Start with lower asymptote b[m], then add the sigmoid term.
+        real lin = b[m];  // Will accumulate: b + corrections + sigmoid
+
+        // Ecology correction β_{G₂/₃} × gdgt23ratio (Eq. 6)
+        if (use_gd == 1)
+          lin += beta_gd[m] * gd_seg[i];
+
+        // NO₃ correction β_{NO₃} × log₁₀(NO₃) (Eq. 7) — applied conditionally.
+        // logno3 = 0 when NO₃ is outside the valid range, so no correction applied.
         if (use_no3 == 1) {
           real logno3 = 0.0;
           if (n3_seg[i] > 0.0 && n3_seg[i] < no3_cutoff) {
-            logno3 = log10(n3_seg[i] + 1e-9);
+            logno3 = log10(n3_seg[i] + 1e-9);  // small offset avoids log(0)
           }
           lin += beta_no3[m] * logno3;
         }
+
+        // Complete the Richards curve:
+        //   mu = b[m] + corrections + (1 - b[m]) / (1 + Q·exp(-k·(T - T₀)))^(1/ν)
+        // Note: 'lin' already holds b[m] + corrections from above.
         real mu = lin + (1 - b[m]) / pow(1 + Q[m] * exp(-k[m] * (t_seg[i] - t0[m])), 1.0 / v[m]);
+
+        // Log-likelihood of the observed RI under this calibration draw.
         llk[m] = normal_lpdf(y_seg[i] | mu, sigma[m]);
       }
+
+      // Monte Carlo marginalization: log[(1/M) Σ_m exp(llk_m)] = log_sum_exp - log(M)
       lp += log_sum_exp(llk) - log(M);
     }
     return lp;
@@ -47,47 +109,72 @@ functions {
 }
 
 data {
-  int<lower=1> N;
-  int<lower=1> M;
-  vector[N] scaledRI;
-  vector[N] prior_mu_t;
-  real<lower=0> prior_sigma_t;
+    // ─── Proxy observations ───────────────────────────────────────────────────
+    int<lower=1> N;                    // Number of sediment samples
+    vector[N] scaledRI;                // Observed scaled Ring Index (∈ [0,1])
 
-  // Optional predictors
-  int<lower=0,upper=1> use_gdgt23ratio;
-  int<lower=0,upper=1> use_no3;
-  vector[N] gdgt23ratio;
-  vector[N] no3;
-  real<lower=0> no3_cutoff;
+    // ─── Prior on paleotemperature ─────────────────────────────────────────────
+    vector[N] prior_mu_t;              // Prior mean temperature per sample (°C)
+    real<lower=0> prior_sigma_t;       // Prior SD, shared across samples (°C)
 
-  // Forward posterior draws
-  vector[M] t0;
-  vector[M] k;
-  vector[M] b;
-  vector[M] Q;
-  vector[M] v;
-  vector[M] beta_G23;  // zeros if unused
-  vector[M] beta_NO3;          // zeros if unused
-  vector[M] sigma_scaledRI;
+    // ─── Optional non-thermal predictors ──────────────────────────────────────
+    // Flags are 0/1 integers; the corresponding beta vectors are always required
+    // (pass zeros when a predictor is unused — see build_invT_inputData()).
+    int<lower=0, upper=1> use_gdgt23ratio;
+    int<lower=0, upper=1> use_no3;
+    vector[N] gdgt23ratio;
+    vector[N] no3;
+    real<lower=0> no3_cutoff;
 
-  int<lower=1> grainsize;
-  real min_temp;
+    // ─── Forward calibration posterior — M draws (all same-index) ─────────────
+    // Each vector has length M. Row m is one complete self-consistent draw
+    // from the forward posterior: {T₀_m, k_m, b_m, Q_m, ν_m, β_m, σ_m}.
+    // All indexed by [m] in the inner loop to preserve parameter correlations.
+    int<lower=1> M;
+    vector[M] t0;
+    vector[M] k;
+    vector[M] b;
+    vector[M] Q;
+    vector[M] v;
+    vector[M] beta_G23;        // β_{G₂/₃} per draw (zeros if unused)
+    vector[M] beta_NO3;        // β_{NO₃} per draw (zeros if unused)
+    vector[M] sigma_scaledRI;  // Residual calibration noise per draw
+
+    // ─── Parallelism control ───────────────────────────────────────────────────
+    // grainsize: approximate number of samples per parallel chunk.
+    // Set to 1 for maximum parallelism; set to N to disable (single thread).
+    int<lower=1> grainsize;
+
+    // ─── Hard temperature constraint ──────────────────────────────────────────
+    // Physical lower bound imposed on all reconstructed temperatures.
+    // Stan enforces this by transforming t_est to an unconstrained space
+    // during sampling (log-Jacobian corrects the density). No sample will
+    // ever fall below min_temp in the posterior.
+    // Set via predict_T_from_RI(..., constraint_type='hard_constraint', min_temp=-1.8).
+    real min_temp;             // Minimum physically plausible temperature (°C)
 }
 
 parameters {
-  vector<lower=min_temp>[N] t_est;
+    // One temperature per sample — the ONLY parameter in this model.
+    // The <lower=min_temp> bound is a hard constraint: Stan reparameterizes
+    // internally so HMC never proposes values below min_temp. This differs
+    // from a soft penalty — it is strictly enforced by construction.
+    vector<lower=min_temp>[N] t_est;
 }
 
 model {
-  // NEW API: Create array of indices to pass to reduce_sum
-  array[N] int indices = linspaced_int_array(N, 1, N);
-  
-  // NEW API: array of indices as second argument, grainsize as third argument
-  target += reduce_sum(
-    ll_chunk, indices, grainsize,
-    scaledRI, t_est, prior_mu_t, prior_sigma_t,
-    use_gdgt23ratio, use_no3, gdgt23ratio, no3, no3_cutoff,
-    t0, k, b, Q, v,
-    beta_G23, beta_NO3, sigma_scaledRI
-  );
+    // Create an index array {1, 2, …, N} that reduce_sum uses to partition
+    // the N observations into chunks for parallel processing.
+    array[N] int indices = linspaced_int_array(N, 1, N);
+
+    // Dispatch parallel computation across chunks.
+    // reduce_sum calls ll_chunk once per chunk and sums the results.
+    // The prior and likelihood are both computed inside ll_chunk.
+    target += reduce_sum(
+        ll_chunk, indices, grainsize,
+        scaledRI, t_est, prior_mu_t, prior_sigma_t,
+        use_gdgt23ratio, use_no3, gdgt23ratio, no3, no3_cutoff,
+        t0, k, b, Q, v,
+        beta_G23, beta_NO3, sigma_scaledRI
+    );
 }

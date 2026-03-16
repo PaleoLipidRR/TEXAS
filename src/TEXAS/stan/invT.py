@@ -20,7 +20,7 @@ from TEXAS.stan.io import (
     _save_invT_posterior,
     _save_invT_results,
 )
-from TEXAS.utils.system_info import simple_memory_check, get_system_info
+from TEXAS.utils.system_info import simple_memory_check, get_system_info, suggest_stan_sampling_kwargs
 
 
 # Instantiate once
@@ -76,7 +76,7 @@ def get_invT_posterior(
     threads_per_chain: Optional[int] = None,
     stan_model_path: Optional[Union[str, Path]] = None,
     model_type: Literal["direct", "ensemble"] = "direct",
-    constraint_type: Literal["unconstrained", "hard_constraint", "reparameterized", "soft"] = "unconstrained",
+    constraint_type: Literal["unconstrained", "hard_constraint", "truncated_prior", "reparameterized", "soft"] = "unconstrained",
     min_temp: Optional[float] = None,
     fwd_posterior: Optional[xr.Dataset] = None,
 ) -> xr.Dataset:
@@ -109,37 +109,27 @@ def get_invT_posterior(
     sampler_kwargs.setdefault("iter_warmup", 500)
     sampler_kwargs.setdefault("iter_sampling", 1000)
 
-    cpp_options = {}
-    if use_opencl and threads_per_chain:
-        raise ValueError("Cannot use both OpenCL and threading simultaneously.")
-    if use_opencl:
-        cpp_options["STAN_OPENCL"] = True
-        sampler_kwargs["opencl_ids"] = [0, 0]
-    if threads_per_chain:
-        cpp_options["STAN_THREADS"] = True
-        sampler_kwargs["threads_per_chain"] = threads_per_chain
-        data["grainsize"] = 1
-
-    if model_type == "direct":
-        N = data["N"]
-        if threads_per_chain:
-            data["grainsize"] = 1
-        else:
-            data["grainsize"] = max(1, min(10, N // 4))
-
     meta = sampler_kwargs.pop("_metadata", {})
 
-    if constraint_type == "hard_constraint":
+    # Auto-select truncated_prior when min_temp is given and the user hasn't
+    # explicitly chosen a different constraint type.
+    if min_temp is not None and constraint_type == "unconstrained":
+        constraint_type = "truncated_prior"
+        print(f"🔧 Auto-selected constraint_type='truncated_prior' (min_temp={min_temp})")
+
+    if constraint_type in ("hard_constraint", "truncated_prior"):
         if min_temp is None:
             raise ValueError(
-                "min_temp must be provided when constraint_type='hard_constraint'. "
+                f"min_temp must be provided when constraint_type='{constraint_type}'. "
                 "Example: min_temp=-1.8 for seawater freezing point."
             )
         data["min_temp"] = float(min_temp)
     elif min_temp is not None:
-        print(f"⚠️ Warning: min_temp={min_temp} provided but constraint_type='{constraint_type}'. "
+        print(f"⚠️  min_temp={min_temp} provided but constraint_type='{constraint_type}' — "
               f"min_temp will be ignored.")
 
+    # Select the Stan file first — threading is only useful for multiv models
+    # that contain reduce_sum. Applying STAN_THREADS to univ models wastes cores.
     if stan_model_path:
         stan_file = Path(stan_model_path).name
         print(f"✅ Using specified Stan file: {stan_file}")
@@ -152,6 +142,40 @@ def get_invT_posterior(
             model_type=model_type,
             constraint_type=constraint_type)
         print(f"🔧 Automatically selected Stan file: {stan_file}")
+
+    _uses_reduce_sum = "multiv" in stan_file
+
+    # Auto-detect CPU settings now that we know whether the model can use threads.
+    _auto = suggest_stan_sampling_kwargs()
+    sampler_kwargs.setdefault("parallel_chains", _auto["parallel_chains"])
+    if threads_per_chain is None and "threads_per_chain" in _auto and _uses_reduce_sum:
+        threads_per_chain = _auto["threads_per_chain"]
+        print(
+            f"⚙️  Auto CPU config: {_auto['parallel_chains']} parallel chains, "
+            f"{threads_per_chain} threads/chain (reduce_sum model)"
+        )
+    elif threads_per_chain is None:
+        print(
+            f"⚙️  Auto CPU config: {_auto['parallel_chains']} parallel chains, "
+            f"1 thread/chain ({'univ model — threading skipped' if not _uses_reduce_sum else 'single-threaded per chain'})"
+        )
+
+    cpp_options = {}
+    if use_opencl and threads_per_chain:
+        raise ValueError("Cannot use both OpenCL and threading simultaneously.")
+    if use_opencl:
+        cpp_options["STAN_OPENCL"] = True
+        sampler_kwargs["opencl_ids"] = [0, 0]
+    if threads_per_chain and _uses_reduce_sum:
+        cpp_options["STAN_THREADS"] = True
+        sampler_kwargs["threads_per_chain"] = threads_per_chain
+
+    if model_type == "direct":
+        N = data["N"]
+        if threads_per_chain and _uses_reduce_sum:
+            data["grainsize"] = 1
+        else:
+            data["grainsize"] = max(1, min(10, N // 4))
 
     print(f"| M={data.get('M')} N={data.get('N')}")
 
@@ -224,7 +248,7 @@ def _select_invT_stan_file(
     predictor_usage: Dict[str, bool],
     threads_per_chain: Optional[int] = None,
     model_type: Literal["direct", "ensemble"] = "direct",
-    constraint_type: Literal["unconstrained", "hard_constraint", "reparameterized", "soft"] = "unconstrained"
+    constraint_type: Literal["unconstrained", "hard_constraint", "truncated_prior", "reparameterized", "soft"] = "unconstrained"
 ) -> str:
     """
     Choose the correct Stan model file based on data structure.
@@ -235,9 +259,10 @@ def _select_invT_stan_file(
             - "ensemble": Use traditional ensemble models
         constraint_type:
             - "unconstrained": No temperature constraints
-            - "hard_constraint": Hard lower bound at -1.8°C
+            - "hard_constraint": Hard lower bound (Jacobian-biased near boundary)
+            - "truncated_prior": Truncated Normal prior via inverse-CDF; P50 unbiased
             - "reparameterized": Exponential transformation approach
-            - "soft": Soft penalty for temperatures below -1.8°C
+            - "soft": Soft penalty for temperatures below min_temp
     """
     if "M" not in data:
         raise ValueError("Only ensemble mode is supported.")
@@ -315,7 +340,7 @@ def predict_temperature_from_RI(
     threads_per_chain: Optional[int] = None,
     stan_model_path: Optional[Union[str, Path]] = None,
     model_type: Literal["direct", "ensemble"] = "direct",
-    constraint_type: Literal["unconstrained", "hard_constraint", "reparameterized", "soft"] = "unconstrained",
+    constraint_type: Literal["unconstrained", "hard_constraint", "truncated_prior", "reparameterized", "soft"] = "unconstrained",
     min_temp: Optional[float] = None,
     fwd_posterior: Optional[xr.Dataset] = None,
 ) -> Dict[str, Any]:

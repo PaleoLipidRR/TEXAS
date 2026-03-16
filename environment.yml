@@ -56,6 +56,7 @@ dependencies:
   - rtree
   - geopy
   - pyshp=2.3.*
+  - pykrige
 
   # --- xESMF Stack (Complex Dependencies) ---
   - xesmf

@@ -1,10 +1,60 @@
 # TEXAS/plotting/prior_plot.py
 
 import re
+import math
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
-from typing import Union, Optional, Dict, List, Sequence
+from typing import Union, Optional, Dict, List, Sequence, Literal
+
+
+def _format_stat(median: float, std: float) -> str:
+    """Return 'median ± std' formatted to appropriate significant figures.
+
+    The uncertainty drives the precision:
+    - Round std to 1 sig fig (2 sig figs if its leading digit is 1 or 2,
+      since one sig fig would be too coarse there).
+    - Round median to the same decimal place.
+
+    Examples
+    --------
+    >>> _format_stat(35.812, 0.845)   # σ leading digit 8 → 1 sig fig
+    '35.8 ± 0.8'
+    >>> _format_stat(0.02451, 0.00234)  # σ leading digit 2 → 2 sig figs
+    '0.0245 ± 0.0023'
+    >>> _format_stat(35.0, 1.52)      # σ leading digit 1 → 2 sig figs
+    '35.0 ± 1.5'
+    """
+    if not np.isfinite(std) or std <= 0:
+        return f"{median:.3g}"
+    n_dec = _n_decimals(std)
+    fmt = f".{n_dec}f"
+    return f"{round(median, n_dec):{fmt}} ± {round(std, n_dec):{fmt}}"
+
+def _n_decimals(scale: float) -> int:
+    """Decimal places needed to show `scale` to 1–2 sig figs (GUM §7.2.6 rule)."""
+    if not np.isfinite(scale) or scale <= 0:
+        return 3
+    mag = math.floor(math.log10(abs(scale)))
+    first_digit = int(abs(scale) / 10 ** mag)
+    return max(0, 1 - mag) if first_digit <= 3 else max(0, -mag)
+
+
+def _format_ci(median: float, p5: float, p95: float) -> str:
+    """Return 'median [p5, p95]' with sig figs driven by the interval half-width.
+
+    Examples
+    --------
+    >>> _format_ci(31.2, 28.4, 34.1)
+    '31.2 [28.4, 34.1]'
+    >>> _format_ci(0.245, 0.18, 0.31)
+    '0.245 [0.180, 0.310]'
+    """
+    half_width = (p95 - p5) / 2
+    n_dec = _n_decimals(half_width)
+    fmt = f".{n_dec}f"
+    return f"{round(median, n_dec):{fmt}} [{round(p5, n_dec):{fmt}}, {round(p95, n_dec):{fmt}}]"
+
 
 from .range_utils import (
     compute_sample_range,
@@ -15,7 +65,7 @@ from .range_utils import (
 
 
 def plot_prior_distributions(
-    priors_list: Union[List[str], Dict[str,str]],
+    priors_list: Optional[Union[List[str], Dict[str,str]]] = None,
     posterior_datasets: Optional[List["xr.Dataset"]] = None,
     posterior_labels_list: Optional[List[str]] = None,
     show_suptitle: bool = True,
@@ -27,16 +77,37 @@ def plot_prior_distributions(
     zoomin_dataset_idx: Optional[int] = None,
     use_linestyle_by_param: bool = False,
     show_histogram: bool = True,
-    show_median: bool = True,
+    show_annotation: bool = False,
     set_linewidth: float = 1.5,
     set_fig_width_factor: float = 3,
     set_fig_height_factor: float = 3.5,
     set_leg_max_ncol: int = 3,
     color_list: Optional[Sequence[str]] = None,
+    param_source_map: Optional[Dict[str, int]] = None,
+    annotation_style: Literal["ci95", "sigma"] = "ci95",
+    show_subplot_legend: bool = True,
+    show_figure_legend: bool = True,
 ):
     """
     Plot priors + any number of posterior distributions in a grid,
     split by parameter group (t0, k, b, etc.).
+
+    Args:
+        param_source_map: Optional dict mapping a param group name to the index of
+            the dataset in ``posterior_datasets`` that should be used as the sole
+            source for that group.  All other datasets are skipped for that group.
+
+            Use this when different parameters come from different posteriors — e.g.
+            logistic params (t0, k, b…) from a ``culmeso`` run and beta coefficients
+            from a multivariate ``crtp`` run::
+
+                plot_prior_distributions(
+                    posterior_datasets=[culmeso_ds, crtp_multiv_ds],
+                    param_source_map={"beta_G23": 1, "beta_NO3": 1},
+                )
+
+            When a group is not in ``param_source_map``, all datasets are searched
+            as usual.
     """
     # — parse your priors_list into parsed_priors dict just like before…
     # — collect posterior samples into your all_samples list…
@@ -49,6 +120,17 @@ def plot_prior_distributions(
     # At the end return fig, axes
     fig, axes = None, None
     parsed_priors = {}
+
+    # If priors_list not supplied, pull prior strings from the posterior datasets'
+    # attrs["priors"] (set automatically during sampling).  Merge across all
+    # datasets and deduplicate so each prior name appears only once.
+    if priors_list is None:
+        seen = {}
+        for ds in (posterior_datasets or []):
+            for entry in ds.attrs.get("priors", []):
+                name = entry.split(":")[0].strip()
+                seen.setdefault(name, entry)   # first dataset wins on conflict
+        priors_list = list(seen.values())
 
     for prior in priors_list:
         name, dist_expr = prior.split(":", 1)
@@ -115,14 +197,18 @@ def plot_prior_distributions(
                              sharex=False, sharey=False,
                              constrained_layout=True)
 
-    model_labels = []
+    # Keyed by idx_ds → (line_handle, label); populated during plotting so the
+    # figure-level legend always has exactly one entry per dataset in list order.
+    _fig_legend_entries: Dict[int, tuple] = {}
+    _prior_handle = None
+
     for idx, base in enumerate(param_groups):
         row_idx, col_idx = divmod(idx, ncols)
         ax = axes[row_idx][col_idx]
         ax.clear()
             
 
-        param_names = grouped[base]
+        param_names = sorted(grouped[base])   # sort for deterministic order
         if suffix_include:
             param_names = [p for p in param_names if any(p.endswith(suf) for suf in suffix_include)]
         all_samples = []
@@ -173,12 +259,19 @@ def plot_prior_distributions(
             else:
                 continue
 
-            ax.plot(x, y, color='black', lw=set_linewidth, label="Prior")
+            (prior_line,) = ax.plot(x, y, color='black', lw=set_linewidth, label="Prior")
+            if _prior_handle is None:
+                _prior_handle = prior_line
 
-        # Collect all samples first to determine x range if no prior available
+        # Collect all samples first to determine x range if no prior available.
+        # If param_source_map specifies a source dataset for this group, only
+        # pull samples from that dataset; otherwise search all datasets.
+        _source_idx = param_source_map.get(base) if param_source_map else None
         for name in param_names:
             if posterior_datasets:
                 for idx_ds, ds in enumerate(posterior_datasets):
+                    if _source_idx is not None and idx_ds != _source_idx:
+                        continue
                     if name not in ds.data_vars:
                         continue
                     samples = ds[name].values.flatten()
@@ -192,6 +285,10 @@ def plot_prior_distributions(
                     all_samples.append((samples, idx_ds, name, stan_model_labels,
                                         use_gdgt23ratio_check, use_no3_check))
         
+        # Sort by (idx_ds, param_name) so all lines for dataset 0 are plotted
+        # before dataset 1, giving a consistent order in every subplot.
+        all_samples.sort(key=lambda t: (t[1], t[2]))
+
         # If x was not defined by prior, create it from posterior data range
         if x is None and all_samples:
             # Get the combined range of all samples for this parameter group
@@ -236,11 +333,10 @@ def plot_prior_distributions(
         linestyles = ['-', '--', '-.', ':', (0, (3, 1, 1, 1))]
 
         unique_param_names = sorted(set(pname for _, _, pname, _, _, _ in all_samples))
+        _n_annotated = [0]  # counts lines actually drawn; drives annotation y-position
+
         for iiii, (samples, idx_ds, param_label, stan_model_label, use_gdgt23ratio_check, use_no3_check) in enumerate(all_samples):
             color = default_colors[idx_ds % len(default_colors)]
-
-            if param_label.split("_")[0] == "t0":
-                model_labels.append(stan_model_label)
 
             if use_linestyle_by_param:
                 ls_idx = unique_param_names.index(param_label)
@@ -250,37 +346,33 @@ def plot_prior_distributions(
 
             kde = stats.gaussian_kde(samples, bw_method=kde_bw)
             kde_y = kde(x)
-            
-            if param_label.startswith("beta_G23"):
-                if use_gdgt23ratio_check == 1:
-                    ax.plot(x, kde_y, color=color, lw=set_linewidth, linestyle=linestyle, label=param_label)
-                    if show_histogram:
-                        ax.hist(samples, bins=100, density=True, alpha=0.2, color=color)
-                    if show_median:
-                        median_val = np.median(samples)
-                        ypos_shift = iiii * 0.025  # Shift text up for each subsequent model
-                        ax.text(0.02,0.98 - ypos_shift, f"{median_val:.4f}", transform=ax.transAxes, 
-                                fontsize=9, va='top', ha='left', color=color)
-                        
-            elif param_label.startswith("beta_NO3"):
-                if use_no3_check == 1:
-                    ax.plot(x, kde_y, color=color, lw=set_linewidth, linestyle=linestyle, label=param_label)
-                    if show_histogram:
-                        ax.hist(samples, bins=100, density=True, alpha=0.2, color=color)
-                    if show_median:
-                        median_val = np.median(samples)
-                        ypos_shift = iiii * 0.05  # Shift text up for each subsequent model
-                        ax.text(0.02,0.98 - ypos_shift, f"{median_val:.3f}", transform=ax.transAxes, 
-                                fontsize=9, va='top', ha='left', color=color)
-            else:
-                ax.plot(x, kde_y, color=color, lw=set_linewidth, linestyle=linestyle, label=param_label)
+
+            def _plot_line():
+                (line,) = ax.plot(x, kde_y, color=color, lw=set_linewidth, linestyle=linestyle, label=param_label)
+                if idx_ds not in _fig_legend_entries:
+                    _fig_legend_entries[idx_ds] = (line, stan_model_label)
                 if show_histogram:
                     ax.hist(samples, bins=100, density=True, alpha=0.2, color=color)
-                if show_median:
-                    median_val = np.median(samples)
-                    ypos_shift = iiii * 0.05  # Shift text up for each subsequent model
-                    ax.text(0.02,0.98 - ypos_shift, f"{median_val:.3f}", transform=ax.transAxes, 
-                            fontsize=9, va='top', ha='left', color=color)
+                if show_annotation:
+                    med = np.median(samples)
+                    if annotation_style == "ci95":
+                        text = _format_ci(med, np.percentile(samples, 5),
+                                               np.percentile(samples, 95))
+                    else:
+                        text = _format_stat(med, np.std(samples, ddof=1))
+                    ypos = 0.98 - _n_annotated[0] * 0.065
+                    ax.text(0.02, ypos, text, transform=ax.transAxes,
+                            fontsize=8, va='top', ha='left', color=color)
+                    _n_annotated[0] += 1
+
+            if param_label.startswith("beta_G23"):
+                if use_gdgt23ratio_check == 1:
+                    _plot_line()
+            elif param_label.startswith("beta_NO3"):
+                if use_no3_check == 1:
+                    _plot_line()
+            else:
+                _plot_line()
 
 
         if all_samples:
@@ -371,9 +463,9 @@ def plot_prior_distributions(
                         revised_lbl = val + revised_lbl.replace(key, "")
                         break
                 revised_labels_in_ax.append(revised_lbl)
-            if handles:
+            if handles and show_subplot_legend:
                 ax.legend(handles, revised_labels_in_ax, loc='upper right', fontsize=8, ncol=1, frameon=False)
-                
+
         revised_base_dict = {
             "t0": r"T$_0$",
             "k": "k",
@@ -389,13 +481,20 @@ def plot_prior_distributions(
         ax.set_xlabel(f"{revised_base}")
         ax.grid(True)
 
-    model_labels.insert(0, "Prior")
-
     if posterior_datasets:
-        h, l = axes[0][0].get_legend_handles_labels()
+        # Build figure legend: Prior first, then one entry per dataset in
+        # posterior_datasets order (guaranteed by idx_ds key).
+        fig_handles, fig_labels = [], []
+        if _prior_handle is not None:
+            fig_handles.append(_prior_handle)
+            fig_labels.append("Prior")
+        for i in range(len(posterior_datasets)):
+            if i in _fig_legend_entries:
+                h_ds, lbl_ds = _fig_legend_entries[i]
+                fig_handles.append(h_ds)
+                fig_labels.append(lbl_ds)
 
-        legend_labels = model_labels
-        legend_rows = int(np.ceil(len(legend_labels) / set_leg_max_ncol))
+        legend_rows = int(np.ceil(len(fig_labels) / set_leg_max_ncol))
 
         # # Set a more compact bottom_padding to remove excess white space
         tight_layout_bottom_lookup = {
@@ -406,23 +505,23 @@ def plot_prior_distributions(
         }
 
         
-        fig.legend(
-            handles=h,
-            labels=legend_labels,
-            loc='lower right',
-            ncol=min(len(legend_labels), set_leg_max_ncol),
-            fontsize=10,
-            bbox_to_anchor=(0.85, 0.15),  # ← position of legend box relative to the figure plotting space
-
-            frameon=True,
-            borderaxespad=0.0,
-            handletextpad=0.4,
-            labelspacing=0.3
-        )
+        if show_figure_legend:
+            fig.legend(
+                handles=fig_handles,
+                labels=fig_labels,
+                loc='lower right',
+                ncol=min(len(fig_labels), set_leg_max_ncol),
+                fontsize=10,
+                bbox_to_anchor=(0.85, 0.15),
+                frameon=True,
+                borderaxespad=0.0,
+                handletextpad=0.4,
+                labelspacing=0.3
+            )
         ### rect=[0,0,1,1] is the default for tight_layout() --> meaning that all axes plotting spaces will fill the whole figure space (ignoring legend boxes and titiles)
         fig.tight_layout(rect=[
             0,
-            tight_layout_bottom_lookup.get(nrows,0.1) + (0.02 if legend_rows > 3 else 0),
+            tight_layout_bottom_lookup.get(nrows, 0.1) + (0.02 if legend_rows > 3 and show_figure_legend else 0),
             1,
             0.95])
             
@@ -449,11 +548,11 @@ def plot_prior_distributions(
                         revised_lbl = val + revised_lbl.replace(key, "")
                         break
                 revised_labels_in_ax.append(revised_lbl)
-            if handles:
+            if handles and show_subplot_legend:
                 ax.legend(handles, revised_labels_in_ax, loc='upper right', fontsize=9, ncol=1, frameon=False)
-    
+
     # Top right and bottom left legends override if present
-    if axes.shape[0] > 1:
+    if show_subplot_legend and axes.shape[0] > 1:
         for ax in axes[1]:
             handles, labels_in_ax = ax.get_legend_handles_labels()
             revised_labels_in_ax = []

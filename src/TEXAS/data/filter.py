@@ -14,7 +14,10 @@ def filter_stan_compatible(data: Dict[str, Any]) -> Dict[str, Any]:
 def ensure_numpy(x):
     """
     Ensure the input is a numpy.ndarray.
-    If `x` has a `.values` attribute (e.g., xarray.DataArray, pandas.Series), returns `x.values`;
-    otherwise returns `x` unchanged.
+    Handles pandas Series, xarray DataArray (via .values), plain lists, and arrays.
     """
-    return x.values if hasattr(x, 'values') else x
+    if hasattr(x, 'values'):
+        x = x.values
+    if not isinstance(x, np.ndarray):
+        x = np.asarray(x)
+    return x
