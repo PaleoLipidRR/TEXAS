@@ -56,6 +56,37 @@ def _format_ci(median: float, p5: float, p95: float) -> str:
     return f"{round(median, n_dec):{fmt}} [{round(p5, n_dec):{fmt}}, {round(p95, n_dec):{fmt}}]"
 
 
+def _format_prior_expr(dist: str, a: float, b: float, trunc: Optional[str]) -> str:
+    """Return a 'distributed as' string for a prior.
+
+    Notation follows McElreath (Statistical Rethinking) / Stan convention:
+    θ ~ Normal(μ, σ) where σ is the standard deviation.
+    The '~' is written as plain text outside math mode so it renders
+    as a tilde rather than the math-mode '∼' (similar-to) symbol.
+    """
+    def _fmt(v: float) -> str:
+        return f"{v:.4g}"
+
+    args = rf"({_fmt(a)},\;{_fmt(b)})"
+
+    if trunc:
+        bounds = [v.strip() for v in trunc.split(",")]
+        lo = bounds[0] if bounds[0] else r"-\infty"
+        hi = bounds[1] if len(bounds) > 1 and bounds[1] else r"+\infty"
+        args += rf"\;\mathrm{{T}}[{lo},\;{hi}]"
+
+    if dist == "normal":
+        return rf"$\mathcal{{N}}\,{args}$"
+    elif dist == "lognormal":
+        return rf"$\mathrm{{LogNormal}}\,{args}$"
+    elif dist == "beta":
+        return rf"$\mathcal{{B}}\,{args}$"
+    elif dist == "cauchy":
+        return rf"$\mathrm{{Cauchy}}\,{args}$"
+    else:
+        return rf"$\mathrm{{{dist}}}\,{args}$"
+
+
 from .range_utils import (
     compute_sample_range,
     compute_density_based_range,
@@ -87,6 +118,7 @@ def plot_prior_distributions(
     annotation_style: Literal["ci95", "sigma"] = "ci95",
     show_subplot_legend: bool = True,
     show_figure_legend: bool = True,
+    show_prior_expression: bool = True,
 ):
     """
     Plot priors + any number of posterior distributions in a grid,
@@ -262,6 +294,10 @@ def plot_prior_distributions(
             (prior_line,) = ax.plot(x, y, color='black', lw=set_linewidth, label="Prior")
             if _prior_handle is None:
                 _prior_handle = prior_line
+            if show_prior_expression:
+                expr = _format_prior_expr(dist, a, b, trunc)
+                ax.text(0.98, 0.98, expr, transform=ax.transAxes,
+                        fontsize=9, va='top', ha='right', color='black')
 
         # Collect all samples first to determine x range if no prior available.
         # If param_source_map specifies a source dataset for this group, only
