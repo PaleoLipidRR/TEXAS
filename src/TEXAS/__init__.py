@@ -31,7 +31,11 @@ from .models.logistics import (
 from .models.multivariate import (
     generalized_logistic_fixed_upper_multivariate,
     simple_logistic_fixed_upper_multivariate,
+    find_optimal_no3_threshold,
 )
+
+# ─── Statistical utilities ────────────────────────────────────────────────────
+from .stats import f_test, bootstrap_se
 
 # ─── Ensemble generation ────────────────────────────────────────────────
 from .ensemble.generator import generate_ensemble, generate_ensemble_auto
@@ -79,6 +83,10 @@ __all__ = [
     "generalized_logistic_fixed_upper",
     "generalized_logistic_fixed_upper_multivariate",
     "simple_logistic_fixed_upper_multivariate",
+    "find_optimal_no3_threshold",
+    # stats
+    "f_test",
+    "bootstrap_se",
     # ensemble
     "generate_ensemble",
     "generate_ensemble_auto",
