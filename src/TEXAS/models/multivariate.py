@@ -6,6 +6,13 @@ from .logistics import (
     generalized_logistic_fixed_upper
 )
 
+try:
+    import pandas as pd
+    from scipy.stats import spearmanr
+    _HAS_SCIPY_PANDAS = True
+except ImportError:
+    _HAS_SCIPY_PANDAS = False
+
 def simple_logistic_fixed_upper_multivariate(
     x: np.ndarray,
     t0: float = None,
@@ -96,3 +103,79 @@ def generalized_logistic_fixed_upper_multivariate(
         mu[mask] += beta_NO3 * np.log10(arr[mask])
 
     return mu
+
+
+def find_optimal_no3_threshold(
+    no3_values: np.ndarray,
+    residuals: np.ndarray,
+    threshold_range=None,
+    min_points: int = 5,
+):
+    """Find the NO3 threshold that maximises the negative Spearman correlation
+    between log10(NO3) and model residuals.
+
+    Used to select the ``no3_cutoff`` parameter for the multivariate logistic
+    models: points below the threshold carry an NO3 correction; points above
+    are treated as nutrient-replete and excluded from the NO3 term.
+
+    Parameters
+    ----------
+    no3_values : array-like
+        Nitrate concentrations (µmol/L).
+    residuals : array-like
+        Residuals from a temperature-only model fit on the same observations.
+    threshold_range : array-like, optional
+        NO3 thresholds to test.  Defaults to ``np.arange(0.5, 5, 0.01)``.
+    min_points : int
+        Minimum number of valid data points required to compute a correlation.
+
+    Returns
+    -------
+    optimal_threshold : float
+        Threshold (µmol/L) giving the most negative Spearman rho.
+    results : pd.DataFrame
+        One row per tested threshold; columns: ``threshold``, ``spearman_rho``,
+        ``spearman_pval``, ``n_points``.
+
+    Raises
+    ------
+    ImportError
+        If pandas or scipy are not available.
+    """
+    if not _HAS_SCIPY_PANDAS:
+        raise ImportError(
+            "find_optimal_no3_threshold requires pandas and scipy. "
+            "Install them with: pip install pandas scipy"
+        )
+
+    if threshold_range is None:
+        threshold_range = np.arange(0.5, 5, 0.01)
+
+    no3 = np.asarray(no3_values, dtype=float)
+    resid = np.asarray(residuals, dtype=float)
+
+    rows = []
+    for thr in threshold_range:
+        mask = no3 <= thr
+        no3_sub = no3[mask]
+        res_sub = resid[mask]
+        valid = np.isfinite(no3_sub) & np.isfinite(res_sub) & (no3_sub > 0)
+        no3_v = no3_sub[valid]
+        res_v = res_sub[valid]
+        if len(no3_v) >= min_points:
+            rho, pval = spearmanr(np.log10(no3_v), res_v)
+            rows.append({
+                "threshold": thr,
+                "spearman_rho": rho,
+                "spearman_pval": pval,
+                "n_points": len(no3_v),
+            })
+
+    results = pd.DataFrame(rows)
+    if results.empty:
+        raise ValueError(
+            f"No threshold in threshold_range produced >= {min_points} valid points. "
+            "Try lowering min_points or widening threshold_range."
+        )
+    optimal = float(results.loc[results["spearman_rho"].idxmin(), "threshold"])
+    return optimal, results
