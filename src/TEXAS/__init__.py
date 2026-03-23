@@ -32,6 +32,7 @@ from .models.multivariate import (
     generalized_logistic_fixed_upper_multivariate,
     simple_logistic_fixed_upper_multivariate,
     find_optimal_no3_threshold,
+    find_optimal_no3_threshold_nointercept,
 )
 
 # ─── Statistical utilities ────────────────────────────────────────────────────
@@ -84,6 +85,7 @@ __all__ = [
     "generalized_logistic_fixed_upper_multivariate",
     "simple_logistic_fixed_upper_multivariate",
     "find_optimal_no3_threshold",
+    "find_optimal_no3_threshold_nointercept",
     # stats
     "f_test",
     "bootstrap_se",

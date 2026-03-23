@@ -136,11 +136,13 @@ def get_invT_posterior(
     else:
         data = patch_optional_predictors(data)
         predictor_usage = meta.get("predictor_usage", {})
+        no3ratio = meta.get("no3ratio", False)
         stan_file = _select_invT_stan_file(
             data, predictor_usage,
             threads_per_chain=threads_per_chain,
             model_type=model_type,
-            constraint_type=constraint_type)
+            constraint_type=constraint_type,
+            no3ratio=no3ratio)
         print(f"🔧 Automatically selected Stan file: {stan_file}")
 
     _uses_reduce_sum = "multiv" in stan_file
@@ -248,7 +250,8 @@ def _select_invT_stan_file(
     predictor_usage: Dict[str, bool],
     threads_per_chain: Optional[int] = None,
     model_type: Literal["direct", "ensemble"] = "direct",
-    constraint_type: Literal["unconstrained", "hard_constraint", "truncated_prior", "reparameterized", "soft"] = "unconstrained"
+    constraint_type: Literal["unconstrained", "hard_constraint", "truncated_prior", "reparameterized", "soft"] = "unconstrained",
+    no3ratio: bool = False,
 ) -> str:
     """
     Choose the correct Stan model file based on data structure.
@@ -284,6 +287,9 @@ def _select_invT_stan_file(
         raise ValueError(f"Unknown model_type: {model_type}. Use 'direct' or 'ensemble'.")
 
     model_name += f"_{constraint_type}"
+
+    if no3ratio:
+        model_name += "_no3ratio"
 
     return f"{model_name}.stan"
 
