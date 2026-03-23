@@ -329,6 +329,7 @@ def build_invT_inputData(
     # Return both the Stan data and configuration for CmdStanPy.
     # Metadata helps with provenance tracking and debugging.
     # ───────────────────────────────────────────────────────────────────────────
+    fwd_model_name = post.attrs.get("stan_model_name", "")
     sampler_kwargs: Dict[str, Any] = {
         "chains": 4,           # Number of MCMC chains
         "iter_warmup": 500,    # Warmup iterations per chain
@@ -336,9 +337,10 @@ def build_invT_inputData(
         "seed": int(config.seed),
         "_metadata": {
             "posteriors_used": used_posts,  # Which parameters were extracted
-            "calibration_model_name": post.attrs.get("stan_model_name", ""),
+            "calibration_model_name": fwd_model_name,
             "used_suffix": used_suffix,  # e.g., "crtp"
             "predictor_usage": predictor_usage,  # Which covariates are active
+            "no3ratio": "_no3ratio" in fwd_model_name,  # Forward model used centred NO₃ form
         },
     }
 
