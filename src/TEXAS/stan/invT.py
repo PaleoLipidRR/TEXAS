@@ -183,7 +183,7 @@ def get_invT_posterior(
             no3ratio=no3ratio)
         print(f"🔧 Automatically selected Stan file: {stan_file}")
 
-    _uses_reduce_sum = "multiv" in stan_file
+    _uses_reduce_sum = "marginal" in stan_file
 
     # Auto-detect CPU settings now that we know whether the model can use threads.
     _auto = suggest_stan_sampling_kwargs()
@@ -310,10 +310,9 @@ def _select_invT_stan_file(
     """
     if "M" not in data:
         raise ValueError("Only ensemble mode is supported.")
-    has_vQ = ("v" in data) or ("Q" in data)
     multiv = any(predictor_usage.values())
 
-    base = "invT_gen_logi_fixed" if has_vQ else "invT_logistic_fixed"
+    base = "invT_gen_logi_fixed"
     suffix = "_multiv" if multiv else "_univ"
 
     if model_type == "direct":
