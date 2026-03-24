@@ -212,12 +212,15 @@ def _generate_filename_base(
         temp_parts.append(f"no3_{no3_cutoff}")
     temptype_str = "_".join(temp_parts)
 
+    proxy_name = meta.get("proxy_name", "") or ""
+    proxy_segment = f"_{_slug(proxy_name)}" if proxy_name and proxy_name != "unknown" else ""
+
     tag_segment = ""
     if filename_tag:
         tags = [filename_tag] if isinstance(filename_tag, str) else filename_tag
         tag_segment = "_" + "+".join(_slug(t) for t in tags if t)
 
-    return f"{site_name}_{clean_stan_model}_{temptype_str}{tag_segment}_{model_type}"
+    return f"{site_name}_{clean_stan_model}_{temptype_str}{proxy_segment}{tag_segment}_{model_type}"
 
 
 def _sanitize_attrs_for_netcdf(ds: xr.Dataset) -> xr.Dataset:
