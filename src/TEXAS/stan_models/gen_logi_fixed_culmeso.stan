@@ -2,11 +2,11 @@
 data {
   int<lower=1> N_cul;
   vector[N_cul] t_cul;
-  vector[N_cul] scaledRI_cul;
+  vector[N_cul] proxyObs_cul;
 
   int<lower=1> N_meso;
   vector[N_meso] t_meso;
-  vector[N_meso] scaledRI_meso;
+  vector[N_meso] proxyObs_meso;
 }
 
 parameters {
@@ -16,8 +16,8 @@ parameters {
   real<lower=0.1>  v_culmeso;             // Shape (nu); >0, often >0.1 to avoid numerical issues
   real<lower=0>    b_culmeso;             // Lower asymptote (A)
 
-  real<lower=0> sigma_scaledRI_cul;
-  real<lower=0> sigma_scaledRI_meso;
+  real<lower=0> sigma_proxyObs_cul;
+  real<lower=0> sigma_proxyObs_meso;
 }
 
 model {
@@ -27,16 +27,16 @@ model {
   Q_culmeso      ~ normal(1, 30) T[0.1, ]; 
   v_culmeso      ~ normal(1, 20) T[0.1, ]; 
   b_culmeso      ~ beta(2, 5);
-  sigma_scaledRI_cul  ~ normal(0.01, 0.1);
-  sigma_scaledRI_meso ~ normal(0.01, 0.1);
+  sigma_proxyObs_cul  ~ normal(0.01, 0.1);
+  sigma_proxyObs_meso ~ normal(0.01, 0.1);
 
   // Generalized logistic mean vectors
-  vector[N_cul] mu_scaledRI_cul = b_culmeso + (1 - b_culmeso)
+  vector[N_cul] mu_proxyObs_cul = b_culmeso + (1 - b_culmeso)
     ./ pow(1 + Q_culmeso * exp(-k_culmeso * (t_cul - t0_culmeso)), 1 / v_culmeso);
-  vector[N_meso] mu_scaledRI_meso = b_culmeso + (1 - b_culmeso)
+  vector[N_meso] mu_proxyObs_meso = b_culmeso + (1 - b_culmeso)
     ./ pow(1 + Q_culmeso * exp(-k_culmeso * (t_meso - t0_culmeso)), 1 / v_culmeso);
 
   // Likelihood
-  scaledRI_cul  ~ normal(mu_scaledRI_cul, sigma_scaledRI_cul);
-  scaledRI_meso ~ normal(mu_scaledRI_meso, sigma_scaledRI_meso);
+  proxyObs_cul  ~ normal(mu_proxyObs_cul, sigma_proxyObs_cul);
+  proxyObs_meso ~ normal(mu_proxyObs_meso, sigma_proxyObs_meso);
 }

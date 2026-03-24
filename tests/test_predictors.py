@@ -11,7 +11,7 @@ def _base_data():
     n = 10
     return {
         "N_crtp": n,
-        "scaledRI_crtp": np.random.default_rng(0).uniform(0.1, 0.9, n).tolist(),
+        "proxyObs_crtp": np.random.default_rng(0).uniform(0.1, 0.9, n).tolist(),
         "SST_crtp": np.random.default_rng(1).uniform(5, 30, n).tolist(),
     }
 

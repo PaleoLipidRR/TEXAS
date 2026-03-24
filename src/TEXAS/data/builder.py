@@ -45,9 +45,11 @@ _EXTRA_PARAMS = ["v", "Q"]  # Asymmetry and shape parameters
 
 
 def build_invT_inputData(
-    scaledRI: Union[np.ndarray, List[float]],
-    prior_mu_t: Union[np.ndarray, float],
-    prior_sigma_t: float,
+    proxyObs: Union[np.ndarray, List[float]] = None,
+    prior_mu_t: Union[np.ndarray, float] = None,
+    prior_sigma_t: float = None,
+    *,
+    scaledRI: Union[np.ndarray, List[float]] = None,  # deprecated alias
     fwd_posterior_name: Optional[str] = None,
     predictors: Optional[Dict[str, np.ndarray]] = None,
     config: Optional[InvTConfig] = None,
@@ -65,7 +67,8 @@ def build_invT_inputData(
     5. Return data dict (for Stan) + sampler_kwargs (for CmdStanPy)
 
     Args:
-        scaledRI: Observed Ring Index values to predict temperature from (length N)
+        proxyObs: Observed proxy values to predict temperature from (length N).
+            Any proxy is accepted: scaledRI, TEX86, ringIndex, etc.
         prior_mu_t: Prior mean temperature (scalar or array of length N)
         prior_sigma_t: Prior temperature uncertainty (e.g., 10°C)
         fwd_posterior_name: Name of saved forward calibration (without .nc extension).
@@ -81,6 +84,17 @@ def build_invT_inputData(
         data: Dictionary for Stan's data block
         sampler_kwargs: Dictionary for CmdStanPy sampling configuration
     """
+    # Backward-compat: accept deprecated scaledRI kwarg
+    if scaledRI is not None and proxyObs is None:
+        import warnings
+        warnings.warn(
+            "The 'scaledRI' parameter is deprecated; use 'proxyObs' instead.",
+            DeprecationWarning, stacklevel=2,
+        )
+        proxyObs = scaledRI
+    if proxyObs is None:
+        raise TypeError("build_invT_inputData() missing required argument: 'proxyObs'")
+
     if fwd_posterior is None and fwd_posterior_name is None:
         raise ValueError(
             "Provide either fwd_posterior_name (cache lookup) "
@@ -96,7 +110,7 @@ def build_invT_inputData(
     # ═══════════════════════════════════════════════════════════════════════════
     # Accept a pre-loaded Dataset (fwd_posterior) or load from the cache by name.
     # Expected structure: xr.Dataset with dims (chain, draw) and data_vars like:
-    #   - t0_crtp, k_crtp, b_crtp, v_crtp, Q_crtp, sigma_scaledRI_crtp
+    #   - t0_crtp, k_crtp, b_crtp, v_crtp, Q_crtp, sigma_proxyObs_crtp
     #   - beta_G23_crtp, beta_NO3_crtp (if multivariate)
     # ───────────────────────────────────────────────────────────────────────────
     if fwd_posterior is not None:
@@ -127,7 +141,7 @@ def build_invT_inputData(
     # ═══════════════════════════════════════════════════════════════════════════
     # STEP 3: PREPARE OBSERVATION DATA
     # ═══════════════════════════════════════════════════════════════════════════
-    y = np.asarray(scaledRI, dtype=float)  # Observed Ring Index (proxy data)
+    y = np.asarray(proxyObs, dtype=float)  # Observed proxy values
     N = y.size  # Number of observations (e.g., coretop samples or PETM section)
 
     # Prior on temperature: Can be scalar (same prior for all N) or array (site-specific)
@@ -135,7 +149,7 @@ def build_invT_inputData(
             if np.isscalar(prior_mu_t)
             else np.asarray(prior_mu_t, dtype=float))
     if mu_t.shape[0] != N:
-        raise ValueError(f"prior_mu_t length ({mu_t.shape[0]}) must match scaledRI length ({N})")
+        raise ValueError(f"prior_mu_t length ({mu_t.shape[0]}) must match proxyObs length ({N})")
 
     if config.mode != "ensemble":
         raise NotImplementedError(f"Only 'ensemble' mode is supported, not '{config.mode}'")
@@ -205,7 +219,7 @@ def build_invT_inputData(
     # ═══════════════════════════════════════════════════════════════════════════
     data: Dict[str, Any] = {
         "N": N,                     # Number of observations
-        "scaledRI": y,              # Observed Ring Index values
+        "proxyObs": y,              # Observed proxy values
         "prior_mu_t": mu_t,         # Prior temperature mean
         "prior_sigma_t": float(prior_sigma_t),  # Prior temperature uncertainty
         "M": M,                     # Number of forward posterior samples
@@ -242,16 +256,18 @@ def build_invT_inputData(
     # ═══════════════════════════════════════════════════════════════════════════
     # STEP 9: EXTRACT RESIDUAL ERROR PARAMETER
     # ═══════════════════════════════════════════════════════════════════════════
-    # sigma_scaledRI[m] = measurement/model error for calibration sample m
+    # sigma_proxyObs[m] = measurement/model error for calibration sample m
     # If not available in posterior, use a default value.
     # ───────────────────────────────────────────────────────────────────────────
-    sigma_key = f"sigma_scaledRI_{used_suffix}"
+    sigma_key = f"sigma_proxyObs_{used_suffix}"
+    if sigma_key not in P:
+        sigma_key = f"sigma_scaledRI_{used_suffix}"  # backward compat with old posteriors
     if sigma_key in P:
-        data["sigma_scaledRI"] = np.asarray(P[sigma_key].values, dtype=float)  # Shape: (M,)
+        data["sigma_proxyObs"] = np.asarray(P[sigma_key].values, dtype=float)  # Shape: (M,)
         used_posts.append(sigma_key)
     else:
         # Fallback to constant error if not estimated in forward model
-        data["sigma_scaledRI"] = np.full(M, 0.1, dtype=float)
+        data["sigma_proxyObs"] = np.full(M, 0.1, dtype=float)
 
     # ═══════════════════════════════════════════════════════════════════════════
     # STEP 10: PROCESS OPTIONAL ENVIRONMENTAL PREDICTORS

@@ -14,8 +14,12 @@ from .stan.io import (
     save_posterior,
     save_invT_posterior,
 )
-from .stan.invT import get_invT_posterior, predict_temperature_from_RI
-from .predict import predict_RI_from_T, predict_T_from_RI
+from .stan.invT import (
+    get_invT_posterior,
+    predict_temperature_from_proxyObs,
+    predict_temperature_from_RI,  # deprecated alias
+)
+from .predict import predict_RI_from_T, predict_T_from_proxyObs, predict_T_from_RI  # predict_T_from_RI is deprecated
 
 # ─── Data builder for inverse‐T models ──────────────────────────────────
 from .data.builder import build_invT_inputData, InvTConfig
@@ -69,10 +73,12 @@ __all__ = [
     "save_invT_posterior",
     # stan — inverse temperature
     "get_invT_posterior",
-    "predict_temperature_from_RI",
+    "predict_temperature_from_proxyObs",
+    "predict_temperature_from_RI",   # deprecated alias
     # high-level prediction API
     "predict_RI_from_T",
-    "predict_T_from_RI",
+    "predict_T_from_proxyObs",
+    "predict_T_from_RI",             # deprecated alias
     # data builder
     "build_invT_inputData",
     "InvTConfig",

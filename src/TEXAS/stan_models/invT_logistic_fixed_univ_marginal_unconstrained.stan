@@ -3,14 +3,14 @@
 data {
   int<lower=1> N;
   int<lower=1> M;
-  vector[N] scaledRI;
+  vector[N] proxyObs;
   vector[N] prior_mu_t;
   real prior_sigma_t;
 
   vector[M] t0;
   vector[M] k;
   vector[M] b;
-  vector[M] sigma_scaledRI;
+  vector[M] sigma_proxyObs;
 }
 
 parameters {
@@ -24,7 +24,7 @@ model {
     vector[M] lp;
     for (m in 1:M) {
       real mu = b[m] + (1 - b[m]) / (1 + exp(-k[m] * (t_est[n] - t0[m])));
-      lp[m] = normal_lpdf(scaledRI[n] | mu, sigma_scaledRI[m]);
+      lp[m] = normal_lpdf(proxyObs[n] | mu, sigma_proxyObs[m]);
     }
     target += log_sum_exp(lp) - log(M);
   }
