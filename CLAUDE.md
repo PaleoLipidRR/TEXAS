@@ -87,7 +87,7 @@ Posterior variables carry a suffix indicating which dataset they were estimated 
 
 Example: `t0_crtp`, `k_crtp`, `b_crtp`, `v_crtp`, `sigma_proxyObs_crtp`.
 
-> **Q parameter removed (2026-03-24)**: The asymmetry parameter Q has been dropped from all Stan models (both forward and invT). The generalized logistic curve now uses Q=1 (inflection point = T₀). All existing `.stan` files were edited in-place — no `_Q1` variant files exist. Cached `.nc` posteriors generated before this change contain `Q_crtp`/`Q_culmeso` variables that are no longer produced; regenerate them.
+> **Q parameter removed (2026-03-24, Python cleanup 2026-03-24)**: The asymmetry parameter Q has been dropped from all Stan models (both forward and invT). The generalized logistic curve now uses Q=1 (inflection point = T₀). All existing `.stan` files were edited in-place — the `gen_logi_fixed_Q1_culmeso.stan` placeholder has been deleted. `ensemble/detection.py` no longer detects Q; `plotting/prior_plot.py` no longer lists Q in `include_groups` or label dicts. Cached `.nc` posteriors generated before this change contain `Q_crtp`/`Q_culmeso` variables that are no longer produced; regenerate them.
 
 > **Stan model bound fixes (2026-03-24)**:
 > - `k_crtp upper=0.5 → removed` in all priorApprox models (`gen_logi_fixed_hier_crtp_*_priorApprox*.stan`): the standalone culmeso model has no upper cap on k, and its posterior mean (~0.57) exceeded the old bound, pinning k against the constraint.
