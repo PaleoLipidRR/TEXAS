@@ -95,9 +95,9 @@ model {
     // Weakly informative: broad enough to let data dominate, but anchored to
     // the known range of the RI–T relationship.
     t0_culmeso ~ normal(30, 10) T[10, 50];  // Truncated to match declared bounds
-    k_culmeso  ~ beta(2, 5);
+    k_culmeso  ~ normal(0, 1) T[0, 1];
     b_culmeso  ~ beta(2, 5);
-    v_culmeso  ~ normal(1, 10) T[0, ];       // Half-normal: ν must be > 0
+    v_culmeso  ~ normal(0, 10) T[0.1, ];
 
     // ─── 2. Hyperpriors for hierarchical scale parameters ─────────────────────
     // Half-normal (truncated at 0): scales must be positive; penalize very

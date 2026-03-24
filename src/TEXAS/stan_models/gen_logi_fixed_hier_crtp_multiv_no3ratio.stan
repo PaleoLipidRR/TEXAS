@@ -85,9 +85,9 @@ parameters {
 model {
     // ─── 1. Priors for culmeso curve parameters ───────────────────────────────
     t0_culmeso ~ normal(30, 10) T[10, 50];
-    k_culmeso  ~ beta(2, 5);
+    k_culmeso  ~ normal(0, 1) T[0, 1];
     b_culmeso  ~ beta(2, 5);
-    v_culmeso  ~ normal(1, 10) T[0, ];
+    v_culmeso  ~ normal(0, 10) T[0.1, ];
 
     // ─── 2. Hyperpriors for hierarchical scale parameters ─────────────────────
     sigma_t0_culmeso ~ normal(0, 5)   T[0, ];
