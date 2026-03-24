@@ -141,15 +141,18 @@ def plot_prior_distributions(
             When a group is not in ``param_source_map``, all datasets are searched
             as usual.
     """
-    # — parse your priors_list into parsed_priors dict just like before…
-    # — collect posterior samples into your all_samples list…
-    # — for each group “base” create an axis, plot prior curve if available,
-    #   then overlay each posterior’s KDE + optional hist.
+    # ── Resolve any string / Path entries in posterior_datasets ──────────────
+    if posterior_datasets:
+        from pathlib import Path as _Path
+        from ..stan.io import load_posterior as _load_posterior
+        resolved = []
+        for item in posterior_datasets:
+            if isinstance(item, (str, _Path)):
+                resolved.append(_load_posterior(str(item)))
+            else:
+                resolved.append(item)
+        posterior_datasets = resolved
 
-    # (**You can mostly lift the body of your old plot_prior_distributions**,
-    #   just swap direct calls to compute_* for the ones imported above.)
-
-    # At the end return fig, axes
     fig, axes = None, None
     parsed_priors = {}
 

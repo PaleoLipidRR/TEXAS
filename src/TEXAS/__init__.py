@@ -22,7 +22,7 @@ from .stan.invT import (
 from .predict import predict_RI_from_T, predict_T_from_proxyObs, predict_T_from_RI  # predict_T_from_RI is deprecated
 
 # ─── Data builder for inverse‐T models ──────────────────────────────────
-from .data.builder import build_invT_inputData, InvTConfig
+from .data.builder import build_invT_inputData, build_fwd_data, InvTConfig
 
 # ─── Pure-Python logistic helpers ───────────────────────────────────────
 from .models.logistics import (

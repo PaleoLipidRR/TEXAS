@@ -51,10 +51,10 @@ data {
 
 parameters {
     // ─── Coretop generalized-logistic curve parameters ────────────────────────
-    // Bounded to physically plausible ranges (tighter than the culmeso model
-    // since the hyperprior already constrains the distribution).
-    real<lower=10, upper=50>      t0_crtp;  // T₀: reference temperature (°C)
-    real<lower=0.01, upper=0.5>   k_crtp;   // k: steepness
+    // Lower bounds reflect physical constraints; the hyperprior (from culmeso)
+    // provides regularization above — no hard upper cap on k or v.
+    real<lower=10, upper=50>  t0_crtp;  // T₀: reference temperature (°C)
+    real<lower=0.01>          k_crtp;   // k: steepness (unbounded above, matching culmeso)
     real<lower=0.1,  upper=0.6>   b_crtp;   // b: lower asymptote
     real<lower=0.1>               v_crtp;   // ν: shape
 
