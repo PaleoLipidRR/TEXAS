@@ -26,8 +26,8 @@ parameters {
 model {
   // Priors
   t0_culmesocore  ~ normal(30, 10) T[-1.8, ];
-  k_culmesocore       ~ normal(0, 0.5) T[0, ];  // reverted - k is unbounded above in gen logistic
-  v_culmesocore       ~ normal(1, 10) T[0.1, ];  // match lower=0.1 parameter bound
+  k_culmesocore       ~ normal(0, 1) T[0, ];
+  v_culmesocore       ~ normal(0, 10) T[0.1, ];
   b_culmesocore       ~ beta(2, 5);
 
   sigma_proxyObs_cul  ~ normal(0.01, 0.1);
