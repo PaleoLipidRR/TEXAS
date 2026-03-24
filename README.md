@@ -19,6 +19,8 @@ TEXAS implements a two-stage workflow:
 
 Optional non-thermal corrections for GDGT-2/3 ratio and NO₃ concentration are supported.
 
+The calibration curve is a generalized logistic (Richards curve) with the asymmetry parameter Q fixed to 1 (inflection point = T₀), keeping 4 free thermal parameters: T₀, k, b, ν.
+
 ---
 
 ## Getting started
@@ -55,6 +57,17 @@ Then open the notebooks in `notebooks/manuscripts/`.
 > **Pre-built image on GHCR coming soon.** Until then, the image is built locally from `docker/Dockerfile` on first run (takes ~10 minutes).
 
 **Forward posteriors in Docker**: the container bind-mounts your local `data/` directory, so posteriors cached at `data/cache/TEXAS_posterior_cache/` are available automatically inside JupyterLab. Download them first — see [Data and posteriors](#data-and-posteriors) below.
+
+**Platform compatibility:**
+
+| Platform | Status | Notes |
+|---|---|---|
+| Linux (x86\_64) | ✅ Full support | Native — recommended |
+| Windows (Docker Desktop + WSL2) | ✅ Full support | Enable WSL2 backend in Docker Desktop settings |
+| macOS (Intel) | ✅ Full support | — |
+| macOS (Apple Silicon — M1/M2/M3) | ⚠️ Limited | Runs under QEMU emulation; Stan compilation and sampling will be significantly slower. A native `linux/arm64` image is planned. For now, [Option C (pip)](#option-c--pip-install-python-users) with a local conda env is faster on Apple Silicon. |
+
+**Cloud drive mounts**: `run.sh` will prompt you to set up OneDrive or Google Drive mounts. Paths differ by OS — the script handles this automatically. If using the VS Code Dev Container instead, run `.devcontainer/setup-cloud-drives.sh` once after first open.
 
 ---
 
@@ -176,14 +189,25 @@ Only needed if you want to re-fit the model to your own data or reproduce the pu
 Requires CmdStan and the GDGT training database (see [Data and posteriors](#data-and-posteriors) above).
 
 ```python
-from TEXAS import get_posterior, save_posterior
+from TEXAS import build_fwd_data, get_posterior, save_posterior
+
+# Build the Stan data dict — validates shapes, sets proxyObs_* keys and use_* flags
+data = build_fwd_data(
+    t_cul=cul_df["SST"].values,       proxy_cul=cul_df["scaledRI"].values,
+    t_meso=meso_df["SST"].values,     proxy_meso=meso_df["scaledRI"].values,
+    t_crtp=crtp_df["SST"].values,     proxy_crtp=crtp_df["scaledRI"].values,
+    gdgt23ratio_crtp=crtp_df["gdgt23ratio"].values,
+    no3_crtp=crtp_df["no3"].values,   # no3_cutoff auto-calculated if omitted
+)
 
 posterior, diagnostics = get_posterior(
-    data,                                       # your GDGT data dict
-    model_name="gen_logi_fixed_hier_crtp_multiv",
+    data,
+    stan_file="gen_logi_fixed_hier_crtp_multiv",
     temptype="SST",
+    proxy_name="scaledRI",            # required — saved to .nc attrs
 )
-save_posterior(posterior)   # saves to ~/.texas/ (or repo cache/ if running from source)
+save_posterior(posterior)
+# → gen_logi_fixed_hier_crtp_multiv_SST_scaledRI.nc
 ```
 
 ---
@@ -219,8 +243,9 @@ tests/              Unit tests
 | `predict_T_from_RI(scaledRI, prior_mu_t, prior_sigma_t, ...)` | Inverse reconstruction: Ring Index → temperature with full uncertainty (runs Stan) |
 | `download_posteriors(names, ...)` | Download all standard forward posteriors from Zenodo |
 | `download_posterior(name, ...)` | Download a single forward posterior from Zenodo |
-| `get_posterior(data, model_name, temptype, ...)` | Run forward calibration Stan sampling |
-| `save_posterior(ds)` / `load_posterior(name)` | Persist / load forward posterior as compressed NetCDF |
+| `build_fwd_data(t_cul, proxy_cul, ..., no3_crtp, culmeso_posterior)` | Build validated Stan data dict for forward calibration; auto-detects predictors and `no3_cutoff` |
+| `get_posterior(data, stan_file, temptype, proxy_name, ...)` | Run forward calibration Stan sampling; `proxy_name` required, saved to `.nc` attrs |
+| `save_posterior(ds)` / `load_posterior(name)` | Persist / load forward posterior as compressed NetCDF; filename pattern: `{model}_{temptype}_{proxy_name}{suffix}.nc` |
 | `get_invT_posterior(...)` | Run inverse-T sampling and return full posterior xr.Dataset |
 | `generate_ensemble_auto(temperatures, posterior, ...)` | Sample draws from a posterior and compute calibration-curve percentiles |
 | `summarize_sampler_diagnostics(fit)` | Compute divergences, R-hat, ESS, E-BFMI from a CmdStanMCMC fit |

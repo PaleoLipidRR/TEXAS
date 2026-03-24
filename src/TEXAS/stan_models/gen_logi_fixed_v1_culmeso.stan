@@ -12,7 +12,6 @@ data {
 parameters {
   real<lower=-1.8> t0_culmeso;        // Center of the curve (NOT necessarily inflection)
   real<lower=0>    k_culmeso;             // Growth rate (B)
-  real<lower=0>    Q_culmeso;             // Q: curve-start factor
   real<lower=0>    b_culmeso;             // Lower asymptote (A)
 
   real<lower=0> sigma_proxyObs_cul;
@@ -23,16 +22,15 @@ model {
   // Priors
   t0_culmeso ~ normal(30, 10) T[-1.8, ];
   k_culmeso      ~ normal(0, 0.5) T[0, ];  // reverted - k is unbounded above in gen logistic
-  Q_culmeso      ~ normal(1, 30) T[0.1, ]; 
   b_culmeso      ~ beta(2, 5);
   sigma_proxyObs_cul  ~ normal(0.01, 0.1);
   sigma_proxyObs_meso ~ normal(0.01, 0.1);
 
-  // Generalized logistic mean vectors
+  // Generalized logistic mean vectors (Q fixed to 1, v fixed to 1 → standard logistic)
   vector[N_cul] mu_proxyObs_cul = b_culmeso + (1 - b_culmeso)
-    ./ (1 + Q_culmeso * exp(-k_culmeso * (t_cul - t0_culmeso)));
+    ./ (1 + exp(-k_culmeso * (t_cul - t0_culmeso)));
   vector[N_meso] mu_proxyObs_meso = b_culmeso + (1 - b_culmeso)
-    ./ (1 + Q_culmeso * exp(-k_culmeso * (t_meso - t0_culmeso)));
+    ./ (1 + exp(-k_culmeso * (t_meso - t0_culmeso)));
 
   // Likelihood
   proxyObs_cul  ~ normal(mu_proxyObs_cul, sigma_proxyObs_cul);
