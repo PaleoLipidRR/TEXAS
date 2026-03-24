@@ -38,6 +38,8 @@ src/TEXAS/stan_models/gen_logi_*
 src/TEXAS/stan_models/invT_*
 src/TEXAS/stan_models/logistic_*
 src/TEXAS/stan_models/linear_*
+# Re-include .stan source files (negation overrides binary-glob rules above)
+!src/TEXAS/stan_models/*.stan
 # Docs — gitignored by default; selectively un-ignore specific files when ready
 # to make them public by adding negation rules below, e.g.:
 #   !docs/index.md

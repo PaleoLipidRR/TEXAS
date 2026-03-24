@@ -17,7 +17,7 @@ data {
 parameters {
   real<lower=10, upper=50> t0_crtp;            // center (not necessarily inflection point)
   real<lower=0.01> k_crtp;                     // growth rate (unbounded above, matching culmeso)
-  real<lower=0.1, upper=0.6> b_crtp;           // lower asymptote
+  real<lower=0.1, upper=1.0> b_crtp;           // lower asymptote (upper=1 matches joint model)
   real<lower=0.1> v_crtp;                     // asymmetry / shape parameter (ν)
   real<lower=0> sigma_proxyObs_crtp;          // residual std dev
 }
