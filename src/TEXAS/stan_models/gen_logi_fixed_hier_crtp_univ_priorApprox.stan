@@ -18,7 +18,7 @@ parameters {
   real<lower=10, upper=50> t0_crtp;            // center (not necessarily inflection point)
   real<lower=0.01, upper=0.5> k_crtp;          // growth rate
   real<lower=0.1, upper=1.0> b_crtp;           // lower asymptote (upper=1 matches joint model)
-  real<lower=0.1> v_crtp;                     // asymmetry / shape parameter (ν)
+  real<lower=0.1, upper=10> v_crtp;           // asymmetry / shape parameter (ν)
   real<lower=0> sigma_proxyObs_crtp;          // residual std dev
 }
 

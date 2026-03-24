@@ -56,7 +56,7 @@ parameters {
     real<lower=10, upper=50>  t0_crtp;  // T₀: reference temperature (°C)
     real<lower=0.01, upper=0.5>  k_crtp;   // k: steepness
     real<lower=0.1,  upper=1.0>   b_crtp;   // b: lower asymptote (upper=1 matches joint model)
-    real<lower=0.1>               v_crtp;   // ν: shape
+    real<lower=0.1, upper=10>     v_crtp;   // ν: shape
 
     // ─── Non-thermal correction coefficients ──────────────────────────────────
     real<lower=-1, upper=0>  beta_G23_crtp;

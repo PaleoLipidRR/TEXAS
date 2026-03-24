@@ -57,7 +57,7 @@ parameters {
     real<lower=10, upper=50>  t0_culmeso;  // T₀: reference (center) temperature (°C)
     real<lower=0, upper=0.5>  k_culmeso;   // k: steepness of the RI–T slope
     real<lower=0, upper=1>    b_culmeso;   // b: lower asymptote (RI at very cold T)
-    real<lower=0.1>           v_culmeso;   // ν: shape; ν=1 → symmetric logistic
+    real<lower=0.1, upper=10> v_culmeso;   // ν: shape; ν=1 → symmetric logistic
 
     // ─── Coretop curve parameters (hierarchically linked to culmeso) ──────────
     // Each parameter is drawn from a normal centered on the culmeso value
@@ -66,7 +66,7 @@ parameters {
     real<lower=10, upper=50>  t0_crtp;
     real<lower=0, upper=0.5>  k_crtp;
     real<lower=0, upper=1>    b_crtp;
-    real<lower=0.1>           v_crtp;
+    real<lower=0.1, upper=10> v_crtp;
 
     // ─── Non-thermal regression coefficients (coretop only) ───────────────────
     // Bounded negative: these correct for warm bias in RI.
@@ -97,7 +97,7 @@ model {
     t0_culmeso ~ normal(30, 10) T[10, 50];  // Truncated to match declared bounds
     k_culmeso  ~ normal(0, 1) T[0, 0.5];
     b_culmeso  ~ beta(2, 5);
-    v_culmeso  ~ normal(0, 10) T[0.1, ];
+    v_culmeso  ~ normal(1, 2) T[0.1, 10];
 
     // ─── 2. Hyperpriors for hierarchical scale parameters ─────────────────────
     // Half-normal (truncated at 0): scales must be positive; penalize very
@@ -131,7 +131,7 @@ model {
     t0_crtp ~ normal(t0_culmeso, sigma_t0_culmeso) T[10, 50];
     k_crtp  ~ normal(k_culmeso,  sigma_k_culmeso)  T[0, 0.5];
     b_crtp  ~ normal(b_culmeso,  sigma_b_culmeso)  T[0, 1];
-    v_crtp  ~ normal(v_culmeso,  sigma_v_culmeso)  T[0.1, ];
+    v_crtp  ~ normal(v_culmeso,  sigma_v_culmeso)  T[0.1, 10];
 
     // Tight priors on correction coefficients (expected small effect sizes).
     beta_G23_crtp ~ normal(0, 0.05);
