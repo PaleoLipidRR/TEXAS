@@ -2,7 +2,8 @@
 
 from .builder import (
     build_invT_inputData,
-    InvTConfig
+    build_fwd_data,
+    InvTConfig,
 )
 from .filter import (
     filter_stan_compatible,
@@ -13,6 +14,7 @@ from .screening import MahalanobisOutlierDetector
 
 __all__ = [
     "build_invT_inputData",
+    "build_fwd_data",
     "InvTConfig",
     "filter_stan_compatible",
     "ensure_numpy",
