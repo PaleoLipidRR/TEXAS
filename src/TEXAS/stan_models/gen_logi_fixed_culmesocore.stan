@@ -26,7 +26,7 @@ parameters {
 model {
   // Priors
   t0_culmesocore  ~ normal(30, 10) T[-1.8, ];
-  k_culmesocore       ~ normal(0, 1) T[0, 0.5];
+  k_culmesocore       ~ normal(0, 0.2) T[0, 0.5];
   v_culmesocore       ~ normal(1, 2) T[0.1, 10];
   b_culmesocore       ~ beta(2, 5);
 
