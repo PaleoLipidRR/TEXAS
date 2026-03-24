@@ -122,6 +122,7 @@ def get_posterior(
     stan_file: str,
     temptype: str,
     *,
+    proxy_name: Optional[str] = None,
     iter_warmup: Optional[int] = None,
     iter_sampling: Optional[int] = None,
     threads_per_chain: Optional[int] = None,
@@ -187,16 +188,31 @@ def get_posterior(
 
     kwargs.setdefault("show_console", True)
 
+    if proxy_name is None:
+        import warnings
+        warnings.warn(
+            "proxy_name not provided to get_posterior(). "
+            "Specify proxy_name (e.g. 'scaledRI', 'TEX86') to enable proxy-type "
+            "validation in downstream inverse reconstructions. "
+            "This will be required in a future version.",
+            DeprecationWarning, stacklevel=2,
+        )
+
     compiler = StanCompiler()
     sampler = StanSampler(compiler)
 
-    return sampler.sample(
+    ds, diag = sampler.sample(
         data=data,
         stan_file=stan_file,
         temptype=temptype,
         cpp_options=cpp_options or None,
         **kwargs
     )
+
+    if proxy_name is not None:
+        ds.attrs["proxy_name"] = proxy_name
+
+    return ds, diag
 
 def find_index_with_priority(items, priorities):
     """Return the index of the first item whose string contains any priority (in order)."""

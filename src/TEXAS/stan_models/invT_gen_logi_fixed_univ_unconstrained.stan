@@ -3,7 +3,7 @@ data {
   int<lower=1> N;       
   int<lower=1> M;       
 
-  vector[N] scaledRI;    
+  vector[N] proxyObs;    
   vector[N] prior_mu_t;
   real prior_sigma_t;
 
@@ -12,7 +12,7 @@ data {
   vector[M] b;
   vector[M] Q;
   vector[M] v;
-  vector[M] sigma_scaledRI;
+  vector[M] sigma_proxyObs;
 }
 
 parameters {
@@ -20,16 +20,16 @@ parameters {
 }
 
 model {
-  vector[N] mu_scaledRI;
+  vector[N] mu_proxyObs;
 
   for (m in 1:M) {
     vector[N] t_col = t_est[:, m];
 
     t_col ~ normal(prior_mu_t, prior_sigma_t);
 
-    mu_scaledRI = b[m] + elt_divide(1 - b[m],
+    mu_proxyObs = b[m] + elt_divide(1 - b[m],
                      pow(1 + Q[m] * exp(-k[m] * (t_col - t0[m])), 1 / v[m]));
 
-    scaledRI ~ normal(mu_scaledRI, sigma_scaledRI[m]);
+    proxyObs ~ normal(mu_proxyObs, sigma_proxyObs[m]);
   }
 }
