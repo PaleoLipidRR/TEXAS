@@ -56,13 +56,13 @@ data {
 parameters {
     // ─── Generalized-logistic curve parameters (culture + mesocosm) ───────────
     real<lower=10, upper=50>  t0_culmeso;
-    real<lower=0, upper=1>    k_culmeso;
+    real<lower=0, upper=0.5>  k_culmeso;
     real<lower=0, upper=1>    b_culmeso;
     real<lower=0.1>           v_culmeso;
 
     // ─── Coretop curve parameters (hierarchically linked to culmeso) ──────────
     real<lower=10, upper=50>  t0_crtp;
-    real<lower=0, upper=1>    k_crtp;
+    real<lower=0, upper=0.5>  k_crtp;
     real<lower=0, upper=1>    b_crtp;
     real<lower=0.1>           v_crtp;
 
@@ -85,7 +85,7 @@ parameters {
 model {
     // ─── 1. Priors for culmeso curve parameters ───────────────────────────────
     t0_culmeso ~ normal(30, 10) T[10, 50];
-    k_culmeso  ~ normal(0, 1) T[0, 1];
+    k_culmeso  ~ normal(0, 1) T[0, 0.5];
     b_culmeso  ~ beta(2, 5);
     v_culmeso  ~ normal(0, 10) T[0.1, ];
 
@@ -110,7 +110,7 @@ model {
 
     // ─── 5. Hierarchical priors linking coretop parameters to culmeso ─────────
     t0_crtp ~ normal(t0_culmeso, sigma_t0_culmeso) T[10, 50];
-    k_crtp  ~ normal(k_culmeso,  sigma_k_culmeso)  T[0, 1];
+    k_crtp  ~ normal(k_culmeso,  sigma_k_culmeso)  T[0, 0.5];
     b_crtp  ~ normal(b_culmeso,  sigma_b_culmeso)  T[0, 1];
     v_crtp  ~ normal(v_culmeso,  sigma_v_culmeso)  T[0.1, ];
 
