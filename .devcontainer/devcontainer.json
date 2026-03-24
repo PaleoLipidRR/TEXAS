@@ -5,7 +5,7 @@
   "workspaceFolder": "/home/micromamba/app",
 
   "customizations": {
-    "vscode": { "extensions": ["ms-python.python", "ms-toolsai.jupyter", "ms-python.pylint"] }
+    "vscode": { "extensions": ["ms-python.python", "ms-python.vscode-pylance", "ms-toolsai.jupyter", "ms-python.pylint"] }
   },
 
   "settings": {

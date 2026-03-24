@@ -48,18 +48,32 @@ def save_posterior(
             raise ValueError("no3_cutoff must be set when use_no3=1")
         ttype += f"_no3_{cutoff}"
 
+    proxy_name = posterior.attrs.get("proxy_name", "") or ""
+    proxy_tag = f"_{proxy_name}" if proxy_name and proxy_name != "unknown" else ""
+
     # sanitize suffix
     if filename_suffix:
         filename_suffix = f"_{filename_suffix.strip('_')}"
 
-    outpath = outdir / f"{name}_{ttype}{filename_suffix}.nc"
+    outpath = outdir / f"{name}_{ttype}{proxy_tag}{filename_suffix}.nc"
     if outpath.exists() and not overwrite:
         raise FileExistsError(f"{outpath} exists and overwrite=False")
 
     posterior.attrs["filename"] = outpath.name
+    if not posterior.attrs.get("proxy_name"):
+        import warnings
+        warnings.warn(
+            "proxy_name is not set on this posterior. "
+            "Pass proxy_name= to get_posterior() (e.g. proxy_name='scaledRI'). "
+            "It is stored in the .nc file and used downstream to validate that "
+            "the correct proxy type is passed to predict_T_from_proxyObs().",
+            UserWarning, stacklevel=2,
+        )
+        posterior.attrs["proxy_name"] = "unknown"
     encoding = {var: {"zlib": True} for var in posterior.data_vars}
-    posterior.to_netcdf(outpath, encoding=encoding)
-    print(f"Saved forward posterior to {outpath}")
+    sanitized = _sanitize_attrs_for_netcdf(posterior)
+    sanitized.to_netcdf(outpath, encoding=encoding)
+    print(f"Saved forward posterior to {outpath}  [proxy_name='{posterior.attrs['proxy_name']}']")
     return outpath
 
 
@@ -152,8 +166,10 @@ def save_invT_posterior(
         raise FileExistsError(f"{outpath} exists and overwrite=False")
 
     posterior.attrs["filename"] = outpath.name
+    posterior.attrs.setdefault("proxy_name", "")
     encoding = {var: {"zlib": True} for var in posterior.data_vars}
-    posterior.to_netcdf(outpath, encoding=encoding)
+    sanitized = _sanitize_attrs_for_netcdf(posterior)
+    sanitized.to_netcdf(outpath, encoding=encoding)
     print(f"Saved inverse-T posterior to {outpath}")
     return outpath
 
@@ -244,6 +260,7 @@ def _save_invT_posterior(
     filepath = output_dir / f"{base}.nc"
     if filepath.exists() and not overwrite:
         raise FileExistsError(f"{filepath} already exists and overwrite=False.")
+    posterior.attrs.setdefault("proxy_name", "")
     encoding = {var: {"zlib": True} for var in posterior.data_vars}
     sanitized = _sanitize_attrs_for_netcdf(posterior)
     sanitized.to_netcdf(filepath, encoding=encoding)
