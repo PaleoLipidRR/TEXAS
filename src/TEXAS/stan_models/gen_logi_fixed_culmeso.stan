@@ -22,7 +22,7 @@ parameters {
 model {
   // Priors
   t0_culmeso ~ normal(30, 10) T[-1.8, ];
-  k_culmeso      ~ normal(0, 0.5) T[0, ];
+  k_culmeso      ~ normal(0, 0.2) T[0, 0.5];
   v_culmeso      ~ normal(1, 2) T[0.1, 10];
   b_culmeso      ~ beta(2, 5);
   sigma_proxyObs_cul  ~ normal(0.01, 0.1);

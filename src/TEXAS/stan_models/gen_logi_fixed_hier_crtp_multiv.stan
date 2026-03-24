@@ -95,7 +95,7 @@ model {
     // Weakly informative: broad enough to let data dominate, but anchored to
     // the known range of the RI–T relationship.
     t0_culmeso ~ normal(30, 10) T[10, 50];  // Truncated to match declared bounds
-    k_culmeso  ~ normal(0, 1) T[0, 0.5];
+    k_culmeso  ~ normal(0, 0.2) T[0, 0.5];
     b_culmeso  ~ beta(2, 5);
     v_culmeso  ~ normal(1, 2) T[0.1, 10];
 
