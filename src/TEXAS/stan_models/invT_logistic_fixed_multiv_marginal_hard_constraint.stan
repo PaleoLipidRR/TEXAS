@@ -55,7 +55,7 @@ functions {
   real ll_chunk(
       array[] int slice_indices,  // array of indices for this chunk
       int start, int end,
-      vector scaledRI,                 // full vector; slice inside
+      vector proxyObs,                 // full vector; slice inside
       vector T, vector prior_mu_t, real prior_sigma_t,
       int use_gd, int use_no3,
       vector gd, vector no3, real no3_cutoff,
@@ -69,7 +69,7 @@ functions {
 
     // Extract the subset of vectors relevant to this chunk.
     // segment(v, start, length) returns v[start : start+length-1].
-    vector[n_chunk] y      = segment(scaledRI,   start, n_chunk);
+    vector[n_chunk] y      = segment(proxyObs,   start, n_chunk);
     vector[n_chunk] T_seg  = segment(T,          start, n_chunk);
     vector[n_chunk] mu_seg = segment(prior_mu_t, start, n_chunk);
     vector[n_chunk] gd_seg = segment(gd,         start, n_chunk);
@@ -119,7 +119,7 @@ functions {
 data {
     // ─── Proxy observations ───────────────────────────────────────────────────
     int<lower=1> N;                    // Number of sediment samples
-    vector[N] scaledRI;                // Observed scaled Ring Index (∈ [0,1])
+    vector[N] proxyObs;                // Observed scaled Ring Index (∈ [0,1])
 
     // ─── Prior on paleotemperature ─────────────────────────────────────────────
     vector[N] prior_mu_t;              // Prior mean temperature per sample (°C)
@@ -145,7 +145,7 @@ data {
     vector[M] b;
     vector[M] beta_G23;        // β_{G₂/₃} per draw (zeros if unused)
     vector[M] beta_NO3;        // β_{NO₃} per draw (zeros if unused)
-    vector[M] sigma_scaledRI;  // Residual calibration noise per draw
+    vector[M] sigma_proxyObs;  // Residual calibration noise per draw
 
     // ─── Parallelism control ───────────────────────────────────────────────────
     // grainsize: approximate number of samples per parallel chunk.
@@ -179,8 +179,8 @@ model {
     // The prior and likelihood are both computed inside ll_chunk.
     target += reduce_sum(
         ll_chunk, indices, grainsize,
-        scaledRI, t_est, prior_mu_t, prior_sigma_t,
+        proxyObs, t_est, prior_mu_t, prior_sigma_t,
         use_gdgt23ratio, use_no3, gdgt23ratio, no3, no3_cutoff,
-        t0, k, b, beta_G23, beta_NO3, sigma_scaledRI
+        t0, k, b, beta_G23, beta_NO3, sigma_proxyObs
     );
 }

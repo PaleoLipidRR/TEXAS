@@ -57,9 +57,12 @@ def _attach_invT_metadata(
 
 # -------------------------------------------------------------------------
 def get_invT_posterior(
-    scaledRI: Union[np.ndarray, List[float]],
-    prior_mu_t: Union[np.ndarray, float],
-    prior_sigma_t: float,
+    proxyObs: Union[np.ndarray, List[float]] = None,
+    prior_mu_t: Union[np.ndarray, float] = None,
+    prior_sigma_t: float = None,
+    *,
+    proxy_name: Optional[str] = None,
+    scaledRI: Union[np.ndarray, List[float]] = None,  # deprecated alias
     fwd_posterior_name: Optional[str] = None,
     site_name: Optional[str] = None,
     temptype: Optional[str] = None,
@@ -88,6 +91,17 @@ def get_invT_posterior(
             - "direct": Use direct sampling models (more efficient, supports threading)
             - "ensemble": Use traditional ensemble models
     """
+    # Backward-compat: accept deprecated scaledRI kwarg
+    if scaledRI is not None and proxyObs is None:
+        import warnings
+        warnings.warn(
+            "The 'scaledRI' parameter is deprecated; use 'proxyObs' instead.",
+            DeprecationWarning, stacklevel=2,
+        )
+        proxyObs = scaledRI
+    if proxyObs is None:
+        raise TypeError("get_invT_posterior() missing required argument: 'proxyObs'")
+
     tracemalloc.start()
     start_time = time.perf_counter()
     system_info = get_system_info()
@@ -95,8 +109,32 @@ def get_invT_posterior(
     cfg = config or InvTConfig()
     predictors = predictors or {}
 
+    # Resolve forward posterior for proxy_name validation (avoid double I/O)
+    if fwd_posterior is None and fwd_posterior_name is not None:
+        fwd_posterior = load_posterior(fwd_posterior_name)
+
+    # proxy_name: inherit from forward posterior attrs, validate if both are known
+    fwd_proxy_name = fwd_posterior.attrs.get("proxy_name") if fwd_posterior is not None else None
+    if proxy_name is None:
+        if fwd_proxy_name is not None:
+            proxy_name = fwd_proxy_name  # auto-inherit
+        else:
+            import warnings
+            warnings.warn(
+                "The forward posterior has no 'proxy_name' attribute (older posterior). "
+                "Regenerate the forward posterior with proxy_name= to enable proxy-type "
+                "validation. Proceeding without validation.",
+                UserWarning, stacklevel=2,
+            )
+    elif fwd_proxy_name is not None and proxy_name != fwd_proxy_name:
+        raise ValueError(
+            f"proxy_name mismatch: the forward posterior was built with "
+            f"'{fwd_proxy_name}' but you passed '{proxy_name}'. "
+            f"Make sure you are using the correct proxy observations with this calibration."
+        )
+
     data, sampler_kwargs = build_invT_inputData(
-        scaledRI=scaledRI, prior_mu_t=prior_mu_t, prior_sigma_t=prior_sigma_t,
+        proxyObs=proxyObs, prior_mu_t=prior_mu_t, prior_sigma_t=prior_sigma_t,
         fwd_posterior_name=fwd_posterior_name, predictors=predictors, config=cfg,
         fwd_posterior=fwd_posterior,
     )
@@ -229,6 +267,9 @@ def get_invT_posterior(
     else:
         ds.attrs["temptype"] = "unknown_temptype"
 
+    if proxy_name is not None:
+        ds.attrs["proxy_name"] = proxy_name
+
     post_ds = get_invT_post_quantiles(ds)
 
     runtime = time.perf_counter() - start_time
@@ -326,10 +367,10 @@ def get_invT_post_quantiles(
     return xr.Dataset(processed_vars, attrs=posterior.attrs)
 
 # -------------------------------------------------------------------------
-def predict_temperature_from_RI(
-    scaledRI: Union[np.ndarray, List[float]],
-    prior_mu_t: Union[np.ndarray, float],
-    prior_sigma_t: float,
+def predict_temperature_from_proxyObs(
+    proxyObs: Union[np.ndarray, List[float]] = None,
+    prior_mu_t: Union[np.ndarray, float] = None,
+    prior_sigma_t: float = None,
     fwd_posterior_name: Optional[str] = None,
     site_name: Optional[str] = None,
     temptype: Optional[str] = None,
@@ -349,6 +390,9 @@ def predict_temperature_from_RI(
     constraint_type: Literal["unconstrained", "hard_constraint", "truncated_prior", "reparameterized", "soft"] = "unconstrained",
     min_temp: Optional[float] = None,
     fwd_posterior: Optional[xr.Dataset] = None,
+    proxy_name: Optional[str] = None,
+    *,
+    scaledRI: Union[np.ndarray, List[float]] = None,  # deprecated alias
 ) -> Dict[str, Any]:
     """
     High-level wrapper to run the inverse model and get temperature percentiles.
@@ -358,8 +402,17 @@ def predict_temperature_from_RI(
             - "direct": Use direct sampling models (more efficient, supports threading)
             - "ensemble": Use traditional ensemble models
     """
+    # Backward-compat: accept deprecated scaledRI kwarg
+    if scaledRI is not None and proxyObs is None:
+        import warnings
+        warnings.warn(
+            "The 'scaledRI' parameter is deprecated; use 'proxyObs' instead.",
+            DeprecationWarning, stacklevel=2,
+        )
+        proxyObs = scaledRI
+
     post_ds = get_invT_posterior(
-        scaledRI=scaledRI,
+        proxyObs=proxyObs,
         prior_mu_t=prior_mu_t,
         prior_sigma_t=prior_sigma_t,
         fwd_posterior_name=fwd_posterior_name,
@@ -380,6 +433,7 @@ def predict_temperature_from_RI(
         constraint_type=constraint_type,
         min_temp=min_temp,
         fwd_posterior=fwd_posterior,
+        proxy_name=proxy_name,
     )
 
     metadata = {
@@ -389,7 +443,8 @@ def predict_temperature_from_RI(
     }
 
     results = {
-        "scaledRI": np.asarray(scaledRI),
+        "proxyObs": np.asarray(proxyObs),
+        "proxy_name": post_ds.attrs.get("proxy_name"),
         "metadata": metadata,
         'p5': post_ds['t_est'].sel(quantile=0.05, drop=True).values,
         'p50': post_ds['t_est'].sel(quantile=0.50, drop=True).values,
@@ -400,3 +455,20 @@ def predict_temperature_from_RI(
         _save_invT_results(results, results_path)
 
     return results
+
+
+def predict_temperature_from_RI(*args, **kwargs):
+    """Deprecated: use predict_temperature_from_proxyObs() instead."""
+    import warnings
+    warnings.warn(
+        "predict_temperature_from_RI() is deprecated; "
+        "use predict_temperature_from_proxyObs() instead.",
+        DeprecationWarning, stacklevel=2,
+    )
+    # Map old positional arg name to new
+    if args and "proxyObs" not in kwargs and "scaledRI" not in kwargs:
+        kwargs["proxyObs"] = args[0]
+        args = args[1:]
+    elif "scaledRI" in kwargs:
+        kwargs["proxyObs"] = kwargs.pop("scaledRI")
+    return predict_temperature_from_proxyObs(*args, **kwargs)

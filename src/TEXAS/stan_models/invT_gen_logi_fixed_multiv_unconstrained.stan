@@ -2,7 +2,7 @@ data {
   int<lower=1> N;
   int<lower=1> M;
 
-  vector[N] scaledRI;
+  vector[N] proxyObs;
   vector[N] prior_mu_t;
   real<lower=0> prior_sigma_t;
 
@@ -11,7 +11,7 @@ data {
   vector[M] b;
   vector[M] Q;
   vector[M] v;
-  vector<lower=0>[M] sigma_scaledRI;
+  vector<lower=0>[M] sigma_proxyObs;
 
   int<lower=0,upper=1> use_gdgt23ratio;
   vector[N] gdgt23ratio;
@@ -30,7 +30,7 @@ parameters {
 model {
   for (m in 1:M) {
     vector[N] t_col = t_est[:, m];
-    vector[N] mu_scaledRI;
+    vector[N] mu_proxyObs;
     vector[N] denominator;
     vector[N] power_base;
 
@@ -41,11 +41,11 @@ model {
     // This prevents NaN results when Q is negative.
     power_base = fmax(0.0, 1 + Q[m] * exp(-k[m] * (t_col - t0[m])));
     denominator = pow(power_base, 1 / v[m]) + 1e-9;
-    mu_scaledRI = b[m] + elt_divide(1 - b[m], denominator);
+    mu_proxyObs = b[m] + elt_divide(1 - b[m], denominator);
 
     // Optional GDGT-2/3 ratio term
     if (use_gdgt23ratio == 1) {
-      mu_scaledRI += beta_G23[m] * gdgt23ratio;
+      mu_proxyObs += beta_G23[m] * gdgt23ratio;
     }
 
     // Optional nitrate term
@@ -56,10 +56,10 @@ model {
           logno3[n] = log10(no3[n] + 1e-9);
         }
       }
-      mu_scaledRI += beta_NO3[m] * logno3;
+      mu_proxyObs += beta_NO3[m] * logno3;
     }
 
     // Likelihood
-    scaledRI ~ normal(mu_scaledRI, sigma_scaledRI[m]);
+    proxyObs ~ normal(mu_proxyObs, sigma_proxyObs[m]);
   }
 }

@@ -42,7 +42,7 @@ def extract_and_update_metadata(
     version : str, optional
       Your package or model version.
     suffixes : list of str, optional
-      Which suffixes to scan for scaledRI_* and predictor_* arrays.
+      Which suffixes to scan for proxyObs_* and predictor_* arrays.
     direct_keys : list of str, optional
       Which scalar or array keys to pull directly from `data`.
     """
@@ -75,9 +75,11 @@ def extract_and_update_metadata(
         else:
             metadata[key] = val
 
-    # 3) summarize any scaledRI_<suffix> arrays
+    # 3) summarize any proxyObs_<suffix> arrays (also accept legacy scaledRI_<suffix>)
     for suf in suffixes:
-        arr_key = f"scaledRI_{suf}"
+        arr_key = f"proxyObs_{suf}"
+        if arr_key not in data:
+            arr_key = f"scaledRI_{suf}"  # backward compat with old data dicts
         if arr_key not in data:
             continue
         arr = np.asarray(data[arr_key], dtype=float)

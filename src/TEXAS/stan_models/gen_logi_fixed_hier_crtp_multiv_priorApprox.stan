@@ -29,7 +29,7 @@ data {
     // ─── Coretop (sediment) data ──────────────────────────────────────────────
     int<lower=1> N_crtp;
     vector[N_crtp] t_crtp;         // Modern instrumental temperature at each site (°C)
-    vector[N_crtp] scaledRI_crtp;  // Observed scaled Ring Index from sediment
+    vector[N_crtp] proxyObs_crtp;  // Observed scaled Ring Index from sediment
 
     // ─── Optional non-thermal predictors ──────────────────────────────────────
     vector[N_crtp] gdgt23ratio_crtp;
@@ -65,7 +65,7 @@ parameters {
     real<lower=-1, upper=0>  beta_NO3_crtp;
 
     // ─── Residual observation noise ───────────────────────────────────────────
-    real<lower=0>  sigma_scaledRI_crtp;
+    real<lower=0>  sigma_proxyObs_crtp;
 }
 
 model {
@@ -85,21 +85,21 @@ model {
     // ─── 2. Likelihood for coretop data ───────────────────────────────────────
     //
     // Step A: Base thermal term — vectorized over all N_crtp sites.
-    vector[N_crtp] mu_scaledRI_crtp = b_crtp + (1 - b_crtp)
+    vector[N_crtp] mu_proxyObs_crtp = b_crtp + (1 - b_crtp)
         ./ pow(1 + Q_crtp * exp(-k_crtp * (t_crtp - t0_crtp)), 1.0 / v_crtp);
 
     // Step B: Ecology correction (if enabled) — vectorized element-wise multiply.
     if (use_gdgt23ratio == 1)
-        mu_scaledRI_crtp += beta_G23_crtp * gdgt23ratio_crtp;
+        mu_proxyObs_crtp += beta_G23_crtp * gdgt23ratio_crtp;
 
     // Step C: NO₃ correction (if enabled) — loop required for threshold condition.
     if (use_no3 == 1) {
         for (i in 1:N_crtp) {
             if (no3_crtp[i] > 0 && no3_crtp[i] < no3_cutoff)
-                mu_scaledRI_crtp[i] += beta_NO3_crtp * log10(no3_crtp[i]);
+                mu_proxyObs_crtp[i] += beta_NO3_crtp * log10(no3_crtp[i]);
         }
     }
 
-    sigma_scaledRI_crtp ~ normal(0.01, 0.1);
-    scaledRI_crtp ~ normal(mu_scaledRI_crtp, sigma_scaledRI_crtp);
+    sigma_proxyObs_crtp ~ normal(0.01, 0.1);
+    proxyObs_crtp ~ normal(mu_proxyObs_crtp, sigma_proxyObs_crtp);
 }

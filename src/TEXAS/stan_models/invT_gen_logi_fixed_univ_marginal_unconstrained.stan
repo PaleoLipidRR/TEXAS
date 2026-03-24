@@ -2,7 +2,7 @@
 // invT_gen_logi_fixed_univ_marginal_unconstrained.stan
 //
 // PURPOSE: Bayesian paleotemperature reconstruction from observed Ring Index
-//          values. Given scaledRI observations and a forward calibration
+//          values. Given proxyObs observations and a forward calibration
 //          posterior, infers the posterior distribution of temperature for
 //          each sample.
 //
@@ -34,7 +34,7 @@
 data {
     // ─── Proxy observations to reconstruct ────────────────────────────────────
     int<lower=1> N;            // Number of sediment samples (downcore or coretop)
-    vector[N] scaledRI;        // Observed scaled Ring Index for each sample (∈ [0,1])
+    vector[N] proxyObs;        // Observed scaled Ring Index for each sample (∈ [0,1])
 
     // ─── Prior on paleotemperature ─────────────────────────────────────────────
     // A normal prior T ~ Normal(prior_mu_t, prior_sigma_t) encodes any independent
@@ -57,7 +57,7 @@ data {
     vector[M] b;               // b_m: lower asymptote
     vector[M] Q;               // Q_m: asymmetry; Q=1 → standard logistic
     vector[M] v;               // ν_m: shape
-    vector[M] sigma_scaledRI;  // σ_m: residual calibration noise
+    vector[M] sigma_proxyObs;  // σ_m: residual calibration noise
 }
 
 parameters {
@@ -93,7 +93,7 @@ model {
                 / pow(1 + Q[m] * exp(-k[m] * (t_est[n] - t0[m])), 1.0 / v[m]);
 
             // Log-likelihood: how well does this calibration curve explain RI_n?
-            lp[m] = normal_lpdf(scaledRI[n] | mu, sigma_scaledRI[m]);
+            lp[m] = normal_lpdf(proxyObs[n] | mu, sigma_proxyObs[m]);
         }
 
         // Average over all M calibration draws (marginalization).

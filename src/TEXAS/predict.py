@@ -23,8 +23,8 @@ Example
 >>> result["p50"]   # median calibration curve
 >>>
 >>> # Inverse: reconstruct temperature from downcore scaled RI
->>> result = predict_T_from_RI(
-...     scaledRI=my_ri_array,
+>>> result = predict_T_from_proxyObs(
+...     proxyObs=my_ri_array,
 ...     prior_mu_t=15.0,
 ...     prior_sigma_t=10.0,
 ...     fwd_posterior_name="gen_logi_fixed_hier_crtp_multiv_thermoT",
@@ -43,7 +43,7 @@ import xarray as xr
 
 from .stan.io import load_posterior
 from .ensemble.generator import generate_ensemble_auto
-from .stan.invT import predict_temperature_from_RI as _predict_temperature_from_RI
+from .stan.invT import predict_temperature_from_proxyObs as _predict_temperature_from_proxyObs
 from .data.builder import InvTConfig
 
 
@@ -127,12 +127,14 @@ def predict_RI_from_T(
     )
 
 
-def predict_T_from_RI(
-    scaledRI: Union[np.ndarray, List[float]],
-    prior_mu_t: Union[np.ndarray, float],
-    prior_sigma_t: float,
+def predict_T_from_proxyObs(
+    proxyObs: Union[np.ndarray, List[float]] = None,
+    prior_mu_t: Union[np.ndarray, float] = None,
+    prior_sigma_t: float = None,
     fwd_posterior_name: Optional[str] = None,
     *,
+    proxy_name: Optional[str] = None,
+    scaledRI: Union[np.ndarray, List[float]] = None,  # deprecated alias
     fwd_posterior: Optional[xr.Dataset] = None,
     temptype: Optional[str] = None,
     site_name: Optional[str] = None,
@@ -161,8 +163,8 @@ def predict_T_from_RI(
 
     Parameters
     ----------
-    scaledRI : array-like, shape (N,)
-        Observed scaled Ring Index values from downcore or coretop samples.
+    proxyObs : array-like, shape (N,)
+        Observed proxy values from downcore or coretop samples (e.g. scaledRI, TEX86).
     prior_mu_t : float or array-like, shape (N,)
         Prior mean temperature (°C).  Scalar applies the same prior to all
         N observations; array sets a site-specific prior per sample.
@@ -225,14 +227,24 @@ def predict_T_from_RI(
     Returns
     -------
     dict with keys:
-        ``"scaledRI"`` — input scaled RI array
-        ``"p5"``       — 5th percentile temperature (°C), shape (N,)
-        ``"p50"``      — median temperature (°C), shape (N,)
-        ``"p95"``      — 95th percentile temperature (°C), shape (N,)
-        ``"metadata"`` — run metadata dict (model name, attrs, etc.)
+        ``"proxyObs"``   — input proxy array
+        ``"proxy_name"`` — proxy type label (e.g. ``"scaledRI"``, ``"TEX86"``)
+        ``"p5"``         — 5th percentile temperature (°C), shape (N,)
+        ``"p50"``        — median temperature (°C), shape (N,)
+        ``"p95"``        — 95th percentile temperature (°C), shape (N,)
+        ``"metadata"``   — run metadata dict (model name, attrs, etc.)
     """
-    return _predict_temperature_from_RI(
-        scaledRI=scaledRI,
+    # Backward-compat: accept deprecated scaledRI kwarg
+    if scaledRI is not None and proxyObs is None:
+        import warnings
+        warnings.warn(
+            "The 'scaledRI' parameter is deprecated; use 'proxyObs' instead.",
+            DeprecationWarning, stacklevel=2,
+        )
+        proxyObs = scaledRI
+
+    return _predict_temperature_from_proxyObs(
+        proxyObs=proxyObs,
         prior_mu_t=prior_mu_t,
         prior_sigma_t=prior_sigma_t,
         fwd_posterior_name=fwd_posterior_name,
@@ -251,4 +263,20 @@ def predict_T_from_RI(
         model_type="direct",
         constraint_type=constraint_type,
         min_temp=min_temp,
+        proxy_name=proxy_name,
     )
+
+
+def predict_T_from_RI(*args, **kwargs):
+    """Deprecated: use predict_T_from_proxyObs() instead."""
+    import warnings
+    warnings.warn(
+        "predict_T_from_RI() is deprecated; use predict_T_from_proxyObs() instead.",
+        DeprecationWarning, stacklevel=2,
+    )
+    if args and "proxyObs" not in kwargs and "scaledRI" not in kwargs:
+        kwargs["proxyObs"] = args[0]
+        args = args[1:]
+    elif "scaledRI" in kwargs:
+        kwargs["proxyObs"] = kwargs.pop("scaledRI")
+    return predict_T_from_proxyObs(*args, **kwargs)

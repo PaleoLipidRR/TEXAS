@@ -24,17 +24,17 @@ data {
     // ─── Culture data ─────────────────────────────────────────────────────────
     int<lower=1> N_cul;
     vector[N_cul] t_cul;           // Known temperature for each culture experiment (°C)
-    vector[N_cul] scaledRI_cul;    // Observed scaled Ring Index (∈ [0,1])
+    vector[N_cul] proxyObs_cul;    // Observed scaled Ring Index (∈ [0,1])
 
     // ─── Mesocosm data ────────────────────────────────────────────────────────
     int<lower=1> N_meso;
     vector[N_meso] t_meso;         // Known temperature for each mesocosm experiment (°C)
-    vector[N_meso] scaledRI_meso;
+    vector[N_meso] proxyObs_meso;
 
     // ─── Coretop (sediment) data ──────────────────────────────────────────────
     int<lower=1> N_crtp;
     vector[N_crtp] t_crtp;         // Modern instrumental temperature at each site (°C)
-    vector[N_crtp] scaledRI_crtp;  // Observed scaled Ring Index from sediment
+    vector[N_crtp] proxyObs_crtp;  // Observed scaled Ring Index from sediment
 
     // ─── Optional non-thermal predictors (coretop only) ───────────────────────
     // Flags (0 or 1) control whether each correction is applied in the model.
@@ -88,9 +88,9 @@ parameters {
 
     // ─── Residual observation noise ───────────────────────────────────────────
     // Captures RI variability not explained by temperature (or ecology corrections).
-    real<lower=0>  sigma_scaledRI_cul;
-    real<lower=0>  sigma_scaledRI_meso;
-    real<lower=0>  sigma_scaledRI_crtp;
+    real<lower=0>  sigma_proxyObs_cul;
+    real<lower=0>  sigma_proxyObs_meso;
+    real<lower=0>  sigma_proxyObs_crtp;
 }
 
 model {
@@ -113,19 +113,19 @@ model {
     sigma_v_culmeso  ~ normal(0, 2)   T[0, ];
 
     // ─── 3. Priors for residual noise ─────────────────────────────────────────
-    sigma_scaledRI_cul  ~ normal(0.01, 0.1);
-    sigma_scaledRI_meso ~ normal(0.01, 0.1);
+    sigma_proxyObs_cul  ~ normal(0.01, 0.1);
+    sigma_proxyObs_meso ~ normal(0.01, 0.1);
 
     // ─── 4. Likelihood for culture + mesocosm data ────────────────────────────
     // Compute expected RI at each known temperature using the Richards curve.
     // Vectorized: Stan evaluates all N_cul / N_meso points in one expression.
-    vector[N_cul] mu_scaledRI_cul = b_culmeso + (1 - b_culmeso)
+    vector[N_cul] mu_proxyObs_cul = b_culmeso + (1 - b_culmeso)
         ./ pow(1 + Q_culmeso * exp(-k_culmeso * (t_cul - t0_culmeso)), 1.0 / v_culmeso);
-    vector[N_meso] mu_scaledRI_meso = b_culmeso + (1 - b_culmeso)
+    vector[N_meso] mu_proxyObs_meso = b_culmeso + (1 - b_culmeso)
         ./ pow(1 + Q_culmeso * exp(-k_culmeso * (t_meso - t0_culmeso)), 1.0 / v_culmeso);
 
-    scaledRI_cul  ~ normal(mu_scaledRI_cul,  sigma_scaledRI_cul);
-    scaledRI_meso ~ normal(mu_scaledRI_meso, sigma_scaledRI_meso);
+    proxyObs_cul  ~ normal(mu_proxyObs_cul,  sigma_proxyObs_cul);
+    proxyObs_meso ~ normal(mu_proxyObs_meso, sigma_proxyObs_meso);
 
     // ─── 5. Hierarchical priors linking coretop parameters to culmeso ─────────
     // Each coretop parameter is drawn from a normal centered on the culmeso
@@ -147,13 +147,13 @@ model {
     //
     // Step A: Base thermal term — vectorized over all N_crtp sites at once.
     //   Computes the Richards curve at each measured temperature.
-    vector[N_crtp] mu_scaledRI_crtp = b_crtp + (1 - b_crtp)
+    vector[N_crtp] mu_proxyObs_crtp = b_crtp + (1 - b_crtp)
         ./ pow(1 + Q_crtp * exp(-k_crtp * (t_crtp - t0_crtp)), 1.0 / v_crtp);
 
     // Step B: Ecology correction (if enabled) — add β_{G₂/₃} × gdgt23ratio.
     //   Fully vectorized (element-wise multiply, no loop needed).
     if (use_gdgt23ratio == 1)
-        mu_scaledRI_crtp += beta_G23_crtp * gdgt23ratio_crtp;
+        mu_proxyObs_crtp += beta_G23_crtp * gdgt23ratio_crtp;
 
     // Step C: NO₃ correction (if enabled) — add β_{NO₃} × log₁₀(NO₃).
     //   Requires a loop because the threshold condition (0 < NO₃ < cutoff)
@@ -161,10 +161,10 @@ model {
     if (use_no3 == 1) {
         for (i in 1:N_crtp) {
             if (no3_crtp[i] > 0 && no3_crtp[i] < no3_cutoff)
-                mu_scaledRI_crtp[i] += beta_NO3_crtp * log10(no3_crtp[i]);
+                mu_proxyObs_crtp[i] += beta_NO3_crtp * log10(no3_crtp[i]);
         }
     }
 
-    sigma_scaledRI_crtp ~ normal(0.01, 0.1);
-    scaledRI_crtp ~ normal(mu_scaledRI_crtp, sigma_scaledRI_crtp);
+    sigma_proxyObs_crtp ~ normal(0.01, 0.1);
+    proxyObs_crtp ~ normal(mu_proxyObs_crtp, sigma_proxyObs_crtp);
 }

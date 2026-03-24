@@ -13,7 +13,7 @@ PREDICTOR_BETA_NAMES = {
 }
 
 # Stan direct keys (if used across multiple places)
-DIRECT_KEYS = ["scaledRI", "prior_mu_t", "prior_sigma_t",
+DIRECT_KEYS = ["proxyObs", "prior_mu_t", "prior_sigma_t",
     "calibration_model_name", "N_cul", "N_meso", "N_crtp", "N",
     "prior_mu_t", "prior_sigma_t", "M"
 ]
