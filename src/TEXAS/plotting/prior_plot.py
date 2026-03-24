@@ -213,8 +213,7 @@ def plot_prior_distributions(
             if name.startswith(prefix + "_"):
                 grouped[prefix].append(name)
     param_groups = [g for g in include_groups if grouped[g]]
-    ncols = 3 if len(param_groups) > 3 else len(param_groups)
-    
+
     ### pop param_groups
     if ('beta_G23' in param_groups) and (_use_gdgt23ratio_detection == 0):
         param_groups.pop(param_groups.index('beta_G23'))
@@ -222,15 +221,17 @@ def plot_prior_distributions(
     if ('beta_NO3' in param_groups) and (_use_no3_detection == 0):
         param_groups.pop(param_groups.index('beta_NO3'))
 
-    
-    nrows = int(np.ceil(len(param_groups) / ncols))
-    
-    
-    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, 
-                             figsize=(set_fig_width_factor * ncols, set_fig_height_factor * nrows), 
-                             squeeze=True, clear=True,
-                             sharex=False, sharey=False,
-                             constrained_layout=True)
+    # ncols/nrows computed AFTER popping so the grid is sized correctly.
+    # Max layout is 2 rows × 3 cols (6 params: t0, k, b, v, beta_G23, beta_NO3).
+    ncols = min(3, len(param_groups))
+    nrows = int(np.ceil(len(param_groups) / ncols)) if ncols > 0 else 1
+
+    # squeeze=False guarantees axes is always 2-D (nrows × ncols) so indexing
+    # axes[row, col] is safe regardless of grid size.
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols,
+                             figsize=(set_fig_width_factor * ncols, set_fig_height_factor * nrows),
+                             squeeze=False, clear=True,
+                             sharex=False, sharey=False)
 
     # Keyed by idx_ds → (line_handle, label); populated during plotting so the
     # figure-level legend always has exactly one entry per dataset in list order.
@@ -239,7 +240,7 @@ def plot_prior_distributions(
 
     for idx, base in enumerate(param_groups):
         row_idx, col_idx = divmod(idx, ncols)
-        ax = axes[row_idx][col_idx]
+        ax = axes[row_idx, col_idx]
         ax.clear()
             
 
@@ -533,76 +534,36 @@ def plot_prior_distributions(
                 fig_handles.append(h_ds)
                 fig_labels.append(lbl_ds)
 
-        legend_rows = int(np.ceil(len(fig_labels) / set_leg_max_ncol))
+        legend_ncol = min(len(fig_labels), set_leg_max_ncol)
+        legend_nrow = int(np.ceil(len(fig_labels) / legend_ncol))
 
-        # # Set a more compact bottom_padding to remove excess white space
-        tight_layout_bottom_lookup = {
-            1: 0.12,
-            2: 0.1,
-            3: 0.08,
-            4: 0.06
-        }
+        # Reserve space at the bottom for the figure legend (≈0.05 per legend row).
+        # tight_layout fills the axes into rect=[left, bottom, right, top].
+        top_margin = 0.95 if show_suptitle else 1.0
+        bottom_margin = 0.05 + 0.04 * legend_nrow  # ~0.09 for 1 row, ~0.13 for 2 rows
+        fig.tight_layout(rect=[0, bottom_margin if show_figure_legend else 0.02, 1, top_margin])
 
-        
         if show_figure_legend:
+            # Place the legend's upper-centre at the top of the reserved space.
             fig.legend(
                 handles=fig_handles,
                 labels=fig_labels,
-                loc='lower right',
-                ncol=min(len(fig_labels), set_leg_max_ncol),
+                loc='upper center',
+                bbox_to_anchor=(0.5, bottom_margin),
+                ncol=legend_ncol,
                 fontsize=10,
-                bbox_to_anchor=(0.85, 0.15),
                 frameon=True,
                 borderaxespad=0.0,
                 handletextpad=0.4,
-                labelspacing=0.3
+                labelspacing=0.3,
             )
-        ### rect=[0,0,1,1] is the default for tight_layout() --> meaning that all axes plotting spaces will fill the whole figure space (ignoring legend boxes and titiles)
-        fig.tight_layout(rect=[
-            0,
-            tight_layout_bottom_lookup.get(nrows, 0.1) + (0.02 if legend_rows > 3 and show_figure_legend else 0),
-            1,
-            0.95])
-            
+
     if show_suptitle:
         fig.suptitle("Prior and Posterior Distributions", fontsize=14)
 
-    # axes[0][2].legend(loc='upper left', fontsize=8, ncol=1, frameon=False)
-    # Align legends for bottom row
-    for row in axes:
-        for ax in row:
-            if not ax.has_data():
-                ax.set_visible(False)
-                
-    # detect if there are axes[1] then make all axs[1][:] to have legend loc='upper left'
-    if axes.shape[0] > 1:
-        for ax in axes[1]:
-            handles, labels_in_ax = ax.get_legend_handles_labels()
-            
-            revised_labels_in_ax = []
-            for lbl in labels_in_ax:
-                revised_lbl = lbl
-                for key, val in ax_legends_labels_dict.items():
-                    if key in lbl:
-                        revised_lbl = val + revised_lbl.replace(key, "")
-                        break
-                revised_labels_in_ax.append(revised_lbl)
-            if handles and show_subplot_legend:
-                ax.legend(handles, revised_labels_in_ax, loc='upper right', fontsize=9, ncol=1, frameon=False)
+    # Hide any unused subplots in the grid (e.g. last cell when param count is odd).
+    for ax in axes.flat:
+        if not ax.has_data():
+            ax.set_visible(False)
 
-    # Top right and bottom left legends override if present
-    if show_subplot_legend and axes.shape[0] > 1:
-        for ax in axes[1]:
-            handles, labels_in_ax = ax.get_legend_handles_labels()
-            revised_labels_in_ax = []
-            for lbl in labels_in_ax:
-                revised_lbl = lbl
-                for key, val in ax_legends_labels_dict.items():
-                    if key in lbl:
-                        revised_lbl = val + revised_lbl.replace(key, "")
-                        break
-                revised_labels_in_ax.append(revised_lbl)
-            if handles:
-                ax.legend(handles, revised_labels_in_ax, loc='upper right', fontsize=9, ncol=1, frameon=False)
-                
     return fig, axes
