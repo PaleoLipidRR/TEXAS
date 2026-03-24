@@ -89,6 +89,12 @@ Example: `t0_crtp`, `k_crtp`, `b_crtp`, `v_crtp`, `sigma_proxyObs_crtp`.
 
 > **Q parameter removed (2026-03-24)**: The asymmetry parameter Q has been dropped from all Stan models (both forward and invT). The generalized logistic curve now uses Q=1 (inflection point = T₀). All existing `.stan` files were edited in-place — no `_Q1` variant files exist. Cached `.nc` posteriors generated before this change contain `Q_crtp`/`Q_culmeso` variables that are no longer produced; regenerate them.
 
+> **Stan model bound fixes (2026-03-24)**:
+> - `k_crtp upper=0.5 → removed` in all priorApprox models (`gen_logi_fixed_hier_crtp_*_priorApprox*.stan`): the standalone culmeso model has no upper cap on k, and its posterior mean (~0.57) exceeded the old bound, pinning k against the constraint.
+> - `b_crtp upper=0.6 → upper=1.0` in all priorApprox models: same class of bug; joint models already used `upper=1`.
+> - `v prior T[0, ] → T[0.1, ]` in `gen_logi_fixed_culmesocore.stan`: prior truncation must match the `lower=0.1` parameter declaration (mismatched truncation gives an incorrect normalizing constant).
+> - `.gitignore` negation `!src/TEXAS/stan_models/*.stan` added so Stan source files created after the binary-glob rule are not silently untracked.
+
 ### Posterior caching
 
 Posteriors are saved as compressed NetCDF (`.nc`) in:
