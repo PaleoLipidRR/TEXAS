@@ -41,7 +41,7 @@ class InvTConfig:
 _FORWARD_PARAMS = ["t0", "k", "b"]  # Generalized logistic core parameters
 
 # Extra params for generalized logistic models (optional, depending on model)
-_EXTRA_PARAMS = ["v", "Q"]  # Asymmetry and shape parameters
+_EXTRA_PARAMS = ["v"]  # Shape parameter (Q is fixed to 1 in all active models)
 
 
 def build_invT_inputData(
@@ -62,7 +62,7 @@ def build_invT_inputData(
     ─────────
     1. Load forward calibration posterior from .nc file (or accept a pre-loaded Dataset)
     2. Randomly sample M parameter sets from that posterior
-    3. Extract calibration curve parameters (t0, k, b, Q, v, sigma)
+    3. Extract calibration curve parameters (t0, k, b, v, sigma)
     4. Package optional environmental predictors (GDGT-2/3, NO3) if used
     5. Return data dict (for Stan) + sampler_kwargs (for CmdStanPy)
 
@@ -110,7 +110,7 @@ def build_invT_inputData(
     # ═══════════════════════════════════════════════════════════════════════════
     # Accept a pre-loaded Dataset (fwd_posterior) or load from the cache by name.
     # Expected structure: xr.Dataset with dims (chain, draw) and data_vars like:
-    #   - t0_crtp, k_crtp, b_crtp, v_crtp, Q_crtp, sigma_proxyObs_crtp
+    #   - t0_crtp, k_crtp, b_crtp, v_crtp, sigma_proxyObs_crtp
     #   - beta_G23_crtp, beta_NO3_crtp (if multivariate)
     # ───────────────────────────────────────────────────────────────────────────
     if fwd_posterior is not None:
@@ -185,9 +185,9 @@ def build_invT_inputData(
     # 
     # Instead of using a single "best-fit" calibration, we randomly draw M
     # plausible calibration curves from the forward posterior. Each draw m
-    # represents one self-consistent set of parameters {t0, k, b, Q, v, sigma}.
+    # represents one self-consistent set of parameters {t0, k, b, v, sigma}.
     # 
-    # The inverse model will average predictions across all M draws, naturally
+    # The inverse model averages predictions across all M draws, naturally
     # accounting for calibration uncertainty.
     # ───────────────────────────────────────────────────────────────────────────
     total_available = post.dims[draw_dim_name]
@@ -242,10 +242,11 @@ def build_invT_inputData(
         used_posts.append(key)
 
     # ═══════════════════════════════════════════════════════════════════════════
-    # STEP 8: EXTRACT EXTRA PARAMETERS (v, Q) IF PRESENT
+    # STEP 8: EXTRACT EXTRA PARAMETERS (v) IF PRESENT
     # ═══════════════════════════════════════════════════════════════════════════
-    # Generalized logistic models include v (shape) and Q (asymmetry) parameters.
-    # Standard logistic models fix Q=1 and don't estimate v.
+    # Generalized logistic models include v (shape) parameter. Q is fixed to 1
+    # in all active models and is no longer sampled or passed to invT Stan models.
+    # Standard logistic models also fix v=1 and don't include it in the posterior.
     # ───────────────────────────────────────────────────────────────────────────
     for p in _EXTRA_PARAMS:
         key = f"{p}_{used_suffix}"
@@ -361,3 +362,370 @@ def build_invT_inputData(
     }
 
     return data, sampler_kwargs
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FORWARD CALIBRATION DATA BUILDER
+# ═══════════════════════════════════════════════════════════════════════════════
+
+_FWD_HYPERPARAMS = ["t0", "k", "b", "v"]
+
+
+def _fit_gen_logi_to_get_residuals(t: np.ndarray, proxy: np.ndarray) -> np.ndarray:
+    """
+    Fit generalized logistic (fixed upper asymptote = 1) to (t, proxy) and
+    return residuals (proxy − predicted). Used internally to compute the
+    temperature-only baseline before finding the optimal NO3 threshold.
+    """
+    from scipy.optimize import curve_fit
+    from TEXAS.models.logistics import generalized_logistic_fixed_upper
+
+    def _model(x, t0, b, k, v):
+        return generalized_logistic_fixed_upper(x, t0=t0, b=b, k=k, v=v, Q=1.0)
+
+    try:
+        popt, _ = curve_fit(
+            _model, t, proxy,
+            p0=[25.0, 0.2, 0.04, 1.0],
+            bounds=([-5, 0.001, 1e-4, 0.01], [50, 0.99, 2.0, 50.0]),
+            maxfev=20000,
+        )
+        return proxy - _model(t, *popt)
+    except RuntimeError as e:
+        raise RuntimeError(
+            f"Generalized logistic fit failed while computing residuals for NO3 "
+            f"threshold calculation: {e}\n"
+            "Pass proxy_residuals_crtp= to provide pre-computed residuals."
+        )
+
+
+def _auto_no3_cutoff(
+    no3: np.ndarray,
+    t_crtp: np.ndarray,
+    proxy_crtp: np.ndarray,
+    proxy_residuals: Optional[np.ndarray] = None,
+) -> float:
+    """
+    Auto-calculate no3_cutoff via find_optimal_no3_threshold (Spearman method).
+    NaN rows are dropped across all arrays before scoring.
+    """
+    from TEXAS.models.multivariate import find_optimal_no3_threshold
+
+    if proxy_residuals is not None:
+        stack = np.column_stack([no3, proxy_residuals])
+        valid = np.all(np.isfinite(stack), axis=1)
+        no3_clean = no3[valid]
+        res_clean = proxy_residuals[valid]
+        n_excluded = int((~valid).sum())
+        if n_excluded:
+            print(f"      ({n_excluded} samples excluded due to NaN values)")
+    else:
+        stack = np.column_stack([no3, t_crtp, proxy_crtp])
+        valid = np.all(np.isfinite(stack), axis=1)
+        no3_clean = no3[valid]
+        t_clean = t_crtp[valid]
+        proxy_clean = proxy_crtp[valid]
+        n_excluded = int((~valid).sum())
+        print(
+            f"      Computing proxy residuals from generalized logistic fit "
+            f"(N={int(valid.sum())}/{len(no3)} samples"
+            + (f", {n_excluded} excluded with NaN NO3)" if n_excluded else ")")
+        )
+        res_clean = _fit_gen_logi_to_get_residuals(t_clean, proxy_clean)
+
+    optimal_cutoff, _ = find_optimal_no3_threshold(
+        no3_values=no3_clean,
+        residuals=res_clean,
+        score_method="spearmanr",
+    )
+    return round(float(optimal_cutoff), 1)
+
+
+def _extract_culmeso_hyperpriors(posterior: xr.Dataset) -> Dict[str, Any]:
+    """
+    Extract prior_mean_* / prior_sd_* hyperpriors from a culmeso forward posterior.
+    Returns a dict with those keys plus '_suffix' and '_n_draws' for logging.
+    """
+    vars_ = list(posterior.data_vars)
+    used_suffix = None
+    for sfx in ["culmeso", "culmesocore", "crtp", "meso", "cul"]:
+        if f"t0_{sfx}" in vars_:
+            used_suffix = sfx
+            break
+    if not used_suffix:
+        raise ValueError(
+            "Cannot find a parameter suffix in culmeso_posterior "
+            "(expected e.g. t0_culmeso). Check that you passed the correct dataset."
+        )
+
+    if "chain" in posterior.dims:
+        flat = posterior.stack(sample=("chain", "draw")).reset_index("sample")
+        n_draws = int(flat.dims["sample"])
+    elif "sample" in posterior.dims:
+        flat, n_draws = posterior, int(posterior.dims["sample"])
+    elif "draw" in posterior.dims:
+        flat, n_draws = posterior, int(posterior.dims["draw"])
+    else:
+        raise ValueError("Cannot find a draw dimension in culmeso_posterior.")
+
+    result: Dict[str, Any] = {"_suffix": used_suffix, "_n_draws": n_draws}
+    for p in _FWD_HYPERPARAMS:
+        key = f"{p}_{used_suffix}"
+        if key in flat:
+            vals = flat[key].values.ravel()
+            result[f"prior_mean_{p}"] = float(np.mean(vals))
+            result[f"prior_sd_{p}"]  = float(np.std(vals))
+    return result
+
+
+def build_fwd_data(
+    *,
+    # Culture observations
+    t_cul=None,
+    proxy_cul=None,
+    # Mesocosm observations
+    t_meso=None,
+    proxy_meso=None,
+    # Coretop observations
+    t_crtp=None,
+    proxy_crtp=None,
+    # Optional coretop predictors
+    gdgt23ratio_crtp=None,
+    no3_crtp=None,
+    no3_cutoff: Optional[float] = None,
+    proxy_residuals_crtp: Optional[np.ndarray] = None,
+    # Stage-1 culmeso posterior — auto-extracts hyperpriors and no3_cutoff
+    culmeso_posterior: Optional[xr.Dataset] = None,
+    # Manual hyperprior overrides (alternative or supplement to culmeso_posterior)
+    prior_mean_t0=None, prior_sd_t0=None,
+    prior_mean_k=None,  prior_sd_k=None,
+    prior_mean_b=None,  prior_sd_b=None,
+    prior_mean_v=None,  prior_sd_v=None,
+) -> Dict[str, Any]:
+    """
+    Build the Stan data dictionary for forward calibration models.
+
+    Handles all forward model variants:
+      - culmeso / Q1_culmeso / v1_culmeso  : pass t_cul, proxy_cul, t_meso, proxy_meso
+      - culmesocore                         : add t_crtp, proxy_crtp
+      - hier_crtp_multiv                    : add gdgt23ratio_crtp, no3_crtp
+      - hier_crtp_multiv_priorApprox        : add culmeso_posterior (extracts hyperpriors)
+      - hier_crtp_univ_priorApprox          : add culmeso_posterior (no predictors needed)
+
+    Args:
+        t_cul, proxy_cul:           Culture temperature and proxy arrays.
+        t_meso, proxy_meso:         Mesocosm temperature and proxy arrays.
+        t_crtp, proxy_crtp:         Coretop temperature and proxy arrays.
+        gdgt23ratio_crtp:           GDGT-2/GDGT-3 ratio for coretop samples.
+                                    Sets use_gdgt23ratio=1 if non-zero/non-NaN.
+        no3_crtp:                   Nitrate concentration for coretop samples.
+                                    Sets use_no3=1 if non-zero/non-NaN.
+        no3_cutoff:                 NO3 threshold for the nonthermal correction.
+                                    Priority: (1) this arg, (2) culmeso_posterior attrs,
+                                    (3) auto-calculated via Spearman method.
+        proxy_residuals_crtp:       Pre-computed proxy residuals for NO3 threshold
+                                    calculation. If omitted, residuals are computed
+                                    internally by fitting a generalized logistic curve.
+                                    Warning: Stan models use generalized logistic — residuals
+                                    from other functional forms may shift the threshold.
+        culmeso_posterior:          xr.Dataset from a completed culmeso forward run.
+                                    Auto-extracts prior_mean_*/prior_sd_* hyperpriors and
+                                    no3_cutoff (if saved in attrs).
+        prior_mean_*/prior_sd_*:    Manual hyperprior values. Override auto-extracted
+                                    values from culmeso_posterior for individual params.
+
+    Returns:
+        dict: Stan-ready data dict with proxyObs_* keys, N_* counts, use_* flags,
+              and hyperpriors — ready for get_posterior().
+    """
+    import warnings
+
+    # ── Validate dataset pairs and sizes ──────────────────────────────────────
+    _pairs = [
+        ("culture",  "cul",  t_cul,  proxy_cul),
+        ("mesocosm", "meso", t_meso, proxy_meso),
+        ("coretop",  "crtp", t_crtp, proxy_crtp),
+    ]
+    for label, sfx, t, p in _pairs:
+        if (t is None) != (p is None):
+            raise ValueError(
+                f"{label}: t_{sfx} and proxy_{sfx} must be provided together."
+            )
+        if t is not None and len(np.asarray(t)) != len(np.asarray(p)):
+            raise ValueError(
+                f"{label}: t_{sfx} (len={len(np.asarray(t))}) and "
+                f"proxy_{sfx} (len={len(np.asarray(p))}) must have the same length."
+            )
+
+    if all(t is None for _, _, t, _ in _pairs):
+        raise ValueError(
+            "build_fwd_data() requires at least one dataset "
+            "(culture, mesocosm, or coretop)."
+        )
+    if (gdgt23ratio_crtp is not None or no3_crtp is not None) and t_crtp is None:
+        raise ValueError(
+            "gdgt23ratio_crtp / no3_crtp require coretop data (t_crtp, proxy_crtp)."
+        )
+
+    # ── Build data dict ────────────────────────────────────────────────────────
+    data: Dict[str, Any] = {}
+    summary_lines: List[str] = []
+
+    def _range_str(t_arr, p_arr):
+        return (
+            f"N={len(t_arr)}"
+            f"  (t: {t_arr.min():.1f}–{t_arr.max():.1f}°C,"
+            f" proxy: {p_arr.min():.3f}–{p_arr.max():.3f})"
+        )
+
+    # Culture
+    if t_cul is not None:
+        t_arr = np.asarray(t_cul, dtype=float)
+        p_arr = np.asarray(proxy_cul, dtype=float)
+        data.update({"N_cul": len(t_arr), "t_cul": t_arr, "proxyObs_cul": p_arr})
+        summary_lines.append(f"   culture:   {_range_str(t_arr, p_arr)}")
+    else:
+        summary_lines.append("   culture:   —")
+
+    # Mesocosm
+    if t_meso is not None:
+        t_arr = np.asarray(t_meso, dtype=float)
+        p_arr = np.asarray(proxy_meso, dtype=float)
+        data.update({"N_meso": len(t_arr), "t_meso": t_arr, "proxyObs_meso": p_arr})
+        summary_lines.append(f"   mesocosm:  {_range_str(t_arr, p_arr)}")
+    else:
+        summary_lines.append("   mesocosm:  —")
+
+    # Coretop + predictors
+    if t_crtp is not None:
+        t_arr  = np.asarray(t_crtp,    dtype=float)
+        p_arr  = np.asarray(proxy_crtp, dtype=float)
+        N_crtp = len(t_arr)
+        data.update({"N_crtp": N_crtp, "t_crtp": t_arr, "proxyObs_crtp": p_arr})
+        summary_lines.append(f"   coretop:   {_range_str(t_arr, p_arr)}")
+
+        pred_parts: List[str] = []
+
+        # GDGT-2/3 ratio
+        if gdgt23ratio_crtp is not None:
+            g_arr = np.asarray(gdgt23ratio_crtp, dtype=float)
+            if len(g_arr) != N_crtp:
+                raise ValueError(
+                    f"gdgt23ratio_crtp length ({len(g_arr)}) != N_crtp ({N_crtp})."
+                )
+            use_g = int(not (np.all(np.isnan(g_arr)) or np.all(g_arr == 0)))
+            data.update({"gdgt23ratio_crtp": g_arr, "use_gdgt23ratio": use_g})
+            pred_parts.append(f"gdgt23ratio {'✓' if use_g else '✗'}")
+        else:
+            data.update({"gdgt23ratio_crtp": np.zeros(N_crtp), "use_gdgt23ratio": 0})
+
+        # NO3
+        if no3_crtp is not None:
+            n_arr = np.asarray(no3_crtp, dtype=float)
+            if len(n_arr) != N_crtp:
+                raise ValueError(
+                    f"no3_crtp length ({len(n_arr)}) != N_crtp ({N_crtp})."
+                )
+            use_n = int(not (np.all(np.isnan(n_arr)) or np.all(n_arr == 0)))
+            data.update({"no3_crtp": n_arr, "use_no3": use_n})
+
+            if use_n:
+                # Determine no3_cutoff — priority: explicit > posterior attrs > auto-calc
+                if no3_cutoff is not None:
+                    final_cutoff  = float(no3_cutoff)
+                    cutoff_source = "user-provided"
+                elif (culmeso_posterior is not None
+                      and culmeso_posterior.attrs.get("no3_cutoff") is not None):
+                    final_cutoff  = float(culmeso_posterior.attrs["no3_cutoff"])
+                    cutoff_source = "from culmeso_posterior attrs"
+                else:
+                    print("   🔍 Auto-calculating no3_cutoff (Spearman method)...")
+                    if proxy_residuals_crtp is not None:
+                        warnings.warn(
+                            "Pre-computed proxy_residuals_crtp provided. "
+                            "Note: Stan models use generalized logistic functional form — "
+                            "residuals from other models may produce a suboptimal threshold.",
+                            UserWarning, stacklevel=2,
+                        )
+                    final_cutoff = _auto_no3_cutoff(
+                        n_arr, t_arr, p_arr,
+                        proxy_residuals=proxy_residuals_crtp,
+                    )
+                    cutoff_source = "auto-calculated (Spearman)"
+                    print(f"      → no3_cutoff = {final_cutoff:.3g} µmol/L")
+
+                # Validate cutoff
+                if final_cutoff <= 0:
+                    warnings.warn(
+                        f"no3_cutoff={final_cutoff} ≤ 0. _no3ratio Stan models require "
+                        "cutoff > 0 (used as log10(no3/cutoff) denominator). "
+                        "Specify a positive no3_cutoff= explicitly.",
+                        UserWarning, stacklevel=2,
+                    )
+                no3_min = float(np.nanmin(n_arr))
+                no3_max = float(np.nanmax(n_arr))
+                if not (no3_min <= final_cutoff <= no3_max):
+                    warnings.warn(
+                        f"no3_cutoff={final_cutoff:.3g} is outside the range of no3_crtp "
+                        f"({no3_min:.3g}–{no3_max:.3g} µmol/L). The NO3 correction may "
+                        "not apply to any samples. Check your data or threshold value.",
+                        UserWarning, stacklevel=2,
+                    )
+
+                data["no3_cutoff"] = final_cutoff
+                pred_parts.append(
+                    f"no3 ✓  (no3_cutoff={final_cutoff:.3g}, {cutoff_source})"
+                )
+            else:
+                data["no3_cutoff"] = 0.0
+                pred_parts.append("no3 ✗  (all zeros/NaN — correction disabled)")
+        else:
+            data.update({"no3_crtp": np.zeros(N_crtp), "use_no3": 0, "no3_cutoff": 0.0})
+
+        summary_lines.append(
+            f"   predictors: {', '.join(pred_parts) if pred_parts else 'none'}"
+        )
+    else:
+        summary_lines.append("   coretop:   —")
+        summary_lines.append("   predictors: none")
+
+    # ── Hyperpriors ────────────────────────────────────────────────────────────
+    manual_hp = {
+        "prior_mean_t0": prior_mean_t0, "prior_sd_t0": prior_sd_t0,
+        "prior_mean_k":  prior_mean_k,  "prior_sd_k":  prior_sd_k,
+        "prior_mean_b":  prior_mean_b,  "prior_sd_b":  prior_sd_b,
+        "prior_mean_v":  prior_mean_v,  "prior_sd_v":  prior_sd_v,
+    }
+
+    if culmeso_posterior is not None:
+        hp      = _extract_culmeso_hyperpriors(culmeso_posterior)
+        suffix  = hp.pop("_suffix")
+        n_draws = hp.pop("_n_draws")
+        data.update(hp)
+        for k, v in manual_hp.items():   # manual overrides win
+            if v is not None:
+                data[k] = float(v)
+        param_lines = [
+            f"      {p}: mean={data[f'prior_mean_{p}']:.3g}  sd={data[f'prior_sd_{p}']:.3g}"
+            for p in _FWD_HYPERPARAMS if f"prior_mean_{p}" in data
+        ]
+        summary_lines.append(
+            f"   hyperpriors from culmeso posterior  (suffix={suffix}, {n_draws} draws):"
+        )
+        summary_lines.extend(param_lines)
+    else:
+        provided = {k: float(v) for k, v in manual_hp.items() if v is not None}
+        data.update(provided)
+        if provided:
+            summary_lines.append("   hyperpriors: manual")
+            for k, v in provided.items():
+                summary_lines.append(f"      {k}: {v:.3g}")
+        else:
+            summary_lines.append("   hyperpriors: none")
+
+    # ── Print summary ──────────────────────────────────────────────────────────
+    print("📦 build_fwd_data summary:")
+    for line in summary_lines:
+        print(line)
+
+    return data

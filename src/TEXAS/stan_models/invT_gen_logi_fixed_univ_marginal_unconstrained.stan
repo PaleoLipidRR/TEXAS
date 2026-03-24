@@ -8,7 +8,7 @@
 //
 // APPROACH — "Marginal" (direct sampling):
 //   The forward calibration introduces uncertainty in the RI–T curve parameters
-//   θ = {T₀, k, b, Q, ν, σ}. We marginalize (integrate) over this uncertainty:
+//   θ = {T₀, k, b, ν, σ}. We marginalize (integrate) over this uncertainty:
 //
 //     p(RI_obs | T) = ∫ p(RI_obs | T, θ) · p(θ | calib. data) dθ
 //                   ≈ (1/M) Σ_{m=1}^{M}  Normal(RI_obs | f(T; θ_m), σ_m)
@@ -21,7 +21,7 @@
 //   instead estimates N×M temperatures simultaneously — much slower.
 //
 // CRITICAL: ALL PARAMETERS MUST USE THE SAME DRAW INDEX m
-//   {T₀_m, k_m, b_m, Q_m, ν_m, σ_m} are all indexed by m in the inner loop.
+//   {T₀_m, k_m, b_m, ν_m, σ_m} are all indexed by m in the inner loop.
 //   Mixing indices across parameters would break their posterior correlations
 //   and artificially inflate calibration uncertainty.
 //   This constraint is enforced in build_invT_inputData() (Python side).
@@ -55,7 +55,6 @@ data {
     vector[M] t0;              // T₀_m: reference temperature of each calibration draw (°C)
     vector[M] k;               // k_m: steepness
     vector[M] b;               // b_m: lower asymptote
-    vector[M] Q;               // Q_m: asymmetry; Q=1 → standard logistic
     vector[M] v;               // ν_m: shape
     vector[M] sigma_proxyObs;  // σ_m: residual calibration noise
 }
@@ -90,7 +89,7 @@ model {
             // Compute expected RI using the m-th calibration curve (Eq. 1).
             // ALL parameters use the same draw index [m] to preserve correlations.
             real mu = b[m] + (1 - b[m])
-                / pow(1 + Q[m] * exp(-k[m] * (t_est[n] - t0[m])), 1.0 / v[m]);
+                / pow(1 + exp(-k[m] * (t_est[n] - t0[m])), 1.0 / v[m]);
 
             // Log-likelihood: how well does this calibration curve explain RI_n?
             lp[m] = normal_lpdf(proxyObs[n] | mu, sigma_proxyObs[m]);

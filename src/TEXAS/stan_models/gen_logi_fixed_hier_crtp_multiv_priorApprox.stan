@@ -13,12 +13,12 @@
 //
 //   Workflow:
 //     Step 1: Run gen_logi_fixed_culmeso.stan → get posterior means/SDs
-//             of {t0, k, b, Q, v} (e.g., via extract_and_update_metadata)
+//             of {t0, k, b, v} (e.g., via extract_and_update_metadata)
 //     Step 2: Pass those summary statistics as prior_mean_* / prior_sd_* inputs
 //     Step 3: This model fits only the coretop parameters conditional on those priors
 //
-// CALIBRATION CURVE — generalized logistic (Richards, upper asymptote fixed = 1):
-//   RI = b + (1 - b) / (1 + Q · exp(-k · (T - T₀)))^(1/ν)    [Eq. 1]
+// CALIBRATION CURVE — generalized logistic (Richards, upper asymptote fixed = 1, Q fixed = 1):
+//   RI = b + (1 - b) / (1 + exp(-k · (T - T₀)))^(1/ν)    [Eq. 1]
 //
 // NON-THERMAL CORRECTIONS (if enabled):
 //   RI += β_{G₂/₃} · (gdgt23ratio)                            [Eq. 6]
@@ -46,7 +46,6 @@ data {
     real prior_mean_t0;   real prior_sd_t0;
     real prior_mean_k;    real prior_sd_k;
     real prior_mean_b;    real prior_sd_b;
-    real prior_mean_Q;    real prior_sd_Q;
     real prior_mean_v;    real prior_sd_v;
 }
 
@@ -57,7 +56,6 @@ parameters {
     real<lower=10, upper=50>      t0_crtp;  // T₀: reference temperature (°C)
     real<lower=0.01, upper=0.5>   k_crtp;   // k: steepness
     real<lower=0.1,  upper=0.6>   b_crtp;   // b: lower asymptote
-    real<lower=0.01>              Q_crtp;   // Q: asymmetry
     real<lower=0.1>               v_crtp;   // ν: shape
 
     // ─── Non-thermal correction coefficients ──────────────────────────────────
@@ -76,7 +74,6 @@ model {
     t0_crtp ~ normal(prior_mean_t0, prior_sd_t0);
     k_crtp  ~ normal(prior_mean_k,  prior_sd_k);
     b_crtp  ~ normal(prior_mean_b,  prior_sd_b);
-    Q_crtp  ~ normal(prior_mean_Q,  prior_sd_Q);
     v_crtp  ~ normal(prior_mean_v,  prior_sd_v);
 
     beta_G23_crtp ~ normal(0, 0.05);
@@ -86,7 +83,7 @@ model {
     //
     // Step A: Base thermal term — vectorized over all N_crtp sites.
     vector[N_crtp] mu_proxyObs_crtp = b_crtp + (1 - b_crtp)
-        ./ pow(1 + Q_crtp * exp(-k_crtp * (t_crtp - t0_crtp)), 1.0 / v_crtp);
+        ./ pow(1 + exp(-k_crtp * (t_crtp - t0_crtp)), 1.0 / v_crtp);
 
     // Step B: Ecology correction (if enabled) — vectorized element-wise multiply.
     if (use_gdgt23ratio == 1)

@@ -15,7 +15,6 @@ data {
 parameters {
   real<lower=-4> t0_culmesocore;   // center of generalized logistic
   real<lower=0>  k_culmesocore;        // growth rate
-  real<lower=0.01> Q_culmesocore;      // curve start factor (Q), must be > 0
   real<lower=0.1>  v_culmesocore;      // shape/asymmetry (ν), must be > 0
   real<lower=0>    b_culmesocore;      // lower asymptote
 
@@ -28,23 +27,22 @@ model {
   // Priors
   t0_culmesocore  ~ normal(30, 10) T[-1.8, ];
   k_culmesocore       ~ normal(0, 0.5) T[0, ];  // reverted - k is unbounded above in gen logistic
-  Q_culmesocore       ~ normal(1, 30) T[0, ]; 
-  v_culmesocore       ~ normal(1, 10) T[0, ]; 
+  v_culmesocore       ~ normal(1, 10) T[0, ];
   b_culmesocore       ~ beta(2, 5);
 
   sigma_proxyObs_cul  ~ normal(0.01, 0.1);
   sigma_proxyObs_meso ~ normal(0.01, 0.1);
   sigma_proxyObs_crtp ~ normal(0.01, 0.1);
 
-  // Generalized logistic curve (fixed upper bound = 1)
-  vector[N_cul] mu_proxyObs_cul = b_culmesocore 
-    + (1 - b_culmesocore) ./ pow(1 + Q_culmesocore * exp(-k_culmesocore * (t_cul - t0_culmesocore)), 1 / v_culmesocore);
+  // Generalized logistic curve (fixed upper bound = 1, Q fixed to 1)
+  vector[N_cul] mu_proxyObs_cul = b_culmesocore
+    + (1 - b_culmesocore) ./ pow(1 + exp(-k_culmesocore * (t_cul - t0_culmesocore)), 1 / v_culmesocore);
 
-  vector[N_meso] mu_proxyObs_meso = b_culmesocore 
-    + (1 - b_culmesocore) ./ pow(1 + Q_culmesocore * exp(-k_culmesocore * (t_meso - t0_culmesocore)), 1 / v_culmesocore);
+  vector[N_meso] mu_proxyObs_meso = b_culmesocore
+    + (1 - b_culmesocore) ./ pow(1 + exp(-k_culmesocore * (t_meso - t0_culmesocore)), 1 / v_culmesocore);
 
-  vector[N_crtp] mu_proxyObs_crtp = b_culmesocore 
-    + (1 - b_culmesocore) ./ pow(1 + Q_culmesocore * exp(-k_culmesocore * (t_crtp - t0_culmesocore)), 1 / v_culmesocore);
+  vector[N_crtp] mu_proxyObs_crtp = b_culmesocore
+    + (1 - b_culmesocore) ./ pow(1 + exp(-k_culmesocore * (t_crtp - t0_culmesocore)), 1 / v_culmesocore);
 
   // Likelihoods
   proxyObs_cul   ~ normal(mu_proxyObs_cul, sigma_proxyObs_cul);

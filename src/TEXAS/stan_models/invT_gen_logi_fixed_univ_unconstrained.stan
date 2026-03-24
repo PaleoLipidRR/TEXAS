@@ -10,7 +10,6 @@ data {
   vector[M] t0;
   vector[M] k;
   vector[M] b;
-  vector[M] Q;
   vector[M] v;
   vector[M] sigma_proxyObs;
 }
@@ -28,7 +27,7 @@ model {
     t_col ~ normal(prior_mu_t, prior_sigma_t);
 
     mu_proxyObs = b[m] + elt_divide(1 - b[m],
-                     pow(1 + Q[m] * exp(-k[m] * (t_col - t0[m])), 1 / v[m]));
+                     pow(1 + exp(-k[m] * (t_col - t0[m])), 1 / v[m]));
 
     proxyObs ~ normal(mu_proxyObs, sigma_proxyObs[m]);
   }

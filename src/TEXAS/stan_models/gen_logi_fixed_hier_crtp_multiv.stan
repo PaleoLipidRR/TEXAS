@@ -12,8 +12,8 @@
 //   hierarchical priors centered on the culmeso estimates (partial pooling).
 //   Optional ecology corrections are applied to coretop data only.
 //
-// CALIBRATION CURVE — generalized logistic (Richards, upper asymptote fixed = 1):
-//   RI = b + (1 - b) / (1 + Q · exp(-k · (T - T₀)))^(1/ν)    [Eq. 1]
+// CALIBRATION CURVE — generalized logistic (Richards, upper asymptote fixed = 1, Q fixed = 1):
+//   RI = b + (1 - b) / (1 + exp(-k · (T - T₀)))^(1/ν)    [Eq. 1]
 //
 // NON-THERMAL CORRECTIONS (if enabled, coretop only):
 //   RI += β_{G₂/₃} · (gdgt23ratio)                            [Eq. 6]
@@ -49,15 +49,14 @@ data {
 parameters {
     // ─── Generalized-logistic curve parameters (culture + mesocosm) ───────────
     // These describe the shape of the RI–T relationship.
-    // Eq. 1: RI = b + (1 - b) / (1 + Q · exp(-k · (T - T₀)))^(1/ν)
+    // Eq. 1: RI = b + (1 - b) / (1 + exp(-k · (T - T₀)))^(1/ν)   [Q fixed = 1]
     //
     // NOTE: T₀ is NOT the inflection point of the curve in general —
-    //   it is the reference temperature where the logistic term equals 1/(1+Q)^(1/ν).
-    //   Q and ν together shift and skew the inflection away from T₀.
+    //   it is the reference temperature where the logistic term equals 1/(1+1)^(1/ν).
+    //   ν shifts and skews the inflection away from T₀.
     real<lower=10, upper=50>  t0_culmeso;  // T₀: reference (center) temperature (°C)
     real<lower=0, upper=1>    k_culmeso;   // k: steepness of the RI–T slope
     real<lower=0, upper=1>    b_culmeso;   // b: lower asymptote (RI at very cold T)
-    real<lower=0.01>          Q_culmeso;   // Q: asymmetry; Q=1 → standard logistic
     real<lower=0.1>           v_culmeso;   // ν: shape; ν=1 → symmetric logistic
 
     // ─── Coretop curve parameters (hierarchically linked to culmeso) ──────────
@@ -67,7 +66,6 @@ parameters {
     real<lower=10, upper=50>  t0_crtp;
     real<lower=0, upper=1>    k_crtp;
     real<lower=0, upper=1>    b_crtp;
-    real<lower=0.01>          Q_crtp;
     real<lower=0.1>           v_crtp;
 
     // ─── Non-thermal regression coefficients (coretop only) ───────────────────
@@ -83,7 +81,6 @@ parameters {
     real<lower=0>  sigma_t0_culmeso;
     real<lower=0>  sigma_k_culmeso;
     real<lower=0>  sigma_b_culmeso;
-    real<lower=0>  sigma_Q_culmeso;
     real<lower=0>  sigma_v_culmeso;
 
     // ─── Residual observation noise ───────────────────────────────────────────
@@ -100,7 +97,6 @@ model {
     t0_culmeso ~ normal(30, 10) T[10, 50];  // Truncated to match declared bounds
     k_culmeso  ~ beta(2, 5);
     b_culmeso  ~ beta(2, 5);
-    Q_culmeso  ~ normal(1, 30) T[0, ];       // Half-normal: Q must be > 0
     v_culmeso  ~ normal(1, 10) T[0, ];       // Half-normal: ν must be > 0
 
     // ─── 2. Hyperpriors for hierarchical scale parameters ─────────────────────
@@ -109,7 +105,6 @@ model {
     sigma_t0_culmeso ~ normal(0, 5)   T[0, ];
     sigma_k_culmeso  ~ normal(0, 0.2) T[0, ];
     sigma_b_culmeso  ~ normal(0, 0.2) T[0, ];
-    sigma_Q_culmeso  ~ normal(0, 2)   T[0, ];
     sigma_v_culmeso  ~ normal(0, 2)   T[0, ];
 
     // ─── 3. Priors for residual noise ─────────────────────────────────────────
@@ -120,9 +115,9 @@ model {
     // Compute expected RI at each known temperature using the Richards curve.
     // Vectorized: Stan evaluates all N_cul / N_meso points in one expression.
     vector[N_cul] mu_proxyObs_cul = b_culmeso + (1 - b_culmeso)
-        ./ pow(1 + Q_culmeso * exp(-k_culmeso * (t_cul - t0_culmeso)), 1.0 / v_culmeso);
+        ./ pow(1 + exp(-k_culmeso * (t_cul - t0_culmeso)), 1.0 / v_culmeso);
     vector[N_meso] mu_proxyObs_meso = b_culmeso + (1 - b_culmeso)
-        ./ pow(1 + Q_culmeso * exp(-k_culmeso * (t_meso - t0_culmeso)), 1.0 / v_culmeso);
+        ./ pow(1 + exp(-k_culmeso * (t_meso - t0_culmeso)), 1.0 / v_culmeso);
 
     proxyObs_cul  ~ normal(mu_proxyObs_cul,  sigma_proxyObs_cul);
     proxyObs_meso ~ normal(mu_proxyObs_meso, sigma_proxyObs_meso);
@@ -136,7 +131,6 @@ model {
     t0_crtp ~ normal(t0_culmeso, sigma_t0_culmeso) T[10, 50];
     k_crtp  ~ normal(k_culmeso,  sigma_k_culmeso)  T[0, 1];
     b_crtp  ~ normal(b_culmeso,  sigma_b_culmeso)  T[0, 1];
-    Q_crtp  ~ normal(Q_culmeso,  sigma_Q_culmeso)  T[0.01, ];
     v_crtp  ~ normal(v_culmeso,  sigma_v_culmeso)  T[0.1, ];
 
     // Tight priors on correction coefficients (expected small effect sizes).
@@ -148,7 +142,7 @@ model {
     // Step A: Base thermal term — vectorized over all N_crtp sites at once.
     //   Computes the Richards curve at each measured temperature.
     vector[N_crtp] mu_proxyObs_crtp = b_crtp + (1 - b_crtp)
-        ./ pow(1 + Q_crtp * exp(-k_crtp * (t_crtp - t0_crtp)), 1.0 / v_crtp);
+        ./ pow(1 + exp(-k_crtp * (t_crtp - t0_crtp)), 1.0 / v_crtp);
 
     // Step B: Ecology correction (if enabled) — add β_{G₂/₃} × gdgt23ratio.
     //   Fully vectorized (element-wise multiply, no loop needed).

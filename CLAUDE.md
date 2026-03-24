@@ -53,7 +53,7 @@ docker compose up
 | `stan/sampler.py` | `StanSampler` + functional API `get_posterior()` / `sampler_invT_posterior()`; auto-detects optional predictors |
 | `stan/io.py` | `save_posterior()` / `load_posterior()` / `save_invT_posterior()` — persists xarray.Dataset as compressed NetCDF |
 | `stan/metadata.py` | Extracts and attaches metadata + prior strings to posterior datasets |
-| `data/builder.py` | `build_invT_inputData()` + `InvTConfig` — bridges forward → inverse by sampling M parameter sets from a forward posterior |
+| `data/builder.py` | `build_fwd_data()` — builds validated Stan data dict for forward calibration (proxyObs_* keys, auto use_* flags, no3_cutoff auto-calc); `build_invT_inputData()` + `InvTConfig` — bridges forward → inverse by sampling M parameter sets from a forward posterior |
 | `data/filter.py` / `data/screening.py` | Data cleaning and Mahalanobis screening |
 | `models/logistics.py` | Pure-Python logistic / generalized-logistic functions |
 | `models/multivariate.py` | Multivariate variants (GDGT23ratio, NO3 corrections) |
@@ -85,7 +85,9 @@ Posterior variables carry a suffix indicating which dataset they were estimated 
 - `meso` — mesocosm only
 - `cul` — culture only
 
-Example: `t0_crtp`, `k_crtp`, `b_crtp`, `sigma_scaledRI_crtp`.
+Example: `t0_crtp`, `k_crtp`, `b_crtp`, `v_crtp`, `sigma_proxyObs_crtp`.
+
+> **Q parameter removed (2026-03-24)**: The asymmetry parameter Q has been dropped from all Stan models (both forward and invT). The generalized logistic curve now uses Q=1 (inflection point = T₀). All existing `.stan` files were edited in-place — no `_Q1` variant files exist. Cached `.nc` posteriors generated before this change contain `Q_crtp`/`Q_culmeso` variables that are no longer produced; regenerate them.
 
 ### Posterior caching
 
@@ -93,7 +95,10 @@ Posteriors are saved as compressed NetCDF (`.nc`) in:
 - `data/cache/TEXAS_posterior_cache/` — forward calibration posteriors
 - `data/cache/TEXAS_invT_posterior_cache/` — inverse temperature posteriors
 
-Filenames are auto-generated from model name + temptype + optional predictor flags.
+Forward posterior filenames follow: `{model}_{temptype}_{proxy_name}{suffix}.nc`
+e.g. `gen_logi_fixed_hier_crtp_multiv_SST_scaledRI.nc`
+Optional predictor flags (`_gdgt23ratio`, `_no3_1.5`) are appended to `temptype` before `proxy_name`.
+`proxy_name` is omitted from the filename only if not set (falls back to old pattern for backward compat).
 
 ### Streamlit app (`streamlit_app/`)
 
@@ -111,17 +116,26 @@ Entry point: `streamlit_app/main.py`. Config (cache dir resolution, plot default
 
 ## Key Patterns
 
-**Optional predictor auto-detection**: `auto_detect_predictors()` in `stan/sampler.py` inspects the data dict for GDGT23/NO3 arrays and sets `use_gdgt23ratio` / `use_no3` integer flags for Stan. Explicit flags in the data dict override auto-detection.
+**Forward data construction**: `build_fwd_data()` in `data/builder.py` is the recommended way to build the Stan data dict — it enforces `proxyObs_*` key naming, validates array shapes, auto-sets `use_gdgt23ratio` / `use_no3` flags, and auto-calculates `no3_cutoff` via Spearman rank correlation if omitted. For two-stage `priorApprox` models, pass `culmeso_posterior=` to extract hyperpriors automatically. Hyperpriors for `t0`, `k`, `b`, `v` are extracted as raw mean/std from the culmeso posterior. Q is no longer a parameter (fixed to 1 in all models).
 
-**Posterior metadata**: After sampling, `extract_and_update_metadata()` attaches run info (model name, temptype, priors, duration, diagnostic summary) as `xr.Dataset.attrs`. Downstream code reads these attrs for decisions (e.g., `ensemble/detection.py` reads `stan_model_name` and `use_gdgt23ratio`).
+**Optional predictor auto-detection**: `auto_detect_predictors()` in `stan/sampler.py` inspects the data dict for GDGT23/NO3 arrays and sets `use_gdgt23ratio` / `use_no3` integer flags for Stan. Also translates legacy `scaledRI_*` data keys to `proxyObs_*` with a `DeprecationWarning` for backward compatibility.
+
+**Posterior metadata**: After sampling, `extract_and_update_metadata()` attaches run info (model name, temptype, priors, duration, diagnostic summary) as `xr.Dataset.attrs`. The `proxy_name` attr (e.g. `"scaledRI"`, `"TEX86"`) is required at `get_posterior()` call time and is always written to `.nc` files via `_sanitize_attrs_for_netcdf`. Downstream code reads these attrs for decisions (e.g., `ensemble/detection.py` reads `stan_model_name` and `use_gdgt23ratio`).
 
 **Forward → inverse pipeline**:
 ```python
 # 1. Forward calibration
-post, diag = get_posterior(data, "gen_logi_fixed_hier_crtp_multiv", temptype="SST")
-save_posterior(post)
+data = build_fwd_data(
+    t_cul=cul_df["SST"].values,   proxy_cul=cul_df["scaledRI"].values,
+    t_meso=meso_df["SST"].values, proxy_meso=meso_df["scaledRI"].values,
+    t_crtp=crtp_df["SST"].values, proxy_crtp=crtp_df["scaledRI"].values,
+    gdgt23ratio_crtp=crtp_df["gdgt23ratio"].values,
+    no3_crtp=crtp_df["no3"].values,  # no3_cutoff auto-calculated via Spearman if omitted
+)
+post, diag = get_posterior(data, "gen_logi_fixed_hier_crtp_multiv", temptype="SST", proxy_name="scaledRI")
+save_posterior(post)  # → gen_logi_fixed_hier_crtp_multiv_SST_scaledRI.nc
 
 # 2. Inverse reconstruction
-data_inv, kwargs = build_invT_inputData(scaledRI, prior_mu_t, prior_sigma_t, fwd_posterior_name="...")
+data_inv, kwargs = build_invT_inputData(proxyObs, prior_mu_t, prior_sigma_t, fwd_posterior_name="...")
 post_inv, diag = sampler_invT_posterior(data_inv, "invT_gen_logi_fixed_multiv", **kwargs)
 ```
