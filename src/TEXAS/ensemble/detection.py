@@ -57,16 +57,13 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
 
     # Detect presence of optional parameter groups without assuming attrs
     has_v_any   = ("v" in vars_) or any(v.startswith("v_") for v in vars_)
-    has_Q_any   = ("Q" in vars_) or any(v.startswith("Q_") for v in vars_)
-    has_gdz_any = ("use_gdgt23ratio" in attrs_) 
-    has_no3_any = ("use_no3" in attrs_) 
+    has_gdz_any = ("use_gdgt23ratio" in attrs_)
+    has_no3_any = ("use_no3" in attrs_)
 
     # Build candidate basenames up-front for suffix selection
     basenames = ["t0", "b", "k"]
     if has_v_any:
         basenames.append("v")
-    if has_Q_any:
-        basenames.append("Q")
     if has_gdz_any:
         basenames += ["beta_G23"]
     if has_no3_any:
@@ -77,23 +74,19 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
 
     # Now, re-evaluate presence WITH the chosen suffix
     has_v   = (f"v_{suffix}" in vars_) or (suffix == "" and "v" in vars_)
-    has_Q   = (f"Q_{suffix}" in vars_) or (suffix == "" and "Q" in vars_)
-    has_gdz = ("use_gdgt23ratio" in attrs_) 
+    has_gdz = ("use_gdgt23ratio" in attrs_)
     has_no3 = ("use_no3" in attrs_) 
     detected_no3_cutoff = 0.0
     if has_no3:
         detected_no3_cutoff = posterior_ds.attrs.get("no3_cutoff", 0.0)
 
     # Build param list and select model
-    # Use generalized logistic if v OR Q are present
-    is_generalized = has_v or has_Q
-    
+    is_generalized = has_v
+
     if is_generalized:
         params = ["t0", "b", "k"]
         if has_v:
             params.append("v")
-        if has_Q:
-            params.append("Q")
         if has_gdz:
             params.append("beta_G23")
         if has_no3:
