@@ -15,7 +15,7 @@ data {
 parameters {
   real<lower=-4> t0_culmesocore;   // center of generalized logistic
   real<lower=0, upper=0.5>  k_culmesocore;  // growth rate
-  real<lower=0.1>  v_culmesocore;      // shape/asymmetry (ν), must be > 0
+  real<lower=0.1, upper=10>  v_culmesocore;  // shape/asymmetry (ν)
   real<lower=0>    b_culmesocore;      // lower asymptote
 
   real<lower=0> sigma_proxyObs_cul;
@@ -27,7 +27,7 @@ model {
   // Priors
   t0_culmesocore  ~ normal(30, 10) T[-1.8, ];
   k_culmesocore       ~ normal(0, 1) T[0, 0.5];
-  v_culmesocore       ~ normal(0, 10) T[0.1, ];
+  v_culmesocore       ~ normal(1, 2) T[0.1, 10];
   b_culmesocore       ~ beta(2, 5);
 
   sigma_proxyObs_cul  ~ normal(0.01, 0.1);
