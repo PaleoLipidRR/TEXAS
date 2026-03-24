@@ -17,9 +17,11 @@ TEXAS implements a two-stage workflow:
 | **Forward calibration** | Fit a generalized logistic curve (Ring Index → temperature) to culture, mesocosm, and/or coretop data using a hierarchical Bayesian Stan model. Outputs a compressed posterior `.nc` file. |
 | **Inverse reconstruction (invT)** | Predict paleotemperatures from new Ring Index observations by marginalizing over posterior parameter draws. Returns a full posterior temperature distribution per sample. |
 
-Optional non-thermal corrections for GDGT-2/3 ratio and NO₃ concentration are supported.
+Optional non-thermal corrections for GDGT-2/3 ratio (β_{G₂/₃}) and NO₃ concentration (β_{NO₃}) are supported. The NO₃ correction uses log₁₀(NO₃ / cutoff) — a ratio form that is continuous at the cutoff boundary and avoids a step discontinuity in the calibration curve.
 
 The calibration curve is a generalized logistic (Richards curve) with the asymmetry parameter Q fixed to 1 (inflection point = T₀), keeping 4 free thermal parameters: T₀, k, b, ν.
+
+Inverse temperature (invT) Stan models use `reduce_sum` for within-chain parallelism — each observed proxy value is processed as an independent chunk, with threads allocated automatically per chain.
 
 ---
 
@@ -144,8 +146,8 @@ ds = xr.load_dataset("/content/drive/MyDrive/posteriors/gen_logi_fixed_hier_crtp
 
 # Pass the dataset directly — no cache lookup, no download
 result = predict_RI_from_T(temperatures=np.linspace(5, 35, 100), posterior=ds)
-result = predict_T_from_RI(scaledRI=my_ri, prior_mu_t=15.0, prior_sigma_t=10.0,
-                            fwd_posterior=ds, temptype="SST")
+result = predict_T_from_proxyObs(proxyObs=my_ri, prior_mu_t=15.0, prior_sigma_t=10.0,
+                                  fwd_posterior=ds, temptype="SST")
 ```
 
 ---
@@ -155,7 +157,7 @@ result = predict_T_from_RI(scaledRI=my_ri, prior_mu_t=15.0, prior_sigma_t=10.0,
 ```python
 import numpy as np
 import xarray as xr
-from TEXAS import predict_RI_from_T, predict_T_from_RI
+from TEXAS import predict_RI_from_T, predict_T_from_proxyObs
 
 # ── Option 1: use a posterior by name (auto-downloads from Zenodo if needed) ──
 result = predict_RI_from_T(
@@ -171,8 +173,8 @@ ds = xr.load_dataset("/path/to/gen_logi_fixed_hier_crtp_multiv_SST.nc")
 
 result = predict_RI_from_T(temperatures=np.linspace(5, 35, 100), posterior=ds)
 
-result = predict_T_from_RI(
-    scaledRI=my_ri_array,
+result = predict_T_from_proxyObs(
+    proxyObs=my_ri_array,
     prior_mu_t=15.0,        # prior mean temperature (°C)
     prior_sigma_t=10.0,     # prior uncertainty (°C)
     fwd_posterior=ds,       # pre-loaded dataset — no file I/O
@@ -240,7 +242,7 @@ tests/              Unit tests
 | Function | Description |
 |---|---|
 | `predict_RI_from_T(temperatures, posterior, ...)` | Forward prediction: temperature → Ring Index (pure Python) |
-| `predict_T_from_RI(scaledRI, prior_mu_t, prior_sigma_t, ...)` | Inverse reconstruction: Ring Index → temperature with full uncertainty (runs Stan) |
+| `predict_T_from_proxyObs(proxyObs, prior_mu_t, prior_sigma_t, ...)` | Inverse reconstruction: proxy → temperature with full uncertainty (runs Stan); `predict_T_from_RI` is a deprecated alias |
 | `download_posteriors(names, ...)` | Download all standard forward posteriors from Zenodo |
 | `download_posterior(name, ...)` | Download a single forward posterior from Zenodo |
 | `build_fwd_data(t_cul, proxy_cul, ..., no3_crtp, culmeso_posterior)` | Build validated Stan data dict for forward calibration; auto-detects predictors and `no3_cutoff` |
@@ -248,7 +250,11 @@ tests/              Unit tests
 | `save_posterior(ds)` / `load_posterior(name)` | Persist / load forward posterior as compressed NetCDF; filename pattern: `{model}_{temptype}_{proxy_name}{suffix}.nc` |
 | `get_invT_posterior(...)` | Run inverse-T sampling and return full posterior xr.Dataset |
 | `generate_ensemble_auto(temperatures, posterior, ...)` | Sample draws from a posterior and compute calibration-curve percentiles |
+| `find_optimal_no3_threshold(data, ...)` | Find optimal NO₃ cutoff that maximises GDGT–temperature correlation (Spearman-based); supports `log_method`, `score_method`, `weight_method` |
+| `find_optimal_no3_threshold_nointercept(data, ...)` | No-intercept variant; supports `no3_mode`, `log_method`, `weight_method` |
 | `summarize_sampler_diagnostics(fit)` | Compute divergences, R-hat, ESS, E-BFMI from a CmdStanMCMC fit |
+| `create_summary_table(fit)` | Return a formatted DataFrame of per-parameter diagnostics |
+| `detect_model_and_params(posterior)` | Infer suffix, model function, and optional-predictor flags from posterior attributes |
 | `plot_prior_distributions(posterior)` | Plot prior distributions from posterior metadata |
 
 Full API reference: [https://paleolipidRR.github.io/TEXAS](https://paleolipidRR.github.io/TEXAS) *(coming soon)*
