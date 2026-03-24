@@ -102,7 +102,7 @@ def plot_prior_distributions(
     show_suptitle: bool = True,
     kde_bw: float = 0.3,
     focus_on_posterior: bool = True,
-    include_groups: Sequence[str] = ("t0","k","b","v","Q","a","beta_G23","beta_NO3"),
+    include_groups: Sequence[str] = ("t0","k","b","v","a","beta_G23","beta_NO3"),
     suffix_include: Optional[List[str]] = None,
     zoomin_suffix: Optional[Union[str,List[str]]] = None,
     zoomin_dataset_idx: Optional[int] = None,
@@ -477,7 +477,6 @@ def plot_prior_distributions(
             "k_crtp": "k",
             "b_crtp": "b",
             "v_crtp": r"$\nu$",
-            "Q_crtp": "Q",
             "a_crtp": "a",
             "beta_G23_crtp": r"$\beta_{G_{2/3}}$",
             "beta_NO3_crtp": r"$\beta_{NO_3}$",
@@ -486,7 +485,6 @@ def plot_prior_distributions(
             "k_culmeso": r"k$_{culmeso}$",
             "b_culmeso": r"b$_{culmeso}$",
             "v_culmeso": r"$\nu_{culmeso}$",
-            "Q_culmeso": r"Q$_{culmeso}$",
             "a_culmeso": r"a$_{culmeso}$",
             "beta_G23_culmeso": r"$\beta_{G_{2/3},culmeso}$",
             "beta_NO3_culmeso": r"$\beta_{NO_3,culmeso}$",
@@ -511,7 +509,6 @@ def plot_prior_distributions(
             "k": "k",
             "b": "b",
             "v": r"$\nu$",
-            "Q": "Q",
             "a": "a",
             "beta_G23": r"$\beta_{G_{2/3}}$",
             "beta_NO3": r"$\beta_{NO_3}$",
@@ -540,7 +537,7 @@ def plot_prior_distributions(
         # Reserve space at the bottom for the figure legend (≈0.05 per legend row).
         # tight_layout fills the axes into rect=[left, bottom, right, top].
         top_margin = 0.95 if show_suptitle else 1.0
-        bottom_margin = 0.05 + 0.04 * legend_nrow  # ~0.09 for 1 row, ~0.13 for 2 rows
+        bottom_margin = -0.05 + -0.04 * legend_nrow  # ~0.09 for 1 row, ~0.13 for 2 rows
         fig.tight_layout(rect=[0, bottom_margin if show_figure_legend else 0.02, 1, top_margin])
 
         if show_figure_legend:
@@ -548,7 +545,7 @@ def plot_prior_distributions(
             fig.legend(
                 handles=fig_handles,
                 labels=fig_labels,
-                loc='upper center',
+                loc='lower center',
                 bbox_to_anchor=(0.5, bottom_margin),
                 ncol=legend_ncol,
                 fontsize=10,
