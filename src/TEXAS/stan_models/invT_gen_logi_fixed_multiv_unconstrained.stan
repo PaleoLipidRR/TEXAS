@@ -9,7 +9,6 @@ data {
   vector[M] t0;
   vector[M] k;
   vector[M] b;
-  vector[M] Q;
   vector[M] v;
   vector<lower=0>[M] sigma_proxyObs;
 
@@ -37,9 +36,8 @@ model {
     // Prior
     t_col ~ normal(prior_mu_t, prior_sigma_t);
 
-    // Ensure the base of the pow() function is non-negative ---
-    // This prevents NaN results when Q is negative.
-    power_base = fmax(0.0, 1 + Q[m] * exp(-k[m] * (t_col - t0[m])));
+    // Ensure the base of the pow() function is non-negative.
+    power_base = fmax(0.0, 1 + exp(-k[m] * (t_col - t0[m])));
     denominator = pow(power_base, 1 / v[m]) + 1e-9;
     mu_proxyObs = b[m] + elt_divide(1 - b[m], denominator);
 

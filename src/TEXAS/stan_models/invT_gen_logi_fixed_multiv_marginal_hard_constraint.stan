@@ -52,7 +52,7 @@ functions {
                 vector t_est, vector prior_mu_t, real prior_sigma_t,
                 int use_gd, int use_no3,
                 vector gd, vector no3, real no3_cutoff,
-                vector t0, vector k, vector b, vector Q, vector v,
+                vector t0, vector k, vector b, vector v,
                 vector beta_gd, vector beta_no3, vector sigma) {
     int M = rows(t0);
     real lp = 0;
@@ -93,9 +93,9 @@ functions {
         }
 
         // Complete the Richards curve:
-        //   mu = b[m] + corrections + (1 - b[m]) / (1 + Q·exp(-k·(T - T₀)))^(1/ν)
+        //   mu = b[m] + corrections + (1 - b[m]) / (1 + exp(-k·(T - T₀)))^(1/ν)
         // Note: 'lin' already holds b[m] + corrections from above.
-        real mu = lin + (1 - b[m]) / pow(1 + Q[m] * exp(-k[m] * (t_seg[i] - t0[m])), 1.0 / v[m]);
+        real mu = lin + (1 - b[m]) / pow(1 + exp(-k[m] * (t_seg[i] - t0[m])), 1.0 / v[m]);
 
         // Log-likelihood of the observed RI under this calibration draw.
         llk[m] = normal_lpdf(y_seg[i] | mu, sigma[m]);
@@ -128,13 +128,12 @@ data {
 
     // ─── Forward calibration posterior — M draws (all same-index) ─────────────
     // Each vector has length M. Row m is one complete self-consistent draw
-    // from the forward posterior: {T₀_m, k_m, b_m, Q_m, ν_m, β_m, σ_m}.
+    // from the forward posterior: {T₀_m, k_m, b_m, ν_m, β_m, σ_m}.
     // All indexed by [m] in the inner loop to preserve parameter correlations.
     int<lower=1> M;
     vector[M] t0;
     vector[M] k;
     vector[M] b;
-    vector[M] Q;
     vector[M] v;
     vector[M] beta_G23;        // β_{G₂/₃} per draw (zeros if unused)
     vector[M] beta_NO3;        // β_{NO₃} per draw (zeros if unused)
@@ -174,7 +173,7 @@ model {
         ll_chunk, indices, grainsize,
         proxyObs, t_est, prior_mu_t, prior_sigma_t,
         use_gdgt23ratio, use_no3, gdgt23ratio, no3, no3_cutoff,
-        t0, k, b, Q, v,
+        t0, k, b, v,
         beta_G23, beta_NO3, sigma_proxyObs
     );
 }

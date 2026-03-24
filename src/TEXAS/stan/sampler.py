@@ -1,6 +1,7 @@
 # TEXAS/stan/sampler.py (Revised 08/18/2025)
 
 import time
+import importlib.util
 import numpy as np
 import xarray as xr
 from typing import Tuple, Optional, Dict, Any, Literal
@@ -72,6 +73,7 @@ class StanSampler:
         """
         # Pop application-specific arguments that aren't for cmdstanpy
         temptype = kwargs.pop('temptype', None)
+        proxy_name = kwargs.pop('proxy_name', None)
         site_name = kwargs.pop('site_name', None)
         version = kwargs.pop('version', '1.0.0')
         recompile = kwargs.pop('recompile', False)  # ← CHANGE: capture instead of ignoring
@@ -98,6 +100,7 @@ class StanSampler:
         ds.attrs["run_duration (sec)"] = round(duration, 2)
         if temptype:
             ds.attrs["temptype"] = temptype
+        ds.attrs["proxy_name"] = proxy_name if proxy_name is not None else ""
 
         # Attach priors
         stan_path = self.compiler.resolve_stan_path(stan_file)
@@ -121,8 +124,8 @@ def get_posterior(
     data: dict,
     stan_file: str,
     temptype: str,
+    proxy_name: str,
     *,
-    proxy_name: Optional[str] = None,
     iter_warmup: Optional[int] = None,
     iter_sampling: Optional[int] = None,
     threads_per_chain: Optional[int] = None,
@@ -140,6 +143,23 @@ def get_posterior(
 
     # Normalize/auto-complete predictors & flags
     data = auto_detect_predictors(data)
+
+    # Guard: reject univ model when active predictors are present
+    _use_g23 = data.get("use_gdgt23ratio", 0)
+    _use_no3 = data.get("use_no3", 0)
+    _is_univ = "univ" in str(stan_file) and "multiv" not in str(stan_file)
+    if (_use_g23 or _use_no3) and _is_univ:
+        _active = []
+        if _use_g23:
+            _active.append("gdgt23ratio")
+        if _use_no3:
+            _active.append("no3")
+        raise ValueError(
+            f"Active predictor(s) {_active} detected in data but stan_file='{stan_file}' "
+            f"is a univariate model. Use a multivariate model (e.g. replace 'univ' with "
+            f"'multiv', such as 'gen_logi_fixed_hier_crtp_multiv_priorApprox') or "
+            f"omit the predictor arrays from the data dict."
+        )
 
     # Auto-detect optimal CPU settings for this machine.
     # parallel_chains: always apply (CmdStanPy already does min(chains, cpu_count)
@@ -186,17 +206,11 @@ def get_posterior(
     if max_treedepth is not None:
         kwargs["max_treedepth"] = max_treedepth
 
-    kwargs.setdefault("show_console", True)
+    _has_tqdm = importlib.util.find_spec("tqdm") is not None
+    kwargs.setdefault("show_progress", _has_tqdm)
+    kwargs.setdefault("show_console", not _has_tqdm)
 
-    if proxy_name is None:
-        import warnings
-        warnings.warn(
-            "proxy_name not provided to get_posterior(). "
-            "Specify proxy_name (e.g. 'scaledRI', 'TEX86') to enable proxy-type "
-            "validation in downstream inverse reconstructions. "
-            "This will be required in a future version.",
-            DeprecationWarning, stacklevel=2,
-        )
+    print(f"   proxy_name: {proxy_name}")
 
     compiler = StanCompiler()
     sampler = StanSampler(compiler)
@@ -205,12 +219,10 @@ def get_posterior(
         data=data,
         stan_file=stan_file,
         temptype=temptype,
+        proxy_name=proxy_name,
         cpp_options=cpp_options or None,
         **kwargs
     )
-
-    if proxy_name is not None:
-        ds.attrs["proxy_name"] = proxy_name
 
     return ds, diag
 
@@ -240,6 +252,29 @@ def _ensure_lenN_vector(enh: dict, key: str, N: int, fill: float = 0.0):
 def auto_detect_predictors(data: dict) -> dict:
     """Smart predictor detection with data validation (suffix-prioritized)."""
     enhanced = data.copy()
+
+    # 0) Translate legacy scaledRI_* keys → proxyObs_* for backward compatibility
+    _key_map = {
+        "scaledRI_":    "proxyObs_",
+        "mu_scaledRI_": "mu_proxyObs_",
+        "sigma_scaledRI_": "sigma_proxyObs_",
+    }
+    _renames = {}
+    for key in list(enhanced.keys()):
+        for old_prefix, new_prefix in _key_map.items():
+            if key.startswith(old_prefix):
+                _renames[key] = new_prefix + key[len(old_prefix):]
+                break
+    if _renames:
+        import warnings
+        warnings.warn(
+            f"Data dict contains legacy key(s) {list(_renames)}. "
+            "Rename scaledRI_* → proxyObs_* (e.g. scaledRI_cul → proxyObs_cul). "
+            "Auto-translating for now.",
+            DeprecationWarning, stacklevel=3,
+        )
+        for old, new in _renames.items():
+            enhanced[new] = enhanced.pop(old)
 
     # 1) pick the N_* key using priority order
     N_keys = [k for k in enhanced.keys() if k.startswith("N_")]
