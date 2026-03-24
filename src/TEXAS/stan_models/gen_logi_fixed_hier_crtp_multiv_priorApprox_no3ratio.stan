@@ -59,7 +59,7 @@ data {
 parameters {
     // ─── Coretop generalized-logistic curve parameters ────────────────────────
     real<lower=10, upper=50>      t0_crtp;
-    real<lower=0.01>              k_crtp;   // k: steepness (unbounded above, matching culmeso)
+    real<lower=0.01, upper=0.5>   k_crtp;   // k: steepness
     real<lower=0.1,  upper=1.0>   b_crtp;   // b: lower asymptote (upper=1 matches joint model)
     real<lower=0.1>               v_crtp;
 

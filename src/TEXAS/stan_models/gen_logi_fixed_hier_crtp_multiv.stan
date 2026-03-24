@@ -55,7 +55,7 @@ parameters {
     //   it is the reference temperature where the logistic term equals 1/(1+1)^(1/ν).
     //   ν shifts and skews the inflection away from T₀.
     real<lower=10, upper=50>  t0_culmeso;  // T₀: reference (center) temperature (°C)
-    real<lower=0, upper=1>    k_culmeso;   // k: steepness of the RI–T slope
+    real<lower=0, upper=0.5>  k_culmeso;   // k: steepness of the RI–T slope
     real<lower=0, upper=1>    b_culmeso;   // b: lower asymptote (RI at very cold T)
     real<lower=0.1>           v_culmeso;   // ν: shape; ν=1 → symmetric logistic
 
@@ -64,7 +64,7 @@ parameters {
     // (see hierarchical priors in the model block). This "partial pooling"
     // regularizes coretop estimates when data are sparse.
     real<lower=10, upper=50>  t0_crtp;
-    real<lower=0, upper=1>    k_crtp;
+    real<lower=0, upper=0.5>  k_crtp;
     real<lower=0, upper=1>    b_crtp;
     real<lower=0.1>           v_crtp;
 
@@ -95,7 +95,7 @@ model {
     // Weakly informative: broad enough to let data dominate, but anchored to
     // the known range of the RI–T relationship.
     t0_culmeso ~ normal(30, 10) T[10, 50];  // Truncated to match declared bounds
-    k_culmeso  ~ normal(0, 1) T[0, 1];
+    k_culmeso  ~ normal(0, 1) T[0, 0.5];
     b_culmeso  ~ beta(2, 5);
     v_culmeso  ~ normal(0, 10) T[0.1, ];
 
@@ -129,7 +129,7 @@ model {
     // This is the key "borrowing strength" step: coretop estimates are pulled
     // toward the lab calibration shape, reducing overfitting to sparse coretop data.
     t0_crtp ~ normal(t0_culmeso, sigma_t0_culmeso) T[10, 50];
-    k_crtp  ~ normal(k_culmeso,  sigma_k_culmeso)  T[0, 1];
+    k_crtp  ~ normal(k_culmeso,  sigma_k_culmeso)  T[0, 0.5];
     b_crtp  ~ normal(b_culmeso,  sigma_b_culmeso)  T[0, 1];
     v_crtp  ~ normal(v_culmeso,  sigma_v_culmeso)  T[0.1, ];
 
