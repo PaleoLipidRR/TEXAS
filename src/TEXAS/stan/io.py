@@ -177,8 +177,8 @@ def save_invT_posterior(
 # ─── Private helpers for invT I/O ──────────────────────────────────────────
 
 def _slug(x: str) -> str:
-    s = str(x).strip().lower().replace(" ", "-")
-    return re.sub(r"[^a-z0-9._-]+", "", s)
+    s = str(x).strip().replace(" ", "-")
+    return re.sub(r"[^a-zA-Z0-9._-]+", "", s)
 
 
 def _generate_filename_base(
