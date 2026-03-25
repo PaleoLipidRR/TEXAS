@@ -70,7 +70,7 @@ outputs/
 site/
 html_figures/
 figures/   # ← uncomment if you want to ignore generated plots too
-# data/cache/
+data/cache/
 data/spreadsheets/
 *.xlsx
 *.csv
