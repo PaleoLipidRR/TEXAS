@@ -534,19 +534,32 @@ def plot_prior_distributions(
         legend_ncol = min(len(fig_labels), set_leg_max_ncol)
         legend_nrow = int(np.ceil(len(fig_labels) / legend_ncol))
 
-        # Reserve space at the bottom for the figure legend (≈0.05 per legend row).
-        # tight_layout fills the axes into rect=[left, bottom, right, top].
         top_margin = 0.95 if show_suptitle else 1.0
-        bottom_margin = -0.05 + -0.04 * legend_nrow  # ~0.09 for 1 row, ~0.13 for 2 rows
-        fig.tight_layout(rect=[0, bottom_margin if show_figure_legend else 0.02, 1, top_margin])
 
+        # 1. Let tight_layout organize the subplots in the original figure size
+        fig.tight_layout(rect=[0, 0, 1, top_margin])
+
+        # 2. Add extra physical height to the figure specifically for the legend
+        #    (~0.35 inches per row + 0.25 inches of buffer)
+        legend_extra_inches = 0.25 + 0.25 * legend_nrow
+        w, h = fig.get_size_inches()
+        new_h = h + legend_extra_inches
+        fig.set_size_inches(w, new_h)
+
+        # 3. Calculate what fraction of the NEW height belongs to the legend space
+        bottom_frac = legend_extra_inches / new_h
+        
+        # Push subplots up so they sit exactly above the new legend space
+        fig.subplots_adjust(bottom=bottom_frac + 0.1)
+
+        # 4. Anchor the legend to the top of the reserved space, drawing downward
         if show_figure_legend:
-            # Place the legend's upper-centre at the top of the reserved space.
             fig.legend(
                 handles=fig_handles,
                 labels=fig_labels,
-                loc='lower center',
-                bbox_to_anchor=(0.5, bottom_margin),
+                loc='upper center',         
+                # Anchor right below the subplots (inside the figure boundaries)
+                bbox_to_anchor=(0.5, bottom_frac),  
                 ncol=legend_ncol,
                 fontsize=10,
                 frameon=True,
