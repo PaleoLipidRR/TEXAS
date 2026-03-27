@@ -191,7 +191,7 @@ def _generate_filename_base(
     Format: {site}_{model}_{temptype}_{tags}_{model_type}
     Model type (direct/ensemble) goes at the end for easy identification.
     """
-    site_name = meta.get("SiteName", meta.get("site_name", "unknown_site"))
+    site_name = _slug(meta.get("SiteName", meta.get("site_name", "unknown_site")))
     stan_model = meta.get("stan_model_name", meta.get("stan_model", "unknown_model"))
     temptype = meta.get("temptype", "unknown_temptype")
 
