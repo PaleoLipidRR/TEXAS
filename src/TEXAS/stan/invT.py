@@ -445,9 +445,17 @@ def predict_temperature_from_proxyObs(
         "proxyObs": np.asarray(proxyObs),
         "proxy_name": post_ds.attrs.get("proxy_name"),
         "metadata": metadata,
+        'p1': post_ds['t_est'].sel(quantile=0.01, drop=True).values,
         'p5': post_ds['t_est'].sel(quantile=0.05, drop=True).values,
+        'p10': post_ds['t_est'].sel(quantile=0.1, drop=True).values,
+        'p16': post_ds['t_est'].sel(quantile=0.16, drop=True).values,
+        'p25': post_ds['t_est'].sel(quantile=0.25, drop=True).values,
         'p50': post_ds['t_est'].sel(quantile=0.50, drop=True).values,
+        'p75': post_ds['t_est'].sel(quantile=0.75, drop=True).values,
+        'p84': post_ds['t_est'].sel(quantile=0.84, drop=True).values,
+        'p90': post_ds['t_est'].sel(quantile=0.90, drop=True).values,
         'p95': post_ds['t_est'].sel(quantile=0.95, drop=True).values,
+        'p99': post_ds['t_est'].sel(quantile=0.99, drop=True).values,
     }
 
     if save_results:
