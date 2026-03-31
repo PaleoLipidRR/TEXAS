@@ -335,7 +335,7 @@ def _fill_map(
     pcm2 = ax.pcolormesh(
         grid_lon_true, grid_lat_true, z_true,
         cmap=cmap, norm=norm,
-        transform=ccrs.PlateCarree(), zorder=3,
+        transform=ccrs.PlateCarree(), zorder=3, rasterized=True,
     )
     pcm2.set_rasterized(True)
 
