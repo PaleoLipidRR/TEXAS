@@ -150,6 +150,7 @@ def predict_T_from_proxyObs(
     min_temp: Optional[float] = None,
     threads_per_chain: Optional[int] = None,
     save_results: bool = False,
+    save_draws: bool = False,
     filename_tag: Optional[Union[str, Sequence[str]]] = None,
 ) -> Dict[str, Any]:
     """
@@ -219,8 +220,13 @@ def predict_T_from_proxyObs(
     threads_per_chain : int, optional
         Enable within-chain parallelism via Stan's ``reduce_sum``.
     save_results : bool
-        If True, save the posterior ``.nc`` and results ``.npz`` to the
+        If True, save the quantile posterior ``.nc`` and results ``.npz`` to the
         invT cache directory.
+    save_draws : bool
+        If True, also save the raw posterior draws (pre-quantile) as a separate
+        ``{base}_draws.nc`` file in the invT cache directory.  The file contains
+        ``t_est`` with dims ``(chain, draw, obs_idx)`` and is suitable for
+        kernel-density plots or custom quantile calculation.  Default False.
     filename_tag : str or list of str, optional
         Extra tag(s) appended to the output filename.
 
@@ -258,6 +264,7 @@ def predict_T_from_proxyObs(
         iter_sampling=iter_sampling,
         seed=seed,
         save_results=save_results,
+        save_draws=save_draws,
         filename_tag=filename_tag,
         threads_per_chain=threads_per_chain,
         model_type="direct",

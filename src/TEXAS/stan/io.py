@@ -271,6 +271,30 @@ def _save_invT_posterior(
     return filepath
 
 
+def _save_invT_draws(
+    draws: xr.Dataset,
+    cache_dir: Optional[Union[str, Path]] = None,
+    filename_tag: Optional[Union[str, Sequence[str]]] = None,
+    overwrite: bool = True,
+) -> Path:
+    """Save raw invT posterior draws (pre-quantile) as a compressed .nc file.
+
+    The filename mirrors the quantile posterior but with a ``_draws`` suffix,
+    e.g. ``ODP1259_..._040226_direct_draws.nc``.
+    """
+    output_dir = Path(cache_dir) if cache_dir else DEFAULT_INVT_DIR
+    output_dir.mkdir(parents=True, exist_ok=True)
+    base = _generate_filename_base(draws.attrs, filename_tag)
+    filepath = output_dir / f"{base}_draws.nc"
+    if filepath.exists() and not overwrite:
+        raise FileExistsError(f"{filepath} already exists and overwrite=False.")
+    encoding = {var: {"zlib": True} for var in draws.data_vars}
+    sanitized = _sanitize_attrs_for_netcdf(draws)
+    sanitized.to_netcdf(filepath, encoding=encoding)
+    print(f"✅ Raw draws saved to {filepath}")
+    return filepath
+
+
 def _save_invT_results(
     results: Dict[str, Any],
     path: Optional[Union[str, Path]] = None,
