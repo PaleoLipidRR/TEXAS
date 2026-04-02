@@ -18,6 +18,7 @@ from TEXAS.utils import get_repo_root
 from TEXAS.stan.io import (
     load_posterior,
     _save_invT_posterior,
+    _save_invT_draws,
     _save_invT_results,
 )
 from TEXAS.utils.system_info import simple_memory_check, get_system_info, suggest_stan_sampling_kwargs
@@ -69,6 +70,7 @@ def get_invT_posterior(
     predictors: Optional[Dict[str, np.ndarray]] = None,
     config: Optional[InvTConfig] = None,
     save: bool = True,
+    save_draws: bool = False,
     filename_tag: Optional[Union[str, Sequence[str]]] = None,
     cache_dir: Optional[Union[str, Path]] = None,
     chains: Optional[int] = None,
@@ -270,6 +272,9 @@ def get_invT_posterior(
     if proxy_name is not None:
         ds.attrs["proxy_name"] = proxy_name
 
+    if save_draws:
+        _save_invT_draws(ds, cache_dir=cache_dir, filename_tag=filename_tag)
+
     post_ds = get_invT_post_quantiles(ds)
 
     runtime = time.perf_counter() - start_time
@@ -380,6 +385,7 @@ def predict_temperature_from_proxyObs(
     iter_sampling: int = 1000,
     seed: Optional[int] = 42,
     save_results: bool = False,
+    save_draws: bool = False,
     filename_tag: Optional[Union[str, Sequence[str]]] = None,
     results_path: Optional[Union[str, Path]] = None,
     use_opencl: bool = False,
@@ -425,6 +431,7 @@ def predict_temperature_from_proxyObs(
         iter_sampling=iter_sampling,
         seed=seed,
         save=save_results,
+        save_draws=save_draws,
         use_opencl=use_opencl,
         threads_per_chain=threads_per_chain,
         stan_model_path=stan_model_path,

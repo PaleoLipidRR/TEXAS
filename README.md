@@ -110,7 +110,7 @@ TEXAS separates **code** (this repository) from **data** (hosted on Zenodo). Her
 | Goal | What you need | Where to get it |
 |---|---|---|
 | Forward prediction (`predict_RI_from_T`) | Pre-computed forward posterior `.nc` | Zenodo data record *(link upon publication)* |
-| Inverse reconstruction (`predict_T_from_RI`) | Pre-computed forward posterior `.nc` | Zenodo data record *(link upon publication)* |
+| Inverse reconstruction (`predict_T_from_proxyObs`) | Pre-computed forward posterior `.nc` | Zenodo data record *(link upon publication)* |
 | Re-run forward calibration from scratch | GDGT training database | Zenodo data record *(link upon publication)* |
 
 **You do not need to download any data just to install the package.** The Stan model files (`.stan`) are bundled inside the pip package and are found automatically.
@@ -218,7 +218,7 @@ save_posterior(posterior)
 
 ```
 src/TEXAS/
-  predict.py        High-level API: predict_RI_from_T / predict_T_from_RI
+  predict.py        High-level API: predict_RI_from_T / predict_T_from_proxyObs
   stan/             Sampler, compiler, I/O, and invT orchestration
   stan_models/      Stan model files (.stan) — bundled in the pip package
   data/             Input data builders, filters, and screening
@@ -228,6 +228,9 @@ src/TEXAS/
   utils/            Path constants, system info, Zenodo download utilities
 notebooks/
   manuscripts/      Finalized SI notebooks for the paper
+    SI_code1_PreProcessing_finalized.ipynb
+    SI_code2_TEXAS_analysis.ipynb
+    SI_code3_paleo_showcases.ipynb
   colab_quickstart.ipynb   Google Colab quickstart
 streamlit_app/      Drag-and-drop web interface (Streamlit)
 docker/             Dockerfile and compose configuration
