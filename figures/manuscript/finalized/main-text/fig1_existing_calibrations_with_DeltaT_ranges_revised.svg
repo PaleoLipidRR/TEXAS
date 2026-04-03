@@ -29224,9 +29224,9 @@
      inkscape:pageopacity="0.0"
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
-     inkscape:zoom="1.4060829"
-     inkscape:cx="385.11244"
-     inkscape:cy="230.42739"
+     inkscape:zoom="1.4065405"
+     inkscape:cx="369.70141"
+     inkscape:cy="251.68135"
      inkscape:window-width="2560"
      inkscape:window-height="1371"
      inkscape:window-x="0"
@@ -47894,297 +47894,6 @@
          x="0"
          y="0">3</tspan></text>
     <g
-       opacity="0.581125"
-       id="g5087"
-       transform="translate(0,-10.548382)">
-      <path
-         d="M 370.555,255.118 H 337.656"
-         style="fill:none;stroke:#000000;stroke-width:7.50692;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-         transform="scale(1.3333333,1.3328813)"
-         clip-path="url(#clipPath5084)"
-         id="path5086" />
-      <path
-         d="m -331.16,-255.118 -9.738,5.631 v -11.258 z"
-         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.50138;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-         transform="scale(-1.3333333,-1.3328813)"
-         clip-path="url(#clipPath5085)"
-         id="path5087" />
-    </g>
-    <g
-       id="g2"
-       transform="matrix(1.0486958,0,0,1.0486958,-25.79313,-17.255753)">
-      <text
-         id="text5087"
-         xml:space="preserve"
-         transform="scale(1.0001694,0.99983064)"
-         x="431.02982"
-         y="358.6629"
-         style="font-size:20.0177px;stroke-width:1.66814"><tspan
-           id="tspan5087"
-           style="font-variant:normal;font-weight:700;font-size:11.6878px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.66814"
-           x="431.02982"
-           y="358.6629">o</tspan></text>
-      <text
-         id="text5088"
-         xml:space="preserve"
-         transform="scale(1.0001694,0.99983064)"
-         x="437.87885"
-         y="358.6629"
-         style="font-size:20.0177px;stroke-width:1.66814"><tspan
-           id="tspan5088"
-           style="font-variant:normal;font-weight:700;font-size:11.6878px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.66814"
-           x="437.87885"
-           y="358.6629">v</tspan></text>
-      <text
-         id="text5089"
-         xml:space="preserve"
-         transform="scale(1.0001694,0.99983064)"
-         x="444.20193"
-         y="358.6629"
-         style="font-size:20.0177px;stroke-width:1.66814"><tspan
-           id="tspan5089"
-           style="font-variant:normal;font-weight:700;font-size:11.6878px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.66814"
-           x="444.20193"
-           y="358.6629">e</tspan></text>
-      <text
-         id="text5090"
-         xml:space="preserve"
-         transform="scale(1.0001694,0.99983064)"
-         x="450.70032"
-         y="358.6629"
-         style="font-size:20.0177px;stroke-width:1.66814"><tspan
-           id="tspan5090"
-           style="font-variant:normal;font-weight:700;font-size:11.6878px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.66814"
-           x="450.70032"
-           y="358.6629">r</tspan></text>
-      <text
-         id="text5091"
-         xml:space="preserve"
-         transform="scale(1.0001694,0.99983064)"
-         x="455.24686"
-         y="358.6629"
-         style="font-size:20.0177px;stroke-width:1.66814"><tspan
-           id="tspan5091"
-           style="font-variant:normal;font-weight:700;font-size:11.6878px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.66814"
-           x="455.24686"
-           y="358.6629">p</tspan></text>
-      <text
-         id="text5092"
-         xml:space="preserve"
-         transform="scale(1.0001694,0.99983064)"
-         x="462.38809"
-         y="358.6629"
-         style="font-size:20.0177px;stroke-width:1.66814"><tspan
-           id="tspan5092"
-           style="font-variant:normal;font-weight:700;font-size:11.6878px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.66814"
-           x="462.38809"
-           y="358.6629">r</tspan></text>
-      <text
-         id="text5093"
-         xml:space="preserve"
-         transform="scale(1.0001694,0.99983064)"
-         x="466.99304"
-         y="358.6629"
-         style="font-size:20.0177px;stroke-width:1.66814"><tspan
-           id="tspan5093"
-           style="font-variant:normal;font-weight:700;font-size:11.6878px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.66814"
-           x="466.99304"
-           y="358.6629">e</tspan></text>
-      <text
-         id="text5094"
-         xml:space="preserve"
-         transform="scale(1.0001694,0.99983064)"
-         x="473.49142"
-         y="358.6629"
-         style="font-size:20.0177px;stroke-width:1.66814"><tspan
-           id="tspan5094"
-           style="font-variant:normal;font-weight:700;font-size:11.6878px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.66814"
-           x="473.49142"
-           y="358.6629">d</tspan></text>
-      <text
-         id="text5095"
-         xml:space="preserve"
-         transform="scale(1.0001694,0.99983064)"
-         x="480.63266"
-         y="358.6629"
-         style="font-size:20.0177px;stroke-width:1.66814"><tspan
-           id="tspan5095"
-           style="font-variant:normal;font-weight:700;font-size:11.6878px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.66814"
-           x="480.63266"
-           y="358.6629">i</tspan></text>
-      <text
-         id="text5096"
-         xml:space="preserve"
-         transform="scale(1.0001694,0.99983064)"
-         x="483.88184"
-         y="358.6629"
-         style="font-size:20.0177px;stroke-width:1.66814"><tspan
-           id="tspan5096"
-           style="font-variant:normal;font-weight:700;font-size:11.6878px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.66814"
-           x="483.88184"
-           y="358.6629">c</tspan></text>
-      <text
-         id="text5097"
-         xml:space="preserve"
-         transform="scale(1.0001694,0.99983064)"
-         x="490.38025"
-         y="358.6629"
-         style="font-size:20.0177px;stroke-width:1.66814"><tspan
-           id="tspan5097"
-           style="font-variant:normal;font-weight:700;font-size:11.6878px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.66814"
-           x="490.38025"
-           y="358.6629">t</tspan></text>
-    </g>
-    <g
-       opacity="0.581125"
-       id="g5100"
-       transform="translate(0,-10.548382)">
-      <path
-         d="m 375.699,255.051 h 32.903"
-         style="fill:none;stroke:#000000;stroke-width:7.50692;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-         transform="scale(1.3333333,1.3328813)"
-         clip-path="url(#clipPath5097)"
-         id="path5099" />
-      <path
-         d="m 415.098,255.051 -9.743,5.631 V 249.42 Z"
-         style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke:#000000;stroke-width:1.50138;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-         transform="scale(1.3333333,1.3328813)"
-         clip-path="url(#clipPath5098)"
-         id="path5100" />
-    </g>
-    <text
-       id="text5100"
-       xml:space="preserve"
-       transform="scale(1.0001694,0.99983064)"
-       x="501.71329"
-       y="358.87927"
-       style="font-size:21.1917px;stroke-width:1.76598"><tspan
-         id="tspan5100"
-         style="font-variant:normal;font-weight:700;font-size:12.3732px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.76598"
-         x="501.71329"
-         y="358.87927">u</tspan></text>
-    <text
-       id="text5101"
-       xml:space="preserve"
-       transform="scale(1.0001694,0.99983064)"
-       x="509.27335"
-       y="358.87927"
-       style="font-size:21.1917px;stroke-width:1.76598"><tspan
-         id="tspan5101"
-         style="font-variant:normal;font-weight:700;font-size:12.3732px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.76598"
-         x="509.27335"
-         y="358.87927">n</tspan></text>
-    <text
-       id="text5102"
-       xml:space="preserve"
-       transform="scale(1.0001694,0.99983064)"
-       x="516.83337"
-       y="358.87927"
-       style="font-size:21.1917px;stroke-width:1.76598"><tspan
-         id="tspan5102"
-         style="font-variant:normal;font-weight:700;font-size:12.3732px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.76598"
-         x="516.83337"
-         y="358.87927">d</tspan></text>
-    <text
-       id="text5103"
-       xml:space="preserve"
-       transform="scale(1.0001694,0.99983064)"
-       x="524.39343"
-       y="358.87927"
-       style="font-size:21.1917px;stroke-width:1.76598"><tspan
-         id="tspan5103"
-         style="font-variant:normal;font-weight:700;font-size:12.3732px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.76598"
-         x="524.39343"
-         y="358.87927">e</tspan></text>
-    <text
-       id="text5104"
-       xml:space="preserve"
-       transform="scale(1.0001694,0.99983064)"
-       x="531.27295"
-       y="358.87927"
-       style="font-size:21.1917px;stroke-width:1.76598"><tspan
-         id="tspan5104"
-         style="font-variant:normal;font-weight:700;font-size:12.3732px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.76598"
-         x="531.27295"
-         y="358.87927">r</tspan></text>
-    <text
-       id="text5105"
-       xml:space="preserve"
-       transform="scale(1.0001694,0.99983064)"
-       x="536.08612"
-       y="358.87927"
-       style="font-size:21.1917px;stroke-width:1.76598"><tspan
-         id="tspan5105"
-         style="font-variant:normal;font-weight:700;font-size:12.3732px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.76598"
-         x="536.08612"
-         y="358.87927">p</tspan></text>
-    <text
-       id="text5106"
-       xml:space="preserve"
-       transform="scale(1.0001694,0.99983064)"
-       x="543.64618"
-       y="358.87927"
-       style="font-size:21.1917px;stroke-width:1.76598"><tspan
-         id="tspan5106"
-         style="font-variant:normal;font-weight:700;font-size:12.3732px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.76598"
-         x="543.64618"
-         y="358.87927">r</tspan></text>
-    <text
-       id="text5107"
-       xml:space="preserve"
-       transform="scale(1.0001694,0.99983064)"
-       x="548.52118"
-       y="358.87927"
-       style="font-size:21.1917px;stroke-width:1.76598"><tspan
-         id="tspan5107"
-         style="font-variant:normal;font-weight:700;font-size:12.3732px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.76598"
-         x="548.52118"
-         y="358.87927">e</tspan></text>
-    <text
-       id="text5108"
-       xml:space="preserve"
-       transform="scale(1.0001694,0.99983064)"
-       x="555.4007"
-       y="358.87927"
-       style="font-size:21.1917px;stroke-width:1.76598"><tspan
-         id="tspan5108"
-         style="font-variant:normal;font-weight:700;font-size:12.3732px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.76598"
-         x="555.4007"
-         y="358.87927">d</tspan></text>
-    <text
-       id="text5109"
-       xml:space="preserve"
-       transform="scale(1.0001694,0.99983064)"
-       x="562.96075"
-       y="358.87927"
-       style="font-size:21.1917px;stroke-width:1.76598"><tspan
-         id="tspan5109"
-         style="font-variant:normal;font-weight:700;font-size:12.3732px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.76598"
-         x="562.96075"
-         y="358.87927">i</tspan></text>
-    <text
-       id="text5110"
-       xml:space="preserve"
-       transform="scale(1.0001694,0.99983064)"
-       x="566.40051"
-       y="358.87927"
-       style="font-size:21.1917px;stroke-width:1.76598"><tspan
-         id="tspan5110"
-         style="font-variant:normal;font-weight:700;font-size:12.3732px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.76598"
-         x="566.40051"
-         y="358.87927">c</tspan></text>
-    <text
-       id="text5111"
-       xml:space="preserve"
-       transform="scale(1.0001694,0.99983064)"
-       x="573.28003"
-       y="358.87927"
-       style="font-size:21.1917px;stroke-width:1.76598"><tspan
-         id="tspan5111"
-         style="font-variant:normal;font-weight:700;font-size:12.3732px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#000000;fill-opacity:0.8;fill-rule:nonzero;stroke:none;stroke-width:1.76598"
-         x="573.28003"
-         y="358.87927">t</tspan></text>
-    <g
        opacity="0.690395"
        id="g5112"
        transform="matrix(1.0004614,0,0,0.51589612,-0.27173112,13.433664)">
@@ -48199,14 +47908,18 @@
        id="text5112"
        xml:space="preserve"
        transform="scale(1.0001693,0.99983072)"
-       x="425.59329"
-       y="17.491222"
-       style="font-size:20.8082px;stroke-width:1.73402"><tspan
-         id="tspan5112"
-         style="font-style:italic;font-variant:normal;font-weight:normal;font-size:13.8849px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#808080;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.73402"
-         x="425.59329"
-         dx="0 0 0 0 0 0 0 0 0 0 0 -0.55539876 0 0 0 -0.20827456 0 0 0 0 -0.27769938 0 0 0 0 0 0 0 0 -0.20827456 0 0 -0.27769938 0 0 0 0 0 -0.13884969 0 0 0 0 0 -0.20827456"
-         y="17.491222">Based on SST estimates of core-top data below 70°N</tspan></text>
+       x="399.88605"
+       y="17.405184"
+       style="font-size:16px;stroke-width:2.20152"><tspan
+         sodipodi:role="line"
+         id="tspan2"
+         x="399.88605"
+         y="17.405184"><tspan
+           id="tspan5112"
+           style="font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:16px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros Italic';writing-mode:lr-tb;fill:#808080;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.20152"
+           x="399.88605"
+           dx="0 0 0 0 0 0 0 0 0 0 0 -0.70513773 0 0 0 -0.26442668 0 0 0 0 -0.35256886 0 0 0 0 0 0 0 0 -0.26442668 0 0 -0.35256886 0 0 0 0 0 -0.17628443 0 0 0 0 0 -0.26442668"
+           y="17.405184">Based on SST estimates of core-top data below 70°N</tspan></tspan></text>
     <text
        id="text5113"
        xml:space="preserve"
