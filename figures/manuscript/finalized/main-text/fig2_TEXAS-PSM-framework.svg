@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="5.4862514in"
-   height="4.56144in"
-   viewBox="0 0 139.35078 115.86058"
+   width="5.5008898in"
+   height="4.7956514in"
+   viewBox="0 0 139.7226 121.80955"
    version="1.1"
    id="svg1"
    inkscape:version="1.4 (e7c3feb100, 2024-10-09)"
@@ -27,21 +27,22 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="in"
-     inkscape:zoom="4.6243596"
-     inkscape:cx="261.8741"
-     inkscape:cy="247.60185"
+     inkscape:zoom="1.4530176"
+     inkscape:cx="356.49946"
+     inkscape:cy="306.25919"
      inkscape:window-width="2560"
      inkscape:window-height="1371"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1"
-     inkscape:export-bgcolor="#ffffffff">
+     inkscape:export-bgcolor="#ffffffff"
+     showguides="false">
     <inkscape:page
        x="0"
        y="0"
-       width="139.35078"
-       height="115.86057"
+       width="139.7226"
+       height="121.80955"
        id="page694"
        margin="0"
        bleed="0" />
@@ -50,43 +51,60 @@
      id="defs1">
     <marker
        style="overflow:visible"
-       id="marker23"
+       id="marker30"
        refX="0"
        refY="0"
-       orient="auto"
-       inkscape:stockid="Dot"
-       markerWidth="1"
-       markerHeight="1"
+       orient="auto-start-reverse"
+       inkscape:stockid="Triangle arrow"
+       markerWidth="0.30000001"
+       markerHeight="0.30000001"
        viewBox="0 0 1 1"
        inkscape:isstock="true"
        inkscape:collect="always"
        preserveAspectRatio="xMidYMid">
       <path
          transform="scale(0.5)"
-         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
-         d="M 5,0 C 5,2.76 2.76,5 0,5 -2.76,5 -5,2.76 -5,0 c 0,-2.76 2.3,-5 5,-5 2.76,0 5,2.24 5,5 z"
-         sodipodi:nodetypes="sssss"
-         id="path23" />
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path30" />
     </marker>
     <marker
        style="overflow:visible"
-       id="Dot"
+       id="Triangle"
        refX="0"
        refY="0"
-       orient="auto"
-       inkscape:stockid="Dot"
-       markerWidth="1"
-       markerHeight="1"
+       orient="auto-start-reverse"
+       inkscape:stockid="Triangle arrow"
+       markerWidth="0.30000001"
+       markerHeight="0.30000001"
        viewBox="0 0 1 1"
        inkscape:isstock="true"
        inkscape:collect="always"
        preserveAspectRatio="xMidYMid">
       <path
          transform="scale(0.5)"
-         style="fill:context-stroke;fill-rule:evenodd;stroke:none"
-         d="M 5,0 C 5,2.76 2.76,5 0,5 -2.76,5 -5,2.76 -5,0 c 0,-2.76 2.3,-5 5,-5 2.76,0 5,2.24 5,5 z"
-         sodipodi:nodetypes="sssss"
-         id="path17" />
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path29" />
+    </marker>
+    <marker
+       style="overflow:visible"
+       id="marker26"
+       refX="0"
+       refY="0"
+       orient="auto-start-reverse"
+       inkscape:stockid="Triangle arrow"
+       markerWidth="0.30000001"
+       markerHeight="0.30000001"
+       viewBox="0 0 1 1"
+       inkscape:isstock="true"
+       inkscape:collect="always"
+       preserveAspectRatio="xMidYMid">
+      <path
+         transform="scale(0.5)"
+         style="fill:context-stroke;fill-rule:evenodd;stroke:context-stroke;stroke-width:1pt"
+         d="M 5.77,0 -2.88,5 V -5 Z"
+         id="path26" />
     </marker>
     <inkscape:path-effect
        effect="bspline"
@@ -13668,12 +13686,429 @@
     </clipPath>
   </defs>
   <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     style="display:inline">
+    <path
+       d="M 23.176363,33.834627 V 39.03586 H 2.9698445 v 80.44367 H 136.58288 V 39.03586 H 58.00266 v -5.201233 z"
+       style="fill:#f9f9f9;stroke:#666666;stroke-width:0.127;stroke-linejoin:round;stroke-dasharray:none"
+       id="path32" />
+    <text
+       id="text1491-6-9"
+       xml:space="preserve"
+       x="8.0158806"
+       y="72.847961"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.03465px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.336222"><tspan
+         id="tspan1491-2-2"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.03465px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.336222"
+         x="8.0158806"
+         y="72.847961">Temperature</tspan></text>
+    <text
+       id="text1491-6-9-2"
+       xml:space="preserve"
+       x="53.134716"
+       y="73.076309"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.0078px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#4d4d4d;fill-opacity:1;stroke-width:0.333983"><tspan
+         id="tspan1491-2-2-0"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.0078px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.333983"
+         x="53.134716"
+         y="73.076309">GDGT compositions</tspan></text>
+    <text
+       id="text1491-6-9-2-5-6"
+       xml:space="preserve"
+       x="77.37764"
+       y="108.11678"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.12435px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#006680;fill-opacity:1;stroke-width:0.260363"><tspan
+         id="tspan1491-2-2-0-3-3"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.12435px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#006680;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.260363"
+         x="77.37764"
+         y="108.11678"><tspan
+   style="fill:#000000"
+   id="tspan37">link via</tspan> GDGT-2/GDGT-3</tspan></text>
+    <text
+       id="text1491-6-9-2-5-6-9"
+       xml:space="preserve"
+       x="77.550056"
+       y="114.86979"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.12435px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;display:inline;fill:#000000;stroke-width:0.260363"><tspan
+         id="tspan1491-2-2-0-3-3-36"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.12435px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.260363"
+         x="77.550056"
+         y="114.86979">link via <tspan
+   style="fill:#217821"
+   id="tspan38">surfuce ocean nitrate levels</tspan></tspan></text>
+    <rect
+       style="fill:#87cdde;fill-opacity:1;stroke:none;stroke-width:0.367905;stroke-dasharray:none"
+       id="rect16-8"
+       width="21.001429"
+       height="5.2923117"
+       x="53.429241"
+       y="104.30927" />
+    <text
+       id="text1491-6-9-2-6-9-3"
+       xml:space="preserve"
+       x="43.908085"
+       y="78.501266"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.12435px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;inline-size:74.7477;display:inline;stroke-width:0.260363"
+       transform="translate(10.401626,29.441916)"><tspan
+         x="43.908085"
+         y="78.501266"
+         id="tspan1">AOA ecology</tspan></text>
+    <rect
+       style="fill:#87deaa;fill-opacity:1;stroke:none;stroke-width:0.367905;stroke-dasharray:none"
+       id="rect16-2"
+       width="21.001429"
+       height="5.2923117"
+       x="53.523399"
+       y="111.32478" />
+    <text
+       id="text1491-6-9-2-6-9-2"
+       xml:space="preserve"
+       x="43.908085"
+       y="78.501266"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.12435px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;inline-size:74.7477;display:inline;stroke-width:0.260363"
+       transform="translate(10.318263,36.457424)"><tspan
+         x="43.908085"
+         y="78.501266"
+         id="tspan2">Nutrient level</tspan></text>
+    <g
+       id="g23"
+       transform="translate(2.122011,0.66312848)" />
+    <g
+       id="g16"
+       transform="translate(-4.635148)">
+      <text
+         id="text1491-6"
+         xml:space="preserve"
+         x="34.1297"
+         y="37.141273"
+         style="font-size:1.28743px;stroke-width:0.107286"><tspan
+           id="tspan1491-2"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.48939px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros Bold';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
+           x="34.1297"
+           y="37.141273">sensor model</tspan></text>
+      <text
+         id="text1491-6-7"
+         xml:space="preserve"
+         x="65.015282"
+         y="37.275299"
+         style="font-size:1.28743px;stroke-width:0.107286"><tspan
+           id="tspan1491-2-0"
+           style="font-variant:normal;font-weight:normal;font-size:3.48939px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
+           x="65.015282"
+           y="37.275299">archive model</tspan></text>
+      <text
+         id="text1491-6-7-0"
+         xml:space="preserve"
+         x="94.604881"
+         y="37.46212"
+         style="font-size:1.28743px;stroke-width:0.107286"><tspan
+           id="tspan1491-2-0-6"
+           style="font-variant:normal;font-weight:normal;font-size:3.48939px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
+           x="94.604881"
+           y="37.46212">observation model</tspan></text>
+      <text
+         id="text1492"
+         xml:space="preserve"
+         x="25.111055"
+         y="6.8027987"
+         style="font-size:1.28743px;stroke-width:0.107286"><tspan
+           id="tspan1492"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.32481px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
+           x="25.111055"
+           dx="0 0 0 0 0 0 0 0 0 -0.30273706 0 0 0.021624077 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.10812039"
+           y="6.8027987">TEXAS = TetraEther indeX of Ammonia oxidizerS</tspan></text>
+      <path
+         id="path7852"
+         d="M 21.548891,11.262265 H 45.11914 v 5.098993 H 21.548891 Z"
+         style="fill:#bf9d40;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
+      <path
+         id="path7853"
+         d="m 47.777479,11.262265 h 24.005294 v 5.098993 H 47.777479 Z"
+         style="fill:#bf9d40;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
+      <path
+         id="path7854"
+         d="m 74.220101,11.262265 h 26.239419 v 5.098993 H 74.220101 Z"
+         style="fill:#666666;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
+      <path
+         id="path7855"
+         d="m 102.59313,11.262265 h 28.12154 v 5.098993 h -28.12154 z"
+         style="fill:#666666;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
+      <path
+         id="path7856"
+         d="M 21.548891,16.714551 H 45.11914 V 27.816208 H 21.548891 Z"
+         style="fill:#d8c387;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
+      <path
+         id="path7857"
+         d="M 47.777479,16.714551 H 71.782773 V 27.816208 H 47.777479 Z"
+         style="fill:#d8c387;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
+      <path
+         id="path7858"
+         d="M 74.220101,16.714551 H 100.45952 V 27.816208 H 74.220101 Z"
+         style="fill:#cccccc;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
+      <path
+         id="path7859"
+         d="m 102.59313,16.714551 h 28.12154 v 11.101657 h -28.12154 z"
+         style="fill:#cccccc;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
+      <path
+         id="path7860"
+         d="m 32.627483,27.784344 v 3.974204 h 25.87937 v -1.875363"
+         style="fill:none;stroke:#5a4924;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker30)" />
+      <path
+         id="path7861"
+         d="m 60.034501,30.475727 -1.478189,-2.55942 -1.477654,2.55942 z"
+         style="fill:#5a4924;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
+      <path
+         id="path7862"
+         d="m 65.057213,27.755377 v 4.027847 h 20.220129 v -1.900897"
+         style="fill:none;stroke:#4d4d4d;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker30)" />
+      <path
+         id="path7863"
+         d="m 86.754995,30.475727 -1.478082,-2.55942 -1.477653,2.55942 z"
+         style="fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
+      <path
+         id="path7864"
+         d="m 94.954884,27.755377 v 4.027847 h 20.220126 v -1.900897"
+         style="fill:none;stroke:#4d4d4d;stroke-width:1;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1;marker-end:url(#marker30)" />
+      <path
+         id="path7865"
+         d="m 116.65266,30.475727 -1.47808,-2.55942 -1.47776,2.55942 z"
+         style="fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
+      <text
+         id="text7866"
+         xml:space="preserve"
+         x="22.795969"
+         y="15.07514"
+         style="font-size:1.28743px;stroke-width:0.107286"><tspan
+           id="tspan7866"
+           style="font-variant:normal;font-weight:700;font-size:3.43316px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
+           x="22.795969"
+           dx="0 0 -0.068663239"
+           y="15.07514">Environment</tspan></text>
+      <text
+         id="text7867"
+         xml:space="preserve"
+         x="26.1064"
+         y="19.966005"
+         style="font-size:1.28743px;stroke-width:0.107286"><tspan
+           id="tspan7867"
+           style="font-variant:normal;font-weight:normal;font-size:2.57487px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
+           x="26.1064"
+           dx="0 -0.24461263 0 0 0 0 0 0 0 0 -0.025748698"
+           y="19.966005">Temperature</tspan><tspan
+           id="tspan7868"
+           style="font-variant:normal;font-weight:normal;font-size:2.57487px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
+           x="25.917143"
+           dx="0 -0.090120442 -0.090120442"
+           y="23.184595">AOA ecology</tspan><tspan
+           id="tspan7869"
+           style="font-variant:normal;font-weight:normal;font-size:2.57487px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
+           x="26.614933"
+           dx="0 0 0 0 0 0 0 0 0 0 0 -0.038623046 -0.051497396"
+           y="26.403185">Nutrient level</tspan><tspan
+           id="tspan7870"
+           style="font-variant:normal;font-weight:normal;font-size:2.57487px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
+           x="48.238392"
+           dx="0 0 0 -0.11586915 0 0 0 0 0.01287435"
+           y="22.946421">GDGT compositions</tspan><tspan
+           id="tspan7871"
+           style="font-variant:normal;font-weight:normal;font-size:2.57487px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
+           x="77.478172"
+           dx="0 -0.06437175"
+           y="21.313951">Post-depositional</tspan><tspan
+           id="tspan7872"
+           style="font-variant:normal;font-weight:normal;font-size:2.57487px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
+           x="81.453773"
+           dx="0 0 -0.01287435"
+           y="24.532541">processes</tspan><tspan
+           id="tspan7873"
+           style="font-variant:normal;font-weight:normal;font-size:2.57487px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
+           x="105.78162"
+           dx="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.01287435 0 0.01287435"
+           y="19.70466">Instrumental errors</tspan><tspan
+           id="tspan7874"
+           style="font-variant:normal;font-weight:normal;font-size:2.57487px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
+           x="107.35614"
+           dx="0 0 0 0 -0.01287435 0 0 0 0 0 0 0 0 0 -0.01287435 0 0.01287435"
+           y="22.92325">Analytical errors</tspan><tspan
+           id="tspan7875"
+           style="font-variant:normal;font-weight:normal;font-size:2.57487px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
+           x="110.43697"
+           dx="0 -0.025748698"
+           y="26.141832">Age model</tspan></text>
+      <text
+         id="text7875"
+         xml:space="preserve"
+         x="53.938721"
+         y="15.06312"
+         style="font-size:1.28743px;stroke-width:0.107286"><tspan
+           id="tspan7876"
+           style="font-variant:normal;font-weight:700;font-size:3.43316px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
+           x="53.938721"
+           dx="0 0 0 0 0 0 15.500698 0 0 0 0 0 -0.051497426 13.052902 0 0 0 0 0.068663239 -0.051497426"
+           y="15.06312">SensorArchiveObservation</tspan></text>
+      <text
+         id="text1492-1"
+         xml:space="preserve"
+         x="9.2376213"
+         y="10.90837"
+         style="font-size:3.68316px;display:inline;stroke-width:0.30693"><tspan
+           id="tspan1492-4"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.3727px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.30693"
+           x="9.2376213"
+           y="10.90837">a</tspan></text>
+      <text
+         id="text1492-1-9"
+         xml:space="preserve"
+         x="8.5016308"
+         y="51.03376"
+         style="font-size:3.68316px;display:inline;stroke-width:0.30693"><tspan
+           id="tspan1492-4-5"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.3727px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.30693"
+           x="8.5016308"
+           y="51.03376">b</tspan></text>
+    </g>
+    <g
+       id="g692"
+       transform="matrix(1.3668138,0,0,1.3668138,-13.404042,-25.83389)">
+      <path
+         d="m 24.134933,53.281413 c -0.764,3e-5 -1.383337,0.619367 -1.383366,1.383367 0.0015,0.01287 0.0032,0.02573 0.0051,0.03856 v 7.196225 c -1.011692,0.514853 -1.651122,1.551625 -1.65707,2.686772 1.58e-4,1.674706 1.357829,3.032236 3.032535,3.032218 1.674706,1.8e-5 3.032377,-1.357512 3.032535,-3.032218 -3.59e-4,-1.138221 -0.638061,-2.180391 -1.651381,-2.698782 V 54.70334 c 0.0019,-0.01282 0.0035,-0.02568 0.0051,-0.03856 -2.9e-5,-0.764 -0.619366,-1.383337 -1.383366,-1.383367 z"
+         style="fill:#ffffff;fill-opacity:0.695164;stroke:#000000;stroke-width:0.611601;stroke-dasharray:none"
+         id="path4" />
+      <path
+         d="m 24.149964,56.517601 c -0.382935,7.5e-5 -0.693347,0.310487 -0.693421,0.693422 0.001,0.0074 0.0022,0.01477 0.0035,0.02212 v 5.28568 c -0.874531,0.288795 -1.466807,1.103985 -1.471229,2.024956 -7e-5,1.183715 0.959445,2.143371 2.143159,2.143476 1.183838,6.9e-5 2.143546,-0.959638 2.143476,-2.143476 -4.51e-4,-0.909158 -0.57442,-1.719125 -1.432053,-2.020846 v -5.291369 h -0.0032 c 0.0012,-0.0068 0.0022,-0.01368 0.0032,-0.02054 -7.4e-5,-0.382935 -0.310486,-0.693347 -0.693422,-0.693421 z"
+         style="fill:#800000;stroke-width:0.715439"
+         id="path7" />
+    </g>
+    <g
+       id="g18"
+       transform="matrix(1.1763301,0,0,1.1763301,-4.8668444,-42.986638)">
+      <text
+         id="text4435"
+         xml:space="preserve"
+         transform="matrix(0.20563972,0,0,0.20594643,98.060802,76.848991)"
+         clip-path="url(#clipPath4436)"><tspan
+           id="tspan4435"
+           style="font-variant:normal;font-weight:700;font-size:13.0184px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#c92a2a;fill-opacity:0.8;fill-rule:nonzero;stroke:none"
+           x="0"
+           y="0">Linear</tspan></text>
+      <text
+         id="text4441"
+         xml:space="preserve"
+         transform="matrix(0.20563972,0,0,0.20594643,98.176122,79.01038)"
+         clip-path="url(#clipPath4442)"><tspan
+           id="tspan4441"
+           style="font-variant:normal;font-weight:normal;font-size:10.0142px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#c92a2a;fill-opacity:0.8;fill-rule:nonzero;stroke:none"
+           x="0"
+           y="0">Schouten et al. (2002)</tspan></text>
+    </g>
+    <g
+       id="g17"
+       transform="matrix(1.1763301,0,0,1.1763301,-4.8668444,-43.871191)">
+      <text
+         id="text4460"
+         xml:space="preserve"
+         transform="matrix(0.20563972,0,0,0.20594643,98.063479,84.190573)"
+         clip-path="url(#clipPath4461)"><tspan
+           id="tspan4460"
+           style="font-variant:normal;font-weight:700;font-size:13.0184px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#e67700;fill-opacity:0.8;fill-rule:nonzero;stroke:none"
+           x="0"
+           y="0">Exponential</tspan></text>
+      <text
+         id="text4471"
+         xml:space="preserve"
+         transform="matrix(0.20563972,0,0,0.20594643,98.112284,86.329405)"
+         clip-path="url(#clipPath4472)"><tspan
+           id="tspan4471"
+           style="font-variant:normal;font-weight:normal;font-size:10.0142px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#e67700;fill-opacity:0.8;fill-rule:nonzero;stroke:none"
+           x="0"
+           y="0">Kim et al. (2010)</tspan></text>
+    </g>
+    <g
+       id="g19"
+       transform="matrix(1.1763301,0,0,1.1763301,-4.8668444,-45.479078)">
+      <text
+         id="text4485"
+         xml:space="preserve"
+         transform="matrix(0.20563972,0,0,0.20594643,98.055447,92.136341)"
+         clip-path="url(#clipPath4486)"><tspan
+           id="tspan4485"
+           style="font-variant:normal;font-weight:700;font-size:13.0184px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#862e9c;fill-opacity:0.8;fill-rule:nonzero;stroke:none"
+           x="0"
+           y="0">BAYSPAR</tspan></text>
+      <text
+         id="text4492"
+         xml:space="preserve"
+         transform="matrix(0.20563972,0,0,0.20594643,98.231724,94.533911)"
+         clip-path="url(#clipPath4493)"><tspan
+           id="tspan4492"
+           style="font-variant:normal;font-weight:normal;font-size:10.0142px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#862e9c;fill-opacity:0.8;fill-rule:nonzero;stroke:none"
+           x="0"
+           y="0">Tierney et al. (2014)</tspan></text>
+    </g>
+    <text
+       id="text1491-6-8"
+       xml:space="preserve"
+       x="22.365959"
+       y="84.288063"
+       style="font-size:1.07073px;fill:#808080;fill-opacity:1;stroke-width:0.0892276"><tspan
+         id="tspan1491-2-09"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.90204px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#808080;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0892276"
+         x="22.365959"
+         y="84.288063">Existing models link SST to coretop GDGTs via<tspan
+   style="fill:#800000"
+   id="tspan40"> TEX</tspan><tspan
+   style="font-size:65%;baseline-shift:sub;fill:#800000"
+   id="tspan39">86</tspan></tspan></text>
+    <text
+       id="text1491-6-8-5"
+       xml:space="preserve"
+       x="35.524879"
+       y="89.118164"
+       style="font-size:1.07073px;white-space:pre;inline-size:97.7153;display:inline;fill:#000000;fill-opacity:1;stroke-width:0.0892276"
+       transform="matrix(1.3369307,0,0,1.3369307,-11.616879,-26.977635)"><tspan
+         x="35.524879"
+         y="89.118164"
+         id="tspan4"><tspan
+           style="font-weight:bold;font-size:2.90204px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold'"
+           id="tspan3">TEXAS (this study)</tspan></tspan></text>
+    <text
+       id="text1491-6-8-5-9"
+       xml:space="preserve"
+       x="12.137611"
+       y="99.927048"
+       style="font-size:1.07073px;display:inline;fill:#000000;fill-opacity:1;stroke-width:0.0892276"><tspan
+         id="tspan1491-2-09-3-1"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.90204px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0892276"
+         x="12.137611"
+         y="99.927048">Unexplained variance in GDGT distributions (i.e. proxy residuals)</tspan></text>
+    <path
+       style="fill:none;stroke:#808080;stroke-width:1.56753;stroke-linejoin:round;stroke-dasharray:none;marker-end:url(#marker26)"
+       d="m 26.237571,76.274869 v 3.44275 H 78.016907 V 77.39488"
+       id="path2"
+       sodipodi:nodetypes="cccc" />
+    <path
+       style="fill:none;stroke:#808080;stroke-width:1.56326;stroke-linejoin:round;stroke-dasharray:none;marker-end:url(#Triangle)"
+       d="m 31.154998,85.967682 v 8.196334"
+       id="path28" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#808080;stroke-width:1.65099997;stroke-linejoin:round;stroke-dasharray:none;marker-end:url(#marker26)"
+       d="m 31.10816,102.24794 v 11.65007 h 16.483608"
+       id="path35" />
+    <path
+       style="fill:none;fill-opacity:1;stroke:#808080;stroke-width:1.651;stroke-linejoin:round;stroke-dasharray:none;marker-end:url(#marker26)"
+       d="M 31.056957,106.8825 H 47.55102"
+       id="path37"
+       sodipodi:nodetypes="cc" />
+  </g>
+  <g
      inkscape:groupmode="layer"
      id="layer2"
      inkscape:label="Layer 2">
     <g
        id="g26"
-       transform="matrix(-0.01990827,-0.40489054,0.40489054,-0.01990827,39.338384,145.19413)">
+       transform="matrix(-0.02171805,-0.44169751,0.44169751,-0.02171805,24.161989,147.64722)">
       <g
          opacity="0.199997"
          id="g24-37"
@@ -14103,7 +14538,7 @@
     </g>
     <g
        id="g25-8"
-       transform="matrix(-0.02892282,-0.41103116,0.41103116,-0.02892282,35.263721,91.958965)">
+       transform="matrix(-0.03155208,-0.44839634,0.44839634,-0.03155208,19.716915,89.572666)">
       <g
          opacity="0.199997"
          id="g24-5"
@@ -14539,7 +14974,7 @@
     </g>
     <g
        id="g27"
-       transform="matrix(-0.0280419,-0.42205534,0.42205534,-0.0280419,42.408573,131.36438)">
+       transform="matrix(-0.03059108,-0.46042269,0.46042269,-0.03059108,27.511277,132.56026)">
       <g
          opacity="0.199997"
          id="g24-37-0-7"
@@ -14967,7 +15402,7 @@
        inkscape:label="GDGT-0">
       <g
          id="g25"
-         transform="matrix(-0.03216606,-0.41079008,0.41079008,-0.03216606,32.573373,92.517522)">
+         transform="matrix(-0.03509015,-0.44813333,0.44813333,-0.03509015,16.781999,90.182)">
         <g
            opacity="0.199997"
            id="g24"
@@ -15403,7 +15838,7 @@
       </g>
       <g
          id="g25-80"
-         transform="matrix(-0.02162632,-0.41147958,0.41147958,-0.02162632,37.665943,91.836262)">
+         transform="matrix(-0.02359229,-0.44888551,0.44888551,-0.02359229,22.337513,89.438809)">
         <g
            opacity="0.199997"
            id="g24-24"
@@ -15839,7 +16274,7 @@
       </g>
       <g
          id="g25-1"
-         transform="matrix(-0.01226312,-0.41186497,0.41186497,-0.01226312,42.416642,91.453185)">
+         transform="matrix(-0.01337791,-0.44930593,0.44930593,-0.01337791,27.52008,89.020909)">
         <g
            opacity="0.199997"
            id="g24-7"
@@ -16275,7 +16710,7 @@
       </g>
       <g
          id="g25-2"
-         transform="matrix(-0.01078852,-0.41190623,0.41190623,-0.01078852,45.294884,91.589567)">
+         transform="matrix(-0.01176927,-0.44935094,0.44935094,-0.01176927,30.65997,89.169688)">
         <g
            opacity="0.199997"
            id="g24-0"
@@ -16711,7 +17146,7 @@
       </g>
       <g
          id="g25-2-3"
-         transform="matrix(-0.01078852,-0.41190623,0.41190623,-0.01078852,51.051104,91.15823)">
+         transform="matrix(-0.01176927,-0.44935094,0.44935094,-0.01176927,36.939464,88.69914)">
         <g
            opacity="0.199997"
            id="g24-0-9"
@@ -17147,7 +17582,7 @@
       </g>
       <g
          id="g25-2-2"
-         transform="matrix(-0.01078852,-0.41190623,0.41190623,-0.01078852,53.737973,90.720196)">
+         transform="matrix(-0.01176927,-0.44935094,0.44935094,-0.01176927,39.870587,88.221287)">
         <g
            opacity="0.199997"
            id="g24-0-4"
@@ -17583,7 +18018,7 @@
       </g>
       <g
          id="g25-2-2-9"
-         transform="matrix(0.00976693,-0.41193173,0.41193173,0.00976693,58.069704,89.819003)">
+         transform="matrix(0.01065481,-0.44937878,0.44937878,0.01065481,44.596096,87.23817)">
         <g
            opacity="0.199997"
            id="g24-0-4-4"
@@ -18019,7 +18454,7 @@
       </g>
       <g
          id="g25-2-2-9-4"
-         transform="matrix(0.00976693,-0.41193173,0.41193173,0.00976693,60.91284,90.044487)">
+         transform="matrix(0.01065481,-0.44937878,0.44937878,0.01065481,47.697691,87.484151)">
         <g
            opacity="0.199997"
            id="g24-0-4-4-7"
@@ -18455,7 +18890,7 @@
       </g>
       <g
          id="g25-2-2-9-48"
-         transform="matrix(-0.00334166,-0.41203394,0.41203394,-0.00334166,64.546323,91.258899)">
+         transform="matrix(-0.00364543,-0.44949027,0.44949027,-0.00364543,51.66148,88.808961)">
         <g
            opacity="0.199997"
            id="g24-0-4-4-8"
@@ -18891,7 +19326,7 @@
       </g>
       <g
          id="g25-2-2-9-9"
-         transform="matrix(-0.01515286,-0.41176878,0.41176878,-0.01515286,68.204635,91.896118)">
+         transform="matrix(-0.01653035,-0.449201,0.449201,-0.01653035,55.652354,89.504107)">
         <g
            opacity="0.199997"
            id="g24-0-4-4-73"
@@ -19327,7 +19762,7 @@
       </g>
       <g
          id="g25-2-2-9-9-1"
-         transform="matrix(-0.01612505,-0.41173186,0.41173186,-0.01612505,73.742643,91.539145)">
+         transform="matrix(-0.0175909,-0.44916073,0.44916073,-0.0175909,61.693799,89.114683)">
         <g
            opacity="0.199997"
            id="g24-0-4-4-73-2"
@@ -19763,7 +20198,7 @@
       </g>
       <g
          id="g25-2-2-9-9-7"
-         transform="matrix(-0.01515286,-0.41176878,0.41176878,-0.01515286,76.323597,91.057182)">
+         transform="matrix(-0.01653035,-0.449201,0.449201,-0.01653035,64.509378,88.588907)">
         <g
            opacity="0.199997"
            id="g24-0-4-4-73-3"
@@ -20199,7 +20634,7 @@
       </g>
       <g
          id="g25-2-2-9-9-16"
-         transform="matrix(0.00241461,-0.41204042,0.41204042,0.00241461,77.792335,89.808651)">
+         transform="matrix(0.00263412,-0.44949734,0.44949734,0.00263412,66.111632,87.226877)">
         <g
            opacity="0.199997"
            id="g24-0-4-4-73-0"
@@ -20635,7 +21070,7 @@
       </g>
       <g
          id="g25-2-2-9-9-16-2"
-         transform="matrix(0.010614,-0.41191077,0.41191077,0.010614,82.604324,89.338186)">
+         transform="matrix(0.01157887,-0.44935592,0.44935592,0.01157887,71.361061,86.713644)">
         <g
            opacity="0.199997"
            id="g24-0-4-4-73-0-1"
@@ -21071,7 +21506,7 @@
       </g>
       <g
          id="g25-2-2-9-9-16-9"
-         transform="matrix(0.01497625,-0.41177524,0.41177524,0.01497625,84.967689,89.249677)">
+         transform="matrix(0.01633768,-0.44920805,0.44920805,0.01633768,73.939269,86.617089)">
         <g
            opacity="0.199997"
            id="g24-0-4-4-73-0-13"
@@ -21507,7 +21942,7 @@
       </g>
       <g
          id="g689"
-         transform="matrix(-0.02460346,-0.4200565,0.4200565,-0.02460346,62.488475,110.67254)">
+         transform="matrix(-0.02684006,-0.45824212,0.45824212,-0.02684006,49.416562,109.98742)">
         <g
            opacity="0.199997"
            id="g24-3-3-3-3-6"
@@ -21927,83 +22362,83 @@
     <text
        id="text1491-6-9-2-54"
        xml:space="preserve"
-       x="46.098545"
-       y="52.66087"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.97603px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;display:inline;fill:#7e5b79;fill-opacity:1;stroke-width:0.248004"><tspan
+       x="31.536692"
+       y="46.702137"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.24656px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;display:inline;fill:#7e5b79;fill-opacity:1;stroke-width:0.270549"><tspan
          id="tspan1491-2-2-0-15"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.97603px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#7e5b79;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.248004"
-         x="46.098545"
-         y="52.66087">GDGT-0</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.24656px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#7e5b79;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.270549"
+         x="31.536692"
+         y="46.702137">GDGT-0</tspan></text>
     <text
        id="text1491-6-9-2-54-0"
        xml:space="preserve"
-       x="63.571865"
-       y="52.353397"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.97603px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;display:inline;fill:#7e5b79;fill-opacity:1;stroke-width:0.248004"><tspan
+       x="50.598446"
+       y="46.366722"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.24656px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;display:inline;fill:#7e5b79;fill-opacity:1;stroke-width:0.270549"><tspan
          id="tspan1491-2-2-0-15-4"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.97603px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#7e5b79;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.248004"
-         x="63.571865"
-         y="52.353397">1</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.24656px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#7e5b79;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.270549"
+         x="50.598446"
+         y="46.366722">1</tspan></text>
     <text
        id="text1491-6-9-2-54-0-4"
        xml:space="preserve"
-       x="74.504845"
-       y="52.576675"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.97603px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;display:inline;fill:#7e5b79;fill-opacity:1;stroke-width:0.248004"><tspan
+       x="62.525288"
+       y="46.610294"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.24656px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;display:inline;fill:#7e5b79;fill-opacity:1;stroke-width:0.270549"><tspan
          id="tspan1491-2-2-0-15-4-4"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.97603px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#7e5b79;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.248004"
-         x="74.504845"
-         y="52.576675">2</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.24656px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#7e5b79;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.270549"
+         x="62.525288"
+         y="46.610294">2</tspan></text>
     <path
-       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:#ffcc00;stroke-width:0.164903;stroke-dasharray:none"
-       d="m 57.494986,51.52152 h 1.343153 l 0.335788,2.350518"
+       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:#ffcc00;stroke-width:0.179894;stroke-dasharray:none"
+       d="m 43.969135,45.459219 h 1.465253 l 0.366312,2.564192"
        id="path33" />
     <path
-       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:#ffcc00;stroke-width:0.164903;stroke-dasharray:none"
-       d="m 64.602502,52.584851 0.335788,1.734904"
+       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:#ffcc00;stroke-width:0.179894;stroke-dasharray:none"
+       d="m 51.722766,46.619212 0.366312,1.892618"
        id="path34" />
     <path
-       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:#ffcc00;stroke-width:0.164903;stroke-dasharray:none"
-       d="m 74.788075,53.088532 -0.559648,1.511046"
+       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:#ffcc00;stroke-width:0.179894;stroke-dasharray:none"
+       d="m 62.834268,47.16868 -0.610524,1.648409"
        id="path689" />
     <text
        id="text1491-6-9-2-54-0-4-6"
        xml:space="preserve"
-       x="83.291992"
-       y="51.846512"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.97603px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;display:inline;fill:#7e5b79;fill-opacity:1;stroke-width:0.248004"><tspan
+       x="72.111237"
+       y="45.813755"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.24656px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;display:inline;fill:#7e5b79;fill-opacity:1;stroke-width:0.270549"><tspan
          id="tspan1491-2-2-0-15-4-4-3"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.97603px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#7e5b79;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.248004"
-         x="83.291992"
-         y="51.846512">3</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.24656px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#7e5b79;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.270549"
+         x="72.111237"
+         y="45.813755">3</tspan></text>
     <text
        id="text1491-6-9-2-54-0-4-6-5"
        xml:space="preserve"
-       x="93.581184"
-       y="52.037868"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.97603px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;display:inline;fill:#7e5b79;fill-opacity:1;stroke-width:0.248004"><tspan
+       x="83.335785"
+       y="46.022511"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.24656px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;display:inline;fill:#7e5b79;fill-opacity:1;stroke-width:0.270549"><tspan
          id="tspan1491-2-2-0-15-4-4-3-4"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.97603px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#7e5b79;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.248004"
-         x="93.581184"
-         y="52.037868">Cren</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.24656px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#7e5b79;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.270549"
+         x="83.335785"
+         y="46.022511">Cren</tspan></text>
     <text
        id="text1491-6-9-2-54-0-4-6-0"
        xml:space="preserve"
-       x="108.06144"
-       y="51.920376"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.97603px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;display:inline;fill:#7e5b79;fill-opacity:1;stroke-width:0.248004"><tspan
+       x="99.13237"
+       y="45.894337"
+       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.24656px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;display:inline;fill:#7e5b79;fill-opacity:1;stroke-width:0.270549"><tspan
          id="tspan1491-2-2-0-15-4-4-3-0"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.97603px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#7e5b79;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.248004"
-         x="108.06144"
-         y="51.920376">Cren'</tspan></text>
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.24656px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#7e5b79;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.270549"
+         x="99.13237"
+         y="45.894337">Cren'</tspan></text>
     <path
-       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:#ffcc00;stroke-width:0.164903;stroke-dasharray:none"
-       d="M 83.245479,52.450778 82.68583,53.961823"
+       style="display:inline;fill:#ffffff;fill-opacity:1;stroke:#ffcc00;stroke-width:0.179894;stroke-dasharray:none"
+       d="m 72.0605,46.472951 -0.610526,1.648408"
        id="path689-0" />
     <g
        id="g690"
        style="display:inline"
-       transform="matrix(-0.04920603,-0.43086089,0.43086089,-0.04920603,62.596299,135.19086)">
+       transform="matrix(-0.05367915,-0.47002871,0.47002871,-0.05367915,49.534187,136.7346)">
       <g
          opacity="0.199997"
          id="g24-3-3-3-0-12-6"
@@ -22558,7 +22993,7 @@
     <g
        id="g691"
        style="display:inline"
-       transform="matrix(-0.02989678,-0.43208549,0.43208549,-0.02989678,70.786208,150.84883)">
+       transform="matrix(-0.03261457,-0.47136462,0.47136462,-0.03261457,58.468607,153.81598)">
       <g
          opacity="0.199997"
          id="g24-3-3-3-0-12-9-7"
@@ -23089,449 +23524,16 @@
          clip-path="url(#clipPath911)" />
     </g>
     <path
-       style="fill:none;fill-opacity:1;stroke:#ffcc00;stroke-width:0.181754;stroke-dasharray:none"
-       d="m 96.322917,52.746008 -0.107725,1.939036"
+       style="fill:none;fill-opacity:1;stroke:#ffcc00;stroke-width:0.198277;stroke-dasharray:none"
+       d="m 86.326756,46.795019 -0.117515,2.115306"
        id="path692" />
     <path
-       style="fill:none;fill-opacity:1;stroke:#ffcc00;stroke-width:0.181754;stroke-dasharray:none"
-       d="m 107.36465,53.930973 1.02339,-1.939035"
+       style="fill:none;fill-opacity:1;stroke:#ffcc00;stroke-width:0.198277;stroke-dasharray:none"
+       d="M 98.372247,48.087705 99.488674,45.9724"
        id="path694" />
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="Layer 3" />
-  <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
-     id="layer1"
-     style="display:inline">
-    <rect
-       style="fill:#ff8080;fill-opacity:1;stroke:none;stroke-width:0.367905;stroke-dasharray:none"
-       id="rect16"
-       width="21.001429"
-       height="5.2923117"
-       x="19.239008"
-       y="87.851379" />
-    <g
-       id="g13"
-       transform="matrix(1.1474571,0,0,1.1379434,6.9020848,-6.7056855)"
-       style="fill:#ffe3a9;fill-opacity:0.04904235;stroke:#4d4d4d;stroke-width:0.240922;stroke-dasharray:none">
-      <g
-         id="g14"
-         style="fill:#ffe3a9;fill-opacity:0.04904235;stroke:#4d4d4d;stroke-width:0.240922;stroke-dasharray:none">
-        <rect
-           style="fill:#ffe3a9;fill-opacity:0.04904235;stroke:#4d4d4d;stroke-width:0.240922;stroke-dasharray:none"
-           id="rect14"
-           width="106.63699"
-           height="56.420929"
-           x="2.1299877"
-           y="47.094757" />
-      </g>
-    </g>
-    <text
-       id="text1491-6-9"
-       xml:space="preserve"
-       x="20.624886"
-       y="77.458382"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.7946px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.232884"><tspan
-         id="tspan1491-2-2"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.7946px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.232884"
-         x="20.624886"
-         y="77.458382">Temperature</tspan></text>
-    <text
-       id="text1491-6-9-2"
-       xml:space="preserve"
-       x="71.821304"
-       y="77.566528"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.7946px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#4d4d4d;fill-opacity:1;stroke-width:0.232884"><tspan
-         id="tspan1491-2-2-0"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.7946px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.232884"
-         x="71.821304"
-         y="77.566528">GDGT compositions</tspan></text>
-    <text
-       id="text1491-6-9-2-5"
-       xml:space="preserve"
-       x="54.35965"
-       y="91.289719"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.12435px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke-width:0.260363"><tspan
-         id="tspan1491-2-2-0-3"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.12435px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.260363"
-         x="54.35965"
-         y="91.289719">TEX<tspan
-   style="font-size:65%;baseline-shift:sub"
-   id="tspan22">86</tspan></tspan></text>
-    <text
-       id="text1491-6-9-2-5-6"
-       xml:space="preserve"
-       x="54.243839"
-       y="98.674774"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.12435px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke-width:0.260363"><tspan
-         id="tspan1491-2-2-0-3-3"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.12435px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.260363"
-         x="54.243839"
-         y="98.674774">GDGT-2/GDGT-3</tspan></text>
-    <text
-       id="text1491-6-9-2-5-6-4"
-       xml:space="preserve"
-       x="54.134842"
-       y="105.62105"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.12435px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;stroke-width:0.260363"><tspan
-         id="tspan1491-2-2-0-3-3-3"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.12435px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.260363"
-         x="54.134842"
-         y="105.62105">TEX<tspan
-   style="font-size:65%;baseline-shift:sub"
-   id="tspan1">86</tspan> residuals</tspan></text>
-    <text
-       id="text1491-6-9-2-7"
-       xml:space="preserve"
-       x="34.576153"
-       y="67.584946"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18.3774px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;stroke-width:0.188378"><tspan
-         id="tspan1491-2-2-0-1"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:18.3774px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;baseline-shift:baseline;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.188378"
-         x="34.576153"
-         y="67.584946">∝</tspan></text>
-    <text
-       id="text1491-6-9-2-6-9"
-       xml:space="preserve"
-       x="43.908085"
-       y="78.501266"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.12435px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;inline-size:74.7477;display:inline;stroke-width:0.260363"
-       transform="translate(-17.228782,12.984038)"><tspan
-         x="43.908085"
-         y="78.501266"
-         id="tspan2">SST</tspan></text>
-    <rect
-       style="fill:#87cdde;fill-opacity:1;stroke:none;stroke-width:0.367905;stroke-dasharray:none"
-       id="rect16-8"
-       width="21.001429"
-       height="5.2923117"
-       x="19.402815"
-       y="94.984528" />
-    <text
-       id="text1491-6-9-2-6-9-3"
-       xml:space="preserve"
-       x="43.908085"
-       y="78.501266"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.12435px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;inline-size:74.7477;display:inline;stroke-width:0.260363"
-       transform="translate(-23.624801,20.11718)"><tspan
-         x="43.908085"
-         y="78.501266"
-         id="tspan3">AOA ecology</tspan></text>
-    <rect
-       style="fill:#87deaa;fill-opacity:1;stroke:none;stroke-width:0.367905;stroke-dasharray:none"
-       id="rect16-2"
-       width="21.001429"
-       height="5.2923117"
-       x="19.496971"
-       y="102.00003" />
-    <text
-       id="text1491-6-9-2-6-9-2"
-       xml:space="preserve"
-       x="43.908085"
-       y="78.501266"
-       style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.12435px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;white-space:pre;inline-size:74.7477;display:inline;stroke-width:0.260363"
-       transform="translate(-19.817535,27.132688)"><tspan
-         x="43.908085"
-         y="78.501266"
-         id="tspan4">Nutrient</tspan></text>
-    <g
-       id="g23"
-       transform="translate(2.122011,0.66312848)" />
-    <g
-       id="g16"
-       transform="translate(-4.635148)">
-      <text
-         id="text1491-6"
-         xml:space="preserve"
-         x="33.711632"
-         y="40.735443"
-         style="font-size:1.28743px;stroke-width:0.107286"><tspan
-           id="tspan1491-2"
-           style="font-variant:normal;font-weight:normal;font-size:3.48939px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
-           x="33.711632"
-           y="40.735443">sensor model</tspan></text>
-      <text
-         id="text1491-6-7"
-         xml:space="preserve"
-         x="63.404099"
-         y="40.869469"
-         style="font-size:1.28743px;stroke-width:0.107286"><tspan
-           id="tspan1491-2-0"
-           style="font-variant:normal;font-weight:normal;font-size:3.48939px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
-           x="63.404099"
-           y="40.869469">archive model</tspan></text>
-      <text
-         id="text1491-6-7-0"
-         xml:space="preserve"
-         x="92.993698"
-         y="41.05629"
-         style="font-size:1.28743px;stroke-width:0.107286"><tspan
-           id="tspan1491-2-0-6"
-           style="font-variant:normal;font-weight:normal;font-size:3.48939px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
-           x="92.993698"
-           y="41.05629">observation model</tspan></text>
-      <text
-         id="text1492"
-         xml:space="preserve"
-         x="23.499876"
-         y="10.396969"
-         style="font-size:1.28743px;stroke-width:0.107286"><tspan
-           id="tspan1492"
-           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.32481px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
-           x="23.499876"
-           dx="0 0 0 0 0 0 0 0 0 -0.30273706 0 0 0.021624077 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.10812039"
-           y="10.396969">TEXAS = TetraEther indeX of Ammonia oxidizerS</tspan></text>
-      <path
-         id="path7852"
-         d="M 19.937711,14.856435 H 43.50796 v 5.098993 H 19.937711 Z"
-         style="fill:#bf9d40;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
-      <path
-         id="path7853"
-         d="m 46.166299,14.856435 h 24.005294 v 5.098993 H 46.166299 Z"
-         style="fill:#bf9d40;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
-      <path
-         id="path7854"
-         d="m 72.608921,14.856435 h 26.239424 v 5.098993 H 72.608921 Z"
-         style="fill:#666666;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
-      <path
-         id="path7855"
-         d="m 100.98195,14.856435 h 28.12154 v 5.098993 h -28.12154 z"
-         style="fill:#666666;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
-      <path
-         id="path7856"
-         d="M 19.937711,20.308721 H 43.50796 V 31.410378 H 19.937711 Z"
-         style="fill:#d8c387;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
-      <path
-         id="path7857"
-         d="M 46.166299,20.308721 H 70.171593 V 31.410378 H 46.166299 Z"
-         style="fill:#d8c387;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
-      <path
-         id="path7858"
-         d="M 72.608921,20.308721 H 98.848345 V 31.410378 H 72.608921 Z"
-         style="fill:#cccccc;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
-      <path
-         id="path7859"
-         d="m 100.98195,20.308721 h 28.12154 v 11.101657 h -28.12154 z"
-         style="fill:#cccccc;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
-      <path
-         id="path7860"
-         d="m 31.016303,31.378514 v 3.974204 h 25.87937 v -1.875363"
-         style="fill:none;stroke:#5a4924;stroke-width:0.66619;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
-      <path
-         id="path7861"
-         d="m 58.423321,34.069897 -1.478189,-2.55942 -1.477654,2.55942 z"
-         style="fill:#5a4924;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
-      <path
-         id="path7862"
-         d="m 63.446033,31.349547 v 4.027847 h 20.220129 v -1.900897"
-         style="fill:none;stroke:#4d4d4d;stroke-width:0.592812;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
-      <path
-         id="path7863"
-         d="m 85.143815,34.069897 -1.478082,-2.55942 -1.477653,2.55942 z"
-         style="fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
-      <path
-         id="path7864"
-         d="m 93.343704,31.349547 v 4.027847 h 20.220126 v -1.900897"
-         style="fill:none;stroke:#4d4d4d;stroke-width:0.592812;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none;stroke-opacity:1" />
-      <path
-         id="path7865"
-         d="m 115.04148,34.069897 -1.47808,-2.55942 -1.47776,2.55942 z"
-         style="fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286" />
-      <text
-         id="text7866"
-         xml:space="preserve"
-         x="21.18479"
-         y="18.66931"
-         style="font-size:1.28743px;stroke-width:0.107286"><tspan
-           id="tspan7866"
-           style="font-variant:normal;font-weight:700;font-size:3.43316px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
-           x="21.18479"
-           dx="0 0 -0.068663239"
-           y="18.66931">Environment</tspan></text>
-      <text
-         id="text7867"
-         xml:space="preserve"
-         x="24.49522"
-         y="23.560175"
-         style="font-size:1.28743px;stroke-width:0.107286"><tspan
-           id="tspan7867"
-           style="font-variant:normal;font-weight:normal;font-size:2.57487px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
-           x="24.49522"
-           dx="0 -0.24461263 0 0 0 0 0 0 0 0 -0.025748698"
-           y="23.560175">Temperature</tspan><tspan
-           id="tspan7868"
-           style="font-variant:normal;font-weight:normal;font-size:2.57487px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
-           x="24.305964"
-           dx="0 -0.090120442 -0.090120442"
-           y="26.778765">AOA ecology</tspan><tspan
-           id="tspan7869"
-           style="font-variant:normal;font-weight:normal;font-size:2.57487px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
-           x="25.003754"
-           dx="0 0 0 0 0 0 -0.038623046 0 0 0 -0.038623046 -0.051497396"
-           y="29.997355">Nitrate level</tspan><tspan
-           id="tspan7870"
-           style="font-variant:normal;font-weight:normal;font-size:2.57487px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
-           x="46.627213"
-           dx="0 0 0 -0.11586915 0 0 0 0 0.01287435"
-           y="26.54059">GDGT compositions</tspan><tspan
-           id="tspan7871"
-           style="font-variant:normal;font-weight:normal;font-size:2.57487px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
-           x="75.866989"
-           dx="0 -0.06437175"
-           y="24.908121">Post-depositional</tspan><tspan
-           id="tspan7872"
-           style="font-variant:normal;font-weight:normal;font-size:2.57487px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
-           x="79.84259"
-           dx="0 0 -0.01287435"
-           y="28.126711">processes</tspan><tspan
-           id="tspan7873"
-           style="font-variant:normal;font-weight:normal;font-size:2.57487px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
-           x="104.17043"
-           dx="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.01287435 0 0.01287435"
-           y="23.29883">Instrumental errors</tspan><tspan
-           id="tspan7874"
-           style="font-variant:normal;font-weight:normal;font-size:2.57487px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
-           x="105.74496"
-           dx="0 0 0 0 -0.01287435 0 0 0 0 0 0 0 0 0 -0.01287435 0 0.01287435"
-           y="26.51742">Analytical errors</tspan><tspan
-           id="tspan7875"
-           style="font-variant:normal;font-weight:normal;font-size:2.57487px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
-           x="108.82579"
-           dx="0 -0.025748698"
-           y="29.736002">Age model</tspan></text>
-      <text
-         id="text7875"
-         xml:space="preserve"
-         x="52.327541"
-         y="18.65729"
-         style="font-size:1.28743px;stroke-width:0.107286"><tspan
-           id="tspan7876"
-           style="font-variant:normal;font-weight:700;font-size:3.43316px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#ffffff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
-           x="52.327541"
-           dx="0 0 0 0 0 0 15.500698 0 0 0 0 0 -0.051497426 13.052902 0 0 0 0 0.068663239 -0.051497426"
-           y="18.65729">SensorArchiveObservation</tspan></text>
-      <text
-         id="text1492-1"
-         xml:space="preserve"
-         x="9.361558"
-         y="11.899865"
-         style="font-size:3.68316px;display:inline;stroke-width:0.30693"><tspan
-           id="tspan1492-4"
-           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.3727px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.30693"
-           x="9.361558"
-           y="11.899865">a</tspan></text>
-      <text
-         id="text1492-1-9"
-         xml:space="preserve"
-         x="16.378078"
-         y="58.91021"
-         style="font-size:3.68316px;display:inline;stroke-width:0.30693"><tspan
-           id="tspan1492-4-5"
-           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:12.3727px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.30693"
-           x="16.378078"
-           y="58.91021">b</tspan></text>
-    </g>
-    <g
-       id="g692"
-       transform="matrix(1.4130016,0,0,1.4130016,-5.886183,-22.715721)">
-      <path
-         d="m 24.134933,53.281413 c -0.764,3e-5 -1.383337,0.619367 -1.383366,1.383367 0.0015,0.01287 0.0032,0.02573 0.0051,0.03856 v 7.196225 c -1.011692,0.514853 -1.651122,1.551625 -1.65707,2.686772 1.58e-4,1.674706 1.357829,3.032236 3.032535,3.032218 1.674706,1.8e-5 3.032377,-1.357512 3.032535,-3.032218 -3.59e-4,-1.138221 -0.638061,-2.180391 -1.651381,-2.698782 V 54.70334 c 0.0019,-0.01282 0.0035,-0.02568 0.0051,-0.03856 -2.9e-5,-0.764 -0.619366,-1.383337 -1.383366,-1.383367 z"
-         style="fill:#ffffff;fill-opacity:0.695164;stroke:#000000;stroke-width:0.611601;stroke-dasharray:none"
-         id="path4" />
-      <path
-         d="m 24.149964,56.517601 c -0.382935,7.5e-5 -0.693347,0.310487 -0.693421,0.693422 0.001,0.0074 0.0022,0.01477 0.0035,0.02212 v 5.28568 c -0.874531,0.288795 -1.466807,1.103985 -1.471229,2.024956 -7e-5,1.183715 0.959445,2.143371 2.143159,2.143476 1.183838,6.9e-5 2.143546,-0.959638 2.143476,-2.143476 -4.51e-4,-0.909158 -0.57442,-1.719125 -1.432053,-2.020846 v -5.291369 h -0.0032 c 0.0012,-0.0068 0.0022,-0.01368 0.0032,-0.02054 -7.4e-5,-0.382935 -0.310486,-0.693347 -0.693422,-0.693421 z"
-         style="fill:#800000;stroke-width:0.715439"
-         id="path7" />
-    </g>
-    <g
-       id="g18"
-       transform="translate(-11.656366,12.431212)">
-      <text
-         id="text4435"
-         xml:space="preserve"
-         transform="matrix(0.20563972,0,0,0.20594643,98.060802,76.848991)"
-         clip-path="url(#clipPath4436)"><tspan
-           id="tspan4435"
-           style="font-variant:normal;font-weight:700;font-size:13.0184px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#c92a2a;fill-opacity:0.8;fill-rule:nonzero;stroke:none"
-           x="0"
-           y="0">Linear</tspan></text>
-      <text
-         id="text4441"
-         xml:space="preserve"
-         transform="matrix(0.20563972,0,0,0.20594643,98.176122,79.01038)"
-         clip-path="url(#clipPath4442)"><tspan
-           id="tspan4441"
-           style="font-variant:normal;font-weight:normal;font-size:10.0142px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#c92a2a;fill-opacity:0.8;fill-rule:nonzero;stroke:none"
-           x="0"
-           y="0">Schouten et al. (2002)</tspan></text>
-    </g>
-    <g
-       id="g17"
-       transform="translate(-11.656366,11.679251)">
-      <text
-         id="text4460"
-         xml:space="preserve"
-         transform="matrix(0.20563972,0,0,0.20594643,98.063479,84.190573)"
-         clip-path="url(#clipPath4461)"><tspan
-           id="tspan4460"
-           style="font-variant:normal;font-weight:700;font-size:13.0184px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#e67700;fill-opacity:0.8;fill-rule:nonzero;stroke:none"
-           x="0"
-           y="0">Exponential</tspan></text>
-      <text
-         id="text4471"
-         xml:space="preserve"
-         transform="matrix(0.20563972,0,0,0.20594643,98.112284,86.329405)"
-         clip-path="url(#clipPath4472)"><tspan
-           id="tspan4471"
-           style="font-variant:normal;font-weight:normal;font-size:10.0142px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#e67700;fill-opacity:0.8;fill-rule:nonzero;stroke:none"
-           x="0"
-           y="0">Kim et al. (2010)</tspan></text>
-    </g>
-    <g
-       id="g19"
-       transform="translate(-11.656366,10.312379)">
-      <text
-         id="text4485"
-         xml:space="preserve"
-         transform="matrix(0.20563972,0,0,0.20594643,98.055447,92.136341)"
-         clip-path="url(#clipPath4486)"><tspan
-           id="tspan4485"
-           style="font-variant:normal;font-weight:700;font-size:13.0184px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#862e9c;fill-opacity:0.8;fill-rule:nonzero;stroke:none"
-           x="0"
-           y="0">BAYSPAR</tspan></text>
-      <text
-         id="text4492"
-         xml:space="preserve"
-         transform="matrix(0.20563972,0,0,0.20594643,98.231724,94.533911)"
-         clip-path="url(#clipPath4493)"><tspan
-           id="tspan4492"
-           style="font-variant:normal;font-weight:normal;font-size:10.0142px;font-family:'TeX Gyre Heros';writing-mode:lr-tb;fill:#862e9c;fill-opacity:0.8;fill-rule:nonzero;stroke:none"
-           x="0"
-           y="0">Tierney et al. (2014)</tspan></text>
-    </g>
-    <text
-       id="text1491-6-8"
-       xml:space="preserve"
-       x="86.322212"
-       y="84.68045"
-       style="font-size:0.997575px;fill:#000000;fill-opacity:1;stroke-width:0.0831314"><tspan
-         id="tspan1491-2-09"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:2.70378px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0831314"
-         x="86.322212"
-         y="84.68045">Existing SST sensor models</tspan></text>
-    <path
-       style="fill:none;fill-opacity:1;stroke:#4d4d4d;stroke-width:0.25;stroke-dasharray:none"
-       d="m 43.615386,46.870267 c 0,-1.301954 0,-2.603905 0,-3.905856"
-       id="path11"
-       inkscape:path-effect="#path-effect11"
-       inkscape:original-d="m 43.615386,46.870267 c 0,-1.301954 0,-2.603905 0,-3.905856"
-       transform="translate(-3.9178233)" />
-    <path
-       style="fill:none;fill-opacity:1;stroke:#4d4d4d;stroke-width:0.182843;stroke-dasharray:none;marker-start:url(#Dot);marker-end:url(#marker23)"
-       d="m 67.705229,90.684898 h 14.634083 v -6.867074 h 1.929039"
-       id="path22" />
-  </g>
 </svg>
