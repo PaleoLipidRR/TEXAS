@@ -52,6 +52,9 @@ from .diagnostics import summarize_sampler_diagnostics, create_summary_table
 # ─── Posterior download utilities ───────────────────────────────────────
 from .utils.download import download_posterior, download_posteriors, POSTERIOR_REGISTRY
 
+# ─── Cache configuration ─────────────────────────────────────────────────
+from .utils.paths import set_cache_dir
+
 # ─── Plotting / dataviz ─────────────────────────────────────────────────
 from .plotting import (
     compute_sample_range,
@@ -106,6 +109,8 @@ __all__ = [
     "download_posterior",
     "download_posteriors",
     "POSTERIOR_REGISTRY",
+    # cache configuration
+    "set_cache_dir",
     # plotting
     "compute_sample_range",
     "compute_density_based_range",
