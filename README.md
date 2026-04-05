@@ -121,7 +121,7 @@ The forward calibration posteriors are the pre-computed Bayesian parameter distr
 
 ```python
 import TEXAS
-TEXAS.download_posteriors()   # downloads all standard posteriors to ~/.texas/
+TEXAS.download_posteriors()   # downloads all standard posteriors to ~/.texas/cache/
 ```
 
 Or download a single posterior:
@@ -130,7 +130,14 @@ Or download a single posterior:
 TEXAS.download_posterior("gen_logi_fixed_hier_crtp_multiv_SST")
 ```
 
-Posteriors are cached at `~/.texas/data/cache/TEXAS_posterior_cache/` and are found automatically on subsequent calls — no repeated downloads.
+Posteriors are cached at `~/.texas/cache/TEXAS_posterior_cache/` and are found automatically on subsequent calls — no repeated downloads.
+
+**Custom cache location**: set the `TEXAS_CACHE_DIR` environment variable before importing, or call `TEXAS.set_cache_dir(path)` at the top of your script:
+
+```python
+import TEXAS
+TEXAS.set_cache_dir("/data/my_texas_cache")   # call before any posterior I/O
+```
 
 > **Zenodo data record coming upon paper submission.** Until then, contact the authors or generate posteriors yourself with `get_posterior()` (see Example usage below).
 
@@ -248,6 +255,7 @@ tests/              Unit tests
 | `predict_T_from_proxyObs(proxyObs, prior_mu_t, prior_sigma_t, ...)` | Inverse reconstruction: proxy → temperature with full uncertainty (runs Stan); `predict_T_from_RI` is a deprecated alias |
 | `download_posteriors(names, ...)` | Download all standard forward posteriors from Zenodo |
 | `download_posterior(name, ...)` | Download a single forward posterior from Zenodo |
+| `set_cache_dir(path)` | Override cache location at runtime; persistent alternative is `TEXAS_CACHE_DIR` env var |
 | `build_fwd_data(t_cul, proxy_cul, ..., no3_crtp, culmeso_posterior)` | Build validated Stan data dict for forward calibration; auto-detects predictors and `no3_cutoff` |
 | `get_posterior(data, stan_file, temptype, proxy_name, ...)` | Run forward calibration Stan sampling; `proxy_name` required, saved to `.nc` attrs |
 | `save_posterior(ds)` / `load_posterior(name)` | Persist / load forward posterior as compressed NetCDF; filename pattern: `{model}_{temptype}_{proxy_name}{suffix}.nc` |

@@ -1,6 +1,6 @@
 # TEXAS Repo — Publication Readiness Plan
 
-> Created: 2026-04-03. Not yet implemented.
+> Created: 2026-04-03. Last updated: 2026-04-04.
 
 This document tracks the plan for preparing the TEXAS repo for public release alongside manuscript submission.
 
@@ -10,7 +10,7 @@ This document tracks the plan for preparing the TEXAS repo for public release al
 
 1. **Data archive**: Zenodo/Figshare for raw data, or everything self-contained in repo?
 2. **Demo notebooks**: ship with pre-run cell outputs, or cleared (run-it-yourself)?
-3. **Cache path backward compat**: keep `data/cache/` as a fallback for existing users, or clean break with migration note?
+3. ~~**Cache path backward compat**: keep `data/cache/` as a fallback for existing users, or clean break with migration note?~~ → resolved: repo users keep `data/cache/` unchanged; pip users get `~/.texas/cache/`; old `~/.texas/data/cache/` triggers a deprecation warning.
 4. **PyPI push**: credentials available on this machine, or user pushes manually after prep?
 
 ---
@@ -48,23 +48,20 @@ All demos reference only data in `data/published/`.
 
 ---
 
-## 3. Cache File Fix (Core Technical Issue)
+## 3. Cache File Fix ✅ Done (2026-04-04)
 
-**Problem:** `src/TEXAS/utils/paths.py` hardcodes cache paths relative to the repo root (`data/cache/TEXAS_posterior_cache/`). This silently breaks for pip-installed users who have no repo checkout.
+~~**Problem:** `src/TEXAS/utils/paths.py` hardcodes cache paths relative to the repo root (`data/cache/TEXAS_posterior_cache/`). This silently breaks for pip-installed users who have no repo checkout.~~
 
-**Fix:** Resolve to a user-level cache directory with an environment variable override:
+**Implemented in `src/TEXAS/utils/paths.py`:**
 
-```python
-CACHE_ROOT = Path(os.environ.get("TEXAS_CACHE_DIR", Path.home() / ".texas" / "cache"))
-POSTERIOR_CACHE_DIR = CACHE_ROOT / "TEXAS_posterior_cache"
-INVT_CACHE_DIR     = CACHE_ROOT / "TEXAS_invT_posterior_cache"
-```
+- `_resolve_cache_root()` resolves priority: `TEXAS_CACHE_DIR` env var → `{repo}/data/cache/` (git checkout) → `~/.texas/cache/` (pip/Colab)
+- `CACHE_ROOT`, `CACHE_DIR` (alias), `POSTERIOR_CACHE_DIR`, `INVT_CACHE_DIR` defined from `CACHE_ROOT`
+- `set_cache_dir(path)` exported from top-level `TEXAS` — updates module globals and propagates into `io.DEFAULT_FORWARD_DIR` / `io.DEFAULT_INVT_DIR`
+- Old `~/.texas/data/cache/` layout (pre-fix pip installs) triggers a `UserWarning` with migration instructions
+- `README.md` updated: corrected cache path, added `TEXAS_CACHE_DIR` / `set_cache_dir` usage block and API table entry
 
-- **pip users:** `~/.texas/cache/` works out of the box, no config needed
-- **Docker users:** extend `run.sh` to prompt for a local cache dir and mount it as a volume
-  (`-v /local/path:/root/.texas/cache`)
-- **Runtime override:** add a `texas.set_cache_dir(path)` convenience function
-- **Backward compat:** optionally check `data/cache/` as a fallback and emit a deprecation warning
+**Still needed (Docker):**
+- Extend `run.sh` to prompt for a local cache dir and mount it as `-v /local/path:/root/.texas/cache`
 
 ---
 
@@ -81,7 +78,7 @@ INVT_CACHE_DIR     = CACHE_ROOT / "TEXAS_invT_posterior_cache"
 
 1. Answer the open questions above
 2. Audit SI notebooks → identify data files → populate `data/published/`
-3. Fix cache paths in `src/TEXAS/utils/paths.py`
+3. ~~Fix cache paths in `src/TEXAS/utils/paths.py`~~ ✅
 4. Update `run.sh` to support cache volume mounting for Docker
 5. Write the three demo notebooks
 6. Update `.gitignore` to explicitly include `data/published/`
