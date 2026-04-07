@@ -1,0 +1,36 @@
+# syntax=docker/dockerfile:1.7
+# ─────────────────────────────────────────────────────────────────────────────
+# TEXAS — Supplementary Information (SI) image
+# For reproducing the manuscript analysis (SI_code1/2/3 notebooks).
+# Includes all SI notebooks and baked-in posterior caches (forward + invT)
+# so reviewers can run every figure without re-running MCMC.
+#
+# Prerequisites: push the base image first:
+#   docker build -f docker/Dockerfile -t ghcr.io/paleolipidRR/texas-base:latest .
+#   docker push ghcr.io/paleolipidRR/texas-base:latest
+#
+# Build & run:
+#   docker compose --profile si up
+# ─────────────────────────────────────────────────────────────────────────────
+FROM ghcr.io/paleolipidRR/texas-base:latest
+
+WORKDIR /home/micromamba/app
+
+# Manuscript SI notebooks
+COPY --chown=micromamba:micromamba notebooks/manuscripts/ ./notebooks/manuscripts/
+
+# Forward calibration posteriors (~4 MB)
+COPY --chown=micromamba:micromamba data/cache/TEXAS_posterior_cache/ ./data/cache/TEXAS_posterior_cache/
+
+# Inverse temperature posteriors, including draws/ subfolder (~20 MB)
+COPY --chown=micromamba:micromamba data/cache/TEXAS_invT_posterior_cache/ ./data/cache/TEXAS_invT_posterior_cache/
+
+EXPOSE 8888
+
+CMD ["jupyter", "lab", \
+     "--ip=0.0.0.0", \
+     "--port=8888", \
+     "--no-browser", \
+     "--NotebookApp.token=", \
+     "--NotebookApp.password=", \
+     "--notebook-dir=/home/micromamba/app"]
