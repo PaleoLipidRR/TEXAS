@@ -1,0 +1,32 @@
+# syntax=docker/dockerfile:1.7
+# ─────────────────────────────────────────────────────────────────────────────
+# TEXAS — Demo image
+# For users who want to run TEXAS analyses on their own data.
+# Includes demo notebooks and the forward calibration posterior cache.
+#
+# Prerequisites: push the base image first:
+#   docker build -f docker/Dockerfile -t ghcr.io/paleolipidRR/texas-base:latest .
+#   docker push ghcr.io/paleolipidRR/texas-base:latest
+#
+# Build & run:
+#   docker compose --profile demo up
+# ─────────────────────────────────────────────────────────────────────────────
+FROM ghcr.io/paleolipidRR/texas-base:latest
+
+WORKDIR /home/micromamba/app
+
+# Demo notebooks
+COPY --chown=micromamba:micromamba notebooks/current/ ./notebooks/current/
+
+# Forward calibration posteriors (pre-built, ~4 MB)
+COPY --chown=micromamba:micromamba data/cache/TEXAS_posterior_cache/ ./data/cache/TEXAS_posterior_cache/
+
+EXPOSE 8888
+
+CMD ["jupyter", "lab", \
+     "--ip=0.0.0.0", \
+     "--port=8888", \
+     "--no-browser", \
+     "--NotebookApp.token=", \
+     "--NotebookApp.password=", \
+     "--notebook-dir=/home/micromamba/app"]
