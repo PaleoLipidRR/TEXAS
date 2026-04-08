@@ -281,8 +281,11 @@ def _save_invT_draws(
 
     The filename mirrors the quantile posterior but with a ``_draws`` suffix,
     e.g. ``ODP1259_..._040226_direct_draws.nc``.
+    
+    Draws are automatically organized into a ``draws/`` subdirectory.
     """
-    output_dir = Path(cache_dir) if cache_dir else DEFAULT_INVT_DIR
+    base_dir = Path(cache_dir) if cache_dir else DEFAULT_INVT_DIR
+    output_dir = base_dir / "draws"  # Auto-organize into draws subfolder
     output_dir.mkdir(parents=True, exist_ok=True)
     base = _generate_filename_base(draws.attrs, filename_tag)
     filepath = output_dir / f"{base}_draws.nc"
