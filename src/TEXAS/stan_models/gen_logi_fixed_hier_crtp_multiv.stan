@@ -135,7 +135,7 @@ model {
 
     // Tight priors on correction coefficients (expected small effect sizes).
     beta_G23_crtp ~ normal(0, 0.05);
-    beta_NO3_crtp ~ normal(0, 0.05);
+    beta_NO3_crtp ~ normal(-0.064, 0.008); // tight, informative prior based on strong nutrient effect region
 
     // ─── 6. Likelihood for coretop data (with optional non-thermal corrections) ─
     //
