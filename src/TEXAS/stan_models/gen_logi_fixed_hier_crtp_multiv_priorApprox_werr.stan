@@ -96,6 +96,6 @@ model {
         }
     }
 
-    sigma_proxyObs_crtp ~ normal(0.01, 0.1);
+    sigma_proxyObs_crtp ~ normal(0, 0.1);
     proxyObs_crtp ~ normal(mu_proxyObs_crtp, sigma_proxyObs_crtp);
 }
