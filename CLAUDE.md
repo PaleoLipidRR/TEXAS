@@ -95,6 +95,9 @@ Example: `t0_crtp`, `k_crtp`, `b_crtp`, `v_crtp`, `sigma_proxyObs_crtp`.
 > - `v prior T[0, ] → T[0.1, ]` in `gen_logi_fixed_culmesocore.stan`: prior truncation must match the `lower=0.1` parameter declaration (mismatched truncation gives an incorrect normalizing constant).
 > - `.gitignore` negation `!src/TEXAS/stan_models/*.stan` added so Stan source files created after the binary-glob rule are not silently untracked.
 
+> **Stan model prior fix (2026-04-08)**:
+> - `sigma_proxyObs_crtp ~ normal(0.01, 0.1) → normal(0, 0.1)` in 5 files: `gen_logi_fixed_hier_crtp_multiv.stan`, `gen_logi_fixed_hier_crtp_multiv_priorApprox.stan`, `gen_logi_fixed_hier_crtp_univ_priorApprox.stan`, `gen_logi_fixed_hier_crtp_multiv_priorApprox_werr.stan`, `gen_logi_fixed_culmesocore.stan`. The old prior mean (0.01) was ~5× below the posterior (~0.05); `normal(0, 0.1)` is the conventional half-normal weakly informative prior for scale parameters. Cached `.nc` posteriors from these models must be regenerated.
+
 ### Posterior caching
 
 Posteriors are saved as compressed NetCDF (`.nc`) in:

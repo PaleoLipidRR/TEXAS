@@ -32,7 +32,7 @@ model {
 
   sigma_proxyObs_cul  ~ normal(0.01, 0.1);
   sigma_proxyObs_meso ~ normal(0.01, 0.1);
-  sigma_proxyObs_crtp ~ normal(0.01, 0.1);
+  sigma_proxyObs_crtp ~ normal(0, 0.1);
 
   // Generalized logistic curve (fixed upper bound = 1, Q fixed to 1)
   vector[N_cul] mu_proxyObs_cul = b_culmesocore

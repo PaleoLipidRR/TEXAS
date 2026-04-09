@@ -96,6 +96,44 @@ model {
         }
     }
 
-    sigma_proxyObs_crtp ~ normal(0.01, 0.1);
+    sigma_proxyObs_crtp ~ normal(0, 0.1);
     proxyObs_crtp ~ normal(mu_proxyObs_crtp, sigma_proxyObs_crtp);
+}
+
+generated quantities {
+    // ── In-sample R² for this model ───────────────────────────────────────────
+    // R2_full     : frequentist 1 - RSS/TSS  (matches figure; fixed denominator)
+    // bayesR2_full: Bayesian var(μ)/(var(μ)+σ²)  (Gelman et al. 2019)
+    // Both computed using this model's own estimated parameters.
+    // Sequential variance partitioning (deltaR2_G23, deltaR2_NO3, etc.) is
+    // derived in Python by differencing R2_full across separately-fit posteriors.
+    real R2_full;
+    real bayesR2_full;
+    real RMSE_full;
+
+    {   // local scope — mu vector not saved
+        vector[N_crtp] mu = b_crtp + (1 - b_crtp)
+            ./ pow(1 + exp(-k_crtp * (t_crtp - t0_crtp)), 1.0 / v_crtp);
+
+        if (use_gdgt23ratio == 1)
+            mu += beta_G23_crtp * gdgt23ratio_crtp;
+
+        if (use_no3 == 1) {
+            for (i in 1:N_crtp) {
+                if (no3_crtp[i] > 0 && no3_crtp[i] < no3_cutoff)
+                    mu[i] += beta_NO3_crtp * log10(no3_crtp[i]);
+            }
+        }
+
+        vector[N_crtp] resid = proxyObs_crtp - mu;
+        real ybar    = mean(proxyObs_crtp);
+        real TSS     = dot_self(proxyObs_crtp - ybar);
+        real RSS     = dot_self(resid);
+        R2_full      = 1 - RSS / TSS;
+        RMSE_full    = sqrt(RSS / N_crtp);
+
+        real var_mu  = variance(mu);
+        real sigma2  = sigma_proxyObs_crtp ^ 2;
+        bayesR2_full = var_mu / (var_mu + sigma2);
+    }
 }
