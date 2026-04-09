@@ -76,7 +76,7 @@ class StanSampler:
         proxy_name = kwargs.pop('proxy_name', None)
         site_name = kwargs.pop('site_name', None)
         version = kwargs.pop('version', '1.0.0')
-        recompile = kwargs.pop('recompile', False)  # ← CHANGE: capture instead of ignoring
+        recompile = kwargs.pop('recompile', False)
 
         t0 = time.time()
         

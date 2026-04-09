@@ -28,7 +28,7 @@ model {
   k_crtp  ~ normal(prior_mean_k, prior_sd_k);
   b_crtp  ~ normal(prior_mean_b, prior_sd_b);
   v_crtp  ~ normal(prior_mean_v, prior_sd_v);
-  sigma_proxyObs_crtp ~ normal(0.01, 0.1);
+  sigma_proxyObs_crtp ~ normal(0, 0.1);
 
   // Generalized logistic mean (upper asymptote fixed at 1, Q fixed to 1)
   vector[N_crtp] mu_proxyObs_crtp = b_crtp + (1 - b_crtp)
@@ -39,6 +39,32 @@ model {
 }
 
 generated quantities {
-  real inflection_point;
-  inflection_point = t0_crtp + log(v_crtp) / k_crtp;
+    // Inflection point of the Richards curve (where curvature changes sign)
+    real inflection_point = t0_crtp + log(v_crtp) / k_crtp;
+
+    // ── In-sample R² for this model ───────────────────────────────────────────
+    // R2_full     : frequentist 1 - RSS/TSS  (matches figure; fixed denominator)
+    // bayesR2_full: Bayesian var(μ)/(var(μ)+σ²)  (Gelman et al. 2019)
+    // Both computed using this model's own estimated parameters (T only, no
+    // non-thermal predictors). Use R2_full for sequential variance partitioning
+    // by differencing across posteriors in Python.
+    real R2_full;
+    real bayesR2_full;
+    real RMSE_full;
+
+    {   // local scope — mu vector not saved
+        vector[N_crtp] mu    = b_crtp + (1 - b_crtp)
+            ./ pow(1 + exp(-k_crtp * (t_crtp - t0_crtp)), 1.0 / v_crtp);
+
+        vector[N_crtp] resid = proxyObs_crtp - mu;
+        real ybar    = mean(proxyObs_crtp);
+        real TSS     = dot_self(proxyObs_crtp - ybar);
+        real RSS     = dot_self(resid);
+        R2_full      = 1 - RSS / TSS;
+        RMSE_full    = sqrt(RSS / N_crtp);
+
+        real var_mu  = variance(mu);
+        real sigma2  = sigma_proxyObs_crtp ^ 2;
+        bayesR2_full = var_mu / (var_mu + sigma2);
+    }
 }
