@@ -21,6 +21,7 @@ dependencies:
   - statsmodels
   - seaborn
   - gsw
+  - odrpack
   
   # --- Core Data Handling ---
   - xarray
@@ -57,6 +58,8 @@ dependencies:
   - geopy
   - pyshp=2.3.*
   - pykrige
+  - pygplates
+  - regionmask>=0.9
 
   # --- xESMF Stack (Complex Dependencies) ---
   - xesmf
