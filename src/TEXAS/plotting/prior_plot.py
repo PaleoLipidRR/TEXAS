@@ -258,7 +258,7 @@ def plot_prior_distributions(
             dist, a, b, trunc = prior_info["dist"], prior_info["a"], prior_info["b"], prior_info["trunc"]
 
             if dist == "normal":
-                std_range = 4 if trunc is None else 2.5
+                std_range = 4 if trunc is None else 3
                 x_min = a - std_range * b
                 x_max = a + std_range * b
                 if trunc:
@@ -328,6 +328,17 @@ def plot_prior_distributions(
         # Sort by (idx_ds, param_name) so all lines for dataset 0 are plotted
         # before dataset 1, giving a consistent order in every subplot.
         all_samples.sort(key=lambda t: (t[1], t[2]))
+        
+        # ── NEW: expand x to cover posterior tails if they exceed prior bounds ──
+        if all_samples and x is not None:
+            all_param_samples = np.concatenate([s for s, _, _, _, _, _ in all_samples])
+            p_lo = np.percentile(all_param_samples, 0.5)
+            p_hi = np.percentile(all_param_samples, 99.5)
+            needs_expansion = (p_lo < x_min) or (p_hi > x_max)
+            if needs_expansion:
+                x_min = min(x_min, p_lo)
+                x_max = max(x_max, p_hi)
+                x = np.linspace(x_min, x_max, 5000)
 
         # If x was not defined by prior, create it from posterior data range
         if x is None and all_samples:
