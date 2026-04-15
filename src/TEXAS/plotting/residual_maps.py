@@ -382,7 +382,7 @@ def _section_header(
     row_left: int, row_right: int,
     y_axfrac: float,
     label: str,
-    color="gray5", fontsize=13, lw=0.8,
+    color=_C_GRAY5, fontsize=13, lw=0.8,
 ):
     """
     Bold label right-aligned to axs[row_right, -1], with a horizontal rule
@@ -453,9 +453,9 @@ def plot_residual_maps(
     metrics=None,
     # Per-row annotation string (replaces R²/RMSE when provided)
     row_annotations: Optional[List[str]] = None,
-    # ProPlot figure settings
+    # Figure settings
     fig_width: float = 7,
-    hspace: Optional[List] = None,   # default: [1,1,4,1,1] for 6 rows; pass explicitly for other row counts
+    hspace: float = 0.08,   # matplotlib hspace (fraction of row height); was a proplot em-unit list
     # Metrics formatting
     rmse_fmt: str = ".3f",           # e.g. ".1f" for temperature residuals
     rmse_unit: str = "",             # e.g. "°C" for temperature residuals
@@ -512,7 +512,6 @@ def plot_residual_maps(
     -------
     fig, axs
     """
-    import proplot as plot
     from sklearn.metrics import r2_score
 
     nrows = len(data)
@@ -575,36 +574,40 @@ def plot_residual_maps(
         boundaries = np.arange(-vlim, vlim + 1e-9, boundary_step)
     norm_res   = mcolors.BoundaryNorm(boundaries, ncolors=256)
 
-    # ── ProPlot figure layout ───────────────────────────────────────────────
-    proj_global   = plot.Proj('eck3', lon_0=-100)
-    proj_regional = plot.Proj('eck3', lon_0=0)
+    # ── Figure layout ──────────────────────────────────────────────────────
+    proj_global   = ccrs.EckertIII(central_longitude=-100)
+    proj_regional = ccrs.EckertIII(central_longitude=0)
 
-    proj_dict = {}
-    for row in range(nrows):
-        base = row * 3 + 1
-        proj_dict[base]     = proj_global
-        proj_dict[base + 1] = proj_regional
-        proj_dict[base + 2] = proj_regional
+    # Estimate figure height: EckertIII aspect ≈ 1.65 (w/h); global col is
+    # 2/(2+2+0.75) = 0.42 of total width.
+    row_height = (fig_width * 2 / 4.75) / 1.65
+    fig_height = row_height * nrows + 0.6   # extra 0.6 in for colorbar
 
-    fig, axs = plot.subplots(
-        proj=proj_dict,
-        width=fig_width, ncols=3, nrows=nrows, share=0,
-        wratios=[2, 2, 0.75],
-        wspace=[1, 1],
-        hspace=hspace if hspace is not None else [1, 1, 4, 1, 1],
+    fig = plt.figure(figsize=(fig_width, fig_height))
+    fig.subplots_adjust(bottom=0.10)   # room for colorbar
+
+    gs = mgridspec.GridSpec(
+        nrows, 3, figure=fig,
+        width_ratios=[2, 2, 0.75],
+        wspace=0.05, hspace=hspace,
     )
 
+    axs = np.empty((nrows, 3), dtype=object)
+    for row in range(nrows):
+        axs[row, 0] = fig.add_subplot(gs[row, 0], projection=proj_global)
+        axs[row, 1] = fig.add_subplot(gs[row, 1], projection=proj_regional)
+        axs[row, 2] = fig.add_subplot(gs[row, 2], projection=proj_regional)
+
     # ── Per-column gridlines ────────────────────────────────────────────────
-    axs[:, 0].format(lonlines=30, latlines=30, fontsize=10)
-    axs[:, 1].format(lonlines=10, latlines=10, fontsize=8)
-    axs[:, 2].format(fontsize=8)
-    for ax in axs[:, 2]:
-        for geoaxis in [ax._lonaxis, ax._lataxis]:
-            geoaxis.set_major_locator(mticker.NullLocator())
-            geoaxis.set_minor_locator(mticker.NullLocator())
-        for gl in getattr(ax, "_gridliners", []):
-            gl.xlines = False
-            gl.ylines = False
+    for ax in axs[:, 0]:
+        gl = ax.gridlines(draw_labels=False, linewidth=0.3, color='0.75', alpha=0.6)
+        gl.xlocator = mticker.FixedLocator(range(-180, 181, 30))
+        gl.ylocator = mticker.FixedLocator(range(-90, 91, 30))
+    for ax in axs[:, 1]:
+        gl = ax.gridlines(draw_labels=False, linewidth=0.3, color='0.75', alpha=0.6)
+        gl.xlocator = mticker.FixedLocator(range(-180, 181, 10))
+        gl.ylocator = mticker.FixedLocator(range(-90, 91, 10))
+    # col 2 (Red Sea): no gridlines
 
     row_labels = list("abcdefghijklmnopqrstuvwxyz")
 
@@ -666,12 +669,12 @@ def plot_residual_maps(
         ax_global.text(
             -0.05, 0.68, f"row {row_labels[i]}",
             transform=ax_global.transAxes,
-            fontsize=16, fontweight="bold", ha="right", va="bottom", c="gray7",
+            fontsize=16, fontweight="bold", ha="right", va="bottom", color=_C_GRAY7,
         )
         ax_global.text(
             -0.05, 0.65, method_label,
             transform=ax_global.transAxes,
-            fontsize=9, fontweight="bold", ha="right", va="top", c="gray6",
+            fontsize=9, fontweight="bold", ha="right", va="top", color=_C_GRAY6,
         )
         if row_annotations is not None:
             ann_text = row_annotations[i]
@@ -680,34 +683,30 @@ def plot_residual_maps(
         ax_global.text(
             -0.05, 0.3, ann_text,
             transform=ax_global.transAxes,
-            fontsize=9, ha="right", va="center", c="gray6",
+            fontsize=9, ha="right", va="center", color=_C_GRAY6,
         )
 
     # ── Shared colorbar ─────────────────────────────────────────────────────────
     # Pull the resolved cmap from the first pcolormesh drawn — guarantees
-    # the colorbar matches the maps exactly, no proplot dependency needed.
+    # the colorbar matches the maps exactly.
     pcm_ref = axs[0, 0].collections[0]
     sm = mplcm.ScalarMappable(cmap=pcm_ref.get_cmap(), norm=norm_res)
     sm.set_array([])
+    cbar_ax = fig.add_axes([0.25, 0.03, 0.5, 0.018])
     cb = fig.colorbar(
-        sm, loc="b", label=colorbar_label,
-        extend="both", ticks=boundaries,
-        length=0.5, width=0.2,
+        sm, cax=cbar_ax, orientation="horizontal",
+        label=colorbar_label, extend="both", ticks=boundaries,
     )
     cb.minorticks_off()
 
     # ── Global axes formatting ──────────────────────────────────────────────
-    axs.format(
-        yticklabels=[], grid=False,
-        labelcolor="gray7",
-        xtickcolor="gray7",  xticklabelcolor="gray7",
-        ytickcolor="gray7",  yticklabelcolor="gray7",
-    )
-    plot.rc["abc"] = False
-    for ax in axs:
-        ax.spines[:].set_linewidth(1.2)
-        ax.spines[:].set_color("gray7")
-        ax.spines[:].set_zorder(10)
+    for ax in axs.flat:
+        ax.tick_params(labelleft=False, left=False, labelcolor=_C_GRAY7,
+                       colors=_C_GRAY7)
+        for spine in ax.spines.values():
+            spine.set_linewidth(1.2)
+            spine.set_color(_C_GRAY7)
+            spine.set_zorder(10)
 
     # ── Post-draw layout (must be after fig.canvas.draw()) ─────────────────
     fig.canvas.draw()
