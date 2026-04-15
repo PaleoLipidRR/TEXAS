@@ -19,10 +19,6 @@ Set env var KRIGE_N_JOBS to override parallelism (1 = serial).
 
 from __future__ import annotations
 
-# NOTE: proplot and sklearn are imported lazily inside plot_residual_maps()
-# so that importing this module (e.g. for krige_halo_all / make_true_grid)
-# does not require proplot to be installed.
-
 import os
 from pathlib import Path
 from typing import List, Optional, Sequence, Tuple
@@ -30,6 +26,8 @@ from typing import List, Optional, Sequence, Tuple
 import numpy as np
 from scipy.spatial import cKDTree
 from pykrige.ok import OrdinaryKriging
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as mgridspec
 import matplotlib.cm as mplcm
 import matplotlib.colors as mcolors
 import matplotlib.ticker as mticker
@@ -37,6 +35,13 @@ import matplotlib.lines as mlines
 from matplotlib.patches import Rectangle
 import cartopy.feature as cfeature
 import cartopy.crs as ccrs
+
+# ── Gray color constants (approximate proplot gray scale equivalents) ─────────
+# proplot gray0=white → gray10=black; values below are hex approximations.
+_C_GRAY3 = '#b3b3b3'   # was 'gray3' — light gray (land fill)
+_C_GRAY5 = '#808080'   # was 'gray5' — medium gray (borders)
+_C_GRAY6 = '#666666'   # was 'gray6' — medium-dark gray (secondary text)
+_C_GRAY7 = '#4d4d4d'   # was 'gray7' — dark gray (primary text / spines)
 
 try:
     from joblib import Parallel, delayed
@@ -61,13 +66,13 @@ _GRID_LON_025DEG,  _GRID_LAT_025DEG  = make_krige_grid(0.25)
 
 # ── Natural Earth features — preloaded once ──────────────────────────────────
 _LAND = cfeature.NaturalEarthFeature(
-    'physical', 'land', '110m', facecolor='gray3')
+    'physical', 'land', '110m', facecolor=_C_GRAY3)
 _COASTLINE = cfeature.NaturalEarthFeature(
     'physical', 'coastline', '110m',
-    edgecolor='gray7', facecolor='none', linewidth=0.5)
+    edgecolor=_C_GRAY7, facecolor='none', linewidth=0.5)
 _BORDERS = cfeature.NaturalEarthFeature(
     'cultural', 'admin_0_boundary_lines_land', '110m',
-    edgecolor='gray5', facecolor='none', linewidth=0.3, linestyle=':')
+    edgecolor=_C_GRAY5, facecolor='none', linewidth=0.3, linestyle=':')
 
 # ── Default regional extents ─────────────────────────────────────────────────
 MED_EXTENT = [-10, 43, 25, 50]   # [lon_min, lon_max, lat_min, lat_max]
