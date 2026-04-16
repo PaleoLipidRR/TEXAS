@@ -32,15 +32,12 @@
 //   letting the prior attenuate β toward zero — the opposite of de-attenuation.
 //   The latent variable approach below is the correct fix.
 //
-// PRIOR DESIGN NOTE — why β_{NO₃} must not be centered at zero:
+// PRIOR DESIGN NOTE — why β_{NO₃} is zero-centered in this model:
 //   The latent variables log10_no3_true[j] introduce extra degrees of freedom.
-//   With a zero-centered prior on β, the HMC sampler can fit the RI observations
-//   by adjusting the latent variables WITHOUT moving β away from zero — the
-//   latent variables absorb the residuals instead. This paradoxically produces
-//   MORE attenuation than the naive (no-EIV) model that uses X_obs directly.
-//   Solution: use the same informative prior as the non-EIV model,
-//   normal(-0.064, 0.008), so both models are directly comparable and the
-//   EIV de-attenuation signal is not masked by a miscentered prior.
+//   With a strongly informative prior on β, the sampler can be forced toward
+//   that prior regardless of the EIV signal in the data. Here we instead use
+//   a weakly informative zero-centered prior, normal(0, 0.05), so that the
+//   latent-variable model can reveal the de-attenuated NO₃ effect if present.
 //
 // LATENT VARIABLES:
 //
@@ -140,12 +137,10 @@ model {
     v_crtp  ~ normal(prior_mean_v,  prior_sd_v);
 
     beta_G23_crtp       ~ normal(0, 0.05);
-    beta_NO3_crtp       ~ normal(-0.064, 0.008); // matches non-EIV model prior; center ≠ 0 is
-                                                  // essential — a zero-centered prior with the
-                                                  // EIV latent variables can cause β to drift
-                                                  // MORE toward zero (not less) because the
-                                                  // latent variables absorb residuals that would
-                                                  // otherwise pull β negative.
+    beta_NO3_crtp       ~ normal(-0.064, 0.008); // non-zero center essential: zero-centered prior
+                                                  // + latent vars causes MORE attenuation, not less
+                                                  // (latent vars absorb residuals that would otherwise
+                                                  // pull beta negative). Matches _odr and _eiv models.
     sigma_proxyObs_crtp ~ normal(0, 0.1);
 
     // ─── 2. Measurement models for latent predictors ──────────────────────────

@@ -75,7 +75,7 @@ Model names follow a naming convention: `{transform}_{curve}_{params}_{datasourc
 - **Curve type**: `gen_logi` = generalized logistic; `logistic` = standard logistic; `linear` = linear
 - **Params**: `fixed` = fixed upper asymptote; `free` = free upper asymptote
 - **Data sources**: `culmeso` = culture+mesocosm; `culmesocore` = culture+mesocosm+coretop; `crtp` = coretop-only
-- **Variants**: `hier_crtp` = hierarchical coretop; `multiv` = multivariate (GDGT23/NO3); `priorApprox` = prior approximation; `werr` = error-in-variables (EIV) treatment of secondary predictors (see below); `odr` = same EIV treatment but in the full hierarchical (non-priorApprox) model; `marginal_*` = marginalized variants; `reduce_sum` = parallelized with `reduce_sum`
+- **Variants**: `hier_crtp` = hierarchical coretop; `multiv` = multivariate (GDGT23/NO3); `priorApprox` = prior approximation; `werr` = delta-method EIV (heteroscedastic likelihood, no latent vars); `werr_ver2` = latent-variable EIV with quadrature RI error + process-noise separation (see below); `odr` = delta-method EIV in the full hierarchical (non-priorApprox) model; `marginal_*` = marginalized variants; `reduce_sum` = parallelized with `reduce_sum`
 
 ### Parameter suffix convention
 
@@ -100,19 +100,28 @@ Example: `t0_crtp`, `k_crtp`, `b_crtp`, `v_crtp`, `sigma_proxyObs_crtp`.
 > **Stan model prior fix (2026-04-08)**:
 > - `sigma_proxyObs_crtp ~ normal(0.01, 0.1) → normal(0, 0.1)` in 5 files: `gen_logi_fixed_hier_crtp_multiv.stan`, `gen_logi_fixed_hier_crtp_multiv_priorApprox.stan`, `gen_logi_fixed_hier_crtp_univ_priorApprox.stan`, `gen_logi_fixed_hier_crtp_multiv_priorApprox_werr.stan`, `gen_logi_fixed_culmesocore.stan`. The old prior mean (0.01) was ~5× below the posterior (~0.05); `normal(0, 0.1)` is the conventional half-normal weakly informative prior for scale parameters. Cached `.nc` posteriors from these models must be regenerated.
 
-> **ODR (error-in-variables) Stan models added (2026-04-15)**:
-> Two new/rewritten models implement Bayesian EIV treatment of the G₂/₃ and NO₃ secondary predictors.
-> Both accept `sd_gdgt23ratio_crtp` and `sd_no3_crtp` as per-site measurement SEs and propagate them analytically into a **heteroscedastic likelihood** — no latent-variable parameters, no change to sampling speed:
+> **ODR / EIV Stan models added (2026-04-15 / 2026-04-16)**:
+> Three models implement Bayesian EIV treatment of the G₂/₃ and NO₃ secondary predictors.
 >
-> - `gen_logi_fixed_hier_crtp_multiv_priorApprox_werr.stan` — priorApprox (Stage-2) version; also adds the previously missing `generated quantities` block.
+> **Delta-method (heteroscedastic likelihood) variants** — no latent-variable parameters, no change to sampling speed:
+> - `gen_logi_fixed_hier_crtp_multiv_priorApprox_werr.stan` — priorApprox (Stage-2) version. Uses CV-gating: sites with `sd_no3 / no3 > 0.3` treated as exact (delta-method approximation breaks at high CV).
 > - `gen_logi_fixed_hier_crtp_multiv_odr.stan` — full hierarchical (culture + mesocosm + coretop) version.
 >
-> **EIV implementation (error propagation)**:
+> EIV implementation (delta method):
 > - G₂/₃ term (linear): exact — `σ²_eff[i] += β²_{G₂/₃} · σ²_{G₂/₃}[i]`
 > - NO₃ term (log₁₀): delta method — `σ²_eff[i] += β²_{NO₃} · (σ_{NO₃}[i] / (no3[i] · ln 10))²`, applied only where `0 < NO₃[i] < no3_cutoff`
-> - `sigma_proxyObs_crtp` becomes the *pure* RI residual noise (predictor SE contributions are explicit); expect it to be smaller than in non-ODR fits.
-> - `bayesR2_full` in `generated quantities` uses `mean(σ²_eff)` as the denominator noise term to account for heteroscedasticity.
-> - `build_fwd_data()` must be updated to pass `sd_gdgt23ratio_crtp` and `sd_no3_crtp` when using these models.
+> - `sigma_proxyObs_crtp` = pure RI residual noise; `bayesR2_full` uses `mean(σ²_eff)` as denominator.
+>
+> **Latent-variable variant** — samples N_crtp latent `true_no3_crtp` values; valid at any CV:
+> - `gen_logi_fixed_hier_crtp_multiv_priorApprox_werr_ver2.stan` — priorApprox (Stage-2) version.
+>
+> Key differences from `_werr.stan`:
+> - `sd_proxyObs` (per-site RI analytical SE; default Rs = 0.03) is passed as data and enters the likelihood in quadrature: `total_sd = √(sd_proxyObs² + sigma_proxyObs_crtp²)`. `sigma_proxyObs_crtp` is therefore *pure process noise* (oceanographic scatter, bioturbation) only.
+> - `sigma_proxyObs_crtp` prior scaled to `mean(sd_proxyObs) · √(1 − R²_thermal)`; `R2_thermal` must be passed as data (pre-compute from a thermal-only coretop fit).
+> - `true_no3_crtp ~ lognormal(log(0.3), 1.0)` with `<lower=0, upper=no3_cutoff>` — upper bound prevents double-precision overflow (`exp(>710) = Inf`) during HMC leapfrog.
+> - Sites with `sd_no3_crtp[i] = 0` (unknown SE) skip the measurement model; receive only the lognormal prior. No formal CV-gating needed.
+> - Requires `sd_proxyObs` and `R2_thermal` in the Stan data dict; `build_fwd_data()` accepts both. `sampler.py` raises `ValueError` if `R2_thermal` is missing for `_ver2` models.
+> - `_werr.stan` and `_odr.stan` are retained pending comparison of β_NO3 posteriors; may be deleted if `_werr_ver2` proves superior.
 
 ### Posterior caching
 

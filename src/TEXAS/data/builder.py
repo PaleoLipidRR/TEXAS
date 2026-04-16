@@ -494,8 +494,15 @@ def build_fwd_data(
     sd_gdgt23ratio_crtp=None,   # per-site SE of G₂/₃ — required for ODR models (_werr, _odr)
     no3_crtp=None,
     sd_no3_crtp=None,            # per-site SE of NO₃ (μmol/L, linear) — required for ODR models
+    no3_eiv_cv_max: float = 0.3, # CV = sd_no3/no3 ceiling for latent-variable EIV eligibility.
+                                  # Delta-method σ_log10 = CV/ln10; valid only when CV < ~0.3.
+                                  # Sites exceeding this are moved to no3_exact_idx (use observed).
     no3_cutoff: Optional[float] = None,
     proxy_residuals_crtp: Optional[np.ndarray] = None,
+    # Analytical measurement SE of RI — required for _werr_ver2 models
+    sd_proxyObs=None,            # per-site SE of scaled RI; defaults to 0.03 (Schouten et al. 2013)
+    # Thermal-only R² — required for _werr_ver2 sigma prior scaling
+    R2_thermal: Optional[float] = None,   # compute from a thermal-only coretop run first
     # Stage-1 culmeso posterior — auto-extracts hyperpriors and no3_cutoff
     culmeso_posterior: Optional[xr.Dataset] = None,
     # Manual hyperprior overrides (alternative or supplement to culmeso_posterior)
@@ -527,8 +534,15 @@ def build_fwd_data(
         no3_crtp:                   Nitrate concentration for coretop samples.
                                     Sets use_no3=1 if non-zero/non-NaN.
         sd_no3_crtp:                Per-site measurement SE of NO₃ (μmol/L, linear space).
-                                    Required for ODR models. Propagated via delta method
+                                    Required for ODR/_eiv models. Propagated via delta method
                                     through the log₁₀(NO₃) term. Only added when provided.
+        no3_eiv_cv_max:             CV = sd_no3/no3 ceiling for latent-variable eligibility.
+                                    The delta-method approximation σ_log10 ≈ σ_lin/(NO₃·ln10)
+                                    is valid only when CV < ~0.3 (Carroll et al. 2006).
+                                    Sites with CV > no3_eiv_cv_max are moved from no3_valid_idx
+                                    to no3_exact_idx (observed value used directly; latent
+                                    variable would be unconstrained and provide no benefit).
+                                    Default: 0.3 (σ_log10 < 0.13 for eligible sites).
         no3_cutoff:                 NO3 threshold for the nonthermal correction.
                                     Priority: (1) this arg, (2) culmeso_posterior attrs,
                                     (3) auto-calculated via Spearman method.
@@ -668,10 +682,10 @@ def build_fwd_data(
                 if np.any(sd_n < 0):
                     raise ValueError("sd_no3_crtp must be non-negative.")
                 data["sd_no3_crtp"] = sd_n
-                n_eiv = int((sd_n > 0).sum())
+                n_with_se = int((sd_n > 0).sum())
                 pred_parts.append(
                     f"sd_no3: {sd_n[sd_n>0].min():.3g}–{sd_n.max():.3g} µmol/L "
-                    f"(EIV for {n_eiv}/{N_crtp} sites)"
+                    f"({n_with_se}/{N_crtp} sites have SE; CV gate applied at no3_cutoff)"
                 )
             else:
                 # sd_no3_crtp not provided: treat all NO₃ sites as exact (no latent variable).
@@ -745,14 +759,25 @@ def build_fwd_data(
         _no3_cutoff = data.get("no3_cutoff", 0.0)
         if data.get("use_no3", 0) == 1 and _no3_cutoff > 0:
             _in_range = (_no3_obs > 0) & (_no3_obs < _no3_cutoff) & np.isfinite(_no3_obs)
-            # EIV sites: in-range AND sd_no3 > 0 → latent variable treatment
-            _eiv_mask             = _in_range & (_sd_no3 > 0)
+            # CV gate: delta-method σ_log10 = σ_lin/(NO₃·ln10) is only valid when CV < cv_max.
+            # Sites with CV ≥ cv_max are unconstrained on the log scale and provide no EIV benefit.
+            _cv            = np.where(_no3_obs > 0, _sd_no3 / _no3_obs, np.inf)
+            _cv_ok         = _cv < no3_eiv_cv_max
+            # EIV sites: in-range AND sd_no3 > 0 AND CV < cv_max → latent variable treatment
+            _eiv_mask             = _in_range & (_sd_no3 > 0) & _cv_ok
             data["N_no3_valid"]   = int(_eiv_mask.sum())
             data["no3_valid_idx"] = (np.where(_eiv_mask)[0] + 1).tolist()  # 1-based for Stan
-            # Exact sites: in-range AND sd_no3 = 0 → use observed value directly
-            _exact_mask            = _in_range & (_sd_no3 == 0)
+            # Exact sites: in-range AND (sd_no3 = 0 OR CV ≥ cv_max) → use observed value directly
+            _exact_mask            = _in_range & (~_eiv_mask)
             data["N_no3_exact"]    = int(_exact_mask.sum())
             data["no3_exact_idx"]  = (np.where(_exact_mask)[0] + 1).tolist()
+            _n_cv_gated = int((_in_range & (_sd_no3 > 0) & ~_cv_ok).sum())
+            if _n_cv_gated > 0:
+                pred_parts.append(
+                    f"CV gate (cv_max={no3_eiv_cv_max}): {_n_cv_gated} sites moved "
+                    f"exact (CV≥{no3_eiv_cv_max}; sd_log10 would exceed "
+                    f"{no3_eiv_cv_max/np.log(10):.2f})"
+                )
         else:
             data["N_no3_valid"]   = 0
             data["no3_valid_idx"] = []
@@ -776,6 +801,26 @@ def build_fwd_data(
             "N_no3_valid": 0, "no3_valid_idx": [],
             "N_no3_exact": 0, "no3_exact_idx": [],
         })
+
+    # ── sd_proxyObs — per-site RI analytical SE (_werr_ver2) ──────────────────
+    if sd_proxyObs is not None:
+        sd_p = np.asarray(sd_proxyObs, dtype=float)
+        if N_crtp and len(sd_p) != N_crtp:
+            raise ValueError(
+                f"sd_proxyObs length ({len(sd_p)}) != N_crtp ({N_crtp})."
+            )
+        if np.any(sd_p < 0):
+            raise ValueError("sd_proxyObs must be non-negative.")
+        data["sd_proxyObs"] = sd_p
+    elif N_crtp:
+        data["sd_proxyObs"] = np.full(N_crtp, 0.03, dtype=float)  # default Rs (Schouten et al. 2013)
+
+    # ── R2_thermal — thermal-only R² for sigma prior scaling (_werr_ver2) ─────
+    if R2_thermal is not None:
+        r2 = float(R2_thermal)
+        if not (0.0 <= r2 <= 1.0):
+            raise ValueError(f"R2_thermal must be in [0, 1], got {r2}.")
+        data["R2_thermal"] = r2
 
     # ── Hyperpriors ────────────────────────────────────────────────────────────
     manual_hp = {
