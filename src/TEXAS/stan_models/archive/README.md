@@ -21,11 +21,14 @@ and are not referenced by any Python code or SI notebooks.
 
 ## Active models (in `../`)
 
-All 22 active models are reachable by Python code or executed in SI notebooks.
-See `src/TEXAS/stan/invT.py::_select_invT_stan_file()` for selection logic.
+23 active models as of 2026-04-16. See `src/TEXAS/stan/invT.py::_select_invT_stan_file()` for invT selection logic.
 
-| Group | Count |
-|---|---|
-| Forward (`gen_logi_fixed_*`) | 9 |
-| Inverse (`invT_gen_logi_fixed_*`) | 12 |
-| Linear | 1 |
+| Group | Count | Notes |
+|---|---|---|
+| Forward (`gen_logi_fixed_*`) | 10 | +1 `_werr_ver2` added 2026-04-16 |
+| Inverse (`invT_gen_logi_fixed_*`) | 12 | |
+| Linear | 1 | |
+
+### EIV / ODR forward models (experimental, under comparison)
+
+Three models implement Bayesian error-in-variables for secondary predictors (G₂/₃, NO₃). The `_odr` and `_werr` variants use the delta method (heteroscedastic likelihood, no latent vars). `_werr_ver2` uses a latent-variable formulation that also separates RI analytical measurement error (Rs ≈ 0.03) from structural process noise. `_werr.stan` and `_odr.stan` may be archived once `_werr_ver2` comparison is complete.
