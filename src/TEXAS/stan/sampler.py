@@ -162,7 +162,8 @@ def get_posterior(
         )
 
     # Guard: ODR models require per-site SE arrays when the corresponding predictor is active
-    _is_odr = "_odr" in str(stan_file) or "_werr" in str(stan_file)
+    _is_odr  = "_odr" in str(stan_file) or "_werr" in str(stan_file)
+    _is_ver2 = "_ver2" in str(stan_file)
     if _is_odr:
         _missing_sd = []
         if _use_g23 and "sd_gdgt23ratio_crtp" not in data:
@@ -173,12 +174,16 @@ def get_posterior(
             _missing_sd.append(
                 "sd_no3_crtp  (SE of NO₃ per site in µmol/L — pass to build_fwd_data())"
             )
+        if _is_ver2 and "R2_thermal" not in data:
+            _missing_sd.append(
+                "R2_thermal  (R² from thermal-only coretop fit — pass to build_fwd_data(R2_thermal=...))"
+            )
         if _missing_sd:
             raise ValueError(
                 f"ODR model '{stan_file}' requires per-site SE arrays for active predictors, "
                 f"but the following are missing from the data dict:\n"
                 + "\n".join(f"  • {s}" for s in _missing_sd)
-                + "\n\nProvide them via build_fwd_data(..., sd_gdgt23ratio_crtp=..., sd_no3_crtp=...)."
+                + "\n\nProvide them via build_fwd_data(..., sd_gdgt23ratio_crtp=..., sd_no3_crtp=..., R2_thermal=...)."
             )
 
     # Auto-detect optimal CPU settings for this machine.
