@@ -75,31 +75,110 @@ Then open the notebooks in `notebooks/manuscripts/`.
 
 ### Option C — pip install (Python users)
 
+> **Do not run `pip install` against the system Python.** Modern Debian/Ubuntu systems mark the system Python as externally managed (PEP 668) and will refuse the install. Always install into a virtual environment first.
+
+**Step 1 — create and activate an isolated environment** (pick one):
+
+```bash
+# Option C1: conda (recommended if you already have conda/miniforge)
+conda create -n texas-env python=3.10 pip
+conda activate texas-env
+
+# Option C2: plain venv
+python3 -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+```
+
+**Step 2 — install the package:**
+
 ```bash
 pip install texas-psm
 ```
 
-**One-time CmdStan install** (required for any Stan sampling — forward calibration or inverse reconstruction):
+**Step 3 — one-time CmdStan install** (required for Stan sampling — forward calibration and inverse reconstruction):
 
 ```bash
 TBB_CXX_TYPE=gcc python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.36.0')"
 ```
 
-TEXAS will search for CmdStan in `~/.cmdstan/`, `/opt/cmdstan/`, or the `CMDSTAN` environment variable.
+This installs CmdStan to `~/.cmdstan/cmdstan-2.36.0`. TEXAS finds it automatically on next import.
+
+TEXAS searches for CmdStan in the following priority order:
+
+| Priority | Location |
+|---|---|
+| 1 | `CMDSTAN` environment variable (auto-set by conda; also honoured when set manually) |
+| 2 | `/opt/cmdstan/cmdstan-2.36.0` |
+| 3 | `~/.cmdstan/cmdstan-2.36.0` — default target of `cmdstanpy.install_cmdstan()` |
+| 4 | `/usr/local/cmdstan/cmdstan-2.36.0` |
+| 5 | Whatever cmdstanpy is already configured to use |
+
+`set_cmdstan_path()` is always called on the winning path. If `CMDSTAN` is set but points to a broken directory, TEXAS emits a warning and continues down the list. If nothing is found, a `RuntimeError` is raised with explicit install instructions.
+
+To use a specific CmdStan installation (e.g. `~/.cmdstan/cmdstan-2.36.0` instead of a conda-managed one):
+
+```bash
+export CMDSTAN=~/.cmdstan/cmdstan-2.36.0
+```
 
 ---
 
-### Option D — conda + pip from source (for development)
+### Option D — conda-lock (exact reproducible environment)
+
+For the most reproducible setup outside of Docker, use the pre-solved conda-lock files published alongside this repository. Every package version and checksum is pinned — the environment will be identical on any machine of the same platform.
+
+**Step 1 — choose your method:**
+
+*With `conda-lock` (multi-platform lock file — recommended):*
+
+```bash
+# Install conda-lock once
+conda install -c conda-forge conda-lock   # or: pip install conda-lock
+
+# Create the environment
+conda-lock install -n texas-env conda-lock.yml
+conda activate texas-env
+```
+
+*Without `conda-lock` (platform-specific explicit file — works with plain conda):*
+
+```bash
+# Pick the file for your platform
+conda create -n texas-env --file conda-linux-64.lock    # Linux x86_64
+conda create -n texas-env --file conda-osx-arm64.lock   # macOS Apple Silicon
+conda create -n texas-env --file conda-osx-64.lock      # macOS Intel
+conda create -n texas-env --file conda-win-64.lock      # Windows
+
+conda activate texas-env
+```
+
+**Step 2 — install the package:**
+
+```bash
+pip install texas-psm
+```
+
+CmdStan is bundled in the conda-lock environment — no separate `install_cmdstan()` step needed.
+
+---
+
+### Option E — conda + pip from source (for development)
 
 ```bash
 git clone https://github.com/PaleoLipidRR/TEXAS.git
 cd TEXAS
 conda env create -f environment.yml
 conda activate texas-env
-pip install -e .
+pip install -e .          # editable install — required for development
 ```
 
-Then install CmdStan as shown in Option C above.
+> **Always use `pip install -e .`** (editable mode). A plain `pip install .` or `pip install texas-psm` puts a static copy in site-packages: `STAN_MODELS_DIR` will point there (no pre-compiled binaries), and any local code changes you make will be silently ignored by the running kernel. After cloning, or any time you find the wrong package version is active, re-run `pip install -e .` and restart your Jupyter kernel.
+
+The conda environment sets `CMDSTAN` automatically to the bundled CmdStan. If you installed CmdStan manually via `cmdstanpy.install_cmdstan()` and want to use that version instead, set:
+
+```bash
+export CMDSTAN=~/.cmdstan/cmdstan-2.36.0
+```
 
 ---
 

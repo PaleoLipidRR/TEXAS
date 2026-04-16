@@ -161,6 +161,26 @@ def get_posterior(
             f"omit the predictor arrays from the data dict."
         )
 
+    # Guard: ODR models require per-site SE arrays when the corresponding predictor is active
+    _is_odr = "_odr" in str(stan_file) or "_werr" in str(stan_file)
+    if _is_odr:
+        _missing_sd = []
+        if _use_g23 and "sd_gdgt23ratio_crtp" not in data:
+            _missing_sd.append(
+                "sd_gdgt23ratio_crtp  (SE of G₂/₃ per site — pass to build_fwd_data())"
+            )
+        if _use_no3 and "sd_no3_crtp" not in data:
+            _missing_sd.append(
+                "sd_no3_crtp  (SE of NO₃ per site in µmol/L — pass to build_fwd_data())"
+            )
+        if _missing_sd:
+            raise ValueError(
+                f"ODR model '{stan_file}' requires per-site SE arrays for active predictors, "
+                f"but the following are missing from the data dict:\n"
+                + "\n".join(f"  • {s}" for s in _missing_sd)
+                + "\n\nProvide them via build_fwd_data(..., sd_gdgt23ratio_crtp=..., sd_no3_crtp=...)."
+            )
+
     # Auto-detect optimal CPU settings for this machine.
     # parallel_chains: always apply (CmdStanPy already does min(chains, cpu_count)
     #   but being explicit avoids surprises).
@@ -338,10 +358,17 @@ def auto_detect_predictors(data: dict) -> dict:
     enhanced.setdefault("no3_cutoff", 1.0)
 
     # 7) Logging
+    sd_g23_key = f"sd_gdgt23ratio_{suffix}"
+    sd_no3_key = f"sd_no3_{suffix}"
+    _has_sd_g23 = sd_g23_key in enhanced
+    _has_sd_no3 = sd_no3_key in enhanced
+
     print("🔍 Predictor auto-detection:")
     print(f"   Chosen group: {suffix} (from {chosen_key}, N={data_len})")
-    print(f"   GDGT23 keys in data: {gdgt23_keys} → use_gdgt23ratio = {enhanced['use_gdgt23ratio']}")
-    print(f"   NO3 keys in data:    {no3_keys} → use_no3 = {enhanced['use_no3']}")
+    print(f"   GDGT23 keys in data: {gdgt23_keys} → use_gdgt23ratio = {enhanced['use_gdgt23ratio']}"
+          + (f"  [ODR: {sd_g23_key} present]" if _has_sd_g23 else ""))
+    print(f"   NO3 keys in data:    {no3_keys} → use_no3 = {enhanced['use_no3']}"
+          + (f"  [ODR: {sd_no3_key} present]" if _has_sd_no3 else ""))
 
     return enhanced
 

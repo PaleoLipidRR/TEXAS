@@ -491,7 +491,9 @@ def build_fwd_data(
     proxy_crtp=None,
     # Optional coretop predictors
     gdgt23ratio_crtp=None,
+    sd_gdgt23ratio_crtp=None,   # per-site SE of G₂/₃ — required for ODR models (_werr, _odr)
     no3_crtp=None,
+    sd_no3_crtp=None,            # per-site SE of NO₃ (μmol/L, linear) — required for ODR models
     no3_cutoff: Optional[float] = None,
     proxy_residuals_crtp: Optional[np.ndarray] = None,
     # Stage-1 culmeso posterior — auto-extracts hyperpriors and no3_cutoff
@@ -518,8 +520,15 @@ def build_fwd_data(
         t_crtp, proxy_crtp:         Coretop temperature and proxy arrays.
         gdgt23ratio_crtp:           GDGT-2/GDGT-3 ratio for coretop samples.
                                     Sets use_gdgt23ratio=1 if non-zero/non-NaN.
+        sd_gdgt23ratio_crtp:        Per-site measurement SE of gdgt23ratio (same units,
+                                    linear). Required for ODR models (_werr, _odr).
+                                    Only added to the data dict when provided — non-ODR
+                                    models will reject unknown data variables.
         no3_crtp:                   Nitrate concentration for coretop samples.
                                     Sets use_no3=1 if non-zero/non-NaN.
+        sd_no3_crtp:                Per-site measurement SE of NO₃ (μmol/L, linear space).
+                                    Required for ODR models. Propagated via delta method
+                                    through the log₁₀(NO₃) term. Only added when provided.
         no3_cutoff:                 NO3 threshold for the nonthermal correction.
                                     Priority: (1) this arg, (2) culmeso_posterior attrs,
                                     (3) auto-calculated via Spearman method.
@@ -565,6 +574,14 @@ def build_fwd_data(
     if (gdgt23ratio_crtp is not None or no3_crtp is not None) and t_crtp is None:
         raise ValueError(
             "gdgt23ratio_crtp / no3_crtp require coretop data (t_crtp, proxy_crtp)."
+        )
+    if sd_gdgt23ratio_crtp is not None and gdgt23ratio_crtp is None:
+        raise ValueError(
+            "sd_gdgt23ratio_crtp requires gdgt23ratio_crtp to be provided."
+        )
+    if sd_no3_crtp is not None and no3_crtp is None:
+        raise ValueError(
+            "sd_no3_crtp requires no3_crtp to be provided."
         )
 
     # ── Build data dict ────────────────────────────────────────────────────────
@@ -616,6 +633,19 @@ def build_fwd_data(
             use_g = int(not (np.all(np.isnan(g_arr)) or np.all(g_arr == 0)))
             data.update({"gdgt23ratio_crtp": g_arr, "use_gdgt23ratio": use_g})
             pred_parts.append(f"gdgt23ratio {'✓' if use_g else '✗'}")
+
+            if sd_gdgt23ratio_crtp is not None:
+                sd_g = np.asarray(sd_gdgt23ratio_crtp, dtype=float)
+                if len(sd_g) != N_crtp:
+                    raise ValueError(
+                        f"sd_gdgt23ratio_crtp length ({len(sd_g)}) != N_crtp ({N_crtp})."
+                    )
+                if np.any(sd_g < 0):
+                    raise ValueError("sd_gdgt23ratio_crtp must be non-negative.")
+                data["sd_gdgt23ratio_crtp"] = sd_g
+                pred_parts.append(
+                    f"sd_gdgt23ratio: {sd_g.min():.3g}–{sd_g.max():.3g} (ODR)"
+                )
         else:
             data.update({"gdgt23ratio_crtp": np.zeros(N_crtp), "use_gdgt23ratio": 0})
 
@@ -628,6 +658,27 @@ def build_fwd_data(
                 )
             use_n = int(not (np.all(np.isnan(n_arr)) or np.all(n_arr == 0)))
             data.update({"no3_crtp": n_arr, "use_no3": use_n})
+
+            if sd_no3_crtp is not None:
+                sd_n = np.asarray(sd_no3_crtp, dtype=float)
+                if len(sd_n) != N_crtp:
+                    raise ValueError(
+                        f"sd_no3_crtp length ({len(sd_n)}) != N_crtp ({N_crtp})."
+                    )
+                if np.any(sd_n < 0):
+                    raise ValueError("sd_no3_crtp must be non-negative.")
+                data["sd_no3_crtp"] = sd_n
+                n_eiv = int((sd_n > 0).sum())
+                pred_parts.append(
+                    f"sd_no3: {sd_n[sd_n>0].min():.3g}–{sd_n.max():.3g} µmol/L "
+                    f"(EIV for {n_eiv}/{N_crtp} sites)"
+                )
+            else:
+                # sd_no3_crtp not provided: treat all NO₃ sites as exact (no latent variable).
+                # The Stan data block always requires sd_no3_crtp; default to zeros so
+                # build_fwd_data() produces a complete data dict for EIV models.
+                data["sd_no3_crtp"] = np.zeros(N_crtp, dtype=float)
+                pred_parts.append("sd_no3: not provided (all sites treated as exact)")
 
             if use_n:
                 # Determine no3_cutoff — priority: explicit > posterior attrs > auto-calc
@@ -682,12 +733,49 @@ def build_fwd_data(
         else:
             data.update({"no3_crtp": np.zeros(N_crtp), "use_no3": 0, "no3_cutoff": 0.0})
 
+        # ── EIV latent variable index arrays (for _werr and _odr models) ────────
+        # N_g23        : number of latent G₂/₃ parameters = N_crtp when enabled, 0 when not.
+        # N_no3_valid  : count of sites with 0 < NO₃_obs < no3_cutoff (latent NO₃ estimated here).
+        # no3_valid_idx: 1-based Stan indices of those sites in the coretop arrays.
+        # Non-EIV Stan models simply ignore these extra data dict keys (CmdStanPy is
+        # tolerant of unrecognized keys; they are not forwarded unless the model declares them).
+        data["N_g23"] = N_crtp if data.get("use_gdgt23ratio", 0) == 1 else 0
+        _no3_obs    = data.get("no3_crtp", np.zeros(N_crtp))
+        _sd_no3     = data.get("sd_no3_crtp", np.zeros(N_crtp))
+        _no3_cutoff = data.get("no3_cutoff", 0.0)
+        if data.get("use_no3", 0) == 1 and _no3_cutoff > 0:
+            _in_range = (_no3_obs > 0) & (_no3_obs < _no3_cutoff) & np.isfinite(_no3_obs)
+            # EIV sites: in-range AND sd_no3 > 0 → latent variable treatment
+            _eiv_mask             = _in_range & (_sd_no3 > 0)
+            data["N_no3_valid"]   = int(_eiv_mask.sum())
+            data["no3_valid_idx"] = (np.where(_eiv_mask)[0] + 1).tolist()  # 1-based for Stan
+            # Exact sites: in-range AND sd_no3 = 0 → use observed value directly
+            _exact_mask            = _in_range & (_sd_no3 == 0)
+            data["N_no3_exact"]    = int(_exact_mask.sum())
+            data["no3_exact_idx"]  = (np.where(_exact_mask)[0] + 1).tolist()
+        else:
+            data["N_no3_valid"]   = 0
+            data["no3_valid_idx"] = []
+            data["N_no3_exact"]   = 0
+            data["no3_exact_idx"] = []
+        pred_parts.append(
+            f"EIV indices: N_g23={data['N_g23']}, "
+            f"N_no3_valid={data['N_no3_valid']} (EIV), "
+            f"N_no3_exact={data['N_no3_exact']} (exact)"
+        )
+
         summary_lines.append(
             f"   predictors: {', '.join(pred_parts) if pred_parts else 'none'}"
         )
     else:
         summary_lines.append("   coretop:   —")
         summary_lines.append("   predictors: none")
+        # EIV defaults when no coretop data is provided
+        data.update({
+            "N_g23": 0,
+            "N_no3_valid": 0, "no3_valid_idx": [],
+            "N_no3_exact": 0, "no3_exact_idx": [],
+        })
 
     # ── Hyperpriors ────────────────────────────────────────────────────────────
     manual_hp = {
