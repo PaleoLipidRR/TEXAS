@@ -25,7 +25,9 @@ pip install -e .
 pip install -e ".[all]"
 ```
 
-CmdStan 2.36.0 must be installed and discoverable. `TEXAS/utils/paths.py::find_cmdstan()` searches `~/.cmdstan/`, `/opt/cmdstan/`, and the `CMDSTAN` environment variable.
+CmdStan 2.36.0 must be installed and discoverable. `TEXAS/utils/paths.py::find_cmdstan()` searches in priority order: `CMDSTAN` env var → `/opt/cmdstan/cmdstan-{version}` → `~/.cmdstan/cmdstan-{version}` → `/usr/local/cmdstan/cmdstan-{version}` → cmdstanpy's configured default. `set_cmdstan_path()` is always called on the winning path so cmdstanpy's internal state stays consistent. If `CMDSTAN` points to a broken path, a `UserWarning` is emitted and the search continues. If nothing is found, a `RuntimeError` is raised with install instructions.
+
+> **Development note (editable install)**: always run `pip install -e .` after cloning. A regular `pip install texas-psm` puts the package in site-packages (no compiled Stan binaries, no local source changes). Without `-e`, `STAN_MODELS_DIR` points to site-packages and every Stan model must recompile from scratch on first use.
 
 ## Common Commands
 
@@ -73,7 +75,7 @@ Model names follow a naming convention: `{transform}_{curve}_{params}_{datasourc
 - **Curve type**: `gen_logi` = generalized logistic; `logistic` = standard logistic; `linear` = linear
 - **Params**: `fixed` = fixed upper asymptote; `free` = free upper asymptote
 - **Data sources**: `culmeso` = culture+mesocosm; `culmesocore` = culture+mesocosm+coretop; `crtp` = coretop-only
-- **Variants**: `hier_crtp` = hierarchical coretop; `multiv` = multivariate (GDGT23/NO3); `priorApprox` = prior approximation; `marginal_*` = marginalized variants; `reduce_sum` = parallelized with `reduce_sum`
+- **Variants**: `hier_crtp` = hierarchical coretop; `multiv` = multivariate (GDGT23/NO3); `priorApprox` = prior approximation; `werr` = error-in-variables (EIV) treatment of secondary predictors (see below); `odr` = same EIV treatment but in the full hierarchical (non-priorApprox) model; `marginal_*` = marginalized variants; `reduce_sum` = parallelized with `reduce_sum`
 
 ### Parameter suffix convention
 
@@ -97,6 +99,20 @@ Example: `t0_crtp`, `k_crtp`, `b_crtp`, `v_crtp`, `sigma_proxyObs_crtp`.
 
 > **Stan model prior fix (2026-04-08)**:
 > - `sigma_proxyObs_crtp ~ normal(0.01, 0.1) → normal(0, 0.1)` in 5 files: `gen_logi_fixed_hier_crtp_multiv.stan`, `gen_logi_fixed_hier_crtp_multiv_priorApprox.stan`, `gen_logi_fixed_hier_crtp_univ_priorApprox.stan`, `gen_logi_fixed_hier_crtp_multiv_priorApprox_werr.stan`, `gen_logi_fixed_culmesocore.stan`. The old prior mean (0.01) was ~5× below the posterior (~0.05); `normal(0, 0.1)` is the conventional half-normal weakly informative prior for scale parameters. Cached `.nc` posteriors from these models must be regenerated.
+
+> **ODR (error-in-variables) Stan models added (2026-04-15)**:
+> Two new/rewritten models implement Bayesian EIV treatment of the G₂/₃ and NO₃ secondary predictors.
+> Both accept `sd_gdgt23ratio_crtp` and `sd_no3_crtp` as per-site measurement SEs and propagate them analytically into a **heteroscedastic likelihood** — no latent-variable parameters, no change to sampling speed:
+>
+> - `gen_logi_fixed_hier_crtp_multiv_priorApprox_werr.stan` — priorApprox (Stage-2) version; also adds the previously missing `generated quantities` block.
+> - `gen_logi_fixed_hier_crtp_multiv_odr.stan` — full hierarchical (culture + mesocosm + coretop) version.
+>
+> **EIV implementation (error propagation)**:
+> - G₂/₃ term (linear): exact — `σ²_eff[i] += β²_{G₂/₃} · σ²_{G₂/₃}[i]`
+> - NO₃ term (log₁₀): delta method — `σ²_eff[i] += β²_{NO₃} · (σ_{NO₃}[i] / (no3[i] · ln 10))²`, applied only where `0 < NO₃[i] < no3_cutoff`
+> - `sigma_proxyObs_crtp` becomes the *pure* RI residual noise (predictor SE contributions are explicit); expect it to be smaller than in non-ODR fits.
+> - `bayesR2_full` in `generated quantities` uses `mean(σ²_eff)` as the denominator noise term to account for heteroscedasticity.
+> - `build_fwd_data()` must be updated to pass `sd_gdgt23ratio_crtp` and `sd_no3_crtp` when using these models.
 
 ### Posterior caching
 

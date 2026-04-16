@@ -5,21 +5,69 @@ from pathlib import Path
 from cmdstanpy import set_cmdstan_path, cmdstan_path
 
 def find_cmdstan(version: str = "2.36.0") -> Path:
+    """Locate a working CmdStan installation and configure cmdstanpy to use it.
+
+    Search order:
+      1. ``CMDSTAN`` environment variable (auto-set by conda; also honoured when
+         set manually, e.g. ``export CMDSTAN=~/.cmdstan/cmdstan-{version}``)
+      2. ``/opt/cmdstan/cmdstan-{version}``
+      3. ``~/.cmdstan/cmdstan-{version}``   (installed via cmdstanpy.install_cmdstan())
+      4. ``/usr/local/cmdstan/cmdstan-{version}``
+      5. Whatever cmdstanpy is already configured to use
+
+    ``set_cmdstan_path()`` is always called so cmdstanpy's internal state stays
+    consistent with the returned path, regardless of which branch matched.
+
+    Raises:
+        RuntimeError: if no working CmdStan installation is found anywhere.
+    """
     stanc = "stanc.exe" if os.name == "nt" else "stanc"
-    def ok(p: Path) -> bool: return (p / "bin" / stanc).exists()
 
+    def ok(p: Path) -> bool:
+        return (p / "bin" / stanc).exists()
+
+    def _use(p: Path) -> Path:
+        set_cmdstan_path(str(p))
+        return p
+
+    # 1. CMDSTAN env var — highest priority so conda/Docker/user-set overrides work
     env = os.environ.get("CMDSTAN")
-    if env and ok(Path(env)):
-        return Path(env)
+    if env:
+        env_path = Path(env)
+        if ok(env_path):
+            return _use(env_path)
+        warnings.warn(
+            f"CMDSTAN env var points to '{env}' but no stanc binary was found "
+            "there. Ignoring env var and searching standard paths.",
+            UserWarning, stacklevel=2,
+        )
 
-    for p in [Path("/opt/cmdstan")/f"cmdstan-{version}",
-              Path.home()/".cmdstan"/f"cmdstan-{version}",
-              Path("/usr/local/cmdstan")/f"cmdstan-{version}"]:
+    # 2–4. Well-known installation directories
+    for p in [
+        Path("/opt/cmdstan") / f"cmdstan-{version}",
+        Path.home() / ".cmdstan" / f"cmdstan-{version}",
+        Path("/usr/local/cmdstan") / f"cmdstan-{version}",
+    ]:
         if ok(p):
-            set_cmdstan_path(str(p))
-            return p
+            return _use(p)
 
-    return Path(cmdstan_path())
+    # 5. Whatever cmdstanpy is already configured to use (e.g. a pre-configured
+    #    system install or an earlier set_cmdstan_path() call in the same session)
+    try:
+        fallback = Path(cmdstan_path())
+        if ok(fallback):
+            return _use(fallback)
+    except Exception:
+        pass
+
+    raise RuntimeError(
+        f"No working CmdStan {version} installation found.\n"
+        f"  Searched : $CMDSTAN, /opt/cmdstan/cmdstan-{version}, "
+        f"~/.cmdstan/cmdstan-{version}, /usr/local/cmdstan/cmdstan-{version}\n"
+        f"  Install  : python -c \"import cmdstanpy; "
+        f"cmdstanpy.install_cmdstan(version='{version}')\"\n"
+        f"  Or set   : export CMDSTAN=/path/to/cmdstan-{version}"
+    )
 
 def get_repo_root(target_dir_name: str = "TEXAS") -> Path | None:
     cwd = Path.cwd()

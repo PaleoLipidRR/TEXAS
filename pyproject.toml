@@ -83,5 +83,7 @@ TEXAS = ["stan_models/*.stan"]
 
 [tool.conda-lock.dependencies]
 pip = [
-    "pygwalker"
+    "pygwalker",
+    "regionmask",
+    "odrpack"
 ]
