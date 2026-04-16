@@ -41,6 +41,7 @@ dependencies:
   - cmocean
   - plotly
   - pygmt
+  
   ### Google Map/Google Earth
   - geetools
   - simplekml
