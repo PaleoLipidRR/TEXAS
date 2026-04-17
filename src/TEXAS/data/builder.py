@@ -741,10 +741,11 @@ def build_fwd_data(
                     f"no3 ✓  (no3_cutoff={final_cutoff:.3g}, {cutoff_source})"
                 )
             else:
-                data["no3_cutoff"] = 0.0
+                data["no3_cutoff"] = 1.0
                 pred_parts.append("no3 ✗  (all zeros/NaN — correction disabled)")
         else:
-            data.update({"no3_crtp": np.zeros(N_crtp), "use_no3": 0, "no3_cutoff": 0.0})
+            data.update({"no3_crtp": np.zeros(N_crtp), "use_no3": 0, "no3_cutoff": 1.0,
+                         "sd_no3_crtp": np.zeros(N_crtp, dtype=float)})
 
         summary_lines.append(
             f"   predictors: {', '.join(pred_parts) if pred_parts else 'none'}"
