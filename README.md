@@ -21,6 +21,8 @@ Optional non-thermal corrections for GDGT-2/3 ratio (β_{G₂/₃}) and NO₃ co
 
 The calibration curve is a generalized logistic (Richards curve) with the asymmetry parameter Q fixed to 1 (inflection point = T₀), keeping 4 free thermal parameters: T₀, k, b, ν.
 
+An **Error-in-Variables (EIV)** Stan model (`_eiv`) is available for the multivariate coretop stage. It separates analytical RI measurement error (`sd_proxyObs`) from oceanographic process noise, and treats NO₃ as a latent variable with a lognormal measurement model — providing rigorous uncertainty propagation when secondary predictor uncertainties are known.
+
 Inverse temperature (invT) Stan models use `reduce_sum` for within-chain parallelism — each observed proxy value is processed as an independent chunk, with threads allocated automatically per chain.
 
 ---
@@ -269,6 +271,33 @@ result = predict_T_from_proxyObs(
 result["p50"]   # median temperature reconstruction (°C)
 result["p5"]    # 5th percentile
 result["p95"]   # 95th percentile
+
+# ── NO₃ predictor options for inverse reconstruction ─────────────────────────
+# Option A — disable NO₃ correction (pass a value above the cutoff)
+result = predict_T_from_proxyObs(
+    proxyObs=my_ri_array, prior_mu_t=15.0, prior_sigma_t=10.0,
+    fwd_posterior_name="gen_logi_fixed_hier_crtp_multiv_SST",
+    no3=10.0,   # scalar > no3_cutoff (~1 µmol/L) → correction disabled for all samples
+)
+
+# Option B — provide explicit NO₃ values (scalar or per-observation array)
+result = predict_T_from_proxyObs(
+    proxyObs=my_ri_array, prior_mu_t=15.0, prior_sigma_t=10.0,
+    fwd_posterior_name="gen_logi_fixed_hier_crtp_multiv_SST",
+    no3=my_no3_array,   # array of length N, one value per observation
+)
+
+# Option C — automatic lookup from modern WOA23 climatology at drill-site location
+import xarray as xr
+ocean_prop_ds = xr.load_dataset("/path/to/ocean_prop_ds.nc")   # from SI_code1
+
+result = predict_T_from_proxyObs(
+    proxyObs=my_ri_array, prior_mu_t=15.0, prior_sigma_t=10.0,
+    fwd_posterior_name="gen_logi_fixed_hier_crtp_multiv_SST",
+    site_lat=15.3, site_lon=-23.7,   # modern lat/lon of the drill site
+    no3_dataset=ocean_prop_ds,       # WOA23-derived xr.Dataset with (lat, lon) grid
+)
+# Prints: 🌊 WOA23 NO₃ lookup: lat=15.3, lon=-23.7 → 0.42 µmol/L
 ```
 
 ### Running forward calibration from scratch
@@ -307,7 +336,7 @@ src/TEXAS/
   predict.py        High-level API: predict_RI_from_T / predict_T_from_proxyObs
   stan/             Sampler, compiler, I/O, and invT orchestration
   stan_models/      Stan model files (.stan) — bundled in the pip package
-  data/             Input data builders, filters, and screening
+  data/             Input data builders, filters, screening, and ocean property lookups
   ensemble/         Posterior ensemble generation and model detection
   models/           Logistic curve functions and classical calibrations
   plotting/         Prior/posterior distribution plots and range utilities
@@ -331,7 +360,8 @@ tests/              Unit tests
 | Function | Description |
 |---|---|
 | `predict_RI_from_T(temperatures, posterior, ...)` | Forward prediction: temperature → Ring Index (pure Python) |
-| `predict_T_from_proxyObs(proxyObs, prior_mu_t, prior_sigma_t, ...)` | Inverse reconstruction: proxy → temperature with full uncertainty (runs Stan); `predict_T_from_RI` is a deprecated alias |
+| `predict_T_from_proxyObs(proxyObs, prior_mu_t, prior_sigma_t, ...)` | Inverse reconstruction: proxy → temperature with full uncertainty (runs Stan). Accepts `no3` / `gdgt23ratio` as scalar or array; pass `site_lat` / `site_lon` / `no3_dataset` for automatic WOA23 NO₃ lookup. `predict_T_from_RI` is a deprecated alias |
+| `lookup_no3_from_woa(lat, lon, woa_dataset, ...)` | Look up modern NO₃ climatology at one or more lat/lon coordinates from a WOA23-derived xr.Dataset; handles 0–360 and −180–180 longitude conventions automatically |
 | `download_posteriors(names, ...)` | Download all standard forward posteriors from Zenodo |
 | `download_posterior(name, ...)` | Download a single forward posterior from Zenodo |
 | `set_cache_dir(path)` | Override cache location at runtime; persistent alternative is `TEXAS_CACHE_DIR` env var |

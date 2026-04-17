@@ -45,6 +45,7 @@ from .stan.io import load_posterior
 from .ensemble.generator import generate_ensemble_auto
 from .stan.invT import predict_temperature_from_proxyObs as _predict_temperature_from_proxyObs
 from .data.builder import InvTConfig
+from .data.ocean_lookup import lookup_no3_from_woa
 
 
 def predict_RI_from_T(
@@ -139,6 +140,15 @@ def predict_T_from_proxyObs(
     temptype: Optional[str] = None,
     site_name: Optional[str] = None,
     predictors: Optional[Dict[str, np.ndarray]] = None,
+    # ── Predictor shorthands (override anything in predictors dict) ───────
+    no3: Optional[Union[float, np.ndarray]] = None,
+    gdgt23ratio: Optional[Union[float, np.ndarray]] = None,
+    # ── Modern-ocean NO₃ lookup from WOA23-derived dataset ───────────────
+    site_lat: Optional[Union[float, np.ndarray]] = None,
+    site_lon: Optional[Union[float, np.ndarray]] = None,
+    no3_dataset: Optional[xr.Dataset] = None,
+    no3_dataset_var: str = "no3_sf2tc_avg",
+    # ─────────────────────────────────────────────────────────────────────
     config: Optional[InvTConfig] = None,
     chains: int = 4,
     iter_warmup: int = 500,
@@ -190,6 +200,43 @@ def predict_T_from_proxyObs(
         Non-thermal predictor arrays for the N observations, e.g.
         ``{"gdgt23ratio": array, "no3": array}``.  Must be provided when
         the forward posterior was fitted with the multivariate model.
+        Overridden by *no3* / *gdgt23ratio* shorthands when both are given.
+    no3 : float or array-like, optional
+        Nitrate concentration (µmol/L) for the N observations.
+
+        - **Array** (length N): per-observation values — use modern WOA23
+          values extracted at each sample's location (``ocean_prop_ds``
+          column ``"no3_sf2tc_avg"``).
+        - **Scalar**: broadcast to all N observations.  Pass a value above
+          ``no3_cutoff`` (e.g. ``no3=10.0`` when ``no3_cutoff=1.0``) to
+          effectively disable the NO₃ correction — all observations fall
+          outside the correction window.
+
+        Overrides any ``"no3"`` key in *predictors*.  Ignored when
+        *site_lat* / *site_lon* / *no3_dataset* are also provided (the
+        lookup result takes priority).
+    gdgt23ratio : float or array-like, optional
+        GDGT-2/GDGT-3 ratio for the N observations.  Scalar or array,
+        same broadcast rules as *no3*.  Overrides any ``"gdgt23ratio"``
+        key in *predictors*.
+    site_lat : float or array-like, optional
+        Decimal latitude(s) of the study site(s).  Scalar for a single
+        drill core; array of length N to assign a distinct location to
+        each observation.  Requires *site_lon* and *no3_dataset*.
+    site_lon : float or array-like, optional
+        Decimal longitude(s) of the study site(s).  Same shape rules as
+        *site_lat*.
+    no3_dataset : xr.Dataset, optional
+        WOA23-derived dataset with a ``(lat, lon)`` grid, typically the
+        ``ocean_prop_ds`` generated in the preprocessing notebook
+        (SI_code1).  Must contain *no3_dataset_var*.  When provided
+        together with *site_lat* / *site_lon*, the NO₃ value at those
+        coordinates is looked up via bilinear interpolation and used as
+        the predictor.  The result is a scalar (one drill site) or array
+        (per-obs sites), and is broadcast to all N observations when scalar.
+    no3_dataset_var : str
+        Variable name to extract from *no3_dataset*.
+        Default ``"no3_sf2tc_avg"``.
     config : InvTConfig, optional
         Controls number of forward-posterior draws (M), seed, etc.
         Defaults to ``InvTConfig()`` (M=100).
@@ -248,6 +295,36 @@ def predict_T_from_proxyObs(
             DeprecationWarning, stacklevel=2,
         )
         proxyObs = scaledRI
+
+    # ── Resolve NO₃ predictor ─────────────────────────────────────────────────
+    # Priority: site_lat/lon lookup > no3= explicit > predictors["no3"] > zeros
+    predictors = dict(predictors or {})
+
+    if site_lat is not None or site_lon is not None:
+        if site_lat is None or site_lon is None:
+            raise ValueError(
+                "site_lat and site_lon must both be provided for a WOA23 lookup."
+            )
+        if no3_dataset is None:
+            raise ValueError(
+                "no3_dataset must be provided when using site_lat/site_lon. "
+                "Pass the WOA23-derived ocean_prop_ds from your preprocessing notebook."
+            )
+        no3 = lookup_no3_from_woa(
+            lat=site_lat,
+            lon=site_lon,
+            woa_dataset=no3_dataset,
+            variable=no3_dataset_var,
+        )
+        _lat_repr = f"{site_lat}" if np.isscalar(site_lat) else f"array[{np.asarray(site_lat).size}]"
+        _lon_repr = f"{site_lon}" if np.isscalar(site_lon) else f"array[{np.asarray(site_lon).size}]"
+        _no3_repr = f"{float(no3):.3g}" if np.asarray(no3).ndim == 0 else f"array[{np.asarray(no3).size}], mean={float(np.nanmean(no3)):.3g}"
+        print(f"🌊 WOA23 NO₃ lookup: lat={_lat_repr}, lon={_lon_repr} → {_no3_repr} µmol/L")
+
+    if no3 is not None:
+        predictors["no3"] = no3
+    if gdgt23ratio is not None:
+        predictors["gdgt23ratio"] = gdgt23ratio
 
     return _predict_temperature_from_proxyObs(
         proxyObs=proxyObs,

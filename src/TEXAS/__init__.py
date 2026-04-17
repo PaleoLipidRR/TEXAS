@@ -1,6 +1,6 @@
 # TEXAS/__init__.py
 
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 
 # ─── Stan interface ──────────────────────────────────────────────────────
 from .stan.compiler import StanCompiler
@@ -23,6 +23,9 @@ from .predict import predict_RI_from_T, predict_T_from_proxyObs, predict_T_from_
 
 # ─── Data builder for inverse‐T models ──────────────────────────────────
 from .data.builder import build_invT_inputData, build_fwd_data, InvTConfig
+
+# ─── Ocean property lookups ──────────────────────────────────────────────
+from .data.ocean_lookup import lookup_no3_from_woa
 
 # ─── Pure-Python logistic helpers ───────────────────────────────────────
 from .models.logistics import (

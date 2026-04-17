@@ -285,8 +285,11 @@ def build_invT_inputData(
         use_flag = bool(post.attrs.get(f"use_{pred}", False))
         predictor_usage[pred] = use_flag
         
-        # Get observed predictor values for our N observations (or zeros if not provided)
+        # Get observed predictor values for our N observations (or zeros if not provided).
+        # Scalars (e.g. no3=10.0) are broadcast to all N observations.
         arr = ensure_numpy(predictors.get(pred, np.zeros(N, dtype=float)))
+        if arr.ndim == 0:  # scalar → broadcast
+            arr = np.full(N, float(arr), dtype=float)
         if arr.shape[0] != N:
             raise ValueError(f"Predictor '{pred}' length ({arr.shape[0]}) must equal N ({N})")
         
@@ -491,17 +494,14 @@ def build_fwd_data(
     proxy_crtp=None,
     # Optional coretop predictors
     gdgt23ratio_crtp=None,
-    sd_gdgt23ratio_crtp=None,   # per-site SE of G₂/₃ — required for ODR models (_werr, _odr)
+    sd_gdgt23ratio_crtp=None,   # per-site SE of G₂/₃ — required for _eiv model; defaults to zeros
     no3_crtp=None,
-    sd_no3_crtp=None,            # per-site SE of NO₃ (μmol/L, linear) — required for ODR models
-    no3_eiv_cv_max: float = 0.3, # CV = sd_no3/no3 ceiling for latent-variable EIV eligibility.
-                                  # Delta-method σ_log10 = CV/ln10; valid only when CV < ~0.3.
-                                  # Sites exceeding this are moved to no3_exact_idx (use observed).
+    sd_no3_crtp=None,            # per-site SE of NO₃ (μmol/L, linear) — required for _eiv model; defaults to zeros
     no3_cutoff: Optional[float] = None,
     proxy_residuals_crtp: Optional[np.ndarray] = None,
-    # Analytical measurement SE of RI — required for _werr_ver2 models
+    # Analytical measurement SE of RI — required for _eiv model
     sd_proxyObs=None,            # per-site SE of scaled RI; defaults to 0.03 (Schouten et al. 2013)
-    # Thermal-only R² — required for _werr_ver2 sigma prior scaling
+    # Thermal-only R² — required for _eiv sigma prior scaling
     R2_thermal: Optional[float] = None,   # compute from a thermal-only coretop run first
     # Stage-1 culmeso posterior — auto-extracts hyperpriors and no3_cutoff
     culmeso_posterior: Optional[xr.Dataset] = None,
@@ -528,21 +528,15 @@ def build_fwd_data(
         gdgt23ratio_crtp:           GDGT-2/GDGT-3 ratio for coretop samples.
                                     Sets use_gdgt23ratio=1 if non-zero/non-NaN.
         sd_gdgt23ratio_crtp:        Per-site measurement SE of gdgt23ratio (same units,
-                                    linear). Required for ODR models (_werr, _odr).
-                                    Only added to the data dict when provided — non-ODR
-                                    models will reject unknown data variables.
+                                    linear). Required for the _eiv model; always included
+                                    in the data dict (defaults to zeros when not provided,
+                                    which disables the G₂/₃ EIV measurement model).
         no3_crtp:                   Nitrate concentration for coretop samples.
                                     Sets use_no3=1 if non-zero/non-NaN.
         sd_no3_crtp:                Per-site measurement SE of NO₃ (μmol/L, linear space).
-                                    Required for ODR/_eiv models. Propagated via delta method
-                                    through the log₁₀(NO₃) term. Only added when provided.
-        no3_eiv_cv_max:             CV = sd_no3/no3 ceiling for latent-variable eligibility.
-                                    The delta-method approximation σ_log10 ≈ σ_lin/(NO₃·ln10)
-                                    is valid only when CV < ~0.3 (Carroll et al. 2006).
-                                    Sites with CV > no3_eiv_cv_max are moved from no3_valid_idx
-                                    to no3_exact_idx (observed value used directly; latent
-                                    variable would be unconstrained and provide no benefit).
-                                    Default: 0.3 (σ_log10 < 0.13 for eligible sites).
+                                    Required for the _eiv model. Always included (defaults
+                                    to zeros; sites with sd=0 receive only the lognormal
+                                    prior and skip the normal measurement model).
         no3_cutoff:                 NO3 threshold for the nonthermal correction.
                                     Priority: (1) this arg, (2) culmeso_posterior attrs,
                                     (3) auto-calculated via Spearman method.
@@ -658,10 +652,15 @@ def build_fwd_data(
                     raise ValueError("sd_gdgt23ratio_crtp must be non-negative.")
                 data["sd_gdgt23ratio_crtp"] = sd_g
                 pred_parts.append(
-                    f"sd_gdgt23ratio: {sd_g.min():.3g}–{sd_g.max():.3g} (ODR)"
+                    f"sd_gdgt23ratio: {sd_g.min():.3g}–{sd_g.max():.3g} (EIV)"
                 )
+            else:
+                # Always include sd_gdgt23ratio_crtp so _eiv model always has its required
+                # data variable. Zeros disable the EIV measurement model for G₂/₃.
+                data["sd_gdgt23ratio_crtp"] = np.zeros(N_crtp, dtype=float)
         else:
-            data.update({"gdgt23ratio_crtp": np.zeros(N_crtp), "use_gdgt23ratio": 0})
+            data.update({"gdgt23ratio_crtp": np.zeros(N_crtp), "use_gdgt23ratio": 0,
+                         "sd_gdgt23ratio_crtp": np.zeros(N_crtp, dtype=float)})
 
         # NO3
         if no3_crtp is not None:
@@ -685,7 +684,7 @@ def build_fwd_data(
                 n_with_se = int((sd_n > 0).sum())
                 pred_parts.append(
                     f"sd_no3: {sd_n[sd_n>0].min():.3g}–{sd_n.max():.3g} µmol/L "
-                    f"({n_with_se}/{N_crtp} sites have SE; CV gate applied at no3_cutoff)"
+                    f"({n_with_se}/{N_crtp} sites have SE; EIV)"
                 )
             else:
                 # sd_no3_crtp not provided: treat all NO₃ sites as exact (no latent variable).
@@ -747,62 +746,14 @@ def build_fwd_data(
         else:
             data.update({"no3_crtp": np.zeros(N_crtp), "use_no3": 0, "no3_cutoff": 0.0})
 
-        # ── EIV latent variable index arrays (for _werr and _odr models) ────────
-        # N_g23        : number of latent G₂/₃ parameters = N_crtp when enabled, 0 when not.
-        # N_no3_valid  : count of sites with 0 < NO₃_obs < no3_cutoff (latent NO₃ estimated here).
-        # no3_valid_idx: 1-based Stan indices of those sites in the coretop arrays.
-        # Non-EIV Stan models simply ignore these extra data dict keys (CmdStanPy is
-        # tolerant of unrecognized keys; they are not forwarded unless the model declares them).
-        data["N_g23"] = N_crtp if data.get("use_gdgt23ratio", 0) == 1 else 0
-        _no3_obs    = data.get("no3_crtp", np.zeros(N_crtp))
-        _sd_no3     = data.get("sd_no3_crtp", np.zeros(N_crtp))
-        _no3_cutoff = data.get("no3_cutoff", 0.0)
-        if data.get("use_no3", 0) == 1 and _no3_cutoff > 0:
-            _in_range = (_no3_obs > 0) & (_no3_obs < _no3_cutoff) & np.isfinite(_no3_obs)
-            # CV gate: delta-method σ_log10 = σ_lin/(NO₃·ln10) is only valid when CV < cv_max.
-            # Sites with CV ≥ cv_max are unconstrained on the log scale and provide no EIV benefit.
-            _cv            = np.where(_no3_obs > 0, _sd_no3 / _no3_obs, np.inf)
-            _cv_ok         = _cv < no3_eiv_cv_max
-            # EIV sites: in-range AND sd_no3 > 0 AND CV < cv_max → latent variable treatment
-            _eiv_mask             = _in_range & (_sd_no3 > 0) & _cv_ok
-            data["N_no3_valid"]   = int(_eiv_mask.sum())
-            data["no3_valid_idx"] = (np.where(_eiv_mask)[0] + 1).tolist()  # 1-based for Stan
-            # Exact sites: in-range AND (sd_no3 = 0 OR CV ≥ cv_max) → use observed value directly
-            _exact_mask            = _in_range & (~_eiv_mask)
-            data["N_no3_exact"]    = int(_exact_mask.sum())
-            data["no3_exact_idx"]  = (np.where(_exact_mask)[0] + 1).tolist()
-            _n_cv_gated = int((_in_range & (_sd_no3 > 0) & ~_cv_ok).sum())
-            if _n_cv_gated > 0:
-                pred_parts.append(
-                    f"CV gate (cv_max={no3_eiv_cv_max}): {_n_cv_gated} sites moved "
-                    f"exact (CV≥{no3_eiv_cv_max}; sd_log10 would exceed "
-                    f"{no3_eiv_cv_max/np.log(10):.2f})"
-                )
-        else:
-            data["N_no3_valid"]   = 0
-            data["no3_valid_idx"] = []
-            data["N_no3_exact"]   = 0
-            data["no3_exact_idx"] = []
-        pred_parts.append(
-            f"EIV indices: N_g23={data['N_g23']}, "
-            f"N_no3_valid={data['N_no3_valid']} (EIV), "
-            f"N_no3_exact={data['N_no3_exact']} (exact)"
-        )
-
         summary_lines.append(
             f"   predictors: {', '.join(pred_parts) if pred_parts else 'none'}"
         )
     else:
         summary_lines.append("   coretop:   —")
         summary_lines.append("   predictors: none")
-        # EIV defaults when no coretop data is provided
-        data.update({
-            "N_g23": 0,
-            "N_no3_valid": 0, "no3_valid_idx": [],
-            "N_no3_exact": 0, "no3_exact_idx": [],
-        })
 
-    # ── sd_proxyObs — per-site RI analytical SE (_werr_ver2) ──────────────────
+    # ── sd_proxyObs — per-site RI analytical SE (_eiv model) ─────────────────
     if sd_proxyObs is not None:
         sd_p = np.asarray(sd_proxyObs, dtype=float)
         if N_crtp and len(sd_p) != N_crtp:
@@ -815,7 +766,7 @@ def build_fwd_data(
     elif N_crtp:
         data["sd_proxyObs"] = np.full(N_crtp, 0.03, dtype=float)  # default Rs (Schouten et al. 2013)
 
-    # ── R2_thermal — thermal-only R² for sigma prior scaling (_werr_ver2) ─────
+    # ── R2_thermal — thermal-only R² for sigma prior scaling (_eiv model) ──────
     if R2_thermal is not None:
         r2 = float(R2_thermal)
         if not (0.0 <= r2 <= 1.0):

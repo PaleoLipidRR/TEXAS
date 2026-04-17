@@ -76,7 +76,7 @@ model {
     v_crtp  ~ normal(prior_mean_v,  prior_sd_v);
 
     beta_G23_crtp ~ normal(0, 0.05);
-    beta_NO3_crtp ~ normal(0, 0.05); //normal(-0.064, 0.008) // tight, informative prior based on strong nutrient effect region
+    beta_NO3_crtp ~ normal(0, 0.05);
 
     // ─── 2. Likelihood for coretop data ───────────────────────────────────────
     //

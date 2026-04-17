@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import List, Optional, Sequence, Tuple
+from typing import List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from scipy.spatial import cKDTree
@@ -270,10 +270,18 @@ def load_or_build_halo_cache(
     if recompute != True:  # False or 'auto'
         if os.path.exists(cache_path):
             cache = np.load(cache_path)
-            halo_grids = [
-                np.ma.array(cache[f"data_{i}"], mask=cache[f"mask_{i}"])
-                for i in range(len(data))
-            ]
+            # Try new format first (halo_data_), fall back to old format (data_)
+            try:
+                halo_grids = [
+                    np.ma.array(cache[f"halo_data_{i}"], mask=cache[f"halo_mask_{i}"])
+                    for i in range(len(data))
+                ]
+            except KeyError:
+                # Fall back to old format
+                halo_grids = [
+                    np.ma.array(cache[f"data_{i}"], mask=cache[f"mask_{i}"])
+                    for i in range(len(data))
+                ]
             print(f"Loaded halo cache ← {cache_path}")
             return halo_grids
         if recompute == False:
@@ -295,6 +303,80 @@ def load_or_build_halo_cache(
     )
     print(f"Saved halo cache → {cache_path}")
     return halo_grids
+
+
+def load_or_build_grids_cache(
+    cache_path: str,
+    data: list,
+    lons: np.ndarray,
+    lats: np.ndarray,
+    grid_lon_halo: Optional[np.ndarray] = None,
+    grid_lat_halo: Optional[np.ndarray] = None,
+    grid_lon_true: Optional[np.ndarray] = None,
+    grid_lat_true: Optional[np.ndarray] = None,
+    n_closest: int = 5,
+    max_dist_deg: float = 10.0,
+    grid_res: float = 1.0,
+    recompute=False,
+) -> Tuple[List[np.ma.MaskedArray], List[np.ma.MaskedArray]]:
+    """
+    Load halo + true grids from cache, or recompute and save if needed.
+
+    Returns (halo_grids, true_grids)
+    """
+    if grid_lon_halo is None:
+        grid_lon_halo = _GRID_LON_1DEG
+    if grid_lat_halo is None:
+        grid_lat_halo = _GRID_LAT_1DEG
+    if grid_lon_true is None:
+        grid_lon_true = _GRID_LON_025DEG
+    if grid_lat_true is None:
+        grid_lat_true = _GRID_LAT_025DEG
+
+    if recompute != True:  # False or 'auto'
+        if os.path.exists(cache_path):
+            cache = np.load(cache_path)
+            halo_grids = [
+                np.ma.array(cache[f"halo_data_{i}"], mask=cache[f"halo_mask_{i}"])
+                for i in range(len(data))
+            ]
+            true_grids = [
+                np.ma.array(cache[f"true_data_{i}"], mask=cache[f"true_mask_{i}"])
+                for i in range(len(data))
+            ]
+            print(f"Loaded grids cache ← {cache_path}")
+            return halo_grids, true_grids
+        if recompute == False:
+            raise FileNotFoundError(
+                f"Cache not found at:\n  {cache_path}\n"
+                "Pass recompute=True to generate it, or recompute='auto' to "
+                "compute-and-cache automatically."
+            )
+        # recompute='auto' and cache missing — fall through to compute
+
+    # Compute both halo and true grids
+    halo_grids = krige_halo_all(
+        data, lons, lats, grid_lon_halo, grid_lat_halo,
+        n_closest=n_closest, max_dist_deg=max_dist_deg, grid_res=grid_res,
+    )
+    
+    true_grids = []
+    for _, _, _, residuals, _, _ in data:
+        res_vals = residuals.values if hasattr(residuals, "values") else np.array(residuals)
+        true_grids.append(
+            make_true_grid(lons, lats, res_vals, grid_lon_true, grid_lat_true)
+        )
+    
+    # Save both to cache
+    np.savez(
+        cache_path,
+        **{f"halo_data_{i}": halo_grids[i].data for i in range(len(data))},
+        **{f"halo_mask_{i}": halo_grids[i].mask for i in range(len(data))},
+        **{f"true_data_{i}": true_grids[i].data for i in range(len(data))},
+        **{f"true_mask_{i}": true_grids[i].mask for i in range(len(data))},
+    )
+    print(f"Saved grids cache → {cache_path}")
+    return halo_grids, true_grids
 
 
 # ============================================================================
@@ -455,7 +537,8 @@ def plot_residual_maps(
     row_annotations: Optional[List[str]] = None,
     # Figure settings
     fig_width: float = 7,
-    hspace: float = 0.08,   # matplotlib hspace (fraction of row height); was a proplot em-unit list
+    hspace: Optional[Union[List[float], float]] = 0.04,   # matplotlib hspace (fraction of row height)
+    show_grid: bool = True,
     # Metrics formatting
     rmse_fmt: str = ".3f",           # e.g. ".1f" for temperature residuals
     rmse_unit: str = "",             # e.g. "°C" for temperature residuals
@@ -486,14 +569,14 @@ def plot_residual_maps(
         cache filename to prevent collisions between calls with the same
         ``temp_param``/``y_param`` but different residual content.
     cache_path : str, optional
-        Explicit path to the .npz halo cache.  When omitted and both
+        Explicit path to the .npz grids cache.  When omitted and both
         ``temp_param`` and ``y_param`` are set, auto-generated as
-        ``data/cache/kriged_halo_{res}deg_{dist}dmax_woa23_{temp_param}_{y_param}.npz``
-        inside the project root.
+        ``data/cache/kriged_grids_{res}deg_{dist}dmax_woa23_{temp_param}_{y_param}_{residual_tag}.npz``
+        inside the project root. Now caches both halo and true grids for faster plotting.
     recompute : bool or ``'auto'``
-        - ``False``  : load from cache; raise ``FileNotFoundError`` if not found.
-        - ``True``   : always re-krige and overwrite the cache.
-        - ``'auto'`` : load if cache exists, otherwise compute and save.
+        - ``False``  : load grids from cache; raise ``FileNotFoundError`` if not found.
+        - ``True``   : always re-krige and recompute grids, then overwrite the cache.
+        - ``'auto'`` : load from cache if it exists, otherwise compute and save.
     metrics : list of (r2, rmse), optional
         Pre-computed metrics.  If None, auto-calculated via r2_score.
         Ignored when ``row_annotations`` is provided.
@@ -505,6 +588,8 @@ def plot_residual_maps(
         Section dividers drawn above the specified row range.
     annotations : list of (lon, lat, number_str), optional
         Circled numbers placed on every global panel.
+    show_grid : bool, default True
+        If False, disables the map gridlines on all panels.
     save_dir, fname : str, optional
         If both are provided, saves .png and .pdf.
 
@@ -520,19 +605,20 @@ def plot_residual_maps(
     grid_lon_halo, grid_lat_halo = make_krige_grid(krige_res)
     grid_lon_true, grid_lat_true = make_krige_grid(0.25)
 
-    # ── Halo kriging (cached) ───────────────────────────────────────────────
+    # ── Halo + True grids (cached) ──────────────────────────────────────────
     if cache_path is None and temp_param is not None and y_param is not None:
         from TEXAS.utils.paths import CACHE_DIR
         _tag = f"{temp_param}_{y_param}_{residual_tag}"
         cache_path = str(
-            CACHE_DIR / f"kriged_halo_{krige_res}deg_{int(max_dist_deg)}dmax_woa23_{_tag}.npz"
+            CACHE_DIR / f"kriged_grids_{krige_res}deg_{int(max_dist_deg)}dmax_woa23_{_tag}.npz"
         )
         print(f"Auto cache path: {cache_path}")
 
     if cache_path is not None:
-        halo_grids = load_or_build_halo_cache(
+        halo_grids, true_grids = load_or_build_grids_cache(
             cache_path, data, lons, lats,
-            grid_lon=grid_lon_halo, grid_lat=grid_lat_halo,
+            grid_lon_halo=grid_lon_halo, grid_lat_halo=grid_lat_halo,
+            grid_lon_true=grid_lon_true, grid_lat_true=grid_lat_true,
             n_closest=n_closest, max_dist_deg=max_dist_deg,
             grid_res=krige_res, recompute=recompute,
         )
@@ -543,15 +629,14 @@ def plot_residual_maps(
             n_closest=n_closest, max_dist_deg=max_dist_deg,
             grid_res=krige_res,
         )
-
-    # ── True grids (vectorised, instant) ───────────────────────────────────
-    true_grids = []
-    for _, _, _, residuals, _, _ in data:
-        res_vals = residuals.values if hasattr(residuals, "values") else np.array(residuals)
-        true_grids.append(
-            make_true_grid(lons, lats, res_vals, grid_lon_true, grid_lat_true)
-        )
-    print(f"True grids built ({len(true_grids)} panels)")
+        true_grids = []
+        for _, _, _, residuals, _, _ in data:
+            res_vals = residuals.values if hasattr(residuals, "values") else np.array(residuals)
+            true_grids.append(
+                make_true_grid(lons, lats, res_vals, grid_lon_true, grid_lat_true)
+            )
+    
+    print(f"Grids loaded/built ({len(halo_grids)} halo + {len(true_grids)} true panels)")
 
     # ── Metrics ────────────────────────────────────────────────────────────
     if row_annotations is not None:
@@ -578,35 +663,75 @@ def plot_residual_maps(
     proj_global   = ccrs.EckertIII(central_longitude=-100)
     proj_regional = ccrs.EckertIII(central_longitude=0)
 
-    # Estimate figure height: EckertIII aspect ≈ 1.65 (w/h); global col is
-    # 2/(2+2+0.75) = 0.42 of total width.
-    row_height = (fig_width * 2 / 4.75) / 1.65
-    fig_height = row_height * nrows + 0.6   # extra 0.6 in for colorbar
+    _CBAR_STRIP_IN = 0.3    # inches reserved at figure bottom for colorbar + label
+    _TOP_PAD_IN    = 0.3    # inches at top (for section headers)
+
+    _gap_sum = (
+        float(hspace) * (nrows - 1)
+        if isinstance(hspace, (int, float))
+        else sum(hspace)
+    ) if nrows > 1 else 0.0
+    
+    row_height = ((fig_width * 2 / 4.75) / 1.65) * 0.95   # ← must exist above this block
+    fig_height = row_height * (nrows + _gap_sum) + _CBAR_STRIP_IN + _TOP_PAD_IN
+
+    _bot_frac = _CBAR_STRIP_IN / fig_height
+    _top_frac = 1.0 - _TOP_PAD_IN / fig_height
 
     fig = plt.figure(figsize=(fig_width, fig_height))
-    fig.subplots_adjust(bottom=0.10)   # room for colorbar
+    fig.subplots_adjust(bottom=_bot_frac, top=_top_frac, left=0.005, right=0.995)
+
+    # ── Normalise hspace → list of (nrows-1) gap sizes ─────────────────────
+    # GridSpec only accepts a scalar for hspace, so variable gaps are encoded
+    # via interleaved invisible spacer rows in height_ratios instead.
+    if nrows > 1:
+        if isinstance(hspace, (int, float)):
+            _gaps = [float(hspace)] * (nrows - 1)
+        else:
+            _gaps = list(hspace)
+            if len(_gaps) != nrows - 1:
+                raise ValueError(
+                    f"hspace list length must equal nrows-1={nrows - 1}, "
+                    f"got {len(_gaps)}"
+                )
+    else:
+        _gaps = []   # single row — no gaps needed
+
+    # Interleave: [data_row, spacer, data_row, spacer, ..., data_row]
+    # Total GridSpec rows = 2*nrows - 1
+    _height_ratios: List[float] = []
+    for _r in range(nrows):
+        _height_ratios.append(1.0)
+        if _r < nrows - 1:
+            _height_ratios.append(_gaps[_r])
 
     gs = mgridspec.GridSpec(
-        nrows, 3, figure=fig,
-        width_ratios=[2, 2, 0.75],
-        wspace=0.05, hspace=hspace,
+        2 * nrows - 1, 3, figure=fig,
+        width_ratios=[1.5, 1.3, 0.8],
+        height_ratios=_height_ratios,
+        wspace=0, hspace=0,   # all spacing encoded in height_ratios
     )
+
+    def _gs_row(r: int) -> int:
+        """Map logical data row → GridSpec row index (skipping spacers)."""
+        return r * 2
 
     axs = np.empty((nrows, 3), dtype=object)
     for row in range(nrows):
-        axs[row, 0] = fig.add_subplot(gs[row, 0], projection=proj_global)
-        axs[row, 1] = fig.add_subplot(gs[row, 1], projection=proj_regional)
-        axs[row, 2] = fig.add_subplot(gs[row, 2], projection=proj_regional)
+        axs[row, 0] = fig.add_subplot(gs[_gs_row(row), 0], projection=proj_global)
+        axs[row, 1] = fig.add_subplot(gs[_gs_row(row), 1], projection=proj_regional)
+        axs[row, 2] = fig.add_subplot(gs[_gs_row(row), 2], projection=proj_regional)
 
     # ── Per-column gridlines ────────────────────────────────────────────────
-    for ax in axs[:, 0]:
-        gl = ax.gridlines(draw_labels=False, linewidth=0.3, color='0.75', alpha=0.6)
-        gl.xlocator = mticker.FixedLocator(range(-180, 181, 30))
-        gl.ylocator = mticker.FixedLocator(range(-90, 91, 30))
-    for ax in axs[:, 1]:
-        gl = ax.gridlines(draw_labels=False, linewidth=0.3, color='0.75', alpha=0.6)
-        gl.xlocator = mticker.FixedLocator(range(-180, 181, 10))
-        gl.ylocator = mticker.FixedLocator(range(-90, 91, 10))
+    if show_grid:
+        for ax in axs[:, 0]:
+            gl = ax.gridlines(draw_labels=False, linewidth=0.3, color='0.75', alpha=0.6)
+            gl.xlocator = mticker.FixedLocator(range(-180, 181, 30))
+            gl.ylocator = mticker.FixedLocator(range(-90, 91, 30))
+        for ax in axs[:, 1]:
+            gl = ax.gridlines(draw_labels=False, linewidth=0.3, color='0.75', alpha=0.6)
+            gl.xlocator = mticker.FixedLocator(range(-180, 181, 10))
+            gl.ylocator = mticker.FixedLocator(range(-90, 91, 10))
     # col 2 (Red Sea): no gridlines
 
     row_labels = list("abcdefghijklmnopqrstuvwxyz")
@@ -686,19 +811,6 @@ def plot_residual_maps(
             fontsize=9, ha="right", va="center", color=_C_GRAY6,
         )
 
-    # ── Shared colorbar ─────────────────────────────────────────────────────────
-    # Pull the resolved cmap from the first pcolormesh drawn — guarantees
-    # the colorbar matches the maps exactly.
-    pcm_ref = axs[0, 0].collections[0]
-    sm = mplcm.ScalarMappable(cmap=pcm_ref.get_cmap(), norm=norm_res)
-    sm.set_array([])
-    cbar_ax = fig.add_axes([0.25, 0.03, 0.5, 0.018])
-    cb = fig.colorbar(
-        sm, cax=cbar_ax, orientation="horizontal",
-        label=colorbar_label, extend="both", ticks=boundaries,
-    )
-    cb.minorticks_off()
-
     # ── Global axes formatting ──────────────────────────────────────────────
     for ax in axs.flat:
         ax.tick_params(labelleft=False, left=False, labelcolor=_C_GRAY7,
@@ -708,10 +820,7 @@ def plot_residual_maps(
             spine.set_color(_C_GRAY7)
             spine.set_zorder(10)
 
-    # ── Post-draw layout (must be after fig.canvas.draw()) ─────────────────
-    fig.canvas.draw()
-
-    # Equalise Red Sea panel height to Mediterranean
+    # ── 1. Equalise Red Sea panel height to Mediterranean ───────────────────────
     for i in range(nrows):
         pos_med = axs[i, 1].get_position()
         pos_rs  = axs[i, 2].get_position()
@@ -720,11 +829,108 @@ def plot_residual_maps(
             [pos_rs.x0, cy - pos_med.height / 2, pos_rs.width, pos_med.height]
         )
 
-    # Section headers
+    # ── 2. Repack rows to remove Cartopy internal whitespace ────────────────────
+    # After aspect-ratio enforcement, axs[r,0].get_position().height is the
+    # *actual* rendered map height (smaller than the GridSpec cell).
+    # We rebuild y-positions from scratch using a controlled gap in inches.
+
+    _ROW_GAP_IN      = 0.1   # tight gap between normal rows (inches)
+    _SECTION_GAP_IN  = 0.5   # larger gap at section break (inches)
+
+    # Resolve per-gap inch values from the hspace argument
+    if nrows > 1:
+        if isinstance(hspace, (int, float)):
+            _gap_inches = [_ROW_GAP_IN] * (nrows - 1)
+        else:
+            # treat any value > 0.01 as a section break, else tight gap
+            _gap_inches = [
+                _SECTION_GAP_IN if g > 0.01 else _ROW_GAP_IN
+                for g in hspace
+            ]
+    else:
+        _gap_inches = []
+
+    _gap_fracs = [g / fig_height for g in _gap_inches]
+
+    # Actual rendered row heights in figure fraction (from col 0 after draw)
+    _row_h = [axs[r, 0].get_position().height for r in range(nrows)]
+
+    # Stack rows top-down starting from _top_frac
+    y_cursor = _top_frac
+    for r in range(nrows):
+        h = _row_h[r]
+        y0 = y_cursor - h
+        for c in range(3):
+            pos = axs[r, c].get_position()
+            axs[r, c].set_position([pos.x0, y0, pos.width, h])
+        y_cursor = y0
+        if r < nrows - 1:
+            y_cursor -= _gap_fracs[r]
+            
+    # ── 2b. Repack columns to remove Cartopy horizontal whitespace ──────────
+    _COL_GAP_IN = 0.005   # gap between columns in inches
+    _LEFT_MARGIN = 0.005
+    _RIGHT_MARGIN = 0.005
+
+    # Actual rendered widths per column (from row 0, which is fully drawn)
+    _col_w = [axs[0, c].get_position().width for c in range(3)]
+    _total_gap_frac = 2 * (_COL_GAP_IN / fig_width)
+    _available_frac = 1.0 - _LEFT_MARGIN - _RIGHT_MARGIN - _total_gap_frac
+
+    if sum(_col_w) > 0 and _available_frac > 0:
+        _scale = min(1.0, _available_frac / sum(_col_w))
+        _col_w = [w * _scale for w in _col_w]
+
+    x_cursor = _LEFT_MARGIN
+    for c in range(3):
+        w = _col_w[c]
+        for r in range(nrows):
+            pos = axs[r, c].get_position()
+            axs[r, c].set_position([x_cursor, pos.y0, w, pos.height])
+        x_cursor += w + _COL_GAP_IN / fig_width   # fig_width in inches → fraction
+
+
+    # ── 3. Colorbar — anchored dynamically below repacked last row ──────────────
+    fig.canvas.draw()
+    _cbar_gap_in = 0.1          # gap between last row bottom and colorbar top
+    _cbar_h_in   = 0.18          # colorbar bar thickness
+
+    pos_last  = axs[-1, 0].get_position()
+    cbar_top  = pos_last.y0 - _cbar_gap_in / fig_height
+    cbar_bot  = cbar_top - _cbar_h_in / fig_height
+
+    cbar_ax = fig.add_axes([0.22, cbar_bot, 0.56, _cbar_h_in / fig_height])
+    pcm_ref = axs[0, 0].collections[0]
+    sm = mplcm.ScalarMappable(cmap=pcm_ref.get_cmap(), norm=norm_res)
+    sm.set_array([])
+    tick_values = np.linspace(boundaries[0], boundaries[-1], min(7, len(boundaries)))
+    cb = fig.colorbar(
+        sm, cax=cbar_ax, orientation="horizontal",
+        label=colorbar_label, extend="both", ticks=tick_values,
+    )
+    cb.ax.tick_params(labelsize=8, rotation=0)
+    cb.minorticks_off()
+    
+    # ── Trim figure canvas to content after colorbar placement ──────────────────
+    fig.canvas.draw()
+    _BOTTOM_MARGIN_IN = 0
+    cbar_pos = cbar_ax.get_position()
+    # y0 of colorbar in figure-inches
+    cbar_bottom_in = cbar_pos.y0 * fig_height
+    # new figure height = everything above cbar bottom + small margin below it
+    new_fig_height = fig_height - cbar_bottom_in + _BOTTOM_MARGIN_IN
+    fig.set_size_inches(fig_width, new_fig_height, forward=True)
+    fig.canvas.draw()
+    try:
+        fig.tight_layout(rect=[0, 0.025, 1, 0.98])
+    except Exception:
+        pass
+
+    # Section headers ──────────────────────────
     if section_headers:
         for row_left, row_right, label in section_headers:
             _section_header(fig, axs, row_left, row_right,
-                            y_axfrac=1.0, label=label)
+                            y_axfrac=1.15, label=label)
 
     # ── Save ────────────────────────────────────────────────────────────────
     if save_dir and fname:

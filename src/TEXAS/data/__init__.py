@@ -11,6 +11,7 @@ from .filter import (
 )
 
 from .screening import MahalanobisOutlierDetector
+from .ocean_lookup import lookup_no3_from_woa
 
 __all__ = [
     "build_invT_inputData",
@@ -18,5 +19,6 @@ __all__ = [
     "InvTConfig",
     "filter_stan_compatible",
     "ensure_numpy",
-    'MahalanobisOutlierDetector'
+    "MahalanobisOutlierDetector",
+    "lookup_no3_from_woa",
 ]
