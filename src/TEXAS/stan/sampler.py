@@ -161,30 +161,15 @@ def get_posterior(
             f"omit the predictor arrays from the data dict."
         )
 
-    # Guard: ODR models require per-site SE arrays when the corresponding predictor is active
-    _is_odr  = "_odr" in str(stan_file) or "_werr" in str(stan_file)
-    _is_ver2 = "_ver2" in str(stan_file)
-    if _is_odr:
-        _missing_sd = []
-        if _use_g23 and "sd_gdgt23ratio_crtp" not in data:
-            _missing_sd.append(
-                "sd_gdgt23ratio_crtp  (SE of G₂/₃ per site — pass to build_fwd_data())"
-            )
-        if _use_no3 and "sd_no3_crtp" not in data:
-            _missing_sd.append(
-                "sd_no3_crtp  (SE of NO₃ per site in µmol/L — pass to build_fwd_data())"
-            )
-        if _is_ver2 and "R2_thermal" not in data:
-            _missing_sd.append(
-                "R2_thermal  (R² from thermal-only coretop fit — pass to build_fwd_data(R2_thermal=...))"
-            )
-        if _missing_sd:
-            raise ValueError(
-                f"ODR model '{stan_file}' requires per-site SE arrays for active predictors, "
-                f"but the following are missing from the data dict:\n"
-                + "\n".join(f"  • {s}" for s in _missing_sd)
-                + "\n\nProvide them via build_fwd_data(..., sd_gdgt23ratio_crtp=..., sd_no3_crtp=..., R2_thermal=...)."
-            )
+    # Guard: _eiv model requires R2_thermal (no sensible default exists)
+    _is_eiv = "_eiv" in str(stan_file)
+    if _is_eiv and "R2_thermal" not in data:
+        raise ValueError(
+            f"EIV model '{stan_file}' requires R2_thermal (R² from a thermal-only coretop fit) "
+            f"but it is missing from the data dict.\n"
+            f"Compute it from a non-EIV run first, then pass: "
+            f"build_fwd_data(..., R2_thermal=<value>)."
+        )
 
     # Auto-detect optimal CPU settings for this machine.
     # parallel_chains: always apply (CmdStanPy already does min(chains, cpu_count)
@@ -371,9 +356,9 @@ def auto_detect_predictors(data: dict) -> dict:
     print("🔍 Predictor auto-detection:")
     print(f"   Chosen group: {suffix} (from {chosen_key}, N={data_len})")
     print(f"   GDGT23 keys in data: {gdgt23_keys} → use_gdgt23ratio = {enhanced['use_gdgt23ratio']}"
-          + (f"  [ODR: {sd_g23_key} present]" if _has_sd_g23 else ""))
+          + (f"  [EIV: {sd_g23_key} present]" if _has_sd_g23 else ""))
     print(f"   NO3 keys in data:    {no3_keys} → use_no3 = {enhanced['use_no3']}"
-          + (f"  [ODR: {sd_no3_key} present]" if _has_sd_no3 else ""))
+          + (f"  [EIV: {sd_no3_key} present]" if _has_sd_no3 else ""))
 
     return enhanced
 

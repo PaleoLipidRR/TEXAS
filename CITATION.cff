@@ -1,12 +1,12 @@
-cff-version: 1.4.0
+cff-version: 1.5.0
 title: "texas-psm: a python package for TEXAS (A proxy system model for TetraEther indeX of Ammonia oxidizerS)"
 message: "The current version is used for data analysis alongside with a manuscript prepared to submit for publication at a peer-reviewed journal. If you use this software, please cite it using the metadata from this file."
 type: software
 authors:
   - family-names: Rattanasriampaipong
     given-names: Ronnakrit
-version: 0.1.4
-date-released: "2026-04-15"
+version: 0.1.5
+date-released: "2026-04-16"
 license: MIT
 repository-code: "https://github.com/PaleoLipidRR/TEXAS"
 doi: 10.5281/zenodo.XXXXXXX

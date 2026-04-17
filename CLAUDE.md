@@ -98,30 +98,17 @@ Example: `t0_crtp`, `k_crtp`, `b_crtp`, `v_crtp`, `sigma_proxyObs_crtp`.
 > - `.gitignore` negation `!src/TEXAS/stan_models/*.stan` added so Stan source files created after the binary-glob rule are not silently untracked.
 
 > **Stan model prior fix (2026-04-08)**:
-> - `sigma_proxyObs_crtp ~ normal(0.01, 0.1) → normal(0, 0.1)` in 5 files: `gen_logi_fixed_hier_crtp_multiv.stan`, `gen_logi_fixed_hier_crtp_multiv_priorApprox.stan`, `gen_logi_fixed_hier_crtp_univ_priorApprox.stan`, `gen_logi_fixed_hier_crtp_multiv_priorApprox_werr.stan`, `gen_logi_fixed_culmesocore.stan`. The old prior mean (0.01) was ~5× below the posterior (~0.05); `normal(0, 0.1)` is the conventional half-normal weakly informative prior for scale parameters. Cached `.nc` posteriors from these models must be regenerated.
+> - `sigma_proxyObs_crtp ~ normal(0.01, 0.1) → normal(0, 0.1)` in 5 files: `gen_logi_fixed_hier_crtp_multiv.stan`, `gen_logi_fixed_hier_crtp_multiv_priorApprox.stan`, `gen_logi_fixed_hier_crtp_univ_priorApprox.stan`, `gen_logi_fixed_culmesocore.stan` (and the former `_werr.stan`, now superseded). The old prior mean (0.01) was ~5× below the posterior (~0.05); `normal(0, 0.1)` is the conventional half-normal weakly informative prior for scale parameters. Cached `.nc` posteriors from these models must be regenerated.
 
-> **ODR / EIV Stan models added (2026-04-15 / 2026-04-16)**:
-> Three models implement Bayesian EIV treatment of the G₂/₃ and NO₃ secondary predictors.
+> **EIV Stan model consolidated (2026-04-16, v0.1.5)**:
+> The sole EIV model is now `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv.stan`. Earlier development variants (`_werr.stan`, `_werr_ver2.stan`, `_odr.stan`, archived variants) have been removed. Cached posteriors were renamed in-place (`_werr_ver2` → `_eiv`); no resampling needed.
 >
-> **Delta-method (heteroscedastic likelihood) variants** — no latent-variable parameters, no change to sampling speed:
-> - `gen_logi_fixed_hier_crtp_multiv_priorApprox_werr.stan` — priorApprox (Stage-2) version. Uses CV-gating: sites with `sd_no3 / no3 > 0.3` treated as exact (delta-method approximation breaks at high CV).
-> - `gen_logi_fixed_hier_crtp_multiv_odr.stan` — full hierarchical (culture + mesocosm + coretop) version.
->
-> EIV implementation (delta method):
-> - G₂/₃ term (linear): exact — `σ²_eff[i] += β²_{G₂/₃} · σ²_{G₂/₃}[i]`
-> - NO₃ term (log₁₀): delta method — `σ²_eff[i] += β²_{NO₃} · (σ_{NO₃}[i] / (no3[i] · ln 10))²`, applied only where `0 < NO₃[i] < no3_cutoff`
-> - `sigma_proxyObs_crtp` = pure RI residual noise; `bayesR2_full` uses `mean(σ²_eff)` as denominator.
->
-> **Latent-variable variant** — samples N_crtp latent `true_no3_crtp` values; valid at any CV:
-> - `gen_logi_fixed_hier_crtp_multiv_priorApprox_werr_ver2.stan` — priorApprox (Stage-2) version.
->
-> Key differences from `_werr.stan`:
-> - `sd_proxyObs` (per-site RI analytical SE; default Rs = 0.03) is passed as data and enters the likelihood in quadrature: `total_sd = √(sd_proxyObs² + sigma_proxyObs_crtp²)`. `sigma_proxyObs_crtp` is therefore *pure process noise* (oceanographic scatter, bioturbation) only.
-> - `sigma_proxyObs_crtp` prior scaled to `mean(sd_proxyObs) · √(1 − R²_thermal)`; `R2_thermal` must be passed as data (pre-compute from a thermal-only coretop fit).
-> - `true_no3_crtp ~ lognormal(log(0.3), 1.0)` with `<lower=0, upper=no3_cutoff>` — upper bound prevents double-precision overflow (`exp(>710) = Inf`) during HMC leapfrog.
-> - Sites with `sd_no3_crtp[i] = 0` (unknown SE) skip the measurement model; receive only the lognormal prior. No formal CV-gating needed.
-> - Requires `sd_proxyObs` and `R2_thermal` in the Stan data dict; `build_fwd_data()` accepts both. `sampler.py` raises `ValueError` if `R2_thermal` is missing for `_ver2` models.
-> - `_werr.stan` and `_odr.stan` are retained pending comparison of β_NO3 posteriors; may be deleted if `_werr_ver2` proves superior.
+> **`_eiv` model design** — latent-variable EIV with analytical RI SE separation:
+> - `sd_proxyObs` (per-site RI analytical SE; default Rs = 0.03, Schouten et al. 2013) enters the likelihood in quadrature: `total_sd = √(sd_proxyObs² + sigma_proxyObs_crtp²)`. `sigma_proxyObs_crtp` is therefore *pure process noise* (oceanographic scatter, bioturbation) only.
+> - `sigma_proxyObs_crtp` prior scaled to `mean(sd_proxyObs) · √(1 − R²_thermal)`. `R2_thermal` must be passed as data (pre-compute from a thermal-only non-EIV coretop run). `sampler.py` raises `ValueError` if missing.
+> - G₂/₃ latent variable: `true_gdgt23ratio_crtp ~ normal(0, 2)` with normal measurement model. Sites with `sd_gdgt23ratio_crtp[i] = 0` receive only the prior.
+> - NO₃ latent variable: `true_no3_crtp ~ lognormal(log(0.3), 1.0)` with `<lower=0, upper=no3_cutoff>` — upper bound prevents `exp()` overflow during HMC. Sites with `sd_no3_crtp[i] = 0` receive only the prior. No CV-gating.
+> - `build_fwd_data()` always includes `sd_gdgt23ratio_crtp` and `sd_no3_crtp` (defaulting to zeros), and always includes `sd_proxyObs` (defaulting to 0.03). `R2_thermal` must be provided explicitly.
 
 ### Posterior caching
 
@@ -154,7 +141,7 @@ Entry point: `streamlit_app/main.py`. Config (cache dir resolution, plot default
 
 **Optional predictor auto-detection**: `auto_detect_predictors()` in `stan/sampler.py` inspects the data dict for GDGT23/NO3 arrays and sets `use_gdgt23ratio` / `use_no3` integer flags for Stan. Also translates legacy `scaledRI_*` data keys to `proxyObs_*` with a `DeprecationWarning` for backward compatibility.
 
-**Posterior metadata**: After sampling, `extract_and_update_metadata()` attaches run info (model name, temptype, priors, duration, diagnostic summary) as `xr.Dataset.attrs`. The `proxy_name` attr (e.g. `"scaledRI"`, `"TEX86"`) is required at `get_posterior()` call time and is always written to `.nc` files via `_sanitize_attrs_for_netcdf`. Downstream code reads these attrs for decisions (e.g., `ensemble/detection.py` reads `stan_model_name` and `use_gdgt23ratio`).
+**Posterior metadata**: After sampling, `extract_and_update_metadata()` attaches run info (model name, temptype, priors, duration, diagnostic summary) as `xr.Dataset.attrs`. The `proxy_name` attr (e.g. `"scaledRI"`, `"TEX86"`) is required at `get_posterior()` call time and is always written to `.nc` files via `_sanitize_attrs_for_netcdf`. Downstream code reads these attrs for decisions (e.g., `ensemble/detection.py` reads `use_gdgt23ratio`, `use_no3`, `no3_cutoff` from attrs and infers model function from data_vars — it does not read `stan_model_name`).
 
 **Forward → inverse pipeline**:
 ```python

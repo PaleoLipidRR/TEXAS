@@ -12,6 +12,7 @@ from .residual_maps import (
     krige_halo_all,
     make_true_grid,
     load_or_build_halo_cache,
+    load_or_build_grids_cache,
 )
 
 # Deprecated alias — use plot_residual_maps instead
@@ -28,4 +29,5 @@ __all__ = [
     "krige_halo_all",
     "make_true_grid",
     "load_or_build_halo_cache",
+    "load_or_build_grids_cache",
 ]

@@ -1,11 +1,11 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// gen_logi_fixed_hier_crtp_multiv_priorApprox_werr_ver2.stan
+// gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv.stan
 //
 // PURPOSE: Coretop-only forward calibration with Bayesian error-in-variables
 //          (EIV) on secondary predictors (G₂/₃, NO₃) AND explicit separation
 //          of RI analytical measurement error from structural process noise.
 //
-// DIFFERENCES FROM _werr.stan (latent-variable priorApprox):
+// KEY FEATURES (latent-variable EIV, priorApprox two-stage):
 //   1. sd_proxyObs is passed per-site and enters the likelihood in quadrature:
 //      total_sd = √(sd_proxyObs² + sigma_proxyObs_crtp²).
 //      sigma_proxyObs_crtp is therefore the PROCESS noise only (oceanographic
@@ -16,10 +16,9 @@
 //      normal measurement model (no delta-method approximation). All N_crtp
 //      latent NO₃ values are sampled; sites outside (0, no3_cutoff) receive
 //      only the prior (no likelihood update).
-//   4. CV-gating is NOT implemented here (unlike _werr.stan). All sub-threshold
-//      sites receive the EIV measurement model regardless of SE/NO₃ ratio.
-//      build_fwd_data() still supplies the EIV index arrays for _werr.stan
-//      compatibility but they are not used by this model.
+//   4. No CV-gating: all sub-threshold sites receive the EIV measurement model
+//      regardless of SE/NO₃ ratio. Sites with sd_no3_crtp[i]=0 receive only
+//      the lognormal prior (equivalent to treating the site as exact).
 //
 // WORKFLOW (two-stage priorApprox):
 //   Step 1: Run gen_logi_fixed_culmeso.stan → extract posterior mean/SD for
@@ -31,7 +30,7 @@
 //   RI = b + (1 − b) / (1 + exp(−k · (T − T₀)))^(1/ν)            [Eq. 1]
 //
 // NON-THERMAL CORRECTIONS (if enabled):
-//   RI += β_{G₂/₃} · g23_true                                     [Eq. 6]
+//   RI += β_{G₂/₃} · g23_true                                   [Eq. 6]
 //   RI += β_{NO₃}  · log₁₀(no3_true)  [only 0 < NO₃ < cutoff]   [Eq. 7]
 // ═══════════════════════════════════════════════════════════════════════════════
 
@@ -110,10 +109,9 @@ model {
     b_crtp  ~ normal(prior_mean_b,  prior_sd_b);
     v_crtp  ~ normal(prior_mean_v,  prior_sd_v);
 
-    beta_G23_crtp       ~ normal(0,      0.05);
-    beta_NO3_crtp       ~ normal(-0.064, 0.008);  // informative: zero-centered prior + latent vars
-                                                   // causes MORE attenuation (latent vars absorb
-                                                   // residuals rather than moving beta negative).
+    beta_G23_crtp       ~ normal(0, 0.05);
+    beta_NO3_crtp       ~ normal(0, 0.05);
+    
     sigma_proxyObs_crtp ~ normal(0, proxyObs_res_se);
 
     // ─── 2. EIV: G₂/₃ ratio ──────────────────────────────────────────────────

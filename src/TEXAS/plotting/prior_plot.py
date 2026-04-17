@@ -252,6 +252,7 @@ def plot_prior_distributions(
 
         prior_key = next((k for k in parsed_priors if k.startswith(base)), None)
         x = None  # Initialize x variable
+        trunc_bounds = None  # Store truncation bounds for later
         
         if prior_key:
             prior_info = parsed_priors[prior_key]
@@ -261,19 +262,16 @@ def plot_prior_distributions(
                 std_range = 4 if trunc is None else 3
                 x_min = a - std_range * b
                 x_max = a + std_range * b
+                # Parse truncation bounds but don't apply them to x yet
                 if trunc:
-                    t_bounds = [float(v) if v else None for v in re.split(r",\s*", trunc)]
-                    if t_bounds[0] is not None:
-                        x_min = max(x_min, t_bounds[0])
-                    if len(t_bounds) > 1 and t_bounds[1] is not None:
-                        x_max = min(x_max, t_bounds[1])
+                    trunc_bounds = [float(v) if v else None for v in re.split(r",\s*", trunc)]
                 x = np.linspace(x_min, x_max, 5000)
                 y = stats.norm.pdf(x, a, b)
-                if trunc:
-                    if t_bounds[0] is not None:
-                        y[x < t_bounds[0]] = 0
-                    if len(t_bounds) > 1 and t_bounds[1] is not None:
-                        y[x > t_bounds[1]] = 0
+                if trunc_bounds:
+                    if trunc_bounds[0] is not None:
+                        y[x < trunc_bounds[0]] = 0
+                    if len(trunc_bounds) > 1 and trunc_bounds[1] is not None:
+                        y[x > trunc_bounds[1]] = 0
 
             elif dist == "beta":
                 x_min, x_max = 0.0, 1.0
@@ -332,12 +330,21 @@ def plot_prior_distributions(
         # ── NEW: expand x to cover posterior tails if they exceed prior bounds ──
         if all_samples and x is not None:
             all_param_samples = np.concatenate([s for s, _, _, _, _, _ in all_samples])
-            p_lo = np.percentile(all_param_samples, 0.5)
-            p_hi = np.percentile(all_param_samples, 99.5)
-            needs_expansion = (p_lo < x_min) or (p_hi > x_max)
+            p_lo = np.percentile(all_param_samples, 1)
+            p_hi = np.percentile(all_param_samples, 99)
+            # Add 5% padding on each side to ensure KDE tails are visible
+            data_range = p_hi - p_lo
+            if data_range > 0:
+                pad = 0.05 * data_range
+            else:
+                pad = max(abs(p_lo), abs(p_hi)) * 0.1 if (p_lo != p_hi) else 0.1
+            p_lo_padded = p_lo - pad
+            p_hi_padded = p_hi + pad
+            
+            needs_expansion = (p_lo_padded < x_min) or (p_hi_padded > x_max)
             if needs_expansion:
-                x_min = min(x_min, p_lo)
-                x_max = max(x_max, p_hi)
+                x_min = min(x_min, p_lo_padded)
+                x_max = max(x_max, p_hi_padded)
                 x = np.linspace(x_min, x_max, 5000)
 
         # If x was not defined by prior, create it from posterior data range
