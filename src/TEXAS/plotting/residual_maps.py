@@ -524,6 +524,7 @@ def plot_residual_maps(
     boundary_step: float = 0.025,
     cmap: str = "RdBu_r",
     colorbar_label: str = "Proxy Residuals",
+    colorbar_ticks: Optional[Sequence] = None,   # explicit tick values; auto if None
     # Regional extents [lon_min, lon_max, lat_min, lat_max]
     med_extent: Sequence = MED_EXTENT,
     rs_extent: Sequence = RS_EXTENT,
@@ -903,7 +904,10 @@ def plot_residual_maps(
     pcm_ref = axs[0, 0].collections[0]
     sm = mplcm.ScalarMappable(cmap=pcm_ref.get_cmap(), norm=norm_res)
     sm.set_array([])
-    tick_values = np.linspace(boundaries[0], boundaries[-1], min(7, len(boundaries)))
+    if colorbar_ticks is not None:
+        tick_values = np.asarray(colorbar_ticks)
+    else:
+        tick_values = np.linspace(boundaries[0], boundaries[-1], min(7, len(boundaries)))
     cb = fig.colorbar(
         sm, cax=cbar_ax, orientation="horizontal",
         label=colorbar_label, extend="both", ticks=tick_values,
