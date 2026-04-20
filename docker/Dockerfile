@@ -79,5 +79,6 @@ ENV PATH="$CMDSTAN/bin:$PATH"
 # Runtime fixes
 ENV PROJ_LIB=/opt/conda/envs/texas-env/share/proj
 ENV ESMFMKFILE=/opt/conda/envs/texas-env/lib/esmf.mk
+ENV LD_LIBRARY_PATH=/opt/conda/envs/texas-env/lib:${LD_LIBRARY_PATH}
 
 CMD ["bash"]
