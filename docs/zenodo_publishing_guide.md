@@ -94,7 +94,7 @@ bash scripts/prepare_review_archive.sh
 | **Title** | TEXAS: GDGT calibration database and forward posteriors |
 | **Authors** | Rattanasriampaipong, Ronnakrit |
 | **Version** | 0.1.5 |
-| **Description** | Pre-computed Bayesian forward calibration posteriors (.nc) and the GDGT training database used in Rattanasriampaipong et al. (in prep). Required for running inverse temperature reconstructions with the `texas-psm` Python package. |
+| **Description** | Pre-computed Bayesian forward calibration posteriors (.nc) and the GDGT training database used in Rattanasriampaipong et al. (in prep), *TEXAS: A proxy system model for TEX86 paleothermometry*, AGU Paleoceanography and Paleoclimatology. Required for running inverse temperature reconstructions with the `texas-psm` Python package. |
 | **License** | CC-BY-4.0 |
 | **Access** | Open — No restrictions |
 | **Keywords** | GDGT, TEX86, Ring Index, paleothermometry, Bayesian, Stan |

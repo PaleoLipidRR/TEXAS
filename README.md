@@ -387,7 +387,7 @@ Full API reference: [https://paleolipidRR.github.io/TEXAS](https://paleolipidRR.
 
 If you use TEXAS in your research, please cite:
 
-> Rattanasriampaipong, R. et al. (in prep). *TEXAS: Bayesian GDGT–temperature calibration using Stan.* AGU Paleoceanography and Paleoclimatology.
+> Rattanasriampaipong, R. et al. (in prep). *TEXAS: A proxy system model for TEX86 paleothermometry.* AGU Paleoceanography and Paleoclimatology.
 
 See [`CITATION.cff`](CITATION.cff) for machine-readable citation metadata. A Zenodo software DOI will be added upon submission.
 

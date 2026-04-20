@@ -167,8 +167,8 @@ result = TEXAS.predict_T_from_proxyObs(
 
 ## Citation
 
-Rattanasriampaipong, R. et al. (in prep). *TEXAS: Bayesian GDGT–temperature
-calibration using Stan.* AGU Paleoceanography and Paleoclimatology.
+Rattanasriampaipong, R. et al. (in prep). *TEXAS: A proxy system model for
+TEX86 paleothermometry.* AGU Paleoceanography and Paleoclimatology.
 EOF
 
 # ── Print manifest ───────────────────────────────────────────────────────────
