@@ -5,6 +5,20 @@ type: software
 authors:
   - family-names: Rattanasriampaipong
     given-names: Ronnakrit
+    orcid: "https://orcid.org/0000-0002-1425-8737"
+    affiliation: "Department of Geosciences, The University of Arizona"
+  - family-names: Tierney
+    given-names: Jessica E.
+    orcid: "https://orcid.org/0000-0002-9080-9289"
+    affiliation: "Department of Geosciences, The University of Arizona"
+  - family-names: Elling
+    given-names: Felix J.
+    orcid: "https://orcid.org/0000-0003-0405-4033"
+    affiliation: "Leibniz-Laboratory for Radiometric Dating and Isotope Research, Kiel University"
+  - family-names: Inglis
+    given-names: Gordon N.
+    orcid: "https://orcid.org/0000-0002-0032-4668"
+    affiliation: "School of Ocean and Earth Science, University of Southampton"
 version: 0.1.5
 date-released: "2026-04-16"
 license: MIT
@@ -30,6 +44,15 @@ references:
       - family-names: Rattanasriampaipong
         given-names: Ronnakrit
         orcid: "https://orcid.org/0000-0002-1425-8737"
+      - family-names: Tierney
+        given-names: Jessica E.
+        orcid: "https://orcid.org/0000-0002-9080-9289"
+      - family-names: Elling
+        given-names: Felix J.
+        orcid: "https://orcid.org/0000-0003-0405-4033"
+      - family-names: Inglis
+        given-names: Gordon N.
+        orcid: "https://orcid.org/0000-0002-0032-4668"
     title: "TEXAS: A proxy system model for TEX86 paleothermometry"
     journal: "AGU Paleoceanography and Paleoclimatology"
     year: 2026

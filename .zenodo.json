@@ -1,14 +1,29 @@
 {
-  "title": "TEXAS: Temperature Estimation via a Bayesian Approach with Stan (texas-psm)",
-  "description": "<p>TEXAS (<code>texas-psm</code>) is a Python package for Bayesian GDGT–temperature calibration using Stan. It implements a two-stage workflow:</p><ol><li><strong>Forward calibration</strong>: Fit a generalized logistic curve (Ring Index → temperature) to culture, mesocosm, and coretop isoGDGT data using hierarchical Bayesian Stan models. Outputs a compressed posterior <code>.nc</code> file.</li><li><strong>Inverse reconstruction (invT)</strong>: Predict paleotemperatures from new Ring Index observations by marginalising over posterior parameter draws. Returns a full posterior temperature distribution per sample.</li></ol><p>Optional non-thermal corrections for GDGT-2/3 ratio and NO₃ concentration are supported. The package ships 20 Stan models covering univariate and multivariate variants, direct (marginal) and ensemble sampling, and hard/unconstrained temperature constraints.</p>",
+  "title": "TEXAS: TetraEther indeX of Ammonia oxidizerS (texas-psm)",
+  "description": "<p>TEXAS (<code>texas-psm</code>) is a Python package using Bayesian calibration for marine GDGTs and environmental predictors using Stan. It implements a two-stage workflow:</p><ol><li><strong>Forward calibration</strong>: Fit a generalized logistic curve (Ring Index → temperature) to culture, mesocosm, and coretop isoGDGT data using hierarchical Bayesian Stan models. Outputs a compressed posterior <code>.nc</code> file.</li><li><strong>Inverse reconstruction (invT)</strong>: Predict paleotemperatures from new Ring Index observations by marginalising over posterior parameter draws. Returns a full posterior temperature distribution per sample.</li></ol><p>Optional non-thermal corrections for GDGT-2/3 ratio and NO₃ concentration are supported. The package ships 20 Stan models covering univariate and multivariate variants, direct (marginal) and ensemble sampling, and hard/unconstrained temperature constraints.</p>",
   "upload_type": "software",
   "access_right": "open",
   "license": "MIT",
   "creators": [
     {
       "name": "Rattanasriampaipong, Ronnakrit",
-      "affiliation": "The University of Texas at Austin",
+      "affiliation": "Department of Geosciences, The University of Arizona",
       "orcid": "0000-0002-1425-8737"
+    },
+    {
+      "name": "Tierney, Jessica E.",
+      "affiliation": "Department of Geosciences, The University of Arizona",
+      "orcid": "0000-0002-9080-9289"
+    },
+    {
+      "name": "Elling, Felix J.",
+      "affiliation": "Leibniz-Laboratory for Radiometric Dating and Isotope Research, Kiel University; Institute of Earth Sciences, Heidelberg University",
+      "orcid": "0000-0003-0405-4033"
+    },
+    {
+      "name": "Inglis, Gordon N.",
+      "affiliation": "School of Ocean and Earth Science, University of Southampton",
+      "orcid": "0000-0002-0032-4668"
     }
   ],
   "keywords": [
