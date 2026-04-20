@@ -1,4 +1,11 @@
 
+# Zenodo review archive staging (local only — never commit)
+review_archive_v*/
+
+# Stray files
+*.Rhistory
+=*
+
 # Python
 __pycache__/
 *.py[cod]

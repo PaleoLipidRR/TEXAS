@@ -51,7 +51,7 @@ docker compose up
 
 | Module | Purpose |
 |---|---|
-| `stan/compiler.py` | `StanCompiler`: wraps `CmdStanModel` with in-memory + disk caching; `force=True` clears binary |
+| `stan/compiler.py` | `StanCompiler`: wraps `CmdStanModel` with in-memory + disk caching; `force=True` clears binary; auto-detects stale/cross-environment binaries (exit code 127 → delete + recompile with `RuntimeWarning`) |
 | `stan/sampler.py` | `StanSampler` + functional API `get_posterior()` / `sampler_invT_posterior()`; auto-detects optional predictors |
 | `stan/io.py` | `save_posterior()` / `load_posterior()` / `save_invT_posterior()` — persists xarray.Dataset as compressed NetCDF |
 | `stan/metadata.py` | Extracts and attaches metadata + prior strings to posterior datasets |

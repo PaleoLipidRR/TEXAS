@@ -3,6 +3,8 @@
 from pathlib import Path
 from typing import Dict, Optional, Union
 import os
+import subprocess
+import warnings
 from ..utils.paths import STAN_MODELS_DIR
 from cmdstanpy import CmdStanModel
 from TEXAS.utils import get_repo_root
@@ -42,7 +44,30 @@ class StanCompiler:
         stan_path = self.resolve_stan_path(stan_file)
         cache_key = str(stan_path) + str(sorted(cpp_options.items()) if cpp_options else "{}")
 
-        # ← ADD: Force recompilation logic
+        # Auto-detect stale/incompatible binary (e.g. compiled in Docker, wrong arch/libc)
+        binary_path = stan_path.with_suffix('')
+        if not force and binary_path.exists():
+            try:
+                result = subprocess.run(
+                    [str(binary_path), "--version"],
+                    capture_output=True, timeout=10,
+                )
+                if result.returncode == 127:
+                    warnings.warn(
+                        f"Stan model '{binary_path.name}' was compiled for a different "
+                        f"environment (e.g. Docker or another OS) and cannot run here "
+                        f"(exit code 127). The old binary has been removed and the model "
+                        f"will be recompiled for your current setup — this is normal when "
+                        f"switching between Docker and a local install.",
+                        RuntimeWarning, stacklevel=3,
+                    )
+                    os.remove(binary_path)
+                    if cache_key in self.cache:
+                        del self.cache[cache_key]
+            except (OSError, subprocess.TimeoutExpired):
+                pass
+
+        # Force recompilation logic
         if force:
             # Remove from in-memory cache
             if cache_key in self.cache:

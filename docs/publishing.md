@@ -1,5 +1,17 @@
 # Publishing Guide — `texas-psm` on PyPI
 
+## Version scheme
+
+```
+0.x.xx   pre-publication (manuscript under review) — current
+1.x.xx   published (after paper acceptance)
+```
+
+The jump from `0.x.xx` to `1.0.0` happens exactly once, at paper acceptance.
+Do not use `1.x.xx` before then.  Reviewers who install the package during
+peer review will cite `0.1.5` (or whatever the review version is) — that is
+intentional and correct.
+
 This document covers everything you need to do when publishing or updating
 the package on PyPI for the first time. Read it top to bottom before running
 any commands.

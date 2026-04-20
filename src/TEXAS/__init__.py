@@ -53,7 +53,10 @@ from .ensemble.detection import detect_model_and_params
 from .diagnostics import summarize_sampler_diagnostics, create_summary_table
 
 # ─── Posterior download utilities ───────────────────────────────────────
-from .utils.download import download_posterior, download_posteriors, POSTERIOR_REGISTRY
+from .utils.download import (
+    download_posterior, download_posteriors, POSTERIOR_REGISTRY,
+    download_training_data, TRAINING_DATA_REGISTRY,
+)
 
 # ─── Cache configuration ─────────────────────────────────────────────────
 from .utils.paths import set_cache_dir
@@ -111,6 +114,8 @@ __all__ = [
     # download utilities
     "download_posterior",
     "download_posteriors",
+    "download_training_data",
+    "TRAINING_DATA_REGISTRY",
     "POSTERIOR_REGISTRY",
     # cache configuration
     "set_cache_dir",

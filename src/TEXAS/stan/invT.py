@@ -135,6 +135,24 @@ def get_invT_posterior(
             f"Make sure you are using the correct proxy observations with this calibration."
         )
 
+    # Guard: if the forward posterior requires NO₃ but none was supplied, fail
+    # fast with actionable guidance rather than silently passing zeros.
+    if fwd_posterior is not None and fwd_posterior.attrs.get("use_no3", 0) == 1:
+        if "no3" not in predictors:
+            no3_cutoff = fwd_posterior.attrs.get("no3_cutoff", 1.0)
+            raise ValueError(
+                "The forward posterior uses a NO\u2083 correction (use_no3=1) "
+                "but no NO\u2083 values were supplied.\n\n"
+                "  Option 1 \u2014 modern WOA23 values (recommended for most sites):\n"
+                "    pass  site_lat=<lat>, site_lon=<lon>, no3_dataset=ocean_prop_ds\n"
+                "    \u2192 NO\u2083 is looked up from ocean_prop_ds['no3_sf2tc_avg']\n\n"
+                "  Option 2 \u2014 your own per-observation values:\n"
+                "    pass  no3=<array of length N>  (e.g. from ocean_prop_ds['no3_sf2tc_avg'])\n\n"
+                f"  Option 3 \u2014 disable the NO\u2083 correction entirely:\n"
+                f"    pass  no3={no3_cutoff * 10:.0f}  "
+                f"(any value above the cutoff of {no3_cutoff} \u00b5mol/L sets the correction to zero)"
+            )
+
     data, sampler_kwargs = build_invT_inputData(
         proxyObs=proxyObs, prior_mu_t=prior_mu_t, prior_sigma_t=prior_sigma_t,
         fwd_posterior_name=fwd_posterior_name, predictors=predictors, config=cfg,
