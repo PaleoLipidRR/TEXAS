@@ -62,6 +62,8 @@ Then open the notebooks in `notebooks/manuscripts/`.
 
 **Forward posteriors in Docker**: the container bind-mounts your local `data/` directory, so posteriors cached at `data/cache/TEXAS_posterior_cache/` are available automatically inside JupyterLab. Download them first — see [Data and posteriors](#data-and-posteriors) below.
 
+**Switching between Docker and a local environment**: Stan binaries compiled inside the container are Linux x86_64 ELF binaries — they will not run on macOS or on a different Linux system. TEXAS detects this automatically: if a cached binary exits with code 127 (not executable), `StanCompiler` emits a `RuntimeWarning`, deletes the stale binary, and recompiles for the current environment. No manual cleanup is needed when switching setups.
+
 **Platform compatibility:**
 
 | Platform | Status | Notes |

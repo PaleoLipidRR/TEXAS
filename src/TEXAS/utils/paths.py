@@ -165,6 +165,32 @@ CACHE_DIR = CACHE_ROOT          # backward-compat alias
 POSTERIOR_CACHE_DIR = CACHE_ROOT / "TEXAS_posterior_cache"
 INVT_CACHE_DIR      = CACHE_ROOT / "TEXAS_invT_posterior_cache"
 
+# Training data spreadsheets — inside the repo when running from a git checkout,
+# otherwise ~/.texas/data/spreadsheets/ (pip-installed / Colab).
+# SI notebooks use relative paths rooted at the repo, so git-checkout users get
+# the right location automatically.  Colab users should mount Google Drive and
+# call set_spreadsheets_dir() or set TEXAS_DATA_DIR.
+def _resolve_spreadsheets_dir() -> Path:
+    env = os.environ.get("TEXAS_DATA_DIR")
+    if env:
+        return Path(env) / "spreadsheets"
+    # Same logic as cache root: prefer the repo's data/spreadsheets/
+    cwd = Path.cwd()
+    try:
+        top = subprocess.check_output(
+            ["git", "rev-parse", "--show-toplevel"], cwd=str(cwd),
+            stderr=subprocess.DEVNULL,
+        ).decode().strip()
+        return Path(top) / "data" / "spreadsheets"
+    except Exception:
+        pass
+    for parent in [cwd, *cwd.parents]:
+        if (parent / ".git").exists() or (parent / "pyproject.toml").exists():
+            return parent / "data" / "spreadsheets"
+    return Path.home() / ".texas" / "data" / "spreadsheets"
+
+SPREADSHEETS_DIR = _resolve_spreadsheets_dir()
+
 
 def set_cache_dir(path: "str | Path") -> None:
     """Override TEXAS cache directories at runtime.
