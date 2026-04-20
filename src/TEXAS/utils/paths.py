@@ -116,7 +116,17 @@ REPO_ROOT = PROJECT_ROOT                      # back-compat alias
 STAN_MODELS_DIR = (PACKAGE_ROOT / "stan_models").resolve()
 
 HOME = Path.home()
-CMDSTAN_DIR = find_cmdstan("2.36.0")
+try:
+    CMDSTAN_DIR = find_cmdstan("2.36.0")
+except RuntimeError as _e:
+    CMDSTAN_DIR = None
+    warnings.warn(
+        "CmdStan not found — Stan sampling (forward calibration and inverse "
+        "reconstruction) will not be available until CmdStan is installed.\n"
+        "  Install: python -c \"import cmdstanpy; "
+        "cmdstanpy.install_cmdstan(version='2.36.0')\"",
+        UserWarning, stacklevel=1,
+    )
 DOCUMENTS = HOME / "Documents"
 ONEDRIVE = Path("/mnt/onedrive") if Path("/mnt/onedrive").exists() else HOME / "OneDrive"
 
