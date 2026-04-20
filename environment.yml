@@ -21,7 +21,6 @@ dependencies:
   - statsmodels
   - seaborn
   - gsw
-  - odrpack
   
   # --- Core Data Handling ---
   - xarray
@@ -34,7 +33,7 @@ dependencies:
 
   # --- Plotting (Stable Pinned Versions) ---
   # NOTE: Multiple pins here increase solver complexity.
-  - matplotlib>=3.5
+  - matplotlib
   - matplotlib-inline
   - setuptools<81
   - cmocean
@@ -84,3 +83,7 @@ dependencies:
     - proplot==0.9.7
     - pykrige
     - regionmask>=0.9
+    - odrpack
+    - baysparpy
+    - baysplinepy
+    - texas-psm
