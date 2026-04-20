@@ -27,7 +27,8 @@ dependencies = [
   "stanio>=0.4",
   "matplotlib>=3.3",
   "cmocean",
-  "plotly"
+  "plotly",
+  "psutil"
 ]
 
 [project.optional-dependencies]
