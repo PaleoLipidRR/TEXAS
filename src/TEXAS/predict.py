@@ -5,29 +5,29 @@ High-level prediction API for the TEXAS proxy system model.
 Two functions mirror the two directions of the calibration workflow
 described in the manuscript:
 
-  predict_RI_from_T   — forward:  T → scaled RI  (pure Python, no Stan)
-  predict_T_from_RI   — inverse:  scaled RI → T  (runs Stan)
+  predict_proxy_from_T  — forward:  T → proxy (Scaled RI, TEX86, …)  (pure Python, no Stan)
+  predict_T_from_proxyObs — inverse:  proxy → T  (runs Stan)
 
 Both return percentile summaries (p5 / p50 / p95 by default) and
 optionally the full ensemble / posterior.
 
 Example
 -------
->>> from TEXAS.predict import predict_RI_from_T, predict_T_from_RI
+>>> from TEXAS.predict import predict_proxy_from_T, predict_T_from_proxyObs
 >>>
->>> # Forward: what scaled RI does the calibration predict at 20–30 °C?
->>> result = predict_RI_from_T(
+>>> # Forward: what Scaled RI does the calibration predict at 20–30 °C?
+>>> result = predict_proxy_from_T(
 ...     temperatures=np.linspace(20, 30, 50),
-...     posterior="gen_logi_fixed_hier_crtp_multiv_thermoT",
+...     posterior="gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3",
 ... )
 >>> result["p50"]   # median calibration curve
 >>>
->>> # Inverse: reconstruct temperature from downcore scaled RI
+>>> # Inverse: reconstruct temperature from downcore Scaled RI
 >>> result = predict_T_from_proxyObs(
 ...     proxyObs=my_ri_array,
 ...     prior_mu_t=15.0,
 ...     prior_sigma_t=10.0,
-...     fwd_posterior_name="gen_logi_fixed_hier_crtp_multiv_thermoT",
+...     fwd_posterior_name="gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3",
 ...     temptype="thermoT",
 ... )
 >>> result["p50"]   # median temperature reconstruction
@@ -48,7 +48,7 @@ from .data.builder import InvTConfig
 from .data.ocean_lookup import lookup_no3_from_woa
 
 
-def predict_RI_from_T(
+def predict_proxy_from_T(
     temperatures: Union[np.ndarray, List[float]],
     posterior: Union[xr.Dataset, str],
     *,
@@ -62,7 +62,7 @@ def predict_RI_from_T(
     suffix: Optional[str] = None,
 ) -> Dict[str, np.ndarray]:
     """
-    Forward prediction: temperature → scaled RI percentiles.
+    Forward prediction: temperature → proxy percentiles (Scaled RI, TEX86, or any fitted proxy).
 
     Samples `n_draws` self-consistent parameter sets from the forward
     calibration posterior (all parameters drawn from the same posterior
@@ -349,6 +349,16 @@ def predict_T_from_proxyObs(
         min_temp=min_temp,
         proxy_name=proxy_name,
     )
+
+
+def predict_RI_from_T(*args, **kwargs):
+    """Deprecated: use predict_proxy_from_T() instead."""
+    import warnings
+    warnings.warn(
+        "predict_RI_from_T() is deprecated; use predict_proxy_from_T() instead.",
+        DeprecationWarning, stacklevel=2,
+    )
+    return predict_proxy_from_T(*args, **kwargs)
 
 
 def predict_T_from_RI(*args, **kwargs):

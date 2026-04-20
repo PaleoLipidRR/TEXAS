@@ -113,7 +113,7 @@ These are not hosted on the TEXAS Zenodo record — download them separately:
 
 ## Zenodo record
 
-**Data DOI**: TBD — will be filled in upon paper submission.
+**Data DOI**: https://doi.org/10.5281/zenodo.19666745
 
 Once available, you can also download files manually from the Zenodo record page
 and place them in the directories above.

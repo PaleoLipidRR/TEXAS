@@ -36,7 +36,7 @@ from .paths import POSTERIOR_CACHE_DIR, SPREADSHEETS_DIR
 
 # ─── Zenodo config ────────────────────────────────────────────────────────────
 # Replace with the real Zenodo record ID once the record is published.
-ZENODO_RECORD_ID: Optional[str] = None   # e.g., "1234567"
+ZENODO_RECORD_ID: Optional[str] = "19666745"
 
 def _zenodo_url(filename: str) -> Optional[str]:
     if ZENODO_RECORD_ID is None:
