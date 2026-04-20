@@ -1,6 +1,8 @@
 
 # Zenodo review archive staging (local only — never commit)
 review_archive_v*/
+texas-psm-zenodo-v*.zip
+texas-psm-zenodo-v*/
 
 # Stray files
 *.Rhistory
