@@ -4,7 +4,7 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
 [![PyPI](https://img.shields.io/pypi/v/texas-psm.svg)](https://pypi.org/project/texas-psm/)
 
-**TEXAS** (`texas-psm`) is a Python package for **Bayesian GDGT–temperature calibration**. It fits hierarchical generalized-logistic models to isoGDGT proxy data (TEX86 / Ring Index) using Stan, then reconstructs paleotemperatures from new sediment records with full posterior uncertainty.
+**TEXAS** (`texas-psm`) is a Python package for **Bayesian calibration** that fits hierarchical generalized-logistic models to isoGDGT proxy data (Scaled RI) for thermal responses and linear models for nonthermal effects (i.e., AOA ecology and nutrient effect) using Stan, then reconstructs paleotemperatures from new sediment records with full posterior uncertainty.
 
 ---
 
@@ -14,10 +14,10 @@ TEXAS implements a two-stage workflow:
 
 | Stage | Description |
 |---|---|
-| **Forward calibration** | Fit a generalized logistic curve (Ring Index → temperature) to culture, mesocosm, and/or coretop data using a hierarchical Bayesian Stan model. Outputs a compressed posterior `.nc` file. |
-| **Inverse reconstruction (invT)** | Predict paleotemperatures from new Ring Index observations by marginalizing over posterior parameter draws. Returns a full posterior temperature distribution per sample. |
+| **Forward calibration** | Fit a generalized logistic curve (Scaled RI → temperature) to culture, mesocosm, and/or coretop data using a hierarchical Bayesian Stan model. Outputs a compressed posterior `.nc` file. |
+| **Inverse reconstruction (invT)** | Predict paleotemperatures from Scaled RI observations by marginalizing over posterior parameter draws (i.e., ...). Returns a full posterior temperature distribution per sample. |
 
-Optional non-thermal corrections for GDGT-2/3 ratio (β_{G₂/₃}) and NO₃ concentration (β_{NO₃}) are supported. The NO₃ correction uses log₁₀(NO₃ / cutoff) — a ratio form that is continuous at the cutoff boundary and avoids a step discontinuity in the calibration curve.
+Optional non-thermal corrections for GDGT-2/3 ratio (β_{G₂/₃}) and NO₃ concentration (β_{NO₃}) are supported.
 
 The calibration curve is a generalized logistic (Richards curve) with the asymmetry parameter Q fixed to 1 (inflection point = T₀), keeping 4 free thermal parameters: T₀, k, b, ν.
 
@@ -29,15 +29,7 @@ Inverse temperature (invT) Stan models use `reduce_sum` for within-chain paralle
 
 ## Getting started
 
-### Option A — No-code: Streamlit web app
-
-Upload a CSV and get paleotemperature reconstructions in your browser — no Python or Stan installation required.
-
-> **Streamlit deployment coming soon.**
-
----
-
-### Option B — Docker (recommended for reproducibility)
+### Option A — Docker (recommended for reproducibility)
 
 No Stan or conda setup required — CmdStan and all dependencies are pre-installed in the image.
 
@@ -77,7 +69,7 @@ Then open the notebooks in `notebooks/manuscripts/`.
 
 ---
 
-### Option C — pip install (Python users)
+### Option B — pip install (Python users)
 
 > **Do not run `pip install` against the system Python.** Modern Debian/Ubuntu systems mark the system Python as externally managed (PEP 668) and will refuse the install. Always install into a virtual environment first.
 
@@ -127,7 +119,7 @@ export CMDSTAN=~/.cmdstan/cmdstan-2.36.0
 
 ---
 
-### Option D — conda-lock (exact reproducible environment)
+### Option C — conda-lock (exact reproducible environment)
 
 For the most reproducible setup outside of Docker, use the pre-solved conda-lock files published alongside this repository. Every package version and checksum is pinned — the environment will be identical on any machine of the same platform.
 
@@ -166,7 +158,7 @@ CmdStan is bundled in the conda-lock environment — no separate `install_cmdsta
 
 ---
 
-### Option E — conda + pip from source (for development)
+### Option D — conda + pip from source (for development)
 
 ```bash
 git clone https://github.com/PaleoLipidRR/TEXAS.git
@@ -192,35 +184,31 @@ TEXAS separates **code** (this repository) from **data** (hosted on Zenodo). Her
 
 | Goal | What you need | Where to get it |
 |---|---|---|
-| Forward prediction (`predict_RI_from_T`) | Pre-computed forward posterior `.nc` | Zenodo data record *(link upon publication)* |
-| Inverse reconstruction (`predict_T_from_proxyObs`) | Pre-computed forward posterior `.nc` | Zenodo data record *(link upon publication)* |
-| Re-run forward calibration from scratch | GDGT training database | Zenodo data record *(link upon publication)* |
+| Forward prediction (`predict_proxy_from_T`) | Pre-computed forward posterior `.nc` | `TEXAS.download_all()` |
+| Inverse reconstruction (`predict_T_from_proxyObs`) | Pre-computed forward posterior `.nc` | `TEXAS.download_all()` |
+| Re-run forward calibration from scratch | GDGT training database | `TEXAS.download_all()` |
+
+**Zenodo data record**: https://doi.org/10.5281/zenodo.19666745
 
 **You do not need to download any data just to install the package.** The Stan model files (`.stan`) are bundled inside the pip package and are found automatically.
 
-### Downloading the forward posteriors
+### Downloading the data
 
-The forward calibration posteriors are the pre-computed Bayesian parameter distributions required for both forward and inverse predictions. Once the Zenodo data record is published, you can fetch them in one line:
-
-```python
-import TEXAS
-TEXAS.download_posteriors()   # downloads all standard posteriors to ~/.texas/cache/
-```
-
-Or download a single posterior:
-
-```python
-TEXAS.download_posterior("gen_logi_fixed_hier_crtp_multiv_SST")
-```
-
-Posteriors are cached at `~/.texas/cache/TEXAS_posterior_cache/` and are found automatically on subsequent calls — no repeated downloads.
-
-**Custom cache location**: set the `TEXAS_CACHE_DIR` environment variable before importing, or call `TEXAS.set_cache_dir(path)` at the top of your script:
+Once the Zenodo data record is published, download everything in one shot (~560 MB ZIP):
 
 ```python
 import TEXAS
-TEXAS.set_cache_dir("/data/my_texas_cache")   # call before any posterior I/O
+TEXAS.download_all()           # downloads ZIP and extracts posteriors + training CSVs
 ```
+
+Or selectively:
+
+```python
+TEXAS.download_posteriors()    # forward posteriors only → ~/.texas/cache/TEXAS_posterior_cache/
+TEXAS.download_training_data() # training CSVs only → data/spreadsheets/
+```
+
+All functions are idempotent — running them again skips files already on disk. Use `force=True` to re-download.
 
 > **Zenodo data record coming upon paper submission.** Until then, contact the authors or generate posteriors yourself with `get_posterior()` (see Example usage below).
 
@@ -230,12 +218,13 @@ If you have a posterior `.nc` file on Google Drive (or anywhere on disk), load i
 
 ```python
 import xarray as xr
+from TEXAS import predict_proxy_from_T, predict_T_from_proxyObs
 
 # Mount Google Drive first (Colab), then:
-ds = xr.load_dataset("/content/drive/MyDrive/posteriors/gen_logi_fixed_hier_crtp_multiv_SST.nc")
+ds = xr.load_dataset("/content/drive/MyDrive/posteriors/gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc")
 
 # Pass the dataset directly — no cache lookup, no download
-result = predict_RI_from_T(temperatures=np.linspace(5, 35, 100), posterior=ds)
+result = predict_proxy_from_T(temperatures=np.linspace(5, 35, 100), posterior=ds)
 result = predict_T_from_proxyObs(proxyObs=my_ri, prior_mu_t=15.0, prior_sigma_t=10.0,
                                   fwd_posterior=ds, temptype="SST")
 ```
@@ -247,21 +236,21 @@ result = predict_T_from_proxyObs(proxyObs=my_ri, prior_mu_t=15.0, prior_sigma_t=
 ```python
 import numpy as np
 import xarray as xr
-from TEXAS import predict_RI_from_T, predict_T_from_proxyObs
+from TEXAS import predict_proxy_from_T, predict_T_from_proxyObs
 
 # ── Option 1: use a posterior by name (auto-downloads from Zenodo if needed) ──
-result = predict_RI_from_T(
+result = predict_proxy_from_T(
     temperatures=np.linspace(5, 35, 100),
-    posterior="gen_logi_fixed_hier_crtp_multiv_SST",
+    posterior="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
 )
-result["p50"]   # median calibration curve (scaled RI)
+result["p50"]   # median calibration curve (Scaled RI)
 result["p5"]    # 5th percentile
 result["p95"]   # 95th percentile
 
 # ── Option 2: load a posterior from disk and pass directly ────────────────────
-ds = xr.load_dataset("/path/to/gen_logi_fixed_hier_crtp_multiv_SST.nc")
+ds = xr.load_dataset("/path/to/gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc")
 
-result = predict_RI_from_T(temperatures=np.linspace(5, 35, 100), posterior=ds)
+result = predict_proxy_from_T(temperatures=np.linspace(5, 35, 100), posterior=ds)
 
 result = predict_T_from_proxyObs(
     proxyObs=my_ri_array,
@@ -278,24 +267,25 @@ result["p95"]   # 95th percentile
 # Option A — disable NO₃ correction (pass a value above the cutoff)
 result = predict_T_from_proxyObs(
     proxyObs=my_ri_array, prior_mu_t=15.0, prior_sigma_t=10.0,
-    fwd_posterior_name="gen_logi_fixed_hier_crtp_multiv_SST",
-    no3=10.0,   # scalar > no3_cutoff (~1 µmol/L) → correction disabled for all samples
+    fwd_posterior_name="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3",
+    no3=10.0,   # scalar > no3_cutoff (1.0 µmol/L) → correction disabled for all samples
 )
 
 # Option B — provide explicit NO₃ values (scalar or per-observation array)
 result = predict_T_from_proxyObs(
     proxyObs=my_ri_array, prior_mu_t=15.0, prior_sigma_t=10.0,
-    fwd_posterior_name="gen_logi_fixed_hier_crtp_multiv_SST",
-    no3=my_no3_array,   # array of length N, one value per observation
+    fwd_posterior_name="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3",
+    no3=my_no3_array,       # array of length N, one value per observation
+    gdgt23ratio=my_g23_array,
 )
 
 # Option C — automatic lookup from modern WOA23 climatology at drill-site location
-import xarray as xr
 ocean_prop_ds = xr.load_dataset("/path/to/ocean_prop_ds.nc")   # from SI_code1
 
 result = predict_T_from_proxyObs(
     proxyObs=my_ri_array, prior_mu_t=15.0, prior_sigma_t=10.0,
-    fwd_posterior_name="gen_logi_fixed_hier_crtp_multiv_SST",
+    fwd_posterior_name="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3",
+    gdgt23ratio=my_g23_array,
     site_lat=15.3, site_lon=-23.7,   # modern lat/lon of the drill site
     no3_dataset=ocean_prop_ds,       # WOA23-derived xr.Dataset with (lat, lon) grid
 )
@@ -335,7 +325,7 @@ save_posterior(posterior)
 
 ```
 src/TEXAS/
-  predict.py        High-level API: predict_RI_from_T / predict_T_from_proxyObs
+  predict.py        High-level API: predict_proxy_from_T / predict_T_from_proxyObs
   stan/             Sampler, compiler, I/O, and invT orchestration
   stan_models/      Stan model files (.stan) — bundled in the pip package
   data/             Input data builders, filters, screening, and ocean property lookups
@@ -361,7 +351,7 @@ tests/              Unit tests
 
 | Function | Description |
 |---|---|
-| `predict_RI_from_T(temperatures, posterior, ...)` | Forward prediction: temperature → Ring Index (pure Python) |
+| `predict_proxy_from_T(temperatures, posterior, ...)` | Forward prediction: temperature → proxy (Scaled RI, TEX86, or any fitted proxy; pure Python) |
 | `predict_T_from_proxyObs(proxyObs, prior_mu_t, prior_sigma_t, ...)` | Inverse reconstruction: proxy → temperature with full uncertainty (runs Stan). Accepts `no3` / `gdgt23ratio` as scalar or array; pass `site_lat` / `site_lon` / `no3_dataset` for automatic WOA23 NO₃ lookup. `predict_T_from_RI` is a deprecated alias |
 | `lookup_no3_from_woa(lat, lon, woa_dataset, ...)` | Look up modern NO₃ climatology at one or more lat/lon coordinates from a WOA23-derived xr.Dataset; handles 0–360 and −180–180 longitude conventions automatically |
 | `download_posteriors(names, ...)` | Download all standard forward posteriors from Zenodo |
