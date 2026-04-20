@@ -25,7 +25,10 @@ from typing import List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from scipy.spatial import cKDTree
-from pykrige.ok import OrdinaryKriging
+try:
+    from pykrige.ok import OrdinaryKriging
+except ImportError:
+    OrdinaryKriging = None
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as mgridspec
 import matplotlib.cm as mplcm
@@ -100,6 +103,9 @@ def _krige_panel_worker(
     All data passed explicitly — no globals captured across process boundaries.
     """
     print(f"  [{i+1}] Kriging halo: {method_label} ...", flush=True)
+
+    if OrdinaryKriging is None:
+        raise ImportError("pykrige is required for kriging. Install it: pip install pykrige")
 
     valid = ~np.isnan(res_vals)
     lons_v, lats_v, vals_v = lons[valid], lats[valid], res_vals[valid]
