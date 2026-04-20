@@ -30,7 +30,7 @@ references:
       - family-names: Rattanasriampaipong
         given-names: Ronnakrit
         orcid: "https://orcid.org/0000-0002-1425-8737"
-    title: "TEXAS: Bayesian GDGT-temperature calibration using Stan"
+    title: "TEXAS: A proxy system model for TEX86 paleothermometry"
     journal: "AGU Paleoceanography and Paleoclimatology"
     year: 2026
     notes: "in prep"
