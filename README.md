@@ -50,7 +50,7 @@ docker compose --profile full up
 
 Then open the notebooks in `notebooks/manuscripts/`.
 
-> **Pre-built image on GHCR coming soon.** Until then, the image is built locally from `docker/Dockerfile` on first run (takes ~10 minutes).
+> **Pre-built image available on GHCR** — `docker pull ghcr.io/paleolipidrr/texas:latest`. If you prefer to build locally, the image will be built from `docker/Dockerfile` on first run (~10 minutes).
 
 **Forward posteriors in Docker**: the container bind-mounts your local `data/` directory, so posteriors cached at `data/cache/TEXAS_posterior_cache/` are available automatically inside JupyterLab. Download them first — see [Data and posteriors](#data-and-posteriors) below.
 
