@@ -34,8 +34,8 @@ dependencies:
 
   # --- Plotting (Stable Pinned Versions) ---
   # NOTE: Multiple pins here increase solver complexity.
-  - matplotlib<3.5
-  - matplotlib-inline<0.2
+  - matplotlib>=3.5
+  - matplotlib-inline
   - proplot=0.9.7
   - setuptools<81
   - cmocean
