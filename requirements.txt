@@ -1,4 +1,3 @@
 baysplinepy
 baysparpy
-pygwalker
 -e .

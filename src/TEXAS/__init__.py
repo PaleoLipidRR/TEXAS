@@ -54,7 +54,7 @@ from .diagnostics import summarize_sampler_diagnostics, create_summary_table
 
 # ─── Posterior download utilities ───────────────────────────────────────
 from .utils.download import (
-    download_all, download_posterior, download_posteriors, POSTERIOR_REGISTRY,
+    download_all, download_posteriors, POSTERIOR_REGISTRY,
     download_training_data, TRAINING_DATA_REGISTRY,
 )
 
@@ -114,7 +114,6 @@ __all__ = [
     "create_summary_table",
     # download utilities
     "download_all",
-    "download_posterior",
     "download_posteriors",
     "download_training_data",
     "TRAINING_DATA_REGISTRY",
