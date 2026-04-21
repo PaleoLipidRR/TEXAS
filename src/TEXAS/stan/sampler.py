@@ -2,6 +2,8 @@
 
 import time
 import importlib.util
+import os
+from pathlib import Path
 import numpy as np
 import xarray as xr
 from typing import Tuple, Optional, Dict, Any, Literal
@@ -49,11 +51,27 @@ class StanSampler:
                     "likely a shared-library version mismatch, e.g. TBB).\n"
                     "    Recompiling Stan model from source and retrying..."
                 )
+                # Delete the stale binary ourselves before compile_stan_file
+                # tries to (it also calls os.remove, which would fail if the
+                # binary is owned by a different user, e.g. from a docker test run)
+                exe = Path(model.stan_file).with_suffix(
+                    ".exe" if os.name == "nt" else ""
+                )
+                try:
+                    exe.unlink(missing_ok=True)
+                except PermissionError:
+                    raise PermissionError(
+                        f"Cannot delete stale Stan binary: {exe}\n"
+                        "It was likely compiled by a different user (e.g. a docker test run).\n"
+                        f"Fix: sudo rm {exe}"
+                    ) from None
                 _cmdstanpy.compile_stan_file(model.stan_file, force=True)
-                # Evict stale entry from the compiler's in-memory cache
-                model_path = str(model.stan_file)
+                # Evict stale entry from the compiler's in-memory cache.
+                # Cache keys use the source path; model.stan_file is the build
+                # path — match on filename stem to handle both layouts.
+                model_stem = Path(model.stan_file).stem
                 for key in list(self.compiler.cache.keys()):
-                    if model_path in key:
+                    if model_stem in key:
                         del self.compiler.cache[key]
                 fit = model.sample(data=data, **kwargs)
                 print("✅ Stan sampling completed after recompilation")

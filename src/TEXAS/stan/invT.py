@@ -108,7 +108,17 @@ def get_invT_posterior(
     start_time = time.perf_counter()
     system_info = get_system_info()
 
-    cfg = config or InvTConfig()
+    # config may be an InvTConfig, a plain dict of InvTConfig fields, or a mixed
+    # dict that also contains cmdstanpy sampler keys (e.g. show_console=True).
+    # Separate sampler-level keys out so they reach model.sample(), not InvTConfig.
+    _SAMPLER_KEYS = {"show_console", "show_progress", "refresh", "sig_figs", "timeout"}
+    _sampler_overrides: dict = {}
+    if isinstance(config, dict):
+        config = dict(config)  # don't mutate caller's dict
+        _sampler_overrides = {k: config.pop(k) for k in _SAMPLER_KEYS if k in config}
+        cfg = InvTConfig(**config) if config else InvTConfig()
+    else:
+        cfg = config or InvTConfig()
     predictors = predictors or {}
 
     # Resolve forward posterior for proxy_name validation (avoid double I/O)
@@ -166,6 +176,7 @@ def get_invT_posterior(
     sampler_kwargs.setdefault("chains", 4)
     sampler_kwargs.setdefault("iter_warmup", 500)
     sampler_kwargs.setdefault("iter_sampling", 1000)
+    sampler_kwargs.update(_sampler_overrides)  # e.g. show_console, show_progress
 
     meta = sampler_kwargs.pop("_metadata", {})
 

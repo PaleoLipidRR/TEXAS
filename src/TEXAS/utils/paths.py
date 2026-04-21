@@ -138,6 +138,17 @@ PROJECT_ROOT = get_project_root()
 REPO_ROOT = PROJECT_ROOT                      # back-compat alias
 STAN_MODELS_DIR = (PACKAGE_ROOT / "stan_models").resolve()
 
+# Stan build artifacts (.hpp, binaries) go here — outside the source/bind-mount
+# tree so container users (different UID) can always write compilation output.
+# Override with TEXAS_STAN_BUILD_DIR env var.
+def _resolve_stan_build_dir() -> Path:
+    env = os.environ.get("TEXAS_STAN_BUILD_DIR")
+    if env:
+        return Path(env)
+    return Path.home() / ".texas" / "stan_cache"
+
+STAN_BUILD_DIR = _resolve_stan_build_dir()
+
 HOME = Path.home()
 try:
     CMDSTAN_DIR = find_cmdstan("2.36.0")
