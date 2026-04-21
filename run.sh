@@ -137,11 +137,21 @@ fi
 echo ""
 
 if [[ "$PROFILE" == "full" ]]; then
-    $DC -f "$COMPOSE_FILE" --profile "$PROFILE" run --rm \
-        --service-ports \
-        --volume "${REPO_ROOT}:/home/micromamba/app" \
+    docker run --rm \
+        --user root \
+        -p 8888:8888 \
+        -v "${REPO_ROOT}:/home/micromamba/app" \
         "${VOLUMES[@]+"${VOLUMES[@]}"}" \
-        "$PROFILE"
+        ghcr.io/paleolipidrr/texas:latest \
+        jupyter lab \
+            --ip=0.0.0.0 \
+            --port=8888 \
+            --no-browser \
+            --allow-root \
+            --ServerApp.token='' \
+            --ServerApp.password='' \
+            --ServerApp.root_dir=/home/micromamba/app \
+            --IdentityProvider.token=''
 else
     $DC -f "$COMPOSE_FILE" --profile "$PROFILE" run --rm \
         --service-ports \
