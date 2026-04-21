@@ -38,13 +38,7 @@ dependencies:
   - setuptools<81
   - cmocean
   - plotly
-  - pygmt
-  
-  ### Google Map/Google Earth
-  - geetools
-  - simplekml
-  - salem
-  
+
   # --- Geo Stack (Complex Dependencies) ---
   # NOTE: shapely<2 is a major constraint.
   - geopandas
@@ -70,14 +64,8 @@ dependencies:
   - cmdstanpy>=1.0
   - stanio
   - typing-extensions
-  - anywidget
-  - ipylab
-  - duckdb
   - pyarrow
-  - sqlalchemy
-  - pydantic
   - importlib-metadata<5.0
-  - biopython
 
   # --- Pip-only packages (conda-lock skips these if listed under conda) ---
   - pip:
@@ -85,6 +73,4 @@ dependencies:
     - pykrige
     - regionmask>=0.9
     - odrpack
-    - baysparpy
-    - baysplinepy
-    - texas-psm
+    - texas-psm>=0.1.7
