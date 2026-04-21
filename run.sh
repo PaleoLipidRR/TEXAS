@@ -140,12 +140,12 @@ if [[ "$PROFILE" == "full" ]]; then
     docker run --rm \
         --user root \
         --entrypoint "" \
-        --workdir /home/micromamba/app \
+        --workdir /app \
         -e GIT_CONFIG_COUNT=1 \
         -e GIT_CONFIG_KEY_0=safe.directory \
-        -e GIT_CONFIG_VALUE_0=/home/micromamba/app \
+        -e GIT_CONFIG_VALUE_0=/app \
         -p 8888:8888 \
-        -v "${REPO_ROOT}:/home/micromamba/app" \
+        -v "${REPO_ROOT}:/app" \
         "${VOLUMES[@]+"${VOLUMES[@]}"}" \
         ghcr.io/paleolipidrr/texas:latest \
         /opt/conda/envs/texas-env/bin/jupyter lab \
