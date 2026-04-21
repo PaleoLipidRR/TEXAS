@@ -60,6 +60,7 @@
   ],
 
   "remoteUser": "micromamba",
+  "updateRemoteUserUID": true,
 
   "postCreateCommand": "bash .devcontainer/devcontainer-postcreate.sh",
   "postStartCommand": [
