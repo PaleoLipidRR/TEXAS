@@ -144,14 +144,14 @@ if [[ "$PROFILE" == "full" ]]; then
         -e GIT_CONFIG_COUNT=1 \
         -e GIT_CONFIG_KEY_0=safe.directory \
         -e GIT_CONFIG_VALUE_0=/app \
-        -p 8890:8888 \
+        -p 8890:8890 \
         -v "${REPO_ROOT}:/app" \
         -v "${REPO_ROOT}/docker/jupyter_server_config.py:/root/.jupyter/jupyter_server_config.py:ro" \
         "${VOLUMES[@]+"${VOLUMES[@]}"}" \
         ghcr.io/paleolipidrr/texas:latest \
         /opt/conda/envs/texas-env/bin/jupyter lab \
             --ip=0.0.0.0 \
-            --port=8888 \
+            --port=8890 \
             --no-browser \
             --allow-root \
             --IdentityProvider.token=''
