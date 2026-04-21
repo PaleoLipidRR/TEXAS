@@ -134,31 +134,31 @@ For the full installation guide including manual Docker commands and troubleshoo
 
 > **Do not run `pip install` against the system Python.** Modern Debian/Ubuntu systems mark the system Python as externally managed (PEP 668) and will refuse the install. Always install into a virtual environment first.
 
-**Step 1 — create and activate an isolated environment** (pick one):
+**Linux / macOS / Windows (WSL2)** — run from a bash terminal:
 
 ```bash
-# Option C1: conda (recommended if you already have conda/miniforge)
 conda create -n texas-env python=3.10 pip
 conda activate texas-env
-
-# Option C2: plain venv
-python3 -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-```
-
-**Step 2 — install CmdStan** (required — must be done before importing TEXAS):
-
-```bash
 pip install cmdstanpy
 TBB_CXX_TYPE=gcc python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.36.0')"
+pip install texas-psm
 ```
 
-This installs CmdStan to `~/.cmdstan/cmdstan-2.36.0`. TEXAS finds it automatically on next import.
+**Windows (native Anaconda Prompt)** — use a pre-built CmdStan from conda-forge. Do **not** use `TBB_CXX_TYPE=gcc` (Linux-only syntax) and do **not** install `m2w64-toolchain` (conflicts with the conda-forge package):
 
-**Step 3 — install the package:**
-
-```bash
+```cmd
+conda create -n texas-env python=3.10 pip
+conda activate texas-env
+conda install -c conda-forge cmdstan=2.36.0
 pip install texas-psm
+```
+
+**Google Colab** — use pip; conda is not available by default:
+
+```python
+!pip install cmdstanpy
+import cmdstanpy; cmdstanpy.install_cmdstan(version="2.36.0")
+!pip install texas-psm
 ```
 
 TEXAS searches for CmdStan in the following priority order:
