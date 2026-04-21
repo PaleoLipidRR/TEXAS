@@ -44,7 +44,7 @@ VOLUMES=()
 
 # ─── Profile selection ────────────────────────────────────────────────────────
 echo "Available profiles:"
-echo "  full  — JupyterLab with full Stan environment (port 8888)  [recommended]"
+echo "  full  — JupyterLab with full Stan environment (port 8890)  [recommended]"
 echo "  app   — Streamlit app for exploring posterior distributions (port 8503)"
 echo "  docs  — MkDocs documentation server (port 8000)"
 echo ""
