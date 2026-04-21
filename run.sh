@@ -2,7 +2,9 @@
 # run.sh — one-command launcher for TEXAS Docker environment
 set -euo pipefail
 
-COMPOSE_FILE="$(dirname "$0")/docker/docker-compose.yml"
+REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+export REPO_ROOT
+COMPOSE_FILE="$REPO_ROOT/docker/docker-compose.yml"
 
 # ─── Banner ───────────────────────────────────────────────────────────────────
 echo ""
