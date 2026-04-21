@@ -290,11 +290,34 @@ TEXAS.download_all()           # downloads ZIP and extracts posteriors + trainin
 Or selectively:
 
 ```python
-TEXAS.download_posteriors()    # forward posteriors only → ~/.texas/cache/TEXAS_posterior_cache/
-TEXAS.download_training_data() # training CSVs only → data/spreadsheets/
+TEXAS.download_posteriors()    # forward posteriors only
+TEXAS.download_training_data() # training CSVs only
 ```
 
 All functions are idempotent — running them again skips files already on disk. Use `force=True` to re-download.
+
+### Finding downloaded files
+
+Files land in different locations depending on how TEXAS is installed:
+
+| Install method | Posteriors | Training CSVs |
+|---|---|---|
+| `pip install texas-psm` / Colab | `~/.texas/cache/TEXAS_posterior_cache/` | `~/.texas/data/spreadsheets/` |
+| From source (`pip install -e .`) | `data/cache/TEXAS_posterior_cache/` in repo | `data/spreadsheets/` in repo |
+
+Check the exact paths at runtime:
+
+```python
+from TEXAS.utils.paths import POSTERIOR_CACHE_DIR, SPREADSHEETS_DIR
+
+print("Posteriors:", POSTERIOR_CACHE_DIR)
+print("Training data:", SPREADSHEETS_DIR)
+
+# List all downloaded posteriors
+list(POSTERIOR_CACHE_DIR.glob("*.nc"))
+```
+
+Override the default cache location with the `TEXAS_CACHE_DIR` environment variable or by calling `TEXAS.set_cache_dir("/your/path")` before downloading.
 
 
 ### Google Colab / no internet access

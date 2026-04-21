@@ -19,9 +19,10 @@ if [[ ! -d /mnt/onedrive && ! -d /mnt/gdrive ]]; then
     echo ""
 fi
 
-# Fix permissions before pip install — the workspace may have files owned by
-# root or a different UID from prior docker test runs on the host.
-sudo chown -R micromamba:micromamba /home/micromamba/app
+# Fix permissions on external paths only — updateRemoteUserUID remaps the
+# container user's UID to match the host user, so the bind-mounted workspace
+# (/home/micromamba/app) does not need chowning and must not be touched here
+# (doing so would flip host file ownership to the container UID).
 [ -d /opt/cmdstan ] && sudo chown -R micromamba:micromamba /opt/cmdstan
 CMDSTAN_CONDA="/opt/conda/envs/texas-env/bin/cmdstan"
 [ -d "$CMDSTAN_CONDA" ] && sudo chown -R micromamba:micromamba "$CMDSTAN_CONDA"

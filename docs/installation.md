@@ -204,6 +204,18 @@ TEXAS.download_all()
 
 This saves posteriors to `data/cache/TEXAS_posterior_cache/` inside the cloned repo, which is bind-mounted into the container — so they persist across sessions.
 
+To check exactly where files were saved, or to list downloaded posteriors:
+
+```python
+from TEXAS.utils.paths import POSTERIOR_CACHE_DIR, SPREADSHEETS_DIR
+
+print("Posteriors:", POSTERIOR_CACHE_DIR)
+print("Training data:", SPREADSHEETS_DIR)
+
+# List all downloaded posteriors
+list(POSTERIOR_CACHE_DIR.glob("*.nc"))
+```
+
 ---
 
 ## Option B — conda-lock (exact reproducible environment)
