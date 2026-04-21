@@ -9,6 +9,7 @@ plugins:
 
 nav:
   - Quickstart: index.md
+  - Installation: installation.md
   - API Reference:
       - "TEXAS": api.md
   - Guides:
@@ -17,7 +18,13 @@ nav:
 markdown_extensions:
   - admonition
   - codehilite
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
 
 extra_javascript:
   - https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML
