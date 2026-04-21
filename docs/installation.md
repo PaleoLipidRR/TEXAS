@@ -258,6 +258,39 @@ This saves posteriors to `data/cache/TEXAS_posterior_cache/` inside the cloned r
     pip install texas-psm
     ```
 
+=== "Windows (native Conda)"
+
+    Run all commands from the **Anaconda Prompt** (not PowerShell or CMD).
+
+    **Step 1 — create and activate an environment:**
+
+    ```cmd
+    conda create -n texas-env python=3.10 pip
+    conda activate texas-env
+    ```
+
+    **Step 2 — install a C++ compiler** (required by CmdStan):
+
+    ```cmd
+    conda install -c conda-forge m2w64-toolchain
+    ```
+
+    **Step 3 — install CmdStan** (omit `TBB_CXX_TYPE` — Windows only):
+
+    ```cmd
+    pip install cmdstanpy
+    python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.36.0')"
+    ```
+
+    **Step 4 — install TEXAS:**
+
+    ```cmd
+    pip install texas-psm
+    ```
+
+    !!! note
+        `TBB_CXX_TYPE=gcc` is a Linux/macOS-only syntax and will fail in Windows CMD or Anaconda Prompt. Skip it — `install_cmdstan()` detects the MinGW compiler automatically once `m2w64-toolchain` is installed.
+
 ---
 
 ## Option C — conda-lock (exact reproducible environment)
