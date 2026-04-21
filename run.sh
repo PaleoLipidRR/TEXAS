@@ -136,7 +136,15 @@ else
 fi
 echo ""
 
-$DC -f "$COMPOSE_FILE" --profile "$PROFILE" run --rm \
-    --service-ports \
-    "${VOLUMES[@]+"${VOLUMES[@]}"}" \
-    "$PROFILE"
+if [[ "$PROFILE" == "full" ]]; then
+    $DC -f "$COMPOSE_FILE" --profile "$PROFILE" run --rm \
+        --service-ports \
+        --volume "${REPO_ROOT}:/home/micromamba/app" \
+        "${VOLUMES[@]+"${VOLUMES[@]}"}" \
+        "$PROFILE"
+else
+    $DC -f "$COMPOSE_FILE" --profile "$PROFILE" run --rm \
+        --service-ports \
+        "${VOLUMES[@]+"${VOLUMES[@]}"}" \
+        "$PROFILE"
+fi
