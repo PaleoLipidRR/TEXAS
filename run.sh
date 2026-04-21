@@ -139,17 +139,16 @@ echo ""
 if [[ "$PROFILE" == "full" ]]; then
     docker run --rm \
         --user root \
+        --entrypoint "" \
         -p 8888:8888 \
         -v "${REPO_ROOT}:/home/micromamba/app" \
         "${VOLUMES[@]+"${VOLUMES[@]}"}" \
         ghcr.io/paleolipidrr/texas:latest \
-        jupyter lab \
+        /opt/conda/envs/texas-env/bin/jupyter lab \
             --ip=0.0.0.0 \
             --port=8888 \
             --no-browser \
             --allow-root \
-            --ServerApp.token='' \
-            --ServerApp.password='' \
             --ServerApp.root_dir=/home/micromamba/app \
             --IdentityProvider.token=''
 else
