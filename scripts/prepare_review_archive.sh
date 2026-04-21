@@ -17,7 +17,8 @@
 set -euo pipefail
 
 # ── Config ──────────────────────────────────────────────────────────────────
-VERSION=$(python -c "import sys; sys.path.insert(0,'src'); from TEXAS import __version__; print(__version__)" 2>/dev/null || echo "0.1.5")
+VERSION=$(python -c "from importlib.metadata import version; print(version('texas-psm'))" 2>/dev/null || \
+          grep '^version' pyproject.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
 ARCHIVE_DIR="review_archive_v${VERSION}"
 CACHE="data/cache/TEXAS_posterior_cache"
 

@@ -74,6 +74,12 @@ python -m build
 info "Running twine check ..."
 twine check dist/*
 
+# Verify the wheel carries the right version (catches pyproject.toml sed failures)
+ls dist/texas_psm-"${NEW_VERSION}"-*.whl dist/texas_psm-"${NEW_VERSION}".tar.gz \
+    > /dev/null 2>&1 \
+    || abort "Wheel/sdist for v${NEW_VERSION} not found in dist/ — pyproject.toml update may have failed."
+info "Wheel version verified: texas_psm-${NEW_VERSION} ✓"
+
 # ── 4. commit version bump ────────────────────────────────────────────────────
 info "Committing version bump ..."
 git add pyproject.toml CITATION.cff environment.yml

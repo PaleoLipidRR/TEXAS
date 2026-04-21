@@ -1,6 +1,10 @@
 # TEXAS/__init__.py
 
-__version__ = "0.1.6"
+from importlib.metadata import version as _version, PackageNotFoundError as _PackageNotFoundError
+try:
+    __version__ = _version("texas-psm")
+except _PackageNotFoundError:
+    __version__ = "unknown"
 
 # ─── Stan interface ──────────────────────────────────────────────────────
 from .stan.compiler import StanCompiler

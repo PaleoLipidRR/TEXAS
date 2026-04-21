@@ -57,6 +57,17 @@ docker build \
     -t "${IMAGE}:v${VERSION}" \
     .
 
+# ── smoke test ────────────────────────────────────────────────────────────────
+info "Verifying image: TEXAS version and CmdStan ..."
+docker run --rm "${IMAGE}:v${VERSION}" python -c "
+import TEXAS, sys
+from TEXAS.utils.paths import find_cmdstan
+assert TEXAS.__version__ == '${VERSION}', f'Version mismatch: {TEXAS.__version__} != ${VERSION}'
+cmdstan = find_cmdstan()
+print(f'  TEXAS     : {TEXAS.__version__} OK')
+print(f'  CmdStan   : {cmdstan} OK')
+" || abort "Smoke test failed — image may not be safe to push."
+
 # ── push ──────────────────────────────────────────────────────────────────────
 confirm "Push to GHCR?" || abort "Aborted before push."
 
