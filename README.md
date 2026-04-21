@@ -79,7 +79,7 @@ See the [full Windows setup guide](https://paleolipidRR.github.io/TEXAS/installa
 
 Install [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-install/) (choose Apple Silicon or Intel). Launch it and wait for "Docker Desktop is running" in the menu bar.
 
-> **Apple Silicon (M1/M2/M3)**: the pre-built image runs under QEMU emulation — Stan sampling will be slower. [Option C (conda-lock)](#option-c--conda-lock-exact-reproducible-environment) is faster for repeated use on Apple Silicon.
+> **Apple Silicon (M1/M2/M3)**: the pre-built image runs under QEMU emulation — Stan sampling will be slower. [Option B (conda-lock)](#option-b--conda-lock-exact-reproducible-environment) is faster for repeated use on Apple Silicon.
 
 </details>
 
@@ -124,7 +124,7 @@ For the full installation guide including manual Docker commands and troubleshoo
 | Linux (x86\_64) | ✅ Full support | Native — recommended |
 | Windows (Docker Desktop + WSL2) | ✅ Full support | Enable WSL2 backend in Docker Desktop settings |
 | macOS (Intel) | ✅ Full support | — |
-| macOS (Apple Silicon — M1/M2/M3) | ⚠️ Limited | Runs under QEMU emulation; Stan compilation and sampling will be significantly slower. A native `linux/arm64` image is planned. For now, [Option C (pip)](#option-c--pip-install-python-users) with a local conda env is faster on Apple Silicon. |
+| macOS (Apple Silicon — M1/M2/M3) | ⚠️ Limited | Runs under QEMU emulation; Stan compilation and sampling will be significantly slower. A native `linux/arm64` image is planned. For now, [Option B (conda-lock)](#option-b--conda-lock-exact-reproducible-environment) with a local conda env is faster on Apple Silicon. |
 
 **Cloud drive mounts**: `run.sh` will prompt you to set up OneDrive or Google Drive mounts. Paths differ by OS — the script handles this automatically. If using the VS Code Dev Container instead, run `.devcontainer/setup-cloud-drives.sh` once after first open.
 
