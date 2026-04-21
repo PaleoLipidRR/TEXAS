@@ -47,7 +47,7 @@ Inverse temperature (invT) Stan models use `reduce_sum` for within-chain paralle
 
 No installation required — open the quickstart notebook directly in your browser:
 
-[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PaleoLipidRR/TEXAS/blob/main/notebooks/colab_quickstart.ipynb)
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PaleoLipidRR/TEXAS/blob/main/notebooks/quickstart_demo.ipynb)
 
 The notebook walks through installation, downloading posteriors, and running forward and inverse predictions. If your data is on Google Drive, mount it first — instructions are included in the notebook.
 
