@@ -125,7 +125,7 @@ class CalibrationRegistry:
         'allCoretop_linear_exclRS_above5degC': TEX86Calibration(
             'allCoretop_linear_exclRS_above5degC', 67.63154335, -17.85292574, 'linear'
         ),
-        
+
         # Low et al. 2023 calibrations
         'low23_crtp_lnTEX': TEX86Calibration('low23_crtp_lnTEX', 35.5891263830379, 41.3154356803057, 'ln'),
         'low23_crtp_linear': TEX86Calibration('low23_crtp_linear', 69.61698822, -16.73443208, 'linear'),
