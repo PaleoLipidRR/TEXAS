@@ -1,6 +1,6 @@
 {
   "name": "TEXAS Project Environment",
-  "image": "ghcr.io/paleolipidrr/texas:v0.1.7",
+  "image": "ghcr.io/paleolipidrr/texas:v0.1.8",
   // To build from source instead (e.g. after editing the Dockerfile), replace
   // the "image" line above with:
   //   "build": { "dockerfile": "../docker/Dockerfile", "context": ".." },
