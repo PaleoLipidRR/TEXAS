@@ -1,93 +1,122 @@
-# TEXAS/stan/compiler.py (Corrected with force recompilation)
+# TEXAS/stan/compiler.py
 
-from pathlib import Path
-from typing import Dict, Optional, Union
 import os
+import shutil
 import subprocess
 import warnings
-from ..utils.paths import STAN_MODELS_DIR
+from pathlib import Path
+from typing import Dict, Optional, Union
+
 from cmdstanpy import CmdStanModel
-from TEXAS.utils import get_repo_root
+
+from ..utils.paths import STAN_MODELS_DIR, STAN_BUILD_DIR
+
 
 class StanCompiler:
-    """A simple wrapper for compiling Stan models with caching."""
+    """Wraps CmdStanModel with in-memory caching and a writable build directory.
+
+    Stan writes a .hpp intermediate file and a compiled binary into the same
+    directory as the .stan source file.  When the source tree lives on a
+    bind-mounted volume (devcontainer) and was last written by a different OS
+    user, stanc raises "Permission denied" on the .hpp write.
+
+    This class avoids that by copying each .stan file to STAN_BUILD_DIR
+    (~/.texas/stan_cache/ by default, always writable) and compiling from
+    there.  The source file is used only for reading; build artifacts never
+    touch the source tree.
+    """
+
     def __init__(self, model_dir: Optional[Union[str, Path]] = None):
-        if model_dir is None:
-            self.model_dir = STAN_MODELS_DIR
-        else:
-            self.model_dir = Path(model_dir)
-        self.cache = {}
+        self.model_dir = Path(model_dir) if model_dir is not None else STAN_MODELS_DIR
+        self.build_dir = STAN_BUILD_DIR
+        self.build_dir.mkdir(parents=True, exist_ok=True)
+        self.cache: Dict[str, CmdStanModel] = {}
+
+    # ── Path helpers ────────────────────────────────────────────────────────
 
     def resolve_stan_path(self, stan_file: Union[str, Path]) -> Path:
-        """
-        Resolves the full path to a Stan model file, ensuring it has the .stan extension.
-        """
+        """Return the absolute path to the .stan source file."""
         p = Path(stan_file)
-        if p.suffix != '.stan':
-            p = p.with_suffix('.stan')
+        if p.suffix != ".stan":
+            p = p.with_suffix(".stan")
         return self.model_dir / p
+
+    def _build_path(self, stan_source: Path) -> Path:
+        """Return the path under STAN_BUILD_DIR that we compile from.
+
+        Copies the source file if the build copy is absent or stale.
+        """
+        dest = self.build_dir / stan_source.name
+        src_mtime = stan_source.stat().st_mtime
+        if not dest.exists() or dest.stat().st_mtime < src_mtime:
+            shutil.copy2(stan_source, dest)
+        return dest
+
+    # ── Public API ──────────────────────────────────────────────────────────
 
     def get_model(
         self,
         stan_file: Union[str, Path],
         cpp_options: Optional[Dict] = None,
-        force: bool = False,  # ← ADD: force recompilation parameter
+        force: bool = False,
     ) -> CmdStanModel:
-        """
-        Compile a Stan model, using a cache to avoid re-compilation.
-        
+        """Return a compiled CmdStanModel, using an in-memory cache.
+
         Args:
-            stan_file (str): The name of the .stan file in the model directory.
-            cpp_options (dict, optional): Options for the Stan compiler.
-            force (bool): If True, delete cached model and recompile from scratch.
+            stan_file: Name of the .stan file (with or without extension).
+            cpp_options: Passed to CmdStanModel (e.g. {"STAN_THREADS": True}).
+            force: Delete cached binary and recompile from scratch.
         """
         stan_path = self.resolve_stan_path(stan_file)
-        cache_key = str(stan_path) + str(sorted(cpp_options.items()) if cpp_options else "{}")
+        # Cache key uses the source path so it's stable across sessions
+        opts_str = str(sorted(cpp_options.items()) if cpp_options else "{}")
+        cache_key = str(stan_path) + opts_str
 
-        # Auto-detect stale/incompatible binary (e.g. compiled in Docker, wrong arch/libc)
-        binary_path = stan_path.with_suffix('')
+        # Resolve the writable build copy
+        build_path = self._build_path(stan_path)
+        binary_path = build_path.with_suffix("")
+
+        # Auto-detect stale/incompatible binary (e.g. compiled on another OS)
         if not force and binary_path.exists():
             try:
                 result = subprocess.run(
                     [str(binary_path), "--version"],
-                    capture_output=True, timeout=10,
+                    capture_output=True,
+                    timeout=10,
                 )
                 if result.returncode == 127:
                     warnings.warn(
                         f"Stan model '{binary_path.name}' was compiled for a different "
-                        f"environment (e.g. Docker or another OS) and cannot run here "
-                        f"(exit code 127). The old binary has been removed and the model "
-                        f"will be recompiled for your current setup — this is normal when "
-                        f"switching between Docker and a local install.",
-                        RuntimeWarning, stacklevel=3,
+                        "environment (e.g. Docker or another OS) and cannot run here "
+                        "(exit code 127). The old binary has been removed and the model "
+                        "will be recompiled for your current setup — this is normal when "
+                        "switching between Docker and a local install.",
+                        RuntimeWarning,
+                        stacklevel=3,
                     )
-                    os.remove(binary_path)
-                    if cache_key in self.cache:
-                        del self.cache[cache_key]
+                    binary_path.unlink(missing_ok=True)
+                    self.cache.pop(cache_key, None)
             except (OSError, subprocess.TimeoutExpired):
                 pass
 
-        # Force recompilation logic
+        # Force recompilation
         if force:
-            # Remove from in-memory cache
             if cache_key in self.cache:
                 print(f"🗑️  Clearing cached model: {stan_path.name}")
                 del self.cache[cache_key]
-            
-            # Remove compiled binary from disk
-            binary_path = stan_path.with_suffix('')  # Remove .stan extension
             if binary_path.exists():
                 print(f"🗑️  Removing old binary: {binary_path}")
-                os.remove(binary_path)
+                binary_path.unlink()
 
-        # Check cache
+        # In-memory cache hit
         if cache_key in self.cache:
             print(f"♻️  Using cached model: {stan_path.name}")
             return self.cache[cache_key]
 
-        # Compile
+        # Compile from the writable build copy
         print(f"🔧 Compiling Stan model: {stan_path.name}")
-        model = CmdStanModel(stan_file=stan_path, cpp_options=cpp_options)
+        print(f"   (build dir: {self.build_dir})")
+        model = CmdStanModel(stan_file=build_path, cpp_options=cpp_options)
         self.cache[cache_key] = model
         print(f"✅ Compiled: {stan_path.name}")
         return model

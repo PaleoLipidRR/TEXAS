@@ -117,8 +117,8 @@ def load_posterior(
     if not fpath.exists():
         if model_type == "forward":
             try:
-                from ..utils.download import download_posterior
-                download_posterior(model_name, cache_dir=indir)
+                from ..utils.download import download_posteriors
+                download_posteriors([model_name], cache_dir=indir)
             except (KeyError, RuntimeError) as e:
                 raise FileNotFoundError(
                     f"No forward posterior found at {fpath}.\n"

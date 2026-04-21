@@ -19,6 +19,13 @@ if [[ ! -d /mnt/onedrive && ! -d /mnt/gdrive ]]; then
     echo ""
 fi
 
+# Fix permissions before pip install — the workspace may have files owned by
+# root or a different UID from prior docker test runs on the host.
+sudo chown -R micromamba:micromamba /home/micromamba/app
+[ -d /opt/cmdstan ] && sudo chown -R micromamba:micromamba /opt/cmdstan
+CMDSTAN_CONDA="/opt/conda/envs/texas-env/bin/cmdstan"
+[ -d "$CMDSTAN_CONDA" ] && sudo chown -R micromamba:micromamba "$CMDSTAN_CONDA"
+
 # Initialize micromamba for this shell
 eval "$(micromamba shell hook --shell bash)"
 micromamba activate texas-env
@@ -26,12 +33,6 @@ micromamba activate texas-env
 # Install TEXAS in editable mode so source changes are reflected immediately.
 # (The Dockerfile installs a snapshot; this overwrites it with the live workspace.)
 pip install --no-cache-dir -q -e .
-
-# Fix permissions — also covers cmdstan dir so CmdStan can write build artifacts
-sudo chown -R micromamba:micromamba /home/micromamba/app
-[ -d /opt/cmdstan ] && sudo chown -R micromamba:micromamba /opt/cmdstan
-CMDSTAN_CONDA="/opt/conda/envs/texas-env/bin/cmdstan"
-[ -d "$CMDSTAN_CONDA" ] && sudo chown -R micromamba:micromamba "$CMDSTAN_CONDA"
 
 # Install git-lfs
 sudo apt-get update -qq && sudo apt-get install -y -qq git-lfs

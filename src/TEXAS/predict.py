@@ -35,6 +35,7 @@ Example
 
 from __future__ import annotations
 
+import warnings
 from typing import Dict, List, Literal, Optional, Sequence, Union, Any
 from pathlib import Path
 
@@ -325,6 +326,32 @@ def predict_T_from_proxyObs(
         predictors["no3"] = no3
     if gdgt23ratio is not None:
         predictors["gdgt23ratio"] = gdgt23ratio
+
+    # Warn if predictors are passed but the forward posterior doesn't use them
+    _ds_for_check = fwd_posterior
+    if _ds_for_check is None and fwd_posterior_name:
+        try:
+            _ds_for_check = load_posterior(fwd_posterior_name)
+        except Exception:
+            pass
+    if _ds_for_check is not None:
+        _attrs = _ds_for_check.attrs
+        if predictors.get("gdgt23ratio") is not None and not _attrs.get("use_gdgt23ratio", False):
+            warnings.warn(
+                "gdgt23ratio was passed but the forward posterior has no GDGT-2/3 ratio "
+                "parameters (use_gdgt23ratio=False) — the predictor will be silently ignored. "
+                "To apply the GDGT-2/3 correction, use a multivariate posterior "
+                "(e.g. gen_logi_fixed_hier_crtp_multiv_priorApprox_*).",
+                UserWarning, stacklevel=2,
+            )
+        if predictors.get("no3") is not None and not _attrs.get("use_no3", False):
+            warnings.warn(
+                "no3 was passed but the forward posterior has no NO₃ parameters "
+                "(use_no3=False) — the predictor will be silently ignored. "
+                "To apply the NO₃ correction, use a multivariate posterior "
+                "(e.g. gen_logi_fixed_hier_crtp_multiv_priorApprox_*).",
+                UserWarning, stacklevel=2,
+            )
 
     return _predict_temperature_from_proxyObs(
         proxyObs=proxyObs,
