@@ -106,19 +106,17 @@ if [[ "$ONEDRIVE_ANSWER" =~ ^[Yy]$ ]]; then
     fi
 fi
 
-# ─── Pull pre-built image (full profile only) ─────────────────────────────────
-if [[ "$PROFILE" == "full" ]]; then
-    echo ""
-    echo "Image options for the 'full' profile:"
-    echo "  [Y] Pull pre-built image from GHCR  (~2-3 GB download, no build time)"
-    echo "  [n] Build locally from source        (requires internet; time depends on connection speed)"
-    echo ""
-    read -rp "Pull pre-built image? [Y/n]: " PULL_ANSWER
-    PULL_ANSWER="${PULL_ANSWER:-Y}"
-    if [[ "$PULL_ANSWER" =~ ^[Yy]$ ]]; then
-        echo "Pulling ghcr.io/paleolipidrr/texas:latest ..."
-        $DC -f "$COMPOSE_FILE" --profile full pull full
-    fi
+# ─── Pull pre-built image ─────────────────────────────────────────────────────
+echo ""
+echo "Image options:"
+echo "  [Y] Pull pre-built image from GHCR  (~2-3 GB on first pull; only changed layers after that)"
+echo "  [n] Build locally from source        (requires internet; time depends on connection speed)"
+echo ""
+read -rp "Pull pre-built image? [Y/n]: " PULL_ANSWER
+PULL_ANSWER="${PULL_ANSWER:-Y}"
+if [[ "$PULL_ANSWER" =~ ^[Yy]$ ]]; then
+    echo "Pulling ghcr.io/paleolipidrr/texas:latest ..."
+    docker pull ghcr.io/paleolipidrr/texas:latest
 fi
 
 # ─── Launch ───────────────────────────────────────────────────────────────────
