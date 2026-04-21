@@ -256,7 +256,7 @@ TEXAS separates **code** (this repository) from **data** (hosted on Zenodo). Her
 
 ### Downloading the data
 
-Once the Zenodo data record is published, download everything in one shot (~560 MB ZIP):
+Download everything in one shot (~560 MB ZIP):
 
 ```python
 import TEXAS
@@ -272,7 +272,6 @@ TEXAS.download_training_data() # training CSVs only → data/spreadsheets/
 
 All functions are idempotent — running them again skips files already on disk. Use `force=True` to re-download.
 
-> **Zenodo data record coming upon paper submission.** Until then, contact the authors or generate posteriors yourself with `get_posterior()` (see Example usage below).
 
 ### Google Colab / no internet access
 
