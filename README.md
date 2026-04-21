@@ -94,7 +94,7 @@ chmod +x run.sh
 ./run.sh
 ```
 
-Select profile `full` (JupyterLab with Stan — recommended) or `app` (Streamlit app for exploring posterior distributions). The launcher will ask whether to pull the pre-built image from GHCR (~1.9 GB, no build time) or build locally (~10 min).
+Select profile `full` (JupyterLab with Stan — recommended) or `app` (Streamlit app for exploring posterior distributions). The launcher will ask whether to pull the pre-built image from GHCR (~1.9 GB, no build time) or build locally (requires internet; time depends on connection speed).
 
 > **Disk space — plan for ~3.5 GB total:**
 > | Component | Size | Location |
@@ -130,7 +130,46 @@ For the full installation guide including manual Docker commands and troubleshoo
 
 ---
 
-### Option B — pip install (Python users)
+### Option B — conda-lock (exact reproducible environment)
+
+For the most reproducible setup outside of Docker, use the pre-solved conda-lock files published alongside this repository. Every package version and checksum is pinned — the environment will be identical on any machine of the same platform. CmdStan is bundled on all platforms — no separate install step needed.
+
+> **Windows**: CmdStan 2.35.0 is included (the latest version compatible with `esmf` on Windows). Linux and macOS get 2.36.0. The minor version difference has no effect on TEXAS.
+
+**Step 1 — choose your method:**
+
+*With `conda-lock` (multi-platform lock file — recommended):*
+
+```bash
+# Install conda-lock once
+conda install -c conda-forge conda-lock   # or: pip install conda-lock
+
+# Create the environment
+conda-lock install -n texas-env conda-lock.yml
+conda activate texas-env
+```
+
+*Without `conda-lock` (platform-specific explicit file — works with plain conda):*
+
+```bash
+# Pick the file for your platform
+conda create -n texas-env --file conda-linux-64.lock    # Linux x86_64
+conda create -n texas-env --file conda-osx-arm64.lock   # macOS Apple Silicon
+conda create -n texas-env --file conda-osx-64.lock      # macOS Intel
+conda create -n texas-env --file conda-win-64.lock      # Windows
+
+conda activate texas-env
+```
+
+**Step 2 — install the package:**
+
+```bash
+pip install texas-psm
+```
+
+---
+
+### Option C — pip install (Python users)
 
 > **Do not run `pip install` against the system Python.** Modern Debian/Ubuntu systems mark the system Python as externally managed (PEP 668) and will refuse the install. Always install into a virtual environment first.
 
@@ -178,45 +217,6 @@ To use a specific CmdStan installation (e.g. `~/.cmdstan/cmdstan-2.36.0` instead
 ```bash
 export CMDSTAN=~/.cmdstan/cmdstan-2.36.0
 ```
-
----
-
-### Option C — conda-lock (exact reproducible environment)
-
-For the most reproducible setup outside of Docker, use the pre-solved conda-lock files published alongside this repository. Every package version and checksum is pinned — the environment will be identical on any machine of the same platform.
-
-**Step 1 — choose your method:**
-
-*With `conda-lock` (multi-platform lock file — recommended):*
-
-```bash
-# Install conda-lock once
-conda install -c conda-forge conda-lock   # or: pip install conda-lock
-
-# Create the environment
-conda-lock install -n texas-env conda-lock.yml
-conda activate texas-env
-```
-
-*Without `conda-lock` (platform-specific explicit file — works with plain conda):*
-
-```bash
-# Pick the file for your platform
-conda create -n texas-env --file conda-linux-64.lock    # Linux x86_64
-conda create -n texas-env --file conda-osx-arm64.lock   # macOS Apple Silicon
-conda create -n texas-env --file conda-osx-64.lock      # macOS Intel
-conda create -n texas-env --file conda-win-64.lock      # Windows
-
-conda activate texas-env
-```
-
-**Step 2 — install the package:**
-
-```bash
-pip install texas-psm
-```
-
-CmdStan is bundled in the conda-lock environment — no separate `install_cmdstan()` step needed.
 
 ---
 

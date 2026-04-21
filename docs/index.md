@@ -35,13 +35,19 @@ TEXAS.download_all()
 # ── Step 2: Reconstruct SST from downcore Ring Index measurements ─────────
 ri_values = np.array([0.65, 0.67, 0.70, 0.63])   # your Ring Index values
 
-sst_posterior = TEXAS.predict_T_from_proxyObs(ri_values)
+result = TEXAS.predict_T_from_proxyObs(
+    proxyObs=ri_values,
+    prior_mu_t=15.0,     # prior mean temperature (°C) — your best guess
+    prior_sigma_t=10.0,  # prior uncertainty (°C) — use a wide value if unsure
+    fwd_posterior_name="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
+)
 
-# sst_posterior is an xarray.Dataset with full posterior SST draws
-print(sst_posterior)
+# result is an xarray.Dataset with quantile SST estimates (p1–p99) per sample
+print(result["p50"])   # median SST reconstruction (°C)
+print(result["p5"], result["p95"])   # 90% credible interval
 ```
 
-For a full worked example — including multivariate corrections, visualization, and running the forward calibration — see the notebooks in `notebooks/manuscripts/` inside the repository.
+For a full worked example — including multivariate corrections (GDGT-2/3 ratio, NO₃), visualization, and running the forward calibration — see the notebooks in `notebooks/manuscripts/` inside the repository.
 
 ---
 
