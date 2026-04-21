@@ -31,6 +31,28 @@ Inverse temperature (invT) Stan models use `reduce_sum` for within-chain paralle
 
 ## Getting started
 
+**Not sure which option to use?**
+
+| I want to… | Start here |
+|---|---|
+| Run TEXAS without installing anything | [Google Colab](#google-colab) |
+| Run the full environment in one command, no setup | [Option A — Docker](#option-a--docker-recommended-for-reproducibility) |
+| Install into an existing Python environment | [Option C — pip](#option-c--pip-install-python-users) |
+| Reproduce the exact environment used in the paper | [Option B — conda-lock](#option-b--conda-lock-exact-reproducible-environment) |
+| Modify or develop TEXAS | [Option D — from source](#option-d--conda--pip-from-source-for-development) |
+
+---
+
+### Google Colab
+
+No installation required — open the quickstart notebook directly in your browser:
+
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PaleoLipidRR/TEXAS/blob/main/notebooks/colab_quickstart.ipynb)
+
+The notebook walks through installation, downloading posteriors, and running forward and inverse predictions. If your data is on Google Drive, mount it first — instructions are included in the notebook.
+
+---
+
 ### Option A — Docker (recommended for reproducibility)
 
 No Stan or conda setup required — CmdStan and all dependencies are pre-installed in the image.
