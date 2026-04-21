@@ -75,6 +75,8 @@ Install [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-ins
 
 **Then clone and launch:**
 
+> **New to git?** `git clone` simply downloads a copy of the TEXAS code to your own computer — think of it like downloading a folder. You cannot accidentally break or modify the original repository. Everything runs locally on your machine.
+
 ```bash
 git clone --depth 1 https://github.com/PaleoLipidRR/TEXAS.git
 cd TEXAS
@@ -82,7 +84,16 @@ chmod +x run.sh
 ./run.sh
 ```
 
-Select profile `full`. The launcher will ask whether to pull the pre-built image from GHCR (~2–3 GB, no build time) or build locally (~10 min).
+Select profile `full` (JupyterLab with Stan — recommended) or `app` (Streamlit app for exploring posterior distributions). The launcher will ask whether to pull the pre-built image from GHCR (~1.9 GB, no build time) or build locally (~10 min).
+
+> **Disk space — plan for ~3.5 GB total:**
+> | Component | Size | Location |
+> |---|---|---|
+> | Git clone (tracked files) | ~624 MB | Where you cloned |
+> | Docker image (OS + conda env + CmdStan) | ~1.9 GB | Docker's internal storage |
+> | Posteriors downloaded from Zenodo | ~315 MB | `data/cache/` inside the clone |
+>
+> On Windows, Docker stores its images inside a VHDX virtual disk that grows over time. To reclaim space later: Docker Desktop → **Troubleshoot → Clean / Purge data**, or run `docker image rm ghcr.io/paleolipidrr/texas:latest`.
 
 JupyterLab will be available at **http://localhost:8888**. Open the notebooks in `notebooks/manuscripts/`.
 

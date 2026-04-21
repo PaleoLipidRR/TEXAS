@@ -42,15 +42,15 @@ VOLUMES=()
 
 # ─── Profile selection ────────────────────────────────────────────────────────
 echo "Available profiles:"
-echo "  app   — Streamlit web interface (port 8503)"
-echo "  full  — JupyterLab with full Stan environment (port 8888)"
+echo "  full  — JupyterLab with full Stan environment (port 8888)  [recommended]"
+echo "  app   — Streamlit app for exploring posterior distributions (port 8503)"
 echo "  docs  — MkDocs documentation server (port 8000)"
 echo ""
 read -rp "Which profile? [full]: " PROFILE
 PROFILE="${PROFILE:-full}"
 
 if [[ "$PROFILE" != "app" && "$PROFILE" != "full" && "$PROFILE" != "docs" ]]; then
-    echo "Error: profile must be 'app', 'full', or 'docs'." >&2
+    echo "Error: profile must be 'full', 'app', or 'docs'." >&2
     exit 1
 fi
 

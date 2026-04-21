@@ -101,7 +101,10 @@ Docker bundles CmdStan, all Python dependencies, and the Stan compiler into a si
 
 ### Step 2 — Clone the repository
 
-A shallow clone is recommended — it downloads only the current state of the code without the full commit history (~1.3 GB of files vs. several GB with history).
+!!! note "New to git?"
+    `git clone` downloads a copy of the TEXAS code to your own computer — think of it like downloading a folder. You cannot accidentally break or modify the original repository. Everything runs locally on your machine.
+
+A shallow clone (`--depth 1`) is recommended — it downloads only the current state of the code without the full commit history, saving several GB of disk space.
 
 === "Linux"
 
@@ -152,8 +155,21 @@ You will be prompted to:
 
 Once the image is pulled and the container starts, open **http://localhost:8888** in your browser.
 
-!!! tip "First run"
-    The initial pull (~2–3 GB) takes a few minutes depending on your connection. Subsequent runs start in seconds — the image is cached locally.
+!!! tip "Disk space — plan for ~3.5 GB total"
+    | Component | Size | Location |
+    |---|---|---|
+    | Git clone (tracked files) | ~624 MB | Where you cloned |
+    | Docker image — base OS + system libs | ~300 MB | Docker's internal storage |
+    | Docker image — conda env (Python stack + JupyterLab) | ~1.2 GB | Docker's internal storage |
+    | Docker image — CmdStan 2.36.0 (compiled C++ toolchain) | ~400 MB | Docker's internal storage |
+    | Posteriors downloaded from Zenodo | ~315 MB | `data/cache/` inside the clone |
+    | **Total** | **~2.8–3.5 GB** | |
+
+    The Docker image is stored in Docker's internal storage — **not** inside the cloned repo folder. On Windows, Docker Desktop uses a VHDX virtual disk that grows over time. To reclaim space later: Docker Desktop → **Troubleshoot → Clean / Purge data**, or run:
+    ```bash
+    docker image rm ghcr.io/paleolipidrr/texas:latest
+    ```
+    Subsequent launches after the first pull start in seconds — no re-download needed.
 
 ---
 
