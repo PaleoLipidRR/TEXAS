@@ -27,9 +27,11 @@ services:
     profiles: ["docs"]
 
   full:
+    image: ghcr.io/paleolipidrr/texas:latest
     build:
       context: ..
       dockerfile: docker/Dockerfile
+    user: root
     container_name: texas_full
     command: >
       jupyter lab

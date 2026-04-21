@@ -33,24 +33,60 @@ Inverse temperature (invT) Stan models use `reduce_sum` for within-chain paralle
 
 No Stan or conda setup required — CmdStan and all dependencies are pre-installed in the image.
 
-```bash
-git clone https://github.com/PaleoLipidRR/TEXAS.git
-cd TEXAS
+**Prerequisites — install Docker Desktop for your OS before cloning:**
 
-# Interactive launcher — prompts for profile and optional cloud drive mounts
+<details>
+<summary>Linux</summary>
+
+Install Docker Engine and the Compose plugin, then add your user to the `docker` group:
+
+```bash
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+sudo usermod -aG docker $USER && newgrp docker
+docker info   # verify
+```
+
+See the [full Linux setup guide](https://paleolipidRR.github.io/TEXAS/installation/#linux) for the complete apt source setup.
+
+</details>
+
+<details>
+<summary>Windows (WSL2)</summary>
+
+1. Install WSL2: open PowerShell as Administrator and run `wsl --install`, then restart.
+2. Install [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/) — select **"Use the WSL 2 based engine"**.
+3. In Docker Desktop → **Settings → Resources → WSL Integration**, enable your distro (e.g. Ubuntu).
+4. Open your WSL2 terminal and verify: `docker info`
+
+> **Clone inside WSL2 filesystem** (e.g. `~/Documents/`), not on `/mnt/c/...` — Windows filesystem mounts cause slow I/O and permission issues inside the container.
+
+See the [full Windows setup guide](https://paleolipidRR.github.io/TEXAS/installation/#windows-wsl2) for details.
+
+</details>
+
+<details>
+<summary>macOS</summary>
+
+Install [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-install/) (choose Apple Silicon or Intel). Launch it and wait for "Docker Desktop is running" in the menu bar.
+
+> **Apple Silicon (M1/M2/M3)**: the pre-built image runs under QEMU emulation — Stan sampling will be slower. [Option C (conda-lock)](#option-c--conda-lock-exact-reproducible-environment) is faster for repeated use on Apple Silicon.
+
+</details>
+
+**Then clone and launch:**
+
+```bash
+git clone --depth 1 https://github.com/PaleoLipidRR/TEXAS.git
+cd TEXAS
+chmod +x run.sh
 ./run.sh
 ```
 
-Select profile `full` to launch JupyterLab at `http://localhost:8888`.
-Or launch directly with:
+Select profile `full`. The launcher will ask whether to pull the pre-built image from GHCR (~2–3 GB, no build time) or build locally (~10 min).
 
-```bash
-docker compose --profile full up
-```
+JupyterLab will be available at **http://localhost:8888**. Open the notebooks in `notebooks/manuscripts/`.
 
-Then open the notebooks in `notebooks/manuscripts/`.
-
-> **Pre-built image available on GHCR** — `docker pull ghcr.io/paleolipidrr/texas:latest`. If you prefer to build locally, the image will be built from `docker/Dockerfile` on first run (~10 minutes).
+For the full installation guide including manual Docker commands and troubleshooting, see the [Installation docs](https://paleolipidRR.github.io/TEXAS/installation/).
 
 **Forward posteriors in Docker**: the container bind-mounts your local `data/` directory, so posteriors cached at `data/cache/TEXAS_posterior_cache/` are available automatically inside JupyterLab. Download them first — see [Data and posteriors](#data-and-posteriors) below.
 
@@ -85,19 +121,20 @@ python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 ```
 
-**Step 2 — install the package:**
+**Step 2 — install CmdStan** (required — must be done before importing TEXAS):
 
 ```bash
-pip install texas-psm
-```
-
-**Step 3 — one-time CmdStan install** (required for Stan sampling — forward calibration and inverse reconstruction):
-
-```bash
+pip install cmdstanpy
 TBB_CXX_TYPE=gcc python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.36.0')"
 ```
 
 This installs CmdStan to `~/.cmdstan/cmdstan-2.36.0`. TEXAS finds it automatically on next import.
+
+**Step 3 — install the package:**
+
+```bash
+pip install texas-psm
+```
 
 TEXAS searches for CmdStan in the following priority order:
 
@@ -161,7 +198,7 @@ CmdStan is bundled in the conda-lock environment — no separate `install_cmdsta
 ### Option D — conda + pip from source (for development)
 
 ```bash
-git clone https://github.com/PaleoLipidRR/TEXAS.git
+git clone --depth 1 https://github.com/PaleoLipidRR/TEXAS.git
 cd TEXAS
 conda env create -f environment.yml
 conda activate texas-env
