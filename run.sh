@@ -140,6 +140,9 @@ if [[ "$PROFILE" == "full" ]]; then
     docker run --rm \
         --user root \
         --entrypoint "" \
+        -e GIT_CONFIG_COUNT=1 \
+        -e GIT_CONFIG_KEY_0=safe.directory \
+        -e GIT_CONFIG_VALUE_0=/home/micromamba/app \
         -p 8888:8888 \
         -v "${REPO_ROOT}:/home/micromamba/app" \
         "${VOLUMES[@]+"${VOLUMES[@]}"}" \
