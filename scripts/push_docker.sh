@@ -66,6 +66,15 @@ docker push "${IMAGE}:latest"
 info "Pushing ${IMAGE}:v${VERSION} ..."
 docker push "${IMAGE}:v${VERSION}"
 
+# ── update devcontainer.json ──────────────────────────────────────────────────
+info "Updating .devcontainer/devcontainer.json to v${VERSION} ..."
+sed -i "s|\"image\": \"${IMAGE}:.*\"|\"image\": \"${IMAGE}:v${VERSION}\"|" .devcontainer/devcontainer.json
+
+confirm "Commit and push devcontainer.json update?" || abort "Aborted before devcontainer commit."
+git add .devcontainer/devcontainer.json
+git commit -m "devcontainer: pin image to v${VERSION}"
+git push origin main
+
 info "Done! Image available at:"
 info "  docker pull ${IMAGE}:latest"
 info "  docker pull ${IMAGE}:v${VERSION}"
