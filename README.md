@@ -476,6 +476,14 @@ sudo chown -R $USER:$USER .
 
 Run this any time ownership gets flipped. It is safe to run repeatedly.
 
+For convenience, add a shell alias so recovery is a single command:
+
+```bash
+echo "alias fix-texas='sudo chown -R \$USER:\$USER /path/to/TEXAS/.git'" >> ~/.bashrc && source ~/.bashrc
+```
+
+Replace `/path/to/TEXAS` with your actual clone path (e.g. `~/Documents/GitHub/TEXAS`). Then whenever you see the LFS error, just run `fix-texas`.
+
 ---
 
 ### Stan compilation fails with `Permission denied` on `.hpp` file
