@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.7
 
 ########## Stage 1: builder (root only) ##########
-FROM mambaorg/micromamba:1.5.10-bookworm AS builder
+FROM mambaorg/micromamba:1.5.10-noble AS builder
 SHELL ["/bin/bash", "-lc"]
 ENV MAMBA_DOCKERFILE_ACTIVATE=1
 USER root
@@ -34,10 +34,10 @@ RUN micromamba run -n texas-env python -c \
     "from TEXAS.utils.paths import find_cmdstan; p = find_cmdstan(); print('CmdStan OK:', p)"
 
 ########## Stage 2: final (non-root runtime) ##########
-FROM mambaorg/micromamba:1.5.10-bookworm
+FROM mambaorg/micromamba:1.5.10-noble
 USER root
 
-# Runtime system dependencies
+# Runtime system dependencies (Ubuntu 24.04 Noble ships GCC 13 — compatible with conda TBB)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential libgfortran5 git sudo \
     libglib2.0-0 libsm6 libxrender1 libfreetype6 libpng16-16 \
