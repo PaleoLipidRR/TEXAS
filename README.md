@@ -105,7 +105,11 @@ Select profile `full` (JupyterLab with Stan — recommended) or `app` (Streamlit
 >
 > On Windows, Docker stores its images inside a VHDX virtual disk that grows over time. To reclaim space later: Docker Desktop → **Troubleshoot → Clean / Purge data**, or run `docker image rm ghcr.io/paleolipidrr/texas:latest`.
 
-JupyterLab will be available at **http://localhost:8888**. Open the notebooks in `notebooks/manuscripts/`.
+JupyterLab will be available at **http://localhost:8890**. Open the notebooks in `notebooks/manuscripts/`.
+
+> **Windows/WSL2 — kernel selector on first open**: when you open a notebook for the first time in the Docker container, JupyterLab may show a kernel name like `SI_code1_PreProcessing_finalized.ipynb (3bf86915)` instead of "Python 3". This is a leftover preference saved inside the `.ipynb` file from a previous session. Click the dropdown, select **Python 3 (ipykernel)**, and click **Select** — it will work normally after that.
+
+> **Port 8890 instead of 8888**: `run.sh` uses port 8890 to avoid conflicts with any native JupyterLab or Anaconda installation that may already be running on port 8888 (common on Windows).
 
 For the full installation guide including manual Docker commands and troubleshooting, see the [Installation docs](https://paleolipidRR.github.io/TEXAS/installation/).
 
