@@ -1,6 +1,9 @@
 {
   "name": "TEXAS Project Environment",
-  "build": { "dockerfile": "../docker/Dockerfile", "context": ".." },
+  "image": "ghcr.io/paleolipidrr/texas:latest",
+  // To build from source instead (e.g. after editing the Dockerfile), replace
+  // the "image" line above with:
+  //   "build": { "dockerfile": "../docker/Dockerfile", "context": ".." },
 
   "workspaceFolder": "/home/micromamba/app",
 

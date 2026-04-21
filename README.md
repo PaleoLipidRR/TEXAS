@@ -1,3 +1,5 @@
+ > **Pre-release:** This software is under active development. APIs may change before v1.0.0 (first stable release at paper acceptance).
+
 # TEXAS — A proxy system model for TetraEther indeX of Ammonia oxidizerS
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
