@@ -140,6 +140,7 @@ if [[ "$PROFILE" == "full" ]]; then
     docker run --rm \
         --user root \
         --entrypoint "" \
+        --workdir /home/micromamba/app \
         -e GIT_CONFIG_COUNT=1 \
         -e GIT_CONFIG_KEY_0=safe.directory \
         -e GIT_CONFIG_VALUE_0=/home/micromamba/app \
@@ -152,7 +153,6 @@ if [[ "$PROFILE" == "full" ]]; then
             --port=8888 \
             --no-browser \
             --allow-root \
-            --ServerApp.root_dir=/home/micromamba/app \
             --IdentityProvider.token=''
 else
     $DC -f "$COMPOSE_FILE" --profile "$PROFILE" run --rm \
