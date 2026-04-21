@@ -49,8 +49,10 @@ read -rp "Mount OneDrive? [y/N]: " OD_ANSWER
 OD_ANSWER="${OD_ANSWER:-N}"
 
 if [[ "$OD_ANSWER" =~ ^[Yy]$ ]]; then
+    IS_WSL=false
+    grep -qi microsoft /proc/version 2>/dev/null && IS_WSL=true
+
     if [[ "$OS" == "Darwin" ]]; then
-        # macOS: detect personal vs work account
         PERSONAL="$HOME/Library/CloudStorage/OneDrive-Personal"
         WORK=$(find "$HOME/Library/CloudStorage/" -maxdepth 1 -name "OneDrive-*" ! -name "OneDrive-Personal" 2>/dev/null | head -1)
         if [[ -d "$PERSONAL" ]]; then
@@ -60,8 +62,10 @@ if [[ "$OD_ANSWER" =~ ^[Yy]$ ]]; then
         else
             DEFAULT_OD="$HOME/Library/CloudStorage/OneDrive-Personal"
         fi
+    elif [[ "$IS_WSL" == true ]]; then
+        WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
+        DEFAULT_OD="/mnt/c/Users/${WIN_USER}/OneDrive"
     else
-        # Linux
         DEFAULT_OD="$HOME/OneDrive"
     fi
 
@@ -106,8 +110,14 @@ read -rp "Mount Google Drive? [y/N]: " GD_ANSWER
 GD_ANSWER="${GD_ANSWER:-N}"
 
 if [[ "$GD_ANSWER" =~ ^[Yy]$ ]]; then
+    IS_WSL=false
+    grep -qi microsoft /proc/version 2>/dev/null && IS_WSL=true
+
     if [[ "$OS" == "Darwin" ]]; then
         DEFAULT_GD="$HOME/Google Drive/My Drive"
+    elif [[ "$IS_WSL" == true ]]; then
+        WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
+        DEFAULT_GD="/mnt/c/Users/${WIN_USER}/Google Drive/My Drive"
     else
         if [[ -d "$HOME/GoogleDrive" ]]; then
             DEFAULT_GD="$HOME/GoogleDrive"
