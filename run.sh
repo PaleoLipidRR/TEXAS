@@ -131,7 +131,7 @@ if [[ "$PROFILE" == "app" ]]; then
 elif [[ "$PROFILE" == "docs" ]]; then
     echo "Docs will be available at: http://localhost:8000"
 else
-    echo "JupyterLab will be available at: http://localhost:8888"
+    echo "JupyterLab will be available at: http://localhost:8890"
     echo "(Look for the token URL in the output below)"
 fi
 echo ""
@@ -144,7 +144,7 @@ if [[ "$PROFILE" == "full" ]]; then
         -e GIT_CONFIG_COUNT=1 \
         -e GIT_CONFIG_KEY_0=safe.directory \
         -e GIT_CONFIG_VALUE_0=/app \
-        -p 8888:8888 \
+        -p 8890:8888 \
         -v "${REPO_ROOT}:/app" \
         -v "${REPO_ROOT}/docker/jupyter_server_config.py:/root/.jupyter/jupyter_server_config.py:ro" \
         "${VOLUMES[@]+"${VOLUMES[@]}"}" \
