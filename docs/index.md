@@ -29,25 +29,36 @@ Pre-computed forward posteriors are available for download — most users only n
 import numpy as np
 import TEXAS
 
-# ── Step 1: Download pre-computed forward posteriors (once per machine) ───
+# ── Download pre-computed forward posteriors (once per machine) ───────────
 TEXAS.download_all()
 
-# ── Step 2: Reconstruct SST from downcore Ring Index measurements ─────────
-ri_values = np.array([0.65, 0.67, 0.70, 0.63])   # your Ring Index values
+# ── Forward prediction: temperature → Scaled RI calibration curve ─────────
+temperatures = np.linspace(5, 35, 100)   # °C
+
+result = TEXAS.predict_proxy_from_T(
+    temperatures=temperatures,
+    posterior="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
+    percentiles=[5, 50, 95],
+)
+result["p50"]    # median Scaled RI calibration curve
+result["p5"]     # 5th percentile envelope
+result["p95"]    # 95th percentile envelope
+
+# ── Inverse reconstruction: Scaled RI → SST with full uncertainty ─────────
+ri_values = np.array([0.65, 0.67, 0.70, 0.63])   # downcore Scaled RI
 
 result = TEXAS.predict_T_from_proxyObs(
     proxyObs=ri_values,
-    prior_mu_t=15.0,     # prior mean temperature (°C) — your best guess
-    prior_sigma_t=10.0,  # prior uncertainty (°C) — use a wide value if unsure
+    prior_mu_t=15.0,      # prior mean SST (°C) — your best geological estimate
+    prior_sigma_t=10.0,   # prior uncertainty (°C) — wide if unsure
     fwd_posterior_name="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
 )
-
-# result is an xarray.Dataset with quantile SST estimates (p1–p99) per sample
-print(result["p50"])   # median SST reconstruction (°C)
-print(result["p5"], result["p95"])   # 90% credible interval
+result["p50"]    # median SST reconstruction (°C), one value per sample
+result["p5"]     # 5th percentile
+result["p95"]    # 95th percentile
 ```
 
-For a full worked example — including multivariate corrections (GDGT-2/3 ratio, NO₃), visualization, and running the forward calibration — see the notebooks in `notebooks/manuscripts/` inside the repository.
+For full worked examples — multivariate corrections (GDGT-2/3 ratio, NO₃), paleo showcases, and running the forward calibration — see the notebooks in `notebooks/manuscripts/` inside the repository.
 
 ---
 

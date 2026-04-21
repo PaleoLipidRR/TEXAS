@@ -1,69 +1,35 @@
-# config.py - Configuration and constants for TEXAS GUI
-
 import os
+import warnings
 from pathlib import Path
 
-# Smart cache directory detection without triggering CmdStan imports
-def get_texas_cache_dirs():
-    """
-    Try to find TEXAS cache directories without importing the full package
-    """
-    # Method 1: Try direct path calculation (like TEXAS does, but without CmdStan)
-    try:
-        cwd = Path.cwd()
-        # Look for TEXAS project root
-        for parent in [cwd, *cwd.parents]:
-            if parent.name == "TEXAS" or (parent / "src" / "TEXAS").exists():
-                project_root = parent
-                cache_dir = project_root / "data" / "cache"
-                inv_cache = cache_dir / "TEXAS_invT_posterior_cache"
-                fwd_cache = cache_dir / "TEXAS_posterior_cache"
-                
-                if cache_dir.exists() or project_root.exists():
-                    return str(inv_cache), str(fwd_cache)
-                break
-    except Exception:
-        pass
-    
-    # Method 2: Try importing just the paths (might still fail with CmdStan)
-    try:
-        # Only import if we're sure it won't break
-        import sys
-        if 'cmdstanpy' not in str(sys.modules):
-            from TEXAS.utils.paths import POSTERIOR_CACHE_DIR, INVT_CACHE_DIR
-            return str(INVT_CACHE_DIR), str(POSTERIOR_CACHE_DIR)
-    except Exception:
-        pass
-    
-    # Method 3: Environment variables (user can set these)
+# Resolve cache dirs: env vars take priority (set by docker-compose.yml),
+# then fall back to TEXAS package paths (suppressing the CmdStan-not-found
+# warning since CmdStan is not installed in the Streamlit container).
+def _resolve_cache_dirs():
     inv_env = os.environ.get("TEXAS_INV_CACHE")
     fwd_env = os.environ.get("TEXAS_FWD_CACHE")
     if inv_env and fwd_env:
         return inv_env, fwd_env
-    
-    # Method 4: Fallback to relative paths
-    return "data/cache/TEXAS_invT_posterior_cache", "data/cache/TEXAS_posterior_cache"
 
-# Get cache directories
-INV_CACHE_DIR, FWD_CACHE_DIR = get_texas_cache_dirs()
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            from TEXAS.utils.paths import POSTERIOR_CACHE_DIR, INVT_CACHE_DIR
+        return str(INVT_CACHE_DIR), str(POSTERIOR_CACHE_DIR)
+    except Exception:
+        pass
 
-print(f"📁 Cache directories:")
-print(f"   Inverse T: {INV_CACHE_DIR}")
-print(f"   Forward:   {FWD_CACHE_DIR}")
+    # Local fallback (running outside Docker without env vars)
+    return (
+        "data/cache/TEXAS_invT_posterior_cache",
+        "data/cache/TEXAS_posterior_cache",
+    )
 
-# Create directories if they don't exist (for convenience)
-try:
-    Path(INV_CACHE_DIR).mkdir(parents=True, exist_ok=True)
-    Path(FWD_CACHE_DIR).mkdir(parents=True, exist_ok=True)
-    print(f"✓ Cache directories ready")
-except Exception as e:
-    print(f"⚠ Could not create cache directories: {e}")
+INV_CACHE_DIR, FWD_CACHE_DIR = _resolve_cache_dirs()
 
-# Default CSV directories
-DEFAULT_CSV_DIRS = os.getenv(
-    "TEXAS_CSV_DIRS",
-    "spreadsheets,data/raw,data/external"
-).split(",")
+# Ensure directories exist
+for _d in (INV_CACHE_DIR, FWD_CACHE_DIR):
+    Path(_d).mkdir(parents=True, exist_ok=True)
 
 # Plot settings
 DEFAULT_BINS = 80
@@ -75,9 +41,9 @@ DEFAULT_KDE_BANDWIDTH = "scott"
 DATA_REDUCTION_METHODS = ["flatten", "mean", "median", "std", "min", "max"]
 AXIS_OPTIONS = ["auto", "0 (first)", "1 (second)", "all except last"]
 
-# Variable detection preferences (for auto-selection)
-TEMP_RELATED_VARS = ["t_est", "t", "temperature", "t_mean", "t_est_mean"]
-TIME_LIKE_DIMS = ['time', 'date', 'step', 'iter']
+# Variable detection preferences (forward posteriors: t0, k, b, v; invT: t_est)
+TEMP_RELATED_VARS = ["t_est", "t0_crtp", "t0_culmesocore", "t0_culmeso", "t", "temperature"]
+TIME_LIKE_DIMS = ["time", "date", "step", "iter"]
 
 # UI defaults
 MAX_CHAINS_ASSUMPTION = 20

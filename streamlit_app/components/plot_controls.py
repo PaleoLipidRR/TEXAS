@@ -13,20 +13,25 @@ from utils.data_processing import create_dimension_info_table
 import pandas as pd
 
 
-def plot_type_controls() -> Dict[str, Any]:
+def plot_type_controls(n_files: int = 1) -> Dict[str, Any]:
     """
-    Component for plot type and basic plot controls
-    
-    Returns:
-        Dictionary with plot settings
+    Component for plot type and basic plot controls.
+
+    When multiple files are selected, defaults to KDE line mode so each file
+    appears as a distinct curve on each parameter subplot.
     """
+    multi = n_files > 1
     col1, col2, col3 = st.columns([2, 1, 1])
     with col1:
         plot_type = st.selectbox("Plot type", PLOT_TYPES, index=0)
     with col2:
         if plot_type == "Histogram":
-            use_kde = st.checkbox("Use KDE instead", value=False, 
-                                help="Kernel Density Estimation for smoother curves")
+            use_kde = st.checkbox(
+                "KDE lines" if multi else "Use KDE instead",
+                value=multi,
+                help="One smooth curve per file — cleaner for multi-file comparison" if multi
+                     else "Kernel Density Estimation for smoother curves",
+            )
         else:
             use_kde = False
     with col3:
@@ -72,12 +77,12 @@ def subplot_layout_controls(n_variables: int) -> Dict[str, Any]:
     if n_variables > 1:
         col_a, col_b = st.columns([1, 1])
         with col_a:
-            subplot_cols = st.selectbox("Subplot columns", [1, 2, 3, 4], 
+            subplot_cols = st.selectbox("Subplot columns", [1, 2, 3, 4],
                                       index=1 if n_variables <= 4 else 0,
                                       help="Number of columns in subplot grid")
         with col_b:
-            share_axes = st.checkbox("Share axes", value=True, 
-                                   help="Use same scale for all subplots (easier comparison)")
+            share_axes = st.checkbox("Share axes", value=False,
+                                   help="Use same scale for all subplots — off by default since TEXAS parameters have very different ranges")
     else:
         subplot_cols = 1
         share_axes = False

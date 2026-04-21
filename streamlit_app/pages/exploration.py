@@ -60,7 +60,7 @@ def render_exploration_tab(inv_cache_dir: str, fwd_cache_dir: str):
     selected_vars = variable_selection_controls(all_vars, default_var)
 
     # Plot controls
-    plot_settings = plot_type_controls()
+    plot_settings = plot_type_controls(n_files=len(selected_files))
     layout_settings = subplot_layout_controls(len(selected_vars))
     processing_settings = data_processing_controls(selected_vars, selected_files)
 
