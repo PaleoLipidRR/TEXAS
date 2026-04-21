@@ -108,6 +108,9 @@ Docker bundles CmdStan, all Python dependencies, and the Stan compiler into a si
     !!! warning "Apple Silicon performance"
         The pre-built image is `linux/amd64`. On Apple Silicon it runs under QEMU emulation — Stan compilation and sampling will be noticeably slower. For repeated use, [Option C (pip + conda)](#option-c-conda-lock-exact-reproducible-environment) with a native arm64 conda environment is faster.
 
+    !!! note "macOS — Docker permissions prompt"
+        On first run, macOS may ask whether Docker Desktop can access your Documents or Downloads folder. Click **Allow**. If you dismiss it, the volume mount will silently fail and JupyterLab will show an empty file browser — re-run `./run.sh` and allow access when prompted.
+
 ---
 
 ### Step 2 — Clone the repository
@@ -164,7 +167,13 @@ You will be prompted to:
 | Mount Google Drive / OneDrive? | `y` if your data is there, otherwise `n` |
 | Pull pre-built image from GHCR? | `Y` — downloads ~2–3 GB, no build required |
 
-Once the image is pulled and the container starts, open **http://localhost:8888** in your browser.
+Once the image is pulled and the container starts, open **http://localhost:8890** in your browser.
+
+!!! warning "Port 8890, not 8888"
+    `run.sh` uses port **8890** to avoid conflicts with any native JupyterLab or Anaconda installation that may already be running on port 8888 — common on Windows and macOS with Anaconda installed. The JupyterLab startup log will print `http://127.0.0.1:8890/lab` — use that URL.
+
+!!! note "Windows/WSL2 — kernel selector on first open"
+    When you open a notebook for the first time in the Docker container, JupyterLab may show a kernel name like `SI_code1_PreProcessing_finalized.ipynb (3bf86915)` in the kernel selection dialog instead of "Python 3". This is a leftover preference saved inside the `.ipynb` file from a previous session on a different machine. Click the dropdown, select **Python 3 (ipykernel)**, and click **Select** — it will work normally after that.
 
 !!! tip "Disk space — plan for ~3.5 GB total"
     | Component | Size | Location |
