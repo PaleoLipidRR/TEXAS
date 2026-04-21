@@ -64,6 +64,6 @@
   "postCreateCommand": "bash .devcontainer/devcontainer-postcreate.sh",
   "postStartCommand": [
     "/bin/sh", "-c",
-    "sudo chown -R micromamba:micromamba /home/micromamba/app && ([ -d /opt/cmdstan ] && sudo chown -R micromamba:micromamba /opt/cmdstan || true) && echo '[clinfo first lines]' && (clinfo | sed -n '1,40p' 2>/dev/null || echo 'No OpenCL devices detected - continuing without GPU support')"
+    "sudo chown -R micromamba:micromamba /home/micromamba/app && ([ -d /opt/cmdstan ] && sudo chown -R micromamba:micromamba /opt/cmdstan || true) && ([ -d /opt/conda/envs/texas-env/bin/cmdstan ] && sudo chown -R micromamba:micromamba /opt/conda/envs/texas-env/bin/cmdstan || true) && echo '[clinfo first lines]' && (clinfo | sed -n '1,40p' 2>/dev/null || echo 'No OpenCL devices detected - continuing without GPU support')"
   ]
 }

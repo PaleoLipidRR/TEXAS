@@ -31,7 +31,10 @@ confirm() {
 
 # ── 1. validate ───────────────────────────────────────────────────────────────
 NEW_VERSION="${1:-}"
-[[ -z "$NEW_VERSION" ]] && abort "Usage: $0 <new-version>  e.g. $0 0.1.8"
+[[ -z "$NEW_VERSION" ]] && abort "Usage: $0 <new-version> [commit-message-body]  e.g. $0 0.1.8"
+
+# Optional second argument: extra lines appended to the commit message body.
+COMMIT_BODY="${2:-}"
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 cd "$REPO_ROOT"
@@ -83,7 +86,11 @@ info "Wheel version verified: texas_psm-${NEW_VERSION} ✓"
 # ── 4. commit version bump ────────────────────────────────────────────────────
 info "Committing version bump ..."
 git add pyproject.toml CITATION.cff environment.yml
-git commit -m "bump version to v${NEW_VERSION}"
+if [[ -n "$COMMIT_BODY" ]]; then
+    git commit -m "$(printf "bump version to v%s\n\n%s" "${NEW_VERSION}" "${COMMIT_BODY}")"
+else
+    git commit -m "bump version to v${NEW_VERSION}"
+fi
 
 # ── 5. upload to PyPI ─────────────────────────────────────────────────────────
 confirm "Upload to PyPI now?" || abort "Aborted before PyPI upload."
