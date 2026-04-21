@@ -45,7 +45,7 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - .:/home/micromamba/app
+      - ..:/home/micromamba/app
     profiles: ["full"]
 
   demo:
