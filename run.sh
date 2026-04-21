@@ -111,7 +111,7 @@ if [[ "$PROFILE" == "full" ]]; then
     echo ""
     echo "Image options for the 'full' profile:"
     echo "  [Y] Pull pre-built image from GHCR  (~2-3 GB download, no build time)"
-    echo "  [n] Build locally from source        (~10 min, requires internet for packages)"
+    echo "  [n] Build locally from source        (requires internet; time depends on connection speed)"
     echo ""
     read -rp "Pull pre-built image? [Y/n]: " PULL_ANSWER
     PULL_ANSWER="${PULL_ANSWER:-Y}"

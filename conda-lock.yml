@@ -13,9 +13,9 @@
 version: 1
 metadata:
   content_hash:
-    linux-64: b3e1d5b18d6b636664873f3c3c99c53b2d987160df190005eb2efe065a42a2b5
-    osx-arm64: 187f212eb2b090d21a006ffa13ff0008cb31f69d6af79c224d653fdc99d56785
-    osx-64: fbcd9c78107a1a0fa6520d690e85c40d55cfbd229b8caeb9400604b0e6e64a0f
+    linux-64: 71d2ef5e8518300acf7e230b775bf624cff8cfecc9e33387c6056c9d4773e56d
+    osx-arm64: 654e939f923f26a76d45d8e18895149381a1e79abfcd8393c0bef58da04479dd
+    osx-64: 3e316839c8080409dd85c290e9138836ee0688aa11ecddcb54ac84e16ec71f2d
     win-64: 385468e0534a7c164884afdea18f53008591bd1340b48426b027c90657cb659b
   channels:
   - url: conda-forge
@@ -3876,7 +3876,7 @@ package:
   category: main
   optional: false
 - name: cmdstan
-  version: 2.38.0
+  version: 2.36.0
   manager: conda
   platform: linux-64
   dependencies:
@@ -3886,16 +3886,16 @@ package:
     libstdcxx: '>=14'
     make: ''
     sysroot_linux-64: 2.17.*
-    tbb: '>=2022.3.0'
+    tbb: '>=2021.13.0'
     tbb-devel: ''
-  url: https://conda.anaconda.org/conda-forge/linux-64/cmdstan-2.38.0-hca57ec4_0.conda
+  url: https://conda.anaconda.org/conda-forge/linux-64/cmdstan-2.36.0-hc66edfa_1.conda
   hash:
-    md5: 22746834de86a54575bbaac3333019c6
-    sha256: 5b9df1396d2aa9a015d0eb6d7c0fba5ebe8a76628b3c094ee771d0a281f40ddd
+    md5: a7258dec0219115a8217ae75300844c4
+    sha256: 0926624a52141d2312c3303f17782b662a828868be754c9d38ea66772b0d0421
   category: main
   optional: false
 - name: cmdstan
-  version: 2.38.0
+  version: 2.36.0
   manager: conda
   platform: osx-64
   dependencies:
@@ -3904,16 +3904,16 @@ package:
     libcxx: '>=19'
     macosx_deployment_target_osx-64: 10.13.*
     make: ''
-    tbb: '>=2022.3.0'
+    tbb: '>=2021.13.0'
     tbb-devel: ''
-  url: https://conda.anaconda.org/conda-forge/osx-64/cmdstan-2.38.0-h7f489ec_0.conda
+  url: https://conda.anaconda.org/conda-forge/osx-64/cmdstan-2.36.0-h6c047f0_1.conda
   hash:
-    md5: d074d14b8780cba09fab396ef01790bb
-    sha256: f655f15c418cc6c66f5f44129f198d8393aae2c839564b86b0f63953eff914eb
+    md5: a0bec474cde3d247ad0cac566fdfb235
+    sha256: 70498153b8d79e914d6716267df0fa2ca83dd53388402e909a62f2c809b913df
   category: main
   optional: false
 - name: cmdstan
-  version: 2.38.0
+  version: 2.36.0
   manager: conda
   platform: osx-arm64
   dependencies:
@@ -3922,12 +3922,12 @@ package:
     libcxx: '>=19'
     macosx_deployment_target_osx-arm64: 11.0.*
     make: ''
-    tbb: '>=2022.3.0'
+    tbb: '>=2021.13.0'
     tbb-devel: ''
-  url: https://conda.anaconda.org/conda-forge/osx-arm64/cmdstan-2.38.0-ha5c09bf_0.conda
+  url: https://conda.anaconda.org/conda-forge/osx-arm64/cmdstan-2.36.0-h6557600_1.conda
   hash:
-    md5: 3bc5b4599843b98f759965990328a323
-    sha256: e403f2260d81c17e7e1ff76cc6044ff34753317e666b79dc4a3b42852335dc56
+    md5: 5712bacd092bc9b3a3f8c0613fc7c4c7
+    sha256: 2082509dea5544b292ee2f0f9c2ef58963a5efaad4014edf9962437f0b4bb738
   category: main
   optional: false
 - name: cmdstan
@@ -22527,71 +22527,71 @@ package:
   category: main
   optional: false
 - name: pydantic
-  version: 2.13.2
+  version: 2.13.3
   manager: conda
   platform: linux-64
   dependencies:
     annotated-types: '>=0.6.0'
-    pydantic-core: 2.46.2
+    pydantic-core: 2.46.3
     python: ''
     typing-inspection: '>=0.4.2'
     typing_extensions: '>=4.14.1'
-  url: https://conda.anaconda.org/conda-forge/noarch/pydantic-2.13.2-pyhcf101f3_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/pydantic-2.13.3-pyhcf101f3_0.conda
   hash:
-    md5: e6a5d825488a61785db20effeaac2f69
-    sha256: 551e58cc83b15ba1eb1edc71faa9c6001817faebb485f935d1198c27d934d754
+    md5: f690e6f204efd2e5c06b57518a383d98
+    sha256: 12909d5c2bfb31492667dd4132ac900dd47f8162bd8b1dd9e5973ce8ea28ca1a
   category: main
   optional: false
 - name: pydantic
-  version: 2.13.2
+  version: 2.13.3
   manager: conda
   platform: osx-64
   dependencies:
     annotated-types: '>=0.6.0'
-    pydantic-core: 2.46.2
+    pydantic-core: 2.46.3
     python: ''
     typing-inspection: '>=0.4.2'
     typing_extensions: '>=4.14.1'
-  url: https://conda.anaconda.org/conda-forge/noarch/pydantic-2.13.2-pyhcf101f3_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/pydantic-2.13.3-pyhcf101f3_0.conda
   hash:
-    md5: e6a5d825488a61785db20effeaac2f69
-    sha256: 551e58cc83b15ba1eb1edc71faa9c6001817faebb485f935d1198c27d934d754
+    md5: f690e6f204efd2e5c06b57518a383d98
+    sha256: 12909d5c2bfb31492667dd4132ac900dd47f8162bd8b1dd9e5973ce8ea28ca1a
   category: main
   optional: false
 - name: pydantic
-  version: 2.13.2
+  version: 2.13.3
   manager: conda
   platform: osx-arm64
   dependencies:
     annotated-types: '>=0.6.0'
-    pydantic-core: 2.46.2
+    pydantic-core: 2.46.3
     python: ''
     typing-inspection: '>=0.4.2'
     typing_extensions: '>=4.14.1'
-  url: https://conda.anaconda.org/conda-forge/noarch/pydantic-2.13.2-pyhcf101f3_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/pydantic-2.13.3-pyhcf101f3_0.conda
   hash:
-    md5: e6a5d825488a61785db20effeaac2f69
-    sha256: 551e58cc83b15ba1eb1edc71faa9c6001817faebb485f935d1198c27d934d754
+    md5: f690e6f204efd2e5c06b57518a383d98
+    sha256: 12909d5c2bfb31492667dd4132ac900dd47f8162bd8b1dd9e5973ce8ea28ca1a
   category: main
   optional: false
 - name: pydantic
-  version: 2.13.2
+  version: 2.13.3
   manager: conda
   platform: win-64
   dependencies:
     annotated-types: '>=0.6.0'
-    pydantic-core: 2.46.2
+    pydantic-core: 2.46.3
     python: ''
     typing-inspection: '>=0.4.2'
     typing_extensions: '>=4.14.1'
-  url: https://conda.anaconda.org/conda-forge/noarch/pydantic-2.13.2-pyhcf101f3_0.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/pydantic-2.13.3-pyhcf101f3_0.conda
   hash:
-    md5: e6a5d825488a61785db20effeaac2f69
-    sha256: 551e58cc83b15ba1eb1edc71faa9c6001817faebb485f935d1198c27d934d754
+    md5: f690e6f204efd2e5c06b57518a383d98
+    sha256: 12909d5c2bfb31492667dd4132ac900dd47f8162bd8b1dd9e5973ce8ea28ca1a
   category: main
   optional: false
 - name: pydantic-core
-  version: 2.46.2
+  version: 2.46.3
   manager: conda
   platform: linux-64
   dependencies:
@@ -22600,14 +22600,14 @@ package:
     python: ''
     python_abi: 3.10.*
     typing-extensions: '>=4.6.0,!=4.7.0'
-  url: https://conda.anaconda.org/conda-forge/linux-64/pydantic-core-2.46.2-py310hd8f68c5_0.conda
+  url: https://conda.anaconda.org/conda-forge/linux-64/pydantic-core-2.46.3-py310hd8f68c5_0.conda
   hash:
-    md5: dbebb3b9bfd0b28310f334487f992645
-    sha256: 1bbe5e8539d96ef6b68933321bbc99f89682133a57eccc83a2bb452c77a79394
+    md5: 2649b63fe7bb9c3bef7ee0aaa908e34b
+    sha256: ae6441d9a1998ca533d0014a6a5a711f6eff9852f3877ceb0d518c059964f49a
   category: main
   optional: false
 - name: pydantic-core
-  version: 2.46.2
+  version: 2.46.3
   manager: conda
   platform: osx-64
   dependencies:
@@ -22615,14 +22615,14 @@ package:
     python: ''
     python_abi: 3.10.*
     typing-extensions: '>=4.6.0,!=4.7.0'
-  url: https://conda.anaconda.org/conda-forge/osx-64/pydantic-core-2.46.2-py310h0aa92f5_0.conda
+  url: https://conda.anaconda.org/conda-forge/osx-64/pydantic-core-2.46.3-py310h0aa92f5_0.conda
   hash:
-    md5: 1c49d61473462ccc1988a3bda21877ad
-    sha256: 438479e74f9d71653fb8962cb2728d547b0104d9d78243b41beed07414b15f3e
+    md5: cbfeabbc1f1d7406a07ece3bf3d30528
+    sha256: e6f5155e01a5caef2270519fd9243926a541af43a3877b84ebb0373fb60de644
   category: main
   optional: false
 - name: pydantic-core
-  version: 2.46.2
+  version: 2.46.3
   manager: conda
   platform: osx-arm64
   dependencies:
@@ -22630,14 +22630,14 @@ package:
     python: 3.10.*
     python_abi: 3.10.*
     typing-extensions: '>=4.6.0,!=4.7.0'
-  url: https://conda.anaconda.org/conda-forge/osx-arm64/pydantic-core-2.46.2-py310h9365ca8_0.conda
+  url: https://conda.anaconda.org/conda-forge/osx-arm64/pydantic-core-2.46.3-py310h9365ca8_0.conda
   hash:
-    md5: 5dff79fc193375a53db7982dba40667e
-    sha256: 638032c1dfb4b701c4311fd6fe6905dfbff203abe1d3158e2319a44e3acbb0cd
+    md5: 1e754ac932ec2089fba24b3bcbb48cc5
+    sha256: 310a7649e4438ee283e64b113512323609e3527b81bf84c59cfc7020fcf3ada4
   category: main
   optional: false
 - name: pydantic-core
-  version: 2.46.2
+  version: 2.46.3
   manager: conda
   platform: win-64
   dependencies:
@@ -22647,10 +22647,10 @@ package:
     ucrt: '>=10.0.20348.0'
     vc: '>=14.3,<15'
     vc14_runtime: '>=14.44.35208'
-  url: https://conda.anaconda.org/conda-forge/win-64/pydantic-core-2.46.2-py310h034784e_0.conda
+  url: https://conda.anaconda.org/conda-forge/win-64/pydantic-core-2.46.3-py310h034784e_0.conda
   hash:
-    md5: 82e578313dd2794d1ffbf693cdb083c3
-    sha256: c6878092d85d04bbc19302215edb6b54f9def6fd1443adc5ad01b8c1d1ce513f
+    md5: b07a55e88554a41c480c0a47ee45702e
+    sha256: a1fdaeed86838b4fa9fe7f600d64d05950c3c2628ba89b4cc65693fc94d2df1c
   category: main
   optional: false
 - name: pygments

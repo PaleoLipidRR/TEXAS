@@ -6,11 +6,9 @@ SHELL ["/bin/bash", "-lc"]
 ENV MAMBA_DOCKERFILE_ACTIVATE=1
 USER root
 
-ARG CMDSTAN_VERSION=2.36.0
-
 # System build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential gfortran make wget tar git \
+    build-essential git \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -31,14 +29,9 @@ COPY --chown=micromamba:micromamba ./src/TEXAS /home/micromamba/texas-pkg/src/TE
 # Step 3: Install TEXAS (regular install — editable makes no sense in an image)
 RUN micromamba run -n texas-env pip install --no-cache-dir /home/micromamba/texas-pkg
 
-# ---- Build CmdStan ----
-RUN mkdir -p /opt/cmdstan \
- && cd /opt/cmdstan \
- && wget -q https://github.com/stan-dev/cmdstan/releases/download/v${CMDSTAN_VERSION}/cmdstan-${CMDSTAN_VERSION}.tar.gz \
- && tar -xzf cmdstan-${CMDSTAN_VERSION}.tar.gz \
- && rm cmdstan-${CMDSTAN_VERSION}.tar.gz \
- && cd cmdstan-${CMDSTAN_VERSION} \
- && make TBB_CXX_TYPE=gcc build -j4
+# Verify CmdStan is discoverable via the conda-lock-bundled package
+RUN micromamba run -n texas-env python -c \
+    "from TEXAS.utils.paths import find_cmdstan; p = find_cmdstan(); print('CmdStan OK:', p)"
 
 ########## Stage 2: final (non-root runtime) ##########
 FROM mambaorg/micromamba:1.5.10-bookworm
@@ -61,9 +54,8 @@ RUN echo "micromamba ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/micromamba-nopass
 
 WORKDIR /home/micromamba/app
 
-# Copy environment, CmdStan, and source code
+# Copy conda environment (CmdStan is bundled inside via conda-lock)
 COPY --from=builder --chown=micromamba:micromamba /opt/conda /opt/conda
-COPY --from=builder --chown=micromamba:micromamba /opt/cmdstan /opt/cmdstan
 
 USER micromamba
 
@@ -73,8 +65,6 @@ ENV MAMBA_DEFAULT_ENV=texas-env
 ENV MAMBA_ROOT_PREFIX=/opt/conda
 ENV MAMBA_EXE=/bin/micromamba
 ENV PATH="/opt/conda/envs/texas-env/bin:$PATH"
-ENV CMDSTAN=/opt/cmdstan/cmdstan-2.36.0
-ENV PATH="$CMDSTAN/bin:$PATH"
 
 # Runtime fixes
 ENV PROJ_LIB=/opt/conda/envs/texas-env/share/proj
