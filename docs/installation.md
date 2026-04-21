@@ -206,91 +206,14 @@ This saves posteriors to `data/cache/TEXAS_posterior_cache/` inside the cloned r
 
 ---
 
-## Option B — pip install (Python users)
+## Option B — conda-lock (exact reproducible environment)
 
-=== "Linux / macOS"
+For the most reproducible setup outside of Docker, use the pre-solved conda-lock files published alongside this repository. Every package version and checksum is pinned — the environment will be identical on any machine of the same platform. CmdStan is bundled on all platforms — no separate install step needed.
 
-    **Step 1 — create and activate an isolated environment:**
+!!! note "Windows — CmdStan version"
+    CmdStan 2.35.0 is included on Windows (the latest version compatible with `esmf` on Windows). Linux and macOS get 2.36.0. The minor version difference has no effect on TEXAS.
 
-    ```bash
-    # conda (recommended)
-    conda create -n texas-env python=3.10 pip
-    conda activate texas-env
-
-    # or plain venv
-    python3 -m venv .venv && source .venv/bin/activate
-    ```
-
-    **Step 2 — install CmdStan** (required before importing TEXAS):
-
-    ```bash
-    pip install cmdstanpy
-    TBB_CXX_TYPE=gcc python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.36.0')"
-    ```
-
-    **Step 3 — install TEXAS:**
-
-    ```bash
-    pip install texas-psm
-    ```
-
-=== "Windows (WSL2)"
-
-    Run all commands from your WSL2 terminal (not PowerShell or CMD).
-
-    **Step 1 — create and activate an environment:**
-
-    ```bash
-    conda create -n texas-env python=3.10 pip
-    conda activate texas-env
-    ```
-
-    **Step 2 — install CmdStan:**
-
-    ```bash
-    pip install cmdstanpy
-    TBB_CXX_TYPE=gcc python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.36.0')"
-    ```
-
-    **Step 3 — install TEXAS:**
-
-    ```bash
-    pip install texas-psm
-    ```
-
-=== "Windows (native Conda)"
-
-    Run all commands from the **Anaconda Prompt** (not PowerShell or CMD).
-
-    **Step 1 — create and activate an environment:**
-
-    ```cmd
-    conda create -n texas-env python=3.10 pip
-    conda activate texas-env
-    ```
-
-    **Step 2 — install CmdStan via conda-forge** (pre-built — no compiler needed):
-
-    ```cmd
-    conda install -c conda-forge cmdstan=2.36.0
-    ```
-
-    **Step 3 — install TEXAS:**
-
-    ```cmd
-    pip install texas-psm
-    ```
-
-    !!! warning "Windows-specific pitfalls"
-        - Do **not** install `m2w64-toolchain` — it conflicts with the conda-forge `cmdstan` package.
-        - Do **not** use `TBB_CXX_TYPE=gcc` — that is Linux/macOS syntax and will fail in CMD.
-        - Do **not** run `cmdstanpy.install_cmdstan()` — the conda-forge package is pre-compiled; calling `install_cmdstan()` will try to compile from source and fail.
-
----
-
-## Option C — conda-lock (exact reproducible environment)
-
-Installs every package at a pinned version using pre-solved lock files. CmdStan is included — no separate install step needed.
+**With `conda-lock` (multi-platform lock file — recommended):**
 
 === "Linux"
 
@@ -330,6 +253,106 @@ Installs every package at a pinned version using pre-solved lock files. CmdStan 
     pip install texas-psm
     ```
 
+**Without `conda-lock` (platform-specific explicit file — works with plain conda):**
+
+```bash
+# Pick the file for your platform
+conda create -n texas-env --file conda-linux-64.lock    # Linux x86_64
+conda create -n texas-env --file conda-osx-arm64.lock   # macOS Apple Silicon
+conda create -n texas-env --file conda-osx-64.lock      # macOS Intel
+conda create -n texas-env --file conda-win-64.lock      # Windows
+
+conda activate texas-env
+pip install texas-psm
+```
+
+---
+
+## Option C — pip install (Python users)
+
+!!! warning
+    Do not run `pip install` against the system Python. Modern Debian/Ubuntu systems mark the system Python as externally managed (PEP 668) and will refuse the install. Always install into a virtual environment first.
+
+=== "Linux / macOS / Windows (WSL2)"
+
+    Run from a bash terminal. For Windows, open your WSL2 terminal (not PowerShell or CMD).
+
+    **Step 1 — create and activate an isolated environment:**
+
+    ```bash
+    conda create -n texas-env python=3.10 pip
+    conda activate texas-env
+    ```
+
+    **Step 2 — install CmdStan** (required before importing TEXAS):
+
+    ```bash
+    pip install cmdstanpy
+    TBB_CXX_TYPE=gcc python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.36.0')"
+    ```
+
+    **Step 3 — install TEXAS:**
+
+    ```bash
+    pip install texas-psm
+    ```
+
+=== "Windows (native Anaconda Prompt)"
+
+    Run all commands from the **Anaconda Prompt** (not PowerShell or CMD).
+
+    **Step 1 — create and activate an environment:**
+
+    ```cmd
+    conda create -n texas-env python=3.10 pip
+    conda activate texas-env
+    ```
+
+    **Step 2 — install CmdStan via conda-forge** (pre-built — no compiler needed):
+
+    ```cmd
+    conda install -c conda-forge cmdstan=2.36.0
+    ```
+
+    **Step 3 — install TEXAS:**
+
+    ```cmd
+    pip install texas-psm
+    ```
+
+    !!! warning "Windows-specific pitfalls"
+        - Do **not** install `m2w64-toolchain` — it conflicts with the conda-forge `cmdstan` package.
+        - Do **not** use `TBB_CXX_TYPE=gcc` — that is Linux/macOS syntax and will fail in CMD.
+        - Do **not** run `cmdstanpy.install_cmdstan()` — the conda-forge package is pre-compiled; calling `install_cmdstan()` will try to compile from source and fail.
+
+=== "Google Colab"
+
+    ```python
+    !pip install cmdstanpy
+    import cmdstanpy; cmdstanpy.install_cmdstan(version="2.36.0")
+    !pip install texas-psm
+    ```
+
+### CmdStan discovery
+
+TEXAS searches for CmdStan in the following priority order:
+
+| Priority | Location |
+|---|---|
+| 1 | `CMDSTAN` environment variable (auto-set by conda; also honoured when set manually) |
+| 2 | `/opt/cmdstan/cmdstan-2.36.0` |
+| 3 | `~/.cmdstan/cmdstan-2.36.0` — default target of `cmdstanpy.install_cmdstan()` |
+| 4 | `/usr/local/cmdstan/cmdstan-2.36.0` |
+| 5 | Whatever cmdstanpy is already configured to use |
+
+`set_cmdstan_path()` is always called on the winning path. If `CMDSTAN` is set but points to a broken directory, TEXAS emits a warning and continues down the list. If nothing is found, a `RuntimeError` is raised with explicit install instructions.
+
+To use a specific CmdStan installation instead of the one conda manages:
+
+```bash
+export CMDSTAN=~/.cmdstan/cmdstan-2.36.0
+```
+
 ---
 
 ## Option D — conda from source (development)
@@ -339,7 +362,13 @@ git clone --depth 1 https://github.com/PaleoLipidRR/TEXAS.git
 cd TEXAS
 conda env create -f environment.yml
 conda activate texas-env
-pip install -e .
+pip install -e .          # editable install — required for development
 ```
 
-> **Always use `pip install -e .`** (editable mode). A plain `pip install .` puts a static copy in site-packages — local code changes will be ignored by the running kernel.
+> **Always use `pip install -e .`** (editable mode). A plain `pip install .` or `pip install texas-psm` puts a static copy in site-packages: `STAN_MODELS_DIR` will point there (no pre-compiled binaries), and any local code changes will be silently ignored by the running kernel. After cloning, or any time you find the wrong package version is active, re-run `pip install -e .` and restart your Jupyter kernel.
+
+The conda environment sets `CMDSTAN` automatically to the bundled CmdStan. If you installed CmdStan manually via `cmdstanpy.install_cmdstan()` and want to use that version instead:
+
+```bash
+export CMDSTAN=~/.cmdstan/cmdstan-2.36.0
+```

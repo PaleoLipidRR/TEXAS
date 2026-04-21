@@ -39,7 +39,7 @@ ZENODO_ZIP_FILENAME: str = "texas-psm-zenodo-v0.1.5.zip"
 ZENODO_ZIP_ROOT: str = "texas-psm-zenodo"   # folder inside the ZIP
 
 _ZIP_URL = (
-    f"https://zenodo.org/record/{ZENODO_RECORD_ID}/files/"
+    f"https://zenodo.org/records/{ZENODO_RECORD_ID}/files/"
     f"{ZENODO_ZIP_FILENAME}?download=1"
 )
 
@@ -47,14 +47,38 @@ _ZIP_URL = (
 def _download_zip(dest: Path, force: bool = False) -> Path:
     """Download the Zenodo ZIP to *dest*, skipping if already present."""
     if dest.exists() and not force:
-        return dest
+        # Validate the cached file is actually a ZIP before trusting it
+        if zipfile.is_zipfile(dest):
+            return dest
+        dest.unlink()  # stale/corrupt file — re-download below
+
     dest.parent.mkdir(parents=True, exist_ok=True)
     print(f"Downloading {ZENODO_ZIP_FILENAME} from Zenodo (~560 MB) …")
     try:
-        urllib.request.urlretrieve(_ZIP_URL, dest)
-    except urllib.error.URLError as e:
-        dest.unlink(missing_ok=True)
+        with urllib.request.urlopen(_ZIP_URL) as resp:
+            status = resp.status
+            if status != 200:
+                raise urllib.error.URLError(
+                    f"Zenodo returned HTTP {status} for {_ZIP_URL!r}.\n"
+                    "  The data record may not be published yet — "
+                    "contact the authors or check https://doi.org/10.5281/zenodo."
+                    f"{ZENODO_RECORD_ID}"
+                )
+            data = resp.read()
+    except urllib.error.URLError:
+        raise
+    except Exception as e:
         raise urllib.error.URLError(f"ZIP download failed: {e}") from e
+
+    dest.write_bytes(data)
+    if not zipfile.is_zipfile(dest):
+        dest.unlink()
+        raise ValueError(
+            f"Downloaded file from Zenodo is not a valid ZIP.\n"
+            f"  URL     : {_ZIP_URL}\n"
+            f"  The Zenodo record ({ZENODO_RECORD_ID}) may not be published yet or "
+            "the file name may have changed."
+        )
     print(f"ZIP saved to {dest}")
     return dest
 
