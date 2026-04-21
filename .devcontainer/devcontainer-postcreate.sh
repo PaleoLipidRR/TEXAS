@@ -28,7 +28,8 @@ micromamba activate texas-env
 pip install --no-cache-dir -q -e .
 
 # Fix permissions
-sudo chown -R micromamba:micromamba /home/micromamba/app /opt/cmdstan
+sudo chown -R micromamba:micromamba /home/micromamba/app
+[ -d /opt/cmdstan ] && sudo chown -R micromamba:micromamba /opt/cmdstan
 
 # Install git-lfs
 sudo apt-get update -qq && sudo apt-get install -y -qq git-lfs
