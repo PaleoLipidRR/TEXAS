@@ -18,4 +18,4 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install mkdocs-material mkdocstrings[python]
-      - run: mkdocs gh-deploy --force --config-file docs/mkdocs.yml
+      - run: cd docs && mkdocs gh-deploy --force
