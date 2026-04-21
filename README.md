@@ -33,6 +33,16 @@ Inverse temperature (invT) Stan models use `reduce_sum` for within-chain paralle
 
 No Stan or conda setup required — CmdStan and all dependencies are pre-installed in the image.
 
+**Accounts required:**
+
+| Service | Required? | Notes |
+|---|---|---|
+| [Docker account](https://app.docker.com/signup) | ✅ Free account | Required to download and run Docker Desktop on Windows and macOS |
+| GitHub | ❌ No | Cloning and pulling the pre-built image are anonymous |
+| Zenodo | ❌ No | Downloading posteriors is anonymous |
+
+> **Linux users** do not need a Docker account — Docker Engine can be installed without signing in.
+
 **Prerequisites — install Docker Desktop for your OS before cloning:**
 
 <details>

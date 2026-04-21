@@ -8,6 +8,17 @@ TEXAS can be run via Docker (recommended) or installed directly with pip or cond
 
 Docker bundles CmdStan, all Python dependencies, and the Stan compiler into a single image. No environment setup required.
 
+**Accounts you need before starting:**
+
+| Service | Required? | Notes |
+|---|---|---|
+| [Docker account](https://app.docker.com/signup) | ✅ Free account | Required to download and run Docker Desktop on Windows and macOS |
+| GitHub | ❌ No | Cloning and pulling the pre-built image are both anonymous |
+| Zenodo | ❌ No | Downloading posteriors is anonymous |
+
+!!! note "Linux users"
+    Docker Engine on Linux does not require a Docker account — install it directly via `apt` without signing in.
+
 ### Step 1 — Install Docker
 
 === "Linux"
