@@ -31,6 +31,11 @@ CMDSTAN_CONDA="/opt/conda/envs/texas-env/bin/cmdstan"
 eval "$(micromamba shell hook --shell bash)"
 micromamba activate texas-env
 
+# Remove stale egg-info before the editable install.  If a previous container
+# run created it under a mismatched UID it will be unwritable and pip fails
+# with "Cannot update time stamp of directory 'src/texas_psm.egg-info'".
+rm -rf src/texas_psm.egg-info
+
 # Install TEXAS in editable mode so source changes are reflected immediately.
 # (The Dockerfile installs a snapshot; this overwrites it with the live workspace.)
 pip install --no-cache-dir -q -e .
