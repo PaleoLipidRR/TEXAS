@@ -417,6 +417,7 @@ def predict_temperature_from_proxyObs(
     save_draws: bool = False,
     filename_tag: Optional[Union[str, Sequence[str]]] = None,
     results_path: Optional[Union[str, Path]] = None,
+    cache_dir: Optional[Union[str, Path]] = None,
     use_opencl: bool = False,
     threads_per_chain: Optional[int] = None,
     stan_model_path: Optional[Union[str, Path]] = None,
@@ -461,6 +462,7 @@ def predict_temperature_from_proxyObs(
         seed=seed,
         save=save_results,
         save_draws=save_draws,
+        cache_dir=cache_dir,
         use_opencl=use_opencl,
         threads_per_chain=threads_per_chain,
         stan_model_path=stan_model_path,
@@ -495,6 +497,13 @@ def predict_temperature_from_proxyObs(
     }
 
     if save_results:
+        if results_path is None and cache_dir is not None:
+            from pathlib import Path as _Path
+            from ..stan.io import _generate_filename_base
+            _out = _Path(cache_dir)
+            _out.mkdir(parents=True, exist_ok=True)
+            _base = _generate_filename_base(metadata, filename_tag)
+            results_path = _out / f"{_base}.npz"
         _save_invT_results(results, results_path)
 
     return results

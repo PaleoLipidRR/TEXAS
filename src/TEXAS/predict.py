@@ -163,6 +163,7 @@ def predict_T_from_proxyObs(
     save_results: bool = False,
     save_draws: bool = False,
     filename_tag: Optional[Union[str, Sequence[str]]] = None,
+    cache_dir: Optional[Union[str, Path]] = None,
 ) -> Dict[str, Any]:
     """
     Inverse reconstruction: scaled RI → temperature percentiles.
@@ -277,6 +278,11 @@ def predict_T_from_proxyObs(
         kernel-density plots or custom quantile calculation.  Default False.
     filename_tag : str or list of str, optional
         Extra tag(s) appended to the output filename.
+    cache_dir : Path or str, optional
+        Directory where ``.nc`` and ``.npz`` files are written when
+        *save_results* or *save_draws* is True.  Defaults to the standard
+        invT cache (``~/.texas/cache/TEXAS_invT_posterior_cache/`` for pip
+        installs, or ``data/cache/TEXAS_invT_posterior_cache/`` in the repo).
 
     Returns
     -------
@@ -370,12 +376,80 @@ def predict_T_from_proxyObs(
         save_results=save_results,
         save_draws=save_draws,
         filename_tag=filename_tag,
+        cache_dir=cache_dir,
         threads_per_chain=threads_per_chain,
         model_type="direct",
         constraint_type=constraint_type,
         min_temp=min_temp,
         proxy_name=proxy_name,
     )
+
+
+def compute_scaledRI(
+    gdgt0,
+    gdgt1,
+    gdgt2,
+    gdgt3,
+    cren,
+    cren_prime,
+    *,
+    cren_rings: int = 3,
+) -> np.ndarray:
+    """
+    Compute Scaled Ring Index from six isoGDGT abundances.
+
+    Accepts raw LC/MS peak areas or fractional abundances — both give identical
+    results because the formula divides by the total sum of all six GDGTs, so
+    any common scale factor drops out.
+    Default ``cren_rings=3`` produces **scaledRI_cren3** (RI₀₋₃), the canonical
+    proxy used in TEXAS calibration posteriors.
+
+    Parameters
+    ----------
+    gdgt0, gdgt1, gdgt2, gdgt3, cren, cren_prime : float or array-like
+        isoGDGT abundances — GDGT-0, GDGT-1, GDGT-2, GDGT-3, crenarchaeol,
+        crenarchaeol regioisomer (cren').  Raw LC/MS peak areas and fractional
+        abundances give the same result (see above).
+    cren_rings : int
+        Ring count assigned to both crenarchaeol and its regioisomer.
+        ``3`` → scaledRI_cren3 / RI₀₋₃ (default, recommended).
+        ``4`` → scaledRI / RI₀₋₄ (Zhang et al. 2016 convention).
+
+    Returns
+    -------
+    numpy.ndarray or float
+        Scaled Ring Index, dimensionless, nominally in [0, 1].
+
+    Notes
+    -----
+    The formula is::
+
+        RI      = (1·GDGT1 + 2·GDGT2 + 3·GDGT3 + cren_rings·cren + cren_rings·cren')
+                  / (GDGT0 + GDGT1 + GDGT2 + GDGT3 + cren + cren')
+        scaledRI = RI / cren_rings
+
+    Examples
+    --------
+    >>> compute_scaledRI(0.45, 0.10, 0.08, 0.05, 0.30, 0.02)
+    array(0.547...)
+
+    >>> import pandas as pd
+    >>> df = pd.read_csv("my_gdgt_data.csv")
+    >>> df["scaledRI_cren3"] = compute_scaledRI(
+    ...     df["GDGT-0"], df["GDGT-1"], df["GDGT-2"], df["GDGT-3"],
+    ...     df["cren"],   df["cren_prime"],
+    ... )
+    """
+    g0 = np.asarray(gdgt0, dtype=float)
+    g1 = np.asarray(gdgt1, dtype=float)
+    g2 = np.asarray(gdgt2, dtype=float)
+    g3 = np.asarray(gdgt3, dtype=float)
+    cr = np.asarray(cren, dtype=float)
+    cp = np.asarray(cren_prime, dtype=float)
+
+    numerator = g1 + 2 * g2 + 3 * g3 + cren_rings * cr + cren_rings * cp
+    denominator = (g0 + g1 + g2 + g3 + cr + cp) * cren_rings
+    return numerator / denominator
 
 
 def predict_RI_from_T(*args, **kwargs):

@@ -296,6 +296,26 @@ TEXAS.download_training_data() # training CSVs only
 
 All functions are idempotent — running them again skips files already on disk. Use `force=True` to re-download.
 
+To save to a specific directory, pass `cache_dir` / `dest_dir` directly to the download call:
+
+```python
+# Download posteriors to a custom directory (e.g. Google Drive on Colab)
+TEXAS.download_posteriors(
+    cache_dir="/content/drive/MyDrive/texas/posteriors"
+)
+
+# Download training CSVs to a custom directory
+TEXAS.download_training_data(
+    dest_dir="/content/drive/MyDrive/texas/data"
+)
+
+# Or both at once
+TEXAS.download_all(
+    cache_dir="/content/drive/MyDrive/texas/posteriors",
+    data_dir="/content/drive/MyDrive/texas/data",
+)
+```
+
 ### Finding downloaded files
 
 Files land in different locations depending on how TEXAS is installed:
@@ -335,6 +355,100 @@ ds = xr.load_dataset("/content/drive/MyDrive/posteriors/gen_logi_fixed_hier_crtp
 result = predict_proxy_from_T(temperatures=np.linspace(5, 35, 100), posterior=ds)
 result = predict_T_from_proxyObs(proxyObs=my_ri, prior_mu_t=15.0, prior_sigma_t=10.0,
                                   fwd_posterior=ds, temptype="SST")
+```
+
+---
+
+## The two main prediction functions
+
+### `predict_proxy_from_T` — forward: temperature → proxy
+
+**Returns** a Python dict of percentile arrays (e.g. `result["p50"]`, `result["p5"]`, `result["p95"]`). **No files are written to disk** — the result lives only in memory. Save it yourself:
+
+```python
+import pandas as pd
+from TEXAS import predict_proxy_from_T
+
+result = predict_proxy_from_T(
+    temperatures=np.linspace(5, 35, 100),
+    posterior="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
+)
+
+# result["p50"], result["p5"], result["p95"] are numpy arrays — save them yourself:
+pd.DataFrame(result).to_csv("/your/output/forward_curve.csv", index=False)
+```
+
+### `predict_T_from_proxyObs` — inverse: proxy → temperature
+
+**Returns** a Python dict with `"p1"` … `"p99"` percentile arrays plus `"proxyObs"` and `"metadata"`.  By default **nothing is saved to disk** — you get the dict and decide what to keep.
+
+To save the Stan posterior and results files, use `save_results=True`.  Use `cache_dir` to control where the files land:
+
+```python
+from TEXAS import predict_T_from_proxyObs
+
+result = predict_T_from_proxyObs(
+    proxyObs=my_ri_array,
+    prior_mu_t=15.0,
+    prior_sigma_t=10.0,
+    fwd_posterior_name="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
+    temptype="SST",
+    # ── File output (optional) ────────────────────────────────────────────────
+    save_results=True,           # save quantile .nc + .npz to disk
+    save_draws=True,             # also save raw draws as {name}_draws.nc
+    cache_dir="/your/output/",   # where the files land; default is the invT cache dir
+)
+
+# The percentile arrays are always in the returned dict regardless of save_results:
+result["p50"]   # median temperature (°C), shape (N,)
+result["p5"]    # 5th percentile
+result["p95"]   # 95th percentile
+```
+
+**Where do the files go by default?**
+
+| Install method | Default invT output directory |
+|---|---|
+| `pip install texas-psm` / Colab | `~/.texas/cache/TEXAS_invT_posterior_cache/` |
+| From source (`pip install -e .`) | `data/cache/TEXAS_invT_posterior_cache/` in repo |
+
+Files written (when `save_results=True`):
+- `{name}.nc` — quantile posterior (p1–p99 for each observation)
+- `{name}.npz` — same percentiles as a NumPy archive
+- `{name}_draws.nc` — raw MCMC draws in `draws/` subfolder (only when `save_draws=True`)
+
+> **Colab users**: by default files go to ephemeral Colab storage and are lost when the session ends. Pass `cache_dir` pointing to your Google Drive folder to keep them.
+
+### `compute_scaledRI` — calculate Scaled Ring Index from raw GDGT data
+
+Before calling either prediction function you need Scaled Ring Index values. `compute_scaledRI()` computes them from the six standard isoGDGT abundances. You can pass **raw LC/MS peak areas or fractional abundances** — both give identical results because the formula divides by the total sum of all six GDGTs, so any common scale factor drops out:
+
+```python
+from TEXAS import compute_scaledRI
+
+# Single sample (scalars)
+scaledRI = compute_scaledRI(
+    gdgt0=0.45, gdgt1=0.10, gdgt2=0.08, gdgt3=0.05,
+    cren=0.30,  cren_prime=0.02,
+)  # → 0.547
+
+# DataFrame of downcore samples
+import pandas as pd
+df = pd.read_csv("my_gdgt_data.csv")
+df["scaledRI_cren3"] = compute_scaledRI(
+    df["GDGT-0"], df["GDGT-1"], df["GDGT-2"], df["GDGT-3"],
+    df["cren"],   df["cren_prime"],
+)
+```
+
+The default (`cren_rings=3`) produces **scaledRI_cren3** (RI₀₋₃) — crenarchaeol counted as 3 rings — which is what the canonical TEXAS posteriors were calibrated against. Pass `cren_rings=4` to reproduce the RI₀₋₄ convention of Zhang et al. (2016).
+
+**Formula:**
+
+```
+RI        = (1·GDGT1 + 2·GDGT2 + 3·GDGT3 + cren_rings·cren + cren_rings·cren')
+            / (GDGT0 + GDGT1 + GDGT2 + GDGT3 + cren + cren')
+scaledRI  = RI / cren_rings
 ```
 
 ---
@@ -459,6 +573,7 @@ tests/              Unit tests
 
 | Function | Description |
 |---|---|
+| `compute_scaledRI(gdgt0, gdgt1, gdgt2, gdgt3, cren, cren_prime, ...)` | Compute Scaled Ring Index (RI₀₋₃ by default) from six isoGDGT abundances; works with raw peak areas or fractional abundances |
 | `predict_proxy_from_T(temperatures, posterior, ...)` | Forward prediction: temperature → proxy (Scaled RI, TEX86, or any fitted proxy; pure Python) |
 | `predict_T_from_proxyObs(proxyObs, prior_mu_t, prior_sigma_t, ...)` | Inverse reconstruction: proxy → temperature with full uncertainty (runs Stan). Accepts `no3` / `gdgt23ratio` as scalar or array; pass `site_lat` / `site_lon` / `no3_dataset` for automatic WOA23 NO₃ lookup. `predict_T_from_RI` is a deprecated alias |
 | `lookup_no3_from_woa(lat, lon, woa_dataset, ...)` | Look up modern NO₃ climatology at one or more lat/lon coordinates from a WOA23-derived xr.Dataset; handles 0–360 and −180–180 longitude conventions automatically |
