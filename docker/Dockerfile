@@ -13,7 +13,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-RUN useradd -ms /bin/bash micromamba
+RUN userdel -r ubuntu 2>/dev/null || true \
+ && groupdel ubuntu 2>/dev/null || true \
+ && useradd -ms /bin/bash micromamba
 
 # Copy lock file and create env
 COPY --chown=micromamba:micromamba conda-lock.yml .
@@ -44,8 +46,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ocl-icd-libopencl1 clinfo \
  && rm -rf /var/lib/apt/lists/*
 
-# Create runtime user and working directories
-RUN useradd -ms /bin/bash micromamba \
+# Remove the ubuntu user that ubuntu:noble ships with (UID 1000) so that
+# useradd assigns UID 1000 to micromamba.  Without this, micromamba lands at
+# UID 1001 and updateRemoteUserUID fails silently because UID 1000 is taken,
+# leaving the container user unable to write to bind-mounted workspace files.
+RUN userdel -r ubuntu 2>/dev/null || true \
+ && groupdel ubuntu 2>/dev/null || true \
+ && useradd -ms /bin/bash micromamba \
  && mkdir -p /home/micromamba/app/src \
  && chown -R micromamba:micromamba /home/micromamba/app
 
