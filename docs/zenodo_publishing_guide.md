@@ -37,7 +37,7 @@ one-time manual step.
 
 | Phase | Version | When |
 |-------|---------|------|
-| Pre-publication / manuscript under review | `0.x.xx` (current: `0.1.5`) | Now — do not change |
+| Pre-publication / manuscript under review | `0.x.xx` (current: `0.1.10`) | Now — do not change |
 | Official published release | `1.0.0` | Bump only at paper acceptance |
 
 The `0.x.xx` range signals that the API and calibration are still subject to
@@ -74,7 +74,7 @@ Run from the repo root:
 
 ```bash
 bash scripts/prepare_review_archive.sh
-# → review_archive_v0.1.5/
+# → review_archive_v0.1.10/
 #     posteriors/canonical/   4 × scaledRI_cren3 .nc (RI₀₋₃, recommended)
 #     posteriors/reference/   4 × scaledRI .nc       (RI₀₋₄, comparison)
 #     data/                   2 × training CSVs

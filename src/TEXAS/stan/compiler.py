@@ -84,7 +84,7 @@ class StanCompiler:
                     capture_output=True,
                     timeout=10,
                 )
-                if result.returncode == 127:
+                if result.returncode != 0:
                     warnings.warn(
                         f"Stan model '{binary_path.name}' was compiled for a different "
                         "environment (e.g. Docker or another OS) and cannot run here "
