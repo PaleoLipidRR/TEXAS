@@ -203,7 +203,7 @@ pip install texas-psm
 conda create -n texas-env python=3.10 pip
 conda activate texas-env
 pip install cmdstanpy
-TBB_CXX_TYPE=gcc python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.36.0')"
+TBB_CXX_TYPE=gcc python -c "import cmdstanpy; cmdstanpy.install_cmdstan()"
 pip install texas-psm
 ```
 
@@ -220,7 +220,7 @@ pip install texas-psm
 
 ```python
 !pip install cmdstanpy
-import cmdstanpy; cmdstanpy.install_cmdstan(version="2.36.0")
+import cmdstanpy; cmdstanpy.install_cmdstan()
 !pip install texas-psm
 ```
 
@@ -228,15 +228,15 @@ TEXAS searches for CmdStan in the following priority order:
 
 | Priority | Location |
 |---|---|
-| 1 | `CMDSTAN` environment variable (auto-set by conda; also honoured when set manually) |
-| 2 | `/opt/cmdstan/cmdstan-2.36.0` |
-| 3 | `~/.cmdstan/cmdstan-2.36.0` — default target of `cmdstanpy.install_cmdstan()` |
-| 4 | `/usr/local/cmdstan/cmdstan-2.36.0` |
+| 1 | `CMDSTAN` environment variable (set automatically by conda/mamba on activation; also honoured when set manually) |
+| 2 | `$CONDA_PREFIX/bin/cmdstan` — active conda or mamba environment |
+| 3 | `sys.prefix/bin/cmdstan` — active Python environment (covers Docker where activation scripts didn't run) |
+| 4 | Highest `cmdstan-*` version found across `/opt/cmdstan/`, `~/.cmdstan/`, `/usr/local/cmdstan/` |
 | 5 | Whatever cmdstanpy is already configured to use |
 
-`set_cmdstan_path()` is always called on the winning path. If `CMDSTAN` is set but points to a broken directory, TEXAS emits a warning and continues down the list. If nothing is found, a `RuntimeError` is raised with explicit install instructions.
+Any CmdStan version ≥ 2.23.0 is accepted. The highest version found is preferred. `set_cmdstan_path()` is always called on the winning path so cmdstanpy's internal state stays consistent. If `CMDSTAN` is set but points to a broken directory, TEXAS emits a warning and continues down the list. If nothing is found, a `RuntimeError` is raised with explicit install instructions.
 
-To use a specific CmdStan installation (e.g. `~/.cmdstan/cmdstan-2.36.0` instead of a conda-managed one):
+To use a specific CmdStan installation instead of the auto-detected one:
 
 ```bash
 export CMDSTAN=~/.cmdstan/cmdstan-2.36.0
@@ -634,7 +634,7 @@ Internal compiler error:
 
 **Cause:** Stan's compiler (`stanc`) writes an intermediate `.hpp` file into the same directory as the `.stan` source. If that directory is owned by a different user (e.g. from a prior Docker run), the current user cannot write the `.hpp`.
 
-**Fix (v0.1.9+):** TEXAS now compiles all Stan models into `~/.texas/stan_cache/` — a directory always writable by the current user — instead of the source tree. You should not see this error with an up-to-date install. If you do, upgrade:
+**Fix (v0.1.10+):** TEXAS now compiles all Stan models into `~/.texas/stan_cache/` — a directory always writable by the current user — instead of the source tree. You should not see this error with an up-to-date install. If you do, upgrade:
 
 ```bash
 pip install --upgrade texas-psm

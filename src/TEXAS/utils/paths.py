@@ -4,19 +4,22 @@ import os, subprocess, warnings
 from pathlib import Path
 from cmdstanpy import set_cmdstan_path, cmdstan_path
 
-def find_cmdstan(version: str = "2.36.0") -> Path:
+def find_cmdstan(min_version: str = "2.23.0") -> Path:
     """Locate a working CmdStan installation and configure cmdstanpy to use it.
+
+    Accepts any CmdStan version >= min_version (default 2.23.0, when
+    reduce_sum was introduced).  For well-known directories the highest
+    installed version is preferred so users are not penalised for upgrading.
 
     Search order:
       1. ``CMDSTAN`` env var — set by conda on activation; also honoured when
-         set manually (``export CMDSTAN=/path/to/cmdstan-{version}``)
-      2. ``CONDA_PREFIX/bin/cmdstan`` — conda env activated interactively
+         set manually (``export CMDSTAN=/path/to/cmdstan-X.Y.Z``)
+      2. ``CONDA_PREFIX/bin/cmdstan`` — conda/mamba env activated interactively
       3. ``sys.prefix/bin/cmdstan`` — active Python env (covers Docker/mamba
          where activation scripts didn't run but PATH was set directly)
-      4. ``/opt/cmdstan/cmdstan-{version}``
-      5. ``~/.cmdstan/cmdstan-{version}`` — installed via cmdstanpy.install_cmdstan()
-      6. ``/usr/local/cmdstan/cmdstan-{version}``
-      7. Whatever cmdstanpy is already configured to use
+      4. ``/opt/cmdstan/``, ``~/.cmdstan/``, ``/usr/local/cmdstan/`` —
+         highest cmdstan-* version found across all three directories
+      5. Whatever cmdstanpy is already configured to use
 
     ``set_cmdstan_path()`` is always called so cmdstanpy's internal state stays
     consistent with the returned path, regardless of which branch matched.
@@ -28,11 +31,19 @@ def find_cmdstan(version: str = "2.36.0") -> Path:
     stanc = "stanc.exe" if os.name == "nt" else "stanc"
 
     def ok(p: Path) -> bool:
-        return p.is_dir() and (p / "bin" / stanc).exists()
+        stanc_path = p / "bin" / stanc
+        return p.is_dir() and stanc_path.exists() and os.access(stanc_path, os.X_OK)
 
     def _use(p: Path) -> Path:
         set_cmdstan_path(str(p))
         return p
+
+    def _ver_tuple(p: Path):
+        """Parse (major, minor, patch) from a cmdstan-X.Y.Z directory name."""
+        try:
+            return tuple(int(x) for x in p.name.replace("cmdstan-", "").split("."))
+        except ValueError:
+            return (0, 0, 0)
 
     # 1. CMDSTAN env var — highest priority; conda sets this on `conda activate`
     env_cmdstan = os.environ.get("CMDSTAN")
@@ -46,30 +57,32 @@ def find_cmdstan(version: str = "2.36.0") -> Path:
             UserWarning, stacklevel=2,
         )
 
-    # 2–3. Active conda/mamba environment (covers Docker where env isn't activated
-    #      but PATH includes the env's bin/)
-    for prefix_env in ("CONDA_PREFIX", "MAMBA_ROOT_PREFIX"):
-        prefix = os.environ.get(prefix_env)
-        if prefix:
-            p = Path(prefix) / "bin" / "cmdstan"
-            if ok(p):
-                return _use(p)
+    # 2. Active conda/mamba environment (CONDA_PREFIX is set by both conda and mamba)
+    prefix = os.environ.get("CONDA_PREFIX")
+    if prefix:
+        p = Path(prefix) / "bin" / "cmdstan"
+        if ok(p):
+            return _use(p)
 
+    # 3. sys.prefix — covers Docker/mamba without activation scripts
     p = Path(sys.prefix) / "bin" / "cmdstan"
     if ok(p):
         return _use(p)
 
-    # 4–6. Well-known installation directories
-    for p in [
-        Path("/opt/cmdstan") / f"cmdstan-{version}",
-        Path.home() / ".cmdstan" / f"cmdstan-{version}",
-        Path("/usr/local/cmdstan") / f"cmdstan-{version}",
+    # 4. Well-known installation directories — pick highest version found
+    candidates = []
+    for parent in [
+        Path("/opt/cmdstan"),
+        Path.home() / ".cmdstan",
+        Path("/usr/local/cmdstan"),
     ]:
-        if ok(p):
-            return _use(p)
+        if parent.is_dir():
+            candidates.extend(parent.glob("cmdstan-*"))
+    candidates = sorted((c for c in candidates if ok(c)), key=_ver_tuple, reverse=True)
+    if candidates:
+        return _use(candidates[0])
 
-    # 7. Whatever cmdstanpy is already configured to use (e.g. a prior
-    #    set_cmdstan_path() call in the same session or a system-wide install)
+    # 5. Whatever cmdstanpy is already configured to use
     try:
         p = Path(cmdstan_path())
         if ok(p):
@@ -77,19 +90,15 @@ def find_cmdstan(version: str = "2.36.0") -> Path:
     except Exception:
         pass
 
-    searched = [
-        "$CMDSTAN", "$CONDA_PREFIX/bin/cmdstan", "$MAMBA_ROOT_PREFIX/bin/cmdstan",
-        f"{sys.prefix}/bin/cmdstan",
-        f"/opt/cmdstan/cmdstan-{version}",
-        f"~/.cmdstan/cmdstan-{version}",
-        f"/usr/local/cmdstan/cmdstan-{version}",
-    ]
     raise RuntimeError(
-        f"No working CmdStan installation found.\n"
-        f"  Searched : {', '.join(searched)}\n"
-        f"  Install  : python -c \"import cmdstanpy; "
-        f"cmdstanpy.install_cmdstan(version='{version}')\"\n"
-        f"  Or set   : export CMDSTAN=/path/to/cmdstan-{version}"
+        "No working CmdStan installation found.\n"
+        "  Searched : $CMDSTAN, $CONDA_PREFIX/bin/cmdstan, "
+        f"{sys.prefix}/bin/cmdstan, "
+        "/opt/cmdstan/cmdstan-*, ~/.cmdstan/cmdstan-*, "
+        "/usr/local/cmdstan/cmdstan-*, cmdstanpy configured path\n"
+        "  Install  : python -c \"import cmdstanpy; "
+        "cmdstanpy.install_cmdstan()\"\n"
+        "  Or set   : export CMDSTAN=/path/to/your/cmdstan"
     )
 
 def get_repo_root(target_dir_name: str = "TEXAS") -> Path | None:
@@ -151,14 +160,13 @@ STAN_BUILD_DIR = _resolve_stan_build_dir()
 
 HOME = Path.home()
 try:
-    CMDSTAN_DIR = find_cmdstan("2.36.0")
+    CMDSTAN_DIR = find_cmdstan()
 except RuntimeError as _e:
     CMDSTAN_DIR = None
     warnings.warn(
         "CmdStan not found — Stan sampling (forward calibration and inverse "
         "reconstruction) will not be available until CmdStan is installed.\n"
-        "  Install: python -c \"import cmdstanpy; "
-        "cmdstanpy.install_cmdstan(version='2.36.0')\"",
+        "  Install: python -c \"import cmdstanpy; cmdstanpy.install_cmdstan()\"",
         UserWarning, stacklevel=1,
     )
 DOCUMENTS = HOME / "Documents"
