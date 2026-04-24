@@ -39,6 +39,19 @@ from matplotlib.patches import Rectangle
 import cartopy.feature as cfeature
 import cartopy.crs as ccrs
 
+import xarray as xr
+
+try:
+    import regionmask
+    _REGIONMASK_AVAILABLE = True
+    _OCEAN_BASINS_50 = regionmask.defined_regions.natural_earth_v5_0_0.ocean_basins_50
+    _REGION_NAME_TO_NUMBER = dict(zip(_OCEAN_BASINS_50.names, _OCEAN_BASINS_50.numbers))
+except ImportError:
+    regionmask = None
+    _REGIONMASK_AVAILABLE = False
+    _OCEAN_BASINS_50 = None
+    _REGION_NAME_TO_NUMBER = {}
+
 # ── Gray color constants (approximate proplot gray scale equivalents) ─────────
 # proplot gray0=white → gray10=black; values below are hex approximations.
 _C_GRAY3 = '#b3b3b3'   # was 'gray3' — light gray (land fill)
@@ -394,6 +407,18 @@ def _extent_mask(lons, lats, extent):
     return (lons >= lon0) & (lons <= lon1) & (lats >= lat0) & (lats <= lat1)
 
 
+def _regionmask_mask(lons, lats, region_name):
+    if not _REGIONMASK_AVAILABLE:
+        return None
+    if region_name not in _REGION_NAME_TO_NUMBER:
+        return None
+
+    lon_xr = xr.DataArray(lons, dims='points')
+    lat_xr = xr.DataArray(lats, dims='points')
+    region_ids = _OCEAN_BASINS_50.mask(lon_xr, lat_xr).values
+    return region_ids == _REGION_NAME_TO_NUMBER[region_name]
+
+
 def _fill_map(
     ax,
     z_halo: np.ma.MaskedArray,
@@ -546,6 +571,10 @@ def plot_residual_maps(
     fig_width: float = 7,
     hspace: Optional[Union[List[float], float]] = 0.04,   # matplotlib hspace (fraction of row height)
     show_grid: bool = True,
+    # Zoom panel annotation (RMSE only by default; R² omitted as it is often
+    # negative for regional subsets evaluated with a global calibration)
+    zoom_show_rmse: bool = True,
+    zoom_show_median_sigma: bool = False,
     # Metrics formatting
     rmse_fmt: str = ".3f",           # e.g. ".1f" for temperature residuals
     rmse_unit: str = "",             # e.g. "°C" for temperature residuals
@@ -658,6 +687,39 @@ def plot_residual_maps(
             r2   = r2_score(meas_vals[idx], pred_vals[idx])
             rmse = np.sqrt(np.mean(res_vals[idx] ** 2))
             metrics.append((r2, rmse))
+
+    def _region_metrics(ext, meas_vals, pred_vals, region_name=None):
+        mask = None
+        if region_name is not None:
+            mask = _regionmask_mask(lons, lats, region_name)
+        if mask is None:
+            mask = (
+                (lons >= ext[0]) & (lons <= ext[1]) &
+                (lats >= ext[2]) & (lats <= ext[3])
+            )
+        meas_raw = meas_vals[mask]
+        pred_raw = pred_vals[mask]
+        valid = ~np.isnan(meas_raw) & ~np.isnan(pred_raw)
+        if valid.sum() < 2:
+            return None, None
+        meas = meas_raw[valid]
+        pred = pred_raw[valid]
+        return r2_score(meas, pred), np.sqrt(np.mean((meas - pred) ** 2))
+
+    def _region_median(ext, vals, region_name=None):
+        mask = None
+        if region_name is not None:
+            mask = _regionmask_mask(lons, lats, region_name)
+        if mask is None:
+            mask = (
+                (lons >= ext[0]) & (lons <= ext[1]) &
+                (lats >= ext[2]) & (lats <= ext[3])
+            )
+        vals_raw = vals[mask]
+        valid = ~np.isnan(vals_raw)
+        if valid.sum() < 1:
+            return None
+        return np.median(vals_raw[valid])
 
     # ── Colour scale ────────────────────────────────────────────────────────
     if vmin is not None and vmax is not None:
@@ -772,15 +834,52 @@ def plot_residual_maps(
                 transform=ccrs.PlateCarree(), zorder=7,
             ))
 
+        if measured is not None and predicted is not None:
+            meas_vals = measured.values  if hasattr(measured,  "values") else np.array(measured)
+            pred_vals = predicted.values if hasattr(predicted, "values") else np.array(predicted)
+            _, med_rmse = _region_metrics(
+                med_extent, meas_vals, pred_vals, region_name="Mediterranean Sea"
+            )
+            _, rs_rmse  = _region_metrics(
+                rs_extent, meas_vals, pred_vals, region_name="Red Sea"
+            )
+        else:
+            med_rmse = rs_rmse = None
+
+        if residuals is not None:
+            res_vals = residuals.values if hasattr(residuals, "values") else np.array(residuals)
+            med_median_sigma = _region_median(med_extent, res_vals, "Mediterranean Sea")
+            rs_median_sigma = _region_median(rs_extent, res_vals, "Red Sea")
+        else:
+            med_median_sigma = rs_median_sigma = None
+
         if annotations:
             for lon, lat, num in annotations:
                 _circled_number(ax_global, lon, lat, num,
                                 fontsize=10, pad=0.1,
                                 facecolor="white", edgecolor="k")
 
-        # col 1: Mediterranean
+        # col 1: Mediterranean — fill map first, then annotate so Cartopy's
+        # set_extent() clip-path is established before text artists are added.
         _fill_map(ax_med, z_halo, z_true, lons, lats,
                   extent=list(med_extent), scatter_s=14, scatter_lw=0.5, **fill_kw)
+        if zoom_show_rmse and med_rmse is not None:
+            ax_med.text(
+                0.02, 0.02,
+                f"RMSE {med_rmse:{rmse_fmt}}{rmse_unit}",
+                transform=ax_med.transAxes, fontsize=10,
+                ha="left", va="bottom", zorder=12, clip_on=False,
+                color='white'
+                # bbox=dict(facecolor="white", alpha=0.85, edgecolor="none"),
+            )
+        if zoom_show_median_sigma and med_median_sigma is not None:
+            ax_med.text(
+                0.02, 0.98,
+                f"Median σ {med_median_sigma:.1f}{rmse_unit}",
+                transform=ax_med.transAxes, fontsize=10,
+                ha="left", va="top", zorder=12, clip_on=False,
+                color='white'
+            )
         if annotations:
             for j, (_, _, num) in enumerate(annotations[:1]):   # ① only
                 _circled_number(ax_med, 0.9, 1.0, num,
@@ -788,9 +887,26 @@ def plot_residual_maps(
                                 transform=ax_med.transAxes,
                                 facecolor="white", edgecolor="k")
 
-        # col 2: Red Sea
+        # col 2: Red Sea — same: fill first, then annotate.
         _fill_map(ax_rs, z_halo, z_true, lons, lats,
                   extent=list(rs_extent), scatter_s=14, scatter_lw=0.5, **fill_kw)
+        if zoom_show_rmse and rs_rmse is not None:
+            ax_rs.text(
+                0.02, 0.02,
+                f"{rs_rmse:{rmse_fmt}}{rmse_unit}",
+                transform=ax_rs.transAxes, fontsize=10,
+                ha="left", va="bottom", zorder=12, clip_on=False,
+                color='white'
+                # bbox=dict(facecolor="white", alpha=0.85, edgecolor="none"),
+            )
+        if zoom_show_median_sigma and rs_median_sigma is not None:
+            ax_rs.text(
+                0.02, 0.98,
+                f"Median σ {rs_median_sigma:.1f}{rmse_unit}",
+                transform=ax_rs.transAxes, fontsize=10,
+                ha="left", va="top", zorder=12, clip_on=False,
+                color='white'
+            )
         if annotations and len(annotations) >= 2:
             _circled_number(ax_rs, 0.9, 1.0, annotations[1][2],
                             fontsize=12, pad=0.1,
