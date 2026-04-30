@@ -33,7 +33,7 @@ notebooks/manuscripts/regrid_weights_*.nc
 notebooks/exploration/
 
 # Manuscript draft (pre-publication)
-manuscript/
+/manuscript/
 
 # Data — large external datasets (download separately, see data/README.md)
 data/external/
