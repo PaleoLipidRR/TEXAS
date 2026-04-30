@@ -440,22 +440,39 @@ def _fill_map(
         ax.set_extent(extent, crs=ccrs.PlateCarree())
         m = _extent_mask(lons, lats, extent)
         sc_lons, sc_lats = lons[m], lats[m]
+
+        # Subset grid arrays to extent + buffer. Also: do NOT rasterize zoom
+        # panels — PDF output drops rasterized bitmaps inside a Cartopy axes
+        # that has set_extent (the bitmap loses its clip path and goes white).
+        # After subsetting the grid is small enough for vector rendering.
+        _buf = 5.0
+        lon0, lon1, lat0, lat1 = extent
+        _lh = (grid_lon_halo >= lon0 - _buf) & (grid_lon_halo <= lon1 + _buf)
+        _rh = (grid_lat_halo >= lat0 - _buf) & (grid_lat_halo <= lat1 + _buf)
+        _lt = (grid_lon_true >= lon0 - _buf) & (grid_lon_true <= lon1 + _buf)
+        _rt = (grid_lat_true >= lat0 - _buf) & (grid_lat_true <= lat1 + _buf)
+        grid_lon_halo = grid_lon_halo[_lh]
+        grid_lat_halo = grid_lat_halo[_rh]
+        z_halo        = z_halo[np.ix_(_rh, _lh)]
+        grid_lon_true = grid_lon_true[_lt]
+        grid_lat_true = grid_lat_true[_rt]
+        z_true        = z_true[np.ix_(_rt, _lt)]
+        _rasterized = False
     else:
         sc_lons, sc_lats = lons, lats
+        _rasterized = True
 
     pcm1 = ax.pcolormesh(
         grid_lon_halo, grid_lat_halo, z_halo,
         cmap=cmap, norm=norm,
-        transform=ccrs.PlateCarree(), zorder=2, rasterized=True,
+        transform=ccrs.PlateCarree(), zorder=2, rasterized=_rasterized,
     )
-    pcm1.set_rasterized(True)
 
     pcm2 = ax.pcolormesh(
         grid_lon_true, grid_lat_true, z_true,
         cmap=cmap, norm=norm,
-        transform=ccrs.PlateCarree(), zorder=3, rasterized=True,
+        transform=ccrs.PlateCarree(), zorder=3, rasterized=_rasterized,
     )
-    pcm2.set_rasterized(True)
 
     ax.scatter(
         sc_lons, sc_lats,
@@ -1047,10 +1064,6 @@ def plot_residual_maps(
     new_fig_height = fig_height - cbar_bottom_in + _BOTTOM_MARGIN_IN
     fig.set_size_inches(fig_width, new_fig_height, forward=True)
     fig.canvas.draw()
-    try:
-        fig.tight_layout(rect=[0, 0.025, 1, 0.98])
-    except Exception:
-        pass
 
     # Section headers ──────────────────────────
     if section_headers:
