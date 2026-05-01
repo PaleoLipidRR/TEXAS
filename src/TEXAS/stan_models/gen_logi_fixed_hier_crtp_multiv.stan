@@ -108,8 +108,8 @@ model {
     sigma_v_culmeso  ~ normal(0, 2)   T[0, ];
 
     // ─── 3. Priors for residual noise ─────────────────────────────────────────
-    sigma_proxyObs_cul  ~ normal(0.01, 0.1);
-    sigma_proxyObs_meso ~ normal(0.01, 0.1);
+    sigma_proxyObs_cul  ~ normal(0, 0.1);
+    sigma_proxyObs_meso ~ normal(0, 0.1);
 
     // ─── 4. Likelihood for culture + mesocosm data ────────────────────────────
     // Compute expected RI at each known temperature using the Richards curve.

@@ -13,7 +13,7 @@ parameters {
   real<lower=-1.8> t0_culmeso;        // Center of the curve (NOT necessarily inflection)
   real<lower=0, upper=0.5>  k_culmeso;   // Growth rate
   real<lower=0.1, upper=10>  v_culmeso;             // Shape (nu); >0, often >0.1 to avoid numerical issues
-  real<lower=0>    b_culmeso;             // Lower asymptote (A)
+  real<lower=0, upper=1>    b_culmeso;    // Lower asymptote (A)
 
   real<lower=0> sigma_proxyObs_cul;
   real<lower=0> sigma_proxyObs_meso;
@@ -25,8 +25,8 @@ model {
   k_culmeso      ~ normal(0, 0.2) T[0, 0.5];
   v_culmeso      ~ normal(1, 2) T[0.1, 10];
   b_culmeso      ~ beta(2, 5);
-  sigma_proxyObs_cul  ~ normal(0.01, 0.1);
-  sigma_proxyObs_meso ~ normal(0.01, 0.1);
+  sigma_proxyObs_cul  ~ normal(0, 0.1);
+  sigma_proxyObs_meso ~ normal(0, 0.1);
 
   // Generalized logistic mean vectors (Q fixed to 1)
   vector[N_cul] mu_proxyObs_cul = b_culmeso + (1 - b_culmeso)
