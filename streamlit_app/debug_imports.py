@@ -7,7 +7,7 @@ print('   OK -', FWD_CACHE_DIR, flush=True)
 
 print('2. TEXAS.stan.invT...', flush=True)
 try:
-    from TEXAS.stan.invT import predict_temperature_from_RI
+    from TEXAS.stan.invT import predict_temperature_from_proxyObs
     print('   OK', flush=True)
 except Exception as e:
     print('   skipped:', e, flush=True)

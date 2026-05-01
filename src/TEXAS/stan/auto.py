@@ -1,4 +1,4 @@
-# DEPRECATED: OpenCL variant of predict_temperature_from_RI. Not used by any active workflow. Kept for reference only.
+# DEPRECATED: OpenCL variant of predict_temperature_from_proxyObs. Not used by any active workflow. Kept for reference only.
 # TEXAS/stan/auto.py
 from __future__ import annotations
 import os, shutil, logging
@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Union
 import numpy as np
 
 from TEXAS.utils.hw import detect_opencl_available
-from TEXAS.stan.invT import predict_temperature_from_RI as _predict_raw
+from TEXAS.stan.invT import predict_temperature_from_proxyObs as _predict_raw
 
 log = logging.getLogger(__name__)
 
@@ -74,7 +74,7 @@ def predict_temperature_from_RI_auto(
 
     # 3) Call through to the real implementation
     return _predict_raw(
-        scaledRI=scaledRI,
+        proxyObs=scaledRI,
         prior_mu_t=prior_mu_t,
         prior_sigma_t=prior_sigma_t,
         fwd_posterior_name=fwd_posterior_name,

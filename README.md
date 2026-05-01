@@ -575,7 +575,7 @@ tests/              Unit tests
 |---|---|
 | `compute_scaledRI(gdgt0, gdgt1, gdgt2, gdgt3, cren, cren_prime, ...)` | Compute Scaled Ring Index (RI₀₋₃ by default) from six isoGDGT abundances; works with raw peak areas or fractional abundances |
 | `predict_proxy_from_T(temperatures, posterior, ...)` | Forward prediction: temperature → proxy (Scaled RI, TEX86, or any fitted proxy; pure Python) |
-| `predict_T_from_proxyObs(proxyObs, prior_mu_t, prior_sigma_t, ...)` | Inverse reconstruction: proxy → temperature with full uncertainty (runs Stan). Accepts `no3` / `gdgt23ratio` as scalar or array; pass `site_lat` / `site_lon` / `no3_dataset` for automatic WOA23 NO₃ lookup. `predict_T_from_RI` is a deprecated alias |
+| `predict_T_from_proxyObs(proxyObs, prior_mu_t, prior_sigma_t, ...)` | Inverse reconstruction: proxy → temperature with full uncertainty (runs Stan). Accepts `no3` / `gdgt23ratio` as scalar or array; pass `site_lat` / `site_lon` / `no3_dataset` for automatic WOA23 NO₃ lookup |
 | `lookup_no3_from_woa(lat, lon, woa_dataset, ...)` | Look up modern NO₃ climatology at one or more lat/lon coordinates from a WOA23-derived xr.Dataset; handles 0–360 and −180–180 longitude conventions automatically |
 | `download_posteriors(names, ...)` | Download all standard forward posteriors from Zenodo |
 | `download_posterior(name, ...)` | Download a single forward posterior from Zenodo |

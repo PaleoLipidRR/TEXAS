@@ -130,13 +130,12 @@ def predict_proxy_from_T(
 
 
 def predict_T_from_proxyObs(
-    proxyObs: Union[np.ndarray, List[float]] = None,
-    prior_mu_t: Union[np.ndarray, float] = None,
-    prior_sigma_t: float = None,
+    proxyObs: Union[np.ndarray, List[float]],
+    prior_mu_t: Union[np.ndarray, float],
+    prior_sigma_t: float,
     fwd_posterior_name: Optional[str] = None,
     *,
     proxy_name: Optional[str] = None,
-    scaledRI: Union[np.ndarray, List[float]] = None,  # deprecated alias
     fwd_posterior: Optional[xr.Dataset] = None,
     temptype: Optional[str] = None,
     site_name: Optional[str] = None,
@@ -294,15 +293,6 @@ def predict_T_from_proxyObs(
         ``"p95"``        — 95th percentile temperature (°C), shape (N,)
         ``"metadata"``   — run metadata dict (model name, attrs, etc.)
     """
-    # Backward-compat: accept deprecated scaledRI kwarg
-    if scaledRI is not None and proxyObs is None:
-        import warnings
-        warnings.warn(
-            "The 'scaledRI' parameter is deprecated; use 'proxyObs' instead.",
-            DeprecationWarning, stacklevel=2,
-        )
-        proxyObs = scaledRI
-
     # ── Resolve NO₃ predictor ─────────────────────────────────────────────────
     # Priority: site_lat/lon lookup > no3= explicit > predictors["no3"] > zeros
     predictors = dict(predictors or {})
@@ -452,26 +442,3 @@ def compute_scaledRI(
     return numerator / denominator
 
 
-def predict_RI_from_T(*args, **kwargs):
-    """Deprecated: use predict_proxy_from_T() instead."""
-    import warnings
-    warnings.warn(
-        "predict_RI_from_T() is deprecated; use predict_proxy_from_T() instead.",
-        DeprecationWarning, stacklevel=2,
-    )
-    return predict_proxy_from_T(*args, **kwargs)
-
-
-def predict_T_from_RI(*args, **kwargs):
-    """Deprecated: use predict_T_from_proxyObs() instead."""
-    import warnings
-    warnings.warn(
-        "predict_T_from_RI() is deprecated; use predict_T_from_proxyObs() instead.",
-        DeprecationWarning, stacklevel=2,
-    )
-    if args and "proxyObs" not in kwargs and "scaledRI" not in kwargs:
-        kwargs["proxyObs"] = args[0]
-        args = args[1:]
-    elif "scaledRI" in kwargs:
-        kwargs["proxyObs"] = kwargs.pop("scaledRI")
-    return predict_T_from_proxyObs(*args, **kwargs)

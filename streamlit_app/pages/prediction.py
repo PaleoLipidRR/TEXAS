@@ -59,9 +59,9 @@ def render_prediction_tab(predict_fn):
     disabled = predict_fn is None
     if st.button("Run prediction", type="primary", disabled=disabled):
         if predict_fn is None:
-            st.error("predict_temperature_from_RI not available. Check TEXAS install.")
+            st.error("predict_T_from_proxyObs not available. Check TEXAS install.")
         else:
-            with st.spinner("Calling TEXAS.stan.invT.predict_temperature_from_RI..."):
+            with st.spinner("Running TEXAS.predict_T_from_proxyObs..."):
                 predictors = {}
                 if opt_gdgt != "<none>":
                     predictors["gdgt23ratio"] = df_in[opt_gdgt].astype(float).tolist()
@@ -70,7 +70,7 @@ def render_prediction_tab(predict_fn):
 
                 try:
                     res = predict_fn(
-                        scaledRI=df_in[col_scaledRI].astype(float).tolist(),
+                        proxyObs=df_in[col_scaledRI].astype(float).tolist(),
                         prior_mu_t=float(prior_mu_t),
                         prior_sigma_t=float(prior_sigma_t),
                         fwd_posterior_name=fwd_posterior_name,

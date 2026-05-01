@@ -135,13 +135,13 @@ p(T|data) = ∫ p(T|data,θ) p(θ) dθ
 **🎯 Optimal Settings:**
 ```python
 # For most applications (recommended)
-predict_temperature_from_RI(
+predict_T_from_proxyObs(
     model_type="direct",      # 100× parameter reduction
     threads_per_chain=4,      # 1-4% additional speedup
 )
 
 # For maximum compatibility
-predict_temperature_from_RI(
+predict_T_from_proxyObs(
     model_type="direct",      # Still 100× more efficient
     # no threading
 )
@@ -151,7 +151,7 @@ predict_temperature_from_RI(
 
 ```python
 # Direct sampling with threading (recommended for most cases)
-results = predict_temperature_from_RI(
+results = predict_T_from_proxyObs(
     scaledRI=data,
     prior_mu_t=30.0,
     prior_sigma_t=6.0,
@@ -162,7 +162,7 @@ results = predict_temperature_from_RI(
 )
 
 # Direct sampling without threading (maximum compatibility)
-results = predict_temperature_from_RI(
+results = predict_T_from_proxyObs(
     scaledRI=data,
     prior_mu_t=30.0,
     prior_sigma_t=6.0,
@@ -172,7 +172,7 @@ results = predict_temperature_from_RI(
 )
 
 # Ensemble models (legacy/research use)
-results = predict_temperature_from_RI(
+results = predict_T_from_proxyObs(
     scaledRI=data,
     prior_mu_t=30.0,
     prior_sigma_t=6.0,

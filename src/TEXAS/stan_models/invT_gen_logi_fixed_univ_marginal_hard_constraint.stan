@@ -66,7 +66,7 @@ data {
     // Stan enforces this by transforming t_est to an unconstrained space
     // during sampling (log-Jacobian corrects the density). No sample will
     // ever fall below min_temp in the posterior.
-    // Set via predict_T_from_RI(..., constraint_type='hard_constraint', min_temp=-1.8).
+    // Set via predict_T_from_proxyObs(..., constraint_type='hard_constraint', min_temp=-1.8).
     real min_temp;             // Minimum physically plausible temperature (°C)
 }
 

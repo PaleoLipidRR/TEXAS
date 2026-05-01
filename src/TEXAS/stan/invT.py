@@ -507,20 +507,3 @@ def predict_temperature_from_proxyObs(
         _save_invT_results(results, results_path)
 
     return results
-
-
-def predict_temperature_from_RI(*args, **kwargs):
-    """Deprecated: use predict_temperature_from_proxyObs() instead."""
-    import warnings
-    warnings.warn(
-        "predict_temperature_from_RI() is deprecated; "
-        "use predict_temperature_from_proxyObs() instead.",
-        DeprecationWarning, stacklevel=2,
-    )
-    # Map old positional arg name to new
-    if args and "proxyObs" not in kwargs and "scaledRI" not in kwargs:
-        kwargs["proxyObs"] = args[0]
-        args = args[1:]
-    elif "scaledRI" in kwargs:
-        kwargs["proxyObs"] = kwargs.pop("scaledRI")
-    return predict_temperature_from_proxyObs(*args, **kwargs)

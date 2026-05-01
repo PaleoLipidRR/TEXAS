@@ -15,16 +15,16 @@ def test_version_is_string():
     assert len(TEXAS.__version__) > 0
 
 
-def test_predict_ri_from_t_is_callable():
-    """predict_RI_from_T is exported and callable."""
+def test_predict_proxy_from_t_is_callable():
+    """predict_proxy_from_T is exported and callable."""
     import TEXAS
-    assert callable(TEXAS.predict_RI_from_T)
+    assert callable(TEXAS.predict_proxy_from_T)
 
 
-def test_predict_t_from_ri_is_callable():
-    """predict_T_from_RI is exported and callable."""
+def test_predict_t_from_proxyobs_is_callable():
+    """predict_T_from_proxyObs is exported and callable."""
     import TEXAS
-    assert callable(TEXAS.predict_T_from_RI)
+    assert callable(TEXAS.predict_T_from_proxyObs)
 
 
 def test_load_posterior_is_callable():
