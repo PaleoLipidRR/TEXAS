@@ -622,6 +622,7 @@ def build_fwd_data(
         summary_lines.append("   mesocosm:  —")
 
     # Coretop + predictors
+    N_crtp = 0
     if t_crtp is not None:
         t_arr  = np.asarray(t_crtp,    dtype=float)
         p_arr  = np.asarray(proxy_crtp, dtype=float)
