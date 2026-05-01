@@ -146,15 +146,9 @@ def generate_ensemble_auto(
     is_inv = ("invT_" in model_name) or ("t_est" in post_ds.data_vars)
 
     if model_type in ("auto", "inverse") and is_inv:
-        from .invT import generate_invT_ensemble
-        return generate_invT_ensemble(
-            post_ds,
-            x_vals,
-            gdgt23ratio=gdgt23ratio,
-            no3=no3,
-            no3_cutoff=no3_cutoff,               # <-- pass through user arg (None allowed)
-            return_full_ensemble=return_full_ensemble,
-            **kwargs
+        raise NotImplementedError(
+            "generate_ensemble_auto() does not support invT posteriors. "
+            "Use predict_T_from_proxyObs() for inverse temperature reconstruction."
         )
 
     elif model_type in ("auto", "forward") and not is_inv:

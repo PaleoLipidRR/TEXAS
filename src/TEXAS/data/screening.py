@@ -2,6 +2,7 @@
 Data quality control and outlier screening tools.
 """
 
+from itertools import combinations
 from scipy.spatial.distance import mahalanobis
 from scipy.linalg import inv, pinv, LinAlgError
 from scipy.stats import chi2
@@ -11,7 +12,6 @@ from typing import Optional, Literal
 
 from matplotlib.patches import Ellipse
 import matplotlib.pyplot as plt
-from matplotlib.transforms import Affine2D
 
 class MahalanobisOutlierDetector:
     """
@@ -762,6 +762,7 @@ class MahalanobisOutlierDetector:
         X_valid = X.loc[valid_idx].to_numpy(dtype=float)
         
         # Fit PCA
+        from sklearn.decomposition import PCA
         pca = PCA(n_components=n_components)
         X_pca = pca.fit_transform(X_valid)
         
