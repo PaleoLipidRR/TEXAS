@@ -7,6 +7,7 @@ Usage:
     print_system_summary()
 """
 
+import os
 import platform
 import psutil
 import subprocess
@@ -275,7 +276,11 @@ def suggest_stan_sampling_kwargs() -> dict:
     Returns a dict containing only the keys that differ from CmdStanPy defaults,
     so callers can safely merge it with their own kwargs.
     """
-    physical = psutil.cpu_count(logical=False) or 1
+    try:
+        # Respects cgroup/Docker --cpus limits on Linux; falls back to psutil on other OS
+        physical = len(os.sched_getaffinity(0))
+    except AttributeError:
+        physical = psutil.cpu_count(logical=False) or 1
 
     chains = 4
     parallel_chains = min(chains, physical)
