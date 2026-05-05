@@ -2,20 +2,19 @@
 """
 Utilities for downloading data from the TEXAS Zenodo data record.
 
-The Zenodo data record contains a single ZIP archive
-(``texas-psm-zenodo-v0.1.5.zip``) with the following internal layout::
-
-    texas-psm-zenodo/
-      posteriors/canonical/   ← recommended RI₀₋₃ posteriors
-      posteriors/reference/   ← RI₀₋₄ posteriors (comparison only)
-      data/                   ← training CSVs (needed for SI notebooks)
+Files are downloaded individually from Zenodo so you only fetch what you need.
+The two full multivariate (EIV) posteriors are ~78 MB each; all other files are
+< 2 MB.  A size notice is printed before any download ≥ 5 MB.
 
 Usage
 -----
 >>> import TEXAS
->>> TEXAS.download_all()               # recommended: everything at once
+>>> TEXAS.download_all()               # everything: posteriors + training data
 >>> TEXAS.download_posteriors()        # forward calibration posteriors only
->>> TEXAS.download_training_data()     # training CSVs only (SI notebooks)
+>>> TEXAS.download_training_data()     # training CSVs + NO₃ field only
+
+Download a specific posterior:
+>>> TEXAS.download_posteriors(["gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3"])
 
 Docker/devcontainer users: run on the host machine — the container
 bind-mounts ``data/`` automatically.
@@ -23,106 +22,100 @@ bind-mounts ``data/`` automatically.
 
 from __future__ import annotations
 
-import io
-import tempfile
 import urllib.error
 import urllib.request
-import zipfile
 from pathlib import Path
 from typing import List, Optional
 
 from .paths import POSTERIOR_CACHE_DIR, SPREADSHEETS_DIR
 
 # ─── Zenodo config ────────────────────────────────────────────────────────────
+# NOTE: update ZENODO_RECORD_ID after uploading the v0.2.0 data record to Zenodo.
 ZENODO_RECORD_ID: str = "19666745"
-ZENODO_ZIP_FILENAME: str = "texas-psm-zenodo-v0.1.5.zip"
-ZENODO_ZIP_ROOT: str = "texas-psm-zenodo"   # folder inside the ZIP
 
-_ZIP_URL = (
-    f"https://zenodo.org/records/{ZENODO_RECORD_ID}/files/"
-    f"{ZENODO_ZIP_FILENAME}?download=1"
-)
+_ZENODO_BASE = f"https://zenodo.org/records/{ZENODO_RECORD_ID}/files"
 
 
-def _download_zip(dest: Path, force: bool = False) -> Path:
-    """Download the Zenodo ZIP to *dest*, skipping if already present."""
+def _file_url(filename: str) -> str:
+    return f"{_ZENODO_BASE}/{filename}?download=1"
+
+
+def _fmt_size(size_mb: float) -> str:
+    if size_mb >= 1:
+        return f"~{size_mb:.0f} MB"
+    return f"~{size_mb * 1024:.0f} KB"
+
+
+def _download_file(url: str, dest: Path, size_mb: float, force: bool = False) -> Path:
+    """Download a single file from *url* to *dest*."""
     if dest.exists() and not force:
-        # Validate the cached file is actually a ZIP before trusting it
-        if zipfile.is_zipfile(dest):
-            return dest
-        dest.unlink()  # stale/corrupt file — re-download below
-
+        print(f"Already cached: {dest.name}")
+        return dest
     dest.parent.mkdir(parents=True, exist_ok=True)
-    print(f"Downloading {ZENODO_ZIP_FILENAME} from Zenodo (~560 MB) …")
+    if size_mb >= 5:
+        print(f"Downloading {dest.name} ({_fmt_size(size_mb)}) …")
+    else:
+        print(f"Downloading {dest.name} …")
     try:
-        with urllib.request.urlopen(_ZIP_URL) as resp:
-            status = resp.status
-            if status != 200:
+        with urllib.request.urlopen(url) as resp:
+            if resp.status != 200:
                 raise urllib.error.URLError(
-                    f"Zenodo returned HTTP {status} for {_ZIP_URL!r}.\n"
+                    f"Zenodo returned HTTP {resp.status} for {url!r}.\n"
                     "  The data record may not be published yet — "
-                    "contact the authors or check https://doi.org/10.5281/zenodo."
-                    f"{ZENODO_RECORD_ID}"
+                    "contact the authors or check "
+                    f"https://doi.org/10.5281/zenodo.{ZENODO_RECORD_ID}"
                 )
-            data = resp.read()
+            dest.write_bytes(resp.read())
     except urllib.error.URLError:
         raise
     except Exception as e:
-        raise urllib.error.URLError(f"ZIP download failed: {e}") from e
-
-    dest.write_bytes(data)
-    if not zipfile.is_zipfile(dest):
-        dest.unlink()
-        raise ValueError(
-            f"Downloaded file from Zenodo is not a valid ZIP.\n"
-            f"  URL     : {_ZIP_URL}\n"
-            f"  The Zenodo record ({ZENODO_RECORD_ID}) may not be published yet or "
-            "the file name may have changed."
-        )
-    print(f"ZIP saved to {dest}")
+        raise urllib.error.URLError(f"Download failed: {e}") from e
+    print(f"  → saved to {dest}")
     return dest
 
 
-def _extract_member(zf: zipfile.ZipFile, zip_rel_path: str, dest: Path) -> Path:
-    """Extract one member (path inside ZIP relative to ZENODO_ZIP_ROOT) to *dest*."""
-    member = f"{ZENODO_ZIP_ROOT}/{zip_rel_path}"
-    dest.parent.mkdir(parents=True, exist_ok=True)
-    with zf.open(member) as src, open(dest, "wb") as out:
-        out.write(src.read())
-    return dest
-
-
-# ─── Registry of standard posteriors ─────────────────────────────────────────
-# Maps posterior name (no .nc) → path inside ZIP (relative to ZENODO_ZIP_ROOT).
-POSTERIOR_REGISTRY: dict[str, str] = {
-    # ── CANONICAL (scaledRI_cren3, RI₀₋₃) — RECOMMENDED ─────────────────
-    "gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3":
-        "posteriors/canonical/gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc",
-    "gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3":
-        "posteriors/canonical/gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3.nc",
-    "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3":
-        "posteriors/canonical/gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc",
-    "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3":
-        "posteriors/canonical/gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3.nc",
-
-    # ── REFERENCE (scaledRI, RI₀₋₄) — kept for comparison only ──────────
-    "gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI":
-        "posteriors/reference/gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI.nc",
-    "gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI":
-        "posteriors/reference/gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI.nc",
-    "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI":
-        "posteriors/reference/gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI.nc",
-    "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI":
-        "posteriors/reference/gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI.nc",
+# ─── Registry of forward calibration posteriors ───────────────────────────────
+# Each entry: name (no .nc) → {"filename": str, "size_mb": float}
+# filename is the flat name on the Zenodo record (no subdirectory).
+POSTERIOR_REGISTRY: dict[str, dict] = {
+    "gen_logi_fixed_culmeso_cultureT_scaledRI_cren3": {
+        "filename": "gen_logi_fixed_culmeso_cultureT_scaledRI_cren3.nc",
+        "size_mb": 0.2,
+    },
+    "gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3": {
+        "filename": "gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc",
+        "size_mb": 0.3,
+    },
+    "gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3": {
+        "filename": "gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3.nc",
+        "size_mb": 0.3,
+    },
+    # EIV multivariate posteriors — large due to per-site latent variables (~1500 coretop sites)
+    "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3": {
+        "filename": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc",
+        "size_mb": 78,
+    },
+    "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3": {
+        "filename": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3.nc",
+        "size_mb": 78,
+    },
 }
 
 # ─── Training data registry ───────────────────────────────────────────────────
-# Maps local name → path inside ZIP (relative to ZENODO_ZIP_ROOT).
-TRAINING_DATA_REGISTRY: dict[str, str] = {
-    "combined_coretop_culture_mesocosm":
-        "data/combined_coretop_culture_mesocosm_rev20260210.csv",
-    "ds_gridded_screened_global":
-        "data/ds_gridded_screened_global_compilation_finalized.csv",
+# Each entry: name → {"filename": str, "size_mb": float}
+TRAINING_DATA_REGISTRY: dict[str, dict] = {
+    "combined_coretop_culture_mesocosm": {
+        "filename": "combined_coretop_culture_mesocosm_rev20260210.csv",
+        "size_mb": 1.8,
+    },
+    "ds_gridded_screened_global": {
+        "filename": "ds_gridded_screened_global_compilation_finalized.csv",
+        "size_mb": 1.0,
+    },
+    "cmems_no3_uncertainty_field": {
+        "filename": "cmems_no3_uncertainty_field.nc",
+        "size_mb": 14,
+    },
 }
 
 
@@ -133,11 +126,11 @@ def download_all(
     data_dir: Optional[Path | str] = None,
     force: bool = False,
 ) -> None:
-    """Download everything from Zenodo: posteriors + training CSVs.
+    """Download everything from Zenodo: forward posteriors + training data.
 
-    This is the recommended one-shot function for new users.  The ZIP
-    (~560 MB) is downloaded once and extracted; subsequent calls are skipped
-    unless *force=True*.
+    Files are downloaded individually; already-cached files are skipped unless
+    *force=True*.  Total download is ~158 MB (dominated by the two EIV
+    multivariate posteriors at ~78 MB each).
 
     Parameters
     ----------
@@ -145,9 +138,9 @@ def download_all(
         Destination for ``.nc`` posteriors.  Defaults to the standard
         posterior cache directory.
     data_dir : Path or str, optional
-        Destination for training CSVs.  Defaults to ``data/spreadsheets/``.
+        Destination for training data files.  Defaults to ``data/spreadsheets/``.
     force : bool
-        Re-download and re-extract even if files already exist locally.
+        Re-download files that already exist locally.
     """
     download_posteriors(cache_dir=cache_dir, force=force)
     download_training_data(dest_dir=data_dir, force=force)
@@ -160,54 +153,56 @@ def download_posteriors(
 ) -> List[Path]:
     """Download forward calibration posteriors from Zenodo.
 
-    Downloads the Zenodo ZIP once (cached in a temp directory for the
-    session) and extracts only the requested ``.nc`` files.
-
     Parameters
     ----------
     names : list of str, optional
-        Subset of POSTERIOR_REGISTRY keys to extract.  Downloads all
-        canonical and reference posteriors when omitted.
+        Subset of ``POSTERIOR_REGISTRY`` keys to download.  Downloads all
+        five posteriors when omitted (~158 MB total; the two EIV multivariate
+        posteriors are ~78 MB each — pass ``names=`` to download only the
+        univariate ones if you don't need the EIV model).
     cache_dir : Path or str, optional
         Destination directory.  Defaults to the standard posterior cache.
     force : bool
-        Re-download and overwrite files that already exist locally.
+        Re-download files that already exist locally.
 
     Returns
     -------
     list of Path
-        Local paths of the extracted ``.nc`` files.
+        Local paths of the downloaded ``.nc`` files.
+
+    Examples
+    --------
+    Download only the univariate SST posterior (~0.3 MB):
+
+    >>> download_posteriors(["gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3"])
     """
     targets = names if names is not None else list(POSTERIOR_REGISTRY)
     dest_dir = Path(cache_dir) if cache_dir else POSTERIOR_CACHE_DIR
     dest_dir.mkdir(parents=True, exist_ok=True)
 
-    # Check which files are already present
+    for name in targets:
+        if name not in POSTERIOR_REGISTRY:
+            available = "\n  ".join(POSTERIOR_REGISTRY)
+            raise KeyError(
+                f"'{name}' is not in POSTERIOR_REGISTRY.\n"
+                f"Available posteriors:\n  {available}"
+            )
+
     missing = [n for n in targets if not (dest_dir / f"{n}.nc").exists() or force]
     if not missing:
-        print("All posteriors already cached.")
+        print("All requested posteriors already cached.")
         return [dest_dir / f"{n}.nc" for n in targets]
 
-    zip_path = Path(tempfile.gettempdir()) / ZENODO_ZIP_FILENAME
-    _download_zip(zip_path, force=force)
+    total_mb = sum(POSTERIOR_REGISTRY[n]["size_mb"] for n in missing)
+    if total_mb >= 5:
+        print(f"Downloading {len(missing)} posterior(s) — total ~{total_mb:.0f} MB")
 
     paths = []
-    with zipfile.ZipFile(zip_path, "r") as zf:
-        for name in targets:
-            dest = dest_dir / f"{name}.nc"
-            if dest.exists() and not force:
-                print(f"Already cached: {dest}")
-                paths.append(dest)
-                continue
-            if name not in POSTERIOR_REGISTRY:
-                available = "\n  ".join(POSTERIOR_REGISTRY)
-                raise KeyError(
-                    f"'{name}' is not in POSTERIOR_REGISTRY.\n"
-                    f"Available posteriors:\n  {available}"
-                )
-            _extract_member(zf, POSTERIOR_REGISTRY[name], dest)
-            print(f"Extracted → {dest}")
-            paths.append(dest)
+    for name in targets:
+        entry = POSTERIOR_REGISTRY[name]
+        dest = dest_dir / f"{name}.nc"
+        _download_file(_file_url(entry["filename"]), dest, entry["size_mb"], force=force)
+        paths.append(dest)
 
     return paths
 
@@ -216,11 +211,13 @@ def download_training_data(
     dest_dir: Optional[Path | str] = None,
     force: bool = False,
 ) -> List[Path]:
-    """Download the GDGT training CSVs from Zenodo.
+    """Download GDGT training data files from Zenodo.
 
-    These CSVs are needed only to re-run the SI preprocessing and
-    calibration notebooks from scratch.  They are NOT required for inverse
-    temperature reconstructions — use :func:`download_posteriors` for that.
+    Downloads the coretop/culture/mesocosm training CSVs and the CMEMS
+    NO₃ uncertainty field used in the EIV calibration.  These are needed
+    only to re-run the SI preprocessing and calibration notebooks from
+    scratch; they are NOT required for inverse temperature reconstructions —
+    use :func:`download_posteriors` for that.
 
     Parameters
     ----------
@@ -233,32 +230,27 @@ def download_training_data(
     Returns
     -------
     list of Path
-        Local paths of the downloaded CSV files.
+        Local paths of the downloaded files.
     """
     dest = Path(dest_dir) if dest_dir else SPREADSHEETS_DIR
     dest.mkdir(parents=True, exist_ok=True)
 
     missing = [
-        fn for fn in TRAINING_DATA_REGISTRY.values()
-        if not (dest / Path(fn).name).exists() or force
+        name for name, entry in TRAINING_DATA_REGISTRY.items()
+        if not (dest / entry["filename"]).exists() or force
     ]
     if not missing:
-        print("All training CSVs already present.")
-        return [dest / Path(fn).name for fn in TRAINING_DATA_REGISTRY.values()]
+        print("All training data files already present.")
+        return [dest / entry["filename"] for entry in TRAINING_DATA_REGISTRY.values()]
 
-    zip_path = Path(tempfile.gettempdir()) / ZENODO_ZIP_FILENAME
-    _download_zip(zip_path, force=force)
+    total_mb = sum(TRAINING_DATA_REGISTRY[n]["size_mb"] for n in missing)
+    if total_mb >= 5:
+        print(f"Downloading {len(missing)} training data file(s) — total ~{total_mb:.0f} MB")
 
     paths = []
-    with zipfile.ZipFile(zip_path, "r") as zf:
-        for name, zip_rel in TRAINING_DATA_REGISTRY.items():
-            out = dest / Path(zip_rel).name
-            if out.exists() and not force:
-                print(f"Already present: {out}")
-                paths.append(out)
-                continue
-            _extract_member(zf, zip_rel, out)
-            print(f"Extracted → {out}")
-            paths.append(out)
+    for name, entry in TRAINING_DATA_REGISTRY.items():
+        out = dest / entry["filename"]
+        _download_file(_file_url(entry["filename"]), out, entry["size_mb"], force=force)
+        paths.append(out)
 
     return paths
