@@ -5,8 +5,16 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
 [![PyPI](https://img.shields.io/pypi/v/texas-psm.svg)](https://pypi.org/project/texas-psm/)
+[![Zenodo](https://img.shields.io/badge/data-10.5281%2Fzenodo.20032542-blue.svg)](https://doi.org/10.5281/zenodo.20032542)
 
-**TEXAS** (`texas-psm`) is a Python package for **Bayesian calibration** that fits hierarchical generalized-logistic models to isoGDGT proxy data (Scaled RI) for thermal responses and linear models for nonthermal effects (i.e., AOA ecology and nutrient effect) using Stan, then reconstructs paleotemperatures from new sediment records with full posterior uncertainty.
+**TEXAS** (`texas-psm`) is a Python package for **Bayesian calibration** of the TEX86 paleothermometer. It fits hierarchical generalized-logistic Stan models to isoGDGT proxy data (Scaled RI) for thermal responses — with optional non-thermal corrections for AOA ecology (GDGT-2/3 ratio) and nutrient effects (NO₃) — and reconstructs paleotemperatures from new sediment records with full posterior uncertainty.
+
+<p align="center">
+  <kbd><a href="docs/installation.md">📦 Installation</a></kbd> &nbsp;
+  <kbd><a href="https://paleolipidRR.github.io/TEXAS">📖 Documentation</a></kbd> &nbsp;
+  <kbd><a href="CONTRIBUTING.md">🤝 Contributing</a></kbd> &nbsp;
+  <kbd><a href="LICENSE">📄 License</a></kbd>
+</p>
 
 ---
 
@@ -17,439 +25,87 @@ TEXAS implements a two-stage workflow:
 | Stage | Description |
 |---|---|
 | **Forward calibration** | Fit a generalized logistic curve (Scaled RI → temperature) to culture, mesocosm, and/or coretop data using a hierarchical Bayesian Stan model. Outputs a compressed posterior `.nc` file. |
-| **Inverse reconstruction (invT)** | Predict paleotemperatures from Scaled RI observations by marginalizing over posterior parameter draws (i.e., ...). Returns a full posterior temperature distribution per sample. |
+| **Inverse reconstruction (invT)** | Predict paleotemperatures from Scaled RI observations by marginalizing over posterior parameter draws. Returns a full posterior temperature distribution per sample. |
 
-Optional non-thermal corrections for GDGT-2/3 ratio (β_{G₂/₃}) and NO₃ concentration (β_{NO₃}) are supported.
-
-The calibration curve is a generalized logistic (Richards curve) with the asymmetry parameter Q fixed to 1 (inflection point = T₀), keeping 4 free thermal parameters: T₀, k, b, ν.
-
-An **Error-in-Variables (EIV)** Stan model (`_eiv`) is available for the multivariate coretop stage. It separates analytical RI measurement error (`sd_proxyObs`) from oceanographic process noise, and treats NO₃ as a latent variable with a lognormal measurement model — providing rigorous uncertainty propagation when secondary predictor uncertainties are known.
-
-Inverse temperature (invT) Stan models use `reduce_sum` for within-chain parallelism — each observed proxy value is processed as an independent chunk, with threads allocated automatically per chain.
+Optional non-thermal corrections for GDGT-2/3 ratio (β_{G₂/₃}) and NO₃ (β_{NO₃}) are supported via an Error-in-Variables (EIV) Stan model that separates analytical measurement error from oceanographic process noise. Inverse models use `reduce_sum` for within-chain parallelism.
 
 ---
 
-## Getting started
-
-**Not sure which option to use?**
-
-| I want to… | Start here |
-|---|---|
-| Run TEXAS without installing anything | [Google Colab](#google-colab) |
-| Run the full environment in one command, no setup | [Option A — Docker](#option-a--docker-recommended-for-reproducibility) |
-| Install into an existing Python environment | [Option C — pip](#option-c--pip-install-python-users) |
-| Reproduce the exact environment used in the paper | [Option B — conda-lock](#option-b--conda-lock-exact-reproducible-environment) |
-| Modify or develop TEXAS | [Option D — from source](#option-d--conda--pip-from-source-for-development) |
-
----
-
-### Google Colab
-
-No installation required — open the quickstart notebook directly in your browser:
+## Quick start
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PaleoLipidRR/TEXAS/blob/main/notebooks/quickstart_demo.ipynb)
 
-The notebook walks through installation, downloading posteriors, and running forward and inverse predictions. If your data is on Google Drive, mount it first — instructions are included in the notebook.
-
----
-
-### Option A — Docker (recommended for reproducibility)
-
-No Stan or conda setup required — CmdStan and all dependencies are pre-installed in the image.
-
-**Accounts required:**
-
-| Service | Required? | Notes |
-|---|---|---|
-| [Docker account](https://app.docker.com/signup) | ✅ Free account | Required to download and run Docker Desktop on Windows and macOS |
-| GitHub | ❌ No | Cloning and pulling the pre-built image are anonymous |
-| Zenodo | ❌ No | Downloading posteriors is anonymous |
-
-> **Linux users** do not need a Docker account — Docker Engine can be installed without signing in.
-
-**Prerequisites — install Docker Desktop for your OS before cloning:**
-
-<details>
-<summary>Linux</summary>
-
-Install Docker Engine and the Compose plugin, then add your user to the `docker` group:
-
-```bash
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
-sudo usermod -aG docker $USER && newgrp docker
-docker info   # verify
-```
-
-See the [full Linux setup guide](https://paleolipidRR.github.io/TEXAS/installation/#linux) for the complete apt source setup.
-
-</details>
-
-<details>
-<summary>Windows (WSL2)</summary>
-
-1. Install WSL2: open PowerShell as Administrator and run `wsl --install`, then restart.
-2. Install [Docker Desktop for Windows](https://docs.docker.com/desktop/install/windows-install/) — select **"Use the WSL 2 based engine"**.
-3. In Docker Desktop → **Settings → Resources → WSL Integration**, enable your distro (e.g. Ubuntu).
-4. Open your WSL2 terminal and verify: `docker info`
-
-> **Clone inside WSL2 filesystem** (e.g. `~/Documents/`), not on `/mnt/c/...` — Windows filesystem mounts cause slow I/O and permission issues inside the container.
-
-See the [full Windows setup guide](https://paleolipidRR.github.io/TEXAS/installation/#windows-wsl2) for details.
-
-</details>
-
-<details>
-<summary>macOS</summary>
-
-Install [Docker Desktop for Mac](https://docs.docker.com/desktop/install/mac-install/) (choose Apple Silicon or Intel). Launch it and wait for "Docker Desktop is running" in the menu bar.
-
-> **Apple Silicon (M1/M2/M3)**: the pre-built image runs under QEMU emulation — Stan sampling will be slower. [Option B (conda-lock)](#option-b--conda-lock-exact-reproducible-environment) is faster for repeated use on Apple Silicon.
-
-</details>
-
-**Then clone and launch:**
-
-> **New to git?** `git clone` simply downloads a copy of the TEXAS code to your own computer — think of it like downloading a folder. You cannot accidentally break or modify the original repository. Everything runs locally on your machine.
-
-```bash
-git clone --depth 1 https://github.com/PaleoLipidRR/TEXAS.git
-cd TEXAS
-chmod +x run.sh
-./run.sh
-```
-
-Select profile `full` (JupyterLab with Stan — recommended) or `app` (Streamlit app for exploring posterior distributions). The launcher will ask whether to pull the pre-built image from GHCR (~1.9 GB, no build time) or build locally (requires internet; time depends on connection speed).
-
-> **Disk space — plan for ~3.5 GB total:**
-> | Component | Size | Location |
-> |---|---|---|
-> | Git clone (tracked files) | ~624 MB | Where you cloned |
-> | Docker image (OS + conda env + CmdStan) | ~1.9 GB | Docker's internal storage |
-> | Posteriors downloaded from Zenodo | ~315 MB | `data/cache/` inside the clone |
->
-> On Windows, Docker stores its images inside a VHDX virtual disk that grows over time. To reclaim space later: Docker Desktop → **Troubleshoot → Clean / Purge data**, or run `docker image rm ghcr.io/paleolipidrr/texas:latest`.
-
-JupyterLab will be available at **http://localhost:8890**. Open the notebooks in `notebooks/manuscripts/`.
-
-> **Windows/WSL2 — kernel selector on first open**: when you open a notebook for the first time in the Docker container, JupyterLab may show a kernel name like `SI_code1_PreProcessing_finalized.ipynb (3bf86915)` instead of "Python 3". This is a leftover preference saved inside the `.ipynb` file from a previous session. Click the dropdown, select **Python 3 (ipykernel)**, and click **Select** — it will work normally after that.
-
-> **Port 8890 instead of 8888**: `run.sh` uses port 8890 to avoid conflicts with any native JupyterLab or Anaconda installation that may already be running on port 8888 (common on Windows).
-
-For the full installation guide including manual Docker commands and troubleshooting, see the [Installation docs](https://paleolipidRR.github.io/TEXAS/installation/).
-
-**Forward posteriors in Docker**: the container bind-mounts your local `data/` directory, so posteriors cached at `data/cache/TEXAS_posterior_cache/` are available automatically inside JupyterLab. Download them first — see [Data and posteriors](#data-and-posteriors) below.
-
-**Switching between Docker and a local environment**: Stan binaries compiled inside the container are Linux x86_64 ELF binaries — they will not run on macOS or on a different Linux system. TEXAS detects this automatically: if a cached binary exits with code 127 (not executable), `StanCompiler` emits a `RuntimeWarning`, deletes the stale binary, and recompiles for the current environment. No manual cleanup is needed when switching setups.
-
-**Platform compatibility:**
-
-| Platform | Status | Notes |
-|---|---|---|
-| Linux (x86\_64) | ✅ Full support | Native — recommended |
-| Windows (Docker Desktop + WSL2) | ✅ Full support | Enable WSL2 backend in Docker Desktop settings |
-| macOS (Intel) | ✅ Full support | — |
-| macOS (Apple Silicon — M1/M2/M3) | ⚠️ Limited | Runs under QEMU emulation; Stan compilation and sampling will be significantly slower. A native `linux/arm64` image is planned. For now, [Option B (conda-lock)](#option-b--conda-lock-exact-reproducible-environment) with a local conda env is faster on Apple Silicon. |
-
-**Cloud drive mounts**: `run.sh` will prompt you to set up OneDrive or Google Drive mounts. Paths differ by OS — the script handles this automatically. If using the VS Code Dev Container instead, run `.devcontainer/setup-cloud-drives.sh` once after first open.
-
----
-
-### Option B — conda-lock (exact reproducible environment)
-
-For the most reproducible setup outside of Docker, use the pre-solved conda-lock files published alongside this repository. Every package version and checksum is pinned — the environment will be identical on any machine of the same platform. CmdStan is bundled on all platforms — no separate install step needed.
-
-> **Windows**: CmdStan 2.35.0 is included (the latest version compatible with `esmf` on Windows). Linux and macOS get 2.36.0. The minor version difference has no effect on TEXAS.
-
-**Step 1 — choose your method:**
-
-*With `conda-lock` (multi-platform lock file — recommended):*
-
-```bash
-# Install conda-lock once
-conda install -c conda-forge conda-lock   # or: pip install conda-lock
-
-# Create the environment
-conda-lock install -n texas-env conda-lock.yml
-conda activate texas-env
-```
-
-*Without `conda-lock` (platform-specific explicit file — works with plain conda):*
-
-```bash
-# Pick the file for your platform
-conda create -n texas-env --file conda-linux-64.lock    # Linux x86_64
-conda create -n texas-env --file conda-osx-arm64.lock   # macOS Apple Silicon
-conda create -n texas-env --file conda-osx-64.lock      # macOS Intel
-conda create -n texas-env --file conda-win-64.lock      # Windows
-
-conda activate texas-env
-```
-
-**Step 2 — install the package:**
-
 ```bash
 pip install texas-psm
 ```
-
----
-
-### Option C — pip install (Python users)
-
-> **Do not run `pip install` against the system Python.** Modern Debian/Ubuntu systems mark the system Python as externally managed (PEP 668) and will refuse the install. Always install into a virtual environment first.
-
-**Linux / macOS / Windows (WSL2)** — run from a bash terminal:
-
-```bash
-conda create -n texas-env python=3.10 pip
-conda activate texas-env
-pip install cmdstanpy
-TBB_CXX_TYPE=gcc python -c "import cmdstanpy; cmdstanpy.install_cmdstan()"
-pip install texas-psm
-```
-
-**Windows (native Anaconda Prompt)** — use a pre-built CmdStan from conda-forge. Do **not** use `TBB_CXX_TYPE=gcc` (Linux-only syntax) and do **not** install `m2w64-toolchain` (conflicts with the conda-forge package):
-
-```cmd
-conda create -n texas-env python=3.10 pip
-conda activate texas-env
-conda install -c conda-forge cmdstan=2.36.0
-pip install texas-psm
-```
-
-**Google Colab** — use pip; conda is not available by default:
 
 ```python
-!pip install cmdstanpy
-import cmdstanpy; cmdstanpy.install_cmdstan()
-!pip install texas-psm
+import TEXAS
+
+# Download pre-computed posteriors from Zenodo (~0.3 MB for univariate)
+TEXAS.download_posteriors(["gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3"])
+
+# Forward: temperature → Scaled RI
+result = TEXAS.predict_proxy_from_T(
+    temperatures=[15, 20, 25, 30],
+    posterior="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
+)
+
+# Inverse: Scaled RI → temperature
+result = TEXAS.predict_T_from_proxyObs(
+    proxyObs=my_ri_array,
+    prior_mu_t=15.0, prior_sigma_t=10.0,
+    fwd_posterior="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
+    temptype="SST",
+)
+result["p50"]   # median temperature (°C)
+result["p5"]    # 5th percentile
+result["p95"]   # 95th percentile
 ```
 
-TEXAS searches for CmdStan in the following priority order:
-
-| Priority | Location |
-|---|---|
-| 1 | `CMDSTAN` environment variable (set automatically by conda/mamba on activation; also honoured when set manually) |
-| 2 | `$CONDA_PREFIX/bin/cmdstan` — active conda or mamba environment |
-| 3 | `sys.prefix/bin/cmdstan` — active Python environment (covers Docker where activation scripts didn't run) |
-| 4 | Highest `cmdstan-*` version found across `/opt/cmdstan/`, `~/.cmdstan/`, `/usr/local/cmdstan/` |
-| 5 | Whatever cmdstanpy is already configured to use |
-
-Any CmdStan version ≥ 2.23.0 is accepted. The highest version found is preferred. `set_cmdstan_path()` is always called on the winning path so cmdstanpy's internal state stays consistent. If `CMDSTAN` is set but points to a broken directory, TEXAS emits a warning and continues down the list. If nothing is found, a `RuntimeError` is raised with explicit install instructions.
-
-To use a specific CmdStan installation instead of the auto-detected one:
-
-```bash
-export CMDSTAN=~/.cmdstan/cmdstan-2.36.0
-```
-
----
-
-### Option D — conda + pip from source (for development)
-
-```bash
-git clone --depth 1 https://github.com/PaleoLipidRR/TEXAS.git
-cd TEXAS
-conda env create -f environment.yml
-conda activate texas-env
-pip install -e .          # editable install — required for development
-```
-
-> **Always use `pip install -e .`** (editable mode). A plain `pip install .` or `pip install texas-psm` puts a static copy in site-packages: `STAN_MODELS_DIR` will point there (no pre-compiled binaries), and any local code changes you make will be silently ignored by the running kernel. After cloning, or any time you find the wrong package version is active, re-run `pip install -e .` and restart your Jupyter kernel.
-
-The conda environment sets `CMDSTAN` automatically to the bundled CmdStan. If you installed CmdStan manually via `cmdstanpy.install_cmdstan()` and want to use that version instead, set:
-
-```bash
-export CMDSTAN=~/.cmdstan/cmdstan-2.36.0
-```
+For Docker, conda-lock, and development installs, see [Installation](docs/installation.md).
 
 ---
 
 ## Data and posteriors
 
-TEXAS separates **code** (this repository) from **data** (hosted on Zenodo). Here is what you need depending on your goal:
-
-| Goal | What you need | Where to get it |
-|---|---|---|
-| Forward prediction (`predict_proxy_from_T`) | Pre-computed forward posterior `.nc` | `TEXAS.download_all()` |
-| Inverse reconstruction (`predict_T_from_proxyObs`) | Pre-computed forward posterior `.nc` | `TEXAS.download_all()` |
-| Re-run forward calibration from scratch | GDGT training database | `TEXAS.download_all()` |
-
-**Zenodo data record**: https://doi.org/10.5281/zenodo.19666745
-
-**You do not need to download any data just to install the package.** The Stan model files (`.stan`) are bundled inside the pip package and are found automatically.
-
-### Downloading the data
-
-Download everything in one shot (~560 MB ZIP):
+Pre-computed posteriors and training data are hosted on Zenodo:
+**[https://doi.org/10.5281/zenodo.20032542](https://doi.org/10.5281/zenodo.20032542)**
 
 ```python
 import TEXAS
-TEXAS.download_all()           # downloads ZIP and extracts posteriors + training CSVs
+
+TEXAS.download_all()               # posteriors + training CSVs
+TEXAS.download_posteriors()        # forward posteriors only (~158 MB total;
+                                   # EIV multiv posteriors are ~78 MB each)
+TEXAS.download_training_data()     # training CSVs + CMEMS NO₃ field
 ```
 
-Or selectively:
+Pass `names=` to download only what you need:
 
 ```python
-TEXAS.download_posteriors()    # forward posteriors only
-TEXAS.download_training_data() # training CSVs only
+# Univariate SST posterior — ~0.3 MB
+TEXAS.download_posteriors(["gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3"])
 ```
 
-All functions are idempotent — running them again skips files already on disk. Use `force=True` to re-download.
-
-To save to a specific directory, pass `cache_dir` / `dest_dir` directly to the download call:
-
-```python
-# Download posteriors to a custom directory (e.g. Google Drive on Colab)
-TEXAS.download_posteriors(
-    cache_dir="/content/drive/MyDrive/texas/posteriors"
-)
-
-# Download training CSVs to a custom directory
-TEXAS.download_training_data(
-    dest_dir="/content/drive/MyDrive/texas/data"
-)
-
-# Or both at once
-TEXAS.download_all(
-    cache_dir="/content/drive/MyDrive/texas/posteriors",
-    data_dir="/content/drive/MyDrive/texas/data",
-)
-```
-
-### Finding downloaded files
-
-Files land in different locations depending on how TEXAS is installed:
-
-| Install method | Posteriors | Training CSVs |
-|---|---|---|
-| `pip install texas-psm` / Colab | `~/.texas/cache/TEXAS_posterior_cache/` | `~/.texas/data/spreadsheets/` |
-| From source (`pip install -e .`) | `data/cache/TEXAS_posterior_cache/` in repo | `data/spreadsheets/` in repo |
-
-Check the exact paths at runtime:
-
-```python
-from TEXAS.utils.paths import POSTERIOR_CACHE_DIR, SPREADSHEETS_DIR
-
-print("Posteriors:", POSTERIOR_CACHE_DIR)
-print("Training data:", SPREADSHEETS_DIR)
-
-# List all downloaded posteriors
-list(POSTERIOR_CACHE_DIR.glob("*.nc"))
-```
-
-Override the default cache location with the `TEXAS_CACHE_DIR` environment variable or by calling `TEXAS.set_cache_dir("/your/path")` before downloading.
-
-
-### Google Colab / no internet access
-
-If you have a posterior `.nc` file on Google Drive (or anywhere on disk), load it directly — no Zenodo download needed:
+Load a posterior directly from disk (no cache lookup):
 
 ```python
 import xarray as xr
-from TEXAS import predict_proxy_from_T, predict_T_from_proxyObs
-
-# Mount Google Drive first (Colab), then:
-ds = xr.load_dataset("/content/drive/MyDrive/posteriors/gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc")
-
-# Pass the dataset directly — no cache lookup, no download
-result = predict_proxy_from_T(temperatures=np.linspace(5, 35, 100), posterior=ds)
-result = predict_T_from_proxyObs(proxyObs=my_ri, prior_mu_t=15.0, prior_sigma_t=10.0,
-                                  fwd_posterior=ds, temptype="SST")
+ds = xr.load_dataset("/path/to/posterior.nc")
+result = TEXAS.predict_T_from_proxyObs(..., fwd_posterior=ds)
 ```
 
----
-
-## The two main prediction functions
-
-### `predict_proxy_from_T` — forward: temperature → proxy
-
-**Returns** a Python dict of percentile arrays (e.g. `result["p50"]`, `result["p5"]`, `result["p95"]`). **No files are written to disk** — the result lives only in memory. Save it yourself:
+Check what is cached:
 
 ```python
-import pandas as pd
-from TEXAS import predict_proxy_from_T
-
-result = predict_proxy_from_T(
-    temperatures=np.linspace(5, 35, 100),
-    posterior="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
-)
-
-# result["p50"], result["p5"], result["p95"] are numpy arrays — save them yourself:
-pd.DataFrame(result).to_csv("/your/output/forward_curve.csv", index=False)
+TEXAS.list_posteriors()
 ```
 
-### `predict_T_from_proxyObs` — inverse: proxy → temperature
-
-**Returns** a Python dict with `"p1"` … `"p99"` percentile arrays plus `"proxyObs"` and `"metadata"`.  By default **nothing is saved to disk** — you get the dict and decide what to keep.
-
-To save the Stan posterior and results files, use `save_results=True`.  Use `cache_dir` to control where the files land:
-
-```python
-from TEXAS import predict_T_from_proxyObs
-
-result = predict_T_from_proxyObs(
-    proxyObs=my_ri_array,
-    prior_mu_t=15.0,
-    prior_sigma_t=10.0,
-    fwd_posterior_name="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
-    temptype="SST",
-    # ── File output (optional) ────────────────────────────────────────────────
-    save_results=True,           # save quantile .nc + .npz to disk
-    save_draws=True,             # also save raw draws as {name}_draws.nc
-    cache_dir="/your/output/",   # where the files land; default is the invT cache dir
-)
-
-# The percentile arrays are always in the returned dict regardless of save_results:
-result["p50"]   # median temperature (°C), shape (N,)
-result["p5"]    # 5th percentile
-result["p95"]   # 95th percentile
-```
-
-**Where do the files go by default?**
-
-| Install method | Default invT output directory |
-|---|---|
-| `pip install texas-psm` / Colab | `~/.texas/cache/TEXAS_invT_posterior_cache/` |
-| From source (`pip install -e .`) | `data/cache/TEXAS_invT_posterior_cache/` in repo |
-
-Files written (when `save_results=True`):
-- `{name}.nc` — quantile posterior (p1–p99 for each observation)
-- `{name}.npz` — same percentiles as a NumPy archive
-- `{name}_draws.nc` — raw MCMC draws in `draws/` subfolder (only when `save_draws=True`)
-
-> **Colab users**: by default files go to ephemeral Colab storage and are lost when the session ends. Pass `cache_dir` pointing to your Google Drive folder to keep them.
-
-### `compute_scaledRI` — calculate Scaled Ring Index from raw GDGT data
-
-Before calling either prediction function you need Scaled Ring Index values. `compute_scaledRI()` computes them from the six standard isoGDGT abundances. You can pass **raw LC/MS peak areas or fractional abundances** — both give identical results because the formula divides by the total sum of all six GDGTs, so any common scale factor drops out:
-
-```python
-from TEXAS import compute_scaledRI
-
-# Single sample (scalars)
-scaledRI = compute_scaledRI(
-    gdgt0=0.45, gdgt1=0.10, gdgt2=0.08, gdgt3=0.05,
-    cren=0.30,  cren_prime=0.02,
-)  # → 0.547
-
-# DataFrame of downcore samples
-import pandas as pd
-df = pd.read_csv("my_gdgt_data.csv")
-df["scaledRI_cren3"] = compute_scaledRI(
-    df["GDGT-0"], df["GDGT-1"], df["GDGT-2"], df["GDGT-3"],
-    df["cren"],   df["cren_prime"],
-)
-```
-
-The default (`cren_rings=3`) produces **scaledRI_cren3** (RI₀₋₃) — crenarchaeol counted as 3 rings — which is what the canonical TEXAS posteriors were calibrated against. Pass `cren_rings=4` to reproduce the RI₀₋₄ convention of Zhang et al. (2016).
-
-**Formula:**
-
-```
-RI        = (1·GDGT1 + 2·GDGT2 + 3·GDGT3 + cren_rings·cren + cren_rings·cren')
-            / (GDGT0 + GDGT1 + GDGT2 + GDGT3 + cren + cren')
-scaledRI  = RI / cren_rings
-```
+| Install method | Posteriors | Training data |
+|---|---|---|
+| `pip install texas-psm` | `~/.texas/cache/TEXAS_posterior_cache/` | `~/.texas/data/spreadsheets/` |
+| From source (`pip install -e .`) | `data/cache/TEXAS_posterior_cache/` | `data/spreadsheets/` |
 
 ---
 
@@ -458,87 +114,43 @@ scaledRI  = RI / cren_rings
 ```python
 import numpy as np
 import xarray as xr
-from TEXAS import predict_proxy_from_T, predict_T_from_proxyObs
+from TEXAS import compute_scaledRI, predict_proxy_from_T, predict_T_from_proxyObs
 
-# ── Option 1: use a posterior by name (auto-downloads from Zenodo if needed) ──
+# ── Compute Scaled Ring Index from raw GDGT abundances ────────────────────────
+df["scaledRI_cren3"] = compute_scaledRI(
+    df["GDGT-0"], df["GDGT-1"], df["GDGT-2"], df["GDGT-3"],
+    df["cren"],   df["cren_prime"],          # cren_rings=3 by default (RI₀₋₃)
+)
+
+# ── Forward prediction (temperature → proxy) ──────────────────────────────────
 result = predict_proxy_from_T(
     temperatures=np.linspace(5, 35, 100),
     posterior="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
 )
-result["p50"]   # median calibration curve (Scaled RI)
-result["p5"]    # 5th percentile
-result["p95"]   # 95th percentile
+# result["p50"], result["p5"], result["p95"] — numpy arrays
 
-# ── Option 2: load a posterior from disk and pass directly ────────────────────
-ds = xr.load_dataset("/path/to/gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc")
-
-result = predict_proxy_from_T(temperatures=np.linspace(5, 35, 100), posterior=ds)
-
+# ── Inverse reconstruction (proxy → temperature) ──────────────────────────────
 result = predict_T_from_proxyObs(
-    proxyObs=my_ri_array,
-    prior_mu_t=15.0,        # prior mean temperature (°C)
-    prior_sigma_t=10.0,     # prior uncertainty (°C)
-    fwd_posterior=ds,       # pre-loaded dataset — no file I/O
+    proxyObs=df["scaledRI_cren3"].values,
+    prior_mu_t=15.0, prior_sigma_t=10.0,
+    fwd_posterior="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
     temptype="SST",
+    save_results=True,   # write quantile .nc + .npz to the invT cache dir
 )
-result["p50"]   # median temperature reconstruction (°C)
-result["p5"]    # 5th percentile
-result["p95"]   # 95th percentile
 
-# ── NO₃ predictor options for inverse reconstruction ─────────────────────────
-# Option A — disable NO₃ correction (pass a value above the cutoff)
+# ── Multivariate model with NO₃ and GDGT-2/3 correction ──────────────────────
 result = predict_T_from_proxyObs(
-    proxyObs=my_ri_array, prior_mu_t=15.0, prior_sigma_t=10.0,
-    fwd_posterior_name="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3",
-    no3=10.0,   # scalar > no3_cutoff (1.0 µmol/L) → correction disabled for all samples
-)
-
-# Option B — provide explicit NO₃ values (scalar or per-observation array)
-result = predict_T_from_proxyObs(
-    proxyObs=my_ri_array, prior_mu_t=15.0, prior_sigma_t=10.0,
-    fwd_posterior_name="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3",
-    no3=my_no3_array,       # array of length N, one value per observation
-    gdgt23ratio=my_g23_array,
-)
-
-# Option C — automatic lookup from modern WOA23 climatology at drill-site location
-ocean_prop_ds = xr.load_dataset("/path/to/ocean_prop_ds.nc")   # from SI_code1
-
-result = predict_T_from_proxyObs(
-    proxyObs=my_ri_array, prior_mu_t=15.0, prior_sigma_t=10.0,
-    fwd_posterior_name="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3",
-    gdgt23ratio=my_g23_array,
-    site_lat=15.3, site_lon=-23.7,   # modern lat/lon of the drill site
-    no3_dataset=ocean_prop_ds,       # WOA23-derived xr.Dataset with (lat, lon) grid
-)
-# Prints: 🌊 WOA23 NO₃ lookup: lat=15.3, lon=-23.7 → 0.42 µmol/L
-```
-
-### Running forward calibration from scratch
-
-Only needed if you want to re-fit the model to your own data or reproduce the published calibration.
-Requires CmdStan and the GDGT training database (see [Data and posteriors](#data-and-posteriors) above).
-
-```python
-from TEXAS import build_fwd_data, get_posterior, save_posterior
-
-# Build the Stan data dict — validates shapes, sets proxyObs_* keys and use_* flags
-data = build_fwd_data(
-    t_cul=cul_df["SST"].values,       proxy_cul=cul_df["scaledRI"].values,
-    t_meso=meso_df["SST"].values,     proxy_meso=meso_df["scaledRI"].values,
-    t_crtp=crtp_df["SST"].values,     proxy_crtp=crtp_df["scaledRI"].values,
-    gdgt23ratio_crtp=crtp_df["gdgt23ratio"].values,
-    no3_crtp=crtp_df["no3"].values,   # no3_cutoff auto-calculated if omitted
-)
-
-posterior, diagnostics = get_posterior(
-    data,
-    stan_file="gen_logi_fixed_hier_crtp_multiv",
+    proxyObs=df["scaledRI_cren3"].values,
+    prior_mu_t=15.0, prior_sigma_t=10.0,
+    fwd_posterior="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3",
     temptype="SST",
-    proxy_name="scaledRI",            # required — saved to .nc attrs
+    gdgt23ratio=df["gdgt23ratio"].values,
+    no3=df["no3"].values,           # or: site_lat=, site_lon=, no3_dataset= for WOA23 lookup
 )
-save_posterior(posterior)
-# → gen_logi_fixed_hier_crtp_multiv_SST_scaledRI.nc
+
+# ── Pass a pre-loaded dataset (Colab / Google Drive) ──────────────────────────
+ds = xr.load_dataset("/content/drive/MyDrive/posteriors/gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc")
+result = predict_T_from_proxyObs(..., fwd_posterior=ds)
 ```
 
 ---
@@ -550,17 +162,13 @@ src/TEXAS/
   predict.py        High-level API: predict_proxy_from_T / predict_T_from_proxyObs
   stan/             Sampler, compiler, I/O, and invT orchestration
   stan_models/      Stan model files (.stan) — bundled in the pip package
-  data/             Input data builders, filters, screening, and ocean property lookups
+  data/             Input data builders, filters, screening, ocean property lookups
   ensemble/         Posterior ensemble generation and model detection
   models/           Logistic curve functions and classical calibrations
-  plotting/         Prior/posterior distribution plots and range utilities
   utils/            Path constants, system info, Zenodo download utilities
 notebooks/
-  manuscripts/      Finalized SI notebooks for the paper
-    SI_code1_PreProcessing_finalized.ipynb
-    SI_code2_TEXAS_analysis.ipynb
-    SI_code3_paleo_showcases.ipynb
-  colab_quickstart.ipynb   Google Colab quickstart
+  manuscripts/      Finalized SI notebooks (SI_code1, SI_code2, SI_code3)
+  quickstart_demo.ipynb
 streamlit_app/      Drag-and-drop web interface (Streamlit)
 docker/             Dockerfile and compose configuration
 docs/               MkDocs documentation source
@@ -573,90 +181,20 @@ tests/              Unit tests
 
 | Function | Description |
 |---|---|
-| `compute_scaledRI(gdgt0, gdgt1, gdgt2, gdgt3, cren, cren_prime, ...)` | Compute Scaled Ring Index (RI₀₋₃ by default) from six isoGDGT abundances; works with raw peak areas or fractional abundances |
-| `predict_proxy_from_T(temperatures, posterior, ...)` | Forward prediction: temperature → proxy (Scaled RI, TEX86, or any fitted proxy; pure Python) |
-| `predict_T_from_proxyObs(proxyObs, prior_mu_t, prior_sigma_t, ...)` | Inverse reconstruction: proxy → temperature with full uncertainty (runs Stan). Accepts `no3` / `gdgt23ratio` as scalar or array; pass `site_lat` / `site_lon` / `no3_dataset` for automatic WOA23 NO₃ lookup |
-| `lookup_no3_from_woa(lat, lon, woa_dataset, ...)` | Look up modern NO₃ climatology at one or more lat/lon coordinates from a WOA23-derived xr.Dataset; handles 0–360 and −180–180 longitude conventions automatically |
-| `download_posteriors(names, ...)` | Download all standard forward posteriors from Zenodo |
-| `download_posterior(name, ...)` | Download a single forward posterior from Zenodo |
-| `set_cache_dir(path)` | Override cache location at runtime; persistent alternative is `TEXAS_CACHE_DIR` env var |
-| `build_fwd_data(t_cul, proxy_cul, ..., no3_crtp, culmeso_posterior)` | Build validated Stan data dict for forward calibration; auto-detects predictors and `no3_cutoff` |
-| `get_posterior(data, stan_file, temptype, proxy_name, ...)` | Run forward calibration Stan sampling; `proxy_name` required, saved to `.nc` attrs |
-| `save_posterior(ds)` / `load_posterior(name)` | Persist / load forward posterior as compressed NetCDF; filename pattern: `{model}_{temptype}_{proxy_name}{suffix}.nc` |
-| `get_invT_posterior(...)` | Run inverse-T sampling and return full posterior xr.Dataset |
-| `generate_ensemble_auto(temperatures, posterior, ...)` | Sample draws from a posterior and compute calibration-curve percentiles |
-| `find_optimal_no3_threshold(data, ...)` | Find optimal NO₃ cutoff that maximises GDGT–temperature correlation (Spearman-based); supports `log_method`, `score_method`, `weight_method` |
-| `find_optimal_no3_threshold_nointercept(data, ...)` | No-intercept variant; supports `no3_mode`, `log_method`, `weight_method` |
-| `summarize_sampler_diagnostics(fit)` | Compute divergences, R-hat, ESS, E-BFMI from a CmdStanMCMC fit |
-| `create_summary_table(fit)` | Return a formatted DataFrame of per-parameter diagnostics |
-| `detect_model_and_params(posterior)` | Infer suffix, model function, and optional-predictor flags from posterior attributes |
-| `plot_prior_distributions(posterior)` | Plot prior distributions from posterior metadata |
+| `compute_scaledRI(gdgt0, …, cren_prime)` | Compute Scaled RI (RI₀₋₃ by default) from six isoGDGT abundances |
+| `predict_proxy_from_T(temperatures, posterior, …)` | Forward: temperature → proxy percentiles (pure Python) |
+| `predict_T_from_proxyObs(proxyObs, prior_mu_t, prior_sigma_t, fwd_posterior, …)` | Inverse: proxy → temperature with full uncertainty (runs Stan); accepts name string or `xr.Dataset` |
+| `download_posteriors(names, …)` | Download forward posteriors from Zenodo (with per-file size notice) |
+| `download_training_data(…)` | Download training CSVs + CMEMS NO₃ field from Zenodo |
+| `list_posteriors()` | Print and return `.nc` stems in the local cache |
+| `lookup_no3_from_woa(lat, lon, woa_dataset)` | WOA23 NO₃ climatology lookup at drill-site coordinates |
+| `build_fwd_data(t_cul, proxy_cul, …)` | Build validated Stan data dict for forward calibration |
+| `get_posterior(data, stan_file, temptype, proxy_name, …)` | Run forward calibration Stan sampling |
+| `save_posterior(ds)` / `load_posterior(name)` | Persist / load forward posterior as compressed NetCDF |
+| `set_cache_dir(path)` | Override cache root at runtime |
+| `summarize_sampler_diagnostics(fit)` | Divergences, R-hat, ESS, E-BFMI |
 
-Full API reference: [https://paleolipidRR.github.io/TEXAS](https://paleolipidRR.github.io/TEXAS) *(coming soon)*
-
----
-
-## Troubleshooting
-
-### Permission errors after running Docker
-
-**Symptom:** After using the Docker container (or VS Code Dev Container), you get `Permission denied` errors on the host when trying to edit files, run `git`, or build the package — even though you own the repository.
-
-**Cause:** The container runs as an internal user (`micromamba`, UID 57440). When it writes files into the bind-mounted repo directory, those files are owned by UID 57440 on the host. Your host user (e.g. UID 1000) can no longer write them.
-
-**Permanent fix (Dev Container users):** `devcontainer.json` now sets `"updateRemoteUserUID": true`, which tells VS Code to remap the container user's UID to match yours at startup. After rebuilding the container once, files Docker creates will be owned by your host user and this problem will not recur.
-
-**If you still hit it (e.g. after `docker compose up` tests):** restore ownership from the repo root:
-
-```bash
-sudo chown -R $USER:$USER .
-```
-
-Run this any time ownership gets flipped. It is safe to run repeatedly.
-
-For convenience, add a shell alias so recovery is a single command:
-
-```bash
-echo "alias fix-texas='sudo chown -R \$USER:\$USER /path/to/TEXAS/.git'" >> ~/.bashrc && source ~/.bashrc
-```
-
-Replace `/path/to/TEXAS` with your actual clone path (e.g. `~/Documents/GitHub/TEXAS`). Then whenever you see the LFS error, just run `fix-texas`.
-
----
-
-### Stan compilation fails with `Permission denied` on `.hpp` file
-
-**Symptom:**
-```
-Internal compiler error:
-(Sys_error ".../stan_models/model_name.hpp: Permission denied")
-```
-
-**Cause:** Stan's compiler (`stanc`) writes an intermediate `.hpp` file into the same directory as the `.stan` source. If that directory is owned by a different user (e.g. from a prior Docker run), the current user cannot write the `.hpp`.
-
-**Fix (v0.1.10+):** TEXAS now compiles all Stan models into `~/.texas/stan_cache/` — a directory always writable by the current user — instead of the source tree. You should not see this error with an up-to-date install. If you do, upgrade:
-
-```bash
-pip install --upgrade texas-psm
-```
-
-You can override the build directory with the `TEXAS_STAN_BUILD_DIR` environment variable:
-
-```bash
-export TEXAS_STAN_BUILD_DIR=/tmp/texas_stan
-```
-
----
-
-### Stan binary incompatible after switching between Docker and local env
-
-**Symptom:** A `RuntimeWarning` like:
-```
-Stan model 'model_name' was compiled for a different environment (exit code 127).
-The old binary has been removed and the model will be recompiled...
-```
-
-**This is expected and self-healing.** Stan binaries compiled inside Docker (Linux x86_64 ELF) cannot run on macOS, and vice versa. TEXAS detects this automatically, deletes the stale binary, and recompiles for the current environment. No action needed — sampling will proceed after a one-time recompilation.
+Full API reference: [https://paleolipidRR.github.io/TEXAS](https://paleolipidRR.github.io/TEXAS)
 
 ---
 
@@ -666,10 +204,10 @@ If you use TEXAS in your research, please cite:
 
 > Rattanasriampaipong, R. et al. (in prep). *TEXAS: A proxy system model for TEX86 paleothermometry.* AGU Paleoceanography and Paleoclimatology.
 
-See [`CITATION.cff`](CITATION.cff) for machine-readable citation metadata. A Zenodo software DOI will be added upon submission.
+See [`CITATION.cff`](CITATION.cff) for machine-readable citation metadata.
 
 ---
 
 ## License
 
-MIT © Ronnakrit Rattanasriampaipong
+MIT © Ronnakrit Rattanasriampaipong — see [`LICENSE`](LICENSE) for the full text.
