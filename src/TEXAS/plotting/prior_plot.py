@@ -115,7 +115,7 @@ def plot_prior_distributions(
     set_leg_max_ncol: int = 3,
     color_list: Optional[Sequence[str]] = None,
     param_source_map: Optional[Dict[str, int]] = None,
-    annotation_style: Literal["ci95", "sigma"] = "ci95",
+    annotation_style: Literal["ci95", "ci68", "sigma"] = "ci95",
     show_subplot_legend: bool = True,
     show_figure_legend: bool = True,
     show_prior_expression: bool = True,
@@ -416,6 +416,9 @@ def plot_prior_distributions(
                     if annotation_style == "ci95":
                         text = _format_ci(med, np.percentile(samples, 5),
                                                np.percentile(samples, 95))
+                    elif annotation_style == "ci68":
+                        text = _format_ci(med, np.percentile(samples, 16),
+                                               np.percentile(samples, 84))
                     else:
                         text = _format_stat(med, np.std(samples, ddof=1))
                     ypos = 0.98 - _n_annotated[0] * 0.065
