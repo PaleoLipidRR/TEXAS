@@ -154,7 +154,73 @@ def get_posterior(
     **kwargs
 ) -> Tuple[xr.Dataset, str]:
     """
-    Get posterior with auto-detection of predictors.
+    Run forward calibration Stan sampling and return the posterior.
+
+    Wraps ``StanSampler`` with automatic predictor detection, CPU
+    configuration, and metadata attachment.  The returned dataset can be
+    passed directly to ``predict_proxy_from_T`` or saved with
+    ``save_posterior``.
+
+    Parameters
+    ----------
+    data : dict
+        Stan data dict built by ``build_fwd_data()``.  Predictor flags
+        (``use_gdgt23ratio``, ``use_no3``) are auto-detected from the
+        arrays present; you do not need to set them manually.
+    stan_file : str
+        Stan model name (without ``.stan``), e.g.
+        ``"gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv"``.
+    temptype : str
+        Temperature variable type, e.g. ``"SST"`` or ``"thermoT"``.
+        Stored in the posterior metadata.
+    proxy_name : str
+        Proxy type, e.g. ``"scaledRI_cren3"``.  Required — stored in
+        the ``.nc`` attrs and validated downstream when the posterior is
+        used for inverse reconstruction.
+    iter_warmup : int, optional
+        HMC warmup iterations per chain (default: CmdStan default, 1000).
+    iter_sampling : int, optional
+        Post-warmup sampling iterations per chain (default: 1000).
+    chains : int, optional
+        Number of independent chains (default: 4).
+    parallel_chains : int, optional
+        Chains to run simultaneously (auto-detected from CPU count).
+    threads_per_chain : int, optional
+        Threads per chain for ``reduce_sum`` models (auto-enabled for
+        models whose filename contains ``reduce_sum``).
+    adapt_delta : float, optional
+        Target acceptance rate (default: 0.8).  Increase toward 0.99 to
+        reduce divergences at the cost of more leapfrog steps.
+    max_treedepth : int, optional
+        Maximum tree depth for HMC (default: 10).
+    **kwargs
+        Additional keyword arguments forwarded to ``CmdStanModel.sample``.
+
+    Returns
+    -------
+    posterior : xr.Dataset
+        Forward calibration posterior with parameter draws and metadata
+        attrs (model name, temptype, proxy_name, priors, diagnostics).
+    diagnostics : str
+        Human-readable sampler diagnostic summary (divergences, R-hat,
+        ESS, E-BFMI).
+
+    Raises
+    ------
+    ValueError
+        If active predictors are present but a univariate model is
+        requested, or if an EIV model is requested without ``R2_thermal``.
+
+    Examples
+    --------
+    >>> data = build_fwd_data(t_crtp=..., proxy_crtp=..., ...)
+    >>> posterior, diag = get_posterior(
+    ...     data,
+    ...     stan_file="gen_logi_fixed_hier_crtp_univ_priorApprox",
+    ...     temptype="SST",
+    ...     proxy_name="scaledRI_cren3",
+    ... )
+    >>> save_posterior(posterior)
     """
     rng_seed = kwargs.setdefault("seed", 42)
     np.random.seed(rng_seed)

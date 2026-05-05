@@ -140,7 +140,50 @@ def generate_ensemble_auto(
     **kwargs
 ) -> Dict[str, np.ndarray]:
     """
-    Automatically generate ensemble with auto‐detected model types.
+    Sample draws from a forward posterior and compute calibration-curve percentiles.
+
+    Inspects the posterior's ``stan_model_name`` attr and ``data_vars`` to
+    determine the model function, parameter names, and optional-predictor
+    flags automatically, then delegates to ``generate_ensemble``.
+
+    Parameters
+    ----------
+    post_ds : xr.Dataset
+        Forward calibration posterior returned by ``get_posterior()`` or
+        loaded with ``load_posterior()``.
+    x_vals : np.ndarray
+        Temperature values (°C) at which to evaluate the calibration curve.
+    model_type : {"auto", "forward", "inverse"}
+        Force forward or inverse dispatch; ``"auto"`` (default) infers from
+        the posterior.  InvT posteriors are not supported — use
+        ``predict_T_from_proxyObs()`` instead.
+    gdgt23ratio : np.ndarray, optional
+        GDGT-2/3 ratio values; required when the posterior was fitted with
+        a multivariate (GDGT-2/3) model.
+    no3 : np.ndarray, optional
+        NO₃ concentrations (µmol/L); required when the posterior uses the
+        NO₃ correction.
+    no3_cutoff : float, optional
+        Override the NO₃ cutoff from the posterior attrs.
+    return_full_ensemble : bool
+        If ``True``, return the full M × N draw matrix in addition to
+        percentiles.  Default ``False``.
+    suffix : str, optional
+        Force a specific parameter suffix (e.g. ``"crtp"``); overrides
+        auto-detection.
+    **kwargs
+        Forwarded to ``generate_ensemble``.
+
+    Returns
+    -------
+    dict
+        Keys ``"p1"`` … ``"p99"`` (and optionally ``"ensemble"``) — each
+        a numpy array of length ``len(x_vals)``.
+
+    Raises
+    ------
+    NotImplementedError
+        If called with an invT posterior.
     """
     model_name = post_ds.attrs.get("stan_model_name", "")
     is_inv = ("invT_" in model_name) or ("t_est" in post_ds.data_vars)

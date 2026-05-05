@@ -31,7 +31,32 @@ def save_posterior(
     """
     Save a forward-model posterior to disk as compressed NetCDF.
 
-    Default location: repo/.../TEXAS/posterior_cache/
+    The filename is auto-generated from the posterior's metadata attrs:
+    ``{model}_{temptype}[_gdgt23ratio][_no3_{cutoff}][_{proxy_name}]{suffix}.nc``
+
+    Parameters
+    ----------
+    posterior : xr.Dataset
+        Forward calibration posterior returned by ``get_posterior()``.
+        Must have ``stan_model_name``, ``temptype``, and ``proxy_name``
+        attrs set (``proxy_name`` is required — a warning is raised if
+        missing).
+    cache_dir : str or Path, optional
+        Directory to write the file.  Defaults to the standard forward
+        posterior cache (``data/cache/TEXAS_posterior_cache/`` for
+        source installs, ``~/.texas/cache/TEXAS_posterior_cache/`` for
+        pip installs).
+    overwrite : bool
+        If ``False``, raise ``FileExistsError`` when the output path
+        already exists.  Default ``True``.
+    filename_suffix : str, optional
+        Extra tag appended before ``.nc``, e.g. ``"032326"`` for a
+        date-stamped run.  Leading/trailing underscores are stripped.
+
+    Returns
+    -------
+    Path
+        Absolute path of the saved ``.nc`` file.
     """
     if not isinstance(posterior, xr.Dataset):
         raise TypeError("posterior must be an xarray.Dataset")

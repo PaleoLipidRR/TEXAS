@@ -1,77 +1,202 @@
 # API Reference
 
-## Top-level API
+## Quick reference
 
-High-level functions for temperature prediction, posterior download, and data I/O.
-These are the functions most users will call directly — no knowledge of the underlying
-Stan models is required.
+| Function | Description |
+|---|---|
+| [`compute_scaledRI`](#compute-scaled-ring-index) | Compute Scaled RI (RI₀₋₃ by default) from six isoGDGT abundances |
+| [`predict_proxy_from_T`](#predict-proxy-from-t) | Forward: temperature → proxy percentiles (pure Python) |
+| [`predict_T_from_proxyObs`](#predict-t-from-proxy-observations) | Inverse: proxy → temperature with full uncertainty (runs Stan) |
+| [`download_posteriors`](#download-posteriors) | Download forward posteriors from Zenodo |
+| [`download_training_data`](#download-training-data) | Download training CSVs + CMEMS NO₃ field |
+| [`list_posteriors`](#list-posteriors) | Print and return `.nc` stems in the local cache |
+| [`build_fwd_data`](#build-forward-data) | Build validated Stan data dict for forward calibration |
+| [`get_posterior`](#get-posterior) | Run forward calibration Stan sampling |
+| [`save_posterior`](#save-posterior) | Persist forward posterior as compressed NetCDF |
+| [`load_posterior`](#load-posterior) | Load a forward or invT posterior from the cache |
+| [`summarize_sampler_diagnostics`](#sampler-diagnostics) | Divergences, R-hat, ESS, E-BFMI |
 
-::: TEXAS
+---
+
+## Prediction
+
+### Compute Scaled Ring Index
+
+::: TEXAS.predict.compute_scaledRI
     options:
       show_root_heading: false
-      members: true
-      filters:
-        - "^_"
+      show_source: false
 
-## stan
+---
 
-Functions for running the Stan sampler, compiling Stan models, and saving/loading
-posterior distributions. Use these if you need to re-run the forward calibration
-or customize sampling parameters.
+### Predict proxy from T
 
-::: TEXAS.stan
+::: TEXAS.predict.predict_proxy_from_T
     options:
       show_root_heading: false
-      members: true
+      show_source: false
 
-## data
+---
 
-Functions for building the data dictionaries passed to Stan, cleaning and filtering
-GDGT datasets, and screening outliers via Mahalanobis distance.
+### Predict T from proxy observations
 
-::: TEXAS.data
+::: TEXAS.predict.predict_T_from_proxyObs
     options:
       show_root_heading: false
-      members: true
+      show_source: false
 
-## models
+---
 
-Pure-Python implementations of the generalized logistic calibration curve,
-multivariate variants (GDGT-2/3, NO₃ corrections), and classical (non-Bayesian)
-TEX86 calibration equations for comparison.
+## Download and cache
 
-::: TEXAS.models
+### Download posteriors
+
+::: TEXAS.utils.download.download_posteriors
     options:
       show_root_heading: false
-      members: true
+      show_source: false
 
-## ensemble
+---
 
-Functions for drawing calibration curve percentiles from a posterior distribution —
-useful for visualizing the calibrated SST–RI relationship and its uncertainty envelope.
+### Download all
 
-::: TEXAS.ensemble
+::: TEXAS.utils.download.download_all
     options:
       show_root_heading: false
-      members: true
+      show_source: false
 
-## plotting
+---
 
-Utilities for visualizing posterior distributions, prior choices, and calibration
-uncertainty ranges.
+### Download training data
 
-::: TEXAS.plotting
+::: TEXAS.utils.download.download_training_data
     options:
       show_root_heading: false
-      members: true
+      show_source: false
 
-## diagnostics
+---
 
-Functions for assessing Stan sampler health: divergences, R-hat (convergence),
-effective sample size (ESS), and E-BFMI (energy). Always check these after
-running a forward calibration.
+### List posteriors
 
-::: TEXAS.diagnostics
+::: TEXAS.stan.io.list_posteriors
     options:
       show_root_heading: false
-      members: true
+      show_source: false
+
+---
+
+### Set cache directory
+
+::: TEXAS.utils.paths.set_cache_dir
+    options:
+      show_root_heading: false
+      show_source: false
+
+---
+
+## Data builders
+
+### Build forward data
+
+::: TEXAS.data.builder.build_fwd_data
+    options:
+      show_root_heading: false
+      show_source: false
+
+---
+
+### Build invT input data
+
+::: TEXAS.data.builder.build_invT_inputData
+    options:
+      show_root_heading: false
+      show_source: false
+
+---
+
+### WOA23 NO₃ lookup
+
+::: TEXAS.data.ocean_lookup.lookup_no3_from_woa
+    options:
+      show_root_heading: false
+      show_source: false
+
+---
+
+## Forward calibration
+
+### Get posterior
+
+::: TEXAS.stan.sampler.get_posterior
+    options:
+      show_root_heading: false
+      show_source: false
+
+---
+
+### Save posterior
+
+::: TEXAS.stan.io.save_posterior
+    options:
+      show_root_heading: false
+      show_source: false
+
+---
+
+### Load posterior
+
+::: TEXAS.stan.io.load_posterior
+    options:
+      show_root_heading: false
+      show_source: false
+
+---
+
+## Ensemble
+
+### Generate ensemble (auto)
+
+::: TEXAS.ensemble.generator.generate_ensemble_auto
+    options:
+      show_root_heading: false
+      show_source: false
+
+---
+
+### Detect model and params
+
+::: TEXAS.ensemble.detection.detect_model_and_params
+    options:
+      show_root_heading: false
+      show_source: false
+
+---
+
+## Diagnostics
+
+### Sampler diagnostics
+
+::: TEXAS.diagnostics.summarize_sampler_diagnostics
+    options:
+      show_root_heading: false
+      show_source: false
+
+---
+
+### Summary table
+
+::: TEXAS.diagnostics.create_summary_table
+    options:
+      show_root_heading: false
+      show_source: false
+
+---
+
+## Plotting
+
+### Plot prior distributions
+
+::: TEXAS.plotting.prior_plot.plot_prior_distributions
+    options:
+      show_root_heading: false
+      show_source: false
