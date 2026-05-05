@@ -14,18 +14,8 @@ theme:
     - navigation.top
     - content.code.copy
   palette:
-    - scheme: default
-      primary: teal
-      accent: teal
-      toggle:
-        icon: material/weather-sunny
-        name: Switch to dark mode
-    - scheme: slate
-      primary: teal
-      accent: teal
-      toggle:
-        icon: material/weather-night
-        name: Switch to light mode
+    primary: teal
+    accent: teal
 
 plugins:
   - search
@@ -38,14 +28,7 @@ nav:
   - Quickstart: index.md
   - Installation: installation.md
   - API Reference: api.md
-
-exclude_docs: |
-  README.md
-  publication_plan.md
-  publishing.md
-  zenodo_publishing_guide.md
-  *.pdf
-  stan_reduce_sum_notes.md
+  - Troubleshooting: troubleshooting.md
 
 markdown_extensions:
   - admonition

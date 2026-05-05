@@ -6,6 +6,7 @@ on:
     paths:
       - "docs/**"
       - "mkdocs.yml"
+      - "src/TEXAS/**"
 
 jobs:
   deploy:
@@ -18,4 +19,4 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install mkdocs-material mkdocstrings[python]
-      - run: cd docs && mkdocs gh-deploy --force
+      - run: mkdocs gh-deploy --force
