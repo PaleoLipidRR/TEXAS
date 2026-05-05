@@ -30,7 +30,7 @@ from pathlib import Path
 import requests
 
 # ─── Configuration ─────────────────────────────────────────────────────────────
-RECORD_ID = "19666745"          # existing Zenodo data record
+RECORD_ID = "20032542"          # Zenodo data record (v0.2.0, doi:10.5281/zenodo.20032542)
 ZENODO_BASE = "https://zenodo.org/api"
 ARCHIVE_DIR = Path(__file__).parent.parent / "review_archive_v0.2.0"
 VERSION = "0.2.0"

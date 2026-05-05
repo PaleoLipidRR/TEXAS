@@ -30,8 +30,7 @@ from typing import List, Optional
 from .paths import POSTERIOR_CACHE_DIR, SPREADSHEETS_DIR
 
 # ─── Zenodo config ────────────────────────────────────────────────────────────
-# NOTE: update ZENODO_RECORD_ID after uploading the v0.2.0 data record to Zenodo.
-ZENODO_RECORD_ID: str = "19666745"
+ZENODO_RECORD_ID: str = "20032542"
 
 _ZENODO_BASE = f"https://zenodo.org/records/{ZENODO_RECORD_ID}/files"
 
