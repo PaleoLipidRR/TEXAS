@@ -31,11 +31,7 @@ declare -a FWD_CANONICAL=(
   "gen_logi_fixed_culmeso_cultureT_scaledRI_cren3_050126.nc|gen_logi_fixed_culmeso_cultureT_scaledRI_cren3.nc"
   "gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3_050126.nc|gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc"
   "gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3_050126.nc|gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3.nc"
-  "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_scaledRI_cren3_050126.nc|gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_scaledRI_cren3.nc"
-  "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_no3_1.0_scaledRI_cren3_050126.nc|gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_no3_1.0_scaledRI_cren3.nc"
   "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_eiv.nc|gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc"
-  "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_scaledRI_cren3_050126.nc|gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_scaledRI_cren3.nc"
-  "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_no3_1.0_scaledRI_cren3_050126.nc|gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_no3_1.0_scaledRI_cren3.nc"
   "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_eiv.nc|gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3.nc"
 )
 
@@ -100,6 +96,7 @@ declare -a INVT_PALEO=(
 declare -a DATA_FILES=(
   "data/spreadsheets/combined_coretop_culture_mesocosm_rev20260210.csv"
   "data/spreadsheets/ds_gridded_screened_global_compilation_finalized.csv"
+  "data/external/ncfiles/cmems_no3_uncertainty_field.nc"
 )
 
 # ── Create directory structure ───────────────────────────────────────────────
