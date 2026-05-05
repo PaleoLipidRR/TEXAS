@@ -194,8 +194,9 @@ def build_invT_inputData(
 
     if config.n_draws is None:
         # Auto-select M: use up to 25% of available draws, bounded [100, 500].
-        # 300 is the ceiling for typical runs (4 chains × 1000 = 4000 draws →
-        # M=300 gives ~5.8% Monte Carlo error; sufficient for publication quality).
+        # For typical runs (4 chains × 1000 = 4000 draws): 4000//4=1000, capped
+        # at 500 → M=500 (~4.5% Monte Carlo error). Use InvTConfig(n_draws=300)
+        # to match the publication default (M=300, ~5.8% error).
         M = min(500, max(100, total_available // 4))
         print(
             f"⚙️  Auto M={M} ({total_available} posterior draws available; "

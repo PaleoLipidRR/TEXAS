@@ -261,6 +261,24 @@ class MahalanobisOutlierDetector:
         
         return manual_outliers
     
+    def _get_exception_bounds(self) -> Optional[dict]:
+        """
+        Return {feature_name: threshold} for the default manual exception, or None.
+        Mirrors the branching logic in detect_outliers_manual().
+        """
+        feats = self.features
+        if 'ringIndex' in feats and 'TEX86' in feats:
+            return {'ringIndex': 0.75 * 4, 'TEX86': 0.75}
+        elif 'ringIndex_cren3' in feats and 'TEX86' in feats:
+            return {'ringIndex_cren3': 0.75 * 3, 'TEX86': 0.75}
+        elif 'proxyObs' in feats and 'TEX86' in feats:
+            return {'proxyObs': 0.75, 'TEX86': 0.75}
+        elif 'scaledRI' in feats and 'TEX86' in feats:
+            return {'scaledRI': 0.75, 'TEX86': 0.75}
+        elif 'scaledRI_cren3' in feats and 'TEX86' in feats:
+            return {'scaledRI_cren3': 0.75, 'TEX86': 0.75}
+        return None
+
     def fit_transform(
         self,
         df: pd.DataFrame,
@@ -443,13 +461,15 @@ class MahalanobisOutlierDetector:
         ax: plt.Axes = None,
         plot_data: bool = True,
         show_outliers: bool = True,
+        use_manual: bool = True,
+        show_exception_region: bool = True,
         ellipse_kwargs: dict = None,
         scatter_kwargs: dict = None,
         outlier_kwargs: dict = None
     ) -> tuple:
         """
         Complete visualization with data points and decision boundary.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
@@ -460,20 +480,30 @@ class MahalanobisOutlierDetector:
             Whether to plot data points
         show_outliers : bool, default=True
             Whether to highlight outliers differently
+        use_manual : bool, default=True
+            If True, use detect_outliers_manual() so that points kept by the
+            manual exception (e.g. high TEX86 + high scaledRI) are shown as
+            inliers, matching the actual filtered dataset. If False, use
+            detect_outliers() (pure distance threshold, ignores the exception).
+        show_exception_region : bool, default=True
+            If True and use_manual is True, draw a shaded rectangle marking
+            the high-RI / high-TEX86 corner that is retained regardless of
+            Mahalanobis distance. Has no effect when use_manual=False or when
+            the feature combination has no default exception.
         ellipse_kwargs : dict, optional
             Keyword arguments for ellipse
         scatter_kwargs : dict, optional
             Keyword arguments for inlier scatter plot
         outlier_kwargs : dict, optional
             Keyword arguments for outlier scatter plot
-            
+
         Returns
         -------
         ax : matplotlib.axes.Axes
             The axes object
         ellipse : matplotlib.patches.Ellipse
             The ellipse patch
-            
+
         Examples
         --------
         >>> detector = MahalanobisOutlierDetector(['TEX86', 'ringIndex'])
@@ -483,45 +513,64 @@ class MahalanobisOutlierDetector:
         """
         if len(self.features) != 2:
             raise ValueError(f"Decision boundary plot only works for 2D data, got {len(self.features)} features")
-        
+
         if ax is None:
             fig, ax = plt.subplots(figsize=(8, 6))
-        
+
         # Default kwargs
         if ellipse_kwargs is None:
             ellipse_kwargs = {}
         if scatter_kwargs is None:
-            scatter_kwargs = {'c': 'gray6', 's': 30, 'alpha': 0.6, 'label': 'Inliers'}
+            scatter_kwargs = {'c': '#888888', 's': 30, 'alpha': 0.6, 'label': 'Inliers'}
         if outlier_kwargs is None:
-            outlier_kwargs = {'c': 'red', 's': 50, 'alpha': 0.8, 'marker': 'x', 'label': 'Outliers'}
-        
+            outlier_kwargs = {'c': 'red', 's': 50, 'alpha': 0.8, 'marker': 'x', 'label': 'Outliers (screened out)'}
+
         # Plot data points
         if plot_data:
             x_data = df[self.features[0]]
             y_data = df[self.features[1]]
-            
+
             if show_outliers:
-                outliers = self.detect_outliers(df)
-                
+                outliers = (self.detect_outliers_manual(df) if use_manual
+                            else self.detect_outliers(df))
+
                 # Plot inliers
                 inlier_mask = ~outliers.fillna(False)
                 ax.scatter(x_data[inlier_mask], y_data[inlier_mask], **scatter_kwargs)
-                
+
                 # Plot outliers
                 outlier_mask = outliers.fillna(False)
                 if outlier_mask.any():
                     ax.scatter(x_data[outlier_mask], y_data[outlier_mask], **outlier_kwargs)
             else:
                 ax.scatter(x_data, y_data, **scatter_kwargs)
-        
+
         # Plot ellipse
         ellipse = self.plot_ellipse(ax, **ellipse_kwargs)
-        
+
+        # Draw manual-exception rectangle (high-RI / high-TEX86 retained corner)
+        if use_manual and show_exception_region:
+            bounds = self._get_exception_bounds()
+            if bounds is not None:
+                x_thresh = bounds.get(self.features[0])
+                y_thresh = bounds.get(self.features[1])
+                if x_thresh is not None and y_thresh is not None:
+                    # Extend well past any realistic data range; axes limits clip it
+                    large = 1e3
+                    rect = plt.Rectangle(
+                        (x_thresh, y_thresh), large, large,
+                        facecolor='steelblue', alpha=0.12,
+                        edgecolor='steelblue', linewidth=1.2,
+                        linestyle='--', label='Manual exception (retained)',
+                        zorder=0,
+                    )
+                    ax.add_patch(rect)
+
         # Labels
         ax.set_xlabel(self.features[0])
         ax.set_ylabel(self.features[1])
         ax.legend()
-        
+
         return ax, ellipse
     
     def plot_multiple_ellipses(
@@ -567,7 +616,7 @@ class MahalanobisOutlierDetector:
         # Plot data
         x_data = df[self.features[0]]
         y_data = df[self.features[1]]
-        scatter_kwargs = {'c': 'gray6', 's': 20, 'alpha': 0.4, 'zorder': 1}
+        scatter_kwargs = {'c': '#888888', 's': 20, 'alpha': 0.4, 'zorder': 1}
         scatter_kwargs.update(kwargs)
         ax.scatter(x_data, y_data, **scatter_kwargs)
         
@@ -651,7 +700,7 @@ class MahalanobisOutlierDetector:
         if ellipse_kwargs is None:
             ellipse_kwargs = {'facecolor': 'red', 'alpha': 0.1, 'edgecolor': 'red', 'linewidth': 2}
         if scatter_kwargs is None:
-            scatter_kwargs = {'c': 'gray6', 's': 20, 'alpha': 0.5}
+            scatter_kwargs = {'c': '#888888', 's': 20, 'alpha': 0.5}
         if outlier_kwargs is None:
             outlier_kwargs = {'c': 'red', 's': 40, 'marker': 'x', 'alpha': 0.8}
         
@@ -778,7 +827,7 @@ class MahalanobisOutlierDetector:
         if ellipse_kwargs is None:
             ellipse_kwargs = {'facecolor': 'red', 'alpha': 0.1, 'edgecolor': 'red', 'linewidth': 2}
         if scatter_kwargs is None:
-            scatter_kwargs = {'c': 'gray6', 's': 20, 'alpha': 0.5}
+            scatter_kwargs = {'c': '#888888', 's': 20, 'alpha': 0.5}
         if outlier_kwargs is None:
             outlier_kwargs = {'c': 'red', 's': 40, 'marker': 'x', 'alpha': 0.8}
         

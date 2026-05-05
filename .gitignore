@@ -30,6 +30,8 @@ venv/
 */.ipynb_checkpoints/*
 notebooks/dask-worker-space/
 notebooks/manuscripts/regrid_weights_*.nc
+notebooks/manuscripts/*.pkl
+notebooks/manuscripts/*.png
 notebooks/exploration/
 
 # Manuscript draft (pre-publication)

@@ -59,6 +59,50 @@ df["scaledRI_cren3"] = compute_scaledRI(
 
 ---
 
+### Step 1b — Screen your proxy data (recommended)
+
+Use Mahalanobis distance to flag samples that fall outside the modern coretop calibration domain before running the inverse reconstruction. The detector is fit on the **screened coretop training data** (low-G23 subset: `gdgt23ratio ≤ 5`) using `TEX86` and `scaledRI_cren3` as features. Samples in the paleo record whose distance exceeds the chi-squared threshold are flagged; `detect_outliers_manual()` additionally preserves warm end-member samples (high RI + high TEX86) that lie outside the ellipse.
+
+```python
+import pandas as pd
+import matplotlib.pyplot as plt
+import TEXAS
+from TEXAS.utils.paths import SPREADSHEETS_DIR
+from TEXAS.data import MahalanobisOutlierDetector
+
+# Download training data from Zenodo (~1.8 MB, skipped if already cached)
+TEXAS.download_training_data()
+
+# Load combined dataset; keep coretop rows only
+combined_df = pd.read_csv(SPREADSHEETS_DIR / 'combined_coretop_culture_mesocosm_rev20260210.csv')
+coretop_df = combined_df[combined_df['datatype'] == 'coretop']
+
+# Fit on low-G23 coretops (gdgt23ratio ≤ 5 excludes ecology-dominated samples)
+detector = MahalanobisOutlierDetector(['TEX86', 'scaledRI_cren3'], confidence=0.9)
+detector.fit(coretop_df[coretop_df['gdgt23ratio'] <= 5])
+print(f"Fitted on {int((coretop_df['gdgt23ratio'] <= 5).sum())} coretop samples (gdgt23ratio ≤ 5)")
+print(f"Mahalanobis threshold (90% CI): {detector.threshold:.3f}")
+
+# Apply to your downcore data — requires TEX86 and scaledRI_cren3 columns
+df['TEXRI_cren3_mahalDist_low23ratio_outliers_manual'] = detector.detect_outliers_manual(df)
+n_out = int(df['TEXRI_cren3_mahalDist_low23ratio_outliers_manual'].sum())
+print(f"Screened out: {n_out} / {len(df)} samples")
+
+# Visualise — 90% confidence ellipse with inliers/outliers colour-coded
+fig, ax = plt.subplots(figsize=(5, 4))
+detector.plot_decision_boundary(df, ax=ax)
+ax.set_xlabel("TEX$_{86}$")
+ax.set_ylabel(r"Scaled RI$_{0-3}$")
+ax.set_title("Mahalanobis screening (90% CI)")
+plt.tight_layout()
+plt.show()
+
+# Keep only inliers
+df_screened = df[df['TEXRI_cren3_mahalDist_low23ratio_outliers_manual'] == False].reset_index(drop=True)
+```
+
+---
+
 ### Step 2 — Download a forward posterior
 
 Pre-computed posteriors are hosted on [Zenodo](https://doi.org/10.5281/zenodo.20032542). Download only what you need:

@@ -41,7 +41,7 @@ rm -rf src/texas_psm.egg-info
 pip install --no-cache-dir -q -e .
 
 # Install git-lfs and pull any LFS pointer files (best-effort — network may be unavailable)
-if sudo apt-get update -qq && sudo apt-get install -y -qq git-lfs; then
+if timeout 30 sudo apt-get update -qq && sudo apt-get install -y -qq git-lfs; then
     git lfs update --force
     git lfs pull || echo "Warning: git lfs pull failed — LFS data files may be missing."
 else
