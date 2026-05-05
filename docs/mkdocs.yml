@@ -28,6 +28,7 @@ nav:
   - Quickstart: index.md
   - Installation: installation.md
   - API Reference: api.md
+  - Troubleshooting: troubleshooting.md
 
 exclude_docs: |
   README.md
