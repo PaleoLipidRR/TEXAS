@@ -555,10 +555,15 @@ class MahalanobisOutlierDetector:
                 x_thresh = bounds.get(self.features[0])
                 y_thresh = bounds.get(self.features[1])
                 if x_thresh is not None and y_thresh is not None:
-                    # Extend well past any realistic data range; axes limits clip it
-                    large = 1e3
+                    # Freeze axis limits set by the data before adding the patch,
+                    # so the large rectangle does not expand the axes to 1000.
+                    ax.autoscale(False)
+                    xlim = ax.get_xlim()
+                    ylim = ax.get_ylim()
+                    w = (xlim[1] - x_thresh) * 10
+                    h = (ylim[1] - y_thresh) * 10
                     rect = plt.Rectangle(
-                        (x_thresh, y_thresh), large, large,
+                        (x_thresh, y_thresh), w, h,
                         facecolor='steelblue', alpha=0.12,
                         edgecolor='steelblue', linewidth=1.2,
                         linestyle='--', label='Manual exception (retained)',
