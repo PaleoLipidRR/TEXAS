@@ -9,10 +9,11 @@
 #   bash scripts/prepare_review_archive.sh
 #
 # Output: review_archive_v<VERSION>/
-#   posteriors/canonical/   — final scaledRI_cren3 (RI₀₋₃) posteriors, clean names
-#   posteriors/reference/   — scaledRI (RI₀₋₄) posteriors for comparison
-#   data/                   — training CSVs
-#   README.md               — archive manifest for Zenodo
+#   posteriors/forward/         — forward calibration posteriors (scaledRI_cren3, RI₀₋₃)
+#   posteriors/invT/coretop/    — global coretop invT posteriors (combined)
+#   posteriors/invT/paleo/      — paleo-site invT posteriors shown in manuscript figures
+#   data/                       — training CSVs
+#   README.md                   — archive manifest for Zenodo
 
 set -euo pipefail
 
@@ -20,22 +21,80 @@ set -euo pipefail
 VERSION=$(python -c "from importlib.metadata import version; print(version('texas-psm'))" 2>/dev/null || \
           grep '^version' pyproject.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
 ARCHIVE_DIR="review_archive_v${VERSION}"
-CACHE="data/cache/TEXAS_posterior_cache"
+FWD_CACHE="data/cache/TEXAS_posterior_cache"
+INVT_CACHE="data/cache/TEXAS_invT_posterior_cache"
 
-# ── Source → clean-name mapping ─────────────────────────────────────────────
+# ── Forward posteriors: source → clean-name mapping ─────────────────────────
 # Format: "source_filename|clean_zenodo_name"
-declare -a CANONICAL=(
-  "gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3_032326.nc|gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc"
-  "gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3_032326.nc|gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3.nc"
-  "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3_041626_eiv.nc|gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc"
-  "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3_041626_eiv.nc|gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3.nc"
+# All fitted with scaledRI_cren3 (RI₀₋₃); date tag stripped for Zenodo.
+declare -a FWD_CANONICAL=(
+  "gen_logi_fixed_culmeso_cultureT_scaledRI_cren3_050126.nc|gen_logi_fixed_culmeso_cultureT_scaledRI_cren3.nc"
+  "gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3_050126.nc|gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc"
+  "gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3_050126.nc|gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3.nc"
+  "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_scaledRI_cren3_050126.nc|gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_scaledRI_cren3.nc"
+  "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_no3_1.0_scaledRI_cren3_050126.nc|gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_no3_1.0_scaledRI_cren3.nc"
+  "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_eiv.nc|gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc"
+  "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_scaledRI_cren3_050126.nc|gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_scaledRI_cren3.nc"
+  "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_no3_1.0_scaledRI_cren3_050126.nc|gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_no3_1.0_scaledRI_cren3.nc"
+  "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_eiv.nc|gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3.nc"
 )
 
-declare -a REFERENCE=(
-  "gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_032326.nc|gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI.nc"
-  "gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_032326.nc|gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI.nc"
-  "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_041626_eiv.nc|gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI.nc"
-  "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_041626_eiv.nc|gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI.nc"
+# ── InvT posteriors: coretop (combined, 1513 obs each) ──────────────────────
+declare -a INVT_CORETOP=(
+  "global_coretop_invT_gen_logi_fixed_univ_unconstrained_SST_scaledRI_cren3_050126_direct.nc"
+  "global_coretop_invT_gen_logi_fixed_univ_unconstrained_thermoT_scaledRI_cren3_050126_direct.nc"
+  "global_coretop_invT_gen_logi_fixed_multiv_unconstrained_SST_gdgt23ratio_scaledRI_cren3_050126_direct.nc"
+  "global_coretop_invT_gen_logi_fixed_multiv_unconstrained_thermoT_gdgt23ratio_scaledRI_cren3_050126_direct.nc"
+  "global_coretop_invT_gen_logi_fixed_multiv_unconstrained_SST_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_direct.nc"
+  "global_coretop_invT_gen_logi_fixed_multiv_unconstrained_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_direct.nc"
+)
+
+# ── InvT posteriors: paleo sites shown in manuscript figures ─────────────────
+declare -a INVT_PALEO=(
+  "Co1010_invT_gen_logi_fixed_multiv_unconstrained_SST_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_direct.nc"
+  "DSDP591_invT_gen_logi_fixed_univ_unconstrained_sst_scaledRI_cren3_050126_direct.nc"
+  "DSDP591_invT_gen_logi_fixed_univ_unconstrained_thermoT_scaledRI_cren3_050126_direct.nc"
+  "DSDP591_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_direct.nc"
+  "DSDP591_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_001_direct.nc"
+  "DSDP591_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_01_direct.nc"
+  "DSDP591_invT_gen_logi_fixed_multiv_unconstrained_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_direct.nc"
+  "DSDP591_invT_gen_logi_fixed_multiv_unconstrained_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_001_direct.nc"
+  "DSDP591_invT_gen_logi_fixed_multiv_unconstrained_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_01_direct.nc"
+  "MD98-2152_invT_gen_logi_fixed_univ_unconstrained_sst_scaledRI_cren3_050126_direct.nc"
+  "MD98-2152_invT_gen_logi_fixed_univ_unconstrained_thermoT_scaledRI_cren3_050126_direct.nc"
+  "MD98-2152_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_direct.nc"
+  "MD98-2152_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_001_direct.nc"
+  "MD98-2152_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_01_direct.nc"
+  "MD98-2152_invT_gen_logi_fixed_multiv_unconstrained_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_direct.nc"
+  "MD98-2152_invT_gen_logi_fixed_multiv_unconstrained_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_001_direct.nc"
+  "MD98-2152_invT_gen_logi_fixed_multiv_unconstrained_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_01_direct.nc"
+  "ODP1259_invT_gen_logi_fixed_multiv_unconstrained_SST_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_direct.nc"
+  "ODP959_invT_gen_logi_fixed_univ_unconstrained_sst_scaledRI_cren3_050126_direct.nc"
+  "ODP959_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_001_direct.nc"
+  "ODP959_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_01_direct.nc"
+  "ODP959_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_10_direct.nc"
+  "ODP959_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_modern_direct.nc"
+  "SDB_invT_gen_logi_fixed_univ_unconstrained_sst_scaledRI_cren3_050126_direct.nc"
+  "SDB_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_001_direct.nc"
+  "SDB_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_01_direct.nc"
+  "SDB_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_10_direct.nc"
+  "SDB_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_modern_direct.nc"
+  "U1482_invT_gen_logi_fixed_univ_unconstrained_sst_scaledRI_cren3_050126_direct.nc"
+  "U1482_invT_gen_logi_fixed_univ_unconstrained_thermoT_scaledRI_cren3_050126_direct.nc"
+  "U1482_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_direct.nc"
+  "U1482_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_001_direct.nc"
+  "U1482_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_01_direct.nc"
+  "U1482_invT_gen_logi_fixed_multiv_unconstrained_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_direct.nc"
+  "U1482_invT_gen_logi_fixed_multiv_unconstrained_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_001_direct.nc"
+  "U1482_invT_gen_logi_fixed_multiv_unconstrained_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_01_direct.nc"
+  "U1510_invT_gen_logi_fixed_univ_unconstrained_sst_scaledRI_cren3_050126_direct.nc"
+  "U1510_invT_gen_logi_fixed_univ_unconstrained_thermoT_scaledRI_cren3_050126_direct.nc"
+  "U1510_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_direct.nc"
+  "U1510_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_001_direct.nc"
+  "U1510_invT_gen_logi_fixed_multiv_unconstrained_sst_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_01_direct.nc"
+  "U1510_invT_gen_logi_fixed_multiv_unconstrained_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_direct.nc"
+  "U1510_invT_gen_logi_fixed_multiv_unconstrained_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_001_direct.nc"
+  "U1510_invT_gen_logi_fixed_multiv_unconstrained_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_01_direct.nc"
 )
 
 declare -a DATA_FILES=(
@@ -46,19 +105,20 @@ declare -a DATA_FILES=(
 # ── Create directory structure ───────────────────────────────────────────────
 echo "Creating archive: ${ARCHIVE_DIR}/"
 rm -rf "${ARCHIVE_DIR}"
-mkdir -p "${ARCHIVE_DIR}/posteriors/canonical"
-mkdir -p "${ARCHIVE_DIR}/posteriors/reference"
+mkdir -p "${ARCHIVE_DIR}/posteriors/forward"
+mkdir -p "${ARCHIVE_DIR}/posteriors/invT/coretop"
+mkdir -p "${ARCHIVE_DIR}/posteriors/invT/paleo"
 mkdir -p "${ARCHIVE_DIR}/data"
 
-# ── Copy canonical posteriors ────────────────────────────────────────────────
+# ── Copy forward posteriors ──────────────────────────────────────────────────
 echo ""
-echo "Canonical posteriors (scaledRI_cren3, RI₀₋₃ — recommended):"
-for entry in "${CANONICAL[@]}"; do
+echo "Forward calibration posteriors (scaledRI_cren3, RI₀₋₃):"
+for entry in "${FWD_CANONICAL[@]}"; do
   src="${entry%%|*}"
   dst="${entry##*|}"
-  src_path="${CACHE}/${src}"
+  src_path="${FWD_CACHE}/${src}"
   if [[ -f "${src_path}" ]]; then
-    cp "${src_path}" "${ARCHIVE_DIR}/posteriors/canonical/${dst}"
+    cp "${src_path}" "${ARCHIVE_DIR}/posteriors/forward/${dst}"
     echo "  ✓  ${dst}"
   else
     echo "  ✗  MISSING: ${src}"
@@ -66,18 +126,29 @@ for entry in "${CANONICAL[@]}"; do
   fi
 done
 
-# ── Copy reference posteriors ────────────────────────────────────────────────
+# ── Copy coretop invT posteriors ─────────────────────────────────────────────
 echo ""
-echo "Reference posteriors (scaledRI, RI₀₋₄ — for comparison only):"
-for entry in "${REFERENCE[@]}"; do
-  src="${entry%%|*}"
-  dst="${entry##*|}"
-  src_path="${CACHE}/${src}"
+echo "Coretop invT posteriors (combined, 1513 obs):"
+for f in "${INVT_CORETOP[@]}"; do
+  src_path="${INVT_CACHE}/${f}"
   if [[ -f "${src_path}" ]]; then
-    cp "${src_path}" "${ARCHIVE_DIR}/posteriors/reference/${dst}"
-    echo "  ✓  ${dst}"
+    cp "${src_path}" "${ARCHIVE_DIR}/posteriors/invT/coretop/${f}"
+    echo "  ✓  ${f}"
   else
-    echo "  ✗  MISSING: ${src}"
+    echo "  ✗  MISSING: ${f}"
+  fi
+done
+
+# ── Copy paleo-site invT posteriors ──────────────────────────────────────────
+echo ""
+echo "Paleo-site invT posteriors (manuscript figures):"
+for f in "${INVT_PALEO[@]}"; do
+  src_path="${INVT_CACHE}/${f}"
+  if [[ -f "${src_path}" ]]; then
+    cp "${src_path}" "${ARCHIVE_DIR}/posteriors/invT/paleo/${f}"
+    echo "  ✓  ${f}"
+  else
+    echo "  ✗  MISSING: ${f}"
   fi
 done
 
@@ -95,41 +166,46 @@ done
 
 # ── Write archive README ─────────────────────────────────────────────────────
 cat > "${ARCHIVE_DIR}/README.md" << EOF
-# TEXAS: GDGT calibration database and forward posteriors
+# TEXAS: GDGT calibration database and posteriors
 **Version**: ${VERSION} (pre-publication / manuscript review)
 **Package**: texas-psm — https://github.com/PaleoLipidRR/TEXAS
 
-This archive contains the GDGT training database and pre-computed Bayesian
-forward calibration posteriors used in Rattanasriampaipong et al. (in prep).
+This archive contains the GDGT training database and pre-computed Bayesian posteriors
+used in Rattanasriampaipong et al. (in prep).
+
+All posteriors use **scaledRI_cren3** (Ring Index computed from GDGT-0 through
+GDGT-cren, RI₀₋₃).
 
 ---
 
 ## Contents
 
-### posteriors/canonical/  — RECOMMENDED
+### posteriors/forward/
 
-Posteriors fitted with **scaledRI_cren3** (Ring Index computed from GDGT-0
-through GDGT-cren, RI₀₋₃).  These are the primary posteriors used in the
-manuscript and should be used for all new inverse reconstructions.
+Forward calibration posteriors. All fitted with scaledRI_cren3.
 
 | File | Model | Temp type |
 |------|-------|-----------|
+| gen_logi_fixed_culmeso_cultureT_scaledRI_cren3.nc | Culture+mesocosm only | cultureT |
 | gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc | Temperature-only | SST |
 | gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3.nc | Temperature-only | thermoT |
+| gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_scaledRI_cren3.nc | G₂/₃ only | SST |
+| gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_no3_1.0_scaledRI_cren3.nc | NO₃ only | SST |
 | gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc | Multivariate EIV (G₂/₃ + NO₃) | SST |
+| gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_scaledRI_cren3.nc | G₂/₃ only | thermoT |
+| gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_no3_1.0_scaledRI_cren3.nc | NO₃ only | thermoT |
 | gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3.nc | Multivariate EIV (G₂/₃ + NO₃) | thermoT |
 
-### posteriors/reference/  — for comparison only
+### posteriors/invT/coretop/
 
-Posteriors fitted with **scaledRI** (Ring Index including GDGT-cren', RI₀₋₄).
-Retained for comparison with earlier studies; not the primary model.
+Inverse temperature posteriors for the global coretop dataset (1513 sites, combined
+from batched runs). Used in calibration validation figures.
 
-| File | Model | Temp type |
-|------|-------|-----------|
-| gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI.nc | Temperature-only | SST |
-| gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI.nc | Temperature-only | thermoT |
-| gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI.nc | Multivariate EIV (G₂/₃ + NO₃) | SST |
-| gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI.nc | Multivariate EIV (G₂/₃ + NO₃) | thermoT |
+### posteriors/invT/paleo/
+
+Inverse temperature posteriors for paleo-site reconstructions shown in the manuscript
+figures (Co1010, DSDP591, MD98-2152, ODP1259, ODP959, SDB, U1482, U1510).
+Sensitivity variants (no3_001, no3_01, no3_10, no3_modern) are included where shown.
 
 ### data/
 
@@ -158,8 +234,7 @@ result = TEXAS.predict_T_from_proxyObs(
     prior_sigma_t=10.0,
     fwd_posterior_name="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3",
     gdgt23ratio=my_g23_array,
-    no3=my_no3_array,             # from ocean_prop_ds["no3_sf2tc_avg"]
-    # or: no3=10.0                # to disable NO₃ correction (value above 1.0 µmol/L cutoff)
+    no3=my_no3_array,
     temptype="SST",
 )
 \`\`\`

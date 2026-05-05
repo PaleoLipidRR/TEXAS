@@ -133,10 +133,9 @@ def predict_T_from_proxyObs(
     proxyObs: Union[np.ndarray, List[float]],
     prior_mu_t: Union[np.ndarray, float],
     prior_sigma_t: float,
-    fwd_posterior_name: Optional[str] = None,
+    fwd_posterior: Optional[Union[str, xr.Dataset]] = None,
     *,
     proxy_name: Optional[str] = None,
-    fwd_posterior: Optional[xr.Dataset] = None,
     temptype: Optional[str] = None,
     site_name: Optional[str] = None,
     predictors: Optional[Dict[str, np.ndarray]] = None,
@@ -183,15 +182,18 @@ def predict_T_from_proxyObs(
     prior_sigma_t : float
         Prior temperature uncertainty (°C).  Use a diffuse value (e.g. 10)
         when little prior information is available.
-    fwd_posterior_name : str, optional
-        Name of the saved forward calibration posterior (without ``.nc``
-        extension) stored in the posterior cache.  Not required when
-        *fwd_posterior* is supplied directly.
-    fwd_posterior : xr.Dataset, optional
-        Pre-loaded forward posterior Dataset.  When provided, no file I/O or
-        Zenodo download is attempted.  Useful in Google Colab or any context
-        where the posterior cache is unavailable — load the ``.nc`` yourself
-        (e.g. from Google Drive) and pass it here.
+    fwd_posterior : str or xr.Dataset, optional
+        The forward calibration posterior.  Accepts either:
+
+        - **str** — name of the saved posterior (without ``.nc`` extension)
+          in the posterior cache directory.  The file is loaded automatically.
+        - **xr.Dataset** — a pre-loaded posterior Dataset.  No file I/O or
+          Zenodo download is attempted; pass this when the cache is unavailable
+          (e.g. Google Colab with a Drive-mounted ``.nc``)::
+
+              ds = xr.open_dataset("my_drive/posterior.nc")
+              result = predict_T_from_proxyObs(..., fwd_posterior=ds)
+
     temptype : str, optional
         Temperature type: ``"SST"`` or ``"thermoT"``.  Used for metadata
         and output file naming.
@@ -293,6 +295,14 @@ def predict_T_from_proxyObs(
         ``"p95"``        — 95th percentile temperature (°C), shape (N,)
         ``"metadata"``   — run metadata dict (model name, attrs, etc.)
     """
+    # ── Normalise fwd_posterior: split str vs pre-loaded Dataset ─────────────
+    if isinstance(fwd_posterior, xr.Dataset):
+        _fwd_ds: Optional[xr.Dataset] = fwd_posterior
+        _fwd_name: Optional[str] = None
+    else:
+        _fwd_ds = None
+        _fwd_name = fwd_posterior  # str or None
+
     # ── Resolve NO₃ predictor ─────────────────────────────────────────────────
     # Priority: site_lat/lon lookup > no3= explicit > predictors["no3"] > zeros
     predictors = dict(predictors or {})
@@ -324,10 +334,10 @@ def predict_T_from_proxyObs(
         predictors["gdgt23ratio"] = gdgt23ratio
 
     # Warn if predictors are passed but the forward posterior doesn't use them
-    _ds_for_check = fwd_posterior
-    if _ds_for_check is None and fwd_posterior_name:
+    _ds_for_check = _fwd_ds
+    if _ds_for_check is None and _fwd_name:
         try:
-            _ds_for_check = load_posterior(fwd_posterior_name)
+            _ds_for_check = load_posterior(_fwd_name)
         except Exception:
             pass
     if _ds_for_check is not None:
@@ -353,8 +363,8 @@ def predict_T_from_proxyObs(
         proxyObs=proxyObs,
         prior_mu_t=prior_mu_t,
         prior_sigma_t=prior_sigma_t,
-        fwd_posterior_name=fwd_posterior_name,
-        fwd_posterior=fwd_posterior,
+        fwd_posterior_name=_fwd_name,
+        fwd_posterior=_fwd_ds,
         site_name=site_name,
         temptype=temptype,
         predictors=predictors,

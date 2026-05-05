@@ -11,6 +11,7 @@ import xarray as xr
 __all__ = [
     "save_posterior",
     "load_posterior",
+    "list_posteriors",
     "save_invT_posterior",
 ]
 
@@ -120,15 +121,73 @@ def load_posterior(
             f"Posterior file not found: '{model_name}.nc'\n"
             f"Searched in: {indir}\n"
             f"Files present in that directory:\n    {available_str}\n\n"
-            f"If the file lives in a different directory, pass it explicitly:\n"
-            f"    load_posterior('{model_name}', cache_dir='/your/path/here')\n"
-            f"Or move the file into: {indir}\n\n"
-            f"If the file is missing entirely, download it with:\n"
-            f"    from TEXAS.utils.download import download_posteriors\n"
-            f"    download_posteriors(['{model_name}'])"
+            f"Options:\n"
+            f"  1. The file is in a different directory — load it yourself and pass the Dataset:\n"
+            f"       import xarray as xr\n"
+            f"       ds = xr.open_dataset('/your/path/{model_name}.nc')\n"
+            f"       predict_T_from_proxyObs(..., fwd_posterior=ds)\n\n"
+            f"  2. Search a different cache directory:\n"
+            f"       load_posterior('{model_name}', cache_dir='/your/path/here')\n\n"
+            f"  3. Download from Zenodo:\n"
+            f"       from TEXAS.utils.download import download_posteriors\n"
+            f"       download_posteriors(['{model_name}'])"
         )
 
     return xr.load_dataset(fpath)
+
+
+def list_posteriors(
+    model_type: Literal["forward", "invT", "both"] = "both",
+    cache_dir: Optional[Union[str, Path]] = None,
+) -> Dict[str, list]:
+    """
+    List available posterior files in the cache directory.
+
+    Prints a summary and returns a dict of stem names that can be passed
+    directly to ``predict_T_from_proxyObs(fwd_posterior=...)``.
+
+    Parameters
+    ----------
+    model_type : "forward", "invT", or "both"
+        Which cache to inspect.  Default ``"both"``.
+    cache_dir : Path or str, optional
+        Override the default cache root.  When given, both forward and invT
+        subdirectories are looked for under this path.
+
+    Returns
+    -------
+    dict
+        ``{"forward": [...], "invT": [...]}`` — lists of stem names (no ``.nc``).
+    """
+    if cache_dir:
+        root = Path(cache_dir)
+        fwd_dir = root / "TEXAS_posterior_cache"
+        invt_dir = root / "TEXAS_invT_posterior_cache"
+    else:
+        fwd_dir = DEFAULT_FORWARD_DIR
+        invt_dir = DEFAULT_INVT_DIR
+
+    result: Dict[str, list] = {"forward": [], "invT": []}
+
+    def _list(directory: Path, label: str) -> list:
+        files = sorted(directory.glob("*.nc")) if directory.exists() else []
+        stems = [f.stem for f in files]
+        print(f"{label} posteriors  [{directory}]")
+        if stems:
+            for name in stems:
+                print(f"  {name}")
+        else:
+            print("  (none)")
+        return stems
+
+    if model_type in ("forward", "both"):
+        result["forward"] = _list(fwd_dir, "Forward calibration")
+    if model_type in ("invT", "both"):
+        if model_type == "both":
+            print()
+        result["invT"] = _list(invt_dir, "Inverse temperature (invT)")
+
+    return result
 
 
 def save_invT_posterior(

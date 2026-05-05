@@ -17,6 +17,7 @@ from .stan.io import (
     load_posterior,
     save_posterior,
     save_invT_posterior,
+    list_posteriors,
 )
 from .stan.invT import (
     get_invT_posterior,
@@ -81,6 +82,7 @@ __all__ = [
     "StanSampler",
     "get_posterior",
     "load_posterior",
+    "list_posteriors",
     "save_posterior",
     "save_invT_posterior",
     # stan — inverse temperature

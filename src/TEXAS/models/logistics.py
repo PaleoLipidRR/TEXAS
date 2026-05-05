@@ -114,25 +114,44 @@ def generalized_logistic_fixed_upper(
     b: float = None,
     k: float = None,
     v: float = None,
-    Q: float = None
 ) -> np.ndarray:
     """
-    5-parameter generalized logistic with upper asymptote fixed at 1.
-    y = b + (1 - b) / (1 + Q*exp(-k*(x - inflection)))^(1/v)
-    
-    If v or Q are None, they default to 1.0.
+    4-parameter generalized logistic with upper asymptote fixed at 1 and Q=1.
+    y = b + (1 - b) / (1 + exp(-k*(x - t0)))^(1/v)
+
+    v defaults to 1.0 if not provided.
     """
     inflection = t0 if t0 is not None else x0
-    
-    # Check required parameters
     if inflection is None or b is None or k is None:
         raise ValueError("Missing required parameters: t0 (or x0), b, k")
-    
-    # Default v and Q to 1.0 if not provided (allows fixing them)
+
     v_val = v if v is not None else 1.0
-    Q_val = Q if Q is not None else 1.0
-    
+
     x = np.asarray(x).squeeze()
-    exponent = -k * (x - inflection)
-    denominator = 1 + Q_val * np.exp(exponent)
-    return b + (1 - b) / (denominator ** (1 / v_val))
+    return b + (1 - b) / ((1 + np.exp(-k * (x - inflection))) ** (1 / v_val))
+
+
+def inverse_generalized_logistic_fixed_upper(
+    y: np.ndarray,
+    t0: float = None,
+    x0: float = None,
+    b: float = None,
+    k: float = None,
+    v: float = None,
+) -> np.ndarray:
+    """
+    Inverse of generalized_logistic_fixed_upper: given y, return x.
+    x = t0 - ln(((1-b)/(y-b))^v - 1) / k
+
+    v defaults to 1.0 if not provided.
+    """
+    inflection = t0 if t0 is not None else x0
+    if inflection is None or b is None or k is None:
+        raise ValueError("Missing required parameters: t0 (or x0), b, k")
+
+    v_val = v if v is not None else 1.0
+
+    y = np.asarray(y).squeeze()
+    return inflection - np.log(((1 - b) / (y - b)) ** v_val - 1) / k
+
+
