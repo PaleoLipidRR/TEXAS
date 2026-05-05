@@ -25,7 +25,7 @@
 ::: TEXAS.predict.compute_scaledRI
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
 
 ---
 
@@ -34,7 +34,7 @@
 ::: TEXAS.predict.predict_proxy_from_T
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
 
 ---
 
@@ -43,7 +43,7 @@
 ::: TEXAS.predict.predict_T_from_proxyObs
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
 
 ---
 
@@ -54,7 +54,7 @@
 ::: TEXAS.utils.download.download_posteriors
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
 
 ---
 
@@ -63,7 +63,7 @@
 ::: TEXAS.utils.download.download_all
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
 
 ---
 
@@ -72,7 +72,7 @@
 ::: TEXAS.utils.download.download_training_data
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
 
 ---
 
@@ -81,7 +81,7 @@
 ::: TEXAS.stan.io.list_posteriors
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
 
 ---
 
@@ -90,7 +90,7 @@
 ::: TEXAS.utils.paths.set_cache_dir
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
 
 ---
 
@@ -101,7 +101,7 @@
 ::: TEXAS.data.builder.build_fwd_data
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
 
 ---
 
@@ -110,7 +110,7 @@
 ::: TEXAS.data.builder.build_invT_inputData
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
 
 ---
 
@@ -119,7 +119,7 @@
 ::: TEXAS.data.ocean_lookup.lookup_no3_from_woa
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
 
 ---
 
@@ -130,7 +130,7 @@
 ::: TEXAS.stan.sampler.get_posterior
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
 
 ---
 
@@ -139,7 +139,7 @@
 ::: TEXAS.stan.io.save_posterior
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
 
 ---
 
@@ -148,7 +148,7 @@
 ::: TEXAS.stan.io.load_posterior
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
 
 ---
 
@@ -159,7 +159,7 @@
 ::: TEXAS.ensemble.generator.generate_ensemble_auto
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
 
 ---
 
@@ -168,7 +168,7 @@
 ::: TEXAS.ensemble.detection.detect_model_and_params
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
 
 ---
 
@@ -179,7 +179,7 @@
 ::: TEXAS.diagnostics.summarize_sampler_diagnostics
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
 
 ---
 
@@ -188,7 +188,7 @@
 ::: TEXAS.diagnostics.create_summary_table
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
 
 ---
 
@@ -199,4 +199,4 @@
 ::: TEXAS.plotting.prior_plot.plot_prior_distributions
     options:
       show_root_heading: false
-      show_source: false
+      show_source: true
