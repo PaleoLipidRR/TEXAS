@@ -40,8 +40,12 @@ rm -rf src/texas_psm.egg-info
 # (The Dockerfile installs a snapshot; this overwrites it with the live workspace.)
 pip install --no-cache-dir -q -e .
 
-# Install git-lfs
-sudo apt-get update -qq && sudo apt-get install -y -qq git-lfs
-git lfs update --force
+# Install git-lfs and pull any LFS pointer files (best-effort — network may be unavailable)
+if sudo apt-get update -qq && sudo apt-get install -y -qq git-lfs; then
+    git lfs update --force
+    git lfs pull || echo "Warning: git lfs pull failed — LFS data files may be missing."
+else
+    echo "Warning: git-lfs install failed (no network?). LFS data files may be missing."
+fi
 
 exit 0
