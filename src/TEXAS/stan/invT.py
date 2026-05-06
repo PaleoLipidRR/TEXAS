@@ -22,6 +22,7 @@ from TEXAS.stan.io import (
     _save_invT_results,
 )
 from TEXAS.utils.system_info import simple_memory_check, get_system_info, suggest_stan_sampling_kwargs
+from TEXAS.utils.paths import STAN_MODELS_DIR
 
 
 # Instantiate once
@@ -214,7 +215,8 @@ def get_invT_posterior(
             no3ratio=no3ratio)
         print(f"🔧 Automatically selected Stan file: {stan_file}")
 
-    _uses_reduce_sum = "marginal" in stan_file
+    _stan_path = STAN_MODELS_DIR / stan_file
+    _uses_reduce_sum = _stan_path.exists() and "reduce_sum" in _stan_path.read_text()
 
     # Auto-detect CPU settings now that we know whether the model can use threads.
     _auto = suggest_stan_sampling_kwargs()

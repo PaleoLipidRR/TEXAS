@@ -267,24 +267,29 @@ def suggest_stan_sampling_kwargs() -> dict:
 
     Strategy:
     - ``chains``: always 4 (standard for convergence diagnostics).
-    - ``parallel_chains``: min(4, physical_cores) — run chains concurrently,
-      no recompilation needed.
+    - ``parallel_chains``: min(4, logical_available) — run chains concurrently,
+      respects cgroup/Docker CPU limits on Linux.
     - ``threads_per_chain``: physical_cores // 4, only when physical_cores > 4.
       Exploits ``reduce_sum`` within each chain (STAN_THREADS compilation is
-      handled automatically by ``get_invT_posterior``).
+      handled automatically by ``get_invT_posterior``).  Physical cores are used
+      (not logical/hyperthreaded) because Stan HMC is FP-bound and hyperthreads
+      give negligible throughput gain while doubling apparent CPU usage.
 
     Returns a dict containing only the keys that differ from CmdStanPy defaults,
     so callers can safely merge it with their own kwargs.
     """
     try:
-        # Respects cgroup/Docker --cpus limits on Linux; falls back to psutil on other OS
-        physical = len(os.sched_getaffinity(0))
+        # Respects cgroup/Docker --cpus limits on Linux
+        logical_available = len(os.sched_getaffinity(0))
     except AttributeError:
-        physical = psutil.cpu_count(logical=False) or 1
+        logical_available = psutil.cpu_count(logical=True) or 1
+
+    # Physical cores for threading: HMC is FP-bound, hyperthreads don't help
+    physical_cores = psutil.cpu_count(logical=False) or 1
 
     chains = 4
-    parallel_chains = min(chains, physical)
-    threads_per_chain = physical // chains  # 0 when physical < 4
+    parallel_chains = min(chains, logical_available)
+    threads_per_chain = physical_cores // chains  # 0 when physical_cores < 4
 
     result: dict = {
         "chains": chains,
