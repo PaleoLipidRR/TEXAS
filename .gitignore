@@ -1,4 +1,10 @@
 
+# Claude Code local settings (machine-specific paths and permissions)
+.claude/settings.local.json
+
+# Machine-specific backup files (hostname embedded in filename)
+*safeBackup*
+
 # Zenodo review archive staging (local only — never commit)
 review_archive_v*/
 texas-psm-zenodo-v*.zip
