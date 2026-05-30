@@ -1,0 +1,26 @@
+format: jb-book
+root: index
+parts:
+  - caption: Getting started
+    chapters:
+      - file: installation
+      - file: api
+      - file: troubleshooting
+  - caption: Tutorial
+    chapters:
+      - file: tutorial/intro
+        sections:
+          - file: tutorial/module1_prior
+          - file: tutorial/module2_bayesian_updating
+          - file: tutorial/module3_curve_explorer
+          - file: tutorial/module4_mcmc
+          - file: tutorial/module5_results
+  - caption: Explainers
+    chapters:
+      - file: PSM
+      - file: stan_explanation
+      - file: stan_models_explanation_v2
+      - file: marginalization_explainer
+      - file: reduce_sum_for_geologists
+      - file: Prior_Choice_Normal_vs_Cauchy
+      - file: ckdtree_nearest_ocean_explainer

@@ -1,5 +1,5 @@
 # Understanding `reduce_sum` and `ll_chunk` in TEXAS-PSM
-### A visual guide for paleogeologists
+## A visual guide for paleogeologists
 
 This note explains two important pieces of computational machinery used in the TEXAS
 inverse-temperature Stan models — `reduce_sum` and `ll_chunk` — using a small toy

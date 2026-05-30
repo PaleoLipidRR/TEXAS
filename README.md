@@ -171,7 +171,7 @@ notebooks/
   quickstart_demo.ipynb
 streamlit_app/      Drag-and-drop web interface (Streamlit)
 docker/             Dockerfile and compose configuration
-docs/               MkDocs documentation source
+docs/               Jupyter Book documentation source (guides, API, tutorial)
 tests/              Unit tests
 ```
 

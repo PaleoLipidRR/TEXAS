@@ -98,3 +98,4 @@ data/*.csv
 
 # Jupyter Book tutorial build output
 tutorial/_build/
+docs/_build/

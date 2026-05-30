@@ -35,8 +35,8 @@ CmdStan 2.36.0 must be installed and discoverable. `TEXAS/utils/paths.py::find_c
 # Run tests
 pytest
 
-# Build docs
-mkdocs serve  # from docs/
+# Build docs (unified Jupyter Book: guides + autodoc API + tutorial)
+jupyter-book build docs/   # output in docs/_build/html/
 
 # Run Streamlit app (from streamlit_app/ directory)
 streamlit run main.py

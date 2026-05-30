@@ -22,28 +22,21 @@
 
 ### Compute Scaled Ring Index
 
-::: TEXAS.predict.compute_scaledRI
-    options:
-      show_root_heading: false
-      show_source: true
-
----
+```{eval-rst}
+.. autofunction:: TEXAS.predict.compute_scaledRI
+```
 
 ### Predict proxy from T
 
-::: TEXAS.predict.predict_proxy_from_T
-    options:
-      show_root_heading: false
-      show_source: true
-
----
+```{eval-rst}
+.. autofunction:: TEXAS.predict.predict_proxy_from_T
+```
 
 ### Predict T from proxy observations
 
-::: TEXAS.predict.predict_T_from_proxyObs
-    options:
-      show_root_heading: false
-      show_source: true
+```{eval-rst}
+.. autofunction:: TEXAS.predict.predict_T_from_proxyObs
+```
 
 ---
 
@@ -51,46 +44,33 @@
 
 ### Download posteriors
 
-::: TEXAS.utils.download.download_posteriors
-    options:
-      show_root_heading: false
-      show_source: true
-
----
+```{eval-rst}
+.. autofunction:: TEXAS.utils.download.download_posteriors
+```
 
 ### Download all
 
-::: TEXAS.utils.download.download_all
-    options:
-      show_root_heading: false
-      show_source: true
-
----
+```{eval-rst}
+.. autofunction:: TEXAS.utils.download.download_all
+```
 
 ### Download training data
 
-::: TEXAS.utils.download.download_training_data
-    options:
-      show_root_heading: false
-      show_source: true
-
----
+```{eval-rst}
+.. autofunction:: TEXAS.utils.download.download_training_data
+```
 
 ### List posteriors
 
-::: TEXAS.stan.io.list_posteriors
-    options:
-      show_root_heading: false
-      show_source: true
-
----
+```{eval-rst}
+.. autofunction:: TEXAS.stan.io.list_posteriors
+```
 
 ### Set cache directory
 
-::: TEXAS.utils.paths.set_cache_dir
-    options:
-      show_root_heading: false
-      show_source: true
+```{eval-rst}
+.. autofunction:: TEXAS.utils.paths.set_cache_dir
+```
 
 ---
 
@@ -98,28 +78,21 @@
 
 ### Build forward data
 
-::: TEXAS.data.builder.build_fwd_data
-    options:
-      show_root_heading: false
-      show_source: true
-
----
+```{eval-rst}
+.. autofunction:: TEXAS.data.builder.build_fwd_data
+```
 
 ### Build invT input data
 
-::: TEXAS.data.builder.build_invT_inputData
-    options:
-      show_root_heading: false
-      show_source: true
-
----
+```{eval-rst}
+.. autofunction:: TEXAS.data.builder.build_invT_inputData
+```
 
 ### WOA23 NO₃ lookup
 
-::: TEXAS.data.ocean_lookup.lookup_no3_from_woa
-    options:
-      show_root_heading: false
-      show_source: true
+```{eval-rst}
+.. autofunction:: TEXAS.data.ocean_lookup.lookup_no3_from_woa
+```
 
 ---
 
@@ -127,28 +100,21 @@
 
 ### Get posterior
 
-::: TEXAS.stan.sampler.get_posterior
-    options:
-      show_root_heading: false
-      show_source: true
-
----
+```{eval-rst}
+.. autofunction:: TEXAS.stan.sampler.get_posterior
+```
 
 ### Save posterior
 
-::: TEXAS.stan.io.save_posterior
-    options:
-      show_root_heading: false
-      show_source: true
-
----
+```{eval-rst}
+.. autofunction:: TEXAS.stan.io.save_posterior
+```
 
 ### Load posterior
 
-::: TEXAS.stan.io.load_posterior
-    options:
-      show_root_heading: false
-      show_source: true
+```{eval-rst}
+.. autofunction:: TEXAS.stan.io.load_posterior
+```
 
 ---
 
@@ -156,19 +122,15 @@
 
 ### Generate ensemble (auto)
 
-::: TEXAS.ensemble.generator.generate_ensemble_auto
-    options:
-      show_root_heading: false
-      show_source: true
-
----
+```{eval-rst}
+.. autofunction:: TEXAS.ensemble.generator.generate_ensemble_auto
+```
 
 ### Detect model and params
 
-::: TEXAS.ensemble.detection.detect_model_and_params
-    options:
-      show_root_heading: false
-      show_source: true
+```{eval-rst}
+.. autofunction:: TEXAS.ensemble.detection.detect_model_and_params
+```
 
 ---
 
@@ -176,19 +138,15 @@
 
 ### Sampler diagnostics
 
-::: TEXAS.diagnostics.summarize_sampler_diagnostics
-    options:
-      show_root_heading: false
-      show_source: true
-
----
+```{eval-rst}
+.. autofunction:: TEXAS.diagnostics.summarize_sampler_diagnostics
+```
 
 ### Summary table
 
-::: TEXAS.diagnostics.create_summary_table
-    options:
-      show_root_heading: false
-      show_source: true
+```{eval-rst}
+.. autofunction:: TEXAS.diagnostics.create_summary_table
+```
 
 ---
 
@@ -196,7 +154,6 @@
 
 ### Plot prior distributions
 
-::: TEXAS.plotting.prior_plot.plot_prior_distributions
-    options:
-      show_root_heading: false
-      show_source: true
+```{eval-rst}
+.. autofunction:: TEXAS.plotting.prior_plot.plot_prior_distributions
+```

@@ -48,7 +48,7 @@ maps = [
 dev = [
   "ipykernel",
   "pytest",
-  "mkdocs",
+  "jupyter-book<2",
   "jupyterlab",
   "ipywidgets",
   "tqdm",
