@@ -385,7 +385,7 @@ def _fit_gen_logi_to_get_residuals(t: np.ndarray, proxy: np.ndarray) -> np.ndarr
     from TEXAS.models.logistics import generalized_logistic_fixed_upper
 
     def _model(x, t0, b, k, v):
-        return generalized_logistic_fixed_upper(x, t0=t0, b=b, k=k, v=v, Q=1.0)
+        return generalized_logistic_fixed_upper(x, t0=t0, b=b, k=k, v=v)
 
     try:
         popt, _ = curve_fit(
