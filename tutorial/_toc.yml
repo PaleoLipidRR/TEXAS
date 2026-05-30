@@ -1,0 +1,8 @@
+format: jb-book
+root: intro
+chapters:
+  - file: module1_prior
+  - file: module2_bayesian_updating
+  - file: module3_curve_explorer
+  - file: module4_mcmc
+  - file: module5_results

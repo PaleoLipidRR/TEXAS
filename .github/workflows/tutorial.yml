@@ -1,0 +1,37 @@
+name: Build tutorial
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tutorial/**"
+      - ".github/workflows/tutorial.yml"
+  pull_request:
+    paths:
+      - "tutorial/**"
+      - ".github/workflows/tutorial.yml"
+
+jobs:
+  build-book:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Jupyter Book
+        # Pin to the v1 (Sphinx) line — the book uses the classic
+        # _config.yml / _toc.yml (jb-book) format, which v2 (MyST) does not read.
+        run: pip install "jupyter-book<2"
+
+      # execute_notebooks is "off" in _config.yml, so the interactive widgets
+      # are rendered as source — the TEXAS package is not needed to build.
+      - name: Build the book
+        run: jupyter-book build tutorial/
+
+      - name: Upload built HTML
+        uses: actions/upload-artifact@v4
+        with:
+          name: tutorial-html
+          path: tutorial/_build/html

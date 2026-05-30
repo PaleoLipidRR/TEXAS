@@ -1,0 +1,18 @@
+title: TEXAS Interactive Tutorial
+author: Ronnakrit Rattanasriampaipong
+logo: ""
+
+execute:
+  execute_notebooks: "off"
+
+html:
+  use_issues_button: true
+  use_repository_button: true
+
+repository:
+  url: https://github.com/PaleoLipidRR/TEXAS
+  branch: main
+  path_to_book: tutorial
+
+sphinx:
+  extra_extensions: []
