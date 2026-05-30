@@ -1,4 +1,10 @@
-name: Deploy docs
+name: Deploy docs + tutorial
+
+# Builds the mkdocs site AND the Jupyter Book tutorial into a single directory,
+# then publishes the combined tree to gh-pages in one shot. Doing both in one
+# job is what lets them coexist: a previous setup that ran `mkdocs gh-deploy
+# --force` would force-replace gh-pages and wipe any separately-published
+# tutorial. Here the tutorial is nested under site/tutorial/ before publish.
 
 on:
   push:
@@ -7,6 +13,9 @@ on:
       - "docs/**"
       - "mkdocs.yml"
       - "src/TEXAS/**"
+      - "tutorial/**"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:  # allow a manual first publish without a matching push
 
 jobs:
   deploy:
@@ -18,5 +27,26 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install mkdocs-material mkdocstrings[python]
-      - run: mkdocs gh-deploy --force
+
+      - name: Install builders
+        # jupyter-book pinned to v1 (Sphinx/jb-book format the scaffold uses).
+        run: pip install mkdocs-material "mkdocstrings[python]" "jupyter-book<2"
+
+      - name: Build mkdocs site -> ./site
+        run: mkdocs build --site-dir site
+
+      - name: Build Jupyter Book -> ./site/tutorial
+        run: |
+          jupyter-book build tutorial/
+          mkdir -p site/tutorial
+          cp -r tutorial/_build/html/. site/tutorial/
+
+      # peaceiris adds .nojekyll by default, so the book's _static / _sources
+      # underscore directories are served correctly. force_orphan keeps gh-pages
+      # a single clean commit (equivalent to the old --force behaviour).
+      - name: Publish combined site to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          force_orphan: true
