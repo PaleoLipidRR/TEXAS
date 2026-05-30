@@ -5,7 +5,7 @@ import pandas as pd
 
 def summarize_sampler_diagnostics(fit) -> dict:
     """
-    Extract divergent__, treedepth__, E-BFMI, R_hat, and ESS_bulk
+    Extract ``divergent__``, ``treedepth__``, E-BFMI, R_hat, and ESS_bulk
     from a CmdStanPy fit and return them as stan_diag_* attrs.
     """
     diag = {}

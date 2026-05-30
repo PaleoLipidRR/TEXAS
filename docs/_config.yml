@@ -1,0 +1,60 @@
+# Unified TEXAS documentation — Jupyter Book (Sphinx).
+# Replaces the former mkdocs-material site; the tutorial is now a section here.
+
+title: TEXAS
+author: Ronnakrit Rattanasriampaipong
+logo: _static/texas_logo.svg
+
+# Only build files listed in _toc.yml (keeps README.md / drafts out of the site).
+only_build_toc_files: true
+
+execute:
+  execute_notebooks: "off"   # tutorial widgets need a live kernel; render as source
+
+html:
+  use_issues_button: true
+  use_repository_button: true
+  home_page_in_navbar: false
+  baseurl: https://paleolipidrr.github.io/TEXAS/
+
+repository:
+  url: https://github.com/PaleoLipidRR/TEXAS
+  branch: main
+  path_to_book: docs
+
+parse:
+  myst_enable_extensions:
+    - amsmath
+    - dollarmath
+    - colon_fence
+    - deflist
+    - tasklist
+    - linkify
+
+sphinx:
+  extra_extensions:
+    - sphinx.ext.autodoc
+    - sphinx.ext.napoleon
+    - sphinx.ext.viewcode
+  config:
+    html_css_files:
+      - custom.css
+    # Generate #slug anchors for H1–H3 so in-page table links resolve
+    myst_heading_anchors: 3
+    # The codebase mixes Google-style (Args:/Returns:) and NumPy-style
+    # (Parameters\n----------) docstrings — enable both napoleon parsers.
+    napoleon_numpy_docstring: true
+    napoleon_google_docstring: true
+    # autodoc
+    autodoc_member_order: bysource
+    autodoc_typehints: description
+    add_module_names: false
+    python_use_unqualified_type_names: true
+    # Optional/heavy deps that autodoc should not need to import
+    autodoc_mock_imports:
+      - cartopy
+      - regionmask
+      - pykrige
+      - proplot
+      - pygwalker
+      - odrpack

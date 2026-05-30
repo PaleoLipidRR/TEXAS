@@ -1,21 +1,17 @@
-name: Deploy docs + tutorial
+name: Deploy docs
 
-# Builds the mkdocs site AND the Jupyter Book tutorial into a single directory,
-# then publishes the combined tree to gh-pages in one shot. Doing both in one
-# job is what lets them coexist: a previous setup that ran `mkdocs gh-deploy
-# --force` would force-replace gh-pages and wipe any separately-published
-# tutorial. Here the tutorial is nested under site/tutorial/ before publish.
+# Builds the unified Jupyter Book in docs/ (Sphinx) — which now contains the
+# guide pages, the autodoc API reference, the explainers, AND the tutorial —
+# and publishes the single site to gh-pages.
 
 on:
   push:
     branches: [main]
     paths:
       - "docs/**"
-      - "mkdocs.yml"
-      - "src/TEXAS/**"
-      - "tutorial/**"
+      - "src/TEXAS/**"   # autodoc reads docstrings from the source
       - ".github/workflows/docs.yml"
-  workflow_dispatch:  # allow a manual first publish without a matching push
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -28,25 +24,21 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install builders
-        # jupyter-book pinned to v1 (Sphinx/jb-book format the scaffold uses).
-        run: pip install mkdocs-material "mkdocstrings[python]" "jupyter-book<2"
-
-      - name: Build mkdocs site -> ./site
-        run: mkdocs build --site-dir site
-
-      - name: Build Jupyter Book -> ./site/tutorial
+      - name: Install TEXAS (for autodoc) + Jupyter Book
+        # autodoc imports TEXAS; the heavy/optional geo deps are mocked in
+        # _config.yml (autodoc_mock_imports), so the core install suffices.
         run: |
-          jupyter-book build tutorial/
-          mkdir -p site/tutorial
-          cp -r tutorial/_build/html/. site/tutorial/
+          pip install -e .
+          pip install "jupyter-book<2"
 
-      # peaceiris adds .nojekyll by default, so the book's _static / _sources
-      # underscore directories are served correctly. force_orphan keeps gh-pages
-      # a single clean commit (equivalent to the old --force behaviour).
-      - name: Publish combined site to gh-pages
+      - name: Build the book
+        run: jupyter-book build docs/
+
+      # peaceiris adds .nojekyll so Sphinx's _static/_sources dirs serve;
+      # force_orphan keeps gh-pages a single clean commit.
+      - name: Publish to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./site
+          publish_dir: ./docs/_build/html
           force_orphan: true
