@@ -37,6 +37,14 @@ plotting = [
     "setuptools<81"
 ]
 
+# Map-figure dependencies (plot_residual_maps). Heavy geo stack (GEOS/PROJ via
+# cartopy) kept optional so the core `pip install texas-psm` stays lightweight.
+maps = [
+    "cartopy>=0.21",
+    "regionmask>=0.9",
+    "pykrige>=1.7"
+]
+
 dev = [
   "ipykernel",
   "pytest",
