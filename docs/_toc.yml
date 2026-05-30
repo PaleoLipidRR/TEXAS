@@ -18,7 +18,6 @@ parts:
   - caption: Explainers
     chapters:
       - file: PSM
-      - file: stan_explanation
       - file: stan_models_explanation_v2
       - file: marginalization_explainer
       - file: reduce_sum_for_geologists

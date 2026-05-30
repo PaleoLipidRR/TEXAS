@@ -41,13 +41,13 @@ The forward model predicts **scaled Ring Index** (\( RI_{\text{scaled}} \)) from
 Example for a **generalized logistic forward model**:
 
 $$
-RI_{\text{scaled}}(T, X) = t_0 + \frac{L}{\left( 1 + Q \cdot e^{-k (T - T_{0})} \right)^{1/v}} + \sum_{j} \beta_j X_j
+RI_{\text{scaled}}(T, X) = b + \frac{1 - b}{\left( 1 + e^{-k (T - T_{0})} \right)^{1/v}} + \sum_{j} \beta_j X_j
 $$
 
 Where:
 - \( T \) = temperature.
 - \( X_j \) = additional predictors (e.g., GDGT-2/GDGT-3 ratio, nitrate concentration).
-- \( t_0, L, Q, k, v \) = logistic curve parameters (control inflection point, steepness, shape).
+- \( b \) = lower asymptote; the upper asymptote is **fixed at 1**; \( T_0 \) = inflection temperature, \( k \) = steepness, \( v \) = shape (curve asymmetry).
 - \( \beta_j \) = coefficients for optional predictors.
 - \( RI_{\text{scaled}} \) is normalized between 0 and 1 for comparability.
 
@@ -87,7 +87,7 @@ $$
 
 ### 4.2 Priors
 
-- **From cultures** — tightly constrain curve shape parameters (\( t_0, k, v, Q \)) for known archaeal clades.
+- **From cultures** — tightly constrain curve shape parameters (\( T_0, k, v \)) for known archaeal clades.
 - **From core-tops** — set broader priors for environmental effects (\( \beta_j \)).
 
 Example prior for the temperature:
@@ -135,7 +135,7 @@ $$
 
 2. **Forward Logistic Model**
 $$
-RI_{\text{scaled}}(T, X) = t_0 + \frac{L}{\left( 1 + Q \cdot e^{-k (T - T_{0})} \right)^{1/v}} + \sum_{j} \beta_j X_j
+RI_{\text{scaled}}(T, X) = b + \frac{1 - b}{\left( 1 + e^{-k (T - T_{0})} \right)^{1/v}} + \sum_{j} \beta_j X_j
 $$
 
 3. **Likelihood**

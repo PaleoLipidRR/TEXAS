@@ -26,7 +26,7 @@ t0_crtp ~ normal(t0_culmeso, sigma_t0_culmeso);  // Unstable hierarchy
 ### 1. **Realistic Constraints**
 ```stan
 // GOOD: Informative normal priors
-sigma_scaledRI_cul ~ normal(0.01, 0.1);     // Realistic noise levels
+sigma_scaledRI_cul ~ normal(0, 0.1);        // Half-normal (lower=0): realistic noise levels
 sigma_t0_culmeso ~ normal(0, 5);            // Reasonable temperature variation
 sigma_k_culmeso ~ normal(0, 0.2);           // Respects k ∈ [0,1] bounds
 ```
@@ -50,7 +50,7 @@ t0_crtp ~ normal(t0_culmeso, sigma_t0_culmeso); // Coretop inherits info
 ### **For Observation Noise** (`sigma_scaledRI`)
 ```stan
 // OLD: sigma_scaledRI ~ cauchy(0, 0.1)
-// NEW: sigma_scaledRI ~ normal(0.01, 0.1)
+// NEW: sigma_scaledRI ~ normal(0, 0.1)   // half-normal, lower=0
 ```
 - **Expectation**: Scaled RI measurements precise to ~0.01-0.05 units
 - **Cauchy problem**: Allows noise > 1.0 (larger than signal!)
@@ -137,4 +137,6 @@ sigma_k_culmeso ~ normal(0, 0.2);    // "k usually 0.1-0.8, so σ < 0.5"
 4. **Betancourt (2017)**: "A Conceptual Introduction to Hamiltonian Monte Carlo" - On computational considerations
 
 ---
-*This document was created during Stan model standardization for the culRI-Bayesian project (August 2025)*
+*Prior-standardization note for the TEXAS Stan models. The current observation-noise
+prior is the half-normal `normal(0, 0.1)` on `sigma_proxyObs_*` (see the variance-partitioning
+update, 2026-04-08).*

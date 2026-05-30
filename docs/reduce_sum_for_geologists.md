@@ -99,15 +99,15 @@ For sample n=2 (RI_obs = 0.68, T_proposed = 22.5°C):
    ┌──────────────────────────────────────────────────────────┐
    │  Step 2 – Likelihood under each calibration draw         │
    │                                                          │
-   │  Draw m=1: T₀=28, k=0.18, b=0.15, Q=1.2, ν=0.9, σ=0.05 │
+   │  Draw m=1: T₀=28, k=0.18, b=0.15, ν=0.9, σ=0.05        │
    │    → expected RI = 0.65   → log N(0.68 | 0.65, 0.05)   │
    │    → lp[1] = −1.58                                       │
    │                                                          │
-   │  Draw m=2: T₀=27, k=0.20, b=0.12, Q=1.0, ν=1.1, σ=0.06 │
+   │  Draw m=2: T₀=27, k=0.20, b=0.12, ν=1.1, σ=0.06        │
    │    → expected RI = 0.67   → log N(0.68 | 0.67, 0.06)   │
    │    → lp[2] = −1.39                                       │
    │                                                          │
-   │  Draw m=3: T₀=30, k=0.15, b=0.18, Q=0.9, ν=0.8, σ=0.04 │
+   │  Draw m=3: T₀=30, k=0.15, b=0.18, ν=0.8, σ=0.04        │
    │    → expected RI = 0.60   → log N(0.68 | 0.60, 0.04)   │
    │    → lp[3] = −3.13                                       │
    └──────────────────────────────────────────────────────────┘
@@ -159,9 +159,9 @@ same index `[m]` inside the inner loop:
 ```stan
 for (m in 1:M) {
     real mu = b[m] + (1 - b[m])
-        / pow(1 + Q[m] * exp(-k[m] * (t_est[n] - t0[m])), 1.0 / v[m]);
-    //   ^^^          ^^^          ^^^               ^^^         ^^^
-    //   same m      same m       same m            same m     same m
+        / pow(1 + exp(-k[m] * (t_est[n] - t0[m])), 1.0 / v[m]);
+    //   every parameter uses the SAME draw index [m]:
+    //   b[m], k[m], t0[m], v[m] all come from calibration draw m
 }
 ```
 
@@ -213,9 +213,9 @@ lp = [−1.58, −1.39, −3.13]
 
   Forward posterior (M=3 draws):
   ┌──────────────────────────────────────────────────────────┐
-  │  m=1: T₀=28  k=0.18  b=0.15  Q=1.2  ν=0.9  σ=0.05     │
-  │  m=2: T₀=27  k=0.20  b=0.12  Q=1.0  ν=1.1  σ=0.06     │
-  │  m=3: T₀=30  k=0.15  b=0.18  Q=0.9  ν=0.8  σ=0.04     │
+  │  m=1: T₀=28  k=0.18  b=0.15  ν=0.9  σ=0.05            │
+  │  m=2: T₀=27  k=0.20  b=0.12  ν=1.1  σ=0.06            │
+  │  m=3: T₀=30  k=0.15  b=0.18  ν=0.8  σ=0.04            │
   └──────────────────────────────────────────────────────────┘
 
   Downcore samples:   n=1      n=2      n=3      n=4
@@ -275,5 +275,5 @@ the overhead of parallelism may outweigh the benefit.
 
 ---
 
-*See also: `marginalization_explainer.md` (why marginal > ensemble) and
-`stan_reduce_sum_notes.md` (technical implementation notes).*
+*See also: [Why marginalization improves inverse sampling](marginalization_explainer.md)
+and the [Stan models overview](stan_models_explanation_v2.md).*
