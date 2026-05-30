@@ -29,6 +29,7 @@ nav:
   - Installation: installation.md
   - API Reference: api.md
   - Troubleshooting: troubleshooting.md
+  - Tutorial: https://paleolipidrr.github.io/TEXAS/tutorial/
 
 markdown_extensions:
   - admonition
