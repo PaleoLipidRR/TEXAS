@@ -36,8 +36,17 @@ import matplotlib.colors as mcolors
 import matplotlib.ticker as mticker
 import matplotlib.lines as mlines
 from matplotlib.patches import Rectangle
-import cartopy.feature as cfeature
-import cartopy.crs as ccrs
+
+# cartopy is an optional map-plotting dependency — only plot_residual_maps needs
+# it. Guarding the import keeps `import TEXAS` working with the core install.
+try:
+    import cartopy.feature as cfeature
+    import cartopy.crs as ccrs
+    _CARTOPY_AVAILABLE = True
+except ImportError:
+    cfeature = None
+    ccrs = None
+    _CARTOPY_AVAILABLE = False
 
 import xarray as xr
 
@@ -80,15 +89,30 @@ def make_krige_grid(res: float = 1.0):
 _GRID_LON_1DEG,    _GRID_LAT_1DEG    = make_krige_grid(1.0)
 _GRID_LON_025DEG,  _GRID_LAT_025DEG  = make_krige_grid(0.25)
 
-# ── Natural Earth features — preloaded once ──────────────────────────────────
-_LAND = cfeature.NaturalEarthFeature(
-    'physical', 'land', '110m', facecolor=_C_GRAY3)
-_COASTLINE = cfeature.NaturalEarthFeature(
-    'physical', 'coastline', '110m',
-    edgecolor=_C_GRAY7, facecolor='none', linewidth=0.5)
-_BORDERS = cfeature.NaturalEarthFeature(
-    'cultural', 'admin_0_boundary_lines_land', '110m',
-    edgecolor=_C_GRAY5, facecolor='none', linewidth=0.3, linestyle=':')
+# ── Natural Earth features — preloaded once (only if cartopy is available) ───
+if _CARTOPY_AVAILABLE:
+    _LAND = cfeature.NaturalEarthFeature(
+        'physical', 'land', '110m', facecolor=_C_GRAY3)
+    _COASTLINE = cfeature.NaturalEarthFeature(
+        'physical', 'coastline', '110m',
+        edgecolor=_C_GRAY7, facecolor='none', linewidth=0.5)
+    _BORDERS = cfeature.NaturalEarthFeature(
+        'cultural', 'admin_0_boundary_lines_land', '110m',
+        edgecolor=_C_GRAY5, facecolor='none', linewidth=0.3, linestyle=':')
+else:
+    _LAND = _COASTLINE = _BORDERS = None
+
+
+def _require_cartopy() -> None:
+    """Raise a clear error if the optional map-plotting deps are missing."""
+    if not _CARTOPY_AVAILABLE:
+        raise ImportError(
+            "plot_residual_maps requires the optional map-plotting dependencies "
+            "(cartopy, regionmask), which are not installed. Install them with:\n"
+            "    pip install 'texas-psm[maps]'\n"
+            "or, in a conda environment:\n"
+            "    conda install -c conda-forge cartopy regionmask"
+        )
 
 # ── Default regional extents ─────────────────────────────────────────────────
 MED_EXTENT = [-10, 43, 25, 50]   # [lon_min, lon_max, lat_min, lat_max]
@@ -650,6 +674,7 @@ def plot_residual_maps(
     -------
     fig, axs
     """
+    _require_cartopy()
     from sklearn.metrics import r2_score
 
     nrows = len(data)
