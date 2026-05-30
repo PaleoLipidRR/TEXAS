@@ -1,0 +1,44 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/TEXAS/**"
+      - "tests/**"
+      - "pyproject.toml"
+      - "environment.yml"
+      - ".github/workflows/tests.yml"
+  pull_request:
+    paths:
+      - "src/TEXAS/**"
+      - "tests/**"
+      - "pyproject.toml"
+      - "environment.yml"
+      - ".github/workflows/tests.yml"
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}  # login shell so the conda env is activated
+    steps:
+      - uses: actions/checkout@v4
+
+      # Reproduce the documented conda environment (provides the geo stack:
+      # cartopy, regionmask, etc. that `import TEXAS` requires).
+      - uses: mamba-org/setup-micromamba@v2
+        with:
+          environment-file: environment.yml
+          cache-environment: true
+
+      - name: Install TEXAS (editable) + pytest
+        run: |
+          pip install -e .
+          pip install pytest
+
+      # Pure-Python tests only — no Stan compilation needed, so CmdStan is
+      # not installed here.
+      - name: Run test suite
+        run: pytest -q

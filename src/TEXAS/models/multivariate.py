@@ -61,7 +61,6 @@ def generalized_logistic_fixed_upper_multivariate(
     b: float = None,
     k: float = None,
     v: float = None,
-    Q: float = None,
     beta_G23: float = None,
     gdgt23ratio: np.ndarray = None,
     beta_NO3: float = None,
@@ -69,22 +68,22 @@ def generalized_logistic_fixed_upper_multivariate(
     no3_cutoff: float = 50.0
 ) -> np.ndarray:
     """
-    5-parameter generalized logistic (upper asymptote fixed at 1) plus optional corrections.
-    y = b + (1 - b) / (1 + Q*exp(-k*(x - inf)))^(1/v)
-        + beta_G23 * gdgt23ratio 
+    4-parameter generalized logistic (upper asymptote fixed at 1, Q fixed at 1)
+    plus optional corrections.
+    y = b + (1 - b) / (1 + exp(-k*(x - inf)))^(1/v)
+        + beta_G23 * gdgt23ratio
         + beta_NO3 * log10(no3) [only where 0 < no3 < no3_cutoff]
-    
-    If v or Q are None, they default to 1.0 (reducing to simpler forms).
+
+    If v is None it defaults to 1.0 (reducing to the standard logistic).
     """
     inf = t0 if t0 is not None else x0
     if inf is None:
         raise ValueError("Missing required parameter: t0 (or x0).")
-    
-    # Default v and Q to 1.0 if not provided (allows fixing them)
+
+    # Default v to 1.0 if not provided (allows fixing it)
     v_val = v if v is not None else 1.0
-    Q_val = Q if Q is not None else 1.0
-    
-    mu = generalized_logistic_fixed_upper(x, t0=inf, b=b, k=k, v=v_val, Q=Q_val)
+
+    mu = generalized_logistic_fixed_upper(x, t0=inf, b=b, k=k, v=v_val)
     mu = np.array(mu, copy=True)
 
     # GDGT-2/3 ratio correction

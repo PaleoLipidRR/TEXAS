@@ -52,7 +52,7 @@ class TestGeneralizedLogisticFixedUpper:
     def test_approaches_upper_asymptote(self):
         """At large x, result approaches 1."""
         result = generalized_logistic_fixed_upper(
-            x=1000.0, t0=0.0, b=0.0, k=1.0, v=1.0, Q=1.0
+            x=1000.0, t0=0.0, b=0.0, k=1.0, v=1.0
         )
         assert result == pytest.approx(1.0, abs=1e-6)
 
@@ -60,23 +60,23 @@ class TestGeneralizedLogisticFixedUpper:
         """At large negative x, result approaches b."""
         b = 0.05
         result = generalized_logistic_fixed_upper(
-            x=-1000.0, t0=0.0, b=b, k=1.0, v=1.0, Q=1.0
+            x=-1000.0, t0=0.0, b=b, k=1.0, v=1.0
         )
         assert result == pytest.approx(b, abs=1e-6)
 
     def test_array_input(self):
         """Accepts array input and returns array."""
         x = np.linspace(-10, 10, 50)
-        result = generalized_logistic_fixed_upper(x=x, t0=0.0, b=0.0, k=1.0, v=1.0, Q=1.0)
+        result = generalized_logistic_fixed_upper(x=x, t0=0.0, b=0.0, k=1.0, v=1.0)
         assert result.shape == (50,)
         assert np.all(result >= 0.0)
         assert np.all(result <= 1.0)
 
-    def test_v_and_Q_default_to_one(self):
-        """Omitting v and Q should give same result as v=1, Q=1."""
+    def test_v_defaults_to_one(self):
+        """Omitting v should give same result as v=1 (Q is fixed at 1)."""
         x = np.array([0.0, 5.0, 10.0])
         r_default = generalized_logistic_fixed_upper(x=x, t0=0.0, b=0.0, k=0.5)
-        r_explicit = generalized_logistic_fixed_upper(x=x, t0=0.0, b=0.0, k=0.5, v=1.0, Q=1.0)
+        r_explicit = generalized_logistic_fixed_upper(x=x, t0=0.0, b=0.0, k=0.5, v=1.0)
         np.testing.assert_allclose(r_default, r_explicit)
 
 
@@ -85,7 +85,7 @@ class TestGeneralizedLogisticMultivariate:
         """Multivariate function runs fine with no optional predictors."""
         x = np.linspace(-5, 5, 20)
         result = generalized_logistic_fixed_upper_multivariate(
-            x=x, t0=0.0, b=0.0, k=1.0, v=1.0, Q=1.0
+            x=x, t0=0.0, b=0.0, k=1.0, v=1.0
         )
         assert result.shape == (20,)
 
