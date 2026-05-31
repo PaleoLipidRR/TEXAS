@@ -209,34 +209,34 @@ def main() -> None:
     draft = create_new_version(session)
     draft_id = str(draft["id"])
 
-    print(f"\n── Step 2: delete inherited files ──")
+    print("\n── Step 2: delete inherited files ──")
     delete_existing_files(session, draft_id)
 
-    print(f"\n── Step 3: upload individual files ──")
+    print("\n── Step 3: upload individual files ──")
     for zenodo_name, local_path in INDIVIDUAL_FILES.items():
         upload_file(session, draft_id, zenodo_name, local_path)
 
-    print(f"\n── Step 4: bundle and upload invT posteriors ──")
+    print("\n── Step 4: bundle and upload invT posteriors ──")
     with tempfile.TemporaryDirectory() as tmp:
         zip_path = build_invt_zip(Path(tmp))
         upload_file(session, draft_id, INVT_ZIP_NAME, zip_path)
 
-    print(f"\n── Step 5: update metadata ──")
+    print("\n── Step 5: update metadata ──")
     update_metadata(session, draft_id)
 
     if args.publish:
-        print(f"\n── Step 6: publish ──")
+        print("\n── Step 6: publish ──")
         doi = publish_draft(session, draft_id)
         print(f"\nDone! Record: https://zenodo.org/records/{draft_id}")
         print(f"DOI: {doi}")
     else:
-        print(f"\nDraft saved (not published).")
+        print("\nDraft saved (not published).")
         print(f"Review at: https://zenodo.org/uploads/{draft_id}")
-        print(f"\nWhen ready to publish:")
-        print(f"  ZENODO_TOKEN=<token> python scripts/zenodo_upload.py --publish")
-        print(f"\nAfter publishing, update:")
-        print(f"  CITATION.cff  →  doi field")
-        print(f"  src/TEXAS/utils/download.py  →  ZENODO_RECORD_ID (if the ID changed)")
+        print("\nWhen ready to publish:")
+        print("  ZENODO_TOKEN=<token> python scripts/zenodo_upload.py --publish")
+        print("\nAfter publishing, update:")
+        print("  CITATION.cff  →  doi field")
+        print("  src/TEXAS/utils/download.py  →  ZENODO_RECORD_ID (if the ID changed)")
 
 
 if __name__ == "__main__":

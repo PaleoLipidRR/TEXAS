@@ -1,0 +1,11 @@
+# Run `pre-commit install` once after cloning to enable these hooks.
+# Config lives in pyproject.toml ([tool.ruff]).
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.7
+    hooks:
+      # Lint (pyflakes rules) — auto-fixes unused imports/vars on commit.
+      - id: ruff
+        args: [--fix]
+      # Formatter — formats files as they are touched (no mass reformat).
+      - id: ruff-format

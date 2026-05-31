@@ -1,7 +1,6 @@
 """Tests for auto_detect_predictors() in TEXAS.stan.sampler."""
 
 import numpy as np
-import pytest
 
 from TEXAS.stan.sampler import auto_detect_predictors
 

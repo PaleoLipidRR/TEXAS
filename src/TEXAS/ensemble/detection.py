@@ -9,7 +9,6 @@ from ..models.multivariate import (
     simple_logistic_fixed_upper_multivariate,
     generalized_logistic_fixed_upper_multivariate,
 )
-from collections import Counter
 
 # --- Shared suffix utilities ---
 SUFFIX_PRIORITY = ["crtp", "culmesocore", "culmeso", "meso", "cul", "univ", ""]

@@ -5,7 +5,10 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
-from typing import Union, Optional, Dict, List, Sequence, Literal
+from typing import Union, Optional, Dict, List, Sequence, Literal, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import xarray as xr  # only for the "xr.Dataset" type annotation below
 
 
 def _format_stat(median: float, std: float) -> str:
@@ -89,7 +92,6 @@ def _format_prior_expr(dist: str, a: float, b: float, trunc: Optional[str]) -> s
 
 from .range_utils import (
     compute_sample_range,
-    compute_density_based_range,
     compute_suffix_specific_range,
     compute_dataset_specific_range,
 )
