@@ -431,7 +431,7 @@ def compute_scaledRI(
     Examples
     --------
     >>> compute_scaledRI(0.45, 0.10, 0.08, 0.05, 0.30, 0.02)
-    array(0.547...)
+    array(0.45666...)
 
     >>> import pandas as pd
     >>> df = pd.read_csv("my_gdgt_data.csv")
