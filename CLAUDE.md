@@ -67,6 +67,8 @@ docker compose up
 | `utils/paths.py` | All path constants (`STAN_MODELS_DIR`, `POSTERIOR_CACHE_DIR`, `INVT_CACHE_DIR`, etc.) |
 | `constants.py` | `OPTIONAL_PREDICTORS`, `DEFAULT_SUFFIXES` |
 
+> **Deprecated modules removed (2026-05-31)**: `stan/auto.py` (OpenCL auto-detect invT variant), `utils/hw.py` (OpenCL/hardware detection), and `utils/cache_search.py` were deleted — they were marked deprecated and unused by the live package (only `auto.py` imported `hw.py`). Do not reintroduce references to them.
+
 ### Stan models (`src/TEXAS/stan_models/`)
 
 Model names follow a naming convention: `{transform}_{curve}_{params}_{datasources}_{variant}.stan`
@@ -134,6 +136,24 @@ Entry point: `streamlit_app/main.py`. Config (cache dir resolution, plot default
 
 - `notebooks/current/` — active analysis notebooks
 - `notebooks/manuscripts/` — finalized figure-generation notebooks for papers
+
+### Documentation (`docs/`)
+
+The docs are a **single unified Jupyter Book** (Sphinx), migrated from
+mkdocs-material on 2026-05-30. `docs/_config.yml` + `docs/_toc.yml` define one
+book covering the guides, the autodoc API reference, the explainers, and the
+interactive tutorial (`docs/tutorial/`).
+
+- **Build**: `jupyter-book build docs/` (pin `jupyter-book<2` — v2/MyST does not
+  read the `jb-book` `_toc.yml`/`_config.yml` format). Output in `docs/_build/html/`.
+- **API reference** (`docs/api.md`): Sphinx `autodoc` + `napoleon` (both Google
+  and NumPy docstrings). Optional/heavy deps are mocked via `autodoc_mock_imports`
+  in `_config.yml`, so a core install builds the API page.
+- **Branding**: `docs/_static/texas_logo.svg` (colorblock TEXAS wordmark) +
+  `docs/_static/custom.css` (steel-blue accent), derived from the AGU25 poster.
+- **Deploy**: `.github/workflows/docs.yml` builds the book and publishes
+  `docs/_build/html` to `gh-pages` on push to `main`. Live at
+  <https://paleolipidrr.github.io/TEXAS/>. There is no longer an `mkdocs.yml`.
 
 ## Key Patterns
 
