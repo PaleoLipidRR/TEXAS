@@ -5,8 +5,6 @@ import xarray as xr
 from typing import Callable, List, Optional, Dict, Any, Literal
 
 from .detection import detect_model_and_params
-from TEXAS.stan.io import load_posterior
-from TEXAS.stan.sampler import StanSampler, StanCompiler
 
 def generate_ensemble(
     post_ds: xr.Dataset,

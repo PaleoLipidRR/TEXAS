@@ -1,6 +1,5 @@
 """Smoke tests: TEXAS imports cleanly and top-level exports are callable."""
 
-import importlib
 
 
 def test_import_texas():

@@ -20,7 +20,6 @@ Set env var KRIGE_N_JOBS to override parallelism (1 = serial).
 from __future__ import annotations
 
 import os
-from pathlib import Path
 from typing import List, Optional, Sequence, Tuple, Union
 
 import numpy as np
@@ -486,13 +485,13 @@ def _fill_map(
         sc_lons, sc_lats = lons, lats
         _rasterized = True
 
-    pcm1 = ax.pcolormesh(
+    ax.pcolormesh(
         grid_lon_halo, grid_lat_halo, z_halo,
         cmap=cmap, norm=norm,
         transform=ccrs.PlateCarree(), zorder=2, rasterized=_rasterized,
     )
 
-    pcm2 = ax.pcolormesh(
+    ax.pcolormesh(
         grid_lon_true, grid_lat_true, z_true,
         cmap=cmap, norm=norm,
         transform=ccrs.PlateCarree(), zorder=3, rasterized=_rasterized,

@@ -11,7 +11,6 @@ import os
 import platform
 import psutil
 import subprocess
-import sys
 import gc
 import tracemalloc
 import multiprocessing
@@ -246,7 +245,6 @@ def print_system_summary():
 
 def save_system_summary(filepath=None):
     """Save system summary to JSON file"""
-    import json
     from datetime import datetime
 
     summary = generate_system_summary()

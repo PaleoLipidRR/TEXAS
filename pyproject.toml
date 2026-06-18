@@ -8,7 +8,7 @@ version = "0.2.1"
 authors = [{ name = "Ronnakrit Rattanasriampaipong", email = "rattanasriampaipong.r@gmail.com" }]
 description = "Bayesian GDGT–temperature utilities"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = "MIT"
 classifiers = [
   "Programming Language :: Python :: 3",
@@ -96,3 +96,15 @@ pip = [
     "regionmask",
     "odrpack"
 ]
+
+[tool.ruff]
+line-length = 100
+extend-exclude = ["notebooks", "streamlit_app", "docs", "docker", "build", "dist"]
+
+[tool.ruff.lint]
+# Start conservative: pyflakes (F) catches the real issues — undefined names,
+# unused imports/variables — without a noisy whole-repo style reformat.
+select = ["F"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]   # re-exports (TEXAS.build_fwd_data etc.) are intentional

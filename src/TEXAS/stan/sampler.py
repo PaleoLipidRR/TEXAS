@@ -11,9 +11,7 @@ from cmdstanpy import CmdStanModel, CmdStanMCMC
 import cmdstanpy as _cmdstanpy
 
 from .compiler import StanCompiler
-from .io import save_posterior, load_posterior, save_invT_posterior
 from .metadata import extract_and_update_metadata, extract_priors_from_stan
-from .utils import patch_optional_predictors
 from ..diagnostics import summarize_sampler_diagnostics
 from ..utils.system_info import suggest_stan_sampling_kwargs
 

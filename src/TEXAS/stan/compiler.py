@@ -1,6 +1,5 @@
 # TEXAS/stan/compiler.py
 
-import os
 import shutil
 import subprocess
 import warnings

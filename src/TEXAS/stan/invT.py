@@ -1,5 +1,4 @@
 # TEXAS/stan/invT.py
-from ..utils.paths import INVT_CACHE_DIR
 
 from typing import Union, Optional, Dict, Sequence, List, Any, Literal
 import numpy as np
@@ -14,7 +13,6 @@ from .sampler import StanSampler
 from .metadata import extract_priors_from_stan
 from .utils import patch_optional_predictors
 from ..data.builder import build_invT_inputData, InvTConfig
-from TEXAS.utils import get_repo_root
 from TEXAS.stan.io import (
     load_posterior,
     _save_invT_posterior,
