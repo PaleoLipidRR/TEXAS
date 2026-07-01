@@ -8,6 +8,7 @@ from scipy.linalg import inv, pinv, LinAlgError
 from scipy.stats import chi2
 import numpy as np
 import pandas as pd
+import warnings
 from typing import Optional, Literal
 
 from matplotlib.patches import Ellipse
@@ -60,22 +61,34 @@ class MahalanobisOutlierDetector:
         self.threshold = None
         self.is_fitted = False
         
-    def fit(self, df: pd.DataFrame) -> 'MahalanobisOutlierDetector':
+    def fit(
+        self,
+        df: pd.DataFrame,
+        *,
+        columns: Optional[dict] = None,
+        on_unscorable: Literal['warn', 'raise', 'ignore'] = 'warn',
+    ) -> 'MahalanobisOutlierDetector':
         """
         Fit mean, covariance, and threshold on training data.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
             Training data
-            
+        columns : dict, optional
+            Mapping {logical_name: physical_column} for callers whose
+            DataFrame uses different column names than ``self.features``.
+        on_unscorable : {'warn', 'raise', 'ignore'}, default 'warn'
+            Policy for rows that map to a present column but are NaN/Inf.
+
         Returns
         -------
         self : MahalanobisOutlierDetector
             Fitted detector instance
         """
-        # Clean & get valid rows
-        X = df[self.features].replace([np.inf, -np.inf], np.nan)
+        # Resolve logical->physical, then clean & get valid rows
+        X = self._resolve_features(df, columns, on_unscorable=on_unscorable)
+        X = X.replace([np.inf, -np.inf], np.nan)
         X_valid = X.dropna().to_numpy(dtype=float)
         
         if len(X_valid) == 0:
@@ -113,15 +126,93 @@ class MahalanobisOutlierDetector:
         """Round down to nearest 0.05."""
         return np.floor(x * 20) / 20
     
-    def _compute_distances(self, df: pd.DataFrame) -> pd.Series:
+    def _resolve_features(
+        self,
+        df: pd.DataFrame,
+        columns: Optional[dict] = None,
+        *,
+        logical: Optional[list] = None,
+        on_unscorable: Literal['warn', 'raise', 'ignore'] = 'warn',
+    ) -> pd.DataFrame:
+        """
+        Select feature columns from `df` via a logical->physical map and return
+        a COPY relabeled to the logical names (same index as `df`).
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Caller data (physical column names).
+        columns : dict, optional
+            Mapping {logical_name: physical_column}. Missing keys default to
+            identity (logical == physical). None means full identity.
+        logical : list, optional
+            Logical names to resolve. Defaults to ``self.features``.
+        on_unscorable : {'warn', 'raise', 'ignore'}, default 'warn'
+            Policy for rows that map to a present column but are NaN/Inf and
+            therefore cannot be scored.
+
+        Raises
+        ------
+        KeyError
+            If any mapped physical column is absent from `df`, naming each
+            unresolved ``logical -> physical`` pair.
+        ValueError
+            If `on_unscorable='raise'` and any unscorable rows exist, or if
+            `on_unscorable` is not one of the allowed values.
+        """
+        if on_unscorable not in ('warn', 'raise', 'ignore'):
+            raise ValueError(
+                f"on_unscorable must be 'warn', 'raise', or 'ignore', "
+                f"got {on_unscorable!r}"
+            )
+        logical = list(self.features) if logical is None else list(logical)
+        cmap = columns or {}
+        physical = [cmap.get(f, f) for f in logical]
+
+        missing = [(f, p) for f, p in zip(logical, physical) if p not in df.columns]
+        if missing:
+            pairs = ", ".join(f"{f!r} -> {p!r}" for f, p in missing)
+            raise KeyError(
+                f"MahalanobisOutlierDetector: mapped column(s) not found in "
+                f"DataFrame: {pairs}. Available columns: {list(df.columns)}"
+            )
+
+        X = df.loc[:, physical].copy()
+        X.columns = logical
+
+        if on_unscorable != 'ignore':
+            clean = X.replace([np.inf, -np.inf], np.nan)
+            n_unscorable = int(clean.isna().any(axis=1).sum())
+            if n_unscorable > 0:
+                msg = (
+                    f"MahalanobisOutlierDetector: {n_unscorable} row(s) map to "
+                    f"present column(s) but contain NaN/Inf and cannot be scored "
+                    f"(they receive NaN distance/flag). Features: {logical}."
+                )
+                if on_unscorable == 'raise':
+                    raise ValueError(msg)
+                warnings.warn(msg, UserWarning, stacklevel=3)
+
+        return X
+
+    def _compute_distances(
+        self,
+        df: pd.DataFrame,
+        columns: Optional[dict] = None,
+        on_unscorable: Literal['warn', 'raise', 'ignore'] = 'warn',
+    ) -> pd.Series:
         """
         Internal method to compute Mahalanobis distances.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
             Data to compute distances for
-            
+        columns : dict, optional
+            Mapping {logical_name: physical_column}.
+        on_unscorable : {'warn', 'raise', 'ignore'}, default 'warn'
+            Policy for rows that map to a present column but are NaN/Inf.
+
         Returns
         -------
         distances : pd.Series
@@ -129,8 +220,9 @@ class MahalanobisOutlierDetector:
         """
         if not self.is_fitted:
             raise ValueError("Must call fit() before computing distances")
-        
-        X = df[self.features].replace([np.inf, -np.inf], np.nan)
+
+        X = self._resolve_features(df, columns, on_unscorable=on_unscorable)
+        X = X.replace([np.inf, -np.inf], np.nan)
         valid_idx = X.dropna().index
         X_valid = X.loc[valid_idx].to_numpy(dtype=float)
         
@@ -146,52 +238,70 @@ class MahalanobisOutlierDetector:
     def transform(
         self,
         df: pd.DataFrame,
-        col_name: Optional[str] = None
+        col_name: Optional[str] = None,
+        *,
+        columns: Optional[dict] = None,
+        on_unscorable: Literal['warn', 'raise', 'ignore'] = 'warn',
     ) -> pd.Series:
         """
         Compute Mahalanobis distances using fitted parameters.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
             Data to transform
         col_name : str, optional
             If provided, add distances to df as this column
-            
+        columns : dict, optional
+            Mapping {logical_name: physical_column}.
+        on_unscorable : {'warn', 'raise', 'ignore'}, default 'warn'
+            Policy for rows that map to a present column but are NaN/Inf.
+
         Returns
         -------
         distances : pd.Series
             Mahalanobis distances
         """
-        distances = self._compute_distances(df)
-        
+        distances = self._compute_distances(
+            df, columns=columns, on_unscorable=on_unscorable
+        )
+
         if col_name:
             df[col_name] = distances
-        
+
         return distances
-    
+
     def detect_outliers(
         self,
         df: pd.DataFrame,
-        col_name: Optional[str] = None
+        col_name: Optional[str] = None,
+        *,
+        columns: Optional[dict] = None,
+        on_unscorable: Literal['warn', 'raise', 'ignore'] = 'warn',
     ) -> pd.Series:
         """
         Detect outliers using fitted threshold.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
             Data to screen
         col_name : str, optional
             If provided, add outlier flags to df as this column
-            
+        columns : dict, optional
+            Mapping {logical_name: physical_column}.
+        on_unscorable : {'warn', 'raise', 'ignore'}, default 'warn'
+            Policy for rows that map to a present column but are NaN/Inf.
+
         Returns
         -------
         outliers : pd.Series
             Boolean series (True=outlier, False=inlier, NaN=invalid)
         """
-        distances = self._compute_distances(df)
-        
+        distances = self._compute_distances(
+            df, columns=columns, on_unscorable=on_unscorable
+        )
+
         # Flag outliers
         flags = pd.Series(np.nan, index=df.index, dtype="float", name='outlier_flag')
         valid = distances.notna()
@@ -284,11 +394,14 @@ class MahalanobisOutlierDetector:
         df: pd.DataFrame,
         dist_col: Optional[str] = None,
         outlier_col: Optional[str] = None,
-        manual_outlier_col: Optional[str] = None
+        manual_outlier_col: Optional[str] = None,
+        *,
+        columns: Optional[dict] = None,
+        on_unscorable: Literal['warn', 'raise', 'ignore'] = 'warn',
     ) -> dict:
         """
         Fit and transform in one step.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
@@ -299,7 +412,11 @@ class MahalanobisOutlierDetector:
             Column name for outlier flags
         manual_outlier_col : str, optional
             Column name for manual outlier flags
-            
+        columns : dict, optional
+            Mapping {logical_name: physical_column}.
+        on_unscorable : {'warn', 'raise', 'ignore'}, default 'warn'
+            Policy for rows that map to a present column but are NaN/Inf.
+
         Returns
         -------
         results : dict
@@ -309,17 +426,19 @@ class MahalanobisOutlierDetector:
             - 'manual_outliers': Manual outlier flags
             - 'threshold': Computed threshold
         """
-        self.fit(df)
-        
-        distances = self.transform(df, dist_col)
-        outliers = self.detect_outliers(df, outlier_col)
-        manual_outliers = self.detect_outliers_manual(df, manual_outlier_col)
-        
+        self.fit(df, columns=columns, on_unscorable=on_unscorable)
+
+        distances = self.transform(df, dist_col, columns=columns, on_unscorable=on_unscorable)
+        outliers = self.detect_outliers(df, outlier_col, columns=columns, on_unscorable=on_unscorable)
+        manual_outliers = self.detect_outliers_manual(
+            df, manual_outlier_col, columns=columns, on_unscorable=on_unscorable
+        )
+
         return {
             'distances': distances,
             'outliers': outliers,
             'manual_outliers': manual_outliers,
-            'threshold': self.threshold
+            'threshold': self.threshold,
         }
     
     def get_params(self) -> dict:
