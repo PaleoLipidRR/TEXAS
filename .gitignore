@@ -103,3 +103,6 @@ docs/_build/
 # Superpowers workflow artifacts (specs, plans, and scratch ledger)
 .superpowers/
 docs/superpowers/
+
+# Session handoff note (scratch)
+RESUME.md
