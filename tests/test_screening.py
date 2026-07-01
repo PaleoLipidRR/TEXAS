@@ -98,6 +98,12 @@ class TestCoverageGuardrail:
             _w.simplefilter("error")  # any warning becomes an error
             det.transform(phys, columns=m, on_unscorable="ignore")
 
+    def test_invalid_on_unscorable_raises(self):
+        det = self._fitted()
+        train = _training_df()
+        with pytest.raises(ValueError, match=r"on_unscorable"):
+            det.transform(train, on_unscorable="bogus")
+
 
 class TestNoMutation:
     def test_transform_does_not_mutate_caller_df(self):

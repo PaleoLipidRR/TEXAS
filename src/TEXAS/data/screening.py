@@ -87,7 +87,7 @@ class MahalanobisOutlierDetector:
             Fitted detector instance
         """
         # Resolve logical->physical, then clean & get valid rows
-        X = self._resolve_features(df, columns, on_unscorable=on_unscorable)
+        X = self._resolve_features(df, columns=columns, on_unscorable=on_unscorable)
         X = X.replace([np.inf, -np.inf], np.nan)
         X_valid = X.dropna().to_numpy(dtype=float)
         
@@ -129,8 +129,8 @@ class MahalanobisOutlierDetector:
     def _resolve_features(
         self,
         df: pd.DataFrame,
-        columns: Optional[dict] = None,
         *,
+        columns: Optional[dict] = None,
         logical: Optional[list] = None,
         on_unscorable: Literal['warn', 'raise', 'ignore'] = 'warn',
     ) -> pd.DataFrame:
@@ -198,6 +198,7 @@ class MahalanobisOutlierDetector:
     def _compute_distances(
         self,
         df: pd.DataFrame,
+        *,
         columns: Optional[dict] = None,
         on_unscorable: Literal['warn', 'raise', 'ignore'] = 'warn',
     ) -> pd.Series:
@@ -221,7 +222,7 @@ class MahalanobisOutlierDetector:
         if not self.is_fitted:
             raise ValueError("Must call fit() before computing distances")
 
-        X = self._resolve_features(df, columns, on_unscorable=on_unscorable)
+        X = self._resolve_features(df, columns=columns, on_unscorable=on_unscorable)
         X = X.replace([np.inf, -np.inf], np.nan)
         valid_idx = X.dropna().index
         X_valid = X.loc[valid_idx].to_numpy(dtype=float)
