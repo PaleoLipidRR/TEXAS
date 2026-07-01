@@ -135,3 +135,41 @@ class TestBackwardCompat:
         det = MahalanobisOutlierDetector(["TEX86", "scaledRI_cren3"], confidence=0.9).fit(train)
         det.transform(train, col_name="mahal")
         assert "mahal" in train.columns
+
+
+class TestDetectOutliersManualMapping:
+    def test_default_exception_uses_mapped_columns(self):
+        """The default exception rule reads mapped physical columns, not logical."""
+        rng = np.random.default_rng(3)
+        n = 300
+        train = pd.DataFrame({
+            "TEX86": rng.uniform(0.3, 0.9, n),
+            "scaledRI_cren3": rng.uniform(0.2, 0.8, n),
+        })
+        det = MahalanobisOutlierDetector(
+            ["TEX86", "scaledRI_cren3"], confidence=0.9
+        ).fit(train)
+
+        phys = train.rename(columns={"TEX86": "TEX86_best",
+                                     "scaledRI_cren3": "ScaledRI03_best"})
+        m = {"TEX86": "TEX86_best", "scaledRI_cren3": "ScaledRI03_best"}
+
+        via_map = det.detect_outliers_manual(phys, columns=m)
+        via_rename = det.detect_outliers_manual(
+            phys.rename(columns={v: k for k, v in m.items()})
+        )
+        pd.testing.assert_series_equal(via_map, via_rename)
+
+    def test_manual_missing_mapped_column_raises(self):
+        train = pd.DataFrame({
+            "TEX86": np.linspace(0.3, 0.9, 50),
+            "scaledRI_cren3": np.linspace(0.2, 0.8, 50),
+        })
+        det = MahalanobisOutlierDetector(
+            ["TEX86", "scaledRI_cren3"], confidence=0.9
+        ).fit(train)
+        phys = train.rename(columns={"TEX86": "TEX86_best",
+                                     "scaledRI_cren3": "ScaledRI03_best"})
+        with pytest.raises(KeyError, match=r"TEX86.*TEX86_typo"):
+            det.detect_outliers_manual(phys, columns={"TEX86": "TEX86_typo",
+                                                      "scaledRI_cren3": "ScaledRI03_best"})

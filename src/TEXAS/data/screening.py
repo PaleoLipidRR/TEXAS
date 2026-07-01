@@ -318,11 +318,14 @@ class MahalanobisOutlierDetector:
         self,
         df: pd.DataFrame,
         col_name: Optional[str] = None,
-        exclude_condition: Optional[pd.Series] = None
+        exclude_condition: Optional[pd.Series] = None,
+        *,
+        columns: Optional[dict] = None,
+        on_unscorable: Literal['warn', 'raise', 'ignore'] = 'warn',
     ) -> pd.Series:
         """
         Detect outliers with manual exception rules.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
@@ -332,44 +335,54 @@ class MahalanobisOutlierDetector:
         exclude_condition : pd.Series, optional
             Boolean series indicating samples to exclude from outlier detection.
             If None, applies default: (ringIndex > 3) & (TEX86 > 0.7)
-            
+        columns : dict, optional
+            Mapping {logical_name: physical_column} for callers whose
+            DataFrame uses different column names than ``self.features``.
+        on_unscorable : {'warn', 'raise', 'ignore'}, default 'warn'
+            Policy for rows that map to a present column but are NaN/Inf.
+
         Returns
         -------
         manual_outliers : pd.Series
             Boolean series with manual exceptions applied
-            
+
         Examples
         --------
         >>> # Use default exception
         >>> outliers = detector.detect_outliers_manual(df)
-        >>> 
+        >>>
         >>> # Custom exception
         >>> custom_exclude = (df['SST'] > 30) & (df['TEX86'] > 0.8)
         >>> outliers = detector.detect_outliers_manual(df, exclude_condition=custom_exclude)
         """
-        outliers = self.detect_outliers(df)
-        
+        outliers = self.detect_outliers(df, columns=columns, on_unscorable=on_unscorable)
+
         # Apply manual exception
         if exclude_condition is None:
+            cmap = columns or {}
+
+            def _col(name):
+                return cmap.get(name, name)
+
             # Default: exclude high RI + high TEX86 samples
             if 'ringIndex' in self.features and 'TEX86' in self.features:
-                exclude_condition = (df['ringIndex'] > (0.75*4)) & (df['TEX86'] > 0.75)
+                exclude_condition = (df[_col('ringIndex')] > (0.75*4)) & (df[_col('TEX86')] > 0.75)
             elif 'ringIndex_cren3' in self.features and 'TEX86' in self.features:
-                exclude_condition = (df['ringIndex_cren3'] > (0.75*3)) & (df['TEX86'] > 0.75)
+                exclude_condition = (df[_col('ringIndex_cren3')] > (0.75*3)) & (df[_col('TEX86')] > 0.75)
             elif 'proxyObs' in self.features and 'TEX86' in self.features:
-                exclude_condition = (df['proxyObs'] > 0.75) & (df['TEX86'] > 0.75)
+                exclude_condition = (df[_col('proxyObs')] > 0.75) & (df[_col('TEX86')] > 0.75)
             elif 'scaledRI' in self.features and 'TEX86' in self.features:  # backward compat
-                exclude_condition = (df['scaledRI'] > 0.75) & (df['TEX86'] > 0.75)
+                exclude_condition = (df[_col('scaledRI')] > 0.75) & (df[_col('TEX86')] > 0.75)
             elif 'scaledRI_cren3' in self.features and 'TEX86' in self.features:  # backward compat
-                exclude_condition = (df['scaledRI_cren3'] > 0.75) & (df['TEX86'] > 0.75)                
+                exclude_condition = (df[_col('scaledRI_cren3')] > 0.75) & (df[_col('TEX86')] > 0.75)
             else:
                 exclude_condition = pd.Series(False, index=df.index)
-        
+
         manual_outliers = outliers & ~exclude_condition
-        
+
         if col_name:
             df[col_name] = manual_outliers
-        
+
         return manual_outliers
     
     def _get_exception_bounds(self) -> Optional[dict]:
