@@ -99,3 +99,7 @@ data/*.csv
 # Jupyter Book tutorial build output
 tutorial/_build/
 docs/_build/
+
+# Superpowers workflow artifacts (specs, plans, and scratch ledger)
+.superpowers/
+docs/superpowers/
