@@ -41,6 +41,7 @@ from .models.logistics import (
 )
 from .models.multivariate import (
     generalized_logistic_fixed_upper_multivariate,
+    inverse_generalized_logistic_fixed_upper_multivariate,
     simple_logistic_fixed_upper_multivariate,
     find_optimal_no3_threshold,
     find_optimal_no3_threshold_nointercept,
@@ -102,6 +103,7 @@ __all__ = [
     "generalized_logistic",
     "generalized_logistic_fixed_upper",
     "generalized_logistic_fixed_upper_multivariate",
+    "inverse_generalized_logistic_fixed_upper_multivariate",
     "simple_logistic_fixed_upper_multivariate",
     "find_optimal_no3_threshold",
     "find_optimal_no3_threshold_nointercept",

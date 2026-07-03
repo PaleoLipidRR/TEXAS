@@ -10,6 +10,7 @@ from TEXAS.models.logistics import (
 )
 from TEXAS.models.multivariate import (
     generalized_logistic_fixed_upper_multivariate,
+    inverse_generalized_logistic_fixed_upper_multivariate,
 )
 
 
@@ -124,3 +125,97 @@ class TestGeneralizedLogisticMultivariate:
             x=x, t0=0.0, b=0.0, k=1.0, beta_NO3=0.5, no3=no3_above, no3_cutoff=50.0
         )
         np.testing.assert_allclose(r_base, r_no3)
+
+
+class TestInverseGeneralizedLogisticMultivariate:
+    # A single, realistic parameter set reused across round-trip tests.
+    PARAMS = dict(t0=15.0, b=0.05, k=0.4, v=1.3)
+
+    def test_roundtrip_no_predictors(self):
+        """inverse(forward(x)) recovers x with no corrections."""
+        x = np.linspace(0.0, 30.0, 25)
+        y = generalized_logistic_fixed_upper_multivariate(x=x, **self.PARAMS)
+        x_rec = inverse_generalized_logistic_fixed_upper_multivariate(
+            y=y, **self.PARAMS
+        )
+        np.testing.assert_allclose(x_rec, x, atol=1e-8)
+
+    def test_roundtrip_with_gdgt23_per_sample(self):
+        """Round-trip holds with a per-sample GDGT-2/3 correction."""
+        x = np.linspace(0.0, 30.0, 25)
+        g23 = np.linspace(-0.3, 0.4, 25)
+        kw = dict(**self.PARAMS, beta_G23=0.12, gdgt23ratio=g23)
+        y = generalized_logistic_fixed_upper_multivariate(x=x, **kw)
+        x_rec = inverse_generalized_logistic_fixed_upper_multivariate(y=y, **kw)
+        np.testing.assert_allclose(x_rec, x, atol=1e-8)
+
+    def test_roundtrip_with_no3_below_cutoff(self):
+        """Round-trip holds with an NO3 correction (all below cutoff)."""
+        x = np.linspace(5.0, 28.0, 20)
+        no3 = np.linspace(0.5, 4.0, 20)
+        kw = dict(**self.PARAMS, beta_NO3=0.08, no3=no3, no3_cutoff=5.0)
+        y = generalized_logistic_fixed_upper_multivariate(x=x, **kw)
+        x_rec = inverse_generalized_logistic_fixed_upper_multivariate(y=y, **kw)
+        np.testing.assert_allclose(x_rec, x, atol=1e-8)
+
+    def test_roundtrip_with_both_corrections(self):
+        """Round-trip holds with both G23 and NO3 corrections together."""
+        x = np.linspace(5.0, 28.0, 20)
+        g23 = np.linspace(-0.2, 0.3, 20)
+        no3 = np.linspace(0.5, 4.0, 20)
+        kw = dict(
+            **self.PARAMS,
+            beta_G23=0.1, gdgt23ratio=g23,
+            beta_NO3=0.08, no3=no3, no3_cutoff=5.0,
+        )
+        y = generalized_logistic_fixed_upper_multivariate(x=x, **kw)
+        x_rec = inverse_generalized_logistic_fixed_upper_multivariate(y=y, **kw)
+        np.testing.assert_allclose(x_rec, x, atol=1e-8)
+
+    def test_scalar_predictor_broadcasts(self):
+        """A scalar gdgt23ratio is applied to every sample."""
+        x = np.linspace(5.0, 25.0, 10)
+        # Forward with a constant array vs inverse with a scalar → same recovery.
+        y = generalized_logistic_fixed_upper_multivariate(
+            x=x, **self.PARAMS, beta_G23=0.15, gdgt23ratio=np.full(10, 0.2)
+        )
+        x_rec = inverse_generalized_logistic_fixed_upper_multivariate(
+            y=y, **self.PARAMS, beta_G23=0.15, gdgt23ratio=0.2
+        )
+        np.testing.assert_allclose(x_rec, x, atol=1e-8)
+
+    def test_scalar_input_returns_scalar_shape(self):
+        """Scalar proxy in → 0-d array out (matches forward convention)."""
+        y = generalized_logistic_fixed_upper_multivariate(x=15.0, **self.PARAMS)
+        x_rec = inverse_generalized_logistic_fixed_upper_multivariate(
+            y=float(y), **self.PARAMS
+        )
+        assert x_rec.shape == ()
+        assert x_rec == pytest.approx(15.0, abs=1e-8)
+
+    def test_out_of_range_returns_nan_and_warns(self):
+        """Proxy values outside (b, 1) return NaN with a RuntimeWarning."""
+        b = self.PARAMS["b"]
+        # 0.5 is reconstructable; b-0.1 (below lower asymptote) and 1.5 are not.
+        y = np.array([b - 0.1, 0.5, 1.5])
+        with pytest.warns(RuntimeWarning):
+            x_rec = inverse_generalized_logistic_fixed_upper_multivariate(
+                y=y, **self.PARAMS
+            )
+        assert np.isnan(x_rec[0])
+        assert np.isfinite(x_rec[1])
+        assert np.isnan(x_rec[2])
+
+    def test_unbroadcastable_predictor_raises(self):
+        """A predictor whose length mismatches the proxy raises ValueError."""
+        y = np.full(5, 0.5)
+        with pytest.raises(ValueError):
+            inverse_generalized_logistic_fixed_upper_multivariate(
+                y=y, **self.PARAMS, beta_G23=0.1, gdgt23ratio=np.ones(3)
+            )
+
+    def test_missing_params_raises(self):
+        with pytest.raises(ValueError):
+            inverse_generalized_logistic_fixed_upper_multivariate(
+                y=0.5, t0=None, b=0.05, k=0.4
+            )

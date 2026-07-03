@@ -1,10 +1,31 @@
 # TEXAS/models/multivariate.py
 
+import warnings
+
 import numpy as np
 from .logistics import (
     logistic_fixed_upper,
-    generalized_logistic_fixed_upper
+    generalized_logistic_fixed_upper,
+    inverse_generalized_logistic_fixed_upper,
 )
+
+
+def _broadcast_predictor(values, shape, name):
+    """Coerce an optional predictor to ``shape``.
+
+    Accepts a scalar (applied to every sample) or an array broadcastable to
+    ``shape`` (per-sample values).  Returns a float array of exactly ``shape``.
+    Raises ``ValueError`` with a clear message if the array cannot be
+    broadcast (e.g. a length-3 array against 5 samples).
+    """
+    arr = np.asarray(values, dtype=float)
+    try:
+        return np.broadcast_to(arr, shape).astype(float, copy=False)
+    except ValueError:
+        raise ValueError(
+            f"{name} shape {arr.shape} is not broadcastable to the proxy shape "
+            f"{shape}; pass a single value or one value per sample."
+        )
 
 try:
     import pandas as pd
@@ -102,6 +123,136 @@ def generalized_logistic_fixed_upper_multivariate(
         mu[mask] += beta_NO3 * np.log10(arr[mask])
 
     return mu
+
+
+def inverse_generalized_logistic_fixed_upper_multivariate(
+    y: np.ndarray,
+    t0: float = None,
+    x0: float = None,
+    b: float = None,
+    k: float = None,
+    v: float = None,
+    beta_G23: float = None,
+    gdgt23ratio: np.ndarray = None,
+    beta_NO3: float = None,
+    no3: np.ndarray = None,
+    no3_cutoff: float = 50.0,
+) -> np.ndarray:
+    """Invert :func:`generalized_logistic_fixed_upper_multivariate`.
+
+    Given proxy observations ``y`` (e.g. Scaled Ring Index), return the
+    temperature ``x`` (e.g. SST) that the forward model maps to ``y`` for a
+    *single* parameter set.  The two non-thermal corrections are additive and
+    independent of temperature, so inversion subtracts them off and then
+    inverts the pure thermal curve analytically::
+
+        y_thermal = y - beta_G23 * gdgt23ratio
+                      - beta_NO3 * log10(no3)   [only where 0 < no3 < no3_cutoff]
+        x = t0 - ln(((1 - b) / (y_thermal - b))**v - 1) / k
+
+    ``gdgt23ratio`` and ``no3`` may each be a single scalar (applied to every
+    sample) or an array of per-sample values broadcastable to ``y``.  Supply
+    the *same* covariate values that applied to those observations — they are
+    additive predictors, not solved for.
+
+    The thermal inverse is defined only for ``b < y_thermal < 1``.  Proxy
+    values outside that range are physically unreachable for the given
+    parameters and are returned as ``np.nan`` (a single ``RuntimeWarning`` is
+    emitted if any occur).
+
+    .. note::
+       This is a deterministic **point** inverse for one parameter set (e.g.
+       posterior means).  For uncertainty-aware paleotemperature
+       reconstruction that marginalises over the full forward posterior, use
+       :func:`TEXAS.predict.predict_T_from_proxyObs` (the Bayesian Stan path).
+
+    Parameters
+    ----------
+    y : array-like
+        Proxy observations (Scaled Ring Index) to invert.  Scalar or array.
+    t0, x0 : float
+        Inflection point (prefer ``t0``; ``x0`` accepted for legacy callers).
+    b : float
+        Lower asymptote.
+    k : float
+        Slope.
+    v : float, optional
+        Generalized-logistic shape parameter; defaults to 1.0 (standard
+        logistic), matching the forward function.
+    beta_G23 : float, optional
+        GDGT-2/3 ratio coefficient.  Correction applied only if both
+        ``beta_G23`` and ``gdgt23ratio`` are given.
+    gdgt23ratio : array-like, optional
+        GDGT-2/3 ratio: scalar or one value per sample.
+    beta_NO3 : float, optional
+        Nitrate coefficient.  Correction applied only if both ``beta_NO3`` and
+        ``no3`` are given, and only where ``0 < no3 < no3_cutoff``.
+    no3 : array-like, optional
+        Nitrate concentration (µmol/L): scalar or one value per sample.
+    no3_cutoff : float
+        Upper NO3 bound for the correction; must match the forward call.
+
+    Returns
+    -------
+    x : np.ndarray
+        Reconstructed temperature, ``np.nan`` where ``y`` is unreachable.
+        A 0-d array is returned for scalar input, matching the forward
+        function's convention.
+
+    Raises
+    ------
+    ValueError
+        If required parameters (``t0``/``x0``, ``b``, ``k``) are missing, or a
+        predictor array cannot be broadcast to the shape of ``y``.
+    """
+    inf = t0 if t0 is not None else x0
+    if inf is None:
+        raise ValueError("Missing required parameter: t0 (or x0).")
+    if b is None or k is None:
+        raise ValueError("Missing required parameters: b, k.")
+
+    v_val = v if v is not None else 1.0
+
+    y_arr = np.asarray(y, dtype=float)
+    scalar_input = y_arr.ndim == 0
+    # Work on a writable 1-D copy; reshape back to a 0-d array at the end.
+    y_thermal = np.atleast_1d(np.array(y_arr, copy=True))
+    shape = y_thermal.shape
+
+    # Remove the (temperature-independent) GDGT-2/3 offset.
+    if beta_G23 is not None and gdgt23ratio is not None:
+        arr = _broadcast_predictor(gdgt23ratio, shape, "gdgt23ratio")
+        y_thermal = y_thermal - beta_G23 * arr
+
+    # Remove the NO3 offset, using the same mask the forward applies.
+    if beta_NO3 is not None and no3 is not None:
+        arr = _broadcast_predictor(no3, shape, "no3")
+        mask = (arr > 0) & (arr < no3_cutoff)
+        y_thermal[mask] = y_thermal[mask] - beta_NO3 * np.log10(arr[mask])
+
+    # Domain guard: after removing the (per-sample) non-thermal corrections,
+    # y_thermal lies on the base thermal curve, which spans (b, 1) for any
+    # v > 0.  The analytical inverse is real only there; outside it the log
+    # argument is non-positive.  Note the guard is on y_thermal, not the raw
+    # proxy y — y's own valid range is shifted per sample by its corrections.
+    valid = (y_thermal > b) & (y_thermal < 1.0)
+    n_invalid = int(np.count_nonzero(~valid))
+    if n_invalid:
+        warnings.warn(
+            f"{n_invalid} of {y_thermal.size} sample(s) have a thermal (corrected) "
+            f"proxy outside the base-curve range (b, 1) = ({b}, 1); the proxy is "
+            "unreachable for these parameters and they return NaN.",
+            RuntimeWarning,
+            stacklevel=2,
+        )
+
+    out = np.full(shape, np.nan, dtype=float)
+    if np.any(valid):
+        out[valid] = inverse_generalized_logistic_fixed_upper(
+            y_thermal[valid], t0=inf, b=b, k=k, v=v_val
+        )
+
+    return out.reshape(()) if scalar_input else out
 
 
 def find_optimal_no3_threshold(

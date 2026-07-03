@@ -10,6 +10,7 @@ from .logistics import (
 )
 from .multivariate import (
     generalized_logistic_fixed_upper_multivariate,
+    inverse_generalized_logistic_fixed_upper_multivariate,
     simple_logistic_fixed_upper_multivariate,
 )
 
@@ -28,6 +29,7 @@ __all__ = [
     "generalized_logistic_fixed_upper",
     "inverse_generalized_logistic_fixed_upper",
     "generalized_logistic_fixed_upper_multivariate",
+    "inverse_generalized_logistic_fixed_upper_multivariate",
     "simple_logistic_fixed_upper_multivariate",
     'TEX86Calibration',
     'CalibrationRegistry',
