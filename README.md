@@ -37,6 +37,7 @@ Optional non-thermal corrections for GDGT-2/3 ratio (β_{G₂/₃}) and NO₃ (�
 
 ```bash
 pip install texas-psm
+# or, with uv:  uv add texas-psm
 ```
 
 ```python
@@ -63,7 +64,7 @@ result["p5"]    # 5th percentile
 result["p95"]   # 95th percentile
 ```
 
-For Docker, conda-lock, and development installs, see [Installation](docs/installation.md).
+For Docker, conda-lock, uv, and development installs, see [Installation](docs/installation.md).
 
 ---
 

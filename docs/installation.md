@@ -345,6 +345,31 @@ pip install texas-psm
     !pip install texas-psm
     ```
 
+### Using uv instead of pip
+
+[uv](https://docs.astral.sh/uv/) is a fast, drop-in replacement for `pip`/`venv`. TEXAS and all of its core dependencies are published on PyPI, so uv installs it with no extra configuration.
+
+**Standalone environment:**
+
+```bash
+uv venv                       # create .venv/ with an isolated interpreter
+source .venv/bin/activate
+uv pip install cmdstanpy
+python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.36.0')"
+uv pip install texas-psm      # add extras as needed, e.g. "texas-psm[plotting]"
+```
+
+**As a dependency of a uv-managed project:**
+
+```bash
+uv add texas-psm              # or: uv add "texas-psm[plotting]"
+```
+
+!!! note "Optional extras under uv"
+    - `texas-psm[plotting]` (ultraplot) and `texas-psm[maps]` (cartopy, regionmask) install cleanly from PyPI.
+    - The `regrid` extra (`xesmf`, `esmpy`) links against compiled ESMF libraries that are far easier to obtain from conda-forge. For regridding workflows, prefer the conda environment (Option D) or install `esmpy`/`xesmf` via conda even inside a uv project.
+    - CmdStan is **not** a Python package — install it once via `cmdstanpy.install_cmdstan()` or conda-forge `cmdstan`, exactly as for the pip route above.
+
 ### CmdStan discovery
 
 TEXAS searches for CmdStan in the following priority order:

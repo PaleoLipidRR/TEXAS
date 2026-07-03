@@ -69,7 +69,7 @@ dependencies:
 
   # --- Pip-only packages (conda-lock skips these if listed under conda) ---
   - pip:
-    - proplot==0.9.7
+    - ultraplot
     - pykrige
     - regionmask>=0.9
     - odrpack

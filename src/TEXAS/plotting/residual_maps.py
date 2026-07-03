@@ -60,12 +60,12 @@ except ImportError:
     _OCEAN_BASINS_50 = None
     _REGION_NAME_TO_NUMBER = {}
 
-# ── Gray color constants (approximate proplot gray scale equivalents) ─────────
-# proplot gray0=white → gray10=black; values below are hex approximations.
-_C_GRAY3 = '#b3b3b3'   # was 'gray3' — light gray (land fill)
-_C_GRAY5 = '#808080'   # was 'gray5' — medium gray (borders)
-_C_GRAY6 = '#666666'   # was 'gray6' — medium-dark gray (secondary text)
-_C_GRAY7 = '#4d4d4d'   # was 'gray7' — dark gray (primary text / spines)
+# ── Gray color constants ──────────────────────────────────────────────────────
+# A light→dark grayscale ramp (white → black) used for land, borders, and text.
+_C_GRAY3 = '#b3b3b3'   # light gray (land fill)
+_C_GRAY5 = '#808080'   # medium gray (borders)
+_C_GRAY6 = '#666666'   # medium-dark gray (secondary text)
+_C_GRAY7 = '#4d4d4d'   # dark gray (primary text / spines)
 
 try:
     from joblib import Parallel, delayed
