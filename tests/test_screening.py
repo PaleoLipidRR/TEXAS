@@ -137,6 +137,40 @@ class TestBackwardCompat:
         assert "mahal" in train.columns
 
 
+class TestOutlierFlagDtype:
+    """Regression: building the outlier-flag Series must not rely on implicit
+    bool->float coercion, which pandas 2.x deprecates (FutureWarning) and
+    pandas 3.0 removes (TypeError)."""
+
+    def _fitted_and_frame(self):
+        det = MahalanobisOutlierDetector(
+            ["TEX86", "scaledRI_cren3"], confidence=0.9
+        ).fit(_training_df())
+        phys = _training_df(n=50).rename(
+            columns={"TEX86": "TEX86_best", "scaledRI_cren3": "ScaledRI03_best"}
+        )
+        phys.loc[phys.index[:5], "TEX86_best"] = np.nan  # 5 unscorable rows
+        m = {"TEX86": "TEX86_best", "scaledRI_cren3": "ScaledRI03_best"}
+        return det, phys, m
+
+    def test_detect_outliers_emits_no_dtype_warning(self):
+        """Flag assignment produces no FutureWarning (fatal here) and stays boolean."""
+        det, phys, m = self._fitted_and_frame()
+        import warnings as _w
+        with _w.catch_warnings():
+            _w.simplefilter("error")  # any warning, incl. FutureWarning, -> error
+            flags = det.detect_outliers(phys, columns=m, on_unscorable="ignore")
+        assert flags.dtype == "boolean"
+
+    def test_flag_values_na_for_unscorable(self):
+        """Unscorable rows map to <NA>; scored rows map to real booleans."""
+        det, phys, m = self._fitted_and_frame()
+        flags = det.detect_outliers(phys, columns=m, on_unscorable="ignore")
+        assert flags.dtype == "boolean"
+        assert flags.iloc[:5].isna().all()
+        assert flags.iloc[5:].notna().all()
+
+
 class TestDetectOutliersManualMapping:
     def test_default_exception_uses_mapped_columns(self):
         """The default exception rule reads mapped physical columns, not logical."""

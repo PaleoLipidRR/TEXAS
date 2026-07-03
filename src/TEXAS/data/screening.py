@@ -303,11 +303,12 @@ class MahalanobisOutlierDetector:
             df, columns=columns, on_unscorable=on_unscorable
         )
 
-        # Flag outliers
-        flags = pd.Series(np.nan, index=df.index, dtype="float", name='outlier_flag')
+        # Flag outliers. Build the Series as nullable boolean from the start:
+        # assigning a bool array into a float64 Series is deprecated in pandas
+        # 2.x and raises in pandas 3.0. Unscorable rows stay <NA>.
+        flags = pd.Series(pd.NA, index=df.index, dtype="boolean", name='outlier_flag')
         valid = distances.notna()
         flags.loc[valid] = (distances.loc[valid] ** 2) > (self.threshold ** 2)
-        flags = flags.astype("boolean")
         
         if col_name:
             df[col_name] = flags
