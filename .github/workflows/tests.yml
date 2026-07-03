@@ -20,6 +20,19 @@ on:
 jobs:
   pytest:
     runs-on: ubuntu-latest
+    name: pytest (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Default pandas from environment.yml.
+          - name: pandas-default
+            pandas_spec: ""
+          # pandas 3.0 removed several implicit dtype coercions (e.g. bool ->
+          # float64 setitem) that 2.x only deprecates with a FutureWarning.
+          # Users run 3.0, so exercise it here to catch those before release.
+          - name: pandas-3
+            pandas_spec: "pandas>=3.0,<4"
     defaults:
       run:
         shell: bash -el {0}  # login shell so the conda env is activated
@@ -37,6 +50,10 @@ jobs:
         run: |
           pip install -e .
           pip install pytest
+
+      - name: Override pandas version
+        if: matrix.pandas_spec != ''
+        run: pip install "${{ matrix.pandas_spec }}"
 
       # Pure-Python tests only — no Stan compilation needed, so CmdStan is
       # not installed here.
