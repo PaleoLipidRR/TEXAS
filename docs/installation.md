@@ -367,7 +367,7 @@ uv add texas-psm              # or: uv add "texas-psm[plotting]"
 
 !!! note "Optional extras under uv"
     - `texas-psm[plotting]` (ultraplot) and `texas-psm[maps]` (cartopy, regionmask) install cleanly from PyPI.
-    - The `regrid` extra (`xesmf`, `esmpy`) links against compiled ESMF libraries that are far easier to obtain from conda-forge. For regridding workflows, prefer the conda environment (Option D) or install `esmpy`/`xesmf` via conda even inside a uv project.
+    - The `regrid` extra installs `xesmf` and the rest of the geo stack from PyPI, but **`esmpy` (the ESMF bindings xesmf needs at runtime) is not on PyPI** — install it from conda-forge: `conda install -c conda-forge esmpy`. (esmpy is deliberately kept out of the extra: a non-PyPI package in *any* extra makes `uv lock` fail for the whole project.) For heavy regridding, prefer the conda environment (Option D).
     - CmdStan is **not** a Python package — install it once via `cmdstanpy.install_cmdstan()` or conda-forge `cmdstan`, exactly as for the pip route above.
 
 ### CmdStan discovery

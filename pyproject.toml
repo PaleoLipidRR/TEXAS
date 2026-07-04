@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "texas-psm"
-version = "0.2.4"
+version = "0.2.5"
 authors = [{ name = "Ronnakrit Rattanasriampaipong", email = "rattanasriampaipong.r@gmail.com" }]
 description = "Bayesian GDGT–temperature utilities"
 readme = "README.md"
@@ -69,12 +69,18 @@ regrid = [
   "mapclassify",
   "geopy",
   "xesmf",
-  "esmpy",
   "gsw>=3.3"
 ]
+# NOTE: esmpy (the ESMF Python bindings xesmf needs at *runtime* for regridding)
+# is not published on PyPI — install it from conda-forge:
+#   conda install -c conda-forge esmpy
+# It is intentionally omitted here so pip/uv can resolve texas-psm and its
+# extras. Listing a non-PyPI package in any extra makes `uv lock` fail for the
+# whole project, since uv resolves every extra to build its universal lockfile.
 
 all = [
   "texas-psm[plotting]",
+  "texas-psm[maps]",
   "texas-psm[dev]",
   "texas-psm[regrid]"
 ]
