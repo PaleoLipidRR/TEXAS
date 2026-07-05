@@ -56,7 +56,11 @@ dev = [
   "duckdb",
   "pyarrow",
   "sqlalchemy",
-  "pydantic"
+  "pydantic",
+  "odrpack>=0.6",   # orthogonal distance regression (odr_fit) used in SI_code1 notebook
+  "scikit-learn",   # SI_code1: LinearRegression/RANSAC/Huber/TheilSen, BallTree
+  "statsmodels",    # SI_code1 notebook analysis
+  "seaborn"         # SI_code1 notebook plotting
 ]
 
 regrid = [
@@ -101,6 +105,14 @@ pip = [
     "regionmask",
     "odrpack"
 ]
+
+# uv-only build override. The `regrid` extra pins `pyproj<3.6` (last conda-friendly
+# version), but 3.5.0 ships no cp312 wheel, so on Python 3.12 uv builds it from an
+# sdist that needs the PROJ C library and fails. 3.6.1+ has cp312 wheels; this
+# override lets uv download a wheel instead. Does not touch the published `regrid`
+# constraint (conda still resolves pyproj via conda-forge).
+[tool.uv]
+override-dependencies = ["pyproj>=3.6.1"]
 
 [tool.ruff]
 line-length = 100
