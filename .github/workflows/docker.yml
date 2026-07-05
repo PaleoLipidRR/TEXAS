@@ -1,0 +1,67 @@
+name: Publish Docker image
+
+# Builds docker/Dockerfile and pushes it to GHCR whenever a version tag is
+# pushed (v0.2.5, v1.0.0, …), so the published image never drifts behind the
+# repo the way it did before. Also runnable on demand to refresh :latest.
+#
+# The same image is published under two names because the SI/demo Dockerfiles
+# build `FROM ghcr.io/paleolipidrr/texas-base:latest`, while docker-compose and
+# the install docs pull `ghcr.io/paleolipidrr/texas:latest`. Both are the same
+# build of docker/Dockerfile. (Remove the texas-base lines if you drop that split.)
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch: {}   # manual rebuild of :latest from the default branch
+
+permissions:
+  contents: read
+  packages: write         # push to GHCR via the built-in GITHUB_TOKEN
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The conda-lock env + CmdStan toolchain is large; reclaim runner disk
+      # so the build doesn't fail with "no space left on device".
+      - name: Free up disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /opt/ghc /usr/local/lib/android \
+                      /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          df -h /
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Derive tags: the semver from the git tag (e.g. 0.2.5) + latest, for
+      # both image names. On workflow_dispatch there is no tag, so only
+      # :latest is produced.
+      - name: Compute image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/paleolipidrr/texas
+            ghcr.io/paleolipidrr/texas-base
+          tags: |
+            type=semver,pattern={{version}}
+            type=raw,value=latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
