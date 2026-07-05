@@ -23,8 +23,6 @@ dependencies = [
   "typing-extensions>=3.7.4",
   "scipy>=1.7",
   "pandas>=1.3",
-  "baysparpy>=0.0.2",
-  "baysplinepy>=0.0.1",
   "stanio>=0.4",
   "matplotlib>=3.3",
   "cmocean",
@@ -62,7 +60,9 @@ dev = [
   "scikit-learn",   # SI_code1: LinearRegression/RANSAC/Huber/TheilSen, BallTree
   "statsmodels",    # SI_code1 notebook analysis
   "seaborn",        # SI_code1 notebook plotting
-  "openpyxl"        # SI_code1: pd.read_excel of the culture/mesocosm .xlsx dataset
+  "openpyxl",       # SI_code1: pd.read_excel of the culture/mesocosm .xlsx dataset
+  "baysparpy>=0.0.2",   # SI_code2/3: BAYSPAR TEX86 comparison (notebook-only; not used by TEXAS core)
+  "baysplinepy>=0.0.1"  # SI_code2/3: BAYSPLINE UK'37 comparison (notebook-only)
 ]
 
 regrid = [
