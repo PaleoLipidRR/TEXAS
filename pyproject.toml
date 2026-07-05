@@ -90,6 +90,9 @@ all = [
   "texas-psm[dev]",
   "texas-psm[regrid]"
 ]
+[project.scripts]
+texas-doctor = "TEXAS.utils.doctor:_cli_main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["TEXAS*"]
