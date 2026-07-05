@@ -61,7 +61,8 @@ dev = [
   "odrpack>=0.6",   # orthogonal distance regression (odr_fit) used in SI_code1 notebook
   "scikit-learn",   # SI_code1: LinearRegression/RANSAC/Huber/TheilSen, BallTree
   "statsmodels",    # SI_code1 notebook analysis
-  "seaborn"         # SI_code1 notebook plotting
+  "seaborn",        # SI_code1 notebook plotting
+  "openpyxl"        # SI_code1: pd.read_excel of the culture/mesocosm .xlsx dataset
 ]
 
 regrid = [
