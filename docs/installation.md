@@ -1,6 +1,15 @@
 # Installation
 
-TEXAS can be run via Docker (recommended) or installed directly with pip or conda.
+TEXAS can be run via Docker (recommended) or installed directly with pip, [uv](#using-uv-instead-of-pip), or conda.
+
+| Option | Best for | CmdStan handled for you? |
+|---|---|---|
+| **A — Docker** | Zero setup; reproducible; no Python/Stan toolchain to manage | ✅ bundled in the image |
+| **B — conda-lock** | Exact pinned reproducibility outside Docker | ✅ bundled on all platforms |
+| **C — pip / uv** | Lightweight installs into an existing Python/venv workflow | ❌ one extra step (see below) |
+| **D — from source** | Development (editable install) | ❌ conda-managed or manual |
+
+> **CmdStan is never a Python package.** Options A and B bundle it; options C and D require one extra step to install the CmdStan C++ toolchain (and, on a bare machine, a C++ compiler). This is a property of Stan itself — every model compiles to a native binary — not a limitation of pip or uv. See [CmdStan discovery](#cmdstan-discovery).
 
 ---
 
@@ -364,6 +373,26 @@ uv pip install texas-psm      # add extras as needed, e.g. "texas-psm[plotting]"
 ```bash
 uv add texas-psm              # or: uv add "texas-psm[plotting]"
 ```
+
+**Cloning the repo (contributor / notebook workflow):**
+
+To develop TEXAS or run the manuscript notebooks (`notebooks/manuscripts/SI_code*.ipynb`) from a checkout, let uv own a project `.venv`:
+
+```bash
+git clone --depth 1 https://github.com/PaleoLipidRR/TEXAS.git
+cd TEXAS
+uv sync --all-extras          # creates .venv/ and installs everything, incl. Jupyter + notebook deps
+```
+
+Then select `.venv/bin/python` as your notebook kernel (VS Code auto-detects it; for a named Jupyter kernel run `uv run python -m ipykernel install --user --name texas-uv`).
+
+!!! tip "Which sync command?"
+    - `uv sync` — core runtime only (no Jupyter). Cannot serve a notebook kernel.
+    - `uv sync --extra dev` — adds Jupyter/ipykernel + the notebook analysis deps (scikit-learn, statsmodels, seaborn, openpyxl, odrpack).
+    - `uv sync --all-extras` — the above **plus** plotting (ultraplot), maps (cartopy, regionmask), and regrid (geopandas, xesmf). Recommended for the SI notebooks.
+
+!!! note "Python 3.12"
+    uv on Python 3.12 is supported: the project pins a `[tool.uv]` override so `pyproj` resolves to a version with a 3.12 wheel (the `regrid` extra's `pyproj<3.6` cap has no 3.12 wheel and would otherwise force a source build). No action needed on your part.
 
 !!! note "Optional extras under uv"
     - `texas-psm[plotting]` (ultraplot) and `texas-psm[maps]` (cartopy, regionmask) install cleanly from PyPI.

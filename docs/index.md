@@ -28,13 +28,14 @@ TEXAS uses a two-stage workflow:
 
 ```bash
 pip install texas-psm
+# or, with uv:  uv add texas-psm
 ```
 
 Or open the interactive notebook in Google Colab — no installation needed:
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PaleoLipidRR/TEXAS/blob/main/notebooks/quickstart_demo.ipynb)
 
-For Docker, conda-lock, and development installs see [Installation](installation.md).
+For Docker, conda-lock, uv, and development installs see [Installation](installation.md).
 
 ---
 
