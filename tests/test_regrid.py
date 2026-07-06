@@ -35,3 +35,23 @@ def test_regrid_scipy_reproduces_linear_field():
     assert abs(val - 0.0) < 1e-6
     val2 = out["TEMP"].sel(lat=40.0, lon=100.0).item()
     assert abs(val2 - 40.0) < 1e-6
+
+
+def test_periodic_padding_bridges_the_seam():
+    # field varying with longitude; a target point near the 0/360 seam
+    jj, ii = np.meshgrid(np.linspace(-10, 10, 5), np.linspace(2, 358, 20), indexing="ij")
+    ds = xr.Dataset({"TEMP": (("nj", "ni"), np.cos(np.deg2rad(ii)))},
+                    coords={"TLAT": (("nj", "ni"), jj), "TLONG": (("nj", "ni"), ii)})
+    grids = _prepare_grids(ds, None, None, 1.0, (-10, 10), (0, 360))
+    out = _regrid_scipy(ds, ["TEMP"], grids, method="bilinear",
+                        periodic=True, squeeze_dims=None, keep_attrs=False)
+    # at lon=0 (inside the seam gap of the unpadded source [2,358]) value must be finite
+    assert np.isfinite(out["TEMP"].sel(lat=0.0, lon=0.0).item())
+
+
+def test_conservative_method_raises_in_scipy_backend():
+    ds = _curvilinear_ds()
+    grids = _prepare_grids(ds, None, None, 2.0, (-90, 90), (0, 360))
+    with pytest.raises(ValueError, match="conservative"):
+        _regrid_scipy(ds, ["TEMP"], grids, method="conservative",
+                      periodic=False, squeeze_dims=None, keep_attrs=False)

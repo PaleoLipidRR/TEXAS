@@ -72,6 +72,15 @@ def _regrid_scipy(ds, var_names, grids, method, periodic, squeeze_dims, keep_att
 
     pts_lon = src_lon.ravel()
     pts_lat = src_lat.ravel()
+    if periodic:
+        lo, hi = float(np.min(lon_out)), float(np.max(lon_out))
+        left = pts_lon <= lo + _SEAM_PAD_DEG
+        right = pts_lon >= hi - _SEAM_PAD_DEG
+        pts_lon = np.concatenate([pts_lon, pts_lon[left] + (hi - lo), pts_lon[right] - (hi - lo)])
+        pts_lat = np.concatenate([pts_lat, pts_lat[left], pts_lat[right]])
+        _pad_idx = (np.where(left)[0], np.where(right)[0])
+    else:
+        _pad_idx = None
     points = np.column_stack([pts_lon, pts_lat])
     make_interp = _interp_factory(method, points)
 
@@ -87,7 +96,10 @@ def _regrid_scipy(ds, var_names, grids, method, periodic, squeeze_dims, keep_att
         time_dim = next((d for d in var.dims if d not in (lat_dim, lon_dim)), None)
 
         def _one(values2d):
-            interp = make_interp(np.asarray(values2d, dtype=float).ravel())
+            flat = np.asarray(values2d, dtype=float).ravel()
+            if _pad_idx is not None:
+                flat = np.concatenate([flat, flat[_pad_idx[0]], flat[_pad_idx[1]]])
+            interp = make_interp(flat)
             return interp(targets).reshape(lat_mesh.shape)
 
         if time_dim and time_dim in var.dims:
