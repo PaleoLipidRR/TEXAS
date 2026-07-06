@@ -32,7 +32,7 @@ dependencies = [
 
 [project.optional-dependencies]
 plotting = [
-    "ultraplot"
+    "ultraplot>=2.4.0"
 ]
 
 # Map-figure dependencies (plot_residual_maps). Heavy geo stack (GEOS/PROJ via
@@ -63,6 +63,7 @@ dev = [
   "openpyxl",       # SI_code1: pd.read_excel of the culture/mesocosm .xlsx dataset
   "baysparpy>=0.0.2",   # SI_code2/3: BAYSPAR TEX86 comparison (notebook-only; not used by TEXAS core)
   "baysplinepy>=0.0.1", # SI_code2/3: BAYSPLINE UK'37 comparison (notebook-only)
+  "bayfox",
   "pygplates>=1.0"      # SI_code3: paleo plate reconstruction (pip-installable since 1.0; notebook-only)
 ]
 
