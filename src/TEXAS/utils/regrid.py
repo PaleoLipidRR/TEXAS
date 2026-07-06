@@ -6,6 +6,7 @@ so the regrid runs in any environment (including uv, which cannot install esmpy)
 from __future__ import annotations
 
 import warnings
+
 import numpy as np
 import xarray as xr
 from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
@@ -49,7 +50,8 @@ def _prepare_grids(ds, lat_name, lon_name, target_res, lat_range, lon_range):
 
 
 def _interp_factory(method, points):
-    """Return (build_tri, make_interp) so triangulation is reused across time steps."""
+    """Return a factory ``make_interp(values)`` that builds an interpolator,
+    reusing a precomputed triangulation across time steps (for the bilinear path)."""
     if method in ("bilinear",):
         tri = Delaunay(points)
         return lambda values: LinearNDInterpolator(tri, values, fill_value=np.nan)
@@ -177,6 +179,12 @@ def regrid_curvilinear_to_latlon(
     periodic seam, near the poles, and near NaN/land boundaries). 'xesmf' forces
     ESMF (raises ImportError without esmpy). 'scipy' forces the fallback.
     """
+    if method in ("conservative", "patch"):
+        raise ValueError(
+            f"method={method!r} is not supported: conservative/patch regridding needs "
+            "cell bounds, which this regridder does not provide. Use method='bilinear' "
+            "or method='nearest'."
+        )
     grids = _prepare_grids(ds, lat_name, lon_name, target_res, lat_range, lon_range)
     if backend == "auto":
         backend = "xesmf" if _esmf_available() else "scipy"

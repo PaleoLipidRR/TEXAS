@@ -80,6 +80,12 @@ def test_backend_xesmf_raises_without_esmpy():
         regrid_curvilinear_to_latlon(ds, "TEMP", target_res=2.0, backend="xesmf")
 
 
+def test_conservative_rejected_by_public_function():
+    ds = _curvilinear_ds()
+    with pytest.raises(ValueError, match="conservative"):
+        regrid_curvilinear_to_latlon(ds, "TEMP", target_res=2.0, method="conservative")
+
+
 def test_exported_at_top_level():
     import TEXAS
     assert hasattr(TEXAS, "regrid_curvilinear_to_latlon")
