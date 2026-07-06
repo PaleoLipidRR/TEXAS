@@ -78,3 +78,9 @@ def test_backend_xesmf_raises_without_esmpy():
         pytest.skip("esmpy present; xesmf would succeed")
     with pytest.raises(ImportError, match="esmpy"):
         regrid_curvilinear_to_latlon(ds, "TEMP", target_res=2.0, backend="xesmf")
+
+
+def test_exported_at_top_level():
+    import TEXAS
+    assert hasattr(TEXAS, "regrid_curvilinear_to_latlon")
+    assert "regrid_curvilinear_to_latlon" in TEXAS.__all__
