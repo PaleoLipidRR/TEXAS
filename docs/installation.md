@@ -438,3 +438,73 @@ The conda environment sets `CMDSTAN` automatically to the bundled CmdStan. If yo
 ```bash
 export CMDSTAN=~/.cmdstan/cmdstan-2.36.0
 ```
+
+---
+
+## Reproducing the manuscript notebooks on a new machine
+
+The SI notebooks (`notebooks/manuscripts/SI_code1–3`) need more than the package: the
+Stan toolchain, cached posteriors, and some external climatology/model data. Full
+checklist:
+
+### 1. Code + environment
+
+```bash
+git clone https://github.com/PaleoLipidRR/TEXAS.git
+cd TEXAS
+```
+
+- **conda (recommended for the notebooks — the tested stack):** `conda env create -f
+  environment.yml && conda activate texas-env && pip install -e .`. This pins
+  `matplotlib<3.5` and `python=3.10`, the versions the notebooks were authored against.
+- **uv (lightweight):** `uv sync --all-extras`. Newer stack (matplotlib 3.10, numpy 2,
+  ultraplot 2.x) — a few notebook plotting idioms need the updated syntax the notebooks
+  now use.
+
+### 2. CmdStan + environment check
+
+Install CmdStan (Options A/B bundle it; for pip/uv see [Option C](#option-c-pip-install-python-users)),
+then verify everything at once:
+
+```bash
+texas-doctor      # or: python -c "import TEXAS; TEXAS.doctor()"
+```
+
+It reports cmdstanpy, the CmdStan path/version, a C++ compiler, and the cache dirs, and
+prints `Stan sampling: READY` when the machine is set up.
+
+### 3. Posteriors + training data (Zenodo)
+
+```python
+import TEXAS
+TEXAS.download_all()          # forward posteriors + training CSVs → data/cache/, data/spreadsheets/
+```
+
+### 4. External data (WOA23 + model fields) — manual, public sources
+
+The `data/external/` folder (paleoDEMS plate model, Tierney22 / Zhu19 netCDFs) travels
+with the clone. Two datasets do **not** and must be fetched separately:
+
+- **WOA23 climatology** — World Ocean Atlas 2023, decadal average `decav91C0`,
+  **temperature** and **nitrate**, 0.25° grid (files like `woa23_decav91C0_t00_04.nc`,
+  `woa23_decav91C0_n00_04.nc`). Download from NOAA NCEI
+  (<https://www.ncei.noaa.gov/products/world-ocean-atlas>) and place them so the notebook
+  paths resolve (see step 5): `…/WOA23/decav91C0/temperature/` and `…/nitrate/`.
+
+### 5. Set the two path variables
+
+Each notebook's setup cell defines `local_github_path` and `local_onedrive_path`. Point
+them at your clone and at wherever you placed the WOA23 / external datasets:
+
+```python
+from pathlib import Path
+local_github_path   = Path.home() / "Documents/GitHub/TEXAS"   # your clone
+local_onedrive_path = Path.home() / "data/texas-external"      # where you put WOA23 etc.
+```
+
+Under Docker these default to `/home/micromamba/app` and `/mnt/onedrive`; on a bare
+machine adjust as above.
+
+### 6. Run
+
+Select the `texas-env` (conda) or `.venv` (uv) kernel and run top-to-bottom.

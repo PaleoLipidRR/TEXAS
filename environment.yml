@@ -73,4 +73,7 @@ dependencies:
     - pykrige
     - regionmask>=0.9
     - odrpack
+    - baysparpy>=0.0.2      # SI_code2/3: BAYSPAR TEX86 comparison
+    - baysplinepy>=0.0.1    # SI_code2/3: BAYSPLINE UK'37 comparison
+    - bayfox                # SI_code2/3: BAYFOX foram δ18O comparison
     - texas-psm>=0.1.9
