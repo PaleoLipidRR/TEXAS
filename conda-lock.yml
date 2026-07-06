@@ -13,10 +13,10 @@
 version: 1
 metadata:
   content_hash:
-    linux-64: 61c52acce9fe33f7ee486f1b1faecd7a2ab9b3503abc4cbeb437cf498acd39a4
-    osx-arm64: 9ff8038558a6d02dcfdd659188c810e6a18e30451995f5cfbc929b53b3fcb5c3
-    osx-64: c745c3d2916070b96efa7704691df205af8aefef1db4ff1eebd2df6939dfbc99
-    win-64: 398c9de4a69e81f76cfcbc51fda495abfdffecfa7c3c6a8e171e2830cd21e0e0
+    linux-64: 4c965a4aa7a04b5c01b1651b7aae18a457ef4984bb12ddf04cc16ac0da696ed4
+    osx-arm64: bf66950fe14f94c591132c19e199c37fbe7ba6024346d972127c57ac3f095af2
+    osx-64: be3071cab4c631a6685a8a6c4f27cdcafc54ddfb8c38ee1ee8f8186bfe41b500
+    win-64: d2c83f3b53a8b74153f728d17a18afc6f620095136841f6847baba8d1681ca30
   channels:
   - url: conda-forge
     used_env_vars: []
@@ -25718,6 +25718,58 @@ package:
   url: https://files.pythonhosted.org/packages/0b/f7/85273299ab57117850cc0a936c64151171fac4da49bc6fba0dad984a7c5f/affine-2.4.0-py3-none-any.whl
   hash:
     sha256: 8a3df80e2b2378aef598a83c1392efd47967afec4242021a0b06b4c7cbc61a92
+  category: main
+  optional: false
+- name: bayfox
+  version: 0.0.1a3
+  manager: pip
+  platform: linux-64
+  dependencies:
+    attrs: '*'
+    matplotlib: '*'
+    numpy: '*'
+  url: https://files.pythonhosted.org/packages/9c/ec/63a661dd13b513938fc7e1e84705ca56a459753e9af62f0aa3c8972ed6b2/bayfox-0.0.1a3-py3-none-any.whl
+  hash:
+    sha256: 0179e4b46eca8ac81193e9f4a2a8043cc8716360c8069c18b8a1398422d5c80a
+  category: main
+  optional: false
+- name: bayfox
+  version: 0.0.1a3
+  manager: pip
+  platform: osx-64
+  dependencies:
+    attrs: '*'
+    matplotlib: '*'
+    numpy: '*'
+  url: https://files.pythonhosted.org/packages/9c/ec/63a661dd13b513938fc7e1e84705ca56a459753e9af62f0aa3c8972ed6b2/bayfox-0.0.1a3-py3-none-any.whl
+  hash:
+    sha256: 0179e4b46eca8ac81193e9f4a2a8043cc8716360c8069c18b8a1398422d5c80a
+  category: main
+  optional: false
+- name: bayfox
+  version: 0.0.1a3
+  manager: pip
+  platform: osx-arm64
+  dependencies:
+    attrs: '*'
+    matplotlib: '*'
+    numpy: '*'
+  url: https://files.pythonhosted.org/packages/9c/ec/63a661dd13b513938fc7e1e84705ca56a459753e9af62f0aa3c8972ed6b2/bayfox-0.0.1a3-py3-none-any.whl
+  hash:
+    sha256: 0179e4b46eca8ac81193e9f4a2a8043cc8716360c8069c18b8a1398422d5c80a
+  category: main
+  optional: false
+- name: bayfox
+  version: 0.0.1a3
+  manager: pip
+  platform: win-64
+  dependencies:
+    attrs: '*'
+    matplotlib: '*'
+    numpy: '*'
+  url: https://files.pythonhosted.org/packages/9c/ec/63a661dd13b513938fc7e1e84705ca56a459753e9af62f0aa3c8972ed6b2/bayfox-0.0.1a3-py3-none-any.whl
+  hash:
+    sha256: 0179e4b46eca8ac81193e9f4a2a8043cc8716360c8069c18b8a1398422d5c80a
   category: main
   optional: false
 - name: baysparpy

@@ -3,6 +3,7 @@ from __future__ import annotations
 import os, subprocess, warnings
 from pathlib import Path
 from cmdstanpy import set_cmdstan_path, cmdstan_path
+from ..constants import RECOMMENDED_CMDSTAN_VERSION
 
 def find_cmdstan(min_version: str = "2.23.0") -> Path:
     """Locate a working CmdStan installation and configure cmdstanpy to use it.
@@ -97,8 +98,9 @@ def find_cmdstan(min_version: str = "2.23.0") -> Path:
         "/opt/cmdstan/cmdstan-*, ~/.cmdstan/cmdstan-*, "
         "/usr/local/cmdstan/cmdstan-*, cmdstanpy configured path\n"
         "  Install  : python -c \"import cmdstanpy; "
-        "cmdstanpy.install_cmdstan()\"\n"
-        "  Or set   : export CMDSTAN=/path/to/your/cmdstan"
+        f"cmdstanpy.install_cmdstan(version='{RECOMMENDED_CMDSTAN_VERSION}')\"\n"
+        "  Or set   : export CMDSTAN=/path/to/your/cmdstan\n"
+        "  Diagnose : texas-doctor  (or TEXAS.doctor())"
     )
 
 def get_repo_root(target_dir_name: str = "TEXAS") -> Path | None:
@@ -166,7 +168,9 @@ except RuntimeError as _e:
     warnings.warn(
         "CmdStan not found — Stan sampling (forward calibration and inverse "
         "reconstruction) will not be available until CmdStan is installed.\n"
-        "  Install: python -c \"import cmdstanpy; cmdstanpy.install_cmdstan()\"",
+        "  Install: python -c \"import cmdstanpy; "
+        f"cmdstanpy.install_cmdstan(version='{RECOMMENDED_CMDSTAN_VERSION}')\"\n"
+        "  Diagnose: run `texas-doctor` or TEXAS.doctor()",
         UserWarning, stacklevel=1,
     )
 DOCUMENTS = HOME / "Documents"

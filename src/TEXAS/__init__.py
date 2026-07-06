@@ -66,6 +66,13 @@ from .utils.download import (
 # ─── Cache configuration ─────────────────────────────────────────────────
 from .utils.paths import set_cache_dir
 
+# ─── Environment diagnostic ──────────────────────────────────────────────
+from .utils.doctor import doctor
+from .constants import RECOMMENDED_CMDSTAN_VERSION
+
+# ─── Regridding ──────────────────────────────────────────────────────────
+from .utils.regrid import regrid_curvilinear_to_latlon
+
 # ─── Plotting / dataviz ─────────────────────────────────────────────────
 from .plotting import (
     compute_sample_range,
@@ -125,6 +132,11 @@ __all__ = [
     "POSTERIOR_REGISTRY",
     # cache configuration
     "set_cache_dir",
+    # environment diagnostic
+    "doctor",
+    "RECOMMENDED_CMDSTAN_VERSION",
+    # regridding
+    "regrid_curvilinear_to_latlon",
     # plotting
     "compute_sample_range",
     "compute_density_based_range",

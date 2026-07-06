@@ -1,5 +1,10 @@
 # TEXAS/constants.py
 
+# CmdStan version TEXAS is developed and tested against. Single source of truth:
+# referenced by the CmdStan-not-found warning/error in utils/paths.py, the
+# TEXAS.doctor() diagnostic, and the installation docs. Bump here only.
+RECOMMENDED_CMDSTAN_VERSION = "2.36.0"
+
 # Optional predictors
 OPTIONAL_PREDICTORS = ["gdgt23ratio", "no3"]
 

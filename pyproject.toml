@@ -18,12 +18,11 @@ classifiers = [
 dependencies = [
   "numpy>=1.18",
   "xarray>=0.16",
+  "netCDF4>=1.6",   # xarray netCDF backend; required to read/write posterior .nc files
   "cmdstanpy>=1.0",
   "typing-extensions>=3.7.4",
   "scipy>=1.7",
   "pandas>=1.3",
-  "baysparpy>=0.0.2",
-  "baysplinepy>=0.0.1",
   "stanio>=0.4",
   "matplotlib>=3.3",
   "cmocean",
@@ -56,7 +55,15 @@ dev = [
   "duckdb",
   "pyarrow",
   "sqlalchemy",
-  "pydantic"
+  "pydantic",
+  "odrpack>=0.6",   # orthogonal distance regression (odr_fit) used in SI_code1 notebook
+  "scikit-learn",   # SI_code1: LinearRegression/RANSAC/Huber/TheilSen, BallTree
+  "statsmodels",    # SI_code1 notebook analysis
+  "seaborn",        # SI_code1 notebook plotting
+  "openpyxl",       # SI_code1: pd.read_excel of the culture/mesocosm .xlsx dataset
+  "baysparpy>=0.0.2",   # SI_code2/3: BAYSPAR TEX86 comparison (notebook-only; not used by TEXAS core)
+  "baysplinepy>=0.0.1", # SI_code2/3: BAYSPLINE UK'37 comparison (notebook-only)
+  "pygplates>=1.0"      # SI_code3: paleo plate reconstruction (pip-installable since 1.0; notebook-only)
 ]
 
 regrid = [
@@ -84,6 +91,9 @@ all = [
   "texas-psm[dev]",
   "texas-psm[regrid]"
 ]
+[project.scripts]
+texas-doctor = "TEXAS.utils.doctor:_cli_main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["TEXAS*"]
@@ -101,6 +111,14 @@ pip = [
     "regionmask",
     "odrpack"
 ]
+
+# uv-only build override. The `regrid` extra pins `pyproj<3.6` (last conda-friendly
+# version), but 3.5.0 ships no cp312 wheel, so on Python 3.12 uv builds it from an
+# sdist that needs the PROJ C library and fails. 3.6.1+ has cp312 wheels; this
+# override lets uv download a wheel instead. Does not touch the published `regrid`
+# constraint (conda still resolves pyproj via conda-forge).
+[tool.uv]
+override-dependencies = ["pyproj>=3.6.1"]
 
 [tool.ruff]
 line-length = 100
