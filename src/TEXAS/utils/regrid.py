@@ -5,6 +5,7 @@ so the regrid runs in any environment (including uv, which cannot install esmpy)
 """
 from __future__ import annotations
 
+import warnings
 import numpy as np
 import xarray as xr
 from scipy.interpolate import LinearNDInterpolator, NearestNDInterpolator
@@ -118,3 +119,82 @@ def _regrid_scipy(ds, var_names, grids, method, periodic, squeeze_dims, keep_att
     if keep_attrs:
         result.attrs = dict(ds.attrs)
     return result
+
+
+def _esmf_available() -> bool:
+    try:
+        import esmpy  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
+def _regrid_xesmf(ds, var_names, grids, method, periodic, squeeze_dims, keep_attrs):
+    import xesmf as xe
+    if isinstance(var_names, str):
+        var_names = [var_names]
+    lat_dim, lon_dim = grids["lat_dim"], grids["lon_dim"]
+    ds_in = xr.Dataset({"lat": ((lat_dim, lon_dim), grids["src_lat"]),
+                        "lon": ((lat_dim, lon_dim), grids["src_lon"])})
+    ds_out = xr.Dataset({"lat": (["lat"], grids["lat_out"]),
+                         "lon": (["lon"], grids["lon_out"])})
+    regridder = xe.Regridder(ds_in, ds_out, method, periodic=periodic)
+    out_vars = {}
+    for var_name in var_names:
+        if var_name not in ds:
+            continue
+        var = ds[var_name]
+        if squeeze_dims:
+            for d in ([squeeze_dims] if isinstance(squeeze_dims, str) else squeeze_dims):
+                if d in var.dims:
+                    var = var.squeeze(d)
+        time_dim = next((d for d in var.dims if d not in (lat_dim, lon_dim)), None)
+        if time_dim and time_dim in var.dims:
+            chunks = [regridder(var.isel({time_dim: t})) for t in range(var.sizes[time_dim])]
+            da = xr.concat(chunks, dim=time_dim).assign_coords({time_dim: var[time_dim]})
+        else:
+            da = regridder(var)
+        da = da.assign_coords({"lat": ds_out.lat, "lon": ds_out.lon})
+        if keep_attrs:
+            da.attrs = dict(var.attrs)
+        out_vars[var_name] = da
+    result = xr.Dataset(out_vars)
+    if keep_attrs:
+        result.attrs = dict(ds.attrs)
+    return result
+
+
+def regrid_curvilinear_to_latlon(
+    ds, var_names, lat_name=None, lon_name=None,
+    target_res=0.5, lat_range=(-90, 90), lon_range=(0, 360),
+    method="bilinear", periodic=True, squeeze_dims=None, keep_attrs=True,
+    backend="auto",
+):
+    """Regrid a curvilinear (2-D lat/lon) source dataset onto a regular lat/lon grid.
+
+    backend: 'auto' uses xesmf when esmpy is importable, else a pure-pip scipy
+    fallback (a close *linear* approximation that differs from xesmf most at the
+    periodic seam, near the poles, and near NaN/land boundaries). 'xesmf' forces
+    ESMF (raises ImportError without esmpy). 'scipy' forces the fallback.
+    """
+    grids = _prepare_grids(ds, lat_name, lon_name, target_res, lat_range, lon_range)
+    if backend == "auto":
+        backend = "xesmf" if _esmf_available() else "scipy"
+        if backend == "scipy":
+            warnings.warn(
+                "esmpy not found — using the scipy pure-pip regridding fallback "
+                "(approximate; differs from xesmf at the seam/poles). Pass "
+                "backend='xesmf' with esmpy installed for the exact result.",
+                UserWarning, stacklevel=2,
+            )
+    if backend == "xesmf":
+        if not _esmf_available():
+            raise ImportError(
+                "backend='xesmf' requires esmpy, which is not installed. Install it "
+                "via conda-forge (`conda install -c conda-forge esmpy`) or use "
+                "backend='scipy'."
+            )
+        return _regrid_xesmf(ds, var_names, grids, method, periodic, squeeze_dims, keep_attrs)
+    if backend == "scipy":
+        return _regrid_scipy(ds, var_names, grids, method, periodic, squeeze_dims, keep_attrs)
+    raise ValueError(f"Unknown backend={backend!r}; expected 'auto', 'xesmf', or 'scipy'.")

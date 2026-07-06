@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 import xarray as xr
-from TEXAS.utils.regrid import _prepare_grids, _regrid_scipy
+from TEXAS.utils.regrid import _prepare_grids, _regrid_scipy, regrid_curvilinear_to_latlon, _esmf_available
 
 
 def _curvilinear_ds():
@@ -55,3 +55,26 @@ def test_conservative_method_raises_in_scipy_backend():
     with pytest.raises(ValueError, match="conservative"):
         _regrid_scipy(ds, ["TEMP"], grids, method="conservative",
                       periodic=False, squeeze_dims=None, keep_attrs=False)
+
+
+def test_backend_scipy_forces_fallback():
+    ds = _curvilinear_ds()
+    out = regrid_curvilinear_to_latlon(ds, "TEMP", target_res=2.0, backend="scipy")
+    assert abs(out["TEMP"].sel(lat=30.0, lon=200.0).item() - 30.0) < 1e-6
+
+
+def test_backend_auto_uses_scipy_when_esmpy_absent():
+    ds = _curvilinear_ds()
+    if _esmf_available():
+        pytest.skip("esmpy present; auto would use xesmf")
+    with pytest.warns(UserWarning, match="fallback"):
+        out = regrid_curvilinear_to_latlon(ds, "TEMP", target_res=2.0, backend="auto")
+    assert set(out["TEMP"].dims) == {"lat", "lon"}
+
+
+def test_backend_xesmf_raises_without_esmpy():
+    ds = _curvilinear_ds()
+    if _esmf_available():
+        pytest.skip("esmpy present; xesmf would succeed")
+    with pytest.raises(ImportError, match="esmpy"):
+        regrid_curvilinear_to_latlon(ds, "TEMP", target_res=2.0, backend="xesmf")
