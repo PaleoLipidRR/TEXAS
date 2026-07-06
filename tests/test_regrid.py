@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 import xarray as xr
-from TEXAS.utils.regrid import _prepare_grids
+from TEXAS.utils.regrid import _prepare_grids, _regrid_scipy
 
 
 def _curvilinear_ds():
@@ -22,3 +22,16 @@ def test_prepare_grids_autodetects_and_builds_target():
     # target axes use arange(range0, range1 + res/2, res)
     assert g["lat_out"][0] == -90.0 and g["lat_out"][-1] == 90.0
     assert g["lon_out"][0] == 0.0 and g["lon_out"][-1] == 360.0
+
+
+def test_regrid_scipy_reproduces_linear_field():
+    ds = _curvilinear_ds()  # TEMP == latitude
+    grids = _prepare_grids(ds, None, None, 2.0, (-90, 90), (0, 360))
+    out = _regrid_scipy(ds, ["TEMP"], grids, method="bilinear",
+                        periodic=False, squeeze_dims=None, keep_attrs=True)
+    assert set(out["TEMP"].dims) == {"lat", "lon"}
+    # interior target point: value must equal its latitude (linear field, linear interp)
+    val = out["TEMP"].sel(lat=0.0, lon=180.0).item()
+    assert abs(val - 0.0) < 1e-6
+    val2 = out["TEMP"].sel(lat=40.0, lon=100.0).item()
+    assert abs(val2 - 40.0) < 1e-6
