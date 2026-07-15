@@ -91,6 +91,11 @@ def find_cmdstan(min_version: str = "2.23.0") -> Path:
     except Exception:
         pass
 
+    set_hint = (
+        '$env:CMDSTAN="C:\\path\\to\\cmdstan"   (PowerShell)'
+        if os.name == "nt"
+        else "export CMDSTAN=/path/to/your/cmdstan   (bash/zsh)"
+    )
     raise RuntimeError(
         "No working CmdStan installation found.\n"
         "  Searched : $CMDSTAN, $CONDA_PREFIX/bin/cmdstan, "
@@ -99,7 +104,7 @@ def find_cmdstan(min_version: str = "2.23.0") -> Path:
         "/usr/local/cmdstan/cmdstan-*, cmdstanpy configured path\n"
         "  Install  : python -c \"import cmdstanpy; "
         f"cmdstanpy.install_cmdstan(version='{RECOMMENDED_CMDSTAN_VERSION}')\"\n"
-        "  Or set   : export CMDSTAN=/path/to/your/cmdstan\n"
+        f"  Or set   : {set_hint}\n"
         "  Diagnose : texas-doctor  (or TEXAS.doctor())"
     )
 
@@ -168,9 +173,9 @@ except RuntimeError as _e:
     warnings.warn(
         "CmdStan not found — Stan sampling (forward calibration and inverse "
         "reconstruction) will not be available until CmdStan is installed.\n"
-        "  Install: python -c \"import cmdstanpy; "
-        f"cmdstanpy.install_cmdstan(version='{RECOMMENDED_CMDSTAN_VERSION}')\"\n"
-        "  Diagnose: run `texas-doctor` or TEXAS.doctor()",
+        "  Install : TEXAS.install_cmdstan()   (one call; also repairs a broken "
+        "install)\n"
+        "  Diagnose: texas-doctor   (or TEXAS.doctor())",
         UserWarning, stacklevel=1,
     )
 DOCUMENTS = HOME / "Documents"

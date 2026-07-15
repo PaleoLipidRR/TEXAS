@@ -9,7 +9,7 @@ TEXAS can be run via Docker (recommended) or installed directly with pip, [uv](#
 | **C — pip / uv** | Lightweight installs into an existing Python/venv workflow | ❌ one extra step (see below) |
 | **D — from source** | Development (editable install) | ❌ conda-managed or manual |
 
-> **CmdStan is never a Python package.** Options A and B bundle it; options C and D require one extra step to install the CmdStan C++ toolchain (and, on a bare machine, a C++ compiler). This is a property of Stan itself — every model compiles to a native binary — not a limitation of pip or uv. See [CmdStan discovery](#cmdstan-discovery).
+> **CmdStan is never a Python package.** Options A and B bundle it; options C and D require one extra step to install the CmdStan C++ toolchain (and, on a bare machine, a C++ compiler). This is a property of Stan itself — every model compiles to a native binary — not a limitation of pip or uv. See [CmdStan: install, discovery, and verification](#cmdstan-install-discovery-and-verification).
 
 ---
 
@@ -305,18 +305,21 @@ pip install texas-psm
     conda activate texas-env
     ```
 
-    **Step 2 — install CmdStan** (required before importing TEXAS):
-
-    ```bash
-    pip install cmdstanpy
-    TBB_CXX_TYPE=gcc python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.36.0')"
-    ```
-
-    **Step 3 — install TEXAS:**
+    **Step 2 — install TEXAS:**
 
     ```bash
     pip install texas-psm
     ```
+
+    **Step 3 — install CmdStan** (required before *sampling*; the one-call helper
+    installs the tested version and verifies it):
+
+    ```bash
+    texas-install-cmdstan          # or, in Python: TEXAS.install_cmdstan()
+    ```
+
+    Prefer to manage it manually? The equivalent low-level call is
+    `TBB_CXX_TYPE=gcc python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.36.0')"`.
 
 === "Windows (native Anaconda Prompt)"
 
@@ -349,10 +352,15 @@ pip install texas-psm
 === "Google Colab"
 
     ```python
-    !pip install cmdstanpy
-    import cmdstanpy; cmdstanpy.install_cmdstan(version="2.36.0")
     !pip install texas-psm
+    import TEXAS
+    TEXAS.install_cmdstan()      # installs CmdStan to /root/.cmdstan and verifies
     ```
+
+    Colab runtimes are **ephemeral** — `/root/.cmdstan` is wiped when the runtime
+    resets or disconnects, so re-run `TEXAS.install_cmdstan()` once per new session.
+    It compiles CmdStan (~2–5 min) using Colab's preinstalled `g++`/`make`, and sets
+    `TBB_CXX_TYPE=gcc` for you.
 
 ### Using uv instead of pip
 
@@ -399,25 +407,114 @@ Then select `.venv/bin/python` as your notebook kernel (VS Code auto-detects it;
     - The `regrid` extra installs `xesmf` and the rest of the geo stack from PyPI, but **`esmpy` (the ESMF bindings xesmf needs at runtime) is not on PyPI** — install it from conda-forge: `conda install -c conda-forge esmpy`. (esmpy is deliberately kept out of the extra: a non-PyPI package in *any* extra makes `uv lock` fail for the whole project.) For heavy regridding, prefer the conda environment (Option D).
     - CmdStan is **not** a Python package — install it once via `cmdstanpy.install_cmdstan()` or conda-forge `cmdstan`, exactly as for the pip route above.
 
-### CmdStan discovery
+### CmdStan: install, discovery, and verification
 
-TEXAS searches for CmdStan in the following priority order:
+CmdStan is the Stan C++ toolchain. It is **never a Python package** — pip/uv install
+`cmdstanpy` (the Python bindings), but the compiler itself is a separate directory
+(`cmdstan-X.Y.Z/`) containing `bin/stanc` and a `Makefile`. Every Stan model compiles
+to a native binary the first time it runs, so a working CmdStan **and** a C++ compiler
+must both be present.
 
-| Priority | Location |
-|---|---|
-| 1 | `CMDSTAN` environment variable (auto-set by conda; also honoured when set manually) |
-| 2 | `/opt/cmdstan/cmdstan-2.36.0` |
-| 3 | `~/.cmdstan/cmdstan-2.36.0` — default target of `cmdstanpy.install_cmdstan()` |
-| 4 | `/usr/local/cmdstan/cmdstan-2.36.0` |
-| 5 | Whatever cmdstanpy is already configured to use |
+#### The one-call install (pip / uv users)
 
-`set_cmdstan_path()` is always called on the winning path. If `CMDSTAN` is set but points to a broken directory, TEXAS emits a warning and continues down the list. If nothing is found, a `RuntimeError` is raised with explicit install instructions.
+After `pip install texas-psm` (or `uv add texas-psm`), the simplest way to get CmdStan is:
 
-To use a specific CmdStan installation instead of the one conda manages:
+```python
+import TEXAS
+TEXAS.install_cmdstan()      # installs the tested version, verifies, and reports READY
+```
+
+Or from any shell (PowerShell, CMD, bash, zsh):
 
 ```bash
-export CMDSTAN=~/.cmdstan/cmdstan-2.36.0
+texas-install-cmdstan        # add --version X.Y.Z or --overwrite as needed
 ```
+
+This installs the version TEXAS is tested against into `~/.cmdstan/`, points TEXAS at it,
+runs the [`texas-doctor`](#verify-the-whole-toolchain) check, and — unlike a bare
+`cmdstanpy.install_cmdstan()` — **repairs a broken/partial install in place** (see
+[Troubleshooting](troubleshooting.md#cmdstan-directory-exists-but-the-compiler-binaries-are-missing-or-unusable)).
+It is a no-op if a working CmdStan already resolves, and it steps aside for conda-managed
+installs. On Windows it also installs the RTools C++ compiler as part of the call. TEXAS
+never installs CmdStan automatically — you always call this yourself.
+
+The manual routes below (`cmdstanpy.install_cmdstan()`, conda-forge `cmdstan`) remain fully
+supported; use them if you prefer to manage the version yourself.
+
+#### Where CmdStan lives
+
+| Install route | CmdStan location | `CMDSTAN` set for you? |
+|---|---|---|
+| Docker / conda-lock / conda `cmdstan` | inside the conda env (`$CONDA_PREFIX/…`) | ✅ by the env's activation script |
+| `cmdstanpy.install_cmdstan()` | `~/.cmdstan/cmdstan-<version>/` (Windows: `C:\Users\<you>\.cmdstan\…`) | ❌ discovered by TEXAS, but you can set it |
+| Manual download | wherever you unpacked it | ❌ set `CMDSTAN` yourself |
+
+#### How TEXAS discovers it
+
+`TEXAS.utils.paths.find_cmdstan()` searches, in order, and stops at the first directory
+that contains a runnable `bin/stanc` (`stanc.exe` on Windows):
+
+| Priority | Location | Typical source |
+|---|---|---|
+| 1 | `CMDSTAN` environment variable | conda activation, or set manually |
+| 2 | `$CONDA_PREFIX/bin/cmdstan` | interactively-activated conda/mamba env |
+| 3 | `<python prefix>/bin/cmdstan` | Docker/mamba where PATH was set but no activation script ran |
+| 4 | highest `cmdstan-*` in `/opt/cmdstan/`, `~/.cmdstan/`, `/usr/local/cmdstan/` | `install_cmdstan()` default (`~/.cmdstan/`) |
+| 5 | whatever `cmdstanpy` is already configured to use | prior `set_cmdstan_path()` |
+
+`set_cmdstan_path()` is always called on the winning path so cmdstanpy stays consistent.
+Any version **≥ 2.23.0** is accepted (2.23.0 introduced `reduce_sum`); across the
+well-known directories the **highest** installed version wins. If `CMDSTAN` is set but its
+`bin/stanc` is missing or unusable, TEXAS emits a `UserWarning` and continues down the
+list. If nothing is found, a `RuntimeError` is raised with install instructions.
+
+#### Setting `CMDSTAN` manually
+
+Use this to pin a specific install (e.g. the one `install_cmdstan()` created) instead of
+whatever conda manages. Set it **before** importing TEXAS.
+
+=== "PowerShell (Windows)"
+
+    ```powershell
+    # current session
+    $env:CMDSTAN = "$HOME\.cmdstan\cmdstan-2.36.0"
+    # persist across sessions
+    setx CMDSTAN "$HOME\.cmdstan\cmdstan-2.36.0"   # reopen the terminal to pick it up
+    # confirm
+    echo $env:CMDSTAN
+    ```
+
+=== "bash / zsh (Linux, macOS, WSL2)"
+
+    ```bash
+    # current session
+    export CMDSTAN=~/.cmdstan/cmdstan-2.36.0
+    # persist: add the same line to ~/.bashrc or ~/.zshrc
+    # confirm
+    echo "$CMDSTAN"
+    ```
+
+=== "CMD / Anaconda Prompt (Windows)"
+
+    ```cmd
+    set CMDSTAN=%USERPROFILE%\.cmdstan\cmdstan-2.36.0
+    echo %CMDSTAN%
+    ```
+
+#### Verify the whole toolchain
+
+One command checks cmdstanpy, the CmdStan path/version, a C++ compiler, and the cache
+directories — and tells you exactly what is missing. It runs on every platform and shell
+(PowerShell, CMD, bash, zsh):
+
+```bash
+texas-doctor            # or:  python -c "import TEXAS; TEXAS.doctor()"
+```
+
+A healthy machine prints `Stan sampling: READY`. If not, the report names the failure —
+including the case where `CMDSTAN` points at a directory whose `bin/stanc` was never built
+— and prints the exact fix for your platform. See
+[Troubleshooting → CmdStan](troubleshooting.md#cmdstan-not-found) for the failure modes.
 
 ---
 
@@ -433,11 +530,10 @@ pip install -e .          # editable install — required for development
 
 > **Always use `pip install -e .`** (editable mode). A plain `pip install .` or `pip install texas-psm` puts a static copy in site-packages: `STAN_MODELS_DIR` will point there (no pre-compiled binaries), and any local code changes will be silently ignored by the running kernel. After cloning, or any time you find the wrong package version is active, re-run `pip install -e .` and restart your Jupyter kernel.
 
-The conda environment sets `CMDSTAN` automatically to the bundled CmdStan. If you installed CmdStan manually via `cmdstanpy.install_cmdstan()` and want to use that version instead:
-
-```bash
-export CMDSTAN=~/.cmdstan/cmdstan-2.36.0
-```
+The conda environment sets `CMDSTAN` automatically to the bundled CmdStan. To use a
+different install (e.g. one from `cmdstanpy.install_cmdstan()`), set `CMDSTAN` yourself —
+see [Setting `CMDSTAN` manually](#setting-cmdstan-manually) for PowerShell / bash / CMD
+syntax — then run `texas-doctor` to confirm it resolved.
 
 ---
 
@@ -463,8 +559,13 @@ cd TEXAS
 
 ### 2. CmdStan + environment check
 
-Install CmdStan (Options A/B bundle it; for pip/uv see [Option C](#option-c-pip-install-python-users)),
-then verify everything at once:
+Install CmdStan — Options A/B bundle it; pip/uv users get it in one call:
+
+```bash
+texas-install-cmdstan     # or, in Python: TEXAS.install_cmdstan()
+```
+
+Then verify everything at once:
 
 ```bash
 texas-doctor      # or: python -c "import TEXAS; TEXAS.doctor()"

@@ -14,6 +14,7 @@ Also exposed as the ``texas-doctor`` console script.
 """
 from __future__ import annotations
 
+import os
 import platform
 import shutil
 import sys
@@ -31,6 +32,39 @@ def _cmdstanpy_version() -> str | None:
         return None
 
 
+def _cmdstan_diagnosis() -> list[str]:
+    """Explain *why* CmdStan was not discovered.
+
+    Covers the common "the directory exists but the toolchain is missing or
+    unusable" failures that a bare "not found" message hides: ``CMDSTAN`` set to
+    a non-existent path, set to a real directory whose ``bin/stanc`` is missing
+    (never built), or a ``stanc`` that exists but is not executable.
+    """
+    stanc = "stanc.exe" if os.name == "nt" else "stanc"
+    notes: list[str] = []
+
+    def _probe(label: str, root: Path) -> None:
+        binp = root / "bin" / stanc
+        if not root.is_dir():
+            notes.append(f"{label} -> '{root}' does not exist.")
+        elif not binp.exists():
+            notes.append(
+                f"{label} -> '{root}' exists but '{binp.relative_to(root)}' is "
+                "missing: the CmdStan C++ toolchain was never built there. "
+                "Rebuild it (see below) or point CMDSTAN elsewhere."
+            )
+        elif not os.access(binp, os.X_OK):
+            notes.append(
+                f"{label} -> '{binp}' exists but is not executable "
+                "(check file permissions / that it is not a partial download)."
+            )
+
+    env = os.environ.get("CMDSTAN")
+    if env:
+        _probe("CMDSTAN env var", Path(env))
+    return notes
+
+
 def _cmdstan_info() -> dict:
     """Locate CmdStan via the TEXAS safeguard and read its version."""
     info: dict = {
@@ -38,12 +72,15 @@ def _cmdstan_info() -> dict:
         "path": None,
         "version": None,
         "recommended": RECOMMENDED_CMDSTAN_VERSION,
+        "env": os.environ.get("CMDSTAN"),
+        "notes": [],
     }
     try:
         from .paths import find_cmdstan
 
         path = find_cmdstan()
     except Exception:
+        info["notes"] = _cmdstan_diagnosis()
         return info
 
     info["found"] = True
@@ -100,8 +137,25 @@ def check_environment() -> dict:
     return report
 
 
-def _fmt(ok: bool) -> str:
-    return "✓" if ok else "✗"  # ✓ / ✗
+def _unicode_ok() -> bool:
+    """True if stdout can encode the check/cross glyphs.
+
+    Windows consoles default to cp1252, which cannot encode ``✓``/``✗`` and
+    would raise ``UnicodeEncodeError`` on print. Fall back to ASCII markers
+    there so ``texas-doctor`` runs in PowerShell, CMD, and Anaconda Prompt.
+    """
+    enc = getattr(sys.stdout, "encoding", None) or ""
+    try:
+        "✓✗".encode(enc)
+        return True
+    except (LookupError, UnicodeEncodeError):
+        return False
+
+
+def _fmt(ok: bool, unicode: bool = True) -> str:
+    if unicode:
+        return "✓" if ok else "✗"
+    return "OK " if ok else "X  "
 
 
 def doctor(verbose: bool = True) -> dict:
@@ -120,17 +174,18 @@ def doctor(verbose: bool = True) -> dict:
     cp = r["cmdstanpy"]
     cs = r["cmdstan"]
     co = r["compiler"]
+    uni = _unicode_ok()
 
     lines = [
         "TEXAS environment check",
         "=" * 40,
         f"  TEXAS               {r['texas_version']}",
         f"  Python              {r['python_version']}  ({r['platform']})",
-        f"  {_fmt(cp['installed'])} cmdstanpy         "
+        f"  {_fmt(cp['installed'], uni)} cmdstanpy         "
         f"{cp['version'] or 'not installed (pip install cmdstanpy)'}",
-        f"  {_fmt(cs['found'])} CmdStan           "
+        f"  {_fmt(cs['found'], uni)} CmdStan           "
         + (f"{cs['version'] or '?'}  @ {cs['path']}" if cs["found"] else "not found"),
-        f"  {_fmt(co['found'])} C++ compiler      "
+        f"  {_fmt(co['found'], uni)} C++ compiler      "
         + (
             ", ".join(t for t, p in co["which"].items() if p)
             if co["found"]
@@ -143,18 +198,38 @@ def doctor(verbose: bool = True) -> dict:
     ]
 
     if r["sampling_ready"]:
-        lines.append("  Stan sampling: READY ✓")
+        lines.append(f"  Stan sampling: READY {_fmt(True, uni)}")
     else:
-        lines.append("  Stan sampling: NOT READY ✗")
+        lines.append(f"  Stan sampling: NOT READY {_fmt(False, uni)}")
         if not cs["found"]:
+            # Surface *why* discovery failed (e.g. CMDSTAN points at a directory
+            # whose toolchain was never built) before the generic install hint.
+            for note in cs.get("notes", []):
+                lines.append(f"    ! {note}")
             lines.append(
-                "    Install CmdStan:  python -c \"import cmdstanpy; "
-                f"cmdstanpy.install_cmdstan(version='{cs['recommended']}')\""
+                "    Install CmdStan:  TEXAS.install_cmdstan()   "
+                "(one call; repairs a broken install too)"
+            )
+            lines.append(
+                f"      -> installs CmdStan {cs['recommended']} to ~/.cmdstan/; "
+                "conda users instead: conda install -c conda-forge "
+                f"cmdstan={cs['recommended']}"
+            )
+            lines.append("    Point TEXAS at an existing install:")
+            lines.append(
+                "      POSIX (bash/zsh):  export "
+                f"CMDSTAN=~/.cmdstan/cmdstan-{cs['recommended']}"
+            )
+            lines.append(
+                "      PowerShell:        $env:CMDSTAN="
+                f"\"$HOME\\.cmdstan\\cmdstan-{cs['recommended']}\""
             )
         if not co["found"]:
             lines.append(
                 "    Install a compiler:  (Linux) apt install build-essential  |  "
-                "(macOS) xcode-select --install  |  (Windows) RTools"
+                "(macOS) xcode-select --install  |  (Windows) "
+                "python -m cmdstanpy.install_cxx_toolchain "
+                "or conda-forge cmdstan (pre-built)"
             )
     print("\n".join(lines))
     return r
