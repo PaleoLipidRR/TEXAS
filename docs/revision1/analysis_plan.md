@@ -123,9 +123,24 @@ out-of-sample, spatially-independent skill.
 `predict_T_from_proxyObs` per held-out site vs each fold's refit posterior → feed
 its temperature draws to `heldout_scores`. Left to the batch driver.
 
-**Still TODO:** `scripts/revision1/run_crossval.py` batch driver (loads real
-coretop CSV + culmeso posterior; hours-scale — needs Zenodo training data) and
-`notebooks/revision1/R4_spatial_crossval.ipynb` (reviewer-facing figure).
+**Batch driver DONE** (`scripts/revision1/run_crossval.py`): argparse CLI over
+`run_spatial_crossval`, coretop-subset + fold-assign + `CrossvalArrays` build, all
+column names overridable (`--*-col`, Group-D-aligned), ASCII-safe output. Defaults
+to the light univ_priorApprox model; `--stan-file …_eiv --predictors both
+--r2-thermal` opts into the headline multivariate EIV model. **Verified end-to-end**
+on synthetic coretop + the real Zenodo culmeso posterior: one fold refit
+(compile→sample→predict→score) runs green.
+
+> **⚠ Windows PATH caveat (verified 2026-07-15):** a real Stan compile from the
+> `.venv` picks up Strawberry Perl's g++ 13.2.0 and fails at link (`collect2: ld
+> returned 1`) **even though `texas-doctor` says READY**. Prepend RTools40 first:
+> `export PATH="~/.cmdstan/RTools40/mingw64/bin:~/.cmdstan/RTools40/usr/bin:$PATH"`.
+> Applies to the eventual full CV run and any Group B/C refit from this venv.
+
+**Still TODO:** run the real CV once the coretop CSV is un-LFS'd/on Zenodo
+(`ds_gridded_screened_global_compilation_finalized.csv` is still a pointer);
+inverse (proxy→T) held-out skill; `notebooks/revision1/R4_spatial_crossval.ipynb`
+(reviewer-facing figure).
 
 ### Group D — API usability: variable-name-agnostic functions — **TODO**
 
