@@ -109,3 +109,7 @@ RESUME.md
 
 # uv lockfile (not tracked — conda is the canonical env; see docs)
 uv.lock
+
+# Revision-1 analysis outputs (regenerable; .nc/.csv would otherwise hit the
+# over-budget Git LFS filters). Keep results local; commit only the code.
+data/revision1/
