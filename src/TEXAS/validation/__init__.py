@@ -6,12 +6,24 @@ the review triage:
 - ``metrics`` / ``intervals`` (Group A): report diagnostics, noise terms, and
   R2/RMSE **credible intervals** from existing forward posteriors (no refit).
 - ``io``: persist every result to disk as NetCDF/CSV with provenance.
+- ``crossval`` (Group C): spatially-blocked cross-validation — out-of-sample
+  R2/RMSE credible intervals from leave-one-block-out refits.
 
-Cross-validation (Group C) and sensitivity refits (Group B) build on these and
-are added as ``crossval`` / ``sensitivity``.
+Sensitivity refits (Group B) build on these and are added as ``sensitivity``.
 """
 from __future__ import annotations
 
+from .crossval import (
+    CrossvalArrays,
+    SpatialFold,
+    assign_block_folds,
+    assign_ocean_basin_folds,
+    crossval_fold,
+    fold_score_table,
+    heldout_scores,
+    make_folds,
+    run_spatial_crossval,
+)
 from .intervals import LEVELS, credible_interval, format_ci
 from .io import list_results, load_result, results_root, save_result
 from .metrics import (
@@ -37,4 +49,14 @@ __all__ = [
     "CALIBRATION_METRICS",
     "OBSERVATION_NOISE",
     "POOLING_NOISE",
+    # Group C — spatially-blocked cross-validation
+    "SpatialFold",
+    "CrossvalArrays",
+    "assign_block_folds",
+    "assign_ocean_basin_folds",
+    "make_folds",
+    "heldout_scores",
+    "fold_score_table",
+    "run_spatial_crossval",
+    "crossval_fold",
 ]

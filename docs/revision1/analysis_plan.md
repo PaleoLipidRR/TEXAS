@@ -24,7 +24,7 @@ src/TEXAS/validation/
   io.py         save_result/load_result/list_results — .nc + .csv with provenance   [DONE]
   intervals.py  credible_interval() (68/90/95%), "credible" labeling                 [DONE]
   metrics.py    summarize_calibration_metrics/_noise_terms/diagnostics_table         [DONE]
-  crossval.py   spatially-blocked k-fold: partition → refit → score held-out         [TODO — Group C]
+  crossval.py   spatially-blocked k-fold: partition → refit → score held-out         [DONE — core+tests]
   sensitivity.py forward refit under RI / screening / retention variants             [TODO — Group B]
 scripts/revision1/  run_crossval.py · run_sensitivity_refits.py                      [TODO]
 notebooks/revision1/
@@ -98,16 +98,34 @@ predictors={'gdgt23ratio':…, 'no3':…})` (`predict.py:132`; Stan via `stan/in
 
 ### Group C — spatially-blocked cross-validation — **TODO (highest reviewer weight, all new)**
 
-No CV/LOO machinery exists. Build in `validation/crossval.py`:
-1. Partition coretop rows by geography — reuse `plotting/residual_maps.py` `lons/lats`,
-   `_region_metrics` (`:732-748`), `_regionmask_mask` (`:735`).
-2. Per fold: `build_fwd_data(train)` → `get_posterior` → predict held-out via
-   `predict_proxy_from_T` (forward, `predict.py:52`) **and** `predict_T_from_proxyObs`
-   (inverse, `predict.py:132`).
-3. Aggregate held-out R²/RMSE with credible intervals (reuse `validation.metrics`).
-
 Backs R2/R3's ask to soften/support "outperforms all existing calibrations" with
 out-of-sample, spatially-independent skill.
+
+**Built (`validation/crossval.py`, 15 tests total in `test_validation.py`):**
+1. **Partition** — `assign_block_folds(lons, lats, block_deg=20, n_folds=5, seed=)`
+   deals whole equal-area lon/lat blocks into k folds (pure NumPy, no deps; keeps
+   spatial blocks intact so held-out ⟂ training). `assign_ocean_basin_folds` =
+   leave-one-basin-out via the same regionmask basins as `residual_maps.py:55`.
+   `make_folds(fold_ids, min_test=2)` → leave-one-fold-out `SpatialFold` splits.
+2. **Refit + predict** — `crossval_fold(fold, CrossvalArrays, stan_file, temptype,
+   proxy_name, culmeso_posterior, R2_thermal, …)` slices train rows →
+   `build_fwd_data` → `get_posterior` → `predict_proxy_from_T(return_full=True)`
+   on held-out true T. Array-based inputs (no hardcoded column names → aligns w/
+   Group D).
+3. **Score** — `heldout_scores(observed, predicted_draws, level=0.95)` = per-draw
+   R²/RMSE **credible intervals** (out-of-sample analogue of Group A);
+   `fold_score_table(...)` → tidy per-fold + POOLED table.
+4. **Driver** — `run_spatial_crossval(...)` loops folds with per-fold
+   checkpointing (resumable) + persists via `validation.io`.
+
+**Forward held-out skill only** so far (T→proxy — clean per-draw metric). Inverse
+(proxy→T) held-out skill is the invT-heavy path (R1/R2 want both, A5): run
+`predict_T_from_proxyObs` per held-out site vs each fold's refit posterior → feed
+its temperature draws to `heldout_scores`. Left to the batch driver.
+
+**Still TODO:** `scripts/revision1/run_crossval.py` batch driver (loads real
+coretop CSV + culmeso posterior; hours-scale — needs Zenodo training data) and
+`notebooks/revision1/R4_spatial_crossval.ipynb` (reviewer-facing figure).
 
 ### Group D — API usability: variable-name-agnostic functions — **TODO**
 
@@ -170,9 +188,15 @@ Zenodo posteriors confirmed downloaded 2026-07-15: `…_culmeso_cultureT`,
 
 - ✅ **Group A** built, tested (8 passing, synthetic data), ruff-clean, run against real
   Zenodo posteriors; results in `data/revision1/groupA/`.
+- ✅ **Group C core** (`validation/crossval.py`) built + tested — 15 tests total pass in
+  `test_validation.py` (7 new: block folds, LOO splits, held-out CI scoring, table).
+  Pure fold-assignment + scoring covered; Stan orchestrator (`crossval_fold` /
+  `run_spatial_crossval`) is thin, lazily-imported, checkpointed. Forward held-out skill
+  only; inverse held-out is the invT-heavy TODO.
 - ✅ Fixed `utils/download.py` Windows cp1252 crash (non-ASCII in `print`).
-- ⏭ **Next: Group C** (`validation/crossval.py` + `R4` notebook), then Group B refits,
-  then B5/B6 (blocked on LFS/Zenodo data gap above).
+- ⏭ **Next for Group C:** `scripts/revision1/run_crossval.py` batch driver + `R4` notebook
+  (needs Zenodo coretop CSV + culmeso posterior; hours-scale refits).
+- ⏭ Then Group B refits, then B5/B6 (blocked on LFS/Zenodo data gap above).
 - ⏭ **Group D** (variable-name-agnostic API) is independent of Stan/data — can be done
   anytime, in parallel, and unblocks the user's use of TEXAS on other datasets.
 
