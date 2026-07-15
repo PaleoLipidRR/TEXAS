@@ -94,12 +94,41 @@ def _cmdstan_info() -> dict:
 
 
 def _compiler_info() -> dict:
-    """A working C++ compiler + make is required to compile Stan models."""
-    tools = ["make"] + (["cl"] if sys.platform == "win32" else ["g++", "clang++"])
-    found = {t: shutil.which(t) for t in tools}
-    have_make = found.get("make") is not None
-    have_cxx = any(found.get(t) for t in tools if t != "make")
-    return {"found": have_make and have_cxx, "which": found}
+    """A working C++ compiler + make is required to compile Stan models.
+
+    On Windows the Stan toolchain is normally cmdstanpy-managed RTools (mingw
+    ``g++`` + ``mingw32-make``) living under ``~/.cmdstan/RTools*``. cmdstanpy
+    prepends it to PATH only at compile time, not persistently — so a plain PATH
+    scan reports "no compiler" even when models compile fine. Look inside the
+    RTools install (and on PATH) so the report matches actual capability. On
+    POSIX the system ``g++``/``clang++`` + ``make`` on PATH is authoritative.
+    """
+    search_dirs: list[Path] = []
+    if sys.platform == "win32":
+        cmdstan_home = Path(
+            os.environ.get("CMDSTAN_HOME", str(Path.home() / ".cmdstan"))
+        )
+        for rt in sorted(cmdstan_home.glob("RTools*"), reverse=True):
+            for sub in ("mingw64/bin", "mingw32/bin", "usr/bin"):
+                d = rt / sub
+                if d.is_dir():
+                    search_dirs.append(d)
+
+    def _find(name: str) -> str | None:
+        exe = f"{name}.exe" if sys.platform == "win32" else name
+        for d in search_dirs:
+            cand = d / exe
+            if cand.exists():
+                return str(cand)
+        return shutil.which(name)
+
+    cxx_names = ["g++", "clang++", "cl"] if sys.platform == "win32" else ["g++", "clang++"]
+    make_names = ["mingw32-make", "make", "nmake"] if sys.platform == "win32" else ["make"]
+
+    found = {n: _find(n) for n in cxx_names + make_names}
+    have_cxx = any(found.get(n) for n in cxx_names)
+    have_make = any(found.get(n) for n in make_names)
+    return {"found": have_cxx and have_make, "which": found}
 
 
 def check_environment() -> dict:
