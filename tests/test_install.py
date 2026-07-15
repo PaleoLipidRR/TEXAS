@@ -8,8 +8,6 @@ exists but is a broken/partial install.
 import sys
 from pathlib import Path
 
-import pytest
-
 import TEXAS
 from TEXAS.constants import RECOMMENDED_CMDSTAN_VERSION
 from TEXAS.utils import install as install_mod
