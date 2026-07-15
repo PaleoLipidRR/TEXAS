@@ -109,6 +109,23 @@ No CV/LOO machinery exists. Build in `validation/crossval.py`:
 Backs R2/R3's ask to soften/support "outperforms all existing calibrations" with
 out-of-sample, spatially-independent skill.
 
+### Group D — API usability: variable-name-agnostic functions — **TODO**
+
+Author requirement, and it answers **R1's** major usability comment ("what data / what
+layout is required to use this model"). Public functions must not assume DataFrame
+column names — users hit `KeyError` for `scaledRI_cren3` (and `TEX86`, `gdgt23ratio`,
+`no3`) when applying TEXAS to differently-named data.
+
+**Approach:** accept explicit column-name params (`proxy_col=`, `tex86_col=`, …) or
+arrays/Series directly, instead of indexing hardcoded literals. `compute_scaledRI` and
+the top-level `predict_*` already take arrays — gaps are mostly in screening, builders,
+and posterior-name/suffix plumbing.
+
+Hardcoded-name sites (2026-07-15 grep for `scaledRI_cren3`/`TEX86`/`no3`/`gdgt23ratio`):
+`data/screening.py`, `data/builder.py`, `predict.py`, `stan/sampler.py`, `stan/io.py`,
+`stan/invT.py`, `plotting/residual_maps.py`. Add regression tests with a
+deliberately-renamed input DataFrame.
+
 ### Text-only (no rerun — do NOT scope into the analysis workflow)
 PSM framing (R2), "correction"→"conditional" wording (R2), Ishii/Bijl citations (R1),
 streamline Sections 4–6 to SI (R3), abbreviation definitions (R3), title wording (R2).
@@ -156,6 +173,8 @@ Zenodo posteriors confirmed downloaded 2026-07-15: `…_culmeso_cultureT`,
 - ✅ Fixed `utils/download.py` Windows cp1252 crash (non-ASCII in `print`).
 - ⏭ **Next: Group C** (`validation/crossval.py` + `R4` notebook), then Group B refits,
   then B5/B6 (blocked on LFS/Zenodo data gap above).
+- ⏭ **Group D** (variable-name-agnostic API) is independent of Stan/data — can be done
+  anytime, in parallel, and unblocks the user's use of TEXAS on other datasets.
 
 **Open question for the author:** Krapp's "σ²_culmeso" — *observation* noise
 (`sigma_proxyObs_cul/_meso`) or *hierarchical pooling* variance (`sigma_{t0,k,b,v}_culmeso`)?
