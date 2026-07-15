@@ -66,8 +66,9 @@ from .utils.download import (
 # ─── Cache configuration ─────────────────────────────────────────────────
 from .utils.paths import set_cache_dir
 
-# ─── Environment diagnostic ──────────────────────────────────────────────
+# ─── Environment diagnostic + CmdStan installer ─────────────────────────
 from .utils.doctor import doctor
+from .utils.install import install_cmdstan
 from .constants import RECOMMENDED_CMDSTAN_VERSION
 
 # ─── Regridding ──────────────────────────────────────────────────────────
@@ -132,8 +133,9 @@ __all__ = [
     "POSTERIOR_REGISTRY",
     # cache configuration
     "set_cache_dir",
-    # environment diagnostic
+    # environment diagnostic + CmdStan installer
     "doctor",
+    "install_cmdstan",
     "RECOMMENDED_CMDSTAN_VERSION",
     # regridding
     "regrid_curvilinear_to_latlon",

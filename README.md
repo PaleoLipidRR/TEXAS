@@ -40,7 +40,7 @@ pip install texas-psm
 # or, with uv:  uv add texas-psm
 ```
 
-> **Inverse reconstruction runs Stan**, so pip/uv users need CmdStan installed once (`python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.36.0')"`). Docker and conda-lock bundle it. The forward `predict_proxy_from_T` is pure Python and needs no CmdStan. See [Installation](docs/installation.md#cmdstan-discovery).
+> **Inverse reconstruction runs Stan**, so pip/uv users need CmdStan installed once — run `TEXAS.install_cmdstan()` (or the `texas-install-cmdstan` command), which installs the tested version and verifies the toolchain. Docker and conda-lock bundle it. The forward `predict_proxy_from_T` is pure Python and needs no CmdStan. See [Installation](docs/installation.md#cmdstan-install-discovery-and-verification).
 
 ```python
 import TEXAS
