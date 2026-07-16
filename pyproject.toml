@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "texas-psm"
-version = "0.2.5"
+version = "0.2.6"
 authors = [{ name = "Ronnakrit Rattanasriampaipong", email = "rattanasriampaipong.r@gmail.com" }]
 description = "Bayesian GDGT–temperature utilities"
 readme = "README.md"
@@ -18,7 +18,7 @@ classifiers = [
 dependencies = [
   "numpy>=1.18",
   "xarray>=0.16",
-  "netCDF4>=1.6",   # xarray netCDF backend; required to read/write posterior .nc files
+  "netcdf4","h5netcdf",   # xarray netCDF backend; required to read/write posterior .nc files
   "cmdstanpy>=1.0",
   "typing-extensions>=3.7.4",
   "scipy>=1.7",
