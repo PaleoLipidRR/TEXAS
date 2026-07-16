@@ -214,7 +214,7 @@ def get_invT_posterior(
         print(f"🔧 Automatically selected Stan file: {stan_file}")
 
     _stan_path = STAN_MODELS_DIR / stan_file
-    _uses_reduce_sum = _stan_path.exists() and "reduce_sum" in _stan_path.read_text()
+    _uses_reduce_sum = _stan_path.exists() and "reduce_sum" in _stan_path.read_text(encoding="utf-8")
 
     # Auto-detect CPU settings now that we know whether the model can use threads.
     _auto = suggest_stan_sampling_kwargs()

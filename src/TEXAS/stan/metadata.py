@@ -140,7 +140,7 @@ def extract_priors_from_stan(
     in_model = False
     path = Path(stan_path)
 
-    with path.open() as fh:
+    with path.open(encoding="utf-8") as fh:
         for line in fh:
             txt = line.strip()
             if txt.startswith("model"):
