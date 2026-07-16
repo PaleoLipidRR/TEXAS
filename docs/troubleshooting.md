@@ -174,3 +174,51 @@ Then re-run `texas-doctor` — it should print `Stan sampling: READY`.
 - **Windows:** `python -m cmdstanpy.install_cxx_toolchain` (installs the RTools
   MinGW toolchain), or use the conda-forge `cmdstan` package, which ships a pre-built
   compiler.
+
+---
+
+## Stan compilation fails at *linking* with `undefined reference to std::istream::seekg` (Windows)
+
+**Symptom:** CmdStan is found and the compiler probe passes (`texas-doctor` even
+prints `Stan sampling: READY`), but the first model build fails at the **link**
+step:
+
+```
+...\ld.exe: undefined reference to `std::istream::seekg(std::fpos<int>)'
+collect2.exe: error: ld returned 1 exit status
+```
+
+often preceded by `'cut' is not recognized as an internal or external command`.
+
+**Cause:** A *foreign* MinGW `g++` is first on `PATH` — most commonly **Strawberry
+Perl's** `C:\Strawberry\c\bin\g++` (added by many scientific-Python installs), or a
+standalone MSYS2/MinGW. CmdStan ships prebuilt objects compiled with the R-project
+`g++` (RTools); linking them with a different MinGW mixes incompatible `libstdc++`
+ABIs, so the `seekg(fpos<int>)` symbol never resolves. `texas-doctor` reported
+READY because it probes *inside* the RTools install, while the actual build uses
+whatever `g++` PATH resolves first.
+
+**Fix — automatic.** TEXAS prepends the RTools toolchain to `PATH` immediately
+before every Stan compile (`utils.paths.ensure_cxx_toolchain`, called from
+`StanCompiler`), so the correct `g++` wins regardless of what else is on PATH. No action needed as long as RTools exists (installed by
+`TEXAS.install_cmdstan()` on Windows, or `python -m cmdstanpy.install_cxx_toolchain`).
+`texas-doctor` now reports the override explicitly:
+
+```
+  ✓ C++ toolchain (Windows): RTools g++ activated for CmdStan
+      using     C:\Users\<you>\.cmdstan\RTools40\mingw64\bin\g++.EXE
+      overrode  C:\Strawberry\c\bin\g++.EXE  (foreign g++ that fails CmdStan's link step)
+```
+
+**If you still hit it:** you have no RTools install for TEXAS to prefer. Install it
+and re-run:
+
+```python
+import TEXAS
+TEXAS.install_cmdstan()     # installs RTools on Windows
+TEXAS.doctor()              # should now show the toolchain override, or a clean RTools g++
+```
+
+If `texas-doctor` instead prints `✗ C++ toolchain (Windows): a non-RTools g++ is on
+PATH and no RTools install was found`, that is the exact state to fix — install
+RTools as above (or the conda-forge `cmdstan`, which ships its own compiler).
