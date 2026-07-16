@@ -1,6 +1,5 @@
 # TEXAS/stan/compiler.py
 
-import shutil
 import subprocess
 import sys
 import warnings
@@ -70,12 +69,29 @@ class StanCompiler:
     def _build_path(self, stan_source: Path) -> Path:
         """Return the path under STAN_BUILD_DIR that we compile from.
 
-        Copies the source file if the build copy is absent or stale.
+        Writes an ASCII-safe copy of the source if the build copy is absent,
+        stale, or still contains non-ASCII bytes. cmdstanpy opens the model
+        file with the process default encoding (cp1252 on Windows), so a copy
+        carrying non-ASCII comment characters (Greek letters, subscripts,
+        box-drawing headers, em-dashes, …) makes ``CmdStanModel`` raise
+        ``UnicodeDecodeError: 'charmap' codec can't decode byte 0x90``. All
+        non-ASCII in the .stan sources lives in comments / string literals, so
+        replacing it (``?``) leaves the compiled program identical. Sources on
+        disk keep their Unicode documentation. The non-ASCII check also
+        upgrades stale UTF-8 copies left by older TEXAS versions.
         """
         dest = self.build_dir / stan_source.name
         src_mtime = stan_source.stat().st_mtime
-        if not dest.exists() or dest.stat().st_mtime < src_mtime:
-            shutil.copy2(stan_source, dest)
+        stale = (not dest.exists()) or dest.stat().st_mtime < src_mtime
+        if not stale:
+            try:
+                stale = any(b > 127 for b in dest.read_bytes())
+            except OSError:
+                stale = True
+        if stale:
+            text = stan_source.read_text(encoding="utf-8")
+            ascii_text = text.encode("ascii", "replace").decode("ascii")
+            dest.write_text(ascii_text, encoding="ascii")
         return dest
 
     # ── Public API ──────────────────────────────────────────────────────────
