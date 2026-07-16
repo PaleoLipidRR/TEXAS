@@ -108,6 +108,57 @@ def find_cmdstan(min_version: str = "2.23.0") -> Path:
         "  Diagnose : texas-doctor  (or TEXAS.doctor())"
     )
 
+def ensure_cxx_toolchain(install_dir: "str | Path | None" = None) -> tuple[str, ...]:
+    """Windows only: put the RTools C++ toolchain first on PATH for CmdStan compiles.
+
+    CmdStan ships prebuilt objects (``src/cmdstan/main.o``) compiled with the
+    R-project mingw-w64 ``g++`` (RTools).  If an *unrelated* MinGW ``g++`` is
+    first on ``PATH`` — most commonly Strawberry Perl's
+    ``C:\\Strawberry\\c\\bin\\g++`` (which many scientific-Python installs put on
+    PATH) — CmdStan links against an incompatible ``libstdc++`` and the model
+    build fails at the link step with::
+
+        undefined reference to `std::istream::seekg(std::fpos<int>)'
+        collect2.exe: error: ld returned 1 exit status
+
+    (The same mismatch also surfaces earlier as ``'cut' is not recognized`` when
+    the alien toolchain lacks the Unix helpers RTools provides.)
+
+    This prepends RTools' ``mingw64/bin`` and ``usr/bin`` — via cmdstanpy's own
+    :func:`cmdstanpy.utils.cxx_toolchain_path` — so the correct ``g++`` wins.
+
+    - **No-op** on non-Windows platforms.
+    - **No-op** when no RTools install is found: a machine that already compiles
+      fine (e.g. conda-forge cmdstan, or RTools already first on PATH) is left
+      untouched — we never demote a working compiler.
+    - **Idempotent**: cmdstanpy de-duplicates PATH entries, so repeated calls are
+      safe (this runs before every compile).
+
+    Args:
+        install_dir: Root to search for ``RTools*`` (default: ``CMDSTAN_HOME`` env
+            var, else ``~/.cmdstan``). cmdstanpy also always checks
+            ``~/.cmdstan/RTools40``, ``C:\\RTools40``, ``RTOOLS40_HOME``, and
+            ``CMDSTAN_TOOLCHAIN``.
+
+    Returns:
+        The toolchain directories prepended to PATH, or an empty tuple when
+        nothing was done (non-Windows, or no RTools found).
+    """
+    if os.name != "nt":
+        return ()
+    try:
+        from cmdstanpy.utils import cxx_toolchain_path
+    except Exception:
+        return ()
+    idir = install_dir or os.environ.get("CMDSTAN_HOME") or (Path.home() / ".cmdstan")
+    try:
+        return cxx_toolchain_path(install_dir=str(idir))
+    except Exception:
+        # ValueError("no RTools toolchain installation found") or any probe error:
+        # leave PATH as-is so a non-RTools setup that already works keeps working.
+        return ()
+
+
 def get_repo_root(target_dir_name: str = "TEXAS") -> Path | None:
     cwd = Path.cwd()
     try:

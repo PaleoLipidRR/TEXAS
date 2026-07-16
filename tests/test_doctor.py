@@ -30,10 +30,17 @@ def test_doctor_returns_expected_structure():
         "cmdstanpy",
         "cmdstan",
         "compiler",
+        "toolchain",
         "cache_dir",
         "sampling_ready",
     ):
         assert key in report, f"missing key: {key}"
+    # toolchain sub-structure is always present (applies=False off-Windows)
+    tc = report["toolchain"]
+    for key in ("applies", "path_cxx", "rtools_cxx", "effective_cxx", "shadowed"):
+        assert key in tc, f"missing toolchain key: {key}"
+    assert isinstance(tc["applies"], bool)
+    assert isinstance(tc["shadowed"], bool)
     assert isinstance(report["sampling_ready"], bool)
     assert isinstance(report["cmdstanpy"]["installed"], bool)
     # the report echoes the single-source-of-truth version

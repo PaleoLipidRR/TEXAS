@@ -103,11 +103,22 @@ These are not hosted on the TEXAS Zenodo record — download them separately:
 
 | Dataset | Source | Place in |
 |---------|--------|----------|
+| Ocean-property & gridded core-top intermediates (`ds0*.nc`, `calculated_ocean_properties*.nc`, `gridded_coretop_RI.nc`) | [Rattanasriampaipong et al. 2025, *GRL* — Zenodo](https://doi.org/10.5281/zenodo.14806962) | `data/external/ncfiles/` |
 | WOA23 temperature climatology | [NOAA World Ocean Atlas 2023](https://www.ncei.noaa.gov/products/world-ocean-atlas) | `data/external/` |
 | Zhu et al. 2019 proxy data | [Pangaea](https://doi.org/10.1594/PANGAEA.899208) | `data/external/` |
 | Tierney et al. 2022 proxy data | See manuscript data availability section | `data/external/` |
 
 `data/external/` is gitignored (~310 MB).
+
+> **Note on `data/external/ncfiles/`.** These `.nc` intermediates are tracked
+> in Git LFS, but the repo's LFS budget is exceeded, so `git lfs pull` cannot
+> hydrate them (you'll get 133-byte pointer stubs that fail to open in xarray
+> with `did not find a match in any of xarray's ... IO backends`). Download the
+> `ds0*` / ocean-property files from the **GRL 2025 Zenodo record**
+> ([10.5281/zenodo.14806962](https://doi.org/10.5281/zenodo.14806962)) — the
+> supplement to *"A nutrient effect on the TEX₈₆ paleotemperature proxy"* — and
+> place them in `data/external/ncfiles/`. The Zhu19 / Tierney22 / WOA23 files
+> come from their third-party sources above.
 
 ---
 

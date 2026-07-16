@@ -2,13 +2,40 @@
 
 import shutil
 import subprocess
+import sys
 import warnings
 from pathlib import Path
 from typing import Dict, Optional, Union
 
 from cmdstanpy import CmdStanModel
 
-from ..utils.paths import STAN_MODELS_DIR, STAN_BUILD_DIR
+from ..utils.paths import STAN_MODELS_DIR, STAN_BUILD_DIR, ensure_cxx_toolchain
+
+# Emoji → ASCII fallbacks for consoles that cannot encode them (Windows cp1252
+# PowerShell/CMD raise UnicodeEncodeError on a bare print of these glyphs).
+_EMOJI_ASCII = {
+    "🔧": "[compile]",
+    "✅": "[ok]",
+    "♻️": "[cached]",
+    "🗑️": "[clear]",
+}
+
+
+def _safe_print(msg: str) -> None:
+    """print() that never crashes on a non-UTF-8 console.
+
+    Notebooks (ipykernel) use a UTF-8 stream and show the emoji as-is; a Windows
+    cp1252 terminal would otherwise raise ``UnicodeEncodeError`` mid-compile, so
+    there we substitute ASCII tags and drop anything still unencodable.
+    """
+    enc = getattr(sys.stdout, "encoding", None) or "utf-8"
+    try:
+        msg.encode(enc)
+    except (UnicodeEncodeError, LookupError):
+        for _u, _a in _EMOJI_ASCII.items():
+            msg = msg.replace(_u, _a)
+        msg = msg.encode(enc, "replace").decode(enc, "replace")
+    print(msg)
 
 
 class StanCompiler:
@@ -101,21 +128,27 @@ class StanCompiler:
         # Force recompilation
         if force:
             if cache_key in self.cache:
-                print(f"🗑️  Clearing cached model: {stan_path.name}")
+                _safe_print(f"🗑️  Clearing cached model: {stan_path.name}")
                 del self.cache[cache_key]
             if binary_path.exists():
-                print(f"🗑️  Removing old binary: {binary_path}")
+                _safe_print(f"🗑️  Removing old binary: {binary_path}")
                 binary_path.unlink()
 
         # In-memory cache hit
         if cache_key in self.cache:
-            print(f"♻️  Using cached model: {stan_path.name}")
+            _safe_print(f"♻️  Using cached model: {stan_path.name}")
             return self.cache[cache_key]
 
+        # Windows: ensure the RTools g++ (not e.g. Strawberry Perl's) is first on
+        # PATH before compiling, or the link fails with an incompatible-libstdc++
+        # "undefined reference to std::istream::seekg" error. No-op elsewhere and
+        # when no RTools install exists. See utils.paths.ensure_cxx_toolchain.
+        ensure_cxx_toolchain()
+
         # Compile from the writable build copy
-        print(f"🔧 Compiling Stan model: {stan_path.name}")
-        print(f"   (build dir: {self.build_dir})")
+        _safe_print(f"🔧 Compiling Stan model: {stan_path.name}")
+        _safe_print(f"   (build dir: {self.build_dir})")
         model = CmdStanModel(stan_file=build_path, cpp_options=cpp_options)
         self.cache[cache_key] = model
-        print(f"✅ Compiled: {stan_path.name}")
+        _safe_print(f"✅ Compiled: {stan_path.name}")
         return model
