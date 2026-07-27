@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 // gen_logi_fixed_hier_crtp_multiv.stan
 //
 // PURPOSE: Hierarchical Bayesian forward calibration.
@@ -8,58 +8,58 @@
 //
 // MODEL DESIGN:
 //   Two-group hierarchy: culture+mesocosm (culmeso) data constrain the
-//   SHAPE of the RI–T curve; coretop (crtp) parameters are drawn from
+//   SHAPE of the RI-T curve; coretop (crtp) parameters are drawn from
 //   hierarchical priors centered on the culmeso estimates (partial pooling).
 //   Optional ecology corrections are applied to coretop data only.
 //
-// CALIBRATION CURVE — generalized logistic (Richards, upper asymptote fixed = 1, Q fixed = 1):
-//   RI = b + (1 - b) / (1 + exp(-k · (T - T₀)))^(1/ν)    [Eq. 1]
+// CALIBRATION CURVE - generalized logistic (Richards, upper asymptote fixed = 1, Q fixed = 1):
+//   RI = b + (1 - b) / (1 + exp(-k * (T - T0)))^(1/nu)    [Eq. 1]
 //
 // NON-THERMAL CORRECTIONS (if enabled, coretop only):
-//   RI += β_{G₂/₃} · (gdgt23ratio)                            [Eq. 6]
-//   RI += β_{NO₃}  · log₁₀(NO₃)   [only where 0 < NO₃ < cutoff]  [Eq. 7]
-// ═══════════════════════════════════════════════════════════════════════════════
+//   RI += beta_{G2/3} * (gdgt23ratio)                            [Eq. 6]
+//   RI += beta_{NO3}  * log10(NO3)   [only where 0 < NO3 < cutoff]  [Eq. 7]
+// ===============================================================================
 
 data {
-    // ─── Culture data ─────────────────────────────────────────────────────────
+    // --- Culture data ---------------------------------------------------------
     int<lower=1> N_cul;
-    vector[N_cul] t_cul;           // Known temperature for each culture experiment (°C)
-    vector[N_cul] proxyObs_cul;    // Observed scaled Ring Index (∈ [0,1])
+    vector[N_cul] t_cul;           // Known temperature for each culture experiment (degC)
+    vector[N_cul] proxyObs_cul;    // Observed scaled Ring Index (in [0,1])
 
-    // ─── Mesocosm data ────────────────────────────────────────────────────────
+    // --- Mesocosm data --------------------------------------------------------
     int<lower=1> N_meso;
-    vector[N_meso] t_meso;         // Known temperature for each mesocosm experiment (°C)
+    vector[N_meso] t_meso;         // Known temperature for each mesocosm experiment (degC)
     vector[N_meso] proxyObs_meso;
 
-    // ─── Coretop (sediment) data ──────────────────────────────────────────────
+    // --- Coretop (sediment) data ----------------------------------------------
     int<lower=1> N_crtp;
-    vector[N_crtp] t_crtp;         // Modern instrumental temperature at each site (°C)
+    vector[N_crtp] t_crtp;         // Modern instrumental temperature at each site (degC)
     vector[N_crtp] proxyObs_crtp;  // Observed scaled Ring Index from sediment
 
-    // ─── Optional non-thermal predictors (coretop only) ───────────────────────
+    // --- Optional non-thermal predictors (coretop only) -----------------------
     // Flags (0 or 1) control whether each correction is applied in the model.
     vector[N_crtp] gdgt23ratio_crtp;
     int<lower=0, upper=1> use_gdgt23ratio;
 
-    vector[N_crtp] no3_crtp;       // Nitrate concentration (μmol/L)
+    vector[N_crtp] no3_crtp;       // Nitrate concentration (umol/L)
     int<lower=0, upper=1> use_no3;
-    real no3_cutoff;               // Threshold: NO₃ correction applied below this value
+    real no3_cutoff;               // Threshold: NO3 correction applied below this value
 }
 
 parameters {
-    // ─── Generalized-logistic curve parameters (culture + mesocosm) ───────────
-    // These describe the shape of the RI–T relationship.
-    // Eq. 1: RI = b + (1 - b) / (1 + exp(-k · (T - T₀)))^(1/ν)   [Q fixed = 1]
+    // --- Generalized-logistic curve parameters (culture + mesocosm) -----------
+    // These describe the shape of the RI-T relationship.
+    // Eq. 1: RI = b + (1 - b) / (1 + exp(-k * (T - T0)))^(1/nu)   [Q fixed = 1]
     //
-    // NOTE: T₀ is NOT the inflection point of the curve in general —
-    //   it is the reference temperature where the logistic term equals 1/(1+1)^(1/ν).
-    //   ν shifts and skews the inflection away from T₀.
-    real<lower=10, upper=50>  t0_culmeso;  // T₀: reference (center) temperature (°C)
-    real<lower=0, upper=0.5>  k_culmeso;   // k: steepness of the RI–T slope
+    // NOTE: T0 is NOT the inflection point of the curve in general -
+    //   it is the reference temperature where the logistic term equals 1/(1+1)^(1/nu).
+    //   nu shifts and skews the inflection away from T0.
+    real<lower=10, upper=50>  t0_culmeso;  // T0: reference (center) temperature (degC)
+    real<lower=0, upper=0.5>  k_culmeso;   // k: steepness of the RI-T slope
     real<lower=0, upper=1>    b_culmeso;   // b: lower asymptote (RI at very cold T)
-    real<lower=0.1, upper=10> v_culmeso;   // ν: shape; ν=1 → symmetric logistic
+    real<lower=0.1, upper=10> v_culmeso;   // nu: shape; nu=1 -> symmetric logistic
 
-    // ─── Coretop curve parameters (hierarchically linked to culmeso) ──────────
+    // --- Coretop curve parameters (hierarchically linked to culmeso) ----------
     // Each parameter is drawn from a normal centered on the culmeso value
     // (see hierarchical priors in the model block). This "partial pooling"
     // regularizes coretop estimates when data are sparse.
@@ -68,22 +68,22 @@ parameters {
     real<lower=0, upper=1>    b_crtp;
     real<lower=0.1, upper=10> v_crtp;
 
-    // ─── Non-thermal regression coefficients (coretop only) ───────────────────
+    // --- Non-thermal regression coefficients (coretop only) -------------------
     // Bounded negative: these correct for warm bias in RI.
-    real<lower=-1, upper=0>   beta_G23_crtp;  // β_{G₂/₃}: ecology correction coefficient
-    real<lower=-1, upper=0>   beta_NO3_crtp;  // β_{NO₃}: nutrient correction coefficient
+    real<lower=-1, upper=0>   beta_G23_crtp;  // beta_{G2/3}: ecology correction coefficient
+    real<lower=-1, upper=0>   beta_NO3_crtp;  // beta_{NO3}: nutrient correction coefficient
 
-    // ─── Hierarchical scale parameters (hyperparameters) ──────────────────────
+    // --- Hierarchical scale parameters (hyperparameters) ----------------------
     // Controls how much each coretop parameter can deviate from its culmeso mean.
-    // Large sigma → weak pooling (coretop data dominant).
-    // Small sigma → strong pooling (culmeso data dominant).
+    // Large sigma -> weak pooling (coretop data dominant).
+    // Small sigma -> strong pooling (culmeso data dominant).
     // These are inferred from data, so the model learns the appropriate balance.
     real<lower=0>  sigma_t0_culmeso;
     real<lower=0>  sigma_k_culmeso;
     real<lower=0>  sigma_b_culmeso;
     real<lower=0>  sigma_v_culmeso;
 
-    // ─── Residual observation noise ───────────────────────────────────────────
+    // --- Residual observation noise -------------------------------------------
     // Captures RI variability not explained by temperature (or ecology corrections).
     real<lower=0>  sigma_proxyObs_cul;
     real<lower=0>  sigma_proxyObs_meso;
@@ -91,15 +91,15 @@ parameters {
 }
 
 model {
-    // ─── 1. Priors for culmeso curve parameters ───────────────────────────────
+    // --- 1. Priors for culmeso curve parameters -------------------------------
     // Weakly informative: broad enough to let data dominate, but anchored to
-    // the known range of the RI–T relationship.
+    // the known range of the RI-T relationship.
     t0_culmeso ~ normal(30, 10) T[10, 50];  // Truncated to match declared bounds
     k_culmeso  ~ normal(0, 0.2) T[0, 0.5];
     b_culmeso  ~ beta(2, 5);
     v_culmeso  ~ normal(1, 2) T[0.1, 10];
 
-    // ─── 2. Hyperpriors for hierarchical scale parameters ─────────────────────
+    // --- 2. Hyperpriors for hierarchical scale parameters ---------------------
     // Half-normal (truncated at 0): scales must be positive; penalize very
     // large deviations to prevent complete independence of the two data groups.
     sigma_t0_culmeso ~ normal(0, 5)   T[0, ];
@@ -107,11 +107,11 @@ model {
     sigma_b_culmeso  ~ normal(0, 0.2) T[0, ];
     sigma_v_culmeso  ~ normal(0, 2)   T[0, ];
 
-    // ─── 3. Priors for residual noise ─────────────────────────────────────────
+    // --- 3. Priors for residual noise -----------------------------------------
     sigma_proxyObs_cul  ~ normal(0, 0.1);
     sigma_proxyObs_meso ~ normal(0, 0.1);
 
-    // ─── 4. Likelihood for culture + mesocosm data ────────────────────────────
+    // --- 4. Likelihood for culture + mesocosm data ----------------------------
     // Compute expected RI at each known temperature using the Richards curve.
     // Vectorized: Stan evaluates all N_cul / N_meso points in one expression.
     vector[N_cul] mu_proxyObs_cul = b_culmeso + (1 - b_culmeso)
@@ -122,7 +122,7 @@ model {
     proxyObs_cul  ~ normal(mu_proxyObs_cul,  sigma_proxyObs_cul);
     proxyObs_meso ~ normal(mu_proxyObs_meso, sigma_proxyObs_meso);
 
-    // ─── 5. Hierarchical priors linking coretop parameters to culmeso ─────────
+    // --- 5. Hierarchical priors linking coretop parameters to culmeso ---------
     // Each coretop parameter is drawn from a normal centered on the culmeso
     // estimate: crtp_param ~ Normal(culmeso_param, sigma_culmeso).
     // Truncation mirrors the bounds in the parameters block.
@@ -137,20 +137,20 @@ model {
     beta_G23_crtp ~ normal(0, 0.05);
     beta_NO3_crtp ~ normal(0, 0.05); //normal(-0.064, 0.008); // tight, informative prior based on strong nutrient effect region
 
-    // ─── 6. Likelihood for coretop data (with optional non-thermal corrections) ─
+    // --- 6. Likelihood for coretop data (with optional non-thermal corrections) -
     //
-    // Step A: Base thermal term — vectorized over all N_crtp sites at once.
+    // Step A: Base thermal term - vectorized over all N_crtp sites at once.
     //   Computes the Richards curve at each measured temperature.
     vector[N_crtp] mu_proxyObs_crtp = b_crtp + (1 - b_crtp)
         ./ pow(1 + exp(-k_crtp * (t_crtp - t0_crtp)), 1.0 / v_crtp);
 
-    // Step B: Ecology correction (if enabled) — add β_{G₂/₃} × gdgt23ratio.
+    // Step B: Ecology correction (if enabled) - add beta_{G2/3} * gdgt23ratio.
     //   Fully vectorized (element-wise multiply, no loop needed).
     if (use_gdgt23ratio == 1)
         mu_proxyObs_crtp += beta_G23_crtp * gdgt23ratio_crtp;
 
-    // Step C: NO₃ correction (if enabled) — add β_{NO₃} × log₁₀(NO₃).
-    //   Requires a loop because the threshold condition (0 < NO₃ < cutoff)
+    // Step C: NO3 correction (if enabled) - add beta_{NO3} * log10(NO3).
+    //   Requires a loop because the threshold condition (0 < NO3 < cutoff)
     //   must be checked for each site individually.
     if (use_no3 == 1) {
         for (i in 1:N_crtp) {
@@ -164,9 +164,9 @@ model {
 }
 
 generated quantities {
-    // ── In-sample R² for this model ───────────────────────────────────────────
+    // -- In-sample R^2 for this model -------------------------------------------
     // R2_full     : frequentist 1 - RSS/TSS  (matches figure; fixed denominator)
-    // bayesR2_full: Bayesian var(μ)/(var(μ)+σ²)  (Gelman et al. 2019)
+    // bayesR2_full: Bayesian var(mu)/(var(mu)+sigma^2)  (Gelman et al. 2019)
     // Both computed using this model's own estimated parameters.
     // Sequential variance partitioning (deltaR2_G23, deltaR2_NO3, etc.) is
     // derived in Python by differencing R2_full across separately-fit posteriors.
@@ -174,7 +174,7 @@ generated quantities {
     real bayesR2_full;
     real RMSE_full;
 
-    {   // local scope — mu vector not saved
+    {   // local scope - mu vector not saved
         vector[N_crtp] mu = b_crtp + (1 - b_crtp)
             ./ pow(1 + exp(-k_crtp * (t_crtp - t0_crtp)), 1.0 / v_crtp);
 

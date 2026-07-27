@@ -131,58 +131,6 @@ def _compiler_info() -> dict:
     return {"found": have_cxx and have_make, "which": found}
 
 
-def _toolchain_info() -> dict:
-    """Windows: does the g++ that is *first on PATH* match the RTools toolchain?
-
-    ``_compiler_info`` looks *inside* the RTools install, so it reports a compiler
-    even when an unrelated ``g++`` shadows it on PATH. But CmdStan compiles with
-    whatever ``g++`` resolves first, and a foreign MinGW (e.g. Strawberry Perl's
-    ``C:\\Strawberry\\c\\bin\\g++``) links CmdStan against an incompatible
-    libstdc++ — the model build then fails with
-    ``undefined reference to std::istream::seekg``. TEXAS fixes this at compile
-    time via :func:`~TEXAS.utils.paths.ensure_cxx_toolchain`; this check reports
-    whether that fix will (or did) redirect PATH to the RTools compiler.
-
-    Non-Windows: not applicable (``applies=False``).
-    """
-    info: dict = {
-        "applies": sys.platform == "win32",
-        "path_cxx": None,        # g++ first on PATH before the TEXAS fix
-        "rtools_cxx": None,      # RTools g++ TEXAS would prefer
-        "effective_cxx": None,   # g++ first on PATH after the fix
-        "shadowed": False,       # a foreign g++ was overridden by RTools
-    }
-    if not info["applies"]:
-        return info
-
-    info["path_cxx"] = shutil.which("g++")
-
-    cmdstan_home = Path(os.environ.get("CMDSTAN_HOME", str(Path.home() / ".cmdstan")))
-    for rt in sorted(cmdstan_home.glob("RTools*"), reverse=True):
-        cand = rt / "mingw64" / "bin" / "g++.exe"
-        if cand.exists():
-            info["rtools_cxx"] = str(cand)
-            break
-
-    # Apply the same PATH fix the compiler uses, then re-resolve. This is
-    # idempotent and leaves the session ready to compile — matching real behaviour.
-    try:
-        from .paths import ensure_cxx_toolchain
-
-        ensure_cxx_toolchain()
-    except Exception:
-        pass
-    info["effective_cxx"] = shutil.which("g++")
-
-    if (
-        info["path_cxx"]
-        and info["effective_cxx"]
-        and Path(info["path_cxx"]) != Path(info["effective_cxx"])
-    ):
-        info["shadowed"] = True
-    return info
-
-
 def check_environment() -> dict:
     """Return a structured report of the TEXAS runtime environment.
 
@@ -200,7 +148,6 @@ def check_environment() -> dict:
     cmdstanpy_version = _cmdstanpy_version()
     cmdstan = _cmdstan_info()
     compiler = _compiler_info()
-    toolchain = _toolchain_info()
 
     report = {
         "texas_version": texas_version,
@@ -212,7 +159,6 @@ def check_environment() -> dict:
         },
         "cmdstan": cmdstan,
         "compiler": compiler,
-        "toolchain": toolchain,
         "cache_dir": str(paths.POSTERIOR_CACHE_DIR),
         "data_dir": str(paths.SPREADSHEETS_DIR),
         "sampling_ready": bool(cmdstan["found"] and compiler["found"]),
@@ -314,36 +260,6 @@ def doctor(verbose: bool = True) -> dict:
                 "python -m cmdstanpy.install_cxx_toolchain "
                 "or conda-forge cmdstan (pre-built)"
             )
-
-    # Windows C++ toolchain resolution: warn when a foreign g++ shadows RTools
-    # (the classic Strawberry-Perl link failure), or confirm the auto-fix.
-    tc = r.get("toolchain", {})
-    if tc.get("applies"):
-        if tc.get("shadowed"):
-            lines.append("")
-            lines.append(
-                f"  {_fmt(True, uni)} C++ toolchain (Windows): RTools g++ activated "
-                "for CmdStan"
-            )
-            lines.append(f"      using     {tc['effective_cxx']}")
-            lines.append(
-                f"      overrode  {tc['path_cxx']}  "
-                "(foreign g++ that fails CmdStan's link step)"
-            )
-        elif tc.get("path_cxx") and not tc.get("rtools_cxx"):
-            lines.append("")
-            lines.append(
-                f"  {_fmt(False, uni)} C++ toolchain (Windows): a non-RTools g++ is on "
-                "PATH and no RTools install was found"
-            )
-            lines.append(f"      on PATH   {tc['path_cxx']}")
-            lines.append(
-                "      If a model build fails at linking ('undefined reference to "
-                "std::istream::seekg'), install RTools: TEXAS.install_cmdstan() "
-                "(installs RTools on Windows) or python -m "
-                "cmdstanpy.install_cxx_toolchain"
-            )
-
     print("\n".join(lines))
     return r
 

@@ -1,40 +1,14 @@
 # TEXAS/stan/compiler.py
 
+import shutil
 import subprocess
-import sys
 import warnings
 from pathlib import Path
 from typing import Dict, Optional, Union
 
 from cmdstanpy import CmdStanModel
 
-from ..utils.paths import STAN_MODELS_DIR, STAN_BUILD_DIR, ensure_cxx_toolchain
-
-# Emoji → ASCII fallbacks for consoles that cannot encode them (Windows cp1252
-# PowerShell/CMD raise UnicodeEncodeError on a bare print of these glyphs).
-_EMOJI_ASCII = {
-    "🔧": "[compile]",
-    "✅": "[ok]",
-    "♻️": "[cached]",
-    "🗑️": "[clear]",
-}
-
-
-def _safe_print(msg: str) -> None:
-    """print() that never crashes on a non-UTF-8 console.
-
-    Notebooks (ipykernel) use a UTF-8 stream and show the emoji as-is; a Windows
-    cp1252 terminal would otherwise raise ``UnicodeEncodeError`` mid-compile, so
-    there we substitute ASCII tags and drop anything still unencodable.
-    """
-    enc = getattr(sys.stdout, "encoding", None) or "utf-8"
-    try:
-        msg.encode(enc)
-    except (UnicodeEncodeError, LookupError):
-        for _u, _a in _EMOJI_ASCII.items():
-            msg = msg.replace(_u, _a)
-        msg = msg.encode(enc, "replace").decode(enc, "replace")
-    print(msg)
+from ..utils.paths import STAN_MODELS_DIR, STAN_BUILD_DIR
 
 
 class StanCompiler:
@@ -69,29 +43,12 @@ class StanCompiler:
     def _build_path(self, stan_source: Path) -> Path:
         """Return the path under STAN_BUILD_DIR that we compile from.
 
-        Writes an ASCII-safe copy of the source if the build copy is absent,
-        stale, or still contains non-ASCII bytes. cmdstanpy opens the model
-        file with the process default encoding (cp1252 on Windows), so a copy
-        carrying non-ASCII comment characters (Greek letters, subscripts,
-        box-drawing headers, em-dashes, …) makes ``CmdStanModel`` raise
-        ``UnicodeDecodeError: 'charmap' codec can't decode byte 0x90``. All
-        non-ASCII in the .stan sources lives in comments / string literals, so
-        replacing it (``?``) leaves the compiled program identical. Sources on
-        disk keep their Unicode documentation. The non-ASCII check also
-        upgrades stale UTF-8 copies left by older TEXAS versions.
+        Copies the source file if the build copy is absent or stale.
         """
         dest = self.build_dir / stan_source.name
         src_mtime = stan_source.stat().st_mtime
-        stale = (not dest.exists()) or dest.stat().st_mtime < src_mtime
-        if not stale:
-            try:
-                stale = any(b > 127 for b in dest.read_bytes())
-            except OSError:
-                stale = True
-        if stale:
-            text = stan_source.read_text(encoding="utf-8")
-            ascii_text = text.encode("ascii", "replace").decode("ascii")
-            dest.write_text(ascii_text, encoding="ascii")
+        if not dest.exists() or dest.stat().st_mtime < src_mtime:
+            shutil.copy2(stan_source, dest)
         return dest
 
     # ── Public API ──────────────────────────────────────────────────────────
@@ -144,27 +101,21 @@ class StanCompiler:
         # Force recompilation
         if force:
             if cache_key in self.cache:
-                _safe_print(f"🗑️  Clearing cached model: {stan_path.name}")
+                print(f"🗑️  Clearing cached model: {stan_path.name}")
                 del self.cache[cache_key]
             if binary_path.exists():
-                _safe_print(f"🗑️  Removing old binary: {binary_path}")
+                print(f"🗑️  Removing old binary: {binary_path}")
                 binary_path.unlink()
 
         # In-memory cache hit
         if cache_key in self.cache:
-            _safe_print(f"♻️  Using cached model: {stan_path.name}")
+            print(f"♻️  Using cached model: {stan_path.name}")
             return self.cache[cache_key]
 
-        # Windows: ensure the RTools g++ (not e.g. Strawberry Perl's) is first on
-        # PATH before compiling, or the link fails with an incompatible-libstdc++
-        # "undefined reference to std::istream::seekg" error. No-op elsewhere and
-        # when no RTools install exists. See utils.paths.ensure_cxx_toolchain.
-        ensure_cxx_toolchain()
-
         # Compile from the writable build copy
-        _safe_print(f"🔧 Compiling Stan model: {stan_path.name}")
-        _safe_print(f"   (build dir: {self.build_dir})")
+        print(f"🔧 Compiling Stan model: {stan_path.name}")
+        print(f"   (build dir: {self.build_dir})")
         model = CmdStanModel(stan_file=build_path, cpp_options=cpp_options)
         self.cache[cache_key] = model
-        _safe_print(f"✅ Compiled: {stan_path.name}")
+        print(f"✅ Compiled: {stan_path.name}")
         return model

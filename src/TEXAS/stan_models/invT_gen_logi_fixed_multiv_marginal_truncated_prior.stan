@@ -1,8 +1,8 @@
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 // invT_gen_logi_fixed_multiv_marginal_truncated_prior.stan
 //
 // PURPOSE: Bayesian paleotemperature reconstruction with non-thermal corrections
-//          (GDGT-2/3 ratio and/or NO₃), parallelized via Stan's reduce_sum.
+//          (GDGT-2/3 ratio and/or NO3), parallelized via Stan's reduce_sum.
 //          Multivariate counterpart of invT_gen_logi_fixed_univ_marginal_truncated_prior.stan.
 //
 // TEMPERATURE CONSTRAINT: "truncated_prior" variant
@@ -14,18 +14,18 @@
 //   the quantile function of TruncNormal(prior_mu_t[n], prior_sigma_t, lower=min_temp).
 //
 // KEY DIFFERENCE from the hard_constraint multiv model:
-//   The prior on t_est is embedded in the q → t_est reparameterization, so
-//   ll_chunk does NOT include a prior contribution — only the likelihood.
+//   The prior on t_est is embedded in the q -> t_est reparameterization, so
+//   ll_chunk does NOT include a prior contribution - only the likelihood.
 //   prior_mu_t and prior_sigma_t are used only in transformed parameters.
 //
 // PARALLELIZATION via reduce_sum:
 //   The outer loop over N samples is split across CPU threads.
 //   Requires compilation with STAN_THREADS=True and threads_per_chain > 1.
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 
 functions {
-  // ─── ll_chunk: LIKELIHOOD ONLY for a chunk of N observations ──────────────
-  // The prior is NOT included here — it is embedded in the q → t_est mapping
+  // --- ll_chunk: LIKELIHOOD ONLY for a chunk of N observations --------------
+  // The prior is NOT included here - it is embedded in the q -> t_est mapping
   // in the transformed parameters block. ll_chunk only evaluates the
   // marginalized log-likelihood for each sample in the chunk.
 
@@ -99,7 +99,7 @@ data {
 
     int<lower=1> grainsize;
 
-    // Physical lower bound — defines the truncation of the Normal prior.
+    // Physical lower bound - defines the truncation of the Normal prior.
     real min_temp;
 }
 
@@ -117,8 +117,8 @@ transformed parameters {
 }
 
 model {
-    // No prior on q — Uniform(0,1) is implicit from the bounds.
-    // The truncated Normal prior on t_est is induced by the q → t_est mapping.
+    // No prior on q - Uniform(0,1) is implicit from the bounds.
+    // The truncated Normal prior on t_est is induced by the q -> t_est mapping.
 
     array[N] int indices = linspaced_int_array(N, 1, N);
 

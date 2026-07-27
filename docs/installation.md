@@ -516,13 +516,6 @@ including the case where `CMDSTAN` points at a directory whose `bin/stanc` was n
 — and prints the exact fix for your platform. See
 [Troubleshooting → CmdStan](troubleshooting.md#cmdstan-not-found) for the failure modes.
 
-> **Windows C++ toolchain.** If another MinGW `g++` is first on your `PATH` (commonly
-> Strawberry Perl's `C:\Strawberry\c\bin\g++`), CmdStan would otherwise fail at the
-> *link* step with `undefined reference to std::istream::seekg`. TEXAS prevents this by
-> putting the RTools toolchain first on `PATH` before each compile, and `texas-doctor`
-> reports the override under **C++ toolchain (Windows)**. No manual PATH editing needed —
-> see [Troubleshooting → link error](troubleshooting.md#stan-compilation-fails-at-linking-with-undefined-reference-to-stdistreamseekg-windows).
-
 ---
 
 ## Option D — conda from source (development)

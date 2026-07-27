@@ -1,4 +1,4 @@
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 // gen_logi_fixed_hier_crtp_multiv_priorApprox.stan
 //
 // PURPOSE: Coretop-only forward calibration using pre-computed hyperpriors.
@@ -11,26 +11,26 @@
 //   run and allows the coretop stage to be re-run independently.
 //
 //   Workflow:
-//     Step 1: Run gen_logi_fixed_culmeso.stan → get posterior means/SDs
+//     Step 1: Run gen_logi_fixed_culmeso.stan -> get posterior means/SDs
 //             of {t0, k, b, v} (e.g., via extract_and_update_metadata)
 //     Step 2: Pass those summary statistics as prior_mean_* / prior_sd_* inputs
 //     Step 3: This model fits only the coretop parameters conditional on those priors
 //
-// CALIBRATION CURVE — generalized logistic (Richards, upper asymptote fixed = 1, Q fixed = 1):
-//   RI = b + (1 - b) / (1 + exp(-k · (T - T₀)))^(1/ν)    [Eq. 1]
+// CALIBRATION CURVE - generalized logistic (Richards, upper asymptote fixed = 1, Q fixed = 1):
+//   RI = b + (1 - b) / (1 + exp(-k * (T - T0)))^(1/nu)    [Eq. 1]
 //
 // NON-THERMAL CORRECTIONS (if enabled):
-//   RI += β_{G₂/₃} · (gdgt23ratio)                            [Eq. 6]
-//   RI += β_{NO₃}  · log₁₀(NO₃)   [only where 0 < NO₃ < cutoff]  [Eq. 7]
-// ═══════════════════════════════════════════════════════════════════════════════
+//   RI += beta_{G2/3} * (gdgt23ratio)                            [Eq. 6]
+//   RI += beta_{NO3}  * log10(NO3)   [only where 0 < NO3 < cutoff]  [Eq. 7]
+// ===============================================================================
 
 data {
-    // ─── Coretop (sediment) data ──────────────────────────────────────────────
+    // --- Coretop (sediment) data ----------------------------------------------
     int<lower=1> N_crtp;
-    vector[N_crtp] t_crtp;         // Modern instrumental temperature at each site (°C)
+    vector[N_crtp] t_crtp;         // Modern instrumental temperature at each site (degC)
     vector[N_crtp] proxyObs_crtp;  // Observed scaled Ring Index from sediment
 
-    // ─── Optional non-thermal predictors ──────────────────────────────────────
+    // --- Optional non-thermal predictors --------------------------------------
     vector[N_crtp] gdgt23ratio_crtp;
     int<lower=0, upper=1> use_gdgt23ratio;
 
@@ -38,7 +38,7 @@ data {
     int<lower=0, upper=1> use_no3;
     real no3_cutoff;
 
-    // ─── Hyperpriors from the culmeso posterior (Stage-1 summary statistics) ──
+    // --- Hyperpriors from the culmeso posterior (Stage-1 summary statistics) --
     // These replace the full culmeso likelihood. Each pair (mean, sd) defines
     // a normal prior on the corresponding coretop parameter, approximating
     // the hierarchical prior from the joint model.
@@ -49,24 +49,24 @@ data {
 }
 
 parameters {
-    // ─── Coretop generalized-logistic curve parameters ────────────────────────
+    // --- Coretop generalized-logistic curve parameters ------------------------
     // Lower bounds reflect physical constraints; the hyperprior (from culmeso)
-    // provides regularization above — no hard upper cap on k or v.
-    real<lower=10, upper=50>  t0_crtp;  // T₀: reference temperature (°C)
+    // provides regularization above - no hard upper cap on k or v.
+    real<lower=10, upper=50>  t0_crtp;  // T0: reference temperature (degC)
     real<lower=0.01, upper=0.5>  k_crtp;   // k: steepness
     real<lower=0.1,  upper=1.0>   b_crtp;   // b: lower asymptote (upper=1 matches joint model)
-    real<lower=0.1, upper=10>     v_crtp;   // ν: shape
+    real<lower=0.1, upper=10>     v_crtp;   // nu: shape
 
-    // ─── Non-thermal correction coefficients ──────────────────────────────────
+    // --- Non-thermal correction coefficients ----------------------------------
     real<lower=-1, upper=0>  beta_G23_crtp;
     real<lower=-1, upper=0>  beta_NO3_crtp;
 
-    // ─── Residual observation noise ───────────────────────────────────────────
+    // --- Residual observation noise -------------------------------------------
     real<lower=0>  sigma_proxyObs_crtp;
 }
 
 model {
-    // ─── 1. Priors from culmeso posterior (Stage-1 approximate hyperpriors) ───
+    // --- 1. Priors from culmeso posterior (Stage-1 approximate hyperpriors) ---
     // Normal priors parameterized by the posterior mean and SD from the culmeso
     // model. This is the "prior approximation" that gives the model its name:
     // it approximates the full hierarchical prior with a simple normal summary.
@@ -78,17 +78,17 @@ model {
     beta_G23_crtp ~ normal(0, 0.05);
     beta_NO3_crtp ~ normal(0, 0.05);
 
-    // ─── 2. Likelihood for coretop data ───────────────────────────────────────
+    // --- 2. Likelihood for coretop data ---------------------------------------
     //
-    // Step A: Base thermal term — vectorized over all N_crtp sites.
+    // Step A: Base thermal term - vectorized over all N_crtp sites.
     vector[N_crtp] mu_proxyObs_crtp = b_crtp + (1 - b_crtp)
         ./ pow(1 + exp(-k_crtp * (t_crtp - t0_crtp)), 1.0 / v_crtp);
 
-    // Step B: Ecology correction (if enabled) — vectorized element-wise multiply.
+    // Step B: Ecology correction (if enabled) - vectorized element-wise multiply.
     if (use_gdgt23ratio == 1)
         mu_proxyObs_crtp += beta_G23_crtp * gdgt23ratio_crtp;
 
-    // Step C: NO₃ correction (if enabled) — loop required for threshold condition.
+    // Step C: NO3 correction (if enabled) - loop required for threshold condition.
     if (use_no3 == 1) {
         for (i in 1:N_crtp) {
             if (no3_crtp[i] > 0 && no3_crtp[i] < no3_cutoff)
@@ -101,9 +101,9 @@ model {
 }
 
 generated quantities {
-    // ── In-sample R² for this model ───────────────────────────────────────────
+    // -- In-sample R^2 for this model -------------------------------------------
     // R2_full     : frequentist 1 - RSS/TSS  (matches figure; fixed denominator)
-    // bayesR2_full: Bayesian var(μ)/(var(μ)+σ²)  (Gelman et al. 2019)
+    // bayesR2_full: Bayesian var(mu)/(var(mu)+sigma^2)  (Gelman et al. 2019)
     // Both computed using this model's own estimated parameters.
     // Sequential variance partitioning (deltaR2_G23, deltaR2_NO3, etc.) is
     // derived in Python by differencing R2_full across separately-fit posteriors.
@@ -111,7 +111,7 @@ generated quantities {
     real bayesR2_full;
     real RMSE_full;
 
-    {   // local scope — mu vector not saved
+    {   // local scope - mu vector not saved
         vector[N_crtp] mu = b_crtp + (1 - b_crtp)
             ./ pow(1 + exp(-k_crtp * (t_crtp - t0_crtp)), 1.0 / v_crtp);
 
