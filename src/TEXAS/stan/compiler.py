@@ -73,7 +73,16 @@ def _windows_compile_path():
     try:
         yield
     finally:
-        os.environ["PATH"] = original
+        # Undo our reordering, but KEEP any entries added during the block.
+        # cmdstanpy puts the CmdStan TBB dll directory on PATH during model
+        # construction so the compiled exe can load tbb.dll at run time
+        # (STAN_THREADS); dropping it causes 0xC0000135 (DLL not found) when
+        # sampling runs the exe. So restore the original PATH with those
+        # additions prepended rather than blindly overwriting.
+        entry_set = set(entries)
+        added = [e for e in os.environ.get("PATH", "").split(os.pathsep)
+                 if e not in entry_set]
+        os.environ["PATH"] = os.pathsep.join(added + entries)
 
 
 class StanCompiler:
