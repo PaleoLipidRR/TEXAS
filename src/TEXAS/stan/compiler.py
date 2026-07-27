@@ -1,14 +1,79 @@
 # TEXAS/stan/compiler.py
 
+import logging
+import os
 import shutil
 import subprocess
+import sys
 import warnings
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Dict, Optional, Union
 
 from cmdstanpy import CmdStanModel
 
 from ..utils.paths import STAN_MODELS_DIR, STAN_BUILD_DIR
+
+logger = logging.getLogger(__name__)
+
+# Substrings (case-insensitive) of PATH entries that ship a MinGW g++ known to
+# break CmdStan linking on Windows: they are picked up ahead of RTools and their
+# newer libstdc++ ABI clashes with CmdStan's RTools-built static libs, producing
+# "undefined reference to std::istream::seekg(std::fpos<int>)" link errors.
+_CONFLICTING_TOOLCHAIN_HINTS = ("strawberry",)
+
+
+@contextmanager
+def _windows_compile_path():
+    """Make CmdStan's RTools toolchain win on PATH for the duration of a compile.
+
+    cmdstanpy adds RTools to PATH, but another MinGW earlier on PATH (e.g.
+    Strawberry Perl's g++) can still be chosen by ``mingw32-make``, yielding
+    ``undefined reference to std::istream::seekg`` link errors because CmdStan's
+    prebuilt libraries were built with RTools' g++. For the duration of the
+    compile, prepend the RTools toolchain dirs and drop known-conflicting MinGW
+    dirs, then restore the original PATH so the caller's environment is unchanged.
+
+    No-op off Windows or when the RTools toolchain cannot be located (e.g. a
+    conda-forge CmdStan, which uses its own compiler and needs no reordering).
+    """
+    if sys.platform != "win32":
+        yield
+        return
+
+    try:
+        from cmdstanpy.utils import cxx_toolchain_path
+
+        rtools_dirs = [d for d in cxx_toolchain_path() if d and os.path.isdir(d)]
+    except Exception:  # noqa: BLE001 — best-effort; never block a compile
+        rtools_dirs = []
+
+    if not rtools_dirs:
+        yield
+        return
+
+    original = os.environ.get("PATH", "")
+    entries = original.split(os.pathsep)
+    rset = {d.lower() for d in rtools_dirs}
+    conflicts = [
+        e for e in entries
+        if any(h in e.lower() for h in _CONFLICTING_TOOLCHAIN_HINTS)
+    ]
+    kept = [
+        e for e in entries
+        if e.lower() not in rset
+        and not any(h in e.lower() for h in _CONFLICTING_TOOLCHAIN_HINTS)
+    ]
+    os.environ["PATH"] = os.pathsep.join(rtools_dirs + kept)
+    if conflicts:
+        logger.info(
+            "Windows: prioritized RTools toolchain over %s for Stan compilation.",
+            ", ".join(conflicts),
+        )
+    try:
+        yield
+    finally:
+        os.environ["PATH"] = original
 
 
 class StanCompiler:
@@ -115,7 +180,8 @@ class StanCompiler:
         # Compile from the writable build copy
         print(f"🔧 Compiling Stan model: {stan_path.name}")
         print(f"   (build dir: {self.build_dir})")
-        model = CmdStanModel(stan_file=build_path, cpp_options=cpp_options)
+        with _windows_compile_path():
+            model = CmdStanModel(stan_file=build_path, cpp_options=cpp_options)
         self.cache[cache_key] = model
         print(f"✅ Compiled: {stan_path.name}")
         return model

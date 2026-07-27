@@ -131,6 +131,40 @@ def _compiler_info() -> dict:
     return {"found": have_cxx and have_make, "which": found}
 
 
+def _toolchain_conflict() -> str | None:
+    """On Windows, warn if a non-RTools ``g++`` shadows an installed RTools one.
+
+    Strawberry Perl (or another MinGW) earlier on PATH gets picked up by
+    CmdStan's ``make`` ahead of RTools; its newer libstdc++ ABI clashes with
+    CmdStan's RTools-built static libs, giving "undefined reference to
+    std::istream::seekg" link errors. ``StanCompiler`` reorders PATH per-compile
+    to avoid this, but surfacing it here lets a user fix the root cause.
+    Returns a message when a conflict is detected, else ``None``.
+    """
+    if sys.platform != "win32":
+        return None
+    active = shutil.which("g++")
+    if not active or ("rtools" in active.lower() and ".cmdstan" in active.lower()):
+        return None  # nothing on PATH, or RTools already wins
+    cmdstan_home = Path(os.environ.get("CMDSTAN_HOME", str(Path.home() / ".cmdstan")))
+    rtools_gpp: Path | None = None
+    for rt in sorted(cmdstan_home.glob("RTools*"), reverse=True):
+        for sub in ("mingw64/bin", "mingw32/bin"):
+            cand = rt / sub / "g++.exe"
+            if cand.exists():
+                rtools_gpp = cand
+                break
+        if rtools_gpp:
+            break
+    if rtools_gpp is None:
+        return None  # no RTools to shadow; _compiler_info handles "no compiler"
+    return (
+        f"non-RTools g++ first on PATH ({active}) shadows RTools ({rtools_gpp}); "
+        "can cause Stan link errors. TEXAS reorders PATH per-compile, but "
+        "removing the other MinGW (e.g. Strawberry Perl) from PATH is cleaner."
+    )
+
+
 def check_environment() -> dict:
     """Return a structured report of the TEXAS runtime environment.
 
@@ -159,6 +193,7 @@ def check_environment() -> dict:
         },
         "cmdstan": cmdstan,
         "compiler": compiler,
+        "toolchain_conflict": _toolchain_conflict(),
         "cache_dir": str(paths.POSTERIOR_CACHE_DIR),
         "data_dir": str(paths.SPREADSHEETS_DIR),
         "sampling_ready": bool(cmdstan["found"] and compiler["found"]),
@@ -220,6 +255,10 @@ def doctor(verbose: bool = True) -> dict:
             if co["found"]
             else "no working compiler + make on PATH"
         ),
+    ]
+    if r.get("toolchain_conflict"):
+        lines.append(f"  {_fmt(False, uni)} toolchain warning  {r['toolchain_conflict']}")
+    lines += [
         "",
         f"  cache dir           {r['cache_dir']}",
         f"  data dir            {r['data_dir']}",
