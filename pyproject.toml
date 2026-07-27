@@ -18,7 +18,7 @@ classifiers = [
 dependencies = [
   "numpy>=1.18",
   "xarray>=0.16",
-  "netCDF4>=1.6",   # xarray netCDF backend; required to read/write posterior .nc files
+  "netcdf4","h5netcdf",   # xarray netCDF backend; required to read/write posterior .nc files
   "cmdstanpy>=1.0",
   "typing-extensions>=3.7.4",
   "scipy>=1.7",
