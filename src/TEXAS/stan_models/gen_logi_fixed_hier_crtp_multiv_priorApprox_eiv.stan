@@ -1,109 +1,109 @@
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 // gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv.stan
 //
 // PURPOSE: Coretop-only forward calibration with Bayesian error-in-variables
-//          (EIV) on secondary predictors (G₂/₃, NO₃) AND explicit separation
+//          (EIV) on secondary predictors (G2/3, NO3) AND explicit separation
 //          of RI analytical measurement error from structural process noise.
 //
 // KEY FEATURES (latent-variable EIV, priorApprox two-stage):
 //   1. sd_proxyObs is passed per-site and enters the likelihood in quadrature:
-//      total_sd = √(sd_proxyObs² + sigma_proxyObs_crtp²).
+//      total_sd = sqrt(sd_proxyObs^2 + sigma_proxyObs_crtp^2).
 //      sigma_proxyObs_crtp is therefore the PROCESS noise only (oceanographic
-//      scatter, bioturbation, model misfit) — not total RI scatter.
+//      scatter, bioturbation, model misfit) - not total RI scatter.
 //   2. sigma prior is scaled to the residual SE after the thermal curve:
-//      sigma ~ N(0, mean(sd_proxyObs) · √(1 − R²_thermal)).
-//   3. NO₃ latent variable uses a lognormal prior on the LINEAR scale and a
+//      sigma ~ N(0, mean(sd_proxyObs) * sqrt(1 - R^2_thermal)).
+//   3. NO3 latent variable uses a lognormal prior on the LINEAR scale and a
 //      normal measurement model (no delta-method approximation). All N_crtp
-//      latent NO₃ values are sampled; sites outside (0, no3_cutoff) receive
+//      latent NO3 values are sampled; sites outside (0, no3_cutoff) receive
 //      only the prior (no likelihood update).
 //   4. No CV-gating: all sub-threshold sites receive the EIV measurement model
-//      regardless of SE/NO₃ ratio. Sites with sd_no3_crtp[i]=0 receive only
+//      regardless of SE/NO3 ratio. Sites with sd_no3_crtp[i]=0 receive only
 //      the lognormal prior (equivalent to treating the site as exact).
 //
 // WORKFLOW (two-stage priorApprox):
-//   Step 1: Run gen_logi_fixed_culmeso.stan → extract posterior mean/SD for
-//           {t0, k, b, v}; also compute R²_thermal from a thermal-only
+//   Step 1: Run gen_logi_fixed_culmeso.stan -> extract posterior mean/SD for
+//           {t0, k, b, v}; also compute R^2_thermal from a thermal-only
 //           coretop run and pass as R2_thermal.
 //   Step 2: This model fits only the coretop parameters.
 //
-// CALIBRATION CURVE — generalized logistic (Richards, upper asymptote = 1, Q = 1):
-//   RI = b + (1 − b) / (1 + exp(−k · (T − T₀)))^(1/ν)            [Eq. 1]
+// CALIBRATION CURVE - generalized logistic (Richards, upper asymptote = 1, Q = 1):
+//   RI = b + (1 - b) / (1 + exp(-k * (T - T0)))^(1/nu)            [Eq. 1]
 //
 // NON-THERMAL CORRECTIONS (if enabled):
-//   RI += β_{G₂/₃} · g23_true                                   [Eq. 6]
-//   RI += β_{NO₃}  · log₁₀(no3_true)  [only 0 < NO₃ < cutoff]   [Eq. 7]
-// ═══════════════════════════════════════════════════════════════════════════════
+//   RI += beta_{G2/3} * g23_true                                   [Eq. 6]
+//   RI += beta_{NO3}  * log10(no3_true)  [only 0 < NO3 < cutoff]   [Eq. 7]
+// ===============================================================================
 
 data {
-    // ─── Coretop (sediment) data ──────────────────────────────────────────────
+    // --- Coretop (sediment) data ----------------------------------------------
     int<lower=1> N_crtp;
     vector[N_crtp] t_crtp;
     vector[N_crtp] proxyObs_crtp;
-    vector<lower=0>[N_crtp] sd_proxyObs;      // Per-site analytical SE of RI (Rs ≈ 0.03,
+    vector<lower=0>[N_crtp] sd_proxyObs;      // Per-site analytical SE of RI (Rs ~= 0.03,
                                                // Schouten et al. 2013).
 
-    // ─── Optional non-thermal predictors ──────────────────────────────────────
+    // --- Optional non-thermal predictors --------------------------------------
     vector[N_crtp] gdgt23ratio_crtp;
-    vector<lower=0>[N_crtp] sd_gdgt23ratio_crtp;  // per-site SE of G₂/₃ (linear scale)
+    vector<lower=0>[N_crtp] sd_gdgt23ratio_crtp;  // per-site SE of G2/3 (linear scale)
     int<lower=0, upper=1> use_gdgt23ratio;
 
     vector[N_crtp] no3_crtp;
-    vector<lower=0>[N_crtp] sd_no3_crtp;          // per-site SE of NO₃ (µmol/L, linear)
+    vector<lower=0>[N_crtp] sd_no3_crtp;          // per-site SE of NO3 (umol/L, linear)
     int<lower=0, upper=1> use_no3;
     real no3_cutoff;
 
-    // ─── Stage-1 hyperpriors (culmeso posterior summary statistics) ───────────
+    // --- Stage-1 hyperpriors (culmeso posterior summary statistics) -----------
     real prior_mean_t0;   real prior_sd_t0;
     real prior_mean_k;    real prior_sd_k;
     real prior_mean_b;    real prior_sd_b;
     real prior_mean_v;    real prior_sd_v;
 
-    // ─── Thermal R² from a thermal-only preliminary fit ───────────────────────
-    // Pre-compute in Python as the R² of a thermal-only (no G23, no NO3) run
+    // --- Thermal R^2 from a thermal-only preliminary fit -----------------------
+    // Pre-compute in Python as the R^2 of a thermal-only (no G23, no NO3) run
     // on the same coretop data, then pass as R2_thermal to build_fwd_data().
     // Used only to scale the half-normal prior on sigma_proxyObs_crtp.
     real<lower=0, upper=1> R2_thermal;
 }
 
-// ─── Pre-compute residual SE scale ────────────────────────────────────────────
-// proxyObs_res_se ≈ mean(sd_proxyObs) · √(1 − R²_thermal)
+// --- Pre-compute residual SE scale --------------------------------------------
+// proxyObs_res_se ~= mean(sd_proxyObs) * sqrt(1 - R^2_thermal)
 // Used as the scale of the half-normal prior on sigma_proxyObs_crtp.
-// sd_proxyObs still enters the likelihood directly — this is prior scaling only.
+// sd_proxyObs still enters the likelihood directly - this is prior scaling only.
 transformed data {
     real mean_sd_proxyObs = mean(sd_proxyObs);
     real proxyObs_res_se  = mean_sd_proxyObs * sqrt(1.0 - R2_thermal);
 }
 
 parameters {
-    // ─── Coretop generalized-logistic curve parameters ────────────────────────
+    // --- Coretop generalized-logistic curve parameters ------------------------
     real<lower=10, upper=50>   t0_crtp;
-    real<lower=0.01>           k_crtp;       // no upper bound: culmeso posterior mean ≈ 0.57
+    real<lower=0.01>           k_crtp;       // no upper bound: culmeso posterior mean ~= 0.57
     real<lower=0.1, upper=1.0> b_crtp;
     real<lower=0.1, upper=10>  v_crtp;
 
-    // ─── Non-thermal correction coefficients ──────────────────────────────────
+    // --- Non-thermal correction coefficients ----------------------------------
     real<lower=-1, upper=0> beta_G23_crtp;
     real<lower=-1, upper=0> beta_NO3_crtp;
 
-    // ─── Residual process noise (beyond analytical measurement error) ─────────
+    // --- Residual process noise (beyond analytical measurement error) ---------
     // sigma_proxyObs_crtp is structural residual ONLY.
-    // Total RI SD = √(sd_proxyObs² + sigma_proxyObs_crtp²).
+    // Total RI SD = sqrt(sd_proxyObs^2 + sigma_proxyObs_crtp^2).
     real<lower=0> sigma_proxyObs_crtp;
 
-    // ─── Latent true predictor values ─────────────────────────────────────────
-    // G₂/₃: Gaussian measurement model on linear scale.
-    // NO₃:  lognormal prior on linear scale; normal measurement model at valid
-    //       sites (0 < NO₃ < no3_cutoff). Sampled for all N_crtp sites;
+    // --- Latent true predictor values -----------------------------------------
+    // G2/3: Gaussian measurement model on linear scale.
+    // NO3:  lognormal prior on linear scale; normal measurement model at valid
+    //       sites (0 < NO3 < no3_cutoff). Sampled for all N_crtp sites;
     //       above-threshold sites receive only the prior (no likelihood update).
     //       Upper bound = no3_cutoff prevents exp() overflow during HMC leapfrog
-    //       (unconstrained param α = log(true_no3); without an upper cap, α can
-    //       wander past ~710 → exp(710) = Inf in double precision).
+    //       (unconstrained param alpha = log(true_no3); without an upper cap, alpha can
+    //       wander past ~710 -> exp(710) = Inf in double precision).
     vector[N_crtp]                        true_gdgt23ratio_crtp;
     vector<lower=0, upper=no3_cutoff>[N_crtp] true_no3_crtp;
 }
 
 model {
-    // ─── 1. Stage-1 hyperpriors ───────────────────────────────────────────────
+    // --- 1. Stage-1 hyperpriors -----------------------------------------------
     t0_crtp ~ normal(prior_mean_t0, prior_sd_t0);
     k_crtp  ~ normal(prior_mean_k,  prior_sd_k);
     b_crtp  ~ normal(prior_mean_b,  prior_sd_b);
@@ -114,7 +114,7 @@ model {
     
     sigma_proxyObs_crtp ~ normal(0, proxyObs_res_se);
 
-    // ─── 2. EIV: G₂/₃ ratio ──────────────────────────────────────────────────
+    // --- 2. EIV: G2/3 ratio --------------------------------------------------
     if (use_gdgt23ratio == 1) {
         true_gdgt23ratio_crtp ~ normal(0, 2);
         gdgt23ratio_crtp      ~ normal(true_gdgt23ratio_crtp, sd_gdgt23ratio_crtp);
@@ -122,22 +122,22 @@ model {
         true_gdgt23ratio_crtp ~ normal(0, 2);
     }
 
-    // ─── 3. EIV: NO₃ concentration ───────────────────────────────────────────
-    // Lognormal prior centered near sub-threshold typical values (median 0.3 µM).
-    // Normal measurement model at sites with 0 < NO₃_obs < no3_cutoff.
+    // --- 3. EIV: NO3 concentration -------------------------------------------
+    // Lognormal prior centered near sub-threshold typical values (median 0.3 uM).
+    // Normal measurement model at sites with 0 < NO3_obs < no3_cutoff.
     if (use_no3 == 1) {
         true_no3_crtp ~ lognormal(log(0.3), 1.0);
         for (i in 1:N_crtp) {
             if (no3_crtp[i] > 0 && no3_crtp[i] < no3_cutoff && sd_no3_crtp[i] > 0)
                 no3_crtp[i] ~ normal(true_no3_crtp[i], sd_no3_crtp[i]);
-            // sd_no3_crtp[i] == 0 → no measurement model; true_no3_crtp[i] receives
+            // sd_no3_crtp[i] == 0 -> no measurement model; true_no3_crtp[i] receives
             // only the lognormal prior (same effect as treating the site as "exact" in _werr.stan).
         }
     } else {
         true_no3_crtp ~ lognormal(log(0.3), 1.0);
     }
 
-    // ─── 4. Likelihood ────────────────────────────────────────────────────────
+    // --- 4. Likelihood --------------------------------------------------------
     vector[N_crtp] mu = b_crtp + (1.0 - b_crtp)
         ./ pow(1.0 + exp(-k_crtp * (t_crtp - t0_crtp)), 1.0 / v_crtp);
 
@@ -183,7 +183,7 @@ generated quantities {
         R2_full      = 1.0 - RSS / TSS;
         RMSE_full    = sqrt(RSS / N_crtp);
 
-        // bayesR2 uses process noise only (sigma²), not total_sd²,
+        // bayesR2 uses process noise only (sigma^2), not total_sd^2,
         // because sd_proxyObs is fixed known measurement error.
         real var_mu  = variance(mu);
         bayesR2_full = var_mu / (var_mu + square(sigma_proxyObs_crtp));

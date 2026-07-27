@@ -52,15 +52,15 @@ def _download_file(url: str, dest: Path, size_mb: float, force: bool = False) ->
         return dest
     dest.parent.mkdir(parents=True, exist_ok=True)
     if size_mb >= 5:
-        print(f"Downloading {dest.name} ({_fmt_size(size_mb)}) ...")
+        print(f"Downloading {dest.name} ({_fmt_size(size_mb)}) …")
     else:
-        print(f"Downloading {dest.name} ...")
+        print(f"Downloading {dest.name} …")
     try:
         with urllib.request.urlopen(url) as resp:
             if resp.status != 200:
                 raise urllib.error.URLError(
                     f"Zenodo returned HTTP {resp.status} for {url!r}.\n"
-                    "  The data record may not be published yet - "
+                    "  The data record may not be published yet — "
                     "contact the authors or check "
                     f"https://doi.org/10.5281/zenodo.{ZENODO_RECORD_ID}"
                 )
@@ -69,7 +69,7 @@ def _download_file(url: str, dest: Path, size_mb: float, force: bool = False) ->
         raise
     except Exception as e:
         raise urllib.error.URLError(f"Download failed: {e}") from e
-    print(f"  -> saved to {dest}")
+    print(f"  → saved to {dest}")
     return dest
 
 
@@ -194,7 +194,7 @@ def download_posteriors(
 
     total_mb = sum(POSTERIOR_REGISTRY[n]["size_mb"] for n in missing)
     if total_mb >= 5:
-        print(f"Downloading {len(missing)} posterior(s) - total ~{total_mb:.0f} MB")
+        print(f"Downloading {len(missing)} posterior(s) — total ~{total_mb:.0f} MB")
 
     paths = []
     for name in targets:
@@ -244,7 +244,7 @@ def download_training_data(
 
     total_mb = sum(TRAINING_DATA_REGISTRY[n]["size_mb"] for n in missing)
     if total_mb >= 5:
-        print(f"Downloading {len(missing)} training data file(s) - total ~{total_mb:.0f} MB")
+        print(f"Downloading {len(missing)} training data file(s) — total ~{total_mb:.0f} MB")
 
     paths = []
     for name, entry in TRAINING_DATA_REGISTRY.items():

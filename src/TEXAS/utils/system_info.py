@@ -22,7 +22,7 @@ def get_cpu_info():
     try:
         # Try to get CPU model from /proc/cpuinfo (Linux)
         cpu_model = None
-        with open('/proc/cpuinfo', 'r') as f:
+        with open('/proc/cpuinfo', 'r', encoding="utf-8") as f:
             for line in f:
                 if 'model name' in line:
                     cpu_model = line.split(':')[1].strip()
@@ -81,7 +81,7 @@ def get_container_info():
     
     try:
         # Check for container indicators
-        with open('/proc/1/cgroup', 'r') as f:
+        with open('/proc/1/cgroup', 'r', encoding="utf-8") as f:
             cgroup_content = f.read()
             if 'docker' in cgroup_content:
                 container_info["in_container"] = True
@@ -252,7 +252,7 @@ def save_system_summary(filepath=None):
     if filepath is None:
         filepath = f"system_config_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 
-    with open(filepath, 'w') as f:
+    with open(filepath, 'w', encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
 
     print(f"✅ System configuration saved to: {filepath}")

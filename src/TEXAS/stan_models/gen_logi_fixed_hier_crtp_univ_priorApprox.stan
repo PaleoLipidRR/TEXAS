@@ -18,7 +18,7 @@ parameters {
   real<lower=10, upper=50> t0_crtp;            // center (not necessarily inflection point)
   real<lower=0.01, upper=0.5> k_crtp;          // growth rate
   real<lower=0.1, upper=1.0> b_crtp;           // lower asymptote (upper=1 matches joint model)
-  real<lower=0.1, upper=10> v_crtp;           // asymmetry / shape parameter (ν)
+  real<lower=0.1, upper=10> v_crtp;           // asymmetry / shape parameter (nu)
   real<lower=0> sigma_proxyObs_crtp;          // residual std dev
 }
 
@@ -42,9 +42,9 @@ generated quantities {
     // Inflection point of the Richards curve (where curvature changes sign)
     real inflection_point = t0_crtp + log(v_crtp) / k_crtp;
 
-    // ── In-sample R² for this model ───────────────────────────────────────────
+    // -- In-sample R^2 for this model -------------------------------------------
     // R2_full     : frequentist 1 - RSS/TSS  (matches figure; fixed denominator)
-    // bayesR2_full: Bayesian var(μ)/(var(μ)+σ²)  (Gelman et al. 2019)
+    // bayesR2_full: Bayesian var(mu)/(var(mu)+sigma^2)  (Gelman et al. 2019)
     // Both computed using this model's own estimated parameters (T only, no
     // non-thermal predictors). Use R2_full for sequential variance partitioning
     // by differencing across posteriors in Python.
@@ -52,7 +52,7 @@ generated quantities {
     real bayesR2_full;
     real RMSE_full;
 
-    {   // local scope — mu vector not saved
+    {   // local scope - mu vector not saved
         vector[N_crtp] mu    = b_crtp + (1 - b_crtp)
             ./ pow(1 + exp(-k_crtp * (t_crtp - t0_crtp)), 1.0 / v_crtp);
 
