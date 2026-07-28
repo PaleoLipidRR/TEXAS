@@ -41,10 +41,12 @@ from matplotlib.patches import Rectangle
 try:
     import cartopy.feature as cfeature
     import cartopy.crs as ccrs
+    import shapely.geometry as sgeom
     _CARTOPY_AVAILABLE = True
 except ImportError:
     cfeature = None
     ccrs = None
+    sgeom = None
     _CARTOPY_AVAILABLE = False
 
 import xarray as xr
@@ -442,6 +444,57 @@ def _regionmask_mask(lons, lats, region_name):
     return region_ids == _REGION_NAME_TO_NUMBER[region_name]
 
 
+# Pad (degrees) added around a zoom panel's visible window before trimming.
+# Keeps meshes and coastlines running cleanly to the panel edge without
+# carrying meaningful extra geometry.
+_PANEL_PAD_DEG = 1.0
+
+# Clipped Natural Earth geometries, keyed by (feature id, rounded window).
+_CLIPPED_FEATURE_CACHE: dict = {}
+
+
+def _visible_window(ax, pad: float = _PANEL_PAD_DEG):
+    """Return the lon/lat box a zoom panel actually shows, plus *pad*.
+
+    `set_extent()` fits the *projected* bounding box of the requested extent, so
+    the visible window is wider than what was asked for (Eckert III meridians
+    converge poleward: a [-10, 43] request shows out to ~46 degrees E). Trimming
+    to the requested extent alone would clip visible geometry, so trim to this
+    instead.
+    """
+    lon0, lon1, lat0, lat1 = ax.get_extent(ccrs.PlateCarree())
+    return lon0 - pad, lon1 + pad, lat0 - pad, lat1 + pad
+
+
+def _clipped_feature(feature, window):
+    """Return *feature* with its geometries cropped to the *window* box.
+
+    Cartopy's FeatureArtist selects whole geometries by bounding-box overlap, so
+    a Mediterranean panel still embeds the complete Eurasia and Africa polygons
+    in vector output — invisible behind the axes clip path, but they inflate the
+    PDF/SVG and make the panel painful to edit in Inkscape (dragging the
+    coastline drags a continent). Intersecting up front keeps only the vertices
+    that fall inside the panel.
+    """
+    key = (id(feature), tuple(round(v, 3) for v in window))
+    if key in _CLIPPED_FEATURE_CACHE:
+        return _CLIPPED_FEATURE_CACHE[key]
+
+    lon0, lon1, lat0, lat1 = window
+    box = sgeom.box(lon0, lat0, lon1, lat1)
+    geoms = []
+    for geom in feature.geometries():
+        if not geom.intersects(box):
+            continue
+        clipped = geom.intersection(box)
+        if not clipped.is_empty:
+            geoms.append(clipped)
+
+    out = cfeature.ShapelyFeature(geoms, feature.crs, **feature.kwargs)
+    _CLIPPED_FEATURE_CACHE[key] = out
+    return out
+
+
 def _fill_map(
     ax,
     z_halo: np.ma.MaskedArray,
@@ -464,16 +517,17 @@ def _fill_map(
         m = _extent_mask(lons, lats, extent)
         sc_lons, sc_lats = lons[m], lats[m]
 
-        # Subset grid arrays to extent + buffer. Also: do NOT rasterize zoom
-        # panels — PDF output drops rasterized bitmaps inside a Cartopy axes
-        # that has set_extent (the bitmap loses its clip path and goes white).
-        # After subsetting the grid is small enough for vector rendering.
-        _buf = 5.0
-        lon0, lon1, lat0, lat1 = extent
-        _lh = (grid_lon_halo >= lon0 - _buf) & (grid_lon_halo <= lon1 + _buf)
-        _rh = (grid_lat_halo >= lat0 - _buf) & (grid_lat_halo <= lat1 + _buf)
-        _lt = (grid_lon_true >= lon0 - _buf) & (grid_lon_true <= lon1 + _buf)
-        _rt = (grid_lat_true >= lat0 - _buf) & (grid_lat_true <= lat1 + _buf)
+        # Trim every layer to the panel's visible window. Anything outside is
+        # hidden by the axes clip path anyway, but it still ships in the PDF/SVG
+        # and dominates the file size. Also: do NOT rasterize zoom panels — PDF
+        # output drops rasterized bitmaps inside a Cartopy axes that has
+        # set_extent (the bitmap loses its clip path and goes white). After
+        # trimming the grid is small enough for vector rendering.
+        lon0, lon1, lat0, lat1 = _visible_window(ax)
+        _lh = (grid_lon_halo >= lon0) & (grid_lon_halo <= lon1)
+        _rh = (grid_lat_halo >= lat0) & (grid_lat_halo <= lat1)
+        _lt = (grid_lon_true >= lon0) & (grid_lon_true <= lon1)
+        _rt = (grid_lat_true >= lat0) & (grid_lat_true <= lat1)
         grid_lon_halo = grid_lon_halo[_lh]
         grid_lat_halo = grid_lat_halo[_rh]
         z_halo        = z_halo[np.ix_(_rh, _lh)]
@@ -481,9 +535,11 @@ def _fill_map(
         grid_lat_true = grid_lat_true[_rt]
         z_true        = z_true[np.ix_(_rt, _lt)]
         _rasterized = False
+        _window = (lon0, lon1, lat0, lat1)
     else:
         sc_lons, sc_lats = lons, lats
         _rasterized = True
+        _window = None
 
     ax.pcolormesh(
         grid_lon_halo, grid_lat_halo, z_halo,
@@ -491,11 +547,25 @@ def _fill_map(
         transform=ccrs.PlateCarree(), zorder=2, rasterized=_rasterized,
     )
 
-    ax.pcolormesh(
-        grid_lon_true, grid_lat_true, z_true,
-        cmap=cmap, norm=norm,
-        transform=ccrs.PlateCarree(), zorder=3, rasterized=_rasterized,
-    )
+    if _window is None:
+        ax.pcolormesh(
+            grid_lon_true, grid_lat_true, z_true,
+            cmap=cmap, norm=norm,
+            transform=ccrs.PlateCarree(), zorder=3, rasterized=_rasterized,
+        )
+    else:
+        # The 0.25 degree true-data layer is mostly empty — only cells holding a
+        # coretop are unmasked. pcolormesh emits a path for every cell including
+        # the masked ones, which is ~99% of the vector file for a zoom panel;
+        # pcolor drops masked cells entirely. edgecolors='face' strokes each
+        # quad in its own fill colour so neighbouring cells show no hairline
+        # seam. Zoom panels only — the global panels are rasterized, where
+        # pcolormesh is both faster and already compact.
+        ax.pcolor(
+            grid_lon_true, grid_lat_true, z_true,
+            cmap=cmap, norm=norm, edgecolors="face", linewidth=0,
+            transform=ccrs.PlateCarree(), zorder=3, rasterized=_rasterized,
+        )
 
     ax.scatter(
         sc_lons, sc_lats,
@@ -503,9 +573,16 @@ def _fill_map(
         transform=ccrs.PlateCarree(), zorder=6,
     )
 
-    ax.add_feature(_LAND,      zorder=4)
-    ax.add_feature(_COASTLINE, zorder=5)
-    ax.add_feature(_BORDERS,   zorder=5)
+    if _window is None:
+        land, coastline, borders = _LAND, _COASTLINE, _BORDERS
+    else:
+        land      = _clipped_feature(_LAND,      _window)
+        coastline = _clipped_feature(_COASTLINE, _window)
+        borders   = _clipped_feature(_BORDERS,   _window)
+
+    ax.add_feature(land,      zorder=4)
+    ax.add_feature(coastline, zorder=5)
+    ax.add_feature(borders,   zorder=5)
 
 
 def _circled_number(

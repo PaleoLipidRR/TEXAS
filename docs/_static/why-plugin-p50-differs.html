@@ -1,0 +1,402 @@
+<!--
+  Why plug-in P50 ≠ full-Bayesian P50 in the TEXAS inverse reconstruction.
+  Self-contained teaching page (no external assets) — open locally, drop into the
+  TEXAS docs site (docs/), or publish as an Artifact later.
+  Model + numbers taken from the real forward posterior:
+  gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.
+-->
+<title>Why plug-in P50 ≠ Bayesian P50 — TEXAS</title>
+<style>
+  :root{
+    color-scheme: light;
+    --plane:#f9f9f7; --surface:#fcfcfb;
+    --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+    --grid:#e1e0d9; --axis:#c3c2b7; --border:rgba(11,11,11,0.10);
+    --bayes:#2a78d6;   /* full Bayesian posterior */
+    --plugin:#eb6834;  /* plug-in / likelihood-only */
+    --prior:#4a3aa7;   /* temperature prior */
+    --warnc:#d03b3b; --good:#0ca30c; --card:#ffffff;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:where(:not([data-theme="light"])){
+      color-scheme: dark;
+      --plane:#0d0d0d; --surface:#1a1a19; --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+      --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,0.10);
+      --bayes:#3987e5; --plugin:#d95926; --prior:#9085e9; --warnc:#e66767; --card:#232322;
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --plane:#0d0d0d; --surface:#1a1a19; --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#383835; --border:rgba(255,255,255,0.10);
+    --bayes:#3987e5; --plugin:#d95926; --prior:#9085e9; --warnc:#e66767; --card:#232322;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--plane); color:var(--ink); font-family:system-ui,-apple-system,"Segoe UI",sans-serif; line-height:1.55; font-size:16px; -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px; margin:0 auto; padding:32px 22px 96px}
+  header.page{border-bottom:1px solid var(--border); padding-bottom:20px; margin-bottom:8px}
+  h1{font-size:1.72rem; line-height:1.2; margin:0 0 8px; letter-spacing:-0.01em}
+  h2{font-size:1.28rem; margin:44px 0 12px; letter-spacing:-0.01em}
+  h3{font-size:1.02rem; margin:22px 0 6px}
+  .sub{color:var(--ink-2); font-size:1.02rem; margin:0}
+  p{margin:12px 0} .lede{font-size:1.06rem}
+  code,.mono{font-family:ui-monospace,"Cascadia Code","Consolas",monospace; font-size:0.9em}
+  .var{font-style:italic} a{color:var(--bayes)}
+  .callout{background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px 18px; margin:18px 0}
+  .callout.key{border-left:3px solid var(--prior)}
+  .callout.warn{border-left:3px solid var(--plugin)}
+  .callout.crit{border-left:3px solid var(--warnc)}
+  .callout .tag{display:inline-block; font-size:0.72rem; font-weight:650; letter-spacing:0.04em; text-transform:uppercase; color:var(--prior); margin-bottom:4px}
+  .callout.warn .tag{color:var(--plugin)} .callout.crit .tag{color:var(--warnc)}
+  .diagram{display:grid; grid-template-columns:1fr; gap:14px; margin:16px 0 4px}
+  @media(min-width:720px){ .diagram{grid-template-columns:1fr 1fr} }
+  .path{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px}
+  .path h4{margin:0 0 10px; font-size:0.95rem; display:flex; align-items:center; gap:8px}
+  .dot{width:10px; height:10px; border-radius:3px; display:inline-block; flex:none}
+  .dot.b{background:var(--bayes)} .dot.p{background:var(--plugin)} .dot.c{background:var(--warnc)}
+  .sandbox{background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px 18px 8px; margin:14px 0}
+  .plots{display:grid; grid-template-columns:1fr; gap:18px}
+  @media(min-width:760px){ .plots{grid-template-columns:1fr 1fr} }
+  .plot-box h4{margin:0 0 2px; font-size:0.9rem}
+  .plot-box .cap{margin:0 0 8px; font-size:0.78rem; color:var(--muted)}
+  canvas{width:100%; height:auto; display:block; border-radius:8px}
+  .legend{display:flex; flex-wrap:wrap; gap:14px; margin:8px 2px 2px; font-size:0.82rem; color:var(--ink-2)}
+  .legend span{display:inline-flex; align-items:center; gap:6px}
+  .sw{width:22px; height:0; border-top-width:3px; border-top-style:solid; display:inline-block}
+  .sw.dash{border-top-style:dashed} .sw.fill{height:11px; border-top:none; border-radius:3px; opacity:0.9}
+  .readout{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:16px 0 6px}
+  .stat{background:var(--card); border:1px solid var(--border); border-radius:10px; padding:12px 14px}
+  .stat .lab{font-size:0.72rem; color:var(--muted); letter-spacing:0.03em; text-transform:uppercase}
+  .stat .val{font-size:1.5rem; font-weight:600; font-variant-numeric:tabular-nums; margin-top:2px}
+  .stat.bayes .val{color:var(--bayes)} .stat.plugin .val{color:var(--plugin)}
+  .stat .sub2{font-size:0.74rem; color:var(--muted); margin-top:2px}
+  .controls{display:grid; grid-template-columns:1fr; gap:16px 26px; margin:18px 0 6px; padding-top:16px; border-top:1px solid var(--border)}
+  @media(min-width:640px){ .controls{grid-template-columns:1fr 1fr} }
+  .ctrl label{display:flex; justify-content:space-between; font-size:0.86rem; margin-bottom:5px}
+  .ctrl label .v{font-variant-numeric:tabular-nums; color:var(--ink-2); font-weight:600}
+  input[type=range]{width:100%; accent-color:var(--bayes); margin:0}
+  .ctrl .hint{font-size:0.74rem; color:var(--muted); margin-top:3px}
+  .toggles{grid-column:1/-1; display:flex; flex-wrap:wrap; gap:18px; margin-top:2px; align-items:center}
+  .toggles label{display:inline-flex; align-items:center; gap:7px; font-size:0.86rem; cursor:pointer}
+  input[type=checkbox]{accent-color:var(--prior); width:16px; height:16px}
+  .btn{background:var(--plane); border:1px solid var(--border); color:var(--ink); border-radius:8px; padding:7px 12px; font-size:0.82rem; cursor:pointer; font-family:inherit}
+  .btn:hover{border-color:var(--muted)}
+  .decomp{margin-top:14px}
+  .decomp table{width:100%; border-collapse:collapse; font-size:0.88rem}
+  .decomp th,.decomp td{text-align:left; padding:8px 10px; border-bottom:1px solid var(--border)}
+  .decomp th{font-size:0.72rem; letter-spacing:0.03em; text-transform:uppercase; color:var(--muted); font-weight:600}
+  .decomp tr.total td{font-weight:650; border-top:1px solid var(--axis)}
+  .decomp td.num{text-align:right; font-variant-numeric:tabular-nums}
+  .bar{height:8px; border-radius:4px; background:var(--bayes); opacity:0.85}
+  .barcell{width:34%}
+  ul.tight{margin:10px 0; padding-left:22px} ul.tight li{margin:5px 0}
+  pre{background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 16px; overflow-x:auto; font-size:0.83rem; line-height:1.5}
+  pre code{color:var(--ink)}
+  .tok-c{color:var(--muted)} .tok-k{color:var(--prior)} .tok-s{color:var(--good)}
+  footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); font-size:0.85rem; color:var(--muted)}
+  .eq{font-family:ui-monospace,"Cascadia Code",monospace; font-size:0.9em; background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:2px 7px}
+  .theme-toggle{float:right; margin-top:-2px}
+  .flag{display:inline-block; font-size:0.72rem; font-weight:650; padding:2px 8px; border-radius:20px; margin-left:6px; vertical-align:middle}
+  .flag.bad{background:color-mix(in srgb, var(--warnc) 18%, transparent); color:var(--warnc)}
+</style>
+
+<div class="wrap">
+<header class="page">
+  <button class="btn theme-toggle" id="themeBtn" title="Toggle light/dark">◐ theme</button>
+  <h1>Why the plug-in P50 doesn't match the TEXAS Bayesian P50</h1>
+  <p class="sub">Inverting the calibration at the posterior-median parameters is <em>not</em> the same as the median of the full <code>predict_T_from_proxyObs</code> posterior — and for the TEXAS S-curve the gap is largest exactly where you care most: the temperature extremes.</p>
+</header>
+
+<p class="lede">TEXAS reconstructs temperature by inverting a <b>generalized-logistic</b> calibration
+<span class="eq">scaledRI = b + (1−b)/(1+e^(−k(T−t0)))^(1/v) + ε</span>, marginalizing over ~100 forward-posterior draws and applying a temperature prior <span class="eq">T ~ TruncNormal(μ, σ, lower=min_temp)</span>. Your "frequentist" estimate inverts that curve once, at the median <span class="var">(t0, k, b, v)</span>. Three things make the two P50s disagree — and near the S-curve's flat ends the plug-in doesn't just disagree, it <b>breaks</b>. Everything below runs on the real <code>univ_priorApprox_SST_scaledRI_cren3</code> posterior.</p>
+
+<div class="callout key">
+  <span class="tag">The short answer</span>
+  <p style="margin:2px 0 0">The full posterior is a <b>prior × marginalized-likelihood</b> compromise over a steeply nonlinear inverse. The plug-in ignores the prior, ignores the ensemble mixture, and inverts a single S-curve that <b>misbehaves near its own asymptote</b> <span class="eq">b≈0.42</span>. Result: a systematic ~1–2&nbsp;°C offset mid-curve, ballooning to 5–15&nbsp;°C (or <i>undefined</i>) at the cold and warm extremes.</p>
+</div>
+
+<h2>Three effects, and where each dominates</h2>
+<div class="diagram">
+  <div class="path">
+    <h4><span class="dot c"></span>S-curve inverse breaks down near the asymptotes</h4>
+    <p style="margin:2px 0 0; font-size:0.92rem">The inverse <span class="eq">t0 − ln(((1−b)/(y−b))^v − 1)/k</span> explodes as the proxy approaches <span class="eq">b</span> (lower) or 1 (upper). At the median curve, a proxy just above <span class="eq">b</span> maps to an absurd cold value; a proxy <i>below</i> the median <span class="eq">b</span> is <b>undefined</b>. The marginalized posterior stays finite because most ensemble members have a lower <span class="eq">b</span>. <b>Dominant at temperature extremes.</b></p>
+  </div>
+  <div class="path">
+    <h4><span class="dot p"></span>Marginalizing a mixture of curves ≠ inverting the median curve</h4>
+    <p style="margin:2px 0 0; font-size:0.92rem">TEXAS averages the likelihood over ~100 forward draws (the S-curves fan out — steepness <span class="eq">k</span> and shape <span class="eq">v</span> are very uncertain). Because the inverse is steeply nonlinear, <span class="eq">median<sub>m</sub>[inv(y;θ_m)] ≠ inv(y;θ̂)</span> — this moves the <b>median</b>, not just the mean. <b>Dominant on the steep flanks.</b></p>
+  </div>
+</div>
+<div class="callout key" style="margin-top:14px">
+  <span class="tag">3 · The temperature prior — the systematic mid-curve offset</span>
+  <p style="margin:2px 0 0">Where the data are informative (steep middle of the S-curve), the posterior is a precision-weighted blend of the proxy-implied T and the prior mean, shrinking toward <span class="eq">μ</span> by ~1–2&nbsp;°C for a diffuse <span class="eq">σ=10</span> and much more for a tight prior. The plug-in uses none of it. Widen <span class="eq">σ</span> in the sandbox and this piece vanishes — the clean diagnostic that it's the prior, not arithmetic.</p>
+</div>
+
+<h2>Drive it yourself</h2>
+<p>Left: the real forward calibration — 80 posterior S-curves (thin blue), the median curve (bold), the lower asymptote <span class="eq">b</span>, and your proxy read across to the plug-in temperature. Right: the marginalized temperature posterior (blue) against the prior (violet) and the plug-in point (orange). Push the proxy toward <span class="eq">b≈0.42</span> or toward 1 and watch the plug-in detonate.</p>
+
+<div class="sandbox">
+  <div class="plots">
+    <div class="plot-box">
+      <h4>Forward calibration &amp; inverse</h4>
+      <p class="cap">scaledRI vs temperature — real posterior ensemble; proxy read across to the plug-in T</p>
+      <canvas id="calCanvas" width="900" height="640"></canvas>
+    </div>
+    <div class="plot-box">
+      <h4>Reconstructed temperature</h4>
+      <p class="cap">marginalized posterior (blue) vs prior (violet) vs plug-in point (orange)</p>
+      <canvas id="distCanvas" width="900" height="640"></canvas>
+      <div class="legend">
+        <span><i class="sw fill" style="background:var(--prior)"></i>T prior</span>
+        <span><i class="sw fill" style="background:var(--bayes)"></i>posterior</span>
+        <span><i class="sw dash" style="border-color:var(--plugin)"></i>plug-in P50</span>
+        <span><i class="sw" style="border-color:var(--bayes)"></i>Bayes P50</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="readout">
+    <div class="stat plugin"><div class="lab">Plug-in P50 (invert median curve)</div><div class="val" id="v-plugin">–</div><div class="sub2" id="s-plugin"></div></div>
+    <div class="stat bayes"><div class="lab">TEXAS Bayesian P50</div><div class="val" id="v-bayes">–<span style="font-size:.85rem;font-weight:400"> °C</span></div><div class="sub2" id="s-bayes"></div></div>
+    <div class="stat gap"><div class="lab">Disagreement (Bayes − plug-in)</div><div class="val" id="v-gap">–</div><div class="sub2" id="s-gap"></div></div>
+  </div>
+
+  <div class="controls">
+    <div class="ctrl">
+      <label>Proxy value — scaledRI <span class="v"><span id="l-proxy"></span></span></label>
+      <input type="range" id="s-proxy" min="430" max="980" step="2" value="620">
+      <div class="hint">Lower asymptote is b≈0.42. Approach it (or 1.0) to see the plug-in inverse blow up or go undefined.</div>
+    </div>
+    <div class="ctrl">
+      <label>Prior mean T <span class="v"><span id="l-pmean"></span> °C</span></label>
+      <input type="range" id="s-pmean" min="-2" max="32" step="1" value="15">
+      <div class="hint">Where the prior pulls. The mid-curve posterior shrinks from the plug-in toward this value.</div>
+    </div>
+    <div class="ctrl">
+      <label>Prior σ <span class="v"><span id="l-psd"></span> °C</span></label>
+      <input type="range" id="s-psd" min="2" max="30" step="1" value="10">
+      <div class="hint">TEXAS default is diffuse (10–15). Small = strong pull = big offset; large = the prior fades.</div>
+    </div>
+    <div class="ctrl">
+      <label>Calibration spread × <span class="v"><span id="l-scale"></span></span></label>
+      <input type="range" id="s-scale" min="30" max="200" step="5" value="100">
+      <div class="hint">Scales the ensemble fan around the median curve. Wider → bigger mixture/nonlinearity gap.</div>
+    </div>
+    <div class="toggles">
+      <label><input type="checkbox" id="c-prior" checked> apply the T prior</label>
+      <label><input type="checkbox" id="c-trunc" checked> truncate at min_temp = −1.8 °C</label>
+      <button class="btn" id="resetBtn" type="button">reset</button>
+    </div>
+  </div>
+
+  <div class="decomp">
+    <h3 style="margin:6px 0 4px">Where the median gap comes from</h3>
+    <p style="margin:2px 0 8px; font-size:0.86rem; color:var(--ink-2)">Same proxy, built up in stages — relative to the plug-in point.</p>
+    <table>
+      <thead><tr><th>Source added</th><th class="num">|median gap|</th><th class="barcell"></th></tr></thead>
+      <tbody id="decompBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<h2>What to actually do</h2>
+<ul class="tight">
+  <li><b>Trust the TEXAS posterior P50.</b> The <code>p50</code> from <code>predict_T_from_proxyObs</code> already marginalizes the ensemble and applies the prior — that's the number to plot. The plug-in is only a sanity shortcut, and an unreliable one near the asymptotes.</li>
+  <li><b>Never invert at the median parameters near the flat ends.</b> The median-<span class="eq">b</span> curve makes the inverse undefined for any proxy below it, even where the full posterior is perfectly well behaved.</li>
+  <li><b>If you want a fast check that matches</b>, marginalize on a grid (below) instead of inverting a single curve — it reproduces the posterior median to a few hundredths of a degree.</li>
+  <li><b>Report the gap against position on the curve / temperature</b>, not as one global offset — it's small mid-curve and large at the extremes.</li>
+</ul>
+
+<p style="margin-top:14px">The correct call, and the grid check, in your own API:</p>
+<pre><code><span class="tok-k">from</span> TEXAS.predict <span class="tok-k">import</span> predict_T_from_proxyObs
+res = predict_T_from_proxyObs(
+        proxyObs=ri, prior_mu_t=15.0, prior_sigma_t=10.0, min_temp=-1.8,   <span class="tok-c"># truncated_prior auto</span>
+        fwd_posterior=<span class="tok-s">"gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3"</span>,
+        temptype=<span class="tok-s">"SST"</span>)
+res[<span class="tok-s">"p50"</span>]                       <span class="tok-c"># ✓ marginalized + prior-aware median</span>
+
+<span class="tok-c"># fast grid check (no Stan) — matches res["p50"]:</span>
+<span class="tok-k">def</span> fwd(T,t0,k,b,v): <span class="tok-k">return</span> b + (1-b)/np.power(1+np.exp(-k*(T-t0)), 1/v)
+T = np.linspace(-1.8, 45, 4000)
+like = np.mean([np.exp(-0.5*((ri-fwd(T,*p[:4]))/p[4])**2)/p[4] <span class="tok-k">for</span> p <span class="tok-k">in</span> draws], axis=0)
+post = like * np.exp(-0.5*((T-15)/10)**2)                 <span class="tok-c"># × T prior</span>
+cdf  = np.cumsum(post); t_p50 = np.interp(0.5*cdf[-1], cdf, T)
+
+<span class="tok-c"># plug-in (what you did) — ignores prior + mixture, undefined for ri &lt; b_med:</span>
+<span class="tok-k">from</span> TEXAS.models.logistics <span class="tok-k">import</span> inverse_generalized_logistic_fixed_upper
+t_bad = inverse_generalized_logistic_fixed_upper(ri, t0=t0_med, b=b_med, k=k_med, v=v_med)
+</code></pre>
+
+<div class="callout warn">
+  <span class="tag">Sanity checks (try them in the sandbox)</span>
+  <ul class="tight" style="margin:2px 0 0">
+    <li>Uncheck <b>apply the T prior</b> → mid-curve the gap shrinks toward the pure mixture/nonlinearity residue; that isolates the prior's contribution.</li>
+    <li>Drag <b>proxy</b> down toward 0.44 → plug-in flips to nonsense cold / <span class="flag bad">undefined</span> while the Bayesian P50 stays sensible. That's the asymptote effect, not the prior.</li>
+    <li>Set the <b>proxy</b> so the implied T ≈ prior mean → the prior piece of the gap → 0. Leverage is the multiplier.</li>
+  </ul>
+</div>
+
+<footer>
+  <p>Runs on the real forward posterior <span class="mono">gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3</span> (median t0≈34.7, k≈0.17, b≈0.42, v≈2.1, σ≈0.058; 80 embedded draws). The sandbox approximates the marginal inverse by grid-integrating the same marginalized likelihood × truncated-Normal prior that the Stan model samples — matched against a numpy reference. The production numbers come from <span class="mono">predict_T_from_proxyObs</span>; this page is for intuition. Palette follows the project data-viz system · self-contained, no external assets.</p>
+</footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  // ---- real forward posterior: median params + 80 draws [t0,k,b,v,sigma] ----
+  const MED={t0:34.709,k:0.172,b:0.4212,v:2.1354,sig:0.0577};
+  const ENS=[[34.952,0.1668,0.4135,2.169,0.0566],[30.627,0.1185,0.4185,1.283,0.0577],[35.52,0.1953,0.4247,2.473,0.0567],[34.389,0.1606,0.4245,1.917,0.0574],[34.152,0.1717,0.429,1.991,0.0594],[33.613,0.1609,0.4332,1.78,0.0555],[35.536,0.2123,0.4289,2.606,0.0587],[34.33,0.1896,0.4246,2.208,0.0572],[37.629,0.2309,0.4018,3.581,0.0582],[32.63,0.1447,0.424,1.612,0.0579],[36.456,0.1974,0.4034,2.866,0.0578],[35.809,0.2086,0.4161,2.79,0.06],[30.601,0.1332,0.4359,1.244,0.0578],[35.217,0.1806,0.4172,2.308,0.0573],[35.988,0.1999,0.4224,2.595,0.0593],[35.192,0.1876,0.4199,2.36,0.0593],[34.255,0.1712,0.423,2.055,0.0572],[36.529,0.2195,0.4111,3.071,0.0562],[31.499,0.146,0.4406,1.413,0.0571],[34.839,0.1536,0.4159,1.99,0.0598],[33.934,0.1651,0.4193,1.989,0.0579],[34.322,0.1663,0.4227,2.017,0.0562],[35.52,0.1791,0.419,2.326,0.0584],[35.861,0.2243,0.4241,2.874,0.0575],[35.968,0.2013,0.4118,2.727,0.0579],[35.235,0.18,0.423,2.245,0.0575],[35.496,0.1754,0.4181,2.287,0.0573],[33.427,0.1569,0.4203,1.828,0.0594],[37.021,0.2579,0.4031,3.793,0.0585],[35.208,0.1884,0.4241,2.344,0.0578],[34.677,0.1811,0.4214,2.165,0.0591],[33.654,0.1708,0.4267,1.917,0.0572],[34.651,0.2025,0.4261,2.411,0.0593],[37.31,0.2511,0.4006,3.806,0.0576],[35.542,0.166,0.4112,2.261,0.057],[33.015,0.1518,0.423,1.751,0.0581],[34.849,0.208,0.4295,2.436,0.0569],[33.546,0.1591,0.4335,1.764,0.0567],[34.652,0.1853,0.4246,2.213,0.0574],[33.325,0.1519,0.4156,1.815,0.0567],[33.228,0.1534,0.4297,1.697,0.056],[37.409,0.2491,0.4115,3.624,0.0593],[33.06,0.153,0.4271,1.698,0.0569],[36.378,0.2065,0.4123,2.858,0.0581],[36.128,0.2048,0.4098,2.846,0.0574],[30.632,0.1284,0.4309,1.265,0.0576],[32.449,0.1382,0.4303,1.484,0.0585],[35.951,0.1845,0.3967,2.676,0.0589],[35.851,0.2057,0.4154,2.72,0.0595],[32.715,0.1549,0.4275,1.689,0.0558],[34.154,0.1608,0.4202,1.935,0.0564],[34.014,0.174,0.4267,2.008,0.0565],[29.981,0.1358,0.44,1.205,0.0579],[30.109,0.1313,0.4445,1.183,0.0589],[32.549,0.1494,0.4239,1.621,0.0578],[36.235,0.2154,0.4104,3.033,0.0567],[36.098,0.2023,0.4128,2.769,0.0563],[31.881,0.1315,0.4199,1.446,0.0585],[34.728,0.1773,0.4225,2.181,0.0582],[34.653,0.1637,0.4154,2.074,0.0588],[34.123,0.1725,0.4223,2.023,0.0576],[30.944,0.1399,0.4379,1.312,0.0571],[28.76,0.1204,0.4322,1.07,0.0572],[35.378,0.1852,0.4149,2.426,0.0571],[32.502,0.1591,0.442,1.594,0.0575],[37.664,0.2922,0.4021,4.467,0.0585],[31.523,0.1301,0.4231,1.395,0.0579],[33.996,0.1354,0.4119,1.752,0.0596],[35.093,0.1541,0.4111,2.076,0.0568],[29.614,0.1242,0.4335,1.16,0.0583],[35.462,0.1722,0.4133,2.327,0.0567],[32.806,0.1498,0.4259,1.649,0.057],[35.597,0.1775,0.412,2.412,0.0584],[36.673,0.2064,0.4159,2.879,0.0583],[35.901,0.1703,0.4047,2.387,0.0575],[37.342,0.2131,0.4057,3.22,0.0559],[33.731,0.1617,0.4304,1.823,0.057],[37.142,0.2326,0.4104,3.337,0.0571],[34.695,0.1623,0.4119,2.098,0.0575],[36.109,0.2164,0.4145,2.904,0.0562]];
+
+  const T_LO=-2, T_HI=42, RI_LO=0.40, RI_HI=1.0, GRID=520;
+  const fwd=(T,t0,k,b,v)=> b+(1-b)/Math.pow(1+Math.exp(-k*(T-t0)),1/v);
+  function invLogit(y,t0,k,b,v){ if(y<=b||y>=1) return NaN; const val=Math.pow((1-b)/(y-b),v)-1; if(val<=0) return NaN; return t0-Math.log(val)/k; }
+  // scaled ensemble: params_m = MED + scale*(draw_m - MED)
+  function scaledEns(scale){ const M=['t0','k','b','v','sig']; return ENS.map(d=>{const p={}; M.forEach((n,i)=>p[n]=MED[n]+scale*(d[i]-MED[n])); return p;}); }
+
+  const $=id=>document.getElementById(id);
+  const els={proxy:$('s-proxy'),pmean:$('s-pmean'),psd:$('s-psd'),scale:$('s-scale'),
+    prior:$('c-prior'),trunc:$('c-trunc'),
+    lProxy:$('l-proxy'),lPmean:$('l-pmean'),lPsd:$('l-psd'),lScale:$('l-scale'),
+    vPlugin:$('v-plugin'),vBayes:$('v-bayes'),vGap:$('v-gap'),
+    sPlugin:$('s-plugin'),sBayes:$('s-bayes'),sGap:$('s-gap'),decomp:$('decompBody')};
+  const cal=$('calCanvas'), dist=$('distCanvas');
+
+  function P(){return {proxy:+els.proxy.value/1000, pmean:+els.pmean.value, psd:+els.psd.value,
+    scale:+els.scale.value/100, usePrior:els.prior.checked, minT:els.trunc.checked?-1.8:T_LO};}
+
+  // grid posterior over T: marginalized likelihood (× prior)
+  function posterior(p, ens, usePrior){
+    const T=new Float64Array(GRID), post=new Float64Array(GRID), dt=(T_HI-p.minT)/(GRID-1);
+    for(let i=0;i<GRID;i++){ const t=p.minT+i*dt; T[i]=t;
+      let like=0; for(const q of ens){ const mu=fwd(t,q.t0,q.k,q.b,q.v); like+=Math.exp(-0.5*((p.proxy-mu)/q.sig)**2)/q.sig; }
+      like/=ens.length;
+      let pr=1; if(usePrior){ pr=Math.exp(-0.5*((t-p.pmean)/p.psd)**2); }
+      post[i]=like*pr;
+    }
+    return {T,post,dt};
+  }
+  function quantile(g,qq){ let tot=0; for(let i=0;i<GRID;i++)tot+=g.post[i]; if(tot<=0)return NaN;
+    let c=0; const targ=qq*tot; for(let i=0;i<GRID;i++){ c+=g.post[i]; if(c>=targ){ // linear interp
+        const c0=c-g.post[i]; const f=(targ-c0)/(g.post[i]||1); return g.T[i]-g.dt+f*g.dt; } } return g.T[GRID-1]; }
+
+  const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+  function setup(c){const dpr=Math.min(window.devicePixelRatio||1,2);const w=c.clientWidth||440,h=Math.round(w*0.74);
+    c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);c.style.height=h+'px';const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);return {ctx:x,w,h};}
+
+  function drawCal(p,ens){
+    const {ctx,w,h}=setup(cal);
+    const mut=css('--muted'),grid=css('--grid'),axis=css('--axis'),blue=css('--bayes'),orange=css('--plugin'),ink2=css('--ink-2');
+    const m={l:48,r:14,t:14,b:34};
+    const px=v=>m.l+(v-T_LO)/(T_HI-T_LO)*(w-m.l-m.r);
+    const py=v=>h-m.b-(v-RI_LO)/(RI_HI-RI_LO)*(h-m.t-m.b);
+    ctx.clearRect(0,0,w,h);
+    ctx.strokeStyle=grid;ctx.lineWidth=1;ctx.fillStyle=mut;ctx.font='11px system-ui';ctx.textAlign='center';ctx.textBaseline='top';
+    for(let x=0;x<=40;x+=10){ctx.beginPath();ctx.moveTo(px(x),m.t);ctx.lineTo(px(x),h-m.b);ctx.stroke();ctx.fillText(x+'°',px(x),h-m.b+6);}
+    ctx.textAlign='right';ctx.textBaseline='middle';
+    for(let q=0.4;q<=1.001;q+=0.1){ctx.beginPath();ctx.moveTo(m.l,py(q));ctx.lineTo(w-m.r,py(q));ctx.stroke();ctx.fillText(q.toFixed(1),m.l-6,py(q));}
+    ctx.strokeStyle=axis;ctx.beginPath();ctx.moveTo(m.l,h-m.b);ctx.lineTo(w-m.r,h-m.b);ctx.moveTo(m.l,m.t);ctx.lineTo(m.l,h-m.b);ctx.stroke();
+    ctx.fillStyle=ink2;ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText('temperature (°C)',(m.l+w-m.r)/2,h-2);
+    ctx.save();ctx.translate(13,(m.t+h-m.b)/2);ctx.rotate(-Math.PI/2);ctx.textBaseline='top';ctx.fillText('scaledRI',0,0);ctx.restore();
+    // lower asymptote (median b)
+    ctx.strokeStyle=mut;ctx.setLineDash([2,3]);ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(m.l,py(MED.b));ctx.lineTo(w-m.r,py(MED.b));ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle=mut;ctx.textAlign='left';ctx.textBaseline='bottom';ctx.fillText('b ≈ '+MED.b.toFixed(2)+' (lower asymptote)',m.l+6,py(MED.b)-3);
+    // ensemble curves
+    ctx.strokeStyle=blue;ctx.lineWidth=1;ctx.globalAlpha=0.10;
+    for(const q of ens){ ctx.beginPath(); for(let i=0;i<=120;i++){const T=T_LO+(T_HI-T_LO)*i/120; const x=px(T),y=py(fwd(T,q.t0,q.k,q.b,q.v)); i?ctx.lineTo(x,y):ctx.moveTo(x,y);} ctx.stroke(); }
+    ctx.globalAlpha=1;ctx.strokeStyle=blue;ctx.lineWidth=2;ctx.beginPath();
+    for(let i=0;i<=160;i++){const T=T_LO+(T_HI-T_LO)*i/160; const x=px(T),y=py(fwd(T,MED.t0,MED.k,MED.b,MED.v)); i?ctx.lineTo(x,y):ctx.moveTo(x,y);} ctx.stroke();
+    // proxy read-across
+    const yv=Math.min(RI_HI,Math.max(RI_LO,p.proxy)), py0=py(yv);
+    ctx.strokeStyle=orange;ctx.setLineDash([5,4]);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(m.l,py0);ctx.lineTo(w-m.r,py0);ctx.stroke();
+    const tHat=invLogit(p.proxy,MED.t0,MED.k,MED.b,MED.v);
+    if(tHat===tHat && tHat>T_LO && tHat<T_HI){ ctx.beginPath();ctx.moveTo(px(tHat),py0);ctx.lineTo(px(tHat),h-m.b);ctx.stroke();
+      ctx.setLineDash([]);ctx.fillStyle=orange;ctx.beginPath();ctx.arc(px(tHat),py0,4,0,6.283);ctx.fill(); }
+    else { ctx.setLineDash([]); ctx.fillStyle=css('--warnc');ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.font='600 12px system-ui'; ctx.fillText(tHat!==tHat?'plug-in undefined here':'plug-in off-scale', (m.l+w-m.r)/2, py0-12); }
+    ctx.setLineDash([]);ctx.fillStyle=orange;ctx.textAlign='left';ctx.textBaseline='bottom';ctx.font='11px system-ui';
+    ctx.fillText('proxy = '+p.proxy.toFixed(3),m.l+6,py0-4);
+  }
+
+  function drawDist(p,ens){
+    const {ctx,w,h}=setup(dist);
+    const grid=css('--grid'),axis=css('--axis'),mut=css('--muted'),blue=css('--bayes'),orange=css('--plugin'),violet=css('--prior'),ink2=css('--ink-2'),warnc=css('--warnc');
+    const g=posterior(p,ens,p.usePrior);
+    const bP50=quantile(g,0.5), bP5=quantile(g,0.05), bP95=quantile(g,0.95);
+    const pl=invLogit(p.proxy,MED.t0,MED.k,MED.b,MED.v);
+    // x-range
+    let lo=bP5, hi=bP95; if(pl===pl){lo=Math.min(lo,pl);hi=Math.max(hi,pl);} if(p.usePrior){lo=Math.min(lo,p.pmean-p.psd);hi=Math.max(hi,p.pmean+p.psd);}
+    const pad=(hi-lo)*0.16||3; lo-=pad; hi+=pad;
+    const m={l:14,r:14,t:20,b:34}, px=v=>m.l+(v-lo)/(hi-lo)*(w-m.l-m.r), baseY=h-m.b, topY=m.t+6;
+    ctx.clearRect(0,0,w,h);
+    // densities on plotting range
+    const NB=g.T.length; let mxP=0; for(let i=0;i<NB;i++) if(g.post[i]>mxP)mxP=g.post[i];
+    const prior=p.usePrior? g.T.map(t=>Math.exp(-0.5*((t-p.pmean)/p.psd)**2)) : null;
+    let mxPr=0; if(prior){for(const v of prior) if(v>mxPr)mxPr=v;}
+    // axis
+    ctx.strokeStyle=axis;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(m.l,baseY);ctx.lineTo(w-m.r,baseY);ctx.stroke();
+    ctx.font='11px system-ui';const tick=(hi-lo)>24?10:(hi-lo)>10?5:2;
+    for(let t=Math.ceil(lo/tick)*tick;t<=hi;t+=tick){ctx.strokeStyle=grid;ctx.beginPath();ctx.moveTo(px(t),topY);ctx.lineTo(px(t),baseY);ctx.stroke();
+      ctx.fillStyle=mut;ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(t+'°',px(t),baseY+6);}
+    ctx.fillStyle=ink2;ctx.textAlign='center';ctx.textBaseline='bottom';ctx.fillText('reconstructed T (°C)',(m.l+w-m.r)/2,h-2);
+    function area(vals,norm,color,alpha){ ctx.beginPath();ctx.moveTo(px(g.T[0]),baseY);
+      for(let i=0;i<NB;i++){ if(g.T[i]<lo||g.T[i]>hi) continue; ctx.lineTo(px(g.T[i]),baseY-(vals[i]/norm)*(baseY-topY)); }
+      ctx.lineTo(px(g.T[NB-1]),baseY);ctx.closePath();ctx.globalAlpha=alpha;ctx.fillStyle=color;ctx.fill();ctx.globalAlpha=1;
+      ctx.globalAlpha=0.9;ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.beginPath();let started=false;
+      for(let i=0;i<NB;i++){ if(g.T[i]<lo||g.T[i]>hi) continue; const x=px(g.T[i]),y=baseY-(vals[i]/norm)*(baseY-topY); started?ctx.lineTo(x,y):(ctx.moveTo(x,y),started=true);} ctx.stroke();ctx.globalAlpha=1; }
+    if(prior) area(prior,mxPr,violet,0.14);
+    area(Array.from(g.post),mxP,blue,0.22);
+    function vline(x,color,dash,lw){ if(x!==x||x<lo||x>hi)return; ctx.save();ctx.strokeStyle=color;ctx.lineWidth=lw||2;ctx.setLineDash(dash||[]);
+      ctx.beginPath();ctx.moveTo(px(x),topY-6);ctx.lineTo(px(x),baseY);ctx.stroke();ctx.restore(); }
+    vline(pl,orange,[6,4],2.5); vline(bP50,blue,[],2.5);
+    ctx.fillStyle=ink2;ctx.font='600 12px system-ui';ctx.textAlign='center';ctx.textBaseline='top';
+    if(pl===pl){ ctx.fillText('Δ = '+(bP50-pl).toFixed(2)+'°C',(px(Math.max(lo,Math.min(hi,bP50)))+px(Math.max(lo,Math.min(hi,pl))))/2,2); }
+    else { ctx.fillStyle=warnc; ctx.fillText('plug-in undefined — Bayes P50 = '+bP50.toFixed(2)+'°C',(m.l+w-m.r)/2,2); }
+    // readouts
+    const g0=bP50-pl;
+    if(pl===pl){ els.vPlugin.innerHTML=pl.toFixed(2)+'<span style="font-size:.85rem;font-weight:400"> °C</span>'; els.sPlugin.textContent='invert median S-curve'; }
+    else { els.vPlugin.innerHTML='<span style="color:var(--warnc)">undefined</span>'; els.sPlugin.textContent='proxy below median b — no inverse'; }
+    els.vBayes.innerHTML=bP50.toFixed(2)+'<span style="font-size:.85rem;font-weight:400"> °C</span>';
+    els.sBayes.textContent='90% CI '+bP5.toFixed(1)+'…'+bP95.toFixed(1)+'°C';
+    if(pl===pl){ els.vGap.innerHTML=(g0>=0?'+':'')+g0.toFixed(2)+'<span style="font-size:.85rem;font-weight:400"> °C</span>'; els.vGap.style.color=Math.abs(g0)>3?'var(--warnc)':'var(--ink)';
+      els.sGap.textContent=Math.abs(g0)>3?'extreme — asymptote/mixture regime':(p.usePrior?'mid-curve — prior shrinkage':'mixture/nonlinearity only'); }
+    else { els.vGap.innerHTML='<span style="color:var(--warnc)">n/a</span>'; els.vGap.style.color=''; els.sGap.textContent='plug-in has no value to compare'; }
+  }
+
+  function updateDecomp(p,ens){
+    const pl=invLogit(p.proxy,MED.t0,MED.k,MED.b,MED.v);
+    // stage 1: invert each ensemble curve (no prior, no residual), take median
+    const ts=[]; for(const q of ens){ const t=invLogit(p.proxy,q.t0,q.k,q.b,q.v); if(t===t) ts.push(t); }
+    ts.sort((a,b)=>a-b); const mixMed= ts.length? (ts.length%2?ts[(ts.length-1)/2]:0.5*(ts[ts.length/2-1]+ts[ts.length/2])) : NaN;
+    // stage 2: full marginalized posterior (+ residual + prior/trunc)
+    const g=posterior(p,ens,p.usePrior); const full=quantile(g,0.5);
+    const rows=[];
+    if(pl===pl){
+      rows.push(['ensemble mixture + nonlinearity', ts.length? Math.abs(mixMed-pl): NaN, ts.length]);
+      rows.push(['+ residual, truncation'+(p.usePrior?', T prior':''), Math.abs(full-pl), 1]);
+    } else {
+      rows.push(['plug-in undefined (proxy &lt; median b) — no reference', NaN, 0]);
+      rows.push(['Bayesian P50 is still '+full.toFixed(2)+'°C', NaN, 1]);
+    }
+    const vals=rows.map(r=>r[1]).filter(x=>x===x); const gmax=Math.max(0.01,...vals,0.01);
+    els.decomp.innerHTML=rows.map((r,i)=>{
+      const cls=i===rows.length-1?' class="total"':''; const val=r[1];
+      const numtxt = val===val? val.toFixed(2)+' °C' : '—';
+      const bw = val===val? Math.round(val/gmax*100):0;
+      const drop = r[2]!==undefined && r[2]<ens.length && r[2]>0 ? ` <span style="color:var(--muted);font-size:.8em">(${ens.length-r[2]} draws undefined, dropped)</span>`:'';
+      return `<tr${cls}><td>${r[0]}${drop}</td><td class="num">${numtxt}</td><td class="barcell"><div class="bar" style="width:${bw}%"></div></td></tr>`;
+    }).join('');
+  }
+
+  function labels(p){els.lProxy.textContent=p.proxy.toFixed(3);els.lPmean.textContent=p.pmean;els.lPsd.textContent=p.psd;els.lScale.textContent=p.scale.toFixed(2)+'×';}
+  function render(){const p=P(); const ens=scaledEns(p.scale); labels(p); drawCal(p,ens); drawDist(p,ens); updateDecomp(p,ens);}
+
+  ['s-proxy','s-pmean','s-psd','s-scale'].forEach(id=>$(id).addEventListener('input',render));
+  els.prior.addEventListener('change',render); els.trunc.addEventListener('change',render);
+  $('resetBtn').addEventListener('click',()=>{els.proxy.value=620;els.pmean.value=15;els.psd.value=10;els.scale.value=100;els.prior.checked=true;els.trunc.checked=true;render();});
+  window.addEventListener('resize',render);
+  $('themeBtn').addEventListener('click',()=>{const root=document.documentElement,cur=root.getAttribute('data-theme');
+    const sysDark=window.matchMedia('(prefers-color-scheme: dark)').matches;
+    root.setAttribute('data-theme',cur?(cur==='dark'?'light':'dark'):(sysDark?'light':'dark'));render();});
+  render();
+})();
+</script>

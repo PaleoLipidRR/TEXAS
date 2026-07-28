@@ -21,6 +21,7 @@ parts:
       - file: model_validation
       - file: stan_models_explanation_v2
       - file: marginalization_explainer
+      - file: why_plugin_p50_differs
       - file: reduce_sum_for_geologists
       - file: Prior_Choice_Normal_vs_Cauchy
       - file: ckdtree_nearest_ocean_explainer
