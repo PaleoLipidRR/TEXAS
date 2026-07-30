@@ -119,6 +119,13 @@ def _require_cartopy() -> None:
 MED_EXTENT = [-10, 43, 25, 50]   # [lon_min, lon_max, lat_min, lat_max]
 RS_EXTENT  = [ 31, 45,  9, 30]
 
+# ── Default projection centres ───────────────────────────────────────────────
+# Global panels are centred on the Pacific-facing Americas so the coretop
+# transect coverage is not cut by the map seam; zoom panels stay on 0 degrees
+# because the Mediterranean / Red Sea straddle it.
+GLOBAL_LON_CENTER   = -100.0
+REGIONAL_LON_CENTER = 0.0
+
 # ============================================================================
 # Kriging helpers
 # _krige_panel_worker must be module-level so joblib/loky can pickle it.
@@ -673,6 +680,8 @@ def plot_residual_maps(
     cmap: str = "RdBu_r",
     colorbar_label: str = "Proxy Residuals",
     colorbar_ticks: Optional[Sequence] = None,   # explicit tick values; auto if None
+    # Projection
+    lon_center: Optional[float] = None,   # central longitude of the GLOBAL panels only
     # Regional extents [lon_min, lon_max, lat_min, lat_max]
     med_extent: Sequence = MED_EXTENT,
     rs_extent: Sequence = RS_EXTENT,
@@ -741,6 +750,16 @@ def plot_residual_maps(
         Section dividers drawn above the specified row range.
     annotations : list of (lon, lat, number_str), optional
         Circled numbers placed on every global panel.
+    lon_center : float, optional
+        Central longitude (degrees east, negative for west) of the Eckert III
+        projection used by the **global** panels in column 0.  Defaults to
+        ``GLOBAL_LON_CENTER`` (-100).  The Mediterranean and Red Sea zoom
+        panels are unaffected and always use ``REGIONAL_LON_CENTER`` (0).
+        Data, markers, zoom-box outlines and annotations are all specified in
+        PlateCarree, so they follow the new centre automatically; only the map
+        seam moves.  Pick a value that does not cut through a region of
+        interest — e.g. ``lon_center=0`` splits the Pacific, ``lon_center=180``
+        splits the Atlantic and puts the Med/Red Sea boxes near the edge.
     show_grid : bool, default True
         If False, disables the map gridlines on all panels.
     save_dir, fname : str, optional
@@ -847,8 +866,13 @@ def plot_residual_maps(
     norm_res   = mcolors.BoundaryNorm(boundaries, ncolors=256)
 
     # ── Figure layout ──────────────────────────────────────────────────────
-    proj_global   = ccrs.EckertIII(central_longitude=-100)
-    proj_regional = ccrs.EckertIII(central_longitude=0)
+    # Only the global column is re-centreable; the zoom panels stay on
+    # REGIONAL_LON_CENTER because their extents are set explicitly in lon/lat
+    # and rotating them would only skew the projection under a fixed window.
+    proj_global   = ccrs.EckertIII(
+        central_longitude=GLOBAL_LON_CENTER if lon_center is None else float(lon_center)
+    )
+    proj_regional = ccrs.EckertIII(central_longitude=REGIONAL_LON_CENTER)
 
     _CBAR_STRIP_IN = 0.3    # inches reserved at figure bottom for colorbar + label
     _TOP_PAD_IN    = 0.3    # inches at top (for section headers)
