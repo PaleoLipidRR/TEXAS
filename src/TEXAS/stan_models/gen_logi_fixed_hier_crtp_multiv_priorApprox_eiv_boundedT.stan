@@ -15,14 +15,20 @@
 // effective range becomes [b + c, 1 + c]. Nothing holds that inside [0, 1].
 //
 // What that costs in practice, measured on the coretop calibration set (N=2043):
-//   • The effective upper asymptote 1 + c exceeds 1 for 22.5 % of coretops, and
-//     the effective lower asymptote b + c reaches −0.41. The curves those samples
-//     sit on are not confined to [0, 1].
-//   • Evaluated over T ∈ [−2, 40] °C at posterior-median coefficients, the mean
-//     response spans −0.372 … 1.083.
+//   • The effective upper asymptote 1 + c exceeds 1 for 587 of 2043 coretops
+//     (28.7 %), and the effective lower asymptote b + c goes negative (minimum
+//     −0.076, for 1 coretop). The curves those samples sit on are not confined
+//     to [0, 1].
 //   • BUT at the observed (T, G₂/₃, NO₃) of the calibration points themselves, the
-//     fitted mean stays in range: 0.042 … 0.863 across all posterior draws. It is
-//     dragged well below the lower asymptote b ≈ 0.41, but it does not leave [0, 1].
+//     fitted mean stays in range: 0.006 … 0.954 across all posterior draws, with
+//     frac(mu > 1) = frac(mu < 0) = 0. It is dragged well below the lower
+//     asymptote b ≈ 0.42, but it does not leave [0, 1].
+//
+//   All figures above are from the production run (2026-07-28, N=2043, 4 chains ×
+//   1500). An earlier revision of this header quoted a median-coefficient sweep
+//   over T ∈ [−2, 40] °C spanning −0.372 … 1.083. That is an extrapolation
+//   exercise rather than a property of the fit, and RESUME.md explicitly retracts
+//   it — do not quote it in the response to reviewers.
 //
 // So the defect is structural rather than currently-realised: the parameterization
 // carries no bound, the fitted curves do leave [0, 1] away from the data, and the
