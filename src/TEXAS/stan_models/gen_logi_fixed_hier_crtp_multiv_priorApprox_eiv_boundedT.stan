@@ -1,4 +1,25 @@
 // ═══════════════════════════════════════════════════════════════════════════════
+// ⚠ UNDER REVIEW — NOT THE PUBLISHED TEXAS CALIBRATION.
+//
+// This model was written in response to a reviewer comment on the TEXAS manuscript
+// and has NOT been accepted. It is shipped so the revision is reproducible and
+// inspectable, not as a recommendation. The published calibration remains
+// gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv.stan.
+//
+// ⚠ THE PACKAGE API CANNOT USE THIS MODEL YET. Its covariate parameters are named
+// gamma_G23_crtp / gamma_NO3_crtp and act as a SHIFT OF T0, whereas every helper in
+// TEXAS assumes the parent's beta_G23_crtp / beta_NO3_crtp acting additively on the
+// response. Specifically:
+//   * TEXAS.ensemble.generate_ensemble_auto  -> raises "Missing parameters: beta_*"
+//   * TEXAS.predict.predict_T_from_proxyObs  -> SILENTLY selects the ADDITIVE inverse
+//     (TEXAS/stan/invT.py builds the invT model name without any boundedT branch), so
+//     it would return temperatures reconstructed under a model that was never fitted,
+//     with no error raised.
+// Until those paths learn about gamma_*, drive this model directly: build the Stan data
+// yourself and pair it with invT_gen_logi_fixed_multiv_marginal_unconstrained_boundedT.stan.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT.stan
 //
 // PURPOSE: Bounded-response variant of gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv.
@@ -14,27 +35,66 @@
 // The logistic term is bounded, but c slides the whole curve vertically, so the
 // effective range becomes [b + c, 1 + c]. Nothing holds that inside [0, 1].
 //
-// What that costs in practice, measured on the coretop calibration set (N=2043):
-//   • The effective upper asymptote 1 + c exceeds 1 for 587 of 2043 coretops
-//     (28.7 %), and the effective lower asymptote b + c goes negative (minimum
-//     −0.076, for 1 coretop). The curves those samples sit on are not confined
-//     to [0, 1].
-//   • BUT at the observed (T, G₂/₃, NO₃) of the calibration points themselves, the
-//     fitted mean stays in range: 0.006 … 0.954 across all posterior draws, with
-//     frac(mu > 1) = frac(mu < 0) = 0. It is dragged well below the lower
-//     asymptote b ≈ 0.42, but it does not leave [0, 1].
+// What that costs in practice. QUOTE THE GRIDDED COLUMN: the published fit
+// (SI_code2_TEXAS_analysis.ipynb) uses the gridded, screened compilation at
+// N=1513, NOT the raw per-sample compilation at N=2043. Both are given because an
+// earlier revision of this header quoted the raw set by mistake.
 //
-//   All figures above are from the production run (2026-07-28, N=2043, 4 chains ×
-//   1500). An earlier revision of this header quoted a median-coefficient sweep
-//   over T ∈ [−2, 40] °C spanning −0.372 … 1.083. That is an extrapolation
-//   exercise rather than a property of the fit, and RESUME.md explicitly retracts
-//   it — do not quote it in the response to reviewers.
+//                                       raw N=2043        PUBLISHED N=1513
+//   upper asymptote 1 + c > 1        587 (28.7 %)         297 (19.6 %)
+//     …its maximum                        1.177                1.156
+//   lower asymptote b + c < 0          1 (0.05 %)      0 rows — NEVER
+//     …its minimum                       −0.076               +0.238
+//   spread of b + c across coretops        0.677                0.355
+//   fitted mean at the data          0.006 … 0.954        0.340 … 0.946
+//   frac(mu > 1) / frac(mu < 0)            0 / 0                0 / 0
+//
+//   • On the published set the violation lives ENTIRELY at the ceiling. One in five
+//     coretops sits on a curve whose upper asymptote exceeds 1; the lower asymptote
+//     is violated zero times and never comes within 0.23 of zero.
+//   • At the observed (T, G₂/₃, NO₃) of the calibration points themselves the
+//     fitted mean stays in range on both sets, across all posterior draws.
+//
+//   Figures recomputed 2026-07-30 in the revision workspace (not shipped) at
+//   posterior-median coefficients. A still earlier revision quoted a
+//   median-coefficient sweep over T ∈ [−2, 40] °C spanning −0.372 … 1.083; that is
+//   an extrapolation exercise rather than a property of the fit and is retracted —
+//   do not quote it.
 //
 // So the defect is structural rather than currently-realised: the parameterization
 // carries no bound, the fitted curves do leave [0, 1] away from the data, and the
 // guarantee fails under extrapolation — but the published calibration fit is not
 // itself producing out-of-range values. A Scaled Ring Index is a bounded ratio, so
 // the guarantee is still worth having by construction.
+//
+// ON THIS MODEL'S SCOPE — a fair objection, tested and answered.
+// Because the published-set violation is purely at the ceiling, pinning the FLOOR
+// as well (which is what this file does — b is a single scalar shared by every
+// community) is not paid for by the diagnostic above: it discards 0.355 of fitted
+// lower-asymptote spread to fix a problem that occurs only at the top.
+//
+// So the less restrictive alternative was built and fitted:
+// a ceiling-only variant (boundedCeil, kept in the revision workspace and NOT shipped)
+// pins only the ceiling and lets the floor move
+// per community via b_eff = inv_logit(logit(b) + β·covariates).
+//
+// IT FITS WORSE — on the published set, on every metric (2026-07-30, same seed,
+// same folds, zero R̂ > 1.01):
+//
+//                     R²(in)  RMSE(in)  RMSE(spatial CV)    elpd
+//     parent          0.7964    0.0516            0.0574  2328.2
+//     boundedT (this) 0.8034    0.0507            0.0572  2352.8
+//     boundedCeil     0.7892    0.0525            0.0590  2302.8
+//
+//     elpd(boundedCeil − boundedT) = −49.9 ± 16.0  (−3.13 SE)
+//
+// The per-community floors do spread (b_eff_spread median 0.355), and p_waic is the
+// LOWEST of the three (9.93) — so boundedCeil under-fits rather than over-fits. The
+// reading: the non-thermal predictors move the community along the TEMPERATURE axis,
+// which is what T0_eff encodes, not up and down the cold-end baseline.
+//
+// This file therefore stays the headline model, and the shared floor is a choice the
+// data support rather than a restriction imposed for convenience.
 //
 // ─── THE FIX ──────────────────────────────────────────────────────────────────
 // Move the predictors INSIDE the logistic, as a shift of the inflection point:
