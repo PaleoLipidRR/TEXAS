@@ -1,0 +1,763 @@
+<title>TEXAS call map</title>
+
+<style>
+:root{
+  --bg:#EAEFEF; --surface:#FFFFFF; --surface-2:#F4F7F7; --surface-3:#E7EDED;
+  --line:#CFD9DA; --line-soft:#E0E7E7;
+  --text:#16262B; --text-2:#566A71; --text-3:#82949A;
+  --fwd:#A5661F; --fwd-ink:#8A5416; --fwd-wash:rgba(165,102,31,.09);
+  --inv:#0E6E7D; --inv-ink:#0B5B67; --inv-wash:rgba(14,110,125,.09);
+  --util:#5E7480; --util-wash:rgba(94,116,128,.09);
+  --warn:#A03A28; --warn-wash:rgba(160,58,40,.09);
+  --dim:.28;
+  --shadow:0 1px 2px rgba(16,38,44,.05), 0 8px 24px -12px rgba(16,38,44,.18);
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:"Segoe UI Variable Text","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --mono:"Cascadia Code","JetBrains Mono","SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+  --dock-w:390px;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0B1518; --surface:#111E22; --surface-2:#16262B; --surface-3:#1B2F35;
+    --line:#26383E; --line-soft:#1D2E33;
+    --text:#E2EAEA; --text-2:#9DB0B5; --text-3:#6F8087;
+    --fwd:#DDA35A; --fwd-ink:#EDBE81; --fwd-wash:rgba(221,163,90,.12);
+    --inv:#5FC0CF; --inv-ink:#8AD4DF; --inv-wash:rgba(95,192,207,.12);
+    --util:#8BA2AC; --util-wash:rgba(139,162,172,.12);
+    --warn:#E89078; --warn-wash:rgba(232,144,120,.12);
+    --dim:.22;
+    --shadow:0 1px 2px rgba(0,0,0,.35), 0 10px 30px -14px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0B1518; --surface:#111E22; --surface-2:#16262B; --surface-3:#1B2F35;
+  --line:#26383E; --line-soft:#1D2E33;
+  --text:#E2EAEA; --text-2:#9DB0B5; --text-3:#6F8087;
+  --fwd:#DDA35A; --fwd-ink:#EDBE81; --fwd-wash:rgba(221,163,90,.12);
+  --inv:#5FC0CF; --inv-ink:#8AD4DF; --inv-wash:rgba(95,192,207,.12);
+  --util:#8BA2AC; --util-wash:rgba(139,162,172,.12);
+  --warn:#E89078; --warn-wash:rgba(232,144,120,.12);
+  --dim:.22;
+  --shadow:0 1px 2px rgba(0,0,0,.35), 0 10px 30px -14px rgba(0,0,0,.7);
+}
+:root[data-theme="light"]{
+  --bg:#EAEFEF; --surface:#FFFFFF; --surface-2:#F4F7F7; --surface-3:#E7EDED;
+  --line:#CFD9DA; --line-soft:#E0E7E7;
+  --text:#16262B; --text-2:#566A71; --text-3:#82949A;
+  --fwd:#A5661F; --fwd-ink:#8A5416; --fwd-wash:rgba(165,102,31,.09);
+  --inv:#0E6E7D; --inv-ink:#0B5B67; --inv-wash:rgba(14,110,125,.09);
+  --util:#5E7480; --util-wash:rgba(94,116,128,.09);
+  --warn:#A03A28; --warn-wash:rgba(160,58,40,.09);
+  --dim:.28;
+  --shadow:0 1px 2px rgba(16,38,44,.05), 0 8px 24px -12px rgba(16,38,44,.18);
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;text-wrap:balance}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+a{color:var(--accent,var(--inv))}
+:focus-visible{outline:2px solid var(--accent,var(--inv));outline-offset:2px;border-radius:3px}
+
+/* accent switches with the active view */
+.app{--accent:var(--util);--accent-wash:var(--util-wash)}
+.app[data-view="forward"]{--accent:var(--fwd);--accent-wash:var(--fwd-wash)}
+.app[data-view="inverse"]{--accent:var(--inv);--accent-wash:var(--inv-wash)}
+.app[data-view="loose"]{--accent:var(--warn);--accent-wash:var(--warn-wash)}
+
+/* ── header ─────────────────────────────────────────────── */
+.top{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 88%,transparent);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line);
+  display:flex;flex-wrap:wrap;align-items:center;gap:14px 20px;padding:12px 20px}
+.brand{display:flex;align-items:baseline;gap:10px;margin-right:auto}
+.brand .mark{font-family:var(--mono);font-weight:700;font-size:16px;letter-spacing:.14em;
+  color:var(--accent);transition:color .25s}
+.brand .sub{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--text-2)}
+.tabs{display:flex;gap:2px;background:var(--surface-2);border:1px solid var(--line);
+  border-radius:9px;padding:3px}
+.tab{padding:5px 13px;border-radius:6px;font-size:13.5px;color:var(--text-2);
+  display:flex;align-items:center;gap:7px;white-space:nowrap}
+.tab .dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.5}
+.tab[data-t="forward"]{--tc:var(--fwd)} .tab[data-t="inverse"]{--tc:var(--inv)}
+.tab[data-t="all"]{--tc:var(--util)} .tab[data-t="loose"]{--tc:var(--warn)}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--text);
+  box-shadow:0 1px 2px rgba(0,0,0,.08);font-weight:600}
+.tab[aria-selected="true"] .dot{background:var(--tc);opacity:1}
+.tab:hover{color:var(--text)}
+.tools{display:flex;align-items:center;gap:10px}
+.search{position:relative;display:flex;align-items:center}
+.search input{font-family:var(--mono);font-size:13px;width:210px;padding:6px 10px 6px 28px;
+  color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.search input::placeholder{color:var(--text-3);font-family:var(--sans)}
+.search svg{position:absolute;left:8px;width:14px;height:14px;color:var(--text-3);pointer-events:none}
+.icon-btn{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--line);
+  border-radius:8px;background:var(--surface);color:var(--text-2)}
+.icon-btn:hover{color:var(--text);border-color:var(--accent)}
+
+/* ── shell ──────────────────────────────────────────────── */
+main{display:grid;grid-template-columns:minmax(0,1fr) var(--dock-w);align-items:start}
+.canvas{position:relative;padding:26px 24px 120px;min-width:0}
+.wires{position:absolute;top:0;left:0;pointer-events:none;z-index:0;overflow:visible}
+/* active wires sit above the chips so an arrowhead is never hidden behind one */
+.wires.hot{z-index:5}
+.intro{position:relative;z-index:1;max-width:70ch;margin-bottom:26px}
+.intro h1{font-family:var(--serif);font-size:clamp(24px,3.2vw,34px);line-height:1.15;
+  letter-spacing:-.01em;margin-bottom:6px}
+.intro .kick{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:10px}
+.intro p{color:var(--text-2);margin:0}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:16px;font-size:12.5px;color:var(--text-3)}
+.legend span{display:flex;align-items:center;gap:7px}
+.legend i{width:22px;height:0;border-top:2px solid currentColor;display:inline-block}
+.legend i.d{border-top-style:dashed}
+.legend b{width:9px;height:9px;border-radius:2.5px;border:1px solid var(--line);
+  background:var(--surface-2);display:inline-block}
+.intro .hint{margin:10px 0 0;font-size:12.5px;color:var(--text-3);font-style:italic}
+
+/* ── stage bands ────────────────────────────────────────── */
+.band{position:relative;z-index:1;display:grid;grid-template-columns:184px minmax(0,1fr);
+  gap:24px;padding:20px 0;border-top:1px solid var(--line-soft)}
+.band:first-of-type{border-top:none}
+.band-head{position:sticky;top:78px;align-self:start}
+.band-head .idx{font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:.1em}
+.band-head h2{font-family:var(--serif);font-size:17px;line-height:1.25;margin:2px 0 6px}
+.band-head .note{font-size:12.5px;color:var(--text-3);line-height:1.45;margin:0}
+.band-body{display:flex;flex-wrap:wrap;gap:10px;align-content:start;padding-top:2px}
+
+/* ── module cards (full graph) ──────────────────────────── */
+.mods{position:relative;z-index:1;display:grid;gap:16px;
+  grid-template-columns:repeat(auto-fill,minmax(272px,1fr))}
+.mod{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:13px 13px 14px}
+.mod h3{font-family:var(--mono);font-size:12.5px;color:var(--text-2);margin-bottom:2px;
+  word-break:break-all}
+.mod h3 em{font-style:normal;color:var(--text);font-weight:600}
+.mod .cnt{font-size:11px;color:var(--text-3);margin-bottom:10px;font-variant-numeric:tabular-nums}
+.mod .band-body{gap:7px}
+
+/* ── loose ends ─────────────────────────────────────────── */
+.le{position:relative;z-index:1;max-width:104ch}
+.le-group{margin-bottom:34px}
+.le-group > h2{font-family:var(--serif);font-size:19px;margin-bottom:4px}
+.le-group > p{color:var(--text-2);font-size:13.5px;margin:0 0 14px;max-width:78ch}
+.le-list{display:grid;gap:9px}
+.le-row{display:grid;grid-template-columns:4px minmax(0,1fr);gap:0;background:var(--surface);
+  border:1px solid var(--line);border-radius:10px;overflow:hidden;text-align:left;width:100%}
+.le-row:hover{border-color:var(--accent)}
+.le-row .stripe{background:var(--accent);opacity:.85}
+.le-row.soft .stripe{background:var(--util);opacity:.5}
+.le-row .body{padding:11px 14px 12px;min-width:0}
+.le-row .hdr{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 10px}
+.le-row .fnq{font-family:var(--mono);font-size:13.5px;font-weight:600;word-break:break-word}
+.le-row .fnq .cls{color:var(--text-3);font-weight:400}
+.le-row .where{font-family:var(--mono);font-size:10.5px;color:var(--text-3);
+  font-variant-numeric:tabular-nums}
+.le-row .why{display:block;font-size:13.5px;color:var(--text-2);line-height:1.55;margin:6px 0 0;max-width:76ch}
+.le-row .pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.pill{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  padding:2px 7px;border-radius:4px;background:var(--surface-3);color:var(--text-2)}
+.pill.w{background:var(--warn-wash);color:var(--warn)}
+.le-note{border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;
+  background:var(--surface);padding:12px 15px;margin-bottom:24px;font-size:13.5px;
+  color:var(--text-2);max-width:80ch}
+.le-note strong{color:var(--text)}
+.le-cols{display:grid;gap:9px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+
+/* ── chips ──────────────────────────────────────────────── */
+.chip{position:relative;z-index:1;text-align:left;background:var(--surface);
+  border:1px solid var(--line);border-radius:9px;padding:7px 11px 8px;
+  box-shadow:var(--shadow);transition:border-color .15s,transform .15s,opacity .2s,background .15s;
+  max-width:100%}
+.chip .fn{font-family:var(--mono);font-size:13px;line-height:1.3;color:var(--text);
+  display:block;word-break:break-word}
+.chip .fn .cls{color:var(--text-3)}
+.chip .mod-l{font-size:10.5px;color:var(--text-3);font-family:var(--mono);letter-spacing:.01em;
+  display:block;margin-top:2px}
+.chip.priv .fn{color:var(--text-2)}
+.chip.priv{border-style:dashed}
+.chip.doc::after{content:"";position:absolute;top:7px;right:7px;width:5px;height:5px;
+  border-radius:50%;background:var(--accent);opacity:.7}
+.chip:hover{border-color:var(--accent);transform:translateY(-1px)}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-wash);
+  box-shadow:0 0 0 1px var(--accent), var(--shadow)}
+.chip.rel-out{border-color:var(--accent)}
+.chip.rel-in{border-color:var(--util)}
+.canvas.focused .chip:not(.rel-out):not(.rel-in):not([aria-pressed="true"]){opacity:var(--dim)}
+.chip.miss{opacity:.14}
+.le-row.miss{display:none}
+.canvas.searching .chip.hit{border-color:var(--accent);background:var(--accent-wash)}
+.mod.allmiss{display:none}
+
+/* ── dock ───────────────────────────────────────────────── */
+.dock{position:sticky;top:57px;height:calc(100vh - 57px);overflow-y:auto;
+  border-left:1px solid var(--line);background:var(--surface);padding:22px 22px 60px}
+.dock .empty{color:var(--text-3);font-size:13.5px}
+.dock .empty h3{font-family:var(--serif);font-size:16px;color:var(--text);margin-bottom:8px}
+.dock .empty ul{margin:10px 0 0;padding-left:17px;display:grid;gap:6px}
+.d-eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--text-3);margin-bottom:9px}
+.d-name{font-family:var(--mono);font-size:18px;font-weight:600;line-height:1.25;
+  word-break:break-word;margin-bottom:3px}
+.d-name .cls{color:var(--text-3);font-weight:400}
+.d-loc{font-family:var(--mono);font-size:11.5px;color:var(--text-3);
+  font-variant-numeric:tabular-nums;word-break:break-all}
+.d-tags{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 0}
+.tag{font-size:10.5px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 7px;border-radius:5px;background:var(--surface-3);color:var(--text-2)}
+.tag.acc{background:var(--accent-wash);color:var(--accent)}
+.tag.warn{background:var(--warn-wash);color:var(--warn)}
+.expl.reach{font-size:13.5px;color:var(--text-2)}
+.expl code{font-family:var(--mono);font-size:12px;background:var(--surface-2);
+  padding:1px 5px;border-radius:4px;color:var(--text)}
+.d-sec{margin-top:20px;padding-top:16px;border-top:1px solid var(--line-soft)}
+.d-sec h4{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--text-3);font-weight:600;margin-bottom:9px;display:flex;gap:8px;align-items:center}
+.d-sec h4 .n{font-family:var(--sans);letter-spacing:0;text-transform:none;
+  color:var(--text-3);font-weight:400;font-variant-numeric:tabular-nums}
+.sig{font-family:var(--mono);font-size:12px;line-height:1.6;background:var(--surface-2);
+  border:1px solid var(--line-soft);border-radius:8px;padding:10px 11px;
+  overflow-x:auto;white-space:pre;color:var(--text-2)}
+.sig b{color:var(--text);font-weight:600}
+.expl{font-size:14px;line-height:1.62;color:var(--text)}
+.docstr{font-family:var(--mono);font-size:11.5px;line-height:1.6;color:var(--text-2);
+  white-space:pre-wrap;overflow-x:auto;margin:0;
+  max-height:270px;overflow-y:auto}
+.reflist{display:grid;gap:5px}
+.ref{display:flex;align-items:baseline;gap:8px;text-align:left;padding:5px 8px;border-radius:7px;
+  border:1px solid transparent;width:100%}
+.ref:hover{background:var(--surface-2);border-color:var(--line)}
+.ref .arrow{font-family:var(--mono);font-size:11px;color:var(--accent);flex:none}
+.ref.in .arrow{color:var(--util)}
+.ref .t{min-width:0}
+.ref .t b{font-family:var(--mono);font-size:12.5px;font-weight:500;display:block;
+  word-break:break-word}
+.ref .t span{font-family:var(--mono);font-size:10.5px;color:var(--text-3);display:block}
+.ref .dyn{font-size:10px;color:var(--text-3);font-style:italic}
+.none{font-size:12.5px;color:var(--text-3);font-style:italic}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@media (max-width:1080px){
+  main{grid-template-columns:minmax(0,1fr)}
+  .dock{position:fixed;left:0;right:0;bottom:0;top:auto;height:min(58vh,520px);z-index:40;
+    border-left:none;border-top:1px solid var(--line);border-radius:14px 14px 0 0;
+    box-shadow:0 -12px 40px -16px rgba(0,0,0,.35);transform:translateY(calc(100% - 0px));
+    transition:transform .28s}
+  .dock.open{transform:translateY(0)}
+  .dock:not(.open){display:none}
+  .band{grid-template-columns:minmax(0,1fr);gap:12px}
+  .band-head{position:static}
+  .canvas{padding-bottom:60vh}
+}
+@media (max-width:560px){
+  .top{padding:10px 14px;gap:10px}
+  .brand .sub{display:none}
+  .search input{width:140px}
+  .canvas{padding-left:14px;padding-right:14px}
+}
+</style>
+
+<div class="app" id="app" data-view="forward">
+  <header class="top">
+    <div class="brand">
+      <span class="mark">TEXAS</span>
+      <span class="sub">call map</span>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="View">
+      <button class="tab" role="tab" data-t="forward" aria-selected="true"><i class="dot"></i>Forward calibration</button>
+      <button class="tab" role="tab" data-t="inverse" aria-selected="false"><i class="dot"></i>Inverse prediction</button>
+      <button class="tab" role="tab" data-t="all" aria-selected="false"><i class="dot"></i>Every function</button>
+      <button class="tab" role="tab" data-t="loose" aria-selected="false"><i class="dot"></i>Loose ends</button>
+    </nav>
+    <div class="tools">
+      <label class="search">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+          <circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5 14 14"/>
+        </svg>
+        <input id="q" type="search" placeholder="Find a function" aria-label="Find a function"/>
+      </label>
+      <button class="icon-btn" id="themeBtn" title="Switch theme" aria-label="Switch theme">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M13 9.5A5.5 5.5 0 0 1 6.5 3a5.5 5.5 0 1 0 6.5 6.5Z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <div class="canvas" id="canvas">
+      <svg class="wires" id="wires" aria-hidden="true"></svg>
+      <svg class="wires hot" id="wiresTop" aria-hidden="true"></svg>
+      <div class="intro" id="intro"></div>
+      <div id="host"></div>
+    </div>
+    <aside class="dock" id="dock" aria-live="polite"></aside>
+  </main>
+</div>
+
+<script>
+const DATA = /*__DATA__*/null;
+
+const N = DATA.nodes, EDGES = DATA.edges, PIPES = DATA.pipelines;
+const $ = (s, r) => (r || document).querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---- adjacency (static edges) ---- */
+const OUT = new Map(), IN = new Map();
+for (const [a, b] of EDGES) {
+  if (!OUT.has(a)) OUT.set(a, []); OUT.get(a).push(b);
+  if (!IN.has(b)) IN.set(b, []); IN.get(b).push(a);
+}
+const app = $('#app'), canvas = $('#canvas'), host = $('#host'),
+      wires = $('#wires'), wiresTop = $('#wiresTop'), dock = $('#dock'),
+      intro = $('#intro'), qInput = $('#q');
+
+let view = 'forward', selected = null, hovered = null, query = '';
+
+/* The pipeline behind the active view, or null for the non-graph views. */
+const currentPipe = () => PIPES.find(p => p.id === view) || null;
+const dynEdges = () => (currentPipe() || {}).dynamic || [];
+
+/* ---------------- rendering ---------------- */
+function chip(q, showMod) {
+  const d = N[q];
+  if (!d) return '';
+  const label = d.c ? `<span class="cls">${esc(d.c)}.</span>${esc(d.n)}`
+                    : (d.nest ? `<span class="cls">${esc(d.nest)}.</span>${esc(d.n)}` : esc(d.n));
+  return `<button class="chip${d.priv ? ' priv' : ''}${d.x ? ' doc' : ''}" data-q="${esc(q)}"
+      aria-pressed="false" title="${esc(d.m)}.${esc(d.n)}">
+      <span class="fn">${label}</span>
+      ${showMod ? `<span class="mod-l">${esc(d.m)}</span>` : ''}
+    </button>`;
+}
+
+function renderPipeline(p) {
+  intro.innerHTML = `
+    <p class="kick">${esc(p.kicker)}</p>
+    <h1>${esc(p.title)}</h1>
+    <p>${esc(p.blurb)}</p>
+    <div class="legend">
+      <span style="color:var(--accent)"><i></i>calls</span>
+      <span style="color:var(--util)"><i></i>called by</span>
+      <span style="color:var(--text-3)"><i class="d"></i>dynamic dispatch</span>
+      <span><b style="border-style:dashed"></b>private helper</span>
+      <span><b style="background:var(--accent);border-color:var(--accent)"></b>has an explainer</span>
+    </div>
+    <p class="hint">Hover any function to trace its wires; click to pin it open.</p>`;
+  host.innerHTML = p.stages.map((s, i) => `
+    <section class="band">
+      <div class="band-head">
+        <div class="idx">${String(i + 1).padStart(2, '0')}</div>
+        <h2>${esc(s.name)}</h2>
+        <p class="note">${esc(s.note)}</p>
+      </div>
+      <div class="band-body">${s.nodes.map(q => chip(q, true)).join('')}</div>
+    </section>`).join('');
+}
+
+function renderAll() {
+  const mods = new Map();
+  for (const q in N) {
+    const m = N[q].m;
+    if (!mods.has(m)) mods.set(m, []);
+    mods.get(m).push(q);
+  }
+  intro.innerHTML = `
+    <p class="kick">complete surface</p>
+    <h1>Every function in src/TEXAS</h1>
+    <p>All ${DATA.stats.functions} functions and methods across ${DATA.stats.modules} modules,
+       grouped by module and ordered by line number. Wires are hidden here by default —
+       select any function to draw its callers and callees.</p>
+    <div class="legend">
+      <span style="color:var(--accent)"><i></i>calls</span>
+      <span style="color:var(--util)"><i></i>called by</span>
+      <span><b style="border-style:dashed"></b>private helper</span>
+      <span><b style="background:var(--accent);border-color:var(--accent)"></b>has an explainer</span>
+    </div>
+    <p class="hint">Hover any function to trace its wires; click to pin it open.</p>`;
+  const order = [...mods.keys()].sort();
+  host.innerHTML = `<div class="mods">` + order.map(m => {
+    const qs = mods.get(m).sort((a, b) => N[a].l - N[b].l);
+    const parts = m.split('.');
+    return `<div class="mod" data-mod="${esc(m)}">
+      <h3>${esc(parts.slice(0, -1).join('.'))}${parts.length > 1 ? '.' : ''}<em>${esc(parts.at(-1))}</em></h3>
+      <div class="cnt">${qs.length} function${qs.length > 1 ? 's' : ''}</div>
+      <div class="band-body">${qs.map(q => chip(q, false)).join('')}</div>
+    </div>`;
+  }).join('') + `</div>`;
+}
+
+/* ---- loose ends: what nothing reaches ---- */
+const REACH = DATA.reach, NOTES = DATA.notes || {};
+
+function looseRow(q, soft) {
+  const d = N[q], r = REACH[q] || {};
+  const label = d.c ? `<span class="cls">${esc(d.c)}.</span>${esc(d.n)}` : esc(d.n);
+  const pills = [];
+  if (!soft) pills.push(`<span class="pill w">no caller</span>`);
+  if (r.pub) pills.push(`<span class="pill">exported</span>`);
+  if (r.dup) pills.push(`<span class="pill w">name also in ${esc(r.dup.map(x => N[x] ? N[x].m : x).join(', '))}</span>`);
+  if (d.priv) pills.push(`<span class="pill">private</span>`);
+  const why = NOTES[q] || '';
+  return `<button class="le-row${soft ? ' soft' : ''}" data-goto="${esc(q)}">
+    <span class="stripe"></span>
+    <span class="body">
+      <span class="hdr"><span class="fnq">${label}</span>
+        <span class="where">${esc(d.path)}:${d.l}</span></span>
+      ${why ? `<span class="why">${esc(why)}</span>` : ''}
+      ${pills.length ? `<span class="pills">${pills.join('')}</span>` : ''}
+    </span></button>`;
+}
+
+function renderLoose() {
+  const dead = [], api = [];
+  for (const q in N) {
+    const k = (REACH[q] || {}).k;
+    if (k === 'unreferenced') dead.push(q);
+    else if (k === 'exported-only') api.push(q);
+  }
+  const bymod = (a, b) => (N[a].m + N[a].l).localeCompare(N[b].m + N[b].l);
+  dead.sort(bymod); api.sort(bymod);
+
+  intro.innerHTML = `
+    <p class="kick">reachability</p>
+    <h1>Loose ends</h1>
+    <p>Nothing in <code>src/TEXAS</code> calls these, and neither does any notebook, the Streamlit
+       app, or the test suite. The list is computed from the same AST pass that draws the wires,
+       then cross-checked against every <code>__init__.py</code> export, the
+       <code>[project.scripts]</code> entry points, and a name search across
+       <code>notebooks/</code>, <code>streamlit_app/</code> and <code>tests/</code>.</p>`;
+
+  host.innerHTML = `<div class="le">
+    <div class="le-note"><strong>Read this as a shortlist, not a verdict.</strong>
+      A function reached only through <code>getattr</code>, a string-keyed dispatch table, or a
+      user's own script cannot be seen by static analysis. Confirm before deleting — but each of
+      these is at least worth a decision.</div>
+
+    <div class="le-group">
+      <h2>Nothing calls these <span class="where">${dead.length}</span></h2>
+      <p>No caller anywhere in the repository. Notes are hand-written.</p>
+      <div class="le-list">${dead.map(q => looseRow(q, false)).join('')}</div>
+    </div>
+
+    <div class="le-group">
+      <h2>Public but unexercised <span class="where">${api.length}</span></h2>
+      <p>Exported from an <code>__init__.py</code>, so they are part of the promised API and users
+         may well call them — but nothing inside the repository does, which means no notebook or
+         test would catch a regression in them.</p>
+      <div class="le-cols">${api.map(q => looseRow(q, true)).join('')}</div>
+    </div>
+  </div>`;
+}
+
+function render() {
+  selected = null;
+  if (view === 'loose') renderLoose();
+  else if (view === 'all') renderAll();
+  else renderPipeline(PIPES.find(p => p.id === view));
+  indexChips();
+  applySearch();
+  requestAnimationFrame(() => { drawWires(); renderDock(); });
+}
+
+/* ---------------- wires ---------------- */
+let chipMap = new Map();            // rebuilt on every render
+function indexChips() {
+  chipMap = new Map();
+  for (const el of canvas.querySelectorAll('.chip')) chipMap.set(el.dataset.q, el);
+}
+function chipEl(q) { return chipMap.get(q) || null; }
+
+let canvasRect = { left: 0, top: 0 };
+let posCache = new Map();           // measured once per layout, reused on hover
+
+function box(el) {
+  const r = el.getBoundingClientRect();
+  return { x: r.left - canvasRect.left, y: r.top - canvasRect.top, w: r.width, h: r.height };
+}
+function measure() {
+  canvasRect = canvas.getBoundingClientRect();
+  posCache = new Map();
+  for (const [q, el] of chipMap) posCache.set(q, box(el));
+}
+
+const GAP = 10;   // clear space between the arrow tip and the chip it points at
+
+/* Path from a's edge to just short of b's edge, plus the start point so the
+   origin can be dotted. Stopping short is what makes the arrowhead legible. */
+function wire(a, b) {
+  const A = posCache.get(a), B = posCache.get(b);
+  if (!A || !B) return null;
+  if (B.y - (A.y + A.h) > 6) {                    // downward hop: bottom -> top
+    const ax = A.x + A.w / 2, bx = B.x + B.w / 2;
+    const y1 = A.y + A.h + 2, y2 = B.y - GAP;
+    const k = Math.min(95, Math.max(26, (y2 - y1) * .5));
+    return { d: `M${ax},${y1} C${ax},${y1 + k} ${bx},${y2 - k} ${bx},${y2}`, sx: ax, sy: y1 };
+  }
+  // sideways or upward: bow out past the right edge of both chips
+  const x1 = A.x + A.w + 2, x2 = B.x + B.w + GAP;
+  const y1 = A.y + A.h / 2, y2 = B.y + B.h / 2;
+  const px = Math.max(x1, x2) + Math.max(42, Math.abs(y2 - y1) * .3);
+  return { d: `M${x1},${y1} C${px},${y1} ${px},${y2} ${x2},${y2}`, sx: x1, sy: y1 };
+}
+
+function visibleEdges() {
+  const list = [];
+  const seen = new Set();
+  const add = (a, b, dyn) => {
+    const k = a + ' ' + b;
+    if (seen.has(k)) return; seen.add(k);
+    if (chipEl(a) && chipEl(b)) list.push({ a, b, dyn });
+  };
+  for (const [a, b] of EDGES) add(a, b, false);
+  for (const [a, b] of dynEdges()) add(a, b, true);
+  return list;
+}
+
+const ARROWS = `<defs>
+  <marker id="mA" viewBox="0 0 10 10" refX="9.4" refY="5" markerWidth="11" markerHeight="11"
+          markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M0.6,1 L9.6,5 L0.6,9 L2.6,5 Z" fill="var(--accent)"/></marker>
+  <marker id="mI" viewBox="0 0 10 10" refX="9.4" refY="5" markerWidth="11" markerHeight="11"
+          markerUnits="userSpaceOnUse" orient="auto">
+    <path d="M0.6,1 L9.6,5 L0.6,9 L2.6,5 Z" fill="var(--util)"/></marker>
+</defs>`;
+
+/* A traced edge: a halo so it stays readable over whatever it crosses, the
+   coloured stroke, a dot at the caller end and an arrowhead at the callee. */
+function hotWire(e, incoming) {
+  const p = wire(e.a, e.b);
+  if (!p) return '';
+  const col = incoming ? 'var(--util)' : 'var(--accent)';
+  const dash = e.dyn ? ' stroke-dasharray="7 4"' : '';
+  return `<path d="${p.d}" fill="none" stroke="var(--bg)" stroke-width="5.5"
+            stroke-linecap="round" opacity=".62"/>
+          <path d="${p.d}" fill="none" stroke="${col}" stroke-width="2.1"
+            stroke-linecap="round" marker-end="url(#${incoming ? 'mI' : 'mA'})"${dash}/>
+          <circle cx="${p.sx}" cy="${p.sy}" r="3" fill="${col}"/>`;
+}
+
+function coldWire(e) {
+  const p = wire(e.a, e.b);
+  return p ? `<path d="${p.d}" fill="none" stroke="var(--text-3)" stroke-width="1"
+    opacity=".18"${e.dyn ? ' stroke-dasharray="4 4"' : ''}/>` : '';
+}
+
+function drawWires(remeasure = true) {
+  if (remeasure) measure();
+  const w = canvas.scrollWidth, h = canvas.scrollHeight;
+  for (const svg of [wires, wiresTop]) {
+    svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+    svg.setAttribute('width', w);
+    svg.setAttribute('height', h);
+  }
+  if (view === 'loose') { wires.innerHTML = ''; wiresTop.innerHTML = ''; return; }
+
+  // Hover previews without disturbing the selection.
+  const focus = hovered || selected;
+  let cold = '', hot = '';
+  for (const e of visibleEdges()) {
+    const isOut = focus && e.a === focus, isIn = focus && e.b === focus;
+    if (isOut || isIn) { hot += hotWire(e, isIn); continue; }
+    // Unfocused edges are context only — no arrowheads competing for attention.
+    if (view !== 'all') cold += coldWire(e);
+  }
+  wires.innerHTML = cold;
+  wiresTop.innerHTML = ARROWS + hot;
+}
+
+/* ---------------- selection ---------------- */
+function select(q) {
+  selected = (q === selected) ? null : q;
+  canvas.classList.toggle('focused', !!selected);
+  const outs = new Set(selected ? (OUT.get(selected) || []) : []);
+  const ins = new Set(selected ? (IN.get(selected) || []) : []);
+  if (selected) {
+    for (const [a, b] of dynEdges()) {
+      if (a === selected) outs.add(b);
+      if (b === selected) ins.add(a);
+    }
+  }
+  for (const el of canvas.querySelectorAll('.chip')) {
+    const k = el.dataset.q;
+    el.setAttribute('aria-pressed', String(k === selected));
+    el.classList.toggle('rel-out', outs.has(k));
+    el.classList.toggle('rel-in', ins.has(k));
+  }
+  hovered = null;
+  drawWires(false); renderDock();
+  if (selected) dock.classList.add('open');
+}
+
+function refRow(q, dir, why) {
+  const d = N[q]; if (!d) return '';
+  const label = d.c ? `${d.c}.${d.n}` : d.n;
+  return `<button class="ref ${dir}" data-goto="${esc(q)}">
+    <span class="arrow">${dir === 'in' ? '←' : '→'}</span>
+    <span class="t"><b>${esc(label)}</b><span>${esc(d.m)}</span>
+    ${why ? `<span class="dyn">${esc(why)}</span>` : ''}</span></button>`;
+}
+
+function renderDock() {
+  if (!selected) {
+    dock.innerHTML = `<div class="empty">
+      <h3>Nothing selected</h3>
+      <p>Pick any function to read what it does and see exactly what it calls and what calls it.</p>
+      <ul>
+        <li>A <strong>dot</strong> in the top-right of a chip means a written explainer, not just a docstring.</li>
+        <li><strong>Dashed</strong> chips are private helpers.</li>
+        <li>Wires point <span style="color:var(--accent)">from caller to callee</span>.</li>
+        <li>Edges come from an AST pass over <code>src/TEXAS</code>, so they are the real static calls — dynamic dispatch is marked separately.</li>
+        <li>Press <code>/</code> to search, <code>Esc</code> to clear.</li>
+      </ul></div>`;
+    dock.classList.remove('open');
+    return;
+  }
+  const d = N[selected];
+  const outs = (OUT.get(selected) || []).slice().sort();
+  const ins = (IN.get(selected) || []).slice().sort();
+  const dynOut = [], dynIn = [];
+  for (const [a, b, why] of dynEdges()) {
+    if (a === selected) dynOut.push([b, why]);
+    if (b === selected) dynIn.push([a, why]);
+  }
+  const kind = d.c ? 'method' : (d.nest ? 'closure' : 'function');
+  const r = REACH[selected] || {};
+  const tags = [`<span class="tag">${kind}</span>`];
+  if (d.priv) tags.push(`<span class="tag">private</span>`);
+  if (r.pub) tags.push(`<span class="tag">exported</span>`);
+  if (r.k === 'unreferenced') tags.push(`<span class="tag warn">no caller</span>`);
+  if (d.x) tags.push(`<span class="tag acc">explained</span>`);
+
+  // How is it reached, beyond the call edges drawn on the canvas?
+  const reachBits = [];
+  if (r.imp) reachBits.push(`Runs at import time from ${r.imp.map(m => `<code>${esc(m)}</code>`).join(', ')}.`);
+  if (r.ext) reachBits.push(`Called from <code>${r.ext.map(esc).join('</code>, <code>')}</code>.`);
+  if (r.dup) reachBits.push(`Another function of the same name exists in
+      ${r.dup.map(x => `<code>${esc(N[x] ? N[x].m : x)}</code>`).join(', ')}.`);
+  if (r.k === 'unreferenced') reachBits.push(NOTES[selected]
+    ? esc(NOTES[selected])
+    : 'Nothing in the package, the notebooks, the app or the tests calls it.');
+  if (r.k === 'cli') reachBits.push('Wired up as a console script in <code>pyproject.toml</code>.');
+
+  const sigHtml = esc(d.sig).replace(esc(d.n), `<b>${esc(d.n)}</b>`);
+
+  dock.innerHTML = `
+    <div class="d-eyebrow">${esc(d.m)}</div>
+    <div class="d-name">${d.c ? `<span class="cls">${esc(d.c)}.</span>` : ''}${esc(d.n)}</div>
+    <div class="d-loc">${esc(d.path)} · lines ${d.l}–${d.e}</div>
+    <div class="d-tags">${tags.join('')}</div>
+
+    <div class="d-sec"><h4>Signature</h4><div class="sig">${sigHtml}</div></div>
+
+    ${reachBits.length ? `<div class="d-sec"><h4>How it is reached</h4>
+        <div class="expl reach">${reachBits.join(' ')}</div></div>` : ''}
+
+    ${d.x ? `<div class="d-sec"><h4>What it does</h4><div class="expl">${esc(d.x)}</div></div>` : ''}
+    ${d.doc ? `<div class="d-sec"><h4>Docstring <span class="n">verbatim from source</span></h4>
+        <pre class="docstr">${esc(d.doc)}</pre></div>`
+            : (d.x ? '' : `<div class="d-sec"><h4>Docstring</h4><p class="none">No docstring in source.</p></div>`)}
+
+    <div class="d-sec"><h4>Calls <span class="n">${outs.length + dynOut.length}</span></h4>
+      <div class="reflist">${outs.map(q => refRow(q, 'out')).join('')
+        + dynOut.map(([q, w]) => refRow(q, 'out', w || 'passed as a callable')).join('')
+        || '<p class="none">Calls no other TEXAS function.</p>'}</div></div>
+
+    <div class="d-sec"><h4>Called by <span class="n">${ins.length + dynIn.length}</span></h4>
+      <div class="reflist">${ins.map(q => refRow(q, 'in')).join('')
+        + dynIn.map(([q, w]) => refRow(q, 'in', w || 'passed as a callable')).join('')
+        || '<p class="none">Not called elsewhere in TEXAS — an entry point, or used only by notebooks.</p>'}</div></div>`;
+}
+
+/* ---------------- search ---------------- */
+function applySearch() {
+  const q = query.trim().toLowerCase();
+  canvas.classList.toggle('searching', !!q);
+  for (const el of canvas.querySelectorAll('.chip')) {
+    const k = el.dataset.q, d = N[k];
+    const hit = !q || k.toLowerCase().includes(q) ||
+      (d.doc + ' ' + d.x).toLowerCase().includes(q);
+    el.classList.toggle('miss', !hit);
+    el.classList.toggle('hit', !!q && hit);
+  }
+  for (const row of canvas.querySelectorAll('.le-row')) {
+    const k = row.dataset.goto, d = N[k];
+    const hit = !q || k.toLowerCase().includes(q) ||
+      ((NOTES[k] || '') + ' ' + d.doc + ' ' + d.x).toLowerCase().includes(q);
+    row.classList.toggle('miss', !hit);
+  }
+  for (const m of canvas.querySelectorAll('.mod')) {
+    m.classList.toggle('allmiss', !!q && !m.querySelector('.chip:not(.miss)'));
+  }
+}
+
+/* ---------------- events ---------------- */
+/* Hovering traces a function's wires; clicking commits to it. */
+canvas.addEventListener('pointerover', e => {
+  const c = e.target.closest('.chip');
+  const q = c ? c.dataset.q : null;
+  if (q === hovered) return;
+  hovered = q;
+  drawWires(false);
+});
+canvas.addEventListener('pointerleave', () => {
+  if (hovered === null) return;
+  hovered = null;
+  drawWires(false);
+});
+
+canvas.addEventListener('click', e => {
+  const c = e.target.closest('.chip');
+  if (c) { select(c.dataset.q); return; }
+  const g = e.target.closest('[data-goto]');
+  if (g) { goTo(g.dataset.goto); return; }
+  if (selected && !e.target.closest('.band-head')) select(selected);
+});
+function setView(next) {
+  view = next;
+  app.dataset.view = next;
+  for (const t of document.querySelectorAll('.tab'))
+    t.setAttribute('aria-selected', String(t.dataset.t === next));
+  canvas.classList.remove('focused');
+  render();
+}
+
+/* Focus a function, switching to the full graph if it is not on this canvas. */
+function goTo(q) {
+  const el = chipEl(q);
+  if (el) {
+    select(q);
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    return;
+  }
+  setView('all');
+  requestAnimationFrame(() => {
+    select(q);
+    chipEl(q)?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  });
+}
+
+dock.addEventListener('click', e => {
+  const r = e.target.closest('[data-goto]');
+  if (r) goTo(r.dataset.goto);
+});
+for (const t of document.querySelectorAll('.tab')) {
+  t.addEventListener('click', () => { setView(t.dataset.t); window.scrollTo({ top: 0 }); });
+}
+qInput.addEventListener('input', () => { query = qInput.value; applySearch(); drawWires(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if (selected) select(selected); else { qInput.value = ''; query = ''; applySearch(); } }
+  if (e.key === '/' && document.activeElement !== qInput) { e.preventDefault(); qInput.focus(); }
+});
+$('#themeBtn').addEventListener('click', () => {
+  const cur = document.documentElement.dataset.theme;
+  const dark = cur ? cur === 'dark'
+    : matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+});
+
+let rt;
+addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(drawWires, 120); });
+new ResizeObserver(() => { clearTimeout(rt); rt = setTimeout(drawWires, 120); }).observe(host);
+
+render();
+</script>

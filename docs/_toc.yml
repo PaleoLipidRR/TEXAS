@@ -5,6 +5,7 @@ parts:
     chapters:
       - file: installation
       - file: api
+      - file: callmap
       - file: troubleshooting
   - caption: Tutorial
     chapters:

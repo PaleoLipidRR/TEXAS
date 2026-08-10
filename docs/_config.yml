@@ -8,6 +8,12 @@ logo: _static/texas_logo.svg
 # Only build files listed in _toc.yml (keeps README.md / drafts out of the site).
 only_build_toc_files: true
 
+# _scripts/ holds the call-map generator (a template + Python), not page sources.
+exclude_patterns:
+  - _build
+  - _scripts
+  - "**.ipynb_checkpoints"
+
 execute:
   execute_notebooks: "off"   # tutorial widgets need a live kernel; render as source
 

@@ -31,6 +31,12 @@ jobs:
           pip install -e .
           pip install "jupyter-book<2"
 
+      # Regenerated from src/TEXAS on every deploy so the call graph, the
+      # reachability report, and the API can never drift apart. Fails loudly if
+      # callmap_content.py names a function that no longer exists.
+      - name: Regenerate the call map
+        run: python docs/_scripts/build_callmap.py
+
       - name: Build the book
         run: jupyter-book build docs/
 

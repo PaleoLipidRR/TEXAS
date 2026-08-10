@@ -30,10 +30,28 @@ Then open `docs/_build/html/index.html` in your browser.
 | `index.md` | Landing / Quickstart |
 | `installation.md`, `troubleshooting.md` | Guide pages |
 | `api.md` | API reference — Sphinx `autodoc` from NumPy/Google docstrings |
+| `callmap.md` | Interactive call map — embeds the generated `_static/callmap.html` |
+| `_scripts/` | Call-map generator (excluded from the build; see below) |
 | `tutorial/` | Interactive Jupyter Book tutorial (Modules 1–5) |
 | `PSM.md`, `stan_explanation.md`, `stan_models_explanation_v2.md` | Explainers |
 | `marginalization_explainer.md`, `reduce_sum_for_geologists.md` | Stan internals, plain-language |
 | `Prior_Choice_Normal_vs_Cauchy.md`, `ckdtree_nearest_ocean_explainer.md` | Method notes |
+
+## Call map
+
+`_static/callmap.html` is **generated**, not hand-edited. It extracts the call
+graph from `src/TEXAS` with an AST pass and merges it with the curated pipeline
+stages and explainers in `_scripts/callmap_content.py`:
+
+```bash
+python docs/_scripts/build_callmap.py     # → docs/_static/callmap.html
+```
+
+CI runs this before every book build, and it **fails** if the curated content
+names a function that no longer exists — so a rename in `src/TEXAS` shows up as
+a build error instead of a hole in the map. Add stages, explainers and
+loose-end notes in `_scripts/callmap_content.py`; the page shell (styles and
+interaction) is `_scripts/callmap_template.html`.
 
 ## Deployment
 
