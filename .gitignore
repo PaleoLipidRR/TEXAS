@@ -104,8 +104,9 @@ docs/_build/
 .superpowers/
 docs/superpowers/
 
-# Session handoff note (scratch)
-RESUME.md
+# RESUME.md is intentionally TRACKED — it is the cross-machine handoff note.
+# (Was ignored as scratch until 2026-08-10; it now has to travel to the Linux
+# boxes, so it lives in the repo.)
 
 # uv lockfile (not tracked — conda is the canonical env; see docs)
 uv.lock
