@@ -27,6 +27,7 @@ def save_posterior(
     cache_dir: Optional[Union[str, Path]] = None,
     overwrite: bool = True,
     filename_suffix: str = "",
+    layout: Literal["auto", "case", "legacy"] = "auto",
 ) -> Path:
     """
     Save a forward-model posterior to disk as compressed NetCDF.
@@ -52,6 +53,13 @@ def save_posterior(
     filename_suffix : str, optional
         Extra tag appended before ``.nc``, e.g. ``"032326"`` for a
         date-stamped run.  Leading/trailing underscores are stripped.
+        Under the case layout this becomes the run/member token.
+    layout : {"auto", "case", "legacy"}
+        Where to write.  ``"case"`` uses the CESM-style case directory
+        (``tx.v026.GHEB.sst.ri3.G23-N10/fwd.nc``); ``"legacy"`` uses the
+        historical long flat filename; ``"auto"`` (default) prefers the case
+        layout and falls back to legacy with a warning if no case id can be
+        derived.  See :mod:`TEXAS.utils.naming`.
 
     Returns
     -------
@@ -81,7 +89,36 @@ def save_posterior(
     if filename_suffix:
         filename_suffix = f"_{filename_suffix.strip('_')}"
 
-    outpath = outdir / f"{name}_{ttype}{proxy_tag}{filename_suffix}.nc"
+    legacy_path = outdir / f"{name}_{ttype}{proxy_tag}{filename_suffix}.nc"
+
+    # Preferred layout: one directory per calibration case, CESM-style, so the
+    # forward posterior and every reconstruction derived from it sit together
+    # and individual filenames stay short. Falls back to the historical flat
+    # name whenever a case id cannot be derived (e.g. a model this naming
+    # scheme does not know), so saving can never fail on naming alone.
+    outpath = legacy_path
+    if layout in ("case", "auto"):
+        try:
+            from ..utils.naming import case_from_attrs, fwd_relpath, DEFAULT_RUN
+            # A date-stamped suffix becomes the run/member token, which is what
+            # keeps two refits of one configuration from colliding.
+            case = case_from_attrs(posterior.attrs,
+                                   run=filename_suffix.strip("_") or DEFAULT_RUN)
+            outpath = outdir / fwd_relpath(case)
+            outpath.parent.mkdir(exist_ok=True, parents=True)
+            posterior.attrs["case_id"] = str(case)
+        except Exception as exc:
+            if layout == "case":
+                raise
+            import warnings
+            warnings.warn(
+                f"Could not derive a case id for this posterior ({exc}); "
+                f"falling back to the legacy flat filename. Pass "
+                f"layout='legacy' to silence this.",
+                UserWarning, stacklevel=2,
+            )
+            outpath = legacy_path
+
     if outpath.exists() and not overwrite:
         raise FileExistsError(f"{outpath} exists and overwrite=False")
 
@@ -135,13 +172,27 @@ def load_posterior(
     
     # Ensure directory exists
     indir.mkdir(exist_ok=True, parents=True)
-    
-    # Construct file path
-    fpath = indir / f"{model_name}.nc"
-    
-    if not fpath.exists():
-        available = sorted(indir.glob("*.nc"))
-        available_str = "\n    ".join(f.stem for f in available) if available else "(none)"
+
+    # Dual-read: accept either a case id (tx.v026.GHEB.sst.ri3.G23-N10) or a
+    # historical long name, and find the file under either layout. Exact-path
+    # lookups come first; the attr-matching scan only runs if those miss.
+    fpath = None
+    if model_type == "forward":
+        try:
+            from ..utils.naming import resolve_posterior_path
+            fpath = resolve_posterior_path(model_name, indir)
+        except Exception:
+            fpath = None
+    if fpath is None:
+        candidate = indir / f"{model_name}.nc"
+        fpath = candidate if candidate.exists() else None
+
+    if fpath is None:
+        available = sorted(indir.glob("*.nc")) + sorted(indir.glob("*/fwd.nc"))
+        available_str = "\n    ".join(
+            f.parent.name if f.name == "fwd.nc" else f.stem for f in available
+        ) if available else "(none)"
+        model_name = str(model_name)
         raise FileNotFoundError(
             f"Posterior file not found: '{model_name}.nc'\n"
             f"Searched in: {indir}\n"
@@ -283,6 +334,26 @@ def _generate_filename_base(
         model_type = "ensemble"
         clean_stan_model = stan_model
 
+    # Case layout: a reconstruction belongs to the calibration it marginalised
+    # over, so it is written inside that calibration's case directory under a
+    # short leaf name. Requires the fwd_case attr that build_invT_inputData
+    # attaches; posteriors produced before that fall through to the legacy name.
+    fwd_case = meta.get("fwd_case", "")
+    if fwd_case:
+        try:
+            from ..utils.naming import CONSTRAINT_CODES, KIND_CODES, is_case_id
+            if is_case_id(fwd_case):
+                constraint = next(
+                    (c for c in CONSTRAINT_CODES if c in stan_model), "unconstrained"
+                )
+                parts = [f"{CONSTRAINT_CODES[constraint]}{KIND_CODES[model_type]}"]
+                if filename_tag:
+                    tags = [filename_tag] if isinstance(filename_tag, str) else filename_tag
+                    parts.extend(_slug(t) for t in tags if t)
+                return f"{fwd_case}/inv.{site_name}.{'-'.join(parts)}"
+        except Exception:
+            pass  # naming is a convenience; never block a save on it
+
     temp_parts = [temptype]
     if int(meta.get("use_gdgt23ratio", 0)) == 1:
         temp_parts.append("gdgt23ratio")
@@ -342,6 +413,7 @@ def _save_invT_posterior(
     output_dir.mkdir(parents=True, exist_ok=True)
     base = _generate_filename_base(posterior.attrs, filename_tag)
     filepath = output_dir / f"{base}.nc"
+    filepath.parent.mkdir(parents=True, exist_ok=True)
     if filepath.exists() and not overwrite:
         raise FileExistsError(f"{filepath} already exists and overwrite=False.")
     posterior.attrs.setdefault("proxy_name", "")
@@ -370,6 +442,7 @@ def _save_invT_draws(
     output_dir.mkdir(parents=True, exist_ok=True)
     base = _generate_filename_base(draws.attrs, filename_tag)
     filepath = output_dir / f"{base}_draws.nc"
+    filepath.parent.mkdir(parents=True, exist_ok=True)
     if filepath.exists() and not overwrite:
         raise FileExistsError(f"{filepath} already exists and overwrite=False.")
     encoding = {var: {"zlib": True} for var in draws.data_vars}

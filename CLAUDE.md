@@ -123,6 +123,40 @@ e.g. `gen_logi_fixed_hier_crtp_multiv_SST_scaledRI.nc`
 Optional predictor flags (`_gdgt23ratio`, `_no3_1.5`) are appended to `temptype` before `proxy_name`.
 `proxy_name` is omitted from the filename only if not set (falls back to old pattern for backward compat).
 
+> **CESM-style case naming (2026-08-09)**: `utils/naming.py` replaces the
+> concatenated-description filenames (95–122 chars, growing with every new axis)
+> with fixed dot-delimited positions, so tokens stay short:
+>
+> ```
+> tx.v026.GHEB.sst.ri3.G23-N10.001/       <- the case = one calibration identity
+>     fwd.nc                              <- the forward posterior
+>     inv.U1482.ud-050126.nc              <- a reconstruction derived from it
+> ```
+>
+> Positions: project, version, **compset**, target temperature, proxy,
+> predictors, run/member. The 4-char compset encodes curve (`G` gen_logi_fixed,
+> `L` logistic, `N` linear), training set (`H` hier_crtp, `C` culmeso,
+> `J` culmesocore, `T` crtp), estimator (`P` priorApprox, `E` priorApprox+EIV,
+> `D` full hierarchical), and predictor structure (`U` univariate, `A` additive
+> β-on-μ, `B` bounded-T γ-on-T₀). So `..._hier_crtp_multiv_priorApprox_eiv_boundedT`
+> → `GHEB`. Predictors are `G23` and `N` + cutoff×10 (`N10` = cutoff 1.0).
+>
+> - **The case is the forward calibration.** An invT model name records the curve
+>   and constraint but not the training set or estimator, so a reconstruction is
+>   named as a member *of* its parent case, not as a case of its own. This relies
+>   on the `fwd_case` / `fwd_posterior_name` attrs that `build_invT_inputData`
+>   now attaches — invT posteriors written before this carry no provenance and
+>   fall back to the legacy flat name automatically.
+> - **The run position** (`.001`) is CESM's ensemble-member field; `save_posterior`
+>   maps `filename_suffix` (e.g. a `050126` date stamp) onto it, which is what
+>   stops two refits of one configuration from colliding.
+> - **Dual-read, write-new.** Nothing on disk was renamed. `load_posterior()`
+>   accepts *either* a case id or a legacy long name and finds the file under
+>   *either* layout (exact-path lookups first, attr-matching scan only as a
+>   fallback), so existing caches, Zenodo downloads, and old notebooks keep
+>   working. `save_posterior(..., layout=)` takes `"auto"` (default, prefers case),
+>   `"case"`, or `"legacy"`.
+
 ### Streamlit app (`streamlit_app/`)
 
 Three-tab GUI:
