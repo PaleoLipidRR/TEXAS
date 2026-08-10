@@ -92,10 +92,31 @@ assigned to exactly one step, none double-assigned, none missed.
 
 ---
 
-## STATUS: Phases 0 and 1 are DONE (2026-08-10)
+## STATUS: Phases 0, 1 and 2 are DONE — resume at Phase 3 (2026-08-10)
 
-7 commits on `feat/revision1-validation-groupA`, **unpushed**, 175 tests passing.
-Safety net in place: `backup/pre-merge-20260809` + `stash@{0}`.
+Everything below is **pushed to origin**. Nothing important lives only on one
+machine any more; you can pick this up from any clone.
+
+- `feat/revision1-validation-groupA` @ `3e72cd8` — 9 commits, 175 tests passing
+- `main` @ `d70405a` — gridT merged (Phase 2), 85 tests passing
+  (85 not 175 is correct: `test_naming.py` + `test_stan_ascii.py` are 90 tests
+  that live on the feature branch, not yet on main)
+- `backup/pre-merge-20260809` @ `a0b3887` — rollback point, on origin
+- The Phase 0 stash was verified redundant against the pushed commits, then dropped
+
+**The feature branch is now 6 commits behind `main`.** Merge or rebase before
+opening PRs in Phase 4.
+
+Two commits beyond the original 7, both for cross-machine portability:
+
+- `chore: normalize line endings deterministically across platforms` — adds
+  `* text=auto` so a Windows clone (`autocrlf=true`) and a Linux clone
+  (`autocrlf=false`) cannot commit the same file with different endings.
+  Third-party `published_data/**/*.txt` excluded to stay byte-identical.
+  Verified zero churn via `git add --renormalize .`.
+- `docs: track RESUME.md as the cross-machine handoff note` — this file used to
+  be gitignored as scratch, so the plan could not follow the work to the Linux
+  boxes. Now tracked, with the bootstrap section above.
 
 ```
 ab10ce0 notebook(SI03): model-switchable paleo showcases (additive EIV vs bounded-T)
@@ -319,7 +340,7 @@ Once this is green and pushed, drop the safety stash: `git stash drop`.
 
 ---
 
-## Phase 2 — land the free win: the gridT branch
+## Phase 2 — land the free win: the gridT branch — DONE
 
 `origin/claude/gridt-inversion-characterization-15i183` is 5 commits, **all new
 files** under `TEXAS-revision/`, with **zero overlap** against any other branch
