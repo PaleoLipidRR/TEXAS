@@ -48,11 +48,34 @@ pytest -q                   # expect 175 passed
 | `data/cache/**` posteriors | Reconstructions cannot be loaded | `git lfs pull`, `TEXAS.download_posteriors()`, or re-run |
 | CmdStan install | Nothing samples | `texas-install-cmdstan` |
 
-> **Never `git stash` in this repo without checking LFS afterwards.** Stashing
-> and restoring de-hydrated a 3.6 MB LFS file into a 133-byte stub on
-> 2026-08-10. The stub *matches the index*, so the file quietly leaves
-> `git status` and looks like it was cleaned up. Re-run the step-2 check after
-> any stash/restore, and `git lfs pull` if the count went up.
+> ### CHECK THIS FIRST ON EVERY MACHINE: the LFS smudge filter
+>
+> On 2026-08-10 this repo's `.git/config` was found overriding the global LFS
+> filter with `--skip`:
+>
+> ```
+> filter.lfs.smudge  = git-lfs smudge --skip -- %f
+> filter.lfs.process = git-lfs filter-process --skip
+> ```
+>
+> `--skip` means LFS content is **never materialized on checkout**, so every
+> `git checkout`, branch switch, stash apply, and merge silently writes 133-byte
+> pointer stubs instead of data. It is almost certainly a leftover from the July
+> LFS-over-budget period. This was the root cause of every LFS symptom in that
+> session — the stash de-hydration, files turning back into stubs after a
+> `git checkout --`, and the historical 88-of-97.
+>
+> Diagnose and fix (repo-local, so it must be done on each clone):
+>
+> ```bash
+> git config --show-origin --get filter.lfs.smudge   # want the GLOBAL one, no --skip
+> git config --unset filter.lfs.smudge               # only if it shows --skip
+> git config --unset filter.lfs.process
+> git lfs pull
+> ```
+>
+> Verify with the stub count above (want 0), then confirm a checkout no longer
+> stubs: delete an LFS file, `git checkout --` it, and check its size.
 
 ---
 
