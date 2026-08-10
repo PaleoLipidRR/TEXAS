@@ -447,6 +447,91 @@ should be clean.
 
 ---
 
+## Phase 5 — rename the `.stan` model files to the CESM scheme
+
+The case naming landed for posterior `.nc` artifacts only. This phase finishes
+the job on the 17 model sources, so a compset code means the same thing whether
+you are looking at a file, a cache directory, or a posterior attr.
+
+### Target names
+
+Forward models are identified by their compset. Inverse models are not (an invT
+run belongs to the *forward* case it marginalises over), so they are keyed by
+their own three axes: structure `U|A|B`, kind `d`=marginal/direct `e`=ensemble,
+constraint `u|h|t|r|s`.
+
+| current | new |
+|---|---|
+| `gen_logi_fixed_culmeso.stan` | `fwd.GCDU.stan` |
+| `gen_logi_fixed_culmesocore.stan` | `fwd.GJDU.stan` |
+| `gen_logi_fixed_hier_crtp_multiv.stan` | `fwd.GHDA.stan` |
+| `gen_logi_fixed_hier_crtp_multiv_priorApprox.stan` | `fwd.GHPA.stan` |
+| `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv.stan` | `fwd.GHEA.stan` |
+| `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT.stan` | `fwd.GHEB.stan` |
+| `gen_logi_fixed_hier_crtp_univ_priorApprox.stan` | `fwd.GHPU.stan` |
+| `linear_model.stan` | `fwd.NTDU.stan` |
+| `invT_gen_logi_fixed_univ_marginal_unconstrained.stan` | `inv.Udu.stan` |
+| `invT_gen_logi_fixed_univ_marginal_hard_constraint.stan` | `inv.Udh.stan` |
+| `invT_gen_logi_fixed_univ_marginal_truncated_prior.stan` | `inv.Udt.stan` |
+| `invT_gen_logi_fixed_univ_unconstrained.stan` | `inv.Ueu.stan` |
+| `invT_gen_logi_fixed_multiv_marginal_unconstrained.stan` | `inv.Adu.stan` |
+| `invT_gen_logi_fixed_multiv_marginal_hard_constraint.stan` | `inv.Adh.stan` |
+| `invT_gen_logi_fixed_multiv_marginal_truncated_prior.stan` | `inv.Adt.stan` |
+| `invT_gen_logi_fixed_multiv_unconstrained.stan` | `inv.Aeu.stan` |
+| `invT_gen_logi_fixed_multiv_marginal_unconstrained_boundedT.stan` | `inv.Bdu.stan` |
+
+Verified: all 17 map uniquely, no collisions.
+
+### The ordering constraint — 5A must come before 5C
+
+`stan_model_name` is stored on every posterior and **six places parse it as a
+string**. Rename the files and those silently change meaning:
+
+| consumer | what it parses | breaks how |
+|---|---|---|
+| `data/builder.py:377` | `"_no3ratio" in name` | always False under `inv.Adu` |
+| `stan/io.py:327` | `"marginal" in name`, `.replace("_marginal","")` | direct/ensemble misdetected |
+| `utils/naming.py:584` | same two | `legacy_invT_name` wrong |
+| `ensemble/generator.py:186` | model name inspection | model fn misinferred |
+| `plotting/prior_plot.py:129` | model name | group labels wrong |
+| `utils/naming.py:183` | `encode_compset` long-name parse | raises on a short code |
+
+None of these fail loudly — they mostly return the wrong branch. That is why the
+rename cannot go first.
+
+- [ ] **5A Replace string-parsing with explicit attrs.** Write `compset`,
+      `model_kind` (direct/ensemble), `constraint`, and `no3ratio` onto every
+      posterior in `stan/metadata.py`, and change the six consumers to read
+      them. Back-compat: when the structured attrs are missing (every cached
+      `.nc` today), derive them from the long `stan_model_name` with the
+      existing parsers. Ship this alone and verify 175 tests still pass.
+
+- [ ] **5B Directory-scanned model registry.** Replace the string-concatenation
+      in `_select_invT_stan_file` with a registry built by parsing the filenames
+      present in `stan_models/`. Today the code can construct **80** invT names
+      of which only **9** exist, so 71 configurations raise `FileNotFoundError`
+      *after* the forward posterior is loaded. A lookup fails immediately and
+      lists what is available. This also makes 5C a one-line change, because
+      nothing builds names from tokens any more.
+
+- [ ] **5C `git mv` the 17 files** (preserves history), add a header line to
+      each — `// compset GHEB = gen_logi_fixed | hier_crtp | priorApprox+EIV |
+      bounded-T` — and a `stan_models/MODELS.md` index table. Accept both old
+      and new names in `encode_compset`.
+
+- [ ] **5D Sweep the ~98 remaining string references** in `src/`, `tests/`,
+      `docs/`, `CLAUDE.md`, and the SI notebooks. Then delete the old-name
+      acceptance path once nothing references it.
+
+> **Compiled binaries are keyed by file stem**, so 5C forces a one-time full
+> recompile of every model. Expect the first sample after the rename to be slow.
+
+> **Cached posteriors keep their old `stan_model_name`.** That is fine and
+> intended — the attr records what was actually run. 5A is what makes them
+> readable regardless.
+
+---
+
 ## Known gaps — not blockers, but do not forget
 
 - [ ] **Bounded-T forward grid is incomplete.** `boundedT_thermoT_gdgt23ratio_no3_1.0`
