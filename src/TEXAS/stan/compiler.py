@@ -2,9 +2,9 @@
 
 import logging
 import os
-import shutil
 import subprocess
 import sys
+import unicodedata
 import warnings
 from contextlib import contextmanager
 from pathlib import Path
@@ -15,6 +15,90 @@ from cmdstanpy import CmdStanModel
 from ..utils.paths import STAN_MODELS_DIR, STAN_BUILD_DIR
 
 logger = logging.getLogger(__name__)
+
+# ── ASCII sanitization for build copies ──────────────────────────────────────
+# cmdstanpy reads the .stan file with ``open(path, 'r')`` and no explicit
+# encoding (see cmdstanpy/model.py), so it decodes with the platform locale
+# codec — cp1252 on a default Windows install. Any non-ASCII byte then raises
+# ``UnicodeDecodeError``, even when the character only appears in a comment
+# (box-drawing banners, Greek symbols, subscripts, degree signs, arrows, ...).
+# To make compilation independent of the reader's locale we copy an ASCII-only
+# version of each model into the build dir. The *source* file keeps its original
+# Unicode; only the disposable build copy is transliterated.
+
+# Greek letters -> spelled-out names (common in stats/model comments).
+_GREEK_ASCII = {}
+for _cp in range(0x0391, 0x03CA):  # capital Alpha .. small omega
+    _ch = chr(_cp)
+    try:
+        _name = unicodedata.name(_ch)
+    except ValueError:
+        continue
+    if "GREEK SMALL LETTER" in _name:
+        _GREEK_ASCII[_ch] = _name.rsplit(" ", 1)[-1].lower()
+    elif "GREEK CAPITAL LETTER" in _name:
+        _GREEK_ASCII[_ch] = _name.rsplit(" ", 1)[-1].capitalize()
+del _cp, _ch, _name
+
+_STAN_ASCII_MAP = {
+    # box drawing -> ASCII rules
+    "─": "-", "━": "-", "═": "=",
+    "│": "|", "┃": "|", "║": "|",
+    **{c: "+" for c in "┌┐└┘├┤┬┴┼"
+                       "╔╗╚╝╠╣╦╩╬"},
+    # dashes / minus
+    "‐": "-", "‑": "-", "‒": "-", "–": "-",
+    "—": "--", "―": "--", "−": "-",
+    # quotes / punctuation
+    "‘": "'", "’": "'", "“": '"', "”": '"',
+    "…": "...", "·": "*", "•": "*", " ": " ",
+    # math / relations
+    "°": "deg", "±": "+/-", "×": "x", "÷": "/",
+    "µ": "mu", "≈": "~=", "≠": "!=", "≤": "<=",
+    "≥": ">=", "≡": "==", "∞": "inf", "∝": "prop-to",
+    "∑": "sum", "∏": "prod", "∫": "int", "√": "sqrt",
+    "∂": "d", "∇": "grad", "∈": "in", "∉": "not-in",
+    "∀": "forall", "∃": "exists",
+    # arrows
+    "←": "<-", "→": "->", "↔": "<->",
+    "⇐": "<=", "⇒": "=>", "⇔": "<=>",
+    **_GREEK_ASCII,
+}
+
+
+def _stan_text_to_ascii(text: str) -> str:
+    """Return an ASCII-only rendering of Stan source *text*.
+
+    Known formatting/math symbols are transliterated for readability;
+    sub/superscripts and accented letters are reduced via NFKD decomposition
+    (e.g. ``T₀`` -> ``T0``); anything still non-ASCII becomes ``?``. Pure
+    ASCII input is returned unchanged.
+    """
+    mapped = "".join(_STAN_ASCII_MAP.get(ch, ch) for ch in text)
+    decomposed = unicodedata.normalize("NFKD", mapped)
+    return decomposed.encode("ascii", "replace").decode("ascii")
+
+
+def _copy_stan_ascii(src: Path, dest: Path) -> None:
+    """Copy *src* to *dest*, sanitizing to ASCII so any locale can read it.
+
+    Line endings are preserved. For already-ASCII sources this writes
+    byte-identical content, so it is a drop-in replacement for a plain copy.
+    """
+    raw = src.read_bytes()
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        text = raw.decode("latin-1")  # never fails; last-resort readability
+    ascii_text = _stan_text_to_ascii(text)
+    dest.write_bytes(ascii_text.encode("ascii"))
+    if any(ord(c) > 127 for c in text):
+        logger.debug(
+            "Stan source %s contains non-ASCII characters; wrote an "
+            "ASCII-sanitized build copy so cmdstanpy can read it under any "
+            "locale (e.g. cp1252 on Windows).",
+            src.name,
+        )
 
 # Substrings (case-insensitive) of PATH entries that ship a MinGW g++ known to
 # break CmdStan linking on Windows: they are picked up ahead of RTools and their
@@ -97,6 +181,10 @@ class StanCompiler:
     (~/.texas/stan_cache/ by default, always writable) and compiling from
     there.  The source file is used only for reading; build artifacts never
     touch the source tree.
+
+    The build copy is also ASCII-sanitized so cmdstanpy — which reads the
+    .stan file with the platform locale codec (cp1252 on Windows) — never
+    crashes on non-ASCII characters in comments.  See :func:`_copy_stan_ascii`.
     """
 
     def __init__(self, model_dir: Optional[Union[str, Path]] = None):
@@ -117,12 +205,14 @@ class StanCompiler:
     def _build_path(self, stan_source: Path) -> Path:
         """Return the path under STAN_BUILD_DIR that we compile from.
 
-        Copies the source file if the build copy is absent or stale.
+        Copies the source file if the build copy is absent or stale. The copy
+        is ASCII-sanitized (see :func:`_copy_stan_ascii`) so cmdstanpy's
+        locale-encoded file read never fails on non-ASCII comment characters.
         """
         dest = self.build_dir / stan_source.name
         src_mtime = stan_source.stat().st_mtime
         if not dest.exists() or dest.stat().st_mtime < src_mtime:
-            shutil.copy2(stan_source, dest)
+            _copy_stan_ascii(stan_source, dest)
         return dest
 
     # ── Public API ──────────────────────────────────────────────────────────
