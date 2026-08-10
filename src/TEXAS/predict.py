@@ -61,6 +61,7 @@ def predict_proxy_from_T(
     no3: Optional[np.ndarray] = None,
     no3_cutoff: Optional[float] = None,
     suffix: Optional[str] = None,
+    fwd_cache_dir: Optional[Union[str, Path]] = None,
 ) -> Dict[str, np.ndarray]:
     """
     Forward prediction: temperature → proxy percentiles (Scaled RI, TEX86, or any fitted proxy).
@@ -101,6 +102,10 @@ def predict_proxy_from_T(
     suffix : str, optional
         Force a specific parameter suffix (e.g. ``"crtp"``).  Auto-detected
         by priority order when omitted.
+    fwd_cache_dir : Path or str, optional
+        Directory to resolve *posterior* in when it is given as a name string.
+        Defaults to the standard forward posterior cache.  Ignored when a
+        loaded Dataset is passed.
 
     Returns
     -------
@@ -111,7 +116,7 @@ def predict_proxy_from_T(
         ``"metadata"``  — run metadata dict, if return_full=True
     """
     if isinstance(posterior, str):
-        posterior = load_posterior(posterior)
+        posterior = load_posterior(posterior, cache_dir=fwd_cache_dir)
 
     return generate_ensemble_auto(
         post_ds=posterior,
@@ -162,6 +167,7 @@ def predict_T_from_proxyObs(
     save_draws: bool = False,
     filename_tag: Optional[Union[str, Sequence[str]]] = None,
     cache_dir: Optional[Union[str, Path]] = None,
+    fwd_cache_dir: Optional[Union[str, Path]] = None,
 ) -> Dict[str, Any]:
     """
     Inverse reconstruction: scaled RI → temperature percentiles.
@@ -284,6 +290,11 @@ def predict_T_from_proxyObs(
         *save_results* or *save_draws* is True.  Defaults to the standard
         invT cache (``~/.texas/cache/TEXAS_invT_posterior_cache/`` for pip
         installs, or ``data/cache/TEXAS_invT_posterior_cache/`` in the repo).
+    fwd_cache_dir : Path or str, optional
+        Directory to resolve *fwd_posterior* in when it is given as a name
+        string.  Defaults to the standard forward posterior cache.  This is a
+        separate directory from *cache_dir*, which controls only where results
+        are written.
 
     Returns
     -------
@@ -337,7 +348,7 @@ def predict_T_from_proxyObs(
     _ds_for_check = _fwd_ds
     if _ds_for_check is None and _fwd_name:
         try:
-            _ds_for_check = load_posterior(_fwd_name)
+            _ds_for_check = load_posterior(_fwd_name, cache_dir=fwd_cache_dir)
         except Exception:
             pass
     if _ds_for_check is not None:
@@ -377,6 +388,7 @@ def predict_T_from_proxyObs(
         save_draws=save_draws,
         filename_tag=filename_tag,
         cache_dir=cache_dir,
+        fwd_cache_dir=fwd_cache_dir,
         threads_per_chain=threads_per_chain,
         model_type="direct",
         constraint_type=constraint_type,
