@@ -1,3 +1,10 @@
+# Normalize text to LF in the repo regardless of each machine's core.autocrlf.
+# Without this, a Windows clone (autocrlf=true) and a Linux clone (autocrlf=false)
+# can commit the same file with different line endings, producing whole-file
+# diffs that are pure noise. Checkout still gives each platform its native
+# endings. More specific rules below override this one.
+* text=auto
+
 *.nc filter=lfs diff=lfs merge=lfs -text
 *.npz filter=lfs diff=lfs merge=lfs -text
 *.pkl filter=lfs diff=lfs merge=lfs -text
@@ -10,3 +17,7 @@ data/cache/** filter=lfs diff=lfs merge=lfs -text
 *.pdf !text !filter !merge !diff
 *.png !text !filter !merge !diff
 *.svg !text !filter !merge !diff
+
+# Third-party published data downloaded verbatim (NOAA, NICOPP, ...). Keep these
+# byte-identical to the source file; do not renormalize their CRLF endings.
+data/spreadsheets/published_data/**/*.txt -text
