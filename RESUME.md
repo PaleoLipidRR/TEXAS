@@ -523,8 +523,49 @@ rename cannot go first.
       `docs/`, `CLAUDE.md`, and the SI notebooks. Then delete the old-name
       acceptance path once nothing references it.
 
-> **Compiled binaries are keyed by file stem**, so 5C forces a one-time full
-> recompile of every model. Expect the first sample after the rename to be slow.
+### Blast radius — everything a rename touches
+
+| # | Surface | Impact | Reversible? |
+|---|---|---|---|
+| 1 | 17 `.stan` sources | `git mv` | yes |
+| 2 | Compiled binaries (keyed by stem) | one-time full recompile of every model | yes, costs time |
+| 3 | `_select_invT_stan_file` | string-built names; 80 constructible vs 9 real | yes (5B) |
+| 4 | `stan_model_name` attr | 6 string parsers pick the **wrong branch silently** | yes (5A) |
+| 5 | Cached posteriors (17 fwd + 72 invT) | keep old names in attrs, by design | n/a |
+| 6 | **`POSTERIOR_REGISTRY` → Zenodo 20032542** | hardcodes long filenames **as published** | **NO** |
+| 7 | `streamlit_app/` | 3 files reference model names | yes |
+| 8 | `docs/` | 6 files + callmap regeneration | yes |
+| 9 | Notebooks | 4 files (SI_code1/2/3, SI03) | yes |
+| 10 | `CLAUDE.md`, `README.md`, `CITATION.cff` | naming docs + DOI badges | yes |
+
+**Row 6 is the one that decides the schedule.** `utils/download.py` hardcodes
+filenames exactly as they exist on the *published* record
+`10.5281/zenodo.20032542`:
+
+```
+"filename": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc"
+```
+
+Those names are what every reader of the paper downloads. A published DOI's
+files cannot be renamed in place — changing them means a new deposit version,
+and the accepted paper's data-availability statement points at whichever
+version it cites. **So the naming has to be final before the deposit the
+paper cites, and is frozen forever after.**
+
+> **Also unresolved:** `data/README.md` cites DOI `10.5281/zenodo.19666745`
+> while `README.md`, `CITATION.cff` and `download.py` use `20032542`. Reconcile
+> these before submission regardless of the naming decision.
+
+### Recommended schedule against the 2026-09-08 deadline
+
+- **Now → submission: 5A + 5B only.** These are bug fixes wearing a refactor's
+  clothes (six silent wrong-branch parsers; 71 of 80 configurations failing
+  late). They make the revision reruns *safer* and are invisible to reviewers.
+  No file is renamed, so no recompile and no Zenodo impact.
+- **After submission, before the final archive: a dedicated session for
+  5C + 5D + the Zenodo re-deposit.** Renaming mid-revision would force a full
+  recompile and land silent-breakage risk exactly while final figures are being
+  generated, for zero reviewer-visible benefit.
 
 > **Cached posteriors keep their old `stan_model_name`.** That is fine and
 > intended — the attr records what was actually run. 5A is what makes them
