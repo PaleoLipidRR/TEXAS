@@ -110,3 +110,8 @@ docs/superpowers/
 
 # uv lockfile (not tracked — conda is the canonical env; see docs)
 uv.lock
+
+# Claude Code local permission allowlist (machine-specific absolute paths).
+# .claude/agents/ and .claude/skills/ ARE tracked - they are shared tooling.
+.claude/settings.json
+.claude/settings.local.json
