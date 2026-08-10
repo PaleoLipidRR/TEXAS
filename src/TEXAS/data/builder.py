@@ -13,9 +13,23 @@ temperature from observed Ring Index values.
 
 from typing import Dict, Optional, List, Union, Tuple, Any
 from dataclasses import dataclass
+from pathlib import Path
 
 import numpy as np
 import xarray as xr
+
+
+def _fwd_case_id(attrs: Dict[str, Any]) -> str:
+    """Case id of the forward posterior, or "" if it cannot be derived.
+
+    Never fatal: naming is a convenience layer, and a calibration that predates
+    it (or carries incomplete attrs) must still be usable for reconstruction.
+    """
+    try:
+        from ..utils.naming import case_from_attrs
+        return str(case_from_attrs(attrs))
+    except Exception:
+        return ""
 
 from TEXAS.constants import OPTIONAL_PREDICTORS, PREDICTOR_BETA_NAMES
 from TEXAS.data.filter import ensure_numpy
@@ -54,6 +68,7 @@ def build_invT_inputData(
     predictors: Optional[Dict[str, np.ndarray]] = None,
     config: Optional[InvTConfig] = None,
     fwd_posterior: Optional[xr.Dataset] = None,
+    fwd_cache_dir: Optional[Union[str, Path]] = None,
 ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """
     Build the `data` dictionary for Stan's inverse model and sampler configuration.
@@ -79,6 +94,9 @@ def build_invT_inputData(
             fwd_posterior_name is ignored and no file I/O is performed. Useful
             when running from Google Colab or any pip-install context where the
             posterior cache is not available.
+        fwd_cache_dir: Directory to resolve fwd_posterior_name in. Defaults to
+            the standard forward posterior cache. Use this to read posteriors
+            from a project-local bundle without copying them into the cache.
 
     Returns:
         data: Dictionary for Stan's data block
@@ -116,7 +134,7 @@ def build_invT_inputData(
     if fwd_posterior is not None:
         post: xr.Dataset = fwd_posterior
     else:
-        post: xr.Dataset = load_posterior(fwd_posterior_name)
+        post: xr.Dataset = load_posterior(fwd_posterior_name, cache_dir=fwd_cache_dir)
     vars_ = list(post.data_vars)
 
     # ═══════════════════════════════════════════════════════════════════════════
@@ -281,6 +299,12 @@ def build_invT_inputData(
     #   3. Set use_* flags so Stan knows to apply nonthermal corrections
     # ───────────────────────────────────────────────────────────────────────────
     predictor_usage = {}
+    # BoundedT forward models move the covariates inside the logistic (a shift of
+    # the inflection point) and name the slopes gamma_* instead of beta_*. Detect
+    # by coefficient presence so it holds regardless of the model-name string.
+    is_bounded = any(f"gamma_{n}_{used_suffix}" in P for n in ("G23", "NO3"))
+    coef_names = ({"gdgt23ratio": "gamma_G23", "no3": "gamma_NO3"}
+                  if is_bounded else PREDICTOR_BETA_NAMES)
     for pred in OPTIONAL_PREDICTORS:  # ['gdgt23ratio', 'no3']
         # Check if this predictor was used in the forward calibration
         use_flag = bool(post.attrs.get(f"use_{pred}", False))
@@ -301,7 +325,7 @@ def build_invT_inputData(
         # Stan always expects beta_G23 and beta_NO3 as vector[M], even when the
         # predictor is disabled (use_* = 0). Provide zeros when not used so the
         # data block dimensions match regardless of which predictors are active.
-        beta_name = PREDICTOR_BETA_NAMES[pred]          # e.g., "beta_G23"
+        beta_name = coef_names[pred]                    # "beta_G23" or (bounded) "gamma_G23"
         if use_flag:
             # Extract the coefficient from forward posterior
             beta_key = f"{beta_name}_{used_suffix}"          # e.g., "beta_G23_crtp"
@@ -362,6 +386,13 @@ def build_invT_inputData(
             "used_suffix": used_suffix,  # e.g., "crtp"
             "predictor_usage": predictor_usage,  # Which covariates are active
             "no3ratio": "_no3ratio" in fwd_model_name,  # Forward model used centred NO₃ form
+            "is_bounded": is_bounded,  # BoundedT forward model → select boundedT invT model
+            # Forward-calibration provenance. An invT model name records the
+            # curve and the constraint but not the training set or the
+            # estimator, so without these two the saved .nc cannot be traced
+            # back to the calibration it marginalised over.
+            "fwd_posterior_name": fwd_posterior_name or fwd_model_name,
+            "fwd_case": _fwd_case_id(post.attrs),
         },
     }
 

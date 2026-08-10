@@ -83,6 +83,7 @@ def get_invT_posterior(
     constraint_type: Literal["unconstrained", "hard_constraint", "truncated_prior", "reparameterized", "soft"] = "unconstrained",
     min_temp: Optional[float] = None,
     fwd_posterior: Optional[xr.Dataset] = None,
+    fwd_cache_dir: Optional[Union[str, Path]] = None,
 ) -> xr.Dataset:
     """
     Run the inverse-T model and return the posterior Dataset with metadata.
@@ -91,6 +92,11 @@ def get_invT_posterior(
         model_type:
             - "direct": Use direct sampling models (more efficient, supports threading)
             - "ensemble": Use traditional ensemble models
+        cache_dir: Where invT RESULTS are written.
+        fwd_cache_dir: Where fwd_posterior_name is READ from. Defaults to the
+            standard forward posterior cache. The two are separate directories —
+            passing cache_dir does not change where the forward posterior is
+            looked up.
     """
     # Backward-compat: accept deprecated scaledRI kwarg
     if scaledRI is not None and proxyObs is None:
@@ -122,7 +128,7 @@ def get_invT_posterior(
 
     # Resolve forward posterior for proxy_name validation (avoid double I/O)
     if fwd_posterior is None and fwd_posterior_name is not None:
-        fwd_posterior = load_posterior(fwd_posterior_name)
+        fwd_posterior = load_posterior(fwd_posterior_name, cache_dir=fwd_cache_dir)
 
     # proxy_name: inherit from forward posterior attrs, validate if both are known
     fwd_proxy_name = fwd_posterior.attrs.get("proxy_name") if fwd_posterior is not None else None
@@ -165,7 +171,7 @@ def get_invT_posterior(
     data, sampler_kwargs = build_invT_inputData(
         proxyObs=proxyObs, prior_mu_t=prior_mu_t, prior_sigma_t=prior_sigma_t,
         fwd_posterior_name=fwd_posterior_name, predictors=predictors, config=cfg,
-        fwd_posterior=fwd_posterior,
+        fwd_posterior=fwd_posterior, fwd_cache_dir=fwd_cache_dir,
     )
 
     if chains is not None: sampler_kwargs["chains"] = chains
@@ -210,7 +216,15 @@ def get_invT_posterior(
             threads_per_chain=threads_per_chain,
             model_type=model_type,
             constraint_type=constraint_type,
-            no3ratio=no3ratio)
+            no3ratio=no3ratio,
+            bounded=meta.get("is_bounded", False))
+        if not (STAN_MODELS_DIR / stan_file).exists():
+            available = sorted(p.name for p in STAN_MODELS_DIR.glob("invT_*boundedT*.stan"))
+            raise FileNotFoundError(
+                f"Selected invT model '{stan_file}' is not available in {STAN_MODELS_DIR}.\n"
+                f"BoundedT currently ships only the multiv/unconstrained variant "
+                f"(use predictors + constraint_type='unconstrained').\n"
+                f"Available boundedT models: {available or 'none'}")
         print(f"🔧 Automatically selected Stan file: {stan_file}")
 
     _stan_path = STAN_MODELS_DIR / stan_file
@@ -288,6 +302,15 @@ def get_invT_posterior(
     if model_type == "direct" and threads_per_chain:
         ds.attrs["grainsize"] = data.get("grainsize", 0)
 
+    # Forward-calibration provenance, carried through from build_invT_inputData.
+    # The invT model name alone cannot identify the calibration (it records the
+    # curve and the constraint, but not the training set or the estimator), so
+    # these attrs are what let a saved reconstruction be traced to its parent.
+    if meta.get("fwd_posterior_name"):
+        ds.attrs["fwd_posterior_name"] = meta["fwd_posterior_name"]
+    if meta.get("fwd_case"):
+        ds.attrs["fwd_case"] = meta["fwd_case"]
+
     _name_hint = fwd_posterior_name or (fwd_posterior.attrs.get("stan_model_name", "") if fwd_posterior is not None else "")
     if temptype:
         ds.attrs["temptype"] = temptype
@@ -327,6 +350,7 @@ def _select_invT_stan_file(
     model_type: Literal["direct", "ensemble"] = "direct",
     constraint_type: Literal["unconstrained", "hard_constraint", "truncated_prior", "reparameterized", "soft"] = "unconstrained",
     no3ratio: bool = False,
+    bounded: bool = False,
 ) -> str:
     """
     Choose the correct Stan model file based on data structure.
@@ -361,6 +385,9 @@ def _select_invT_stan_file(
         raise ValueError(f"Unknown model_type: {model_type}. Use 'direct' or 'ensemble'.")
 
     model_name += f"_{constraint_type}"
+
+    if bounded:
+        model_name += "_boundedT"
 
     if no3ratio:
         model_name += "_no3ratio"
@@ -426,6 +453,7 @@ def predict_temperature_from_proxyObs(
     min_temp: Optional[float] = None,
     fwd_posterior: Optional[xr.Dataset] = None,
     proxy_name: Optional[str] = None,
+    fwd_cache_dir: Optional[Union[str, Path]] = None,
     *,
     scaledRI: Union[np.ndarray, List[float]] = None,  # deprecated alias
 ) -> Dict[str, Any]:
@@ -471,6 +499,7 @@ def predict_temperature_from_proxyObs(
         min_temp=min_temp,
         fwd_posterior=fwd_posterior,
         proxy_name=proxy_name,
+        fwd_cache_dir=fwd_cache_dir,
     )
 
     metadata = {

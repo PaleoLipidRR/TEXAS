@@ -6,9 +6,141 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 from typing import Union, Optional, Dict, List, Sequence, Literal, TYPE_CHECKING
+from pathlib import Path
 
 if TYPE_CHECKING:
     import xarray as xr  # only for the "xr.Dataset" type annotation below
+
+
+# ── Parameter-group registry ─────────────────────────────────────────────────
+# Groups are matched against posterior variable names by prefix: a group "gamma_G23"
+# collects every variable starting with "gamma_G23_" (e.g. gamma_G23_crtp).
+#
+# CORE_GROUPS are the thermal calibration-curve parameters, present in every model.
+#
+# PREDICTOR_GROUPS are the non-thermal correction coefficients.  The same physical
+# correction is named differently in each model variant because it enters the curve
+# in a different place, so each entry maps a group prefix to the posterior attr that
+# gates it and to the label used on the axis:
+#
+#   beta_*       parent model — additive shift of RI          (RI units per predictor unit)
+#   gamma_*      boundedT     — shift of the inflection point (°C per predictor unit)
+#   betaLogit_*  boundedCeil  — shift of the logit floor      (logit units per predictor unit)
+#
+# To support a new parameterization, add its prefixes here — nothing else in this
+# module hardcodes coefficient names.
+CORE_GROUPS: Sequence[str] = ("t0", "k", "b", "v", "a")
+
+PREDICTOR_GROUPS: Dict[str, Dict[str, str]] = {
+    "beta_G23":      {"use_flag": "use_gdgt23ratio",
+                      "label": r"$\beta_{G_{2/3}}$",
+                      "label_culmeso": r"$\beta_{G_{2/3},culmeso}$"},
+    "beta_NO3":      {"use_flag": "use_no3",
+                      "label": r"$\beta_{NO_3}$",
+                      "label_culmeso": r"$\beta_{NO_3,culmeso}$"},
+    "gamma_G23":     {"use_flag": "use_gdgt23ratio",
+                      "label": r"$\gamma_{G_{2/3}}$",
+                      "label_culmeso": r"$\gamma_{G_{2/3},culmeso}$"},
+    "gamma_NO3":     {"use_flag": "use_no3",
+                      "label": r"$\gamma_{NO_3}$",
+                      "label_culmeso": r"$\gamma_{NO_3,culmeso}$"},
+    "betaLogit_G23": {"use_flag": "use_gdgt23ratio",
+                      "label": r"$\beta^{\,\mathrm{logit}}_{G_{2/3}}$",
+                      "label_culmeso": r"$\beta^{\,\mathrm{logit}}_{G_{2/3},culmeso}$"},
+    "betaLogit_NO3": {"use_flag": "use_no3",
+                      "label": r"$\beta^{\,\mathrm{logit}}_{NO_3}$",
+                      "label_culmeso": r"$\beta^{\,\mathrm{logit}}_{NO_3,culmeso}$"},
+}
+
+DEFAULT_INCLUDE_GROUPS: Sequence[str] = (*CORE_GROUPS, *PREDICTOR_GROUPS)
+
+# Axis labels for the thermal parameters.  Predictor labels come from
+# PREDICTOR_GROUPS above.  Both tables carry the _culmeso form explicitly —
+# deriving it would mean splicing into an existing LaTeX subscript.
+_CORE_LABELS: Dict[str, Dict[str, str]] = {
+    "t0": {"label": r"T$_0$",  "label_culmeso": r"T$_{0, culmeso}$"},
+    "k":  {"label": "k",       "label_culmeso": r"k$_{culmeso}$"},
+    "b":  {"label": "b",       "label_culmeso": r"b$_{culmeso}$"},
+    "v":  {"label": r"$\nu$",  "label_culmeso": r"$\nu_{culmeso}$"},
+    "a":  {"label": "a",       "label_culmeso": r"a$_{culmeso}$"},
+}
+
+
+def _group_label(group: str, suffix: str = "crtp") -> str:
+    """Axis / legend label for a group prefix, falling back to the raw prefix."""
+    spec = _CORE_LABELS.get(group) or PREDICTOR_GROUPS.get(group)
+    if spec is None:
+        return group
+    key = "label_culmeso" if suffix == "culmeso" else "label"
+    return spec.get(key, spec["label"])
+
+
+def _build_label_maps(groups: Sequence[str]) -> Dict[str, str]:
+    """Legend labels for ``{group}_{suffix}`` variables, e.g. gamma_G23_culmeso.
+
+    Longest key first so ``beta_G23_crtp`` is never matched by a shorter,
+    coincidentally-prefixed key.
+    """
+    labels: Dict[str, str] = {}
+    for group in groups:
+        for suffix in ("crtp", "culmeso"):
+            labels[f"{group}_{suffix}"] = _group_label(group, suffix)
+    return dict(sorted(labels.items(), key=lambda kv: -len(kv[0])))
+
+
+def _param_group(name: str, groups: Sequence[str]) -> Optional[str]:
+    """Return the group a posterior variable belongs to, or None.
+
+    Longest prefix wins, so ``betaLogit_G23_crtp`` cannot be captured by a
+    shorter group that happens to prefix it.
+    """
+    matches = [g for g in groups if name.startswith(g + "_")]
+    return max(matches, key=len) if matches else None
+
+
+def _parse_trunc(trunc: Optional[str]) -> Optional[tuple]:
+    """Turn the inside of a ``T[lo, hi]`` into ``(lo, hi)``; either may be None."""
+    if not trunc:
+        return None
+    parts = [v.strip() for v in trunc.split(",")]
+    try:
+        lo = float(parts[0]) if parts[0] else None
+        hi = float(parts[1]) if len(parts) > 1 and parts[1] else None
+    except ValueError:
+        return None
+    return None if lo is None and hi is None else (lo, hi)
+
+
+def _declaration_bounds(posterior_datasets: Sequence["xr.Dataset"]) -> Dict[str, str]:
+    """Recover implicit prior truncation from the packaged .stan files.
+
+    A posterior cached before the prior extractor understood declaration bounds
+    stores ``gamma_G23_crtp: normal(0, 1.0)`` for what is really a HALF-normal
+    (``real<lower=0>``).  Re-reading the model file restores the bound without a
+    refit.  Best-effort — a dataset whose model file is not packaged is skipped,
+    and an explicit ``T[…]`` already in the prior string always wins.
+    """
+    from ..utils.paths import STAN_MODELS_DIR
+    from ..stan.metadata import extract_param_bounds_from_stan
+
+    bounds: Dict[str, str] = {}
+    seen: set = set()
+    for ds in posterior_datasets:
+        model = ds.attrs.get("stan_model_name")
+        if not model or model in seen:
+            continue
+        seen.add(model)
+        path = Path(STAN_MODELS_DIR) / f"{model}.stan"
+        if not path.exists():
+            continue
+        data = ({"no3_cutoff": ds.attrs["no3_cutoff"]}
+                if "no3_cutoff" in ds.attrs else None)
+        try:
+            for name, bound in extract_param_bounds_from_stan(path, data).items():
+                bounds.setdefault(name, bound)
+        except (OSError, ValueError):
+            continue
+    return bounds
 
 
 def _format_stat(median: float, std: float) -> str:
@@ -104,7 +236,7 @@ def plot_prior_distributions(
     show_suptitle: bool = True,
     kde_bw: float = 0.3,
     focus_on_posterior: bool = True,
-    include_groups: Sequence[str] = ("t0","k","b","v","a","beta_G23","beta_NO3"),
+    include_groups: Sequence[str] = DEFAULT_INCLUDE_GROUPS,
     suffix_include: Optional[List[str]] = None,
     zoomin_suffix: Optional[Union[str,List[str]]] = None,
     zoomin_dataset_idx: Optional[int] = None,
@@ -121,6 +253,7 @@ def plot_prior_distributions(
     show_subplot_legend: bool = True,
     show_figure_legend: bool = True,
     show_prior_expression: bool = True,
+    cache_dir: Optional[Union[str, Path]] = None,
 ):
     """
     Plot priors + any number of posterior distributions in a grid,
@@ -142,6 +275,16 @@ def plot_prior_distributions(
 
             When a group is not in ``param_source_map``, all datasets are searched
             as usual.
+        include_groups: Parameter-group prefixes to draw, in panel order.  The
+            default covers the thermal parameters plus every coefficient naming
+            scheme in ``PREDICTOR_GROUPS`` (``beta_*`` for the parent model,
+            ``gamma_*`` for boundedT, ``betaLogit_*`` for boundedCeil), so the
+            same call works for any of them and for figures mixing several.
+            A group with no matching variable in any dataset is skipped, as is a
+            coefficient group whose predictor no dataset switched on.
+        cache_dir: Directory to resolve any name strings in
+            ``posterior_datasets``.  Defaults to the standard forward posterior
+            cache.  Loaded Datasets are passed through untouched.
     """
     # ── Resolve any string / Path entries in posterior_datasets ──────────────
     if posterior_datasets:
@@ -150,7 +293,7 @@ def plot_prior_distributions(
         resolved = []
         for item in posterior_datasets:
             if isinstance(item, (str, _Path)):
-                resolved.append(_load_posterior(str(item)))
+                resolved.append(_load_posterior(str(item), cache_dir=cache_dir))
             else:
                 resolved.append(item)
         posterior_datasets = resolved
@@ -168,6 +311,10 @@ def plot_prior_distributions(
                 name = entry.split(":")[0].strip()
                 seen.setdefault(name, entry)   # first dataset wins on conflict
         priors_list = list(seen.values())
+
+    # Declaration bounds for priors whose stored string predates bounds-aware
+    # extraction.  Only consulted when the prior carries no explicit T[…].
+    _decl_bounds = _declaration_bounds(posterior_datasets) if posterior_datasets else {}
 
     for prior in priors_list:
         name, dist_expr = prior.split(":", 1)
@@ -192,39 +339,41 @@ def plot_prior_distributions(
             "dist": dist_name,
             "a": a,
             "b": b,
-            "trunc": trunc,
+            "trunc": trunc if trunc else _decl_bounds.get(name),
         }
 
     all_param_names = set(parsed_priors.keys())
-    _use_gdgt23ratio_detection = 0
-    _use_no3_detection = 0
+    # How many datasets actually switched each optional predictor on, keyed by the
+    # attr name.  Built from the registry so a new coefficient group is gated
+    # automatically, whatever it is called.
+    _use_flag_counts: Dict[str, int] = {
+        spec["use_flag"]: 0 for spec in PREDICTOR_GROUPS.values()
+    }
     if posterior_datasets:
         for ds in posterior_datasets:
             all_param_names.update(ds.data_vars)
-            
-            # collect "use_gdgt23ratio" and "use_no3" from all datasets
-            if ds.attrs.get("use_gdgt23ratio", 0) == 1:
-                _use_gdgt23ratio_detection += 1
 
-            if ds.attrs.get("use_no3", 0) == 1:
-                _use_no3_detection += 1
+            for flag in _use_flag_counts:
+                if ds.attrs.get(flag, 0) == 1:
+                    _use_flag_counts[flag] += 1
 
     grouped = {key: [] for key in include_groups}
     for name in all_param_names:
-        for prefix in include_groups:
-            if name.startswith(prefix + "_"):
-                grouped[prefix].append(name)
+        group = _param_group(name, include_groups)
+        if group is not None:
+            grouped[group].append(name)
     param_groups = [g for g in include_groups if grouped[g]]
 
-    ### pop param_groups
-    if ('beta_G23' in param_groups) and (_use_gdgt23ratio_detection == 0):
-        param_groups.pop(param_groups.index('beta_G23'))
-
-    if ('beta_NO3' in param_groups) and (_use_no3_detection == 0):
-        param_groups.pop(param_groups.index('beta_NO3'))
+    # Drop a coefficient panel when no dataset used that predictor: the parameter
+    # is still declared and sampled in those runs, so its "posterior" would be
+    # nothing but the prior — a panel that invites a reading it cannot support.
+    param_groups = [
+        g for g in param_groups
+        if g not in PREDICTOR_GROUPS
+        or _use_flag_counts.get(PREDICTOR_GROUPS[g]["use_flag"], 0) > 0
+    ]
 
     # ncols/nrows computed AFTER popping so the grid is sized correctly.
-    # Max layout is 2 rows × 3 cols (6 params: t0, k, b, v, beta_G23, beta_NO3).
     ncols = min(3, len(param_groups))
     nrows = int(np.ceil(len(param_groups) / ncols)) if ncols > 0 else 1
 
@@ -252,48 +401,64 @@ def plot_prior_distributions(
         all_samples = []
         x_min, x_max = None, None
 
-        prior_key = next((k for k in parsed_priors if k.startswith(base)), None)
+        # Match on the group, not a bare prefix: "b" would otherwise capture
+        # beta_G23_crtp and draw the wrong prior on the b panel.
+        prior_key = next(
+            (k for k in parsed_priors if _param_group(k, include_groups) == base), None
+        )
         x = None  # Initialize x variable
         trunc_bounds = None  # Store truncation bounds for later
-        
+
+        # An unusable prior (unrecognised family, degenerate range) leaves
+        # frozen=None: the panel still draws its posteriors, it just has no
+        # prior curve.  Dropping the whole panel would hide the posterior too.
+        frozen = None
         if prior_key:
             prior_info = parsed_priors[prior_key]
             dist, a, b, trunc = prior_info["dist"], prior_info["a"], prior_info["b"], prior_info["trunc"]
+            trunc_bounds = _parse_trunc(trunc)
 
             if dist == "normal":
-                std_range = 4 if trunc is None else 3
-                x_min = a - std_range * b
-                x_max = a + std_range * b
-                # Parse truncation bounds but don't apply them to x yet
-                if trunc:
-                    trunc_bounds = [float(v) if v else None for v in re.split(r",\s*", trunc)]
-                x = np.linspace(x_min, x_max, 5000)
-                y = stats.norm.pdf(x, a, b)
-                if trunc_bounds:
-                    if trunc_bounds[0] is not None:
-                        y[x < trunc_bounds[0]] = 0
-                    if len(trunc_bounds) > 1 and trunc_bounds[1] is not None:
-                        y[x > trunc_bounds[1]] = 0
+                frozen = stats.norm(a, b)
+                x_min, x_max = a - 4 * b, a + 4 * b
 
             elif dist == "beta":
+                frozen = stats.beta(a, b)
                 x_min, x_max = 0.0, 1.0
-                x = np.linspace(x_min, x_max, 5000)
-                y = stats.beta.pdf(x, a, b)
 
             elif dist == "cauchy":
-                x_min = a - 10 * b
-                x_max = a + 10 * b
-                x = np.linspace(x_min, x_max, 5000)
-                y = stats.cauchy.pdf(x, a, b)
-                
+                frozen = stats.cauchy(a, b)
+                x_min, x_max = a - 10 * b, a + 10 * b
+
             elif dist == "lognormal":
+                frozen = stats.lognorm(s=b, scale=np.exp(a))
                 x_min = max(1e-6, np.exp(a - 4 * b))
                 x_max = np.exp(a + 4 * b)
-                x = np.linspace(x_min, x_max, 5000)
-                y = stats.lognorm.pdf(x, s=b, scale=np.exp(a))
 
-            else:
-                continue
+            # Draw the prior over its supported range only, and renormalise so a
+            # truncated prior integrates to 1 like the posterior KDE it is
+            # compared against.  Without this a half-normal — every coefficient
+            # bounded at zero — is drawn at half its true height.
+            if frozen is not None and trunc_bounds:
+                lo, hi = trunc_bounds
+                if lo is not None:
+                    x_min = max(x_min, lo)
+                if hi is not None:
+                    x_max = min(x_max, hi)
+            if frozen is not None and not (
+                np.isfinite(x_min) and np.isfinite(x_max) and x_max > x_min
+            ):
+                frozen = None
+
+        if frozen is not None:
+            x = np.linspace(x_min, x_max, 5000)
+            y = frozen.pdf(x)
+            if trunc_bounds:
+                lo, hi = trunc_bounds
+                mass = (frozen.cdf(hi) if hi is not None else 1.0) - \
+                       (frozen.cdf(lo) if lo is not None else 0.0)
+                if mass > 0:
+                    y = y / mass
 
             (prior_line,) = ax.plot(x, y, color='black', lw=set_linewidth, label="Prior")
             if _prior_handle is None:
@@ -307,6 +472,7 @@ def plot_prior_distributions(
         # If param_source_map specifies a source dataset for this group, only
         # pull samples from that dataset; otherwise search all datasets.
         _source_idx = param_source_map.get(base) if param_source_map else None
+        _use_flag = PREDICTOR_GROUPS[base]["use_flag"] if base in PREDICTOR_GROUPS else None
         for name in param_names:
             if posterior_datasets:
                 for idx_ds, ds in enumerate(posterior_datasets):
@@ -314,16 +480,17 @@ def plot_prior_distributions(
                         continue
                     if name not in ds.data_vars:
                         continue
+                    # Per-dataset gate: skip a coefficient from a run that did not
+                    # use that predictor, even when another dataset in the figure did.
+                    if _use_flag is not None and ds.attrs.get(_use_flag, 0) != 1:
+                        continue
                     samples = ds[name].values.flatten()
                     if posterior_labels_list is not None:
                         stan_model_labels = posterior_labels_list[idx_ds]
                     else:
                         # Fallback to dataset filename if labels not provided
                         stan_model_labels = ds.attrs.get('filename', 'Unknown Model')
-                    use_gdgt23ratio_check = ds.attrs.get('use_gdgt23ratio', 0)
-                    use_no3_check = ds.attrs.get('use_no3', 0)
-                    all_samples.append((samples, idx_ds, name, stan_model_labels,
-                                        use_gdgt23ratio_check, use_no3_check))
+                    all_samples.append((samples, idx_ds, name, stan_model_labels))
         
         # Sort by (idx_ds, param_name) so all lines for dataset 0 are plotted
         # before dataset 1, giving a consistent order in every subplot.
@@ -331,7 +498,7 @@ def plot_prior_distributions(
         
         # ── NEW: expand x to cover posterior tails if they exceed prior bounds ──
         if all_samples and x is not None:
-            all_param_samples = np.concatenate([s for s, _, _, _, _, _ in all_samples])
+            all_param_samples = np.concatenate([s for s, *_ in all_samples])
             p_lo = np.percentile(all_param_samples, 1)
             p_hi = np.percentile(all_param_samples, 99)
             # Add 5% padding on each side to ensure KDE tails are visible
@@ -352,7 +519,7 @@ def plot_prior_distributions(
         # If x was not defined by prior, create it from posterior data range
         if x is None and all_samples:
             # Get the combined range of all samples for this parameter group
-            all_param_samples = np.concatenate([s for s, _, _, _, _, _ in all_samples])
+            all_param_samples = np.concatenate([s for s, *_ in all_samples])
             data_min, data_max = all_param_samples.min(), all_param_samples.max()
             
             # Robust padding calculation that works for any value range
@@ -392,10 +559,10 @@ def plot_prior_distributions(
         
         linestyles = ['-', '--', '-.', ':', (0, (3, 1, 1, 1))]
 
-        unique_param_names = sorted(set(pname for _, _, pname, _, _, _ in all_samples))
+        unique_param_names = sorted(set(pname for _, _, pname, _ in all_samples))
         _n_annotated = [0]  # counts lines actually drawn; drives annotation y-position
 
-        for iiii, (samples, idx_ds, param_label, stan_model_label, use_gdgt23ratio_check, use_no3_check) in enumerate(all_samples):
+        for iiii, (samples, idx_ds, param_label, stan_model_label) in enumerate(all_samples):
             color = default_colors[idx_ds % len(default_colors)]
 
             if use_linestyle_by_param:
@@ -407,7 +574,9 @@ def plot_prior_distributions(
             kde = stats.gaussian_kde(samples, bw_method=kde_bw)
             kde_y = kde(x)
 
-            def _plot_line():
+            def _plot_line(param_label=param_label, idx_ds=idx_ds, color=color,
+                           linestyle=linestyle, kde_y=kde_y, samples=samples,
+                           stan_model_label=stan_model_label):
                 (line,) = ax.plot(x, kde_y, color=color, lw=set_linewidth, linestyle=linestyle, label=param_label)
                 if idx_ds not in _fig_legend_entries:
                     _fig_legend_entries[idx_ds] = (line, stan_model_label)
@@ -428,18 +597,13 @@ def plot_prior_distributions(
                             fontsize=8, va='top', ha='left', color=color)
                     _n_annotated[0] += 1
 
-            if param_label.startswith("beta_G23"):
-                if use_gdgt23ratio_check == 1:
-                    _plot_line()
-            elif param_label.startswith("beta_NO3"):
-                if use_no3_check == 1:
-                    _plot_line()
-            else:
-                _plot_line()
+            # Predictor coefficients are gated when their samples are collected
+            # above, so anything that reached this point is drawable.
+            _plot_line()
 
 
         if all_samples:
-            combined = np.concatenate([s for s, _, _, _, _, _ in all_samples])
+            combined = np.concatenate([s for s, *_ in all_samples])
             
             # Handle dataset-specific zooming (priority over suffix-based zooming)
             if focus_on_posterior and zoomin_dataset_idx is not None:
@@ -495,23 +659,7 @@ def plot_prior_distributions(
 
         
         ### Modified labels in ax
-        ax_legends_labels_dict = {
-            "t0_crtp": r"T$_0$",
-            "k_crtp": "k",
-            "b_crtp": "b",
-            "v_crtp": r"$\nu$",
-            "a_crtp": "a",
-            "beta_G23_crtp": r"$\beta_{G_{2/3}}$",
-            "beta_NO3_crtp": r"$\beta_{NO_3}$",
-            
-            "t0_culmeso": r"T$_{0, culmeso}$",
-            "k_culmeso": r"k$_{culmeso}$",
-            "b_culmeso": r"b$_{culmeso}$",
-            "v_culmeso": r"$\nu_{culmeso}$",
-            "a_culmeso": r"a$_{culmeso}$",
-            "beta_G23_culmeso": r"$\beta_{G_{2/3},culmeso}$",
-            "beta_NO3_culmeso": r"$\beta_{NO_3,culmeso}$",
-        }
+        ax_legends_labels_dict = _build_label_maps(include_groups)
 
         if all_samples:
             handles, labels_in_ax = ax.get_legend_handles_labels()
@@ -527,18 +675,7 @@ def plot_prior_distributions(
             if handles and show_subplot_legend:
                 ax.legend(handles, revised_labels_in_ax, loc='upper right', fontsize=8, ncol=1, frameon=False)
 
-        revised_base_dict = {
-            "t0": r"T$_0$",
-            "k": "k",
-            "b": "b",
-            "v": r"$\nu$",
-            "a": "a",
-            "beta_G23": r"$\beta_{G_{2/3}}$",
-            "beta_NO3": r"$\beta_{NO_3}$",
-        }
-        revised_base = revised_base_dict.get(base, base)
-                
-        ax.set_xlabel(f"{revised_base}")
+        ax.set_xlabel(_group_label(base))
         ax.grid(True)
 
     if posterior_datasets:

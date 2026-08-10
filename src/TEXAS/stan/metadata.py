@@ -15,6 +15,17 @@ _PRIOR_REGEX = re.compile(
     r"(\w+)\s*~\s*([A-Za-z_]\w*)\s*\(([^)]*)\)(\s*T\[[^\]]+\])?"
 )
 
+# Declaration in the parameters block, e.g.
+#   real<lower=0, upper=5>  gamma_G23_crtp;
+#   vector<lower=0, upper=no3_cutoff>[N_crtp] true_no3_crtp;
+_PARAM_DECL_REGEX = re.compile(
+    r"^(?:real|vector|row_vector|matrix|simplex|ordered)"
+    r"\s*(?:<([^>]*)>)?"        # optional <lower=…, upper=…>
+    r"\s*(?:\[[^\]]*\])?"       # optional dimensions
+    r"\s*(\w+)\s*;"
+)
+_BOUND_REGEX = re.compile(r"\b(lower|upper)\s*=\s*([^,>]+)")
+
 # ——— metadata extractor ———————————————————————————————————————————————
 
 def extract_and_update_metadata(
@@ -126,19 +137,106 @@ def _summarize_array(name: str, arr: np.ndarray) -> Dict[str, Any]:
 
 # ——— prior extractor —————————————————————————————————————————————————
 
+def extract_param_bounds_from_stan(
+    stan_path: Union[str, Path],
+    data: Optional[Dict[str, float]] = None,
+) -> Dict[str, str]:
+    """
+    Parse ``<lower=…, upper=…>`` bounds from a .stan file's *parameters* block.
+
+    Stan supports two ways of truncating a prior, and they are not
+    interchangeable when the prior is drawn:
+
+    * an explicit ``T[a, b]`` on the sampling statement, and
+    * a bound on the declaration, which truncates *implicitly* — e.g.
+      ``real<lower=0> gamma;`` with ``gamma ~ normal(0, 1);`` is a HALF-normal.
+
+    Only the first is visible in the model block, so a prior read from there
+    alone can show mass where the sampler is unable to go.  This returns the
+    second, formatted as the inside of a ``T[…]`` so it can be merged in.
+
+    If `data` is given, symbolic bounds found in `data` (e.g. ``no3_cutoff``)
+    are substituted with their numeric values.
+
+    Returns
+    -------
+    dict
+        ``{param_name: "lo, hi"}`` — either side may be empty for a one-sided
+        bound.  Unbounded parameters are omitted entirely.
+    """
+    bounds: Dict[str, str] = {}
+    in_params = False
+    path = Path(stan_path)
+
+    with path.open(encoding="utf-8") as fh:
+        for line in fh:
+            txt = line.strip()
+            if not in_params:
+                # "parameters {" but not "transformed parameters {"
+                if re.match(r"^parameters\s*\{?\s*$", txt):
+                    in_params = True
+                continue
+            if txt.startswith("}"):
+                break
+
+            m = _PARAM_DECL_REGEX.match(txt)
+            if not m:
+                continue
+            constraints, param = m.groups()
+            if not constraints:
+                continue
+
+            found = {k: v.strip() for k, v in _BOUND_REGEX.findall(constraints)}
+            if not found:
+                continue
+
+            def _resolve(v: Optional[str]) -> str:
+                if v is None:
+                    return ""
+                if data and v in data and isinstance(data[v], (int, float)):
+                    return f"{data[v]:.4g}"
+                return v
+
+            lo, hi = _resolve(found.get("lower")), _resolve(found.get("upper"))
+            # A bound that stays symbolic (unresolvable) is dropped rather than
+            # emitted as text no downstream parser can turn into a number.
+            try:
+                if lo:
+                    float(lo)
+                if hi:
+                    float(hi)
+            except ValueError:
+                continue
+            if lo or hi:
+                bounds[param] = f"{lo}, {hi}"
+
+    return bounds
+
+
 def extract_priors_from_stan(
     stan_path: Union[str, Path],
-    data: Optional[Dict[str, float]] = None
+    data: Optional[Dict[str, float]] = None,
+    include_param_bounds: bool = True,
 ) -> Dict[str, str]:
     """
     Parse priors from a .stan file’s model block.
 
     If `data` is given, symbolic args found in `data` will be substituted
     with their numeric values when formatting the prior string.
+
+    When `include_param_bounds` is True (default), declaration bounds from the
+    parameters block are folded into the prior string as ``T[lo, hi]`` for any
+    parameter whose sampling statement carries no explicit truncation.  Without
+    this, an implicitly truncated prior — ``real<lower=0> g;`` with
+    ``g ~ normal(0, 1);`` — reads back as a full normal rather than a
+    half-normal.  See :func:`extract_param_bounds_from_stan`.
     """
     priors: Dict[str, str] = {}
     in_model = False
     path = Path(stan_path)
+    param_bounds = (
+        extract_param_bounds_from_stan(path, data) if include_param_bounds else {}
+    )
 
     with path.open(encoding="utf-8") as fh:
         for line in fh:
@@ -169,6 +267,10 @@ def extract_priors_from_stan(
             prior = f"{dist}({', '.join(resolved)})"
             if trunc:
                 prior += trunc.strip()
+            elif param in param_bounds:
+                # Implicit truncation from the declaration — an explicit T[…]
+                # on the statement always wins over it.
+                prior += f" T[{param_bounds[param]}]"
             priors[param] = prior
 
     return priors
