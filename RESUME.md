@@ -151,7 +151,31 @@ fc68ae4 feat(predict): fwd_cache_dir to resolve posteriors outside the default c
 c1a75bb feat(boundedT): bounded-T model support across the package
 ```
 
-**Resume at Phase 2.** Remaining dirty: only the two Phase 1.8 leftovers.
+**Resume at Phase 3.** Working tree is clean. Phase 1.8's two leftovers are
+resolved: the bounded-T inverse `.stan` is now committed (the branch was not
+self-contained without it — a fresh clone could not run
+`MODEL_VARIANT="boundedT"` at all), and `.claude/settings.json` is gitignored
+as a machine-specific allowlist.
+
+### SI03 is ready to run
+
+Verified by executing cells 0–31 headlessly on 2026-08-10:
+
+- LFS hydrated (0 stubs / 97), all deps present, `texas-doctor` → **READY**
+- Paths resolve on any machine (repo root by `pyproject.toml`; OneDrive by
+  searching `~/OneDrive*` for `Postdoc/WOA23`)
+- With `TEMP_PARAMS = ["SST"]`: the run plan reports **28 Stan runs** and the
+  load cell looks for **exactly 28 files** — run and load agree
+- With `thermoT` added: **44 runs, 12 skipped**, reported up front, because the
+  bounded-T thermoT (g23+no3) forward posterior does not exist
+
+Nothing is cached for the paleo sites, so every column is NaN until you set
+`RUN_INVT = True`. `data/cache/` is gitignored — those posteriors were never in
+git and cannot come from LFS or Zenodo. They must be generated, on whichever
+machine you choose.
+
+Sample counts: MD98-2152 200, U1482 259, DSDP591 46, U1510 43, ODP959 371,
+South Dover Bridge 53.
 
 ### Three things that happened, for the record
 
@@ -403,7 +427,7 @@ git status --short --diff-filter=U       # the conflicted set
 
 | File | How to resolve |
 |---|---|
-| `src/TEXAS/stan_models/invT_..._boundedT.stan` | Same content, CRLF only. Take the branch's: `git checkout --theirs <path>` |
+| `src/TEXAS/stan_models/invT_..._boundedT.stan` | Now committed on the feature branch too, so this is a **same-content** conflict (CRLF only). Take either: `git checkout --theirs <path>` |
 | `figures/.../AppendixA_culmesoT_prior_distributions.pdf` | **Binary — you must decide.** Your Phase-1 commit and the branch each regenerated it. Open both and pick the one from the newer `prior_plot.py`. Likely yours (`--ours`), since Phase 1 carries the rewritten plotting code. |
 | `notebooks/manuscripts/SI_code2_TEXAS_analysis.ipynb` | Modified on both sides. Do **not** take either blindly — diff the cell sources first (see command below) and merge by hand. |
 
