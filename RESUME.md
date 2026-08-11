@@ -117,6 +117,46 @@ assigned to exactly one step, none double-assigned, none missed.
 
 ## STATUS: Phases 0, 1 and 2 are DONE — resume at Phase 3 (2026-08-10)
 
+> ### Handoff — Linux box → Windows, 2026-08-11
+>
+> Written at the end of a Linux session so the Windows machine can pick up cold.
+>
+> **Do this first on Windows**, before trusting any dataframe:
+>
+> ```bash
+> git checkout feat/revision1-validation-groupA && git pull
+> git config --show-origin --get filter.lfs.smudge   # must be the GLOBAL one, NO --skip
+> ```
+>
+> The Linux clone's `.git/config` had the `--skip` smudge override described
+> below; it was **unset there on 2026-08-11** and LFS is fully hydrated (0/99
+> stubs). That fix is **per-clone and does not travel** — assume Windows still
+> has it until you have checked. The GitHub **LFS budget is restored**, so
+> `git lfs pull` works again; the Zenodo fallback is no longer required.
+>
+> **What changed in this session** — documentation only, no code touched:
+> - **Phase 5 was rescoped.** It used to say "rename the `.stan` model files".
+>   That was a mistake: the target is the **posterior `.nc` filenames** (up to
+>   118 chars). Phase 5 is rewritten around that, with four verified defects
+>   (5A–5D) found by auditing the code and the live cache rather than by reading
+>   docs. The `.stan` rename is *out of scope*.
+> - **A "fact" in the do-not-re-derive list was wrong** and is struck through:
+>   the forward cache has **2 case-id collisions**, not 0. Anything that migrates
+>   the cache must be blocked until Phase 5C lands.
+> - The invT-cache "known gap" is **machine-dependent** and was stated as
+>   universal; both machines' contents are now recorded side by side.
+>
+> **Verified on Linux, 2026-08-11:** `texas-doctor` → Stan sampling READY;
+> `pytest -q` → 173 passed, 2 skipped (the "175" below counts the 2 Windows-only
+> skips as passes — expect the same total, split differently, on Windows).
+> Note the editable install's metadata had gone stale at 0.2.1, which is why
+> `texas-doctor` was missing as a command; `pip install -e . --no-deps` fixed it.
+> **If a console script is missing on Windows, that is the first thing to try.**
+>
+> Stale local branches were deleted on the Linux box only (`working-branch`,
+> `archive/laptop-before-merge`, `restructure-repo`, `tutorial`, local
+> `gh-pages`) — all verified superseded. Windows may still list them.
+
 Everything below is **pushed to origin**. Nothing important lives only on one
 machine any more; you can pick this up from any clone.
 
@@ -494,129 +534,141 @@ should be clean.
 
 ---
 
-## Phase 5 — rename the `.stan` model files to the CESM scheme
+## Phase 5 — shorten and systematize the posterior `.nc` filenames
 
-The case naming landed for posterior `.nc` artifacts only. This phase finishes
-the job on the 17 model sources, so a compset code means the same thing whether
-you are looking at a file, a cache directory, or a posterior attr.
+> **Scope correction (2026-08-11).** An earlier draft of this phase described
+> renaming the 17 `.stan` model sources. That was a mistake — **the `.stan`
+> files are not the problem and are not in scope.** The artifacts that need
+> shortening are the **posterior `.nc` output files**, whose names run to 118
+> characters and grow with every new axis. The `.stan` rename is a separate,
+> optional idea; if it is ever revisited it must be its own phase, because it
+> carries a full-recompile cost and six silent string-parsing hazards that the
+> `.nc` work does not.
 
-### Target names
+### The problem, measured
 
-Forward models are identified by their compset. Inverse models are not (an invT
-run belongs to the *forward* case it marginalises over), so they are keyed by
-their own three axes: structure `U|A|B`, kind `d`=marginal/direct `e`=ensemble,
-constraint `u|h|t|r|s`.
+Today's cache on this Linux box: **17 forward + 35 inverse `.nc`, and zero case
+directories.** Worst offender at 118 characters:
 
-| current | new |
-|---|---|
-| `gen_logi_fixed_culmeso.stan` | `fwd.GCDU.stan` |
-| `gen_logi_fixed_culmesocore.stan` | `fwd.GJDU.stan` |
-| `gen_logi_fixed_hier_crtp_multiv.stan` | `fwd.GHDA.stan` |
-| `gen_logi_fixed_hier_crtp_multiv_priorApprox.stan` | `fwd.GHPA.stan` |
-| `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv.stan` | `fwd.GHEA.stan` |
-| `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT.stan` | `fwd.GHEB.stan` |
-| `gen_logi_fixed_hier_crtp_univ_priorApprox.stan` | `fwd.GHPU.stan` |
-| `linear_model.stan` | `fwd.NTDU.stan` |
-| `invT_gen_logi_fixed_univ_marginal_unconstrained.stan` | `inv.Udu.stan` |
-| `invT_gen_logi_fixed_univ_marginal_hard_constraint.stan` | `inv.Udh.stan` |
-| `invT_gen_logi_fixed_univ_marginal_truncated_prior.stan` | `inv.Udt.stan` |
-| `invT_gen_logi_fixed_univ_unconstrained.stan` | `inv.Ueu.stan` |
-| `invT_gen_logi_fixed_multiv_marginal_unconstrained.stan` | `inv.Adu.stan` |
-| `invT_gen_logi_fixed_multiv_marginal_hard_constraint.stan` | `inv.Adh.stan` |
-| `invT_gen_logi_fixed_multiv_marginal_truncated_prior.stan` | `inv.Adt.stan` |
-| `invT_gen_logi_fixed_multiv_unconstrained.stan` | `inv.Aeu.stan` |
-| `invT_gen_logi_fixed_multiv_marginal_unconstrained_boundedT.stan` | `inv.Bdu.stan` |
+```
+MD98-2152_invT_gen_logi_fixed_multiv_unconstrained_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_no3_001_direct.nc
+```
 
-Verified: all 17 map uniquely, no collisions.
+The CESM-style scheme already exists in `src/TEXAS/utils/naming.py` (605 lines)
+and compresses hard — forward names measured across all 17 files:
 
-### The ordering constraint — 5A must come before 5C
-
-`stan_model_name` is stored on every posterior and **six places parse it as a
-string**. Rename the files and those silently change meaning:
-
-| consumer | what it parses | breaks how |
+| | legacy | case id |
 |---|---|---|
-| `data/builder.py:377` | `"_no3ratio" in name` | always False under `inv.Adu` |
-| `stan/io.py:327` | `"marginal" in name`, `.replace("_marginal","")` | direct/ensemble misdetected |
-| `utils/naming.py:584` | same two | `legacy_invT_name` wrong |
-| `ensemble/generator.py:186` | model name inspection | model fn misinferred |
-| `plotting/prior_plot.py:129` | model name | group labels wrong |
-| `utils/naming.py:183` | `encode_compset` long-name parse | raises on a short code |
-
-None of these fail loudly — they mostly return the wrong branch. That is why the
-rename cannot go first.
-
-- [ ] **5A Replace string-parsing with explicit attrs.** Write `compset`,
-      `model_kind` (direct/ensemble), `constraint`, and `no3ratio` onto every
-      posterior in `stan/metadata.py`, and change the six consumers to read
-      them. Back-compat: when the structured attrs are missing (every cached
-      `.nc` today), derive them from the long `stan_model_name` with the
-      existing parsers. Ship this alone and verify 175 tests still pass.
-
-- [ ] **5B Directory-scanned model registry.** Replace the string-concatenation
-      in `_select_invT_stan_file` with a registry built by parsing the filenames
-      present in `stan_models/`. Today the code can construct **80** invT names
-      of which only **9** exist, so 71 configurations raise `FileNotFoundError`
-      *after* the forward posterior is loaded. A lookup fails immediately and
-      lists what is available. This also makes 5C a one-line change, because
-      nothing builds names from tokens any more.
-
-- [ ] **5C `git mv` the 17 files** (preserves history), add a header line to
-      each — `// compset GHEB = gen_logi_fixed | hier_crtp | priorApprox+EIV |
-      bounded-T` — and a `stan_models/MODELS.md` index table. Accept both old
-      and new names in `encode_compset`.
-
-- [ ] **5D Sweep the ~98 remaining string references** in `src/`, `tests/`,
-      `docs/`, `CLAUDE.md`, and the SI notebooks. Then delete the old-name
-      acceptance path once nothing references it.
-
-### Blast radius — everything a rename touches
-
-| # | Surface | Impact | Reversible? |
-|---|---|---|---|
-| 1 | 17 `.stan` sources | `git mv` | yes |
-| 2 | Compiled binaries (keyed by stem) | one-time full recompile of every model | yes, costs time |
-| 3 | `_select_invT_stan_file` | string-built names; 80 constructible vs 9 real | yes (5B) |
-| 4 | `stan_model_name` attr | 6 string parsers pick the **wrong branch silently** | yes (5A) |
-| 5 | Cached posteriors (17 fwd + 72 invT) | keep old names in attrs, by design | n/a |
-| 6 | **`POSTERIOR_REGISTRY` → Zenodo 20032542** | hardcodes long filenames **as published** | **NO** |
-| 7 | `streamlit_app/` | 3 files reference model names | yes |
-| 8 | `docs/` | 6 files + callmap regeneration | yes |
-| 9 | Notebooks | 4 files (SI_code1/2/3, SI03) | yes |
-| 10 | `CLAUDE.md`, `README.md`, `CITATION.cff` | naming docs + DOI badges | yes |
-
-**Row 6 is the one that decides the schedule.** `utils/download.py` hardcodes
-filenames exactly as they exist on the *published* record
-`10.5281/zenodo.20032542`:
+| shortest | 49 | 27 |
+| longest | 104 | 32 |
 
 ```
-"filename": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc"
+tx.v026.GHEA.sst.ri3.G23-N10.001/       <- the case = one calibration identity
+    fwd.nc                              <- the forward posterior
+    inv.U1482.ud-050126.nc              <- a reconstruction derived from it
 ```
 
-Those names are what every reader of the paper downloads. A published DOI's
-files cannot be renamed in place — changing them means a new deposit version,
-and the accepted paper's data-availability statement points at whichever
-version it cites. **So the naming has to be final before the deposit the
-paper cites, and is frozen forever after.**
+**So the scheme is not what is missing. The wiring is.** The forward half works;
+the inverse half is written but not connected, and nothing on disk has moved.
+
+### What is actually broken — verified 2026-08-11, not from reading docs
+
+- [ ] **5A `inv_relpath()` is dead code in production.** It is the documented
+      canonical inverse-name builder, exported in `naming.__all__`, and
+      **nothing outside `tests/test_naming.py` calls it.** The real save path is
+      `io._generate_filename_base()` (`stan/io.py:316`), which reimplements a
+      *different* leaf format inline:
+
+      | | produced |
+      |---|---|
+      | `inv_relpath()` | `inv.<site>.<cc><k>[-<scenario>]-<NNN>.nc` |
+      | `_generate_filename_base()` | `<case>/inv.<site>.<cc><k>[-<tag>]` |
+
+      The production path has **no run number** and folds scenario and run into
+      one undifferentiated tag list. Two spellings of one format is how a naming
+      scheme rots. Fix: delete the inline branch and call `inv_relpath()`.
+      Verify: `tests/test_naming.py:301-323` currently asserts the *inline*
+      behaviour, so those two tests must be updated in the same commit.
+
+- [ ] **5B `save_invT_posterior()` is entirely case-unaware.** The public,
+      `__all__`-exported entry point (`stan/io.py:269`) builds
+      `f"{site}_{name}_{ttype}.nc"` by hand. It never consults `fwd_case`, never
+      calls `_generate_filename_base`, and **silently drops `proxy_name`** — so
+      a `scaledRI` and a `TEX86` reconstruction of the same site overwrite each
+      other. Two invT save paths disagreeing is worse than either alone. Route
+      both through one function.
+
+- [ ] **5C Forward case ids collide — 2 of 17 today.** `case_from_attrs()`
+      defaults the run/member token to `.001`, and `filename_suffix` is **not
+      recoverable from the attrs**, so a refit and its original land on the same
+      id:
+
+      ```
+      ..._SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc              -> tx.v026.GHEA.sst.ri3.G23-N10.001
+      ..._SST_gdgt23ratio_no3_1.0_scaledRI_cren3_041626_eiv.nc   -> tx.v026.GHEA.sst.ri3.G23-N10.001
+      ```
+
+      (Same collision on the `thermoT` pair.) Migrating in this state would
+      **destroy one posterior of each pair.** Fix: persist the run token as an
+      attr (`case_run`) at save time so it survives a round-trip, and have the
+      migration script derive it from the legacy date stamp for existing files.
+      A migration must refuse to run while any collision remains.
+
+- [ ] **5D The 35 cached invT posteriors have no recoverable parent.** Checked
+      every one: **0 of 35 carry a `fwd_case` attr.** Worse, it cannot be
+      reconstructed from the filename — an invT model name records curve,
+      structure and constraint (`gen_logi_fixed_multiv_unconstrained`) but
+      **not the training set or estimator**, which is exactly what the compset
+      encodes. `build_invT_inputData` attaches `fwd_case` now (`stan/invT.py:311`),
+      so anything run from today forward is fine; these 35 predate it.
+
+      **Recommendation: do not migrate them.** Leave them under legacy
+      dual-read, which already works, and let them age out as sites are re-run.
+      Guessing a parent case by matching temptype + predictors would be a guess
+      recorded as provenance — the one thing a naming scheme must never do.
+
+- [ ] **5E Zenodo is the freeze point.** Unchanged and still the schedule
+      driver. `utils/download.py:79` hardcodes five posterior filenames exactly
+      as published on `10.5281/zenodo.20032542`:
+
+      ```
+      "filename": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc"
+      ```
+
+      Those are what every reader of the paper downloads. A published DOI's
+      files cannot be renamed in place; changing them means a new deposit
+      version, and the accepted paper's data-availability statement points at
+      whichever version it cites. **The `.nc` naming must be final before the
+      deposit the paper cites, and is frozen forever after.**
+
+- [ ] **5F Migration script + doc sweep.** Only after 5A–5C. A
+      `scripts/migrate_cache_layout.py` that is **dry-run by default**, refuses
+      to proceed on any collision, copies rather than moves until verified, and
+      reports every source → destination. Then update the hardcoded long names
+      in `docs/index.md`, `docs/stan_models_explanation_v2.md` (4 names),
+      `CLAUDE.md`, and `SI_code2` / `SI_code3` (7 names between them).
 
 > **Also unresolved:** `data/README.md` cites DOI `10.5281/zenodo.19666745`
 > while `README.md`, `CITATION.cff` and `download.py` use `20032542`. Reconcile
-> these before submission regardless of the naming decision.
+> before submission regardless of the naming decision.
 
 ### Recommended schedule against the 2026-09-08 deadline
 
-- **Now → submission: 5A + 5B only.** These are bug fixes wearing a refactor's
-  clothes (six silent wrong-branch parsers; 71 of 80 configurations failing
-  late). They make the revision reruns *safer* and are invisible to reviewers.
-  No file is renamed, so no recompile and no Zenodo impact.
-- **After submission, before the final archive: a dedicated session for
-  5C + 5D + the Zenodo re-deposit.** Renaming mid-revision would force a full
-  recompile and land silent-breakage risk exactly while final figures are being
-  generated, for zero reviewer-visible benefit.
+- **Now → submission: 5A + 5B + 5C only, and rename nothing.** All three are
+  bug fixes wearing a refactor's clothes — a dead canonical function, a public
+  API that silently overwrites on `proxy_name`, and an id collision that would
+  eat data the moment anyone migrates. They are invisible to reviewers, touch
+  no file on disk, cost no recompile, and have zero Zenodo impact. They also
+  make the revision reruns *safer*, because every new posterior written from
+  here on gets a correct, collision-free identity.
+- **After submission, before the final archive: 5F + the Zenodo re-deposit** in
+  one dedicated session. Migrating mid-revision buys nothing a reviewer sees
+  and risks the final figures.
+- **5D stays "do nothing" permanently** unless those 35 sites get re-run anyway.
 
-> **Cached posteriors keep their old `stan_model_name`.** That is fine and
-> intended — the attr records what was actually run. 5A is what makes them
-> readable regardless.
+> **Cached posteriors keep their old `stan_model_name` and their old flat
+> filenames.** That is intended — dual-read already handles both layouts, and
+> the attr records what was actually run.
 
 ---
 
@@ -625,11 +677,18 @@ paper cites, and is frozen forever after.**
 - [ ] **Bounded-T forward grid is incomplete.** `boundedT_thermoT_gdgt23ratio_no3_1.0`
       does not exist; the additive model has it. The thermoT variant comparison
       is incomplete until you fit it. The preflight cell in SI03 prints this.
-- [ ] **No paleo-site invT posteriors are cached.** All 72 files in
-      `TEXAS_invT_posterior_cache/` are `global_coretop_b*` CV blocks — nothing
-      for U1482, MD98-2152, ODP959, etc. SI03's load cells will report
-      everything missing until you run `download_posteriors()` or set
-      `RUN_INVT = True`.
+- [ ] **invT cache contents differ per machine — `data/cache/` is gitignored, so
+      it does not travel.** Check before trusting either statement below.
+      - *Windows box, when this was written:* 72 files, all `global_coretop_b*`
+        CV blocks, no paleo sites. SI03's load cells report everything missing
+        until you run `download_posteriors()` or set `RUN_INVT = True`.
+      - *Linux box, 2026-08-11:* the opposite — **35 files, all paleo sites**
+        (Co1010, DSDP591, MD98-2152, ODP1172, ODP1259, ODP959, SDB, U1482,
+        U1510, WL), and **no** `global_coretop_b*` CV blocks at all. So the CV
+        outputs are the ones missing here.
+
+      Neither machine has both sets. Run `ls data/cache/TEXAS_invT_posterior_cache/`
+      first and believe that, not this file.
 
 ---
 
@@ -640,9 +699,14 @@ paper cites, and is frozen forever after.**
 - Branch file-overlap: gridT ∩ groupA = **∅**; boundedT-si-figures ∩ groupA =
   `pyproject.toml` only (identical version bump).
 - Working tree ∩ boundedT-si-figures = the 3 files listed in Phase 3.
-- Naming scheme verified against all 17 cached forward posteriors: 0 case-id
-  collisions, 0 round-trip failures, dual-read resolves by either name under
-  either layout.
+- ~~Naming scheme verified against all 17 cached forward posteriors: 0 case-id
+  collisions, 0 round-trip failures.~~ **Wrong — corrected 2026-08-11.**
+  Re-measured with `case_from_attrs()` over all 17: **15 unique ids, 2
+  collisions** (`tx.v026.GHEA.sst.ri3.G23-N10.001` and
+  `tx.v026.GHEA.thm.ri3.G23-N10.001` each claimed by two files). The earlier
+  check must have tested round-tripping a *supplied* `filename_suffix` rather
+  than recovering it from attrs — which is precisely the gap. Dual-read itself
+  is fine. See Phase 5C; **do not migrate the cache until this is fixed.**
 - Baseline test count: **175 passed** (122 before this work + 53 new).
 
 ## Recovery

@@ -156,6 +156,21 @@ Optional predictor flags (`_gdgt23ratio`, `_no3_1.5`) are appended to `temptype`
 >   fallback), so existing caches, Zenodo downloads, and old notebooks keep
 >   working. `save_posterior(..., layout=)` takes `"auto"` (default, prefers case),
 >   `"case"`, or `"legacy"`.
+>
+> **Status of the inverse half (audited 2026-08-11) — the forward side is wired,
+> the inverse side is only half-wired. Do not assume otherwise:**
+> - `naming.inv_relpath()` is the documented canonical inverse-name builder and
+>   **nothing outside `tests/` calls it.** The production path is
+>   `io._generate_filename_base()`, which reimplements a *different* leaf format
+>   inline (no run number).
+> - `save_invT_posterior()` (`stan/io.py:269`, exported in `__all__`) is entirely
+>   case-unaware and **silently drops `proxy_name`**, so a `scaledRI` and a
+>   `TEX86` run of one site overwrite each other.
+> - `case_from_attrs()` cannot recover `filename_suffix`, so it defaults the run
+>   token to `.001`. On the current 17-file forward cache that yields **2 id
+>   collisions**. Migrating the cache before fixing this would destroy data.
+>
+> Tracked as Phase 5 in `RESUME.md` on `feat/revision1-validation-groupA`.
 
 ### Streamlit app (`streamlit_app/`)
 
