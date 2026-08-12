@@ -1,5 +1,5 @@
 {
- "generated": "2026-08-12 22:47 UTC",
+ "generated": "2026-08-12 22:49 UTC",
  "n_fits": 81,
  "models": {
   "univ": {
@@ -305,35 +305,35 @@
  ],
  "part2": [
   {
-   "name": "scaledRI_cren5",
+   "name": "univ_priorApprox \u00b7 SST \u00b7 thermal only \u00b7 scaledRI_cren5",
    "file": "tx.v026.GHPU.sst.sri05.p0.001.fwd.nc",
    "all_rhat": 1.01407,
    "core_rhat": 1.0041738117635985,
    "worst": "v_crtp"
   },
   {
-   "name": "scaledRI_cren3",
+   "name": "multiv_priorApprox_eiv \u00b7 SST \u00b7 G23 \u00b7 scaledRI_cren3",
    "file": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_scaledRI_cren3_041626.nc",
    "all_rhat": 1.01268,
    "core_rhat": 1.0005998895493406,
    "worst": "k_crtp"
   },
   {
-   "name": "scaledRI",
+   "name": "multiv_priorApprox_eiv \u00b7 SST \u00b7 G23+NO3 \u00b7 scaledRI",
    "file": "tx.v026.GHEA.sst.sri.G23-N10.001.fwd.nc",
    "all_rhat": 1.01188,
    "core_rhat": 1.000202816366558,
    "worst": "beta_NO3_crtp"
   },
   {
-   "name": "scaledRI_cren3",
+   "name": "multiv_priorApprox_eiv \u00b7 SST \u00b7 G23+NO3 \u00b7 scaledRI_cren3",
    "file": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc",
    "all_rhat": 1.01023,
    "core_rhat": 1.0000075932689414,
    "worst": "k_crtp"
   },
   {
-   "name": "scaledRI_cren3",
+   "name": "multiv_priorApprox_eiv \u00b7 SST \u00b7 G23+NO3 \u00b7 scaledRI_cren3",
    "file": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3_041626_eiv.nc",
    "all_rhat": 1.01023,
    "core_rhat": 1.0000075932689414,

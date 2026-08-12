@@ -250,8 +250,25 @@ def collect_part2() -> list:
             if not core:
                 continue
             worst = max(core, key=core.get)
+            # Label by what distinguishes the fit, not by the proxy. Keying on
+            # proxy_name put three different posteriors -- the G23-only fit,
+            # the G23+NO3 fit, and a date-stamped copy of the latter -- under
+            # one name "scaledRI_cren3", so the table read as duplicate rows
+            # with no way to tell which was which.
+            model = str(ds.attrs.get("stan_model_name", "")) \
+                .replace("gen_logi_fixed_", "").replace("hier_crtp_", "")
+            preds = []
+            if int(ds.attrs.get("use_gdgt23ratio", 0)):
+                preds.append("G23")
+            if int(ds.attrs.get("use_no3", 0)):
+                preds.append("NO3")
             rows.append({
-                "name": ds.attrs.get("proxy_name") or path.stem,
+                "name": " · ".join(filter(None, [
+                    model or path.stem,
+                    str(ds.attrs.get("temptype", "")),
+                    "+".join(preds) or "thermal only",
+                    str(ds.attrs.get("proxy_name", "")),
+                ])),
                 "file": path.name,
                 "all_rhat": float(all_rhat),
                 "core_rhat": float(core[worst]),
@@ -380,13 +397,14 @@ def render_part2(s: dict) -> str:
         rows.append(
             f'        <tr><td>{esc(r["name"])}</td><td>{r["all_rhat"]:.5f}</td>'
             f'<td><span class="chip fail">FAIL</span></td>'
-            f'<td>{r["core_rhat"]:.5f}</td><td>{esc(r["worst"])}</td></tr>')
+            f'<td>{r["core_rhat"]:.5f}</td><td>{esc(r["worst"])}</td>'
+            f'<td style="color:var(--text-3)">{esc(r.get("file",""))}</td></tr>')
     return f"""<div class="scroll">
     <table>
       <caption>Posteriors flagged <span class="chip fail">FAIL</span> by the strict gate, re-checked on calibration parameters only.</caption>
       <thead><tr>
         <th>posterior</th><th>max R&#770; (all)</th><th>verdict</th>
-        <th>max R&#770; (calibration)</th><th>slowest calibration parameter</th>
+        <th>max R&#770; (calibration)</th><th>slowest calibration parameter</th><th>file</th>
       </tr></thead>
       <tbody>
 {chr(10).join(rows)}

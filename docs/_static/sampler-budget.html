@@ -480,14 +480,14 @@
       <caption>Posteriors flagged <span class="chip fail">FAIL</span> by the strict gate, re-checked on calibration parameters only.</caption>
       <thead><tr>
         <th>posterior</th><th>max R&#770; (all)</th><th>verdict</th>
-        <th>max R&#770; (calibration)</th><th>slowest calibration parameter</th>
+        <th>max R&#770; (calibration)</th><th>slowest calibration parameter</th><th>file</th>
       </tr></thead>
       <tbody>
-        <tr><td>scaledRI_cren5</td><td>1.01407</td><td><span class="chip fail">FAIL</span></td><td>1.00417</td><td>v_crtp</td></tr>
-        <tr><td>scaledRI_cren3</td><td>1.01268</td><td><span class="chip fail">FAIL</span></td><td>1.00060</td><td>k_crtp</td></tr>
-        <tr><td>scaledRI</td><td>1.01188</td><td><span class="chip fail">FAIL</span></td><td>1.00020</td><td>beta_NO3_crtp</td></tr>
-        <tr><td>scaledRI_cren3</td><td>1.01023</td><td><span class="chip fail">FAIL</span></td><td>1.00001</td><td>k_crtp</td></tr>
-        <tr><td>scaledRI_cren3</td><td>1.01023</td><td><span class="chip fail">FAIL</span></td><td>1.00001</td><td>k_crtp</td></tr>
+        <tr><td>univ_priorApprox · SST · thermal only · scaledRI_cren5</td><td>1.01407</td><td><span class="chip fail">FAIL</span></td><td>1.00417</td><td>v_crtp</td><td style="color:var(--text-3)">tx.v026.GHPU.sst.sri05.p0.001.fwd.nc</td></tr>
+        <tr><td>multiv_priorApprox_eiv · SST · G23 · scaledRI_cren3</td><td>1.01268</td><td><span class="chip fail">FAIL</span></td><td>1.00060</td><td>k_crtp</td><td style="color:var(--text-3)">gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_scaledRI_cren3_041626.nc</td></tr>
+        <tr><td>multiv_priorApprox_eiv · SST · G23+NO3 · scaledRI</td><td>1.01188</td><td><span class="chip fail">FAIL</span></td><td>1.00020</td><td>beta_NO3_crtp</td><td style="color:var(--text-3)">tx.v026.GHEA.sst.sri.G23-N10.001.fwd.nc</td></tr>
+        <tr><td>multiv_priorApprox_eiv · SST · G23+NO3 · scaledRI_cren3</td><td>1.01023</td><td><span class="chip fail">FAIL</span></td><td>1.00001</td><td>k_crtp</td><td style="color:var(--text-3)">gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc</td></tr>
+        <tr><td>multiv_priorApprox_eiv · SST · G23+NO3 · scaledRI_cren3</td><td>1.01023</td><td><span class="chip fail">FAIL</span></td><td>1.00001</td><td>k_crtp</td><td style="color:var(--text-3)">gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3_041626_eiv.nc</td></tr>
       </tbody>
     </table>
   </div>
@@ -622,7 +622,7 @@
 </section>
 
 <footer>
-  Generated from <code>data/revision1/groupA/param_sensitivity/</code> by <code>docs/_scripts/build_sampler_budget.py</code> on 2026-08-12 22:47 UTC &middot; 81 forward fits, 9 inverse cells. Every figure on this page is read from the sweep output, so the page cannot drift from the run.
+  Generated from <code>data/revision1/groupA/param_sensitivity/</code> by <code>docs/_scripts/build_sampler_budget.py</code> on 2026-08-12 22:49 UTC &middot; 81 forward fits, 9 inverse cells. Every figure on this page is read from the sweep output, so the page cannot drift from the run.
 </footer>
 
 </div>
