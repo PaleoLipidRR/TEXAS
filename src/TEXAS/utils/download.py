@@ -187,10 +187,12 @@ def download_posteriors(
                 f"Available posteriors:\n  {available}"
             )
 
-    missing = [n for n in targets if not (dest_dir / f"{n}.nc").exists() or force]
+    local_paths = {n: _local_dest(dest_dir, n) for n in targets}
+
+    missing = [n for n in targets if not local_paths[n].exists() or force]
     if not missing:
         print("All requested posteriors already cached.")
-        return [dest_dir / f"{n}.nc" for n in targets]
+        return [local_paths[n] for n in targets]
 
     total_mb = sum(POSTERIOR_REGISTRY[n]["size_mb"] for n in missing)
     if total_mb >= 5:
@@ -199,11 +201,32 @@ def download_posteriors(
     paths = []
     for name in targets:
         entry = POSTERIOR_REGISTRY[name]
-        dest = dest_dir / f"{name}.nc"
+        dest = local_paths[name]
+        dest.parent.mkdir(parents=True, exist_ok=True)
         _download_file(_file_url(entry["filename"]), dest, entry["size_mb"], force=force)
         paths.append(dest)
 
     return paths
+
+
+def _local_dest(dest_dir: Path, name: str) -> Path:
+    """
+    Where a Zenodo posterior lands locally.
+
+    The Zenodo record is a **flat** namespace -- it has to be, a DOI deposit has
+    no subdirectories -- but the local cache is organised by case directory. So
+    a registry key that is a case id is unpacked into ``<case>/<case>.fwd.nc``,
+    giving one uniform local layout no matter whether a posterior was sampled
+    here or downloaded. Legacy long-name keys stay flat, which is what the
+    currently published record 10.5281/zenodo.20032542 uses.
+    """
+    try:
+        from .naming import fwd_relpath, is_case_id
+        if is_case_id(name):
+            return dest_dir / fwd_relpath(name)
+    except Exception:
+        pass  # naming is a convenience; never block a download on it
+    return dest_dir / f"{name}.nc"
 
 
 def download_training_data(

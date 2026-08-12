@@ -571,6 +571,33 @@ tx.v026.GHEA.sst.ri3.G23-N10.001/       <- the case = one calibration identity
 **So the scheme is not what is missing. The wiring is.** The forward half works;
 the inverse half is written but not connected, and nothing on disk has moved.
 
+### Decided and implemented 2026-08-11 (commit follows this file)
+
+Four naming decisions, all landed with tests, none of them touching the
+published Zenodo record:
+
+| axis | was | now | why |
+|---|---|---|---|
+| leaf name | `fwd.nc` | `<case>.fwd.nc` | a bare leaf loses its identity the moment it is copied out, and Zenodo's namespace is flat |
+| proxy code | `ri3` | `sri03` | `ri3` read as "ring index variant 3"; it means *scaled* RI with crenarchaeol counted as **3 rings** |
+| no predictors | `none` | `p0` | reads as a value next to `.001`; position kept, CESM-style, because fixed positions are what make the id parseable |
+| `TEXRI_cren3` | `ri3` | `tri03` | it shared a code with `scaledRI_cren3`, collapsing two distinct proxies onto one case id |
+
+Old spellings still **parse**, so the case directories already on disk resolve;
+they are simply no longer written. `download_posteriors()` now unpacks a flat
+Zenodo file into its case directory, so the local cache is one uniform layout
+whether a posterior was sampled here or downloaded.
+
+**Honest accounting on the leaf change:** it is *not* free. Full path goes
+39 → 72 chars against a bare `fwd.nc`. The leaf — the part you publish and
+read — goes ~100 → ~41. The genuinely free option was dropping the case
+directory entirely and going flat; the directory was kept because it groups a
+calibration with its reconstructions and gives one local layout.
+
+`scripts/migrate_cache_layout.py` does the eventual move. **Dry-run by
+default**, refuses on any collision, copies-and-verifies before pruning, and
+skips inverse posteriors entirely (see 5D).
+
 ### What is actually broken — verified 2026-08-11, not from reading docs
 
 - [ ] **5A `inv_relpath()` is dead code in production.** It is the documented

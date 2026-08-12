@@ -188,9 +188,15 @@ def load_posterior(
         fpath = candidate if candidate.exists() else None
 
     if fpath is None:
-        available = sorted(indir.glob("*.nc")) + sorted(indir.glob("*/fwd.nc"))
+        # Case dirs hold "<case>.fwd.nc"; dirs written before 2026-08-11 hold a
+        # bare "fwd.nc". Either way the case id is the directory name.
+        cased = sorted(indir.glob("*/*.fwd.nc")) + sorted(indir.glob("*/fwd.nc"))
+        available = sorted(indir.glob("*.nc")) + cased
         available_str = "\n    ".join(
-            f.parent.name if f.name == "fwd.nc" else f.stem for f in available
+            dict.fromkeys(
+                f.parent.name if f.name.endswith("fwd.nc") else f.stem
+                for f in available
+            )
         ) if available else "(none)"
         model_name = str(model_name)
         raise FileNotFoundError(
@@ -350,7 +356,12 @@ def _generate_filename_base(
                 if filename_tag:
                     tags = [filename_tag] if isinstance(filename_tag, str) else filename_tag
                     parts.extend(_slug(t) for t in tags if t)
-                return f"{fwd_case}/inv.{site_name}.{'-'.join(parts)}"
+                # Leaf repeats the case so a reconstruction copied out of its
+                # case directory still names the calibration it came from.
+                # NOTE: this still duplicates naming.inv_relpath() rather than
+                # calling it (it omits the run number). Consolidating the two is
+                # Phase 5A in RESUME.md; do not add a third spelling here.
+                return f"{fwd_case}/{fwd_case}.inv.{site_name}.{'-'.join(parts)}"
         except Exception:
             pass  # naming is a convenience; never block a save on it
 

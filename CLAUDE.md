@@ -128,9 +128,9 @@ Optional predictor flags (`_gdgt23ratio`, `_no3_1.5`) are appended to `temptype`
 > with fixed dot-delimited positions, so tokens stay short:
 >
 > ```
-> tx.v026.GHEB.sst.ri3.G23-N10.001/       <- the case = one calibration identity
->     fwd.nc                              <- the forward posterior
->     inv.U1482.ud-050126.nc              <- a reconstruction derived from it
+> tx.v026.GHEB.sst.sri03.G23-N10.001/                          <- the case
+>     tx.v026.GHEB.sst.sri03.G23-N10.001.fwd.nc                <- forward posterior
+>     tx.v026.GHEB.sst.sri03.G23-N10.001.inv.U1482.ud-050126.nc <- a reconstruction
 > ```
 >
 > Positions: project, version, **compset**, target temperature, proxy,
@@ -139,7 +139,31 @@ Optional predictor flags (`_gdgt23ratio`, `_no3_1.5`) are appended to `temptype`
 > `J` culmesocore, `T` crtp), estimator (`P` priorApprox, `E` priorApprox+EIV,
 > `D` full hierarchical), and predictor structure (`U` univariate, `A` additive
 > β-on-μ, `B` bounded-T γ-on-T₀). So `..._hier_crtp_multiv_priorApprox_eiv_boundedT`
-> → `GHEB`. Predictors are `G23` and `N` + cutoff×10 (`N10` = cutoff 1.0).
+> → `GHEB`. Predictors are `G23` and `N` + cutoff×10 (`N10` = cutoff 1.0), or
+> `p0` when there are none.
+>
+> **Proxy codes** read as *s*caled + *ri* + crenarchaeol ring count:
+> `sri03` = `scaledRI_cren3` (crenarchaeol counted as 3 rings), `sri04` =
+> `scaledRI_cren4` (the RI₀₋₄ convention of Zhang et al.), `sri` = `scaledRI`,
+> `tex` = `TEX86`, `tri03` = `TEXRI_cren3`.
+>
+> > **Token spellings changed 2026-08-11** (`ri3`→`sri03`, `none`→`p0`, and the
+> > leaf gained its case prefix). The old spellings still *parse*, so case
+> > directories already on disk keep resolving, but they are no longer written.
+> > `TEXRI_cren3` previously shared the code `ri3` with `scaledRI_cren3`, which
+> > silently collapsed two distinct proxies onto one case id; it is now `tri03`.
+>
+> **Why each leaf repeats its case.** CESM names data output for its case
+> (`b.e12.B1850C5CN.f19_g16.iPETM09x.01.pop.h.1901-2000.climo.nc`) and reserves
+> bare names for case *control* files that never leave the directory. A
+> posterior does leave — decisively, it is published to a Zenodo record whose
+> namespace is **flat**, where fifteen files named `fwd.nc` cannot coexist.
+> This is not free: the full path grows from 39 to 72 characters versus a bare
+> `fwd.nc`. What it buys is a leaf that is still self-identifying once detached,
+> and the leaf itself still drops ~100 → ~41 characters against the legacy name.
+> `download_posteriors()` unpacks a flat Zenodo file into its case directory
+> (`utils/download.py::_local_dest`) so the local cache has one uniform layout
+> whether a posterior was sampled here or downloaded.
 >
 > - **The case is the forward calibration.** An invT model name records the curve
 >   and constraint but not the training set or estimator, so a reconstruction is

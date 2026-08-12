@@ -81,13 +81,13 @@ def test_empty_model_name_is_an_error():
     (True, True, 1.5, "G23-N15"),
     (True, False, None, "G23"),
     (False, True, 1.0, "N10"),
-    (False, False, None, "none"),
+    (False, False, None, "p0"),
 ])
 def test_encode_predictors(g23, no3, cutoff, expected):
     assert encode_predictors(g23, no3, cutoff) == expected
 
 
-@pytest.mark.parametrize("token", ["G23-N10", "G23", "N15", "none"])
+@pytest.mark.parametrize("token", ["G23-N10", "G23", "N15", "p0"])
 def test_predictors_round_trip(token):
     d = decode_predictors(token)
     assert encode_predictors(d["use_gdgt23ratio"], d["use_no3"], d["no3_cutoff"]) == token
@@ -101,25 +101,25 @@ def test_no3_without_cutoff_is_an_error():
 # --- the case -------------------------------------------------------------
 
 def test_case_round_trips_through_text():
-    case = CaseName(compset="GHEB", temptype="sst", proxy="ri3",
+    case = CaseName(compset="GHEB", temptype="sst", proxy="sri03",
                     predictors="G23-N10", version="v026", run="001")
-    assert str(case) == "tx.v026.GHEB.sst.ri3.G23-N10.001"
+    assert str(case) == "tx.v026.GHEB.sst.sri03.G23-N10.001"
     assert str(parse_case(str(case))) == str(case)
 
 
 def test_run_position_defaults_and_separates_refits():
-    a = CaseName("GHEB", "sst", "ri3", "G23-N10", version="v026")
-    b = CaseName("GHEB", "sst", "ri3", "G23-N10", version="v026", run="050126")
+    a = CaseName("GHEB", "sst", "sri03", "G23-N10", version="v026")
+    b = CaseName("GHEB", "sst", "sri03", "G23-N10", version="v026", run="050126")
     assert a.run == "001"
     assert str(a) != str(b), "a refit must not collide with the original"
 
 
 def test_parse_case_tolerates_a_missing_run():
-    assert parse_case("tx.v026.GHEB.sst.ri3.G23-N10").run == "001"
+    assert parse_case("tx.v026.GHEB.sst.sri03.G23-N10").run == "001"
 
 
 def test_parse_case_rejects_junk():
-    for bad in ["not-a-case", "tx.v026.TOOLONG.sst.ri3.none", "tx.GHEB.sst"]:
+    for bad in ["not-a-case", "tx.v026.TOOLONG.sst.sri03.none", "tx.GHEB.sst"]:
         assert not is_case_id(bad)
         with pytest.raises(ValueError):
             parse_case(bad)
@@ -127,12 +127,12 @@ def test_parse_case_rejects_junk():
 
 def test_invalid_compset_rejected_at_construction():
     with pytest.raises(ValueError):
-        CaseName(compset="ZZZZ", temptype="sst", proxy="ri3")
+        CaseName(compset="ZZZZ", temptype="sst", proxy="sri03")
 
 
 def test_with_variant_swaps_only_the_structure_axis():
-    case = CaseName("GHEA", "sst", "ri3", "G23-N10", version="v026")
-    assert str(case.with_variant("B")) == "tx.v026.GHEB.sst.ri3.G23-N10.001"
+    case = CaseName("GHEA", "sst", "sri03", "G23-N10", version="v026")
+    assert str(case.with_variant("B")) == "tx.v026.GHEB.sst.sri03.G23-N10.001"
 
 
 def test_case_from_attrs():
@@ -142,7 +142,7 @@ def test_case_from_attrs():
         "use_gdgt23ratio": 1, "use_no3": 1, "no3_cutoff": 1.0,
     }
     case = case_from_attrs(attrs, version="v026")
-    assert str(case) == "tx.v026.GHEB.sst.ri3.G23-N10.001"
+    assert str(case) == "tx.v026.GHEB.sst.sri03.G23-N10.001"
     assert case.temptype_full == "SST"
     assert case.proxy_full == "scaledRI_cren3"
 
@@ -170,24 +170,51 @@ def test_additive_and_boundedT_do_not_collide():
 # --- paths ----------------------------------------------------------------
 
 def test_fwd_relpath():
-    assert fwd_relpath("tx.v026.GHEB.sst.ri3.G23-N10.001").as_posix() == \
-        "tx.v026.GHEB.sst.ri3.G23-N10.001/fwd.nc"
+    assert fwd_relpath("tx.v026.GHEB.sst.sri03.G23-N10.001").as_posix() == \
+        ("tx.v026.GHEB.sst.sri03.G23-N10.001/"
+         "tx.v026.GHEB.sst.sri03.G23-N10.001.fwd.nc")
+
+
+def test_fwd_leaf_is_self_describing_when_detached():
+    """
+    A posterior copied out of its case directory must still name its case --
+    Zenodo's namespace is flat, so many bare ``fwd.nc`` cannot coexist there.
+    """
+    case = "tx.v026.GHEB.sst.sri03.G23-N10.001"
+    assert fwd_relpath(case).name == f"{case}.fwd.nc"
+
+
+def test_repeating_the_case_costs_path_but_buys_a_portable_leaf():
+    """
+    The trade this scheme makes, stated explicitly so nobody 'optimises' it away.
+
+    Repeating the case is NOT free: the full path grows from 39 to 72 chars
+    against a bare ``fwd.nc``. What it buys is a leaf that still identifies its
+    calibration once detached from the directory -- which is mandatory, because
+    the Zenodo record is a flat namespace. The full path is still well under
+    the legacy flat name.
+    """
+    case = "tx.v026.GHEB.sst.sri03.G23-N10.001"
+    full = str(fwd_relpath(case))
+    assert len(full) > len(f"{case}/fwd.nc"), "be honest: the path does grow"
+    assert len(fwd_relpath(case).name) == len(f"{case}.fwd.nc")
 
 
 def test_inv_relpath():
-    p = inv_relpath("tx.v026.GHEB.sst.ri3.G23-N10.001", "U1482",
+    p = inv_relpath("tx.v026.GHEB.sst.sri03.G23-N10.001", "U1482",
                     scenario="mod", run=1)
-    assert p.as_posix() == "tx.v026.GHEB.sst.ri3.G23-N10.001/inv.U1482.ud-mod-001.nc"
+    assert p.as_posix() == ("tx.v026.GHEB.sst.sri03.G23-N10.001/"
+                            "tx.v026.GHEB.sst.sri03.G23-N10.001.inv.U1482.ud-mod-001.nc")
 
 
 def test_inv_relpath_slugs_a_site_with_spaces():
-    p = inv_relpath("tx.v026.GHEB.sst.ri3.none.001", "South Dover Bridge")
+    p = inv_relpath("tx.v026.GHEB.sst.sri03.none.001", "South Dover Bridge")
     assert "South-Dover-Bridge" in p.name
 
 
 def test_inv_relpath_rejects_unknown_constraint():
     with pytest.raises(ValueError, match="constraint"):
-        inv_relpath("tx.v026.GHEB.sst.ri3.none.001", "U1482", constraint="nope")
+        inv_relpath("tx.v026.GHEB.sst.sri03.none.001", "U1482", constraint="nope")
 
 
 def test_new_names_are_much_shorter():
@@ -199,14 +226,20 @@ def test_new_names_are_much_shorter():
     }
     legacy = legacy_fwd_name(attrs) + ".nc"          # 98 chars
     case = case_from_attrs(attrs, version="v026")
-    full = str(fwd_relpath(case))                    # case dir + "fwd.nc"
+    full = str(fwd_relpath(case))                    # case dir + leaf
     leaf = fwd_relpath(case).name                    # what you actually read
 
-    assert len(full) < len(legacy) / 2, (
-        f"case path {full!r} ({len(full)}) should be under half of "
+    # The leaf is what you read, type, and publish to Zenodo -- that is the
+    # number that must halve. The full path carries the case twice by design,
+    # so it only has to beat the legacy name, not halve it.
+    assert len(leaf) < len(legacy) / 2, (
+        f"leaf {leaf!r} ({len(leaf)}) should be under half of "
         f"{legacy!r} ({len(legacy)})"
     )
-    assert len(leaf) <= 8, "the filename inside a case directory stays tiny"
+    assert len(full) < len(legacy), (
+        f"case path {full!r} ({len(full)}) should still beat "
+        f"{legacy!r} ({len(legacy)})"
+    )
 
 
 # --- legacy reproducers (the dual-read fallback depends on these) ----------
@@ -259,7 +292,7 @@ def fwd_posterior():
 def test_save_posterior_uses_the_case_directory(tmp_path, fwd_posterior):
     from TEXAS.stan.io import save_posterior
     p = save_posterior(fwd_posterior, cache_dir=tmp_path)
-    assert p.name == "fwd.nc"
+    assert p.name == f"{p.parent.name}.fwd.nc"
     assert is_case_id(p.parent.name)
     assert fwd_posterior.attrs["case_id"] == p.parent.name
 
@@ -304,11 +337,11 @@ def test_invT_name_lands_in_the_parent_case_directory():
         "stan_model_name": "invT_gen_logi_fixed_multiv_marginal_unconstrained_boundedT",
         "temptype": "sst", "proxy_name": "scaledRI_cren3",
         "use_gdgt23ratio": 1, "use_no3": 1, "no3_cutoff": 1.0,
-        "fwd_case": "tx.v025.GHEB.sst.ri3.G23-N10.001",
+        "fwd_case": "tx.v025.GHEB.sst.sri03.G23-N10.001",
     }
     base = _generate_filename_base(meta, "050126")
-    assert base.startswith("tx.v025.GHEB.sst.ri3.G23-N10.001/")
-    assert base.endswith("/inv.U1482.ud-050126")
+    assert base.startswith("tx.v025.GHEB.sst.sri03.G23-N10.001/")
+    assert base.endswith("/tx.v025.GHEB.sst.sri03.G23-N10.001.inv.U1482.ud-050126")
 
 
 def test_invT_without_provenance_keeps_the_legacy_name():
@@ -324,3 +357,33 @@ def test_invT_without_provenance_keeps_the_legacy_name():
     assert "/" not in base
     assert base == ("U1482_invT_gen_logi_fixed_multiv_unconstrained_sst"
                     "_gdgt23ratio_no3_1.0_scaledRI_cren3_050126_direct")
+
+
+# --- backward compatibility of the token spellings -------------------------
+# The proxy code changed ri3 -> sri03 and the no-predictor token none -> p0 on
+# 2026-08-11. Case ids written before that must still parse, or the two case
+# directories already on disk become unreadable.
+
+@pytest.mark.parametrize("old,proxy", [
+    ("tx.v026.GHEB.sst.ri3.G23-N10.001", "scaledRI_cren3"),
+    ("tx.v026.GHEB.sst.ri4.G23-N10.001", "scaledRI_cren4"),
+    ("tx.v026.GCDU.cul.ri3.none.001", "scaledRI_cren3"),
+])
+def test_pre_20260811_case_ids_still_parse(old, proxy):
+    from TEXAS.utils.naming import PROXY_DECODE
+    case = parse_case(old)
+    assert is_case_id(old)
+    assert PROXY_DECODE[case.proxy] == proxy
+
+
+def test_legacy_none_token_decodes_like_p0():
+    assert decode_predictors("none") == decode_predictors("p0")
+
+
+def test_texri_no_longer_collides_with_scaledri():
+    """Two distinct proxies must not collapse onto one case id."""
+    base = {"stan_model_name": "gen_logi_fixed_hier_crtp_univ_priorApprox",
+            "temptype": "SST"}
+    a = case_from_attrs({**base, "proxy_name": "scaledRI_cren3"}, version="v026")
+    b = case_from_attrs({**base, "proxy_name": "TEXRI_cren3"}, version="v026")
+    assert str(a) != str(b), "scaledRI_cren3 and TEXRI_cren3 shared the code 'ri3'"

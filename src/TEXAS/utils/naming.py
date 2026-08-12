@@ -31,9 +31,17 @@ and the case is a *directory*, so everything derived from one calibration
 lives together and individual filenames stay short::
 
     tx.v026.GHEB.sst.ri3.G23-N10/
-        fwd.nc                       <- the forward posterior
-        inv.U1482.ud-mod-001.nc      <- an inverse reconstruction
-        inv.MD98-2152.ud-n01-001.nc
+        tx.v026.GHEB.sst.ri3.G23-N10.fwd.nc                  <- forward posterior
+        tx.v026.GHEB.sst.ri3.G23-N10.inv.U1482.ud-mod-001.nc <- a reconstruction
+        tx.v026.GHEB.sst.ri3.G23-N10.inv.MD98-2152.ud-n01-001.nc
+
+Each leaf repeats the case, the way CESM names data output for its case
+(``b.e12.B1850C5CN.f19_g16.iPETM09x.01.pop.h.1901-2000.climo.nc``) rather than
+giving it a bare role name. Bare names belong to case *control* files that
+never leave the directory; a posterior does leave -- it gets copied around and
+published to a flat Zenodo namespace where many ``fwd.nc`` cannot coexist.
+The repetition is free: ``<case>/<case>.fwd.nc`` and ``<case>/fwd.nc`` are the
+same length, only the separator moves.
 
 THE COMPSET CODE
 ----------------
@@ -139,10 +147,21 @@ TEMPTYPE_CODES = {"SST": "sst", "sst": "sst", "thermoT": "thm",
                   "thermot": "thm", "cultureT": "cul", "culturet": "cul"}
 TEMPTYPE_DECODE = {"sst": "SST", "thm": "thermoT", "cul": "cultureT"}
 
-PROXY_CODES = {"scaledRI_cren3": "ri3", "scaledRI_cren4": "ri4",
-               "scaledRI": "ri", "TEX86": "tex", "TEXRI_cren3": "ri3"}
-PROXY_DECODE = {"ri3": "scaledRI_cren3", "ri4": "scaledRI_cren4",
-                "ri": "scaledRI", "tex": "TEX86"}
+# Proxy codes read as: s=scaled, ri=Ring Index, NN=crenarchaeol ring count.
+# "cren3" means crenarchaeol counted as 3 rings; cren_rings=4 reproduces the
+# RI(0-4) convention of Zhang et al. The bare "ri3" used before 2026-08-11 read
+# like "ring index variant 3", which is not what it means.
+#
+# TEXRI_cren3 previously shared the "ri3" code with scaledRI_cren3, so two
+# distinct proxies collapsed onto one case id and one would silently overwrite
+# the other. It now has its own code.
+PROXY_CODES = {"scaledRI_cren3": "sri03", "scaledRI_cren4": "sri04",
+               "scaledRI": "sri", "TEX86": "tex", "TEXRI_cren3": "tri03"}
+PROXY_DECODE = {"sri03": "scaledRI_cren3", "sri04": "scaledRI_cren4",
+                "sri": "scaledRI", "tex": "TEX86", "tri03": "TEXRI_cren3",
+                # pre-2026-08-11 codes, so existing case ids still parse
+                "ri3": "scaledRI_cren3", "ri4": "scaledRI_cren4",
+                "ri": "scaledRI"}
 
 CONSTRAINT_CODES = {"unconstrained": "u", "hard_constraint": "h",
                     "truncated_prior": "t", "reparameterized": "r", "soft": "s"}
@@ -151,7 +170,16 @@ CONSTRAINT_DECODE = {v: k for k, v in CONSTRAINT_CODES.items()}
 KIND_CODES = {"direct": "d", "ensemble": "e"}
 KIND_DECODE = {v: k for k, v in KIND_CODES.items()}
 
-NO_PREDICTORS = "none"
+# "zero predictors". Kept as an explicit position rather than omitted, the way
+# CESM names an absent component explicitly (SGLC = stub glacier) instead of
+# dropping the field -- fixed positions are what make the id parseable. Note it
+# is partly redundant with the compset's 4th character (U = univariate); the
+# position exists so the predictor axis is always readable without decoding the
+# compset.
+NO_PREDICTORS = "p0"
+
+#: Pre-2026-08-11 spelling, still accepted when parsing existing case ids.
+LEGACY_NO_PREDICTORS = "none"
 
 DEFAULT_RUN = "001"
 
@@ -285,7 +313,7 @@ def encode_predictors(use_gdgt23ratio: bool = False,
 def decode_predictors(token: str) -> Dict[str, Any]:
     """Inverse of :func:`encode_predictors`."""
     out = {"use_gdgt23ratio": False, "use_no3": False, "no3_cutoff": None}
-    if not token or token == NO_PREDICTORS:
+    if not token or token in (NO_PREDICTORS, LEGACY_NO_PREDICTORS):
         return out
     for part in str(token).split("-"):
         if part == "G23":
@@ -438,8 +466,31 @@ def is_case_id(text: str) -> bool:
 # ---------------------------------------------------------------------------
 
 def fwd_relpath(case: Union[CaseName, str]) -> Path:
-    """``<case>/fwd.nc`` -- the forward posterior of a case."""
-    return Path(str(case)) / "fwd.nc"
+    """
+    ``<case>/<case>.fwd.nc`` -- the forward posterior of a case.
+
+    The case is repeated in the leaf on purpose. CESM names data output for its
+    case (``b.e12.B1850C5CN.f19_g16.iPETM09x.01.pop.h.1901-2000.climo.nc``) and
+    reserves bare names for case *control* files that never leave the case
+    directory. A posterior does leave: it is copied around and, decisively,
+    published to a Zenodo record with a **flat** namespace, where fifteen files
+    named ``fwd.nc`` cannot coexist. Repeating the case costs nothing -- the
+    full path is the same length either way, only the separator moves.
+
+    >>> str(fwd_relpath("tx.v026.GHEB.sst.ri3.G23-N10.001"))
+    'tx.v026.GHEB.sst.ri3.G23-N10.001/tx.v026.GHEB.sst.ri3.G23-N10.001.fwd.nc'
+    """
+    c = str(case)
+    return Path(c) / f"{c}.fwd.nc"
+
+
+#: Pre-2026-08-11 leaf name, kept so existing caches still resolve.
+LEGACY_FWD_LEAF = "fwd.nc"
+
+
+def fwd_leaf_candidates(case: Union[CaseName, str]) -> tuple:
+    """Leaf names to try inside a case dir, current scheme first."""
+    return (f"{case}.fwd.nc", LEGACY_FWD_LEAF)
 
 
 def inv_relpath(
@@ -452,10 +503,15 @@ def inv_relpath(
     run: Union[int, str] = 1,
 ) -> Path:
     """
-    ``<case>/inv.<site>.<constraint><kind>[-<scenario>]-<NNN>.nc``
+    ``<case>/<case>.inv.<site>.<constraint><kind>[-<scenario>]-<NNN>.nc``
 
-    >>> str(inv_relpath("tx.v026.GHEB.sst.ri3.G23-N10", "U1482", scenario="mod"))
-    'tx.v026.GHEB.sst.ri3.G23-N10\\\\inv.U1482.ud-mod-001.nc'
+    The case is repeated in the leaf for the same reason as in
+    :func:`fwd_relpath` -- a reconstruction that is copied out of its case
+    directory must still say which calibration it came from.
+
+    >>> p = inv_relpath("tx.v026.GHEB.sst.ri3.G23-N10", "U1482", scenario="mod")
+    >>> p.name
+    'tx.v026.GHEB.sst.ri3.G23-N10.inv.U1482.ud-mod-001.nc'
     """
     c = CONSTRAINT_CODES.get(constraint)
     if c is None:
@@ -469,7 +525,8 @@ def inv_relpath(
     if scenario:
         parts.append(slug(scenario))
     parts.append(run_str)
-    return Path(str(case)) / f"inv.{slug(site)}.{'-'.join(parts)}.nc"
+    c = str(case)
+    return Path(c) / f"{c}.inv.{slug(site)}.{'-'.join(parts)}.nc"
 
 
 def slug(x: Any) -> str:
@@ -487,14 +544,16 @@ def resolve_posterior_path(name: str, indir: Union[str, Path]) -> Optional[Path]
 
     Resolution order, cheapest first:
 
-    1. ``indir/<name>.nc``           -- historical flat layout, exact hit
-    2. ``indir/<name>/fwd.nc``       -- case-directory layout, exact hit
-    3. *name* is a case id           -- scan flat ``.nc`` files and match the
+    1. ``indir/<name>.nc``                  -- historical flat layout, exact hit
+    2. ``indir/<name>/<name>.fwd.nc``       -- case-directory layout, exact hit
+    3. ``indir/<name>/fwd.nc``              -- case dirs written before
+       2026-08-11, when the leaf was a bare ``fwd.nc``
+    4. *name* is a case id           -- scan flat ``.nc`` files and match the
        case computed from each file's attrs
-    4. *name* is a legacy long name  -- scan case directories and match the
-       legacy name computed from each ``fwd.nc``'s attrs
+    5. *name* is a legacy long name  -- scan case directories and match the
+       legacy name computed from each forward posterior's attrs
 
-    Steps 3 and 4 open files, so they run only when the exact lookups miss.
+    Steps 4 and 5 open files, so they run only when the exact lookups miss.
     Returns ``None`` when nothing matches, leaving the caller to raise.
     """
     indir = Path(indir)
@@ -503,9 +562,10 @@ def resolve_posterior_path(name: str, indir: Union[str, Path]) -> Optional[Path]
     if flat.exists():
         return flat
 
-    cased = indir / name / "fwd.nc"
-    if cased.exists():
-        return cased
+    for leaf in fwd_leaf_candidates(name):
+        cased = indir / name / leaf
+        if cased.exists():
+            return cased
 
     if not indir.is_dir():
         return None
@@ -532,8 +592,9 @@ def resolve_posterior_path(name: str, indir: Union[str, Path]) -> Optional[Path]
 
     # name looks like a legacy long name -> hunt through the case directories
     for d in sorted(p for p in indir.iterdir() if p.is_dir()):
-        fwd = d / "fwd.nc"
-        if not fwd.exists():
+        fwd = next((d / leaf for leaf in fwd_leaf_candidates(d.name)
+                    if (d / leaf).exists()), None)
+        if fwd is None:
             continue
         try:
             with xr.open_dataset(fwd) as ds:
