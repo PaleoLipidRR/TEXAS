@@ -186,6 +186,17 @@ modern-NO3 scenario's tag *was* the bare date.
 ### Still open when you get back
 
 - [ ] Run `audit` and read it. Fix anything NOT READY before quoting numbers.
+      It also writes `case_ids.json` — the case id of every calibration this run
+      produced.
+- [ ] **Point SI03 at the case ids** (decided 2026-08-12: case ids are the
+      canonical identity from the resubmission on). Its `fwd_name()` builds
+      legacy names, and a legacy name cannot reach the refit posteriors at all:
+      the cache holds 17 flat files with exactly those names, and an exact flat
+      hit is the first thing `resolve_posterior_path` tries. So SI03 silently
+      loads the pre-refit fits until it is switched over.
+      **Do not delete the flat files** — `SI_code3_paleo_showcases.ipynb`, the
+      original submission, reads them. They are the compatibility layer; new
+      work names case ids explicitly.
 - [ ] Re-run SI03's figure cells against the new posteriors.
 - [ ] **Under-coverage in the inverse model.** Part 3 found 68% intervals
       containing measured SST only 59-61% of the time and 90% intervals 84%,
