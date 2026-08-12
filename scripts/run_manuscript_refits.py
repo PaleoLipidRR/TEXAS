@@ -66,6 +66,7 @@ PUBLISHED = SPREADSHEETS / "published_data"
 COMPILATION = "ds_gridded_screened_global_compilation_finalized.csv"
 PHANTEX = "PhanTEX_v001_modified_032626.csv"
 GIG_CSV = "PhanTEX_GIG_df.csv"
+OCEAN_PROPS = "ds06_calculated_ocean_properties.nc"
 
 RESULTS_DIR = REPO / "data" / "revision1" / "groupA" / "manuscript_refit"
 MANIFEST = RESULTS_DIR / "manifest.csv"
@@ -246,6 +247,35 @@ def gig_frame() -> pd.DataFrame:
         df = df.rename(columns=lambda c: c.removesuffix("_y"))
         _CACHE["gig"] = df
     return _CACHE["gig"]
+
+
+def ocean_props():
+    """The WOA23-derived grid SI03 reads modern NO3 from. Lives in the repo."""
+    if "ocean" not in _CACHE:
+        import xarray as xr
+        path = REPO / "data" / "external" / "ncfiles" / OCEAN_PROPS
+        if not path.exists():
+            raise FileNotFoundError(
+                f"{path} is missing. The modern-NO3 scenario reads NO3 at each "
+                "site's modern coordinates from this grid, exactly as SI03 does.")
+        _CACHE["ocean"] = xr.open_dataset(path)
+    return _CACHE["ocean"]
+
+
+def modern_no3_at(group: pd.DataFrame) -> float:
+    """
+    Modern NO3 at a site's present-day coordinates, nearest grid cell.
+
+    One value per site, not per sample -- SI03 takes ModLat/ModLon from the
+    first row and broadcasts. Reproduced rather than reinvented: a different
+    lookup here would change every modern-NO3 reconstruction while looking
+    entirely reasonable.
+    """
+    lat = float(group["ModLat"].iloc[0])
+    lon = float(group["ModLon"].iloc[0])
+    val = (ocean_props()["no3_sf2tc_avg"]
+           .sel(lat=lat, lon=lon, method="nearest").values)
+    return float(np.atleast_1d(val)[0])
 
 
 def petm_frame() -> pd.DataFrame:
@@ -581,9 +611,12 @@ def run_inverse(temptypes=None, force=False, dry_run=False):
         if isinstance(sc["no3"], str) and sc["no3"].startswith("column:"):
             no3 = g[sc["no3"].split(":", 1)[1]].values
         elif sc["no3"] == "modern":
-            no3 = g["no3"].values if "no3" in g else g["no3_sf2tc_avg"].values
+            no3 = np.full(len(g), modern_no3_at(g))
         else:
-            no3 = sc["no3"]
+            # np.full rather than a scalar, matching SI03: the reconstruction
+            # takes one NO3 value per sample, and a scalar would be broadcast
+            # by a different code path.
+            no3 = np.full(len(g), float(sc["no3"]))
         prior = (GIG_PRIOR_MU_T if dataset == "gig"
                  else g["prior_mu_T"].values)
         _predict(site, tt, proxy_vals, prior,
