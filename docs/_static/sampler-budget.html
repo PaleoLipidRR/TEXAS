@@ -220,7 +220,7 @@
     <div><dt>univariate</dt><dd><span class="chip pass">400 / 600</span></dd></div>
     <div><dt>EIV multivariate</dt><dd><span class="chip pass">400 / 800</span></dd></div>
     <div><dt>bounded-T</dt><dd><span class="chip pass">300 / 900</span></dd></div>
-    <div><dt>Inverse (Part 3)</dt><dd><span class="chip warn">6 cells, no pass</span></dd></div>
+    <div><dt>Inverse (Part 3)</dt><dd><span class="chip pass">1000 / 1000 &middot; M=500</span></dd></div>
   </dl>
 </header>
 
@@ -554,20 +554,23 @@
         <th>min ESS</th><th>RMSE &deg;C</th><th>cov 68</th><th>drift &deg;C</th>
       </tr></thead>
       <tbody>
-        <tr><td>300 / 500</td><td>300</td><td>102 s</td><td>1.0149</td><td>688</td><td>4.517</td><td>0.610</td><td>&mdash;</td></tr>
-        <tr><td>300 / 500</td><td>500</td><td>168 s</td><td>1.0126</td><td>716</td><td>4.511</td><td>0.595</td><td>&mdash;</td></tr>
-        <tr><td>300 / 1000</td><td>300</td><td>188 s</td><td>1.0056</td><td>1402</td><td>4.521</td><td>0.600</td><td>&mdash;</td></tr>
-        <tr><td>500 / 1000</td><td>300</td><td>208 s</td><td>1.0067</td><td>1342</td><td>4.517</td><td>0.600</td><td>&mdash;</td></tr>
-        <tr><td>300 / 1000</td><td>500</td><td>292 s</td><td>1.0112</td><td>1433</td><td>4.525</td><td>0.590</td><td>&mdash;</td></tr>
-        <tr><td>500 / 1000</td><td>500</td><td>326 s</td><td>1.0063</td><td>1224</td><td>4.527</td><td>0.595</td><td>&mdash;</td></tr>
+        <tr><td>300 / 500</td><td>300</td><td>102 s</td><td>1.0149</td><td>688</td><td>4.517</td><td>0.610</td><td>0.391</td></tr>
+        <tr><td>300 / 500</td><td>500</td><td>168 s</td><td>1.0126</td><td>716</td><td>4.511</td><td>0.595</td><td>0.388</td></tr>
+        <tr><td>300 / 1000</td><td>300</td><td>188 s</td><td>1.0056</td><td>1402</td><td>4.521</td><td>0.600</td><td>0.329</td></tr>
+        <tr><td>500 / 1000</td><td>300</td><td>208 s</td><td>1.0067</td><td>1342</td><td>4.517</td><td>0.600</td><td>0.339</td></tr>
+        <tr><td>1000 / 1000</td><td>300</td><td>265 s</td><td>1.0067</td><td>1410</td><td>4.523</td><td>0.595</td><td>0.420</td></tr>
+        <tr><td>300 / 1000</td><td>500</td><td>292 s</td><td>1.0112</td><td>1433</td><td>4.525</td><td>0.590</td><td>0.308</td></tr>
+        <tr><td>500 / 1000</td><td>500</td><td>326 s</td><td>1.0063</td><td>1224</td><td>4.527</td><td>0.595</td><td>0.366</td></tr>
+        <tr class="ref"><td>1000 / 1000 &nbsp;<span class="chip">replicate</span></td><td>500</td><td>367 s</td><td>1.0061</td><td>1394</td><td>4.522</td><td>0.605</td><td>0.271</td></tr>
+        <tr><td>1000 / 1000</td><td>500</td><td>381 s</td><td>1.0077</td><td>1242</td><td>4.529</td><td>0.605</td><td>0.000</td></tr>
       </tbody>
     </table>
   </div>
 
-  
+  <div class="finding"><h3>Recommended: warmup 1000, sampling 1000, M = 500</h3><p>R&#770;&nbsp;=&nbsp;1.0077 &middot; ESS&nbsp;=&nbsp;1242 &middot; worst-site drift 0.000&nbsp;&deg;C against a measured seed-to-seed floor of 0.271&nbsp;&deg;C. At <strong>381&nbsp;s</strong> that is <strong>1.00&times;</strong> faster than the richest cell swept.</p></div>
 
   <div class="prose" style="margin-top:1.4rem">
-    <p>RMSE varies by <strong>0.02&nbsp;&deg;C across a 3.2&times; spread in cost</strong>, and M&nbsp;=&nbsp;300 is indistinguishable from M&nbsp;=&nbsp;500. The defensible SI statement is therefore not &ldquo;we picked this budget&rdquo; but <em>&ldquo;the answer does not depend on it&rdquo;</em>, which is the stronger claim.</p><p>Coverage is the open question: 68% intervals contain the measured SST 59%&ndash;61% of the time and 90% intervals 84%&ndash;84%, stable across every cell, so it is not sampling noise. Some of that is by construction &mdash; a constant prior mean, an in-sample set, a subset deliberately weighted toward the hard end &mdash; but systematic under-coverage deserves an explanation before it reaches an SI.</p>
+    <p>RMSE varies by <strong>0.02&nbsp;&deg;C across a 3.7&times; spread in cost</strong>, and M&nbsp;=&nbsp;300 is indistinguishable from M&nbsp;=&nbsp;500. The defensible SI statement is therefore not &ldquo;we picked this budget&rdquo; but <em>&ldquo;the answer does not depend on it&rdquo;</em>, which is the stronger claim.</p><p>Coverage is the open question: 68% intervals contain the measured SST 59%&ndash;61% of the time and 90% intervals 84%&ndash;84%, stable across every cell, so it is not sampling noise. Some of that is by construction &mdash; a constant prior mean, an in-sample set, a subset deliberately weighted toward the hard end &mdash; but systematic under-coverage deserves an explanation before it reaches an SI.</p>
   </div>
 </section>
 
@@ -617,7 +620,7 @@
 </section>
 
 <footer>
-  Generated from <code>data/revision1/groupA/param_sensitivity/</code> by <code>docs/_scripts/build_sampler_budget.py</code> on 2026-08-12 20:25 UTC &middot; 81 forward fits, 6 inverse cells. Every figure on this page is read from the sweep output, so the page cannot drift from the run.
+  Generated from <code>data/revision1/groupA/param_sensitivity/</code> by <code>docs/_scripts/build_sampler_budget.py</code> on 2026-08-12 20:47 UTC &middot; 81 forward fits, 9 inverse cells. Every figure on this page is read from the sweep output, so the page cannot drift from the run.
 </footer>
 
 </div>
