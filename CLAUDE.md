@@ -190,11 +190,50 @@ Optional predictor flags (`_gdgt23ratio`, `_no3_1.5`) are appended to `temptype`
 > - `save_invT_posterior()` (`stan/io.py:269`, exported in `__all__`) is entirely
 >   case-unaware and **silently drops `proxy_name`**, so a `scaledRI` and a
 >   `TEX86` run of one site overwrite each other.
-> - `case_from_attrs()` cannot recover `filename_suffix`, so it defaults the run
->   token to `.001`. On the current 17-file forward cache that yields **2 id
->   collisions**. Migrating the cache before fixing this would destroy data.
+> - ~~`case_from_attrs()` cannot recover `filename_suffix`.~~ **Fixed
+>   2026-08-11.** `run_from_attrs()` recovers the run token from the `filename`
+>   attr, which `save_posterior` stamps onto every dataset and which keeps its
+>   date suffix even after a file is renamed without one. Refits now get
+>   distinct runs instead of all collapsing onto `.001`. `save_posterior` still
+>   passes a run explicitly, so a genuinely new fit never inherits a stale
+>   stamp.
 >
 > Tracked as Phase 5 in `RESUME.md` on `feat/revision1-validation-groupA`.
+
+#### Renaming an existing cache onto the case layout
+
+`scripts/migrate_cache_layout.py` converts forward posteriors — legacy flat
+files *and* case directories written before 2026-08-11 — onto
+`<case>/<case>.fwd.nc`.
+
+```bash
+python scripts/migrate_cache_layout.py                  # dry run: print the plan
+python scripts/migrate_cache_layout.py --apply          # copy into place, verify each
+python scripts/migrate_cache_layout.py --apply --prune  # then delete the sources
+python scripts/migrate_cache_layout.py --cache /some/other/dir
+```
+
+It is **dry-run by default**, copies before it deletes, re-opens every copy and
+checks the case id matches the directory, and **exits 1 without touching
+anything if two files claim one case id** — that guard is what makes it safe to
+run unattended.
+
+**This is per-machine, and the plan will differ on each one.** `data/cache/**`
+is gitignored, so it does not travel with a clone: the Linux box and the
+Windows box hold different posteriors. Never assume a migration done on one
+machine has happened on another — run the dry run first and read it. The only
+prerequisites are an editable install (`pip install -e .`, so `TEXAS` imports)
+and `xarray`; no CmdStan, no compilation, no network.
+
+**Inverse posteriors are deliberately skipped.** An invT model name records the
+curve and constraint but not the training set or estimator, so for any file
+without a `fwd_case` attr the parent case is unrecoverable, and inventing one
+would record a guess as provenance. Leave them on the legacy dual-read path.
+
+**Nothing is lost if the leaf names are wrong** — `load_posterior()` reads
+legacy flat names, `<case>/fwd.nc`, and `<case>/<case>.fwd.nc` alike, and old
+`ri3` / `none` tokens still parse. Migration is a tidiness step, not a
+correctness one.
 
 ### Streamlit app (`streamlit_app/`)
 

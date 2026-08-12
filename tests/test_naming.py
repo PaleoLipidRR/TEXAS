@@ -387,3 +387,45 @@ def test_texri_no_longer_collides_with_scaledri():
     a = case_from_attrs({**base, "proxy_name": "scaledRI_cren3"}, version="v026")
     b = case_from_attrs({**base, "proxy_name": "TEXRI_cren3"}, version="v026")
     assert str(a) != str(b), "scaledRI_cren3 and TEXRI_cren3 shared the code 'ri3'"
+
+
+# --- run-token recovery (Phase 5C) -----------------------------------------
+# save_posterior stamps the name it wrote onto the dataset, so a file later
+# renamed without its date suffix still carries the suffix in attrs. Recovering
+# it is what stops two refits of one configuration from colliding on run 001.
+
+@pytest.mark.parametrize("filename,expected", [
+    ("gen_logi_fixed_culmeso_cultureT_scaledRI_cren3_050126.nc", "050126"),
+    ("..._SST_gdgt23ratio_no3_1.0_scaledRI_cren3_041526_eiv.nc", "041526"),
+    ("..._scaledRI_cren3.nc", None),
+    ("fwd.nc", None),
+    ("", None),
+])
+def test_run_from_attrs(filename, expected):
+    from TEXAS.utils.naming import run_from_attrs
+    assert run_from_attrs({"filename": filename}) == expected
+
+
+def test_run_stamp_ignores_short_scenario_tokens():
+    """no3_001 is three digits and must not be mistaken for a run stamp."""
+    from TEXAS.utils.naming import run_from_attrs
+    fn = "MD98-2152_invT_gen_logi_fixed_multiv_sst_cren3_050126_no3_001_direct.nc"
+    assert run_from_attrs({"filename": fn}) == "050126"
+
+
+def test_refits_recover_distinct_runs_from_attrs():
+    """The exact collision that blocked migrating the real cache."""
+    base = {"stan_model_name": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv",
+            "temptype": "SST", "proxy_name": "scaledRI_cren3",
+            "use_gdgt23ratio": 1, "use_no3": 1, "no3_cutoff": 1.0}
+    a = case_from_attrs({**base, "filename": "x_cren3_041526_eiv.nc"}, version="v026")
+    b = case_from_attrs({**base, "filename": "x_cren3_041626_eiv.nc"}, version="v026")
+    assert a.run == "041526" and b.run == "041626"
+    assert str(a) != str(b)
+
+
+def test_explicit_run_still_wins_over_recovery():
+    """save_posterior passes a run explicitly; a fresh fit must not inherit one."""
+    attrs = {"stan_model_name": "gen_logi_fixed_culmeso", "temptype": "cultureT",
+             "proxy_name": "scaledRI_cren3", "filename": "old_050126.nc"}
+    assert case_from_attrs(attrs, version="v026", run="001").run == "001"

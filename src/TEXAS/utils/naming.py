@@ -87,6 +87,7 @@ __all__ = [
     "decode_compset",
     "describe_compset",
     "case_from_attrs",
+    "run_from_attrs",
     "parse_case",
     "fwd_relpath",
     "inv_relpath",
@@ -396,14 +397,45 @@ class CaseName:
         return replace(self, compset=self.compset[:3] + code)
 
 
+#: A date stamp in a legacy filename: ``..._cren3_041626_eiv.nc`` -> ``041626``.
+#: Six digits exactly, so the 3-digit ``no3_001`` scenario tokens never match.
+_RUN_STAMP_RE = re.compile(r"_(\d{6})(?=_|\.|$)")
+
+
+def run_from_attrs(attrs: Dict[str, Any]) -> Optional[str]:
+    """
+    Recover the run/member token from a posterior's ``filename`` attr.
+
+    ``save_posterior`` stamps the name it wrote onto the dataset, and that name
+    keeps the date suffix even when the file on disk was later renamed without
+    one. So a posterior saved as ``..._cren3.nc`` can still carry
+    ``filename = "..._cren3_041526_eiv.nc"`` and report run ``041526``.
+
+    This is what makes two refits of one configuration distinguishable after
+    the fact. Without it they both collapse onto run ``001`` and a migration
+    would overwrite one with the other.
+
+    Returns ``None`` when the attr is missing or carries no stamp.
+    """
+    stem = Path(str(attrs.get("filename", "") or "")).stem
+    found = _RUN_STAMP_RE.findall(stem)
+    return found[-1] if found else None
+
+
 def case_from_attrs(attrs: Dict[str, Any], *, version: Optional[str] = None,
-                    run: str = DEFAULT_RUN) -> CaseName:
+                    run: Optional[str] = None) -> CaseName:
     """
     Build a :class:`CaseName` from a posterior's ``.attrs``.
 
     Reads ``stan_model_name``, ``temptype``, ``proxy_name``,
     ``use_gdgt23ratio``, ``use_no3`` and ``no3_cutoff`` -- exactly the fields
     ``save_posterior`` already relies on.
+
+    When *run* is omitted the token is recovered from the ``filename`` attr via
+    :func:`run_from_attrs`, falling back to ``001``. Pass *run* explicitly to
+    override -- ``save_posterior`` does, because a genuinely new fit should be
+    stamped with its own suffix rather than inheriting the one that happened to
+    be sitting in the attrs of a posterior loaded earlier.
     """
     model = attrs.get("stan_model_name") or ""
     temptype = str(attrs.get("temptype", "") or "")
@@ -427,7 +459,7 @@ def case_from_attrs(attrs: Dict[str, Any], *, version: Optional[str] = None,
             attrs.get("no3_cutoff"),
         ),
         version=version or default_version(),
-        run=run,
+        run=run if run is not None else (run_from_attrs(attrs) or DEFAULT_RUN),
     )
 
 
