@@ -19,16 +19,27 @@ from config import FWD_CACHE_DIR
 DATA_CSV_NAME = "ds_gridded_screened_global_compilation_finalized.csv"
 DATA_SUBDIR = Path("data") / "spreadsheets"
 
-# Human-readable parameter labels (matches manuscript notation)
+# Human-readable parameter labels (matches manuscript notation).
+#
+# Checked against the parameters current posteriors actually contain. An entry
+# for a name nothing produces is dead, and a parameter with no entry falls back
+# to its raw variable name in the UI -- which is how sigma and both bounded-T
+# slopes came to be displayed untranslated: `Q_crtp` was removed from every
+# model on 2026-03-24, `sigma_scaledRI_crtp` was renamed `sigma_proxyObs_crtp`,
+# and the gamma pair arrived with bounded-T and was never added.
 PARAM_LABELS = {
-    "t0_crtp":             "T₀ — inflection point (°C)",
-    "k_crtp":              "k — slope",
-    "b_crtp":              "b — lower asymptote",
-    "v_crtp":              "ν — asymmetry",
-    "Q_crtp":              "Q — asymmetry",
-    "sigma_scaledRI_crtp": "σ — observation noise",
-    "beta_G23_crtp":       "β_{G₂/₃} — GDGT-2/3 coeff.",
-    "beta_NO3_crtp":       "β_{NO₃} — nitrate coeff.",
+    "t0_crtp":              "T₀ — inflection point (°C)",
+    "k_crtp":               "k — slope",
+    "b_crtp":               "b — lower asymptote",
+    "v_crtp":               "ν — asymmetry",
+    "sigma_proxyObs_crtp":  "σ — process noise",
+    # additive EIV: predictors enter the response, outside the logistic
+    "beta_G23_crtp":        "β_{G₂/₃} — GDGT-2/3 coeff. (Scaled RI)",
+    "beta_NO3_crtp":        "β_{NO₃} — nitrate coeff. (Scaled RI)",
+    # bounded-T: the same predictors enter T₀, inside the logistic, so these
+    # are in °C and are not comparable with the β pair above
+    "gamma_G23_crtp":       "γ_{G₂/₃} — GDGT-2/3 coeff. (°C)",
+    "gamma_NO3_crtp":       "γ_{NO₃} — nitrate coeff. (°C)",
 }
 
 DATATYPE_COLORS = {
@@ -51,10 +62,7 @@ def _find_project_root() -> Path:
     return Path(__file__).resolve().parents[2]   # fallback
 
 
-def _gen_logi_fixed_upper(x, t0, b, k, v, Q):
-    """Generalized logistic with upper asymptote fixed at 1."""
-    denom = 1.0 + Q * np.exp(-k * (x - t0))
-    return b + (1.0 - b) / np.power(np.maximum(denom, 1e-12), 1.0 / v)
+from TEXAS.models.logistics import generalized_logistic_fixed_upper
 
 
 @st.cache_data(show_spinner="Loading calibration dataset…")
@@ -80,7 +88,11 @@ def _load_posterior(nc_path: str) -> dict:
 def _compute_curves(nc_path: str, n_subsample: int = 800) -> dict:
     """Compute percentile envelopes of the fitted gen-logi curve."""
     post = _load_posterior(nc_path)
-    required = ["t0_crtp", "b_crtp", "k_crtp", "v_crtp", "Q_crtp"]
+    # Q was removed from every Stan model on 2026-03-24 (the curve now fixes
+    # Q=1, so the inflection point is T0). Requiring Q_crtp here meant the check
+    # failed for every posterior produced since, and the function returned {} --
+    # so the envelope silently stopped drawing, with no error to notice.
+    required = ["t0_crtp", "b_crtp", "k_crtp", "v_crtp"]
     if not all(k in post for k in required):
         return {}
 
@@ -88,14 +100,15 @@ def _compute_curves(nc_path: str, n_subsample: int = 800) -> dict:
     rng = np.random.default_rng(42)
     idx = rng.choice(n, size=min(n_subsample, n), replace=False)
 
+    # The package's own curve, rather than a copy of it. The copy is how this
+    # page drifted out of step with the model in the first place.
     curves = np.stack([
-        _gen_logi_fixed_upper(
+        generalized_logistic_fixed_upper(
             _T_RANGE,
-            post["t0_crtp"][j],
-            post["b_crtp"][j],
-            post["k_crtp"][j],
-            post["v_crtp"][j],
-            post["Q_crtp"][j],
+            t0=post["t0_crtp"][j],
+            b=post["b_crtp"][j],
+            k=post["k_crtp"][j],
+            v=post["v_crtp"][j],
         )
         for j in idx
     ])  # (n_subsample, len(_T_RANGE))
