@@ -443,11 +443,38 @@ def run_forward(temptypes=None, force=False, dry_run=False):
 
 
 # ── stage 2: inverse ───────────────────────────────────────────────────────
-def _fwd_name(variant, temptype, univ=False):
+def _legacy_fwd_name(variant, temptype, univ=False):
     if univ:
         return f"{UNIV_STEM}_{temptype}_{PROXY}"
     return (f"{VARIANTS[variant]['fwd']}_{temptype}_gdgt23ratio"
             f"_no3_{NO3_CUTOFF}_{PROXY}")
+
+
+def _fwd_name(variant, temptype, univ=False):
+    """
+    The case id of the posterior THIS RUN wrote, not a legacy name.
+
+    Legacy names cannot be used here. ``resolve_posterior_path`` tries an exact
+    flat ``<name>.nc`` first, and this cache still holds flat files with exactly
+    the names above -- so a legacy name resolves to the pre-refit posterior and
+    silently shadows every case directory the refit just created. The
+    reconstructions would then marginalise over the old calibration while the
+    manifest recorded 400/1000, which is the kind of error that survives review.
+
+    The manifest records the exact path of each forward fit, so the case id is
+    read back from there. Falls back to the legacy name only when this run has
+    no forward row -- which the caller checks for separately.
+    """
+    key = (f"fwd|univ|{temptype}|{PROXY}" if univ
+           else f"fwd|{variant}|{temptype}|{PROXY}")
+    df = read_manifest()
+    if not df.empty and "key" in df:
+        hit = df[(df["key"] == key) & (df.get("status", "ok") == "ok")]
+        if not hit.empty:
+            path = Path(str(hit.iloc[-1]["path"]))
+            if path.parent.name.startswith("tx."):
+                return path.parent.name          # the case id, member and all
+    return _legacy_fwd_name(variant, temptype, univ=univ)
 
 
 def _predict(site, temptype, proxy_vals, prior_mu, predictors, tag, key,
@@ -502,15 +529,27 @@ def run_inverse(temptypes=None, force=False, dry_run=False):
             log(f"    ... and {len(pending) - 12} more")
         return
 
-    # Fail before sampling, not an hour in.
-    missing = []
+    # Fail before sampling, not an hour in. Every reconstruction must
+    # marginalise over a posterior THIS run produced; a legacy name here would
+    # resolve to the flat pre-refit file and quietly use the wrong calibration.
+    missing, shadowed = [], []
     for tt in temptypes:
-        for name in [_fwd_name(None, tt, univ=True)] + [
-                _fwd_name(v, tt) for v in VARIANTS]:
+        for variant, univ in [(None, True)] + [(v, False) for v in VARIANTS]:
+            name = _fwd_name(variant, tt, univ=univ)
+            if not name.startswith("tx."):
+                shadowed.append(f"{variant or 'univ'}/{tt}")
+                continue
             try:
                 load_posterior(name)
             except Exception:
                 missing.append(name)
+    if shadowed:
+        raise RuntimeError(
+            "no forward posterior from this run is recorded for: "
+            + ", ".join(shadowed) +
+            "\nWithout a case id these reconstructions would fall back to a "
+            "legacy name, which resolves to the pre-refit flat file. Run the "
+            "forward stage first.")
     if missing:
         raise RuntimeError(
             "these forward posteriors are absent, so the reconstructions that "
@@ -634,6 +673,14 @@ def audit() -> dict:
           "; ".join(fails) + " (check the calibration-parameter R-hat before "
           "treating this as a problem — the EIV models' latents dominate)"
           if fails else "")
+
+    # Every reconstruction must name a case id this run produced. A legacy name
+    # here means it marginalised over the pre-refit flat file instead.
+    if not inv.empty and "model" in inv:
+        legacy = sorted({m for m in inv["model"].astype(str)
+                         if not m.startswith("tx.")})
+        check("reconstructions used this run's calibrations", not legacy,
+              f"{len(legacy)} used a legacy name: {legacy[:3]}")
 
     # Dates must not be back in filenames.
     import re
