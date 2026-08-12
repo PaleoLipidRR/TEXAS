@@ -31,7 +31,10 @@ from pathlib import Path
 
 import xarray as xr
 
-from TEXAS.utils.naming import case_from_attrs, fwd_leaf_candidates, fwd_relpath
+from dataclasses import replace
+
+from TEXAS.utils.naming import (case_from_attrs, fwd_leaf_candidates,
+                                fwd_relpath, parse_case)
 from TEXAS.utils.paths import POSTERIOR_CACHE_DIR
 
 
@@ -64,6 +67,19 @@ def plan(cache: Path) -> tuple[list[tuple[Path, Path]], dict[str, list[Path]]]:
             print(f"  !! no case id, skipped: {src.name} ({exc})")
             continue
 
+        # A file already inside a case directory carries its run/member in the
+        # path, and the directory is the authority on it. case_from_attrs()
+        # recovers the member only from a date stamp in the `filename` attr, so
+        # for a file saved as .002 it returns .001 -- and .001 and .002, which
+        # are two deliberately distinct members, both map onto .001 and look
+        # like a collision. That was harmless while every case was .001;
+        # save_posterior(run="auto") makes further members routine.
+        if src.parent.name.startswith("tx."):
+            try:
+                case = replace(case, run=parse_case(src.parent.name).run)
+            except Exception:
+                pass    # unparsable directory: fall back to the attrs
+
         dest = cache / fwd_relpath(case)
         by_dest[str(case)].append(src)
         if src.resolve() != dest.resolve():
@@ -92,9 +108,11 @@ def main() -> int:
 
     if collisions:
         print("REFUSING TO MIGRATE -- these case ids are claimed by more than one file.\n"
-              "Migrating would overwrite one posterior with another. This is Phase 5C in\n"
-              "RESUME.md: case_from_attrs() cannot recover filename_suffix, so refits\n"
-              "collapse onto run .001. Fix that first, or give the refits distinct runs.\n")
+              "Migrating would overwrite one posterior with another.\n\n"
+              "Two files legitimately differing by member (.001 vs .002) are NOT a\n"
+              "collision and are not reported here. A genuine one means two files claim\n"
+              "the same member: give one of them a distinct run, or delete the stale\n"
+              "copy, then re-run.\n")
         for case, srcs in sorted(collisions.items()):
             print(f"  {case}")
             for s in srcs:
@@ -119,7 +137,13 @@ def main() -> int:
         shutil.copy2(src, dest)
         try:
             with xr.open_dataset(dest) as ds:
-                assert str(case_from_attrs(dict(ds.attrs))) == dest.parent.name
+                # Compare on everything except the member, which lives in the
+                # path rather than the attrs. Asserting on the full id would
+                # reject every copy destined for .002 or beyond and then delete
+                # it, which is the worst possible outcome for a verify step.
+                got = case_from_attrs(dict(ds.attrs))
+                want = parse_case(dest.parent.name)
+                assert str(replace(got, run=want.run)) == str(want)
         except Exception as exc:
             dest.unlink(missing_ok=True)
             print(f"  FAILED to verify {dest.name}, copy removed: {exc}")

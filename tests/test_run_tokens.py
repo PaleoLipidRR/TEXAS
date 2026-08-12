@@ -126,3 +126,28 @@ def test_an_exact_case_id_still_pins_its_member(tmp_path):
     first = save_posterior(_posterior(), cache_dir=tmp_path)
     save_posterior(_posterior(), cache_dir=tmp_path)
     assert resolve_posterior_path(first.parent.name, tmp_path) == first
+
+
+def test_next_free_run_sees_old_token_spellings(tmp_path):
+    """
+    A directory written before the 2026-08-11 token rename holds the same
+    calibration under `ri3`/`none` where it is now `sri03`/`p0`. parse_case
+    preserves what it read, so comparing raw makes them look like different
+    cases -- and this function would hand out a member the old directory
+    already holds. Two files on one member of one calibration is exactly what
+    the member exists to prevent, and it blocks a flat publish where both would
+    claim the same leaf name.
+    """
+    (tmp_path / "tx.v026.GHPU.sst.ri3.none.001").mkdir()
+    assert next_free_run("tx.v026.GHPU.sst.sri03.p0.001", tmp_path) == "002"
+
+
+def test_flattened_leaves_are_unique_per_member(tmp_path):
+    """
+    Zenodo's namespace is flat, so the leaf alone must identify the file. Two
+    members of one calibration must therefore not share a leaf name.
+    """
+    a = save_posterior(_posterior(), cache_dir=tmp_path)
+    b = save_posterior(_posterior(), cache_dir=tmp_path)
+    assert a.name != b.name, f"both members flatten to {a.name}"
+    assert a.parent.name in a.name and b.parent.name in b.name

@@ -525,6 +525,27 @@ def next_free_run(case: Union["CaseName", str],
     if not indir.is_dir():
         return DEFAULT_RUN
 
+    def canonical(c: "CaseName") -> "CaseName":
+        """
+        Re-encode the tokens so old and current spellings compare equal.
+
+        ``parse_case`` deliberately preserves what it read, so a directory
+        written before 2026-08-11 keeps ``ri3``/``none`` where the same
+        calibration is now ``sri03``/``p0``. Comparing raw, those look like
+        different cases -- and this function would then hand out a member that
+        the old directory already holds, putting two files on one member of one
+        calibration. That is precisely what the member exists to prevent, and it
+        blocks a flat publish, where both would want the same leaf name.
+        """
+        try:
+            return replace(c,
+                           proxy=PROXY_CODES.get(c.proxy_full, c.proxy),
+                           predictors=encode_predictors(
+                               decode_predictors(c.predictors)))
+        except Exception:
+            return c
+
+    want = canonical(replace(case, run=DEFAULT_RUN))
     used = set()
     for d in indir.iterdir():
         if not d.is_dir():
@@ -534,7 +555,7 @@ def next_free_run(case: Union["CaseName", str],
         except Exception:
             continue
         # Same calibration identity, different member.
-        if replace(other, run=case.run) == case:
+        if canonical(replace(other, run=DEFAULT_RUN)) == want:
             used.add(other.run)
 
     n = 1
