@@ -183,6 +183,56 @@ SI03's NO3 scenarios are named rather than dated (`no3_modern`, `no3_01`,
 `no3_001`, `no3_10`). Stripping the date exposed that it was load-bearing: the
 modern-NO3 scenario's tag *was* the bare date.
 
+### Post-refit cleanup — FLATTEN the cache, then dedupe (decided 2026-08-12)
+
+Two decisions, both to run once the refit lands. Neither is safe mid-run: the
+job writes into this cache, and a restart under changed layout code would give
+one refit two layouts.
+
+**1. Flatten both caches.** Today they hold two layouts at once — forward 17
+flat + 18 in case directories, invT 35 flat + 46 in 6 directories — which is
+the confusion this fixes. The case directory earns nothing: the leaf already
+carries the whole case id, so it is self-identifying either way, and the
+directory only repeats it. Flat also matches Zenodo, halves the path (72 -> 41
+chars), and still groups a calibration with its reconstructions, because
+`...001.fwd.nc` and `...001.inv.<site>.nc` sort adjacent.
+
+Target:
+
+```
+data/cache/TEXAS_posterior_cache/tx.v026.GHEA.sst.sri03.G23-N10.001.fwd.nc
+data/cache/TEXAS_invT_posterior_cache/tx.v026.GHEA.sst.sri03.G23-N10.001.inv.U1482.ud.nc
+```
+
+Order of work:
+
+- [ ] `naming.fwd_relpath()` / `inv_relpath()` return a bare leaf, not
+      `<case>/<leaf>`
+- [ ] `resolve_posterior_path()` gains the flat-leaf candidate and KEEPS the
+      two directory forms, so nothing on disk has to move for reads to work
+- [ ] `next_free_run()` scans flat files as well as directories — it currently
+      only looks at directories, so after flattening it would restart at .001
+      and collide
+- [ ] `io._generate_filename_base()` drops its `<case>/` prefix
+- [ ] `download.py::_local_dest()` becomes the identity function
+- [ ] `migrate_cache_layout.py --flatten` to move what exists, dry-run first
+- [ ] tests: a flat leaf resolves, a directory leaf still resolves, members
+      still increment
+
+**2. Dedupe.** At least three known duplicate pairs, all from the old
+date-stamping:
+
+- `..._eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc` and its `_041626_eiv`
+  twin — identical statistics, so almost certainly identical draws
+- `tx.v026.GCDU.cul.ri3.none.001/fwd.nc` vs `...cul.sri03.p0.001/` — verified
+  byte-identical draws
+- `tx.v026.GHPU.sst.ri3.none.001/fwd.nc` vs `...sst.sri03.p0.001/` — draws
+  DIFFER; the new one is today's 400/1000 refit, so keep that and retire the
+  old, but decide deliberately rather than by script
+
+Compare draws, not file size, before deleting anything: two of the three pairs
+differ in bytes while agreeing in content.
+
 ### Still open when you get back
 
 - [ ] Run `audit` and read it. Fix anything NOT READY before quoting numbers.
