@@ -37,6 +37,13 @@ jobs:
       - name: Regenerate the call map
         run: python docs/_scripts/build_callmap.py
 
+      # The sweep output is gitignored, so CI rebuilds this page from the
+      # committed _static/sampler-budget.data.json snapshot. With neither
+      # present the script leaves the committed page alone rather than
+      # publishing an empty one.
+      - name: Regenerate the sampler-budget report
+        run: python docs/_scripts/build_sampler_budget.py
+
       - name: Build the book
         run: jupyter-book build docs/
 

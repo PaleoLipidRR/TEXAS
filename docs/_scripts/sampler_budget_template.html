@@ -1,0 +1,525 @@
+<title>TEXAS Sampler Budget</title>
+<style>
+  /* ── tokens: complete light palette on bare :root ────────────────────── */
+  :root {
+    --ground:      #f6f7f7;
+    --surface:     #ffffff;
+    --surface-2:   #eef1f1;
+    --line:        #d5dbdb;
+    --line-strong: #b3bdbd;
+    --text:        #161e20;
+    --text-2:      #4a5658;
+    --text-3:      #6f7c7e;
+    --accent:      #0f6e78;
+    --accent-soft: #d8ebed;
+    --accent-text: #0b5058;
+    --pass:        #2c6e49;
+    --pass-bg:     #dcece2;
+    --warn:        #96661a;
+    --warn-bg:     #f4e8d2;
+    --fail:        #9b3520;
+    --fail-bg:     #f3ddd7;
+    --mid:         #7a5b2e;
+    --mid-bg:      #f0e4cd;
+    --shadow:      0 1px 2px rgba(22,30,32,.06), 0 8px 24px rgba(22,30,32,.05);
+
+    --serif: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+    --sans:  system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono:  ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground:      #0e1416;
+      --surface:     #151d1f;
+      --surface-2:   #1c2629;
+      --line:        #2a3538;
+      --line-strong: #3d4b4e;
+      --text:        #e6ecec;
+      --text-2:      #a8b5b6;
+      --text-3:      #7f8d8f;
+      --accent:      #57b8c2;
+      --accent-soft: #163236;
+      --accent-text: #8ad3db;
+      --pass:        #6fbf8e;
+      --pass-bg:     #142b1f;
+      --warn:        #d9a441;
+      --warn-bg:     #2e2413;
+      --fail:        #e0785e;
+      --fail-bg:     #331a14;
+      --mid:         #c9964a;
+      --mid-bg:      #2a2115;
+      --shadow:      0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground:      #0e1416;
+    --surface:     #151d1f;
+    --surface-2:   #1c2629;
+    --line:        #2a3538;
+    --line-strong: #3d4b4e;
+    --text:        #e6ecec;
+    --text-2:      #a8b5b6;
+    --text-3:      #7f8d8f;
+    --accent:      #57b8c2;
+    --accent-soft: #163236;
+    --accent-text: #8ad3db;
+    --pass:        #6fbf8e;
+    --pass-bg:     #142b1f;
+    --warn:        #d9a441;
+    --warn-bg:     #2e2413;
+    --fail:        #e0785e;
+    --fail-bg:     #331a14;
+    --mid:         #c9964a;
+    --mid-bg:      #2a2115;
+    --shadow:      0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.3);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--ground);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.62;
+    margin: 0;
+    padding: 0 1.25rem 6rem;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 60rem; margin: 0 auto; }
+  .prose { max-width: 40rem; }
+
+  h1, h2, h3 { font-family: var(--serif); font-weight: 600; text-wrap: balance; line-height: 1.2; }
+  h1 { font-size: clamp(2.1rem, 5vw, 3rem); letter-spacing: -.015em; margin: 0 0 .4rem; }
+  h2 { font-size: 1.6rem; margin: 0 0 .3rem; }
+  h3 { font-size: 1.12rem; margin: 0 0 .35rem; }
+  p  { margin: 0 0 1rem; }
+  a  { color: var(--accent-text); }
+  strong { font-weight: 650; }
+
+  .eyebrow {
+    font-family: var(--mono); font-size: .72rem; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--text-3); margin: 0 0 .9rem;
+  }
+  code, .num, .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  code {
+    font-size: .87em; background: var(--surface-2); color: var(--accent-text);
+    padding: .1em .35em; border-radius: 3px;
+  }
+
+  header.masthead {
+    padding: 4rem 0 2rem; border-bottom: 2px solid var(--line-strong); margin-bottom: 2.5rem;
+  }
+  .lede { font-size: 1.16rem; color: var(--text-2); max-width: 42rem; margin: 0; }
+
+  .status {
+    display: flex; flex-wrap: wrap; gap: 1rem 2rem; margin-top: 1.8rem;
+    padding-top: 1.4rem; border-top: 1px solid var(--line);
+  }
+  .status div { display: flex; flex-direction: column; }
+  .status dt { font-family: var(--mono); font-size: .68rem; letter-spacing: .12em;
+               text-transform: uppercase; color: var(--text-3); }
+  .status dd { margin: 0; font-family: var(--mono); font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+
+  section { margin: 3.5rem 0 0; }
+  section > .prose + * { margin-top: 1.6rem; }
+
+  /* gates */
+  .gates { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(15.5rem, 1fr)); margin-top: 1.6rem; }
+  .gate {
+    background: var(--surface); border: 1px solid var(--line);
+    border-top: 3px solid var(--accent); border-radius: 2px;
+    padding: 1.15rem 1.2rem 1.3rem; box-shadow: var(--shadow);
+    display: flex; flex-direction: column; gap: .55rem;
+  }
+  .gate .thr {
+    font-family: var(--mono); font-size: 1.25rem; color: var(--accent-text);
+    font-variant-numeric: tabular-nums;
+  }
+  .gate p { margin: 0; font-size: .92rem; color: var(--text-2); }
+  .gate .catch { font-size: .86rem; color: var(--text-3); border-top: 1px dashed var(--line);
+                 padding-top: .55rem; margin-top: .1rem; }
+
+  /* definition rows */
+  .defs { border-top: 1px solid var(--line); margin-top: 1.4rem; }
+  .def { display: grid; grid-template-columns: 12rem 1fr; gap: 0 1.6rem;
+         padding: .95rem 0; border-bottom: 1px solid var(--line); align-items: start; }
+  .def > .k { font-family: var(--mono); font-size: .88rem; color: var(--accent-text); word-break: break-word; }
+  .def > .v { color: var(--text-2); font-size: .95rem; }
+  .def > .v em { color: var(--text); font-style: normal; font-weight: 600; }
+  @media (max-width: 34rem) { .def { grid-template-columns: 1fr; gap: .2rem; } }
+
+  /* tables */
+  .scroll { overflow-x: auto; margin-top: 1.4rem; border: 1px solid var(--line);
+            border-radius: 2px; background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; font-family: var(--mono);
+          font-size: .84rem; font-variant-numeric: tabular-nums; }
+  caption { caption-side: top; text-align: left; font-family: var(--sans); font-size: .88rem;
+            color: var(--text-3); padding: .8rem 1rem; border-bottom: 1px solid var(--line); }
+  th, td { padding: .5rem .8rem; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase;
+       color: var(--text-3); font-weight: 600; background: var(--surface-2); }
+  th:first-child, td:first-child { text-align: left; }
+  tbody tr:last-child td { border-bottom: none; }
+  tr.best td { background: var(--accent-soft); font-weight: 700; }
+  tr.ref td { color: var(--text-3); }
+
+  .chip { display: inline-block; padding: .08em .5em; border-radius: 2px;
+          font-size: .78rem; font-weight: 650;
+          background: var(--surface-2); color: var(--text-3); }
+  .chip.pass { background: var(--pass-bg); color: var(--pass); }
+  .chip.warn { background: var(--warn-bg); color: var(--warn); }
+  .chip.fail { background: var(--fail-bg); color: var(--fail); }
+
+  /* grid heatmap */
+  .heat td.c { text-align: center; font-weight: 650; }
+  .c0 { background: var(--pass-bg); color: var(--pass); }
+  .c1 { background: var(--warn-bg); color: var(--warn); }
+  .c2 { background: var(--mid-bg);  color: var(--mid); }
+  .c3 { background: var(--fail-bg); color: var(--fail); }
+
+  .triple { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); margin-top: 1.4rem; }
+  .triple .scroll { margin-top: 0; }
+
+  /* callouts */
+  .finding {
+    background: var(--surface); border: 1px solid var(--line);
+    border-left: 4px solid var(--accent); padding: 1.3rem 1.4rem; margin-top: 1.6rem;
+    border-radius: 2px; box-shadow: var(--shadow);
+  }
+  .finding h3 { margin-top: 0; }
+  .finding p:last-child { margin-bottom: 0; }
+  .caution { border-left-color: var(--warn); }
+  .corrected { border-left-color: var(--fail); }
+
+  .was {
+    font-size: .9rem; color: var(--text-3); border-top: 1px dashed var(--line);
+    margin-top: 1rem; padding-top: .8rem;
+  }
+  .was strong { color: var(--fail); font-weight: 650; }
+
+  ul.plain { padding-left: 1.15rem; color: var(--text-2); }
+  ul.plain li { margin-bottom: .5rem; }
+  ul.plain li::marker { color: var(--accent); }
+  ul.plain li.done::marker { content: "✓  "; color: var(--pass); }
+
+  footer { margin-top: 4.5rem; padding-top: 1.4rem; border-top: 1px solid var(--line);
+           color: var(--text-3); font-size: .85rem; }
+</style>
+
+<div class="wrap">
+
+<header class="masthead">
+  <p class="eyebrow">SI Code 2a &middot; Parts 1&ndash;3</p>
+  <h1>How many iterations does the calibration need?</h1>
+  <p class="lede">Four gates decide whether a sampler budget is adequate. Three of them
+  ask whether the chains agree with each other; only one asks whether they found the
+  right answer. The forward grid is now complete across all three models &mdash; and the
+  inverse model turns out to need a different question entirely.</p>
+  <!--__STATUS__-->
+</header>
+
+<section>
+  <div class="prose">
+    <h2>The four gates</h2>
+    <p>A budget passes only if all four hold at once. They are deliberately different in
+    kind &mdash; the first three are <em>self-consistency</em> checks that a broken sampler can
+    still pass, and the fourth is the one that catches it.</p>
+  </div>
+
+  <div class="gates">
+    <div class="gate">
+      <h3>Split R&#770;</h3>
+      <div class="thr">&lt; 1.01</div>
+      <p>Compares variance <em>between</em> chains against variance <em>within</em> them. At 1.00 the
+      chains are exploring one common distribution; above 1.01 they are still describing
+      different places.</p>
+      <p class="catch">Catches: warmup too short for the sampler to adapt. Misses: four chains
+      that are all confidently wrong in the same way.</p>
+    </div>
+    <div class="gate">
+      <h3>Bulk ESS</h3>
+      <div class="thr">&ge; 400</div>
+      <p>How many <em>independent</em> draws the correlated chain is worth. 400 across 4 chains is
+      100 each &mdash; the usual floor for trusting a posterior mean.</p>
+      <p class="catch">Catches: chains that move but crawl. Misses: bias &mdash; a stuck sampler
+      can report high ESS for the wrong distribution.</p>
+    </div>
+    <div class="gate">
+      <h3>Divergent transitions</h3>
+      <div class="thr">= 0</div>
+      <p>The integrator failing on curvature it cannot resolve. Divergences are not noise:
+      they mark regions the sampler <em>could not enter</em>, so the posterior is biased away
+      from them.</p>
+      <p class="catch">Catches: geometry the step size cannot handle. Any non-zero count
+      invalidates the run regardless of R&#770;.</p>
+    </div>
+    <div class="gate">
+      <h3>Drift vs reference</h3>
+      <div class="thr">|z| &le; 0.1</div>
+      <p>Distance from a long reference run&rsquo;s posterior mean, in units of that
+      reference&rsquo;s SD. The only gate that asks whether this budget reproduces the answer
+      rather than merely agreeing with itself.</p>
+      <p class="catch">Catches: everything above passing on a posterior that is quietly
+      shifted. This is the gate that makes the other three meaningful.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="prose">
+    <h2>What you are turning, and what you are watching</h2>
+    <p>Two different vocabularies get mixed together in the output. These are the knobs:</p>
+  </div>
+  <div class="defs">
+    <div class="def"><div class="k">iter_warmup</div><div class="v">
+      <em>Adaptation, not sampling.</em> Stan uses these iterations to tune step size and the
+      mass matrix, then throws the draws away. This is the setting that determines whether
+      the sampler can navigate the posterior at all.</div></div>
+    <div class="def"><div class="k">iter_sampling</div><div class="v">
+      Draws kept per chain, after warmup. Buys precision (ESS). Whether it buys anything
+      else depends on the model &mdash; see Finding&nbsp;1, which is narrower than it first
+      appeared.</div></div>
+    <div class="def"><div class="k">chains</div><div class="v">
+      Independent runs from different starting points. Held at <code>4</code> throughout, because
+      R&#770; is a between-chain statistic &mdash; a budget adequate at 4 chains says nothing about
+      the same budget at 2.</div></div>
+    <div class="def"><div class="k">multiplier</div><div class="v">
+      <code>iter_sampling / iter_warmup</code>. A convenience for laying the grid out, not a
+      quantity Stan knows about.</div></div>
+    <div class="def"><div class="k">M</div><div class="v">
+      Calibration draws marginalised per observation in the <em>inverse</em> model only. Not an
+      MCMC setting at all &mdash; it sets Monte Carlo error in the likelihood itself
+      (~5.8% at 300, ~4.5% at 500), which no number of iterations reduces.</div></div>
+  </div>
+
+  <div class="prose" style="margin-top:2rem">
+    <p>And these are the calibration parameters being watched. R&#770; and ESS are reported
+    per parameter; the gates use the worst one.</p>
+  </div>
+  <div class="defs">
+    <div class="def"><div class="k">t0_crtp</div><div class="v">
+      Inflection point of the logistic &mdash; the temperature at which Ring Index responds most
+      steeply. <em>&deg;C.</em></div></div>
+    <div class="def"><div class="k">k_crtp</div><div class="v">
+      Slope at the inflection. Sets proxy sensitivity, so it propagates directly into
+      reconstructed-temperature uncertainty.</div></div>
+    <div class="def"><div class="k">b_crtp</div><div class="v">
+      Lower asymptote &mdash; the Ring Index floor as temperature falls.</div></div>
+    <div class="def"><div class="k">v_crtp</div><div class="v">
+      Shape parameter controlling asymmetry of the generalized logistic. Weakly identified
+      by construction, and the slowest to settle in the univariate fit.</div></div>
+    <div class="def"><div class="k">sigma_proxyObs_crtp</div><div class="v">
+      <em>Process</em> noise only &mdash; oceanographic scatter and bioturbation. Analytical
+      measurement error enters separately in quadrature, so this is not a residual SD.</div></div>
+    <div class="def"><div class="k">beta_G23_crtp<br>beta_NO3_crtp</div><div class="v">
+      Non-thermal slopes in the <em>parent</em> EIV model, added to the response outside the
+      logistic. Units of Scaled RI.</div></div>
+    <div class="def"><div class="k">gamma_G23_crtp<br>gamma_NO3_crtp</div><div class="v">
+      The same predictors in <em>bounded&#8209;T</em>, applied to the inflection point inside the
+      logistic instead. Units of &deg;C. Expected to be the harder geometry, since they
+      trade off directly against <code>t0</code> &mdash; an expectation the grid did not support.</div></div>
+  </div>
+</section>
+
+<section>
+  <div class="prose">
+    <h2>Three models, three budgets</h2>
+    <p>All 81 cells complete, N&nbsp;=&nbsp;1513 coretop sites, 4 chains, one seed per cell.
+    Each recommendation is the cheapest cell clearing all four gates, measured against
+    the 1000/1000 incumbent.</p>
+  </div>
+
+  <!--__RECS__-->
+
+  <div class="finding corrected">
+    <h3>Bounded&#8209;T is the <em>easiest</em> of the three, not the hardest</h3>
+    <p>It converges at <strong>warmup 300</strong> where the parent EIV model needs 400, and it does
+    so in <strong>79&nbsp;s against the parent&rsquo;s 141&nbsp;s</strong>. The reasoning for giving it
+    its own grid is unaffected and still stands &mdash; a budget does not transfer between
+    models, which is the entire premise of this exercise. Only the guess about which
+    direction the difference would run was wrong.</p>
+    <p class="was"><strong>Superseded:</strong> the earlier draft of this page, and the notebook
+    prose it was written from, predicted bounded&#8209;T would set the binding budget because
+    <code>gamma</code> enters inside the logistic and goes near-degenerate with <code>t0</code>. Both have
+    been corrected in the repository rather than quietly deleted &mdash; the expectation is
+    why the third grid was run at all.</p>
+  </div>
+</section>
+
+<section>
+  <div class="prose">
+    <h2>Finding 1 &mdash; warmup binds; whether sampling helps depends on the model</h2>
+    <p>Each cell holds the number of parameters left with R&#770;&nbsp;&gt;&nbsp;1.01. The
+    univariate panel is the one that produced the original headline: read across a row and
+    sampling three times longer barely moves it, read down and crossing warmup&nbsp;400
+    collapses it to zero.</p>
+    <p>The two EIV panels do not behave that way. Both axes matter there, because what is
+    being counted is dominated by 3026 per-site latent variables &mdash; and those <em>do</em>
+    respond to more draws.</p>
+  </div>
+
+  <!--__HEATMAPS__-->
+
+  <div class="prose" style="margin-top:1.4rem">
+    <p>The counts are not comparable <em>across</em> panels &mdash; the univariate model has about
+    seven parameters and the EIV models about 3040, so a 7 and a 754 describe very
+    different failures. Within a panel the gradient is the message.</p>
+    <p>The practical advice survives, with its scope narrowed: <strong>if a fit will not
+    converge, raise warmup first.</strong> Adding draws to an unadapted chain buys ESS on a
+    posterior that has not settled, which makes a bad answer look more precise. For the
+    EIV models, raising both is what actually clears the latent variables.</p>
+    <p>Two univariate cells still break the pattern: <code>500&nbsp;/&nbsp;500</code> reports 7 while its
+    neighbours report 0, and <code>300</code> stays bad where <code>200&nbsp;/&nbsp;500</code> is nearly clean.
+    Each cell is a <strong>single seed</strong>, so these are almost certainly noise &mdash; see the
+    caveats.</p>
+  </div>
+</section>
+
+<section>
+  <div class="prose">
+    <h2>Finding 2 &mdash; the strict gate works, but it is gating on nuisance parameters</h2>
+    <p>The EIV models add a latent true value per site for both G<sub>2/3</sub> and
+    NO<sub>3</sub><sup>&minus;</sup> &mdash; 3026 extra parameters, each informed by roughly one
+    observation. They dominate the maximum, and they are not the calibration.</p>
+    <p>How completely they dominate it is worth stating precisely: across the full grid,
+    the worst-R&#770; parameter is a per-site latent in <strong>27 of 27 EIV cells and 27 of 27
+    bounded&#8209;T cells</strong>. Not once, in 54 fits, is the slowest parameter one the
+    calibration actually uses.</p>
+  </div>
+
+  <!--__GATING__-->
+
+  <div class="finding corrected">
+    <h3>A choice to justify, not a bug to fix</h3>
+    <p>Core-gating is roughly <strong>2.2&times; cheaper</strong> than strict gating for both EIV
+    models, and it is defensible: the parameters it drops are per-site nuisance variables
+    that never enter a reconstruction. But it is a choice that has to be argued for in the
+    SI, because the strict gate does work &mdash; it is simply paying to converge 3026
+    variables nobody reads.</p>
+    <p class="was"><strong>Superseded:</strong> at 6 of 27 EIV cells this page said &ldquo;the criterion
+    as written will reject every EIV budget&rdquo; and called it a false negative requiring a
+    <code>max_rhat_core</code> gate before any EIV recommendation could be quoted. With all 27
+    cells in, <strong>7 pass the strict gate</strong>. The observation about which parameters are
+    slowest was right; the conclusion drawn from it was too strong, because the failing
+    cells were all at low warmup.</p>
+  </div>
+</section>
+
+<section>
+  <div class="prose">
+    <h2>The same question, outside the grid</h2>
+    <p>The proxy-convention comparison (Part 2) refits the whole calibration under three
+    crenarchaeol ring conventions at a deliberately generous 1000/1000. Three of those
+    posteriors are flagged as failing &mdash; and every one fails on a latent, exactly as the
+    grid predicts.</p>
+  </div>
+
+  <!--__PART2__-->
+
+  <div class="prose" style="margin-top:1.4rem">
+    <p>The calibration behind the main-text figures carries a headline R&#770; of
+    <strong>1.01023</strong> &mdash; and a calibration-parameter R&#770; of <strong>1.00001</strong>. Every
+    parameter that reaches a reconstruction is converged with room to spare.</p>
+  </div>
+</section>
+
+<section>
+  <div class="prose">
+    <h2>Part 3 &mdash; the inverse model asks a different question</h2>
+    <p>It is tempting to carry the forward budget across to the reconstructions. The Stan
+    source says not to. The forward EIV model is hierarchical with ~3000 correlated
+    latent variables, which is why its warmup binds. The inverse model declares one
+    parameter block:</p>
+  </div>
+
+  <div class="scroll" style="padding:1rem 1.2rem">
+    <code style="background:none;padding:0;font-size:.9rem">parameters { vector[N] t_est; }&nbsp;&nbsp;// the ONLY parameter in this model</code>
+  </div>
+
+  <div class="prose" style="margin-top:1.4rem">
+    <p>The calibration draws arrive as <em>data</em>, not parameters, and the target is a sum of
+    per-sample terms with no coupling between samples. The posterior therefore factorises
+    into N independent one-dimensional posteriors, where a diagonal metric is exact rather
+    than approximate &mdash; the easiest geometry HMC ever sees.</p>
+    <p>So N is a <em>cost</em> knob, not a difficulty knob, and what binds instead is
+    <strong>M</strong> and <strong>saturation</strong>: where Ring Index approaches the upper asymptote the
+    likelihood goes flat in temperature and <code>t_est</code> is prior-dominated. Neither is fixed
+    by more iterations. Part 3 sweeps 4 budgets &times; M&nbsp;&isin;&nbsp;{300,&nbsp;500}
+    against 200 coretop sites spread over the proxy <em>range</em> rather than sampled at
+    random &mdash; the near-saturated warm end is 15.6% of the compilation and 30% of this
+    subset, and it is where the paleo sites live.</p>
+    <p>Because coretop temperature is known, this half can be scored on accuracy as well as
+    convergence: bias, RMSE, and 68% / 90% interval coverage against measured SST. The
+    sites trained the calibration, so those numbers are a tuning diagnostic and never a
+    validation statistic.</p>
+  </div>
+
+  <div class="finding caution">
+    <h3>Two defects the first Part 3 run exposed</h3>
+    <p><strong>No inverse run has ever recorded its convergence.</strong> The invT path calls
+    <code>sample_from_model</code>, which returned draws without ever summarising the fit &mdash; so
+    all 35 cached reconstructions carry no R&#770;, no ESS, no divergence count. The loss is
+    irreversible after the fact: the fit object goes out of scope, and the draws are
+    reduced to quantiles before saving. Fixed, with tests.</p>
+    <p><strong>The drift gate was set below the noise floor.</strong> Worst-site drift came in at
+    0.24&ndash;0.45&nbsp;&deg;C and did <em>not</em> fall as the budget rose &mdash; 1000/1000 at M=300
+    drifted further from the reference than 300/1000 at M=500 did. That is Monte Carlo
+    jitter in the single reference realisation, not a budget effect, and a 0.1&nbsp;&deg;C
+    threshold under it can never be met at any cost. The sweep now runs a seed replicate
+    of the reference configuration and gates on whichever is larger, the threshold or the
+    measured seed-to-seed drift.</p>
+  </div>
+
+  <!--__PART3__-->
+</section>
+
+<section>
+  <div class="prose">
+    <h2>Caveats worth stating in the SI</h2>
+    <ul class="plain">
+      <li><strong>One seed per cell in the forward grid.</strong> Every number there is a single
+      draw from a noisy process, and the two univariate anomalies are the visible evidence.
+      Part 3 now carries a seed replicate; the forward grid still does not, and a defensible
+      published recommendation wants 3&ndash;5 seeds near the threshold.</li>
+      <li><strong>E&#8209;BFMI is not being reported.</strong> This cmdstanpy build does not expose it,
+      so the diagnostic returns <code>-1</code> / <code>UNKNOWN</code> for every run. It is therefore
+      <em>not</em> one of the four gates, and no claim about energy-transition efficiency
+      should be made from this sweep.</li>
+      <li><strong>Iteration counts transfer between machines; seconds do not.</strong> Every
+      speed-up here is specific to this 8-core box, running nothing else alongside.</li>
+      <li><strong>Thresholds are conventions, not laws.</strong> R&#770;&nbsp;&lt;&nbsp;1.01 and
+      ESS&nbsp;&ge;&nbsp;400 follow Vehtari et al. (2021); the <code>|z|&nbsp;&le;&nbsp;0.1</code> accuracy
+      bound and the 0.1&nbsp;&deg;C drift bound are this study&rsquo;s own choices and should be
+      stated as such.</li>
+      <li><strong>Part 2 reused the SRI03 calibration rather than refitting it.</strong> The
+      resume logic found it cached, so the SRI03 column of the proxy comparison comes from
+      the earlier run, not from this sweep.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="prose">
+    <h2>What happened next</h2>
+    <p>Every item this page listed as pending has now been resolved:</p>
+    <ul class="plain">
+      <li class="done">The remaining EIV cells finished, including the 1000/4000 reference
+      the drift gate needs.</li>
+      <li class="done">Bounded&#8209;T ran as a third model &mdash; and came back easier than the
+      parent, not harder.</li>
+      <li class="done">The EIV gate question was settled empirically rather than by
+      switching the gate: strict gating works, core gating is 2.2&times; cheaper, and the
+      choice between them is now an SI argument with numbers behind it.</li>
+      <li class="done">A seed repeat was added &mdash; to Part 3, where it turned out to be
+      load-bearing rather than a refinement.</li>
+    </ul>
+    <p>Still open: the corrected Part 3 run, the under-coverage question, and a seed-repeat
+    pass on the forward cells nearest the threshold.</p>
+  </div>
+</section>
+
+<footer>
+  <!--__FOOTER__-->
+</footer>
+
+</div>

@@ -20,6 +20,7 @@ parts:
     chapters:
       - file: PSM
       - file: model_validation
+      - file: sampler_budget
       - file: stan_models_explanation_v2
       - file: marginalization_explainer
       - file: why_plugin_p50_differs
