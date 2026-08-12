@@ -69,15 +69,17 @@ def test_filename_tag_is_honoured(tmp_path):
     assert plain.name != tagged.name
 
 
-def test_case_layout_is_used_when_provenance_is_present(tmp_path):
+def test_the_leaf_names_its_parent_calibration(tmp_path):
     """
-    With a fwd_case attr the reconstruction belongs inside its calibration's
-    case directory. The old public path could not do this at all.
+    With a fwd_case attr the reconstruction is named for the calibration it
+    marginalised over -- beside it, not inside it. The case directory was
+    dropped on 2026-08-12; the leaf already carried the whole case id, so the
+    directory only repeated it. The old public path could do neither.
     """
-    case = "tx.v026.GHEA.sst.sri03.G23-N10.001"
+    case = "tx.GHEA.sst.sri03.G23-N10"
     path = save_invT_posterior(_posterior(fwd_case=case), cache_dir=tmp_path)
-    assert path.parent.name == case, f"expected case directory, got {path}"
-    assert path.name.startswith(case)
+    assert path.parent == tmp_path, f"writes should be flat, got {path}"
+    assert path.name.startswith(f"{case}.inv."), path.name
 
 
 def test_saved_posterior_records_its_own_filename(tmp_path):

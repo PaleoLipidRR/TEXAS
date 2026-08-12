@@ -59,13 +59,11 @@ def save_posterior(
         where it survives a rename and does not have to be parsed back out of
         a path.  Prefer ``run=`` for an explicit member.
     run : str or int, optional
-        Run/member token under the case layout.  ``"auto"`` (default) takes the
-        next free member for this calibration, so re-running a configuration
-        writes ``.002`` beside ``.001`` instead of overwriting it.  Pass an
-        explicit value to pin one — an explicit *run* wins over
-        *filename_suffix* for the case path.  With ``overwrite=False`` and
-        ``run="auto"``, a ``FileExistsError`` is raised when the calibration
-        already has any member, rather than quietly adding another.
+        Optional run/member token under the case layout.  ``"auto"`` (default)
+        writes **no** member, so a configuration has one canonical path and a
+        re-run replaces it; pass a value only to keep a run deliberately apart.
+        An explicit *run* wins over *filename_suffix* for the case path.  With
+        ``overwrite=False`` an existing file raises ``FileExistsError``.
     layout : {"auto", "case", "legacy"}
         Where to write.  ``"case"`` uses the CESM-style case directory
         (``tx.v026.GHEB.sst.ri3.G23-N10/fwd.nc``); ``"legacy"`` uses the
@@ -109,40 +107,19 @@ def save_posterior(
     # name whenever a case id cannot be derived (e.g. a model this naming
     # scheme does not know), so saving can never fail on naming alone.
     outpath = legacy_path
-    taken = None            # set when overwrite=False and a member already exists
     if layout in ("case", "auto"):
         try:
-            from dataclasses import replace
-            from ..utils.naming import (case_from_attrs, fwd_relpath,
-                                        next_free_run, DEFAULT_RUN)
-            # The run/member token is what keeps a refit from overwriting the
-            # run it repeats. It used to be a date lifted from filename_suffix;
-            # dates are now recorded in the run_timestamp attr instead, and the
-            # token counts. "auto" takes the next free member, so re-running a
-            # configuration adds .002 beside .001 rather than replacing it.
+            from ..utils.naming import case_from_attrs, fwd_relpath
+            # One canonical path per configuration. There is no member counter:
+            # a re-run overwrites, and callers that do not want to re-run check
+            # the cache first (load_posterior, or a resume manifest). The
+            # auto-incrementing member this replaced put ".001" next to "N10",
+            # where only one of the two is a number, and made overwrite=False
+            # vacuous because a fresh member never collides.
             explicit = filename_suffix.strip("_")
-            if run == "auto":
-                case = case_from_attrs(posterior.attrs,
-                                       run=explicit or DEFAULT_RUN)
-                if not explicit:
-                    nxt = next_free_run(case, outdir)
-                    # overwrite=False must still mean something. Auto-increment
-                    # never lands on an existing path, so the exists() guard
-                    # below can never fire -- a caller protecting an existing
-                    # posterior would instead get a silent second copy, and a
-                    # re-executed notebook cell would duplicate a multi-hundred-
-                    # MB file every run.
-                    #
-                    # Recorded rather than raised here: the except below is a
-                    # catch-all implementing the legacy fallback, so raising
-                    # inside the try would be swallowed and turned into a
-                    # warning plus a legacy-named write -- the opposite of
-                    # refusing.
-                    if not overwrite and nxt != DEFAULT_RUN:
-                        taken = outdir / str(replace(case, run=DEFAULT_RUN))
-                    case = replace(case, run=nxt)
-            else:
-                case = case_from_attrs(posterior.attrs, run=str(run))
+            case = case_from_attrs(
+                posterior.attrs,
+                run=(str(run) if run != "auto" else explicit) or None)
             outpath = outdir / fwd_relpath(case)
             outpath.parent.mkdir(exist_ok=True, parents=True)
             posterior.attrs["case_id"] = str(case)
@@ -158,10 +135,6 @@ def save_posterior(
             )
             outpath = legacy_path
 
-    if taken is not None:
-        raise FileExistsError(
-            f"{taken} already exists (and possibly later members); "
-            f"pass overwrite=True to add another member, or run= to pin one.")
     if outpath.exists() and not overwrite:
         raise FileExistsError(f"{outpath} exists and overwrite=False")
 
@@ -398,7 +371,8 @@ def _generate_filename_base(
                 # NOTE: this still duplicates naming.inv_relpath() rather than
                 # calling it (it omits the run number). Consolidating the two is
                 # Phase 5A in RESUME.md; do not add a third spelling here.
-                return f"{fwd_case}/{fwd_case}.inv.{site_name}.{'-'.join(parts)}"
+                # Flat, matching the forward side and Zenodo.
+                return f"{fwd_case}.inv.{site_name}.{'-'.join(parts)}"
         except Exception:
             pass  # naming is a convenience; never block a save on it
 

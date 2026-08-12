@@ -105,6 +105,7 @@ def test_no3_without_cutoff_is_an_error():
 def test_case_round_trips_through_text():
     case = CaseName(compset="GHEB", temptype="sst", proxy="sri03",
                     predictors="G23-N10", version="v026", run="001")
+    # Explicitly set, so both render: a parsed older id round-trips losslessly.
     assert str(case) == "tx.v026.GHEB.sst.sri03.G23-N10.001"
     assert str(parse_case(str(case))) == str(case)
 
@@ -117,7 +118,8 @@ def test_run_position_defaults_and_separates_refits():
 
 
 def test_parse_case_tolerates_a_missing_run():
-    assert parse_case("tx.v026.GHEB.sst.sri03.G23-N10").run == "001"
+    # Nothing is synthesised: an absent member reports as absent.
+    assert parse_case("tx.v026.GHEB.sst.sri03.G23-N10").run == ""
 
 
 def test_parse_case_rejects_junk():
@@ -144,7 +146,10 @@ def test_case_from_attrs():
         "use_gdgt23ratio": 1, "use_no3": 1, "no3_cutoff": 1.0,
     }
     case = case_from_attrs(attrs, version="v026")
-    assert str(case) == "tx.v026.GHEB.sst.sri03.G23-N10.001"
+    # The member is not synthesised any more; the version only appears because
+    # it was passed. A case built from attrs alone is "tx.GHEB.sst.sri03.G23-N10".
+    assert str(case) == "tx.v026.GHEB.sst.sri03.G23-N10"
+    assert str(case_from_attrs(attrs)) == "tx.GHEB.sst.sri03.G23-N10"
     assert case.temptype_full == "SST"
     assert case.proxy_full == "scaledRI_cren3"
 
@@ -172,9 +177,12 @@ def test_additive_and_boundedT_do_not_collide():
 # --- paths ----------------------------------------------------------------
 
 def test_fwd_relpath():
+    # Flat since 2026-08-12: the leaf already carries the case, so the
+    # directory only repeated it.
     assert fwd_relpath("tx.v026.GHEB.sst.sri03.G23-N10.001").as_posix() == \
-        ("tx.v026.GHEB.sst.sri03.G23-N10.001/"
-         "tx.v026.GHEB.sst.sri03.G23-N10.001.fwd.nc")
+        "tx.v026.GHEB.sst.sri03.G23-N10.001.fwd.nc"
+    assert fwd_relpath("tx.GHEB.sst.sri03.G23-N10").as_posix() == \
+        "tx.GHEB.sst.sri03.G23-N10.fwd.nc"
 
 
 def test_fwd_leaf_is_self_describing_when_detached():
@@ -198,15 +206,18 @@ def test_repeating_the_case_costs_path_but_buys_a_portable_leaf():
     """
     case = "tx.v026.GHEB.sst.sri03.G23-N10.001"
     full = str(fwd_relpath(case))
-    assert len(full) > len(f"{case}/fwd.nc"), "be honest: the path does grow"
+    # The case directory was dropped on 2026-08-12, so the path no longer
+    # pays for the repetition -- the leaf IS the path.
+    assert len(full) == len(f"{case}.fwd.nc")
     assert len(fwd_relpath(case).name) == len(f"{case}.fwd.nc")
 
 
 def test_inv_relpath():
-    p = inv_relpath("tx.v026.GHEB.sst.sri03.G23-N10.001", "U1482",
-                    scenario="mod", run=1)
-    assert p.as_posix() == ("tx.v026.GHEB.sst.sri03.G23-N10.001/"
-                            "tx.v026.GHEB.sst.sri03.G23-N10.001.inv.U1482.ud-mod-001.nc")
+    p = inv_relpath("tx.GHEB.sst.sri03.G23-N10", "U1482", scenario="mod")
+    assert p.as_posix() == "tx.GHEB.sst.sri03.G23-N10.inv.U1482.ud-mod.nc"
+    # A member is opt-in, not synthesised.
+    q = inv_relpath("tx.GHEB.sst.sri03.G23-N10", "U1482", scenario="mod", run=1)
+    assert q.as_posix() == "tx.GHEB.sst.sri03.G23-N10.inv.U1482.ud-mod-001.nc"
 
 
 def test_inv_relpath_slugs_a_site_with_spaces():
@@ -294,9 +305,10 @@ def fwd_posterior():
 def test_save_posterior_uses_the_case_directory(tmp_path, fwd_posterior):
     from TEXAS.stan.io import save_posterior
     p = save_posterior(fwd_posterior, cache_dir=tmp_path)
-    assert p.name == f"{p.parent.name}.fwd.nc"
-    assert is_case_id(p.parent.name)
-    assert fwd_posterior.attrs["case_id"] == p.parent.name
+    case = p.name[:-len(".fwd.nc")]
+    assert p.parent == tmp_path, "the case directory is gone; writes are flat"
+    assert is_case_id(case)
+    assert fwd_posterior.attrs["case_id"] == case
 
 
 def test_saved_posterior_loads_by_case_id_and_by_legacy_name(tmp_path, fwd_posterior):
@@ -322,7 +334,7 @@ def test_legacy_layout_still_loads_by_case_id(tmp_path, fwd_posterior):
 def test_filename_suffix_becomes_the_run_token(tmp_path, fwd_posterior):
     from TEXAS.stan.io import save_posterior
     p = save_posterior(fwd_posterior, cache_dir=tmp_path, filename_suffix="050126")
-    assert parse_case(p.parent.name).run == "050126"
+    assert parse_case(p.name[:-len(".fwd.nc")]).run == "050126"
 
 
 def test_two_runs_of_one_config_do_not_overwrite(tmp_path, fwd_posterior):
@@ -342,8 +354,9 @@ def test_invT_name_lands_in_the_parent_case_directory():
         "fwd_case": "tx.v025.GHEB.sst.sri03.G23-N10.001",
     }
     base = _generate_filename_base(meta, "050126")
-    assert base.startswith("tx.v025.GHEB.sst.sri03.G23-N10.001/")
-    assert base.endswith("/tx.v025.GHEB.sst.sri03.G23-N10.001.inv.U1482.ud-050126")
+    # Flat: named for its parent calibration, but beside it rather than inside.
+    assert "/" not in base
+    assert base == "tx.v025.GHEB.sst.sri03.G23-N10.001.inv.U1482.ud-050126"
 
 
 def test_invT_without_provenance_keeps_the_legacy_name():
@@ -439,10 +452,14 @@ def test_refits_recover_distinct_runs_from_attrs():
     base = {"stan_model_name": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv",
             "temptype": "SST", "proxy_name": "scaledRI_cren3",
             "use_gdgt23ratio": 1, "use_no3": 1, "no3_cutoff": 1.0}
-    a = case_from_attrs({**base, "filename": "x_cren3_041526_eiv.nc"}, version="v026")
-    b = case_from_attrs({**base, "filename": "x_cren3_041626_eiv.nc"}, version="v026")
-    assert a.run == "041526" and b.run == "041626"
-    assert str(a) != str(b)
+    # A date stamp in the filename attr is NO LONGER promoted to a member.
+    # The member existed to keep two refits apart; there are no members now,
+    # a refit overwrites, and resolution matches a stamped legacy name through
+    # the filename attr directly rather than by rebuilding a case from it.
+    a = case_from_attrs({**base, "filename": "x_cren3_041526_eiv.nc"})
+    b = case_from_attrs({**base, "filename": "x_cren3_041626_eiv.nc"})
+    assert a.run == "" and b.run == ""
+    assert str(a) == str(b), "one configuration, one canonical name"
 
 
 def test_explicit_run_still_wins_over_recovery():
@@ -471,10 +488,9 @@ def test_stamped_legacy_name_still_resolves_after_migration(tmp_path, fwd_poster
     # directory with its original attrs, `filename` included.
     case = case_from_attrs(fwd_posterior.attrs)
     dest = tmp_path / fwd_relpath(case)
-    dest.parent.mkdir(parents=True, exist_ok=True)
     fwd_posterior.to_netcdf(dest)
 
-    assert case.run == "041626", "the stamp is recovered as the run token"
+    assert case.run == "", "a stamp is no longer promoted to a member"
     assert resolve_posterior_path(stamped, tmp_path) == dest
     assert load_posterior(stamped, cache_dir=tmp_path) is not None
 

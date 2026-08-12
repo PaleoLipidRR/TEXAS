@@ -223,6 +223,7 @@ def _local_dest(dest_dir: Path, name: str) -> Path:
     try:
         from .naming import fwd_relpath, is_case_id
         if is_case_id(name):
+            # Flat both sides now, so this is a rename rather than an unpack.
             return dest_dir / fwd_relpath(name)
     except Exception:
         pass  # naming is a convenience; never block a download on it

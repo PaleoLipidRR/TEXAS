@@ -1,185 +1,89 @@
 """
-Filenames carry no date; the run/member token and the run_timestamp attr split
-the job the date stamp used to do badly.
+One canonical path per calibration: flat, no version, no member.
 
-The stamp was doing two things at once. It distinguished a refit from the run
-it repeated -- real work, now done by the member token, which counts and cannot
-collide. And it recorded when the run happened -- which belongs in metadata,
-where it survives a rename and nobody has to parse it back out of a path.
+The name used to carry three things it should not have. A **date stamp**, which
+belongs in metadata — it cannot be read without parsing, does not survive a
+rename, and collides for two runs on one day. A **version**, taken from the pip
+release, which was wrong in both directions: a docs-only release orphaned every
+name on disk, while a prior change without a release let two incompatible
+posteriors share one identity. And a **member counter**, which read as a second
+number beside the nitrate cutoff (`.001` next to `N10`) and made `overwrite`
+meaningless, because a fresh member can never collide with anything.
 
-The failure mode worth guarding is the quiet one: if resolution handed back the
-*oldest* member of a configuration, every figure would silently be drawn from a
-superseded fit, and nothing downstream reports which member it loaded.
+What replaces them: the run date and package version are attrs, and a re-run
+simply overwrites — callers that do not want to re-run check the cache first.
+
+Reads must still find everything written under the older schemes, which is what
+keeps migrating a tidiness step rather than a prerequisite.
 """
 import numpy as np
 import pytest
 import xarray as xr
 
 from TEXAS.stan.io import save_posterior
-from TEXAS.utils.naming import next_free_run, parse_case, resolve_posterior_path
+from TEXAS.utils.naming import (case_from_attrs, fwd_relpath, inv_relpath,
+                                parse_case, resolve_posterior_path)
 
-CASE = "tx.v026.GHEA.sst.sri03.G23-N10.001"
+CASE = "tx.GHEA.sst.sri03.G23-N10"
+ATTRS = {
+    "stan_model_name": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv",
+    "temptype": "SST", "proxy_name": "scaledRI_cren3",
+    "use_gdgt23ratio": 1, "use_no3": 1, "no3_cutoff": 1.0,
+}
 
 
 def _posterior(proxy="scaledRI_cren3"):
-    dims = ("chain", "draw")
-    shape = (2, 20)
+    dims, shape = ("chain", "draw"), (2, 20)
     rng = np.random.default_rng(0)
-    ds = xr.Dataset({
-        "t0_crtp": (dims, rng.normal(30, 1, shape)),
-        "k_crtp": (dims, rng.normal(0.25, 0.02, shape)),
-        "b_crtp": (dims, rng.normal(0.4, 0.02, shape)),
-        "v_crtp": (dims, rng.normal(2.5, 0.3, shape)),
-    })
-    ds.attrs.update({
-        "stan_model_name": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv",
-        "temptype": "SST", "proxy_name": proxy,
-        "use_gdgt23ratio": 1, "use_no3": 1, "no3_cutoff": 1.0,
-    })
+    ds = xr.Dataset({k: (dims, rng.normal(1, 0.1, shape))
+                     for k in ("t0_crtp", "k_crtp", "b_crtp", "v_crtp")})
+    ds.attrs.update({**ATTRS, "proxy_name": proxy})
     return ds
 
 
-# --- the member token -------------------------------------------------------
+# --- the canonical name -----------------------------------------------------
 
-def test_next_free_run_starts_at_001(tmp_path):
-    assert next_free_run(CASE, tmp_path) == "001"
-
-
-def test_next_free_run_skips_what_exists(tmp_path):
-    from dataclasses import replace
-    for run in ("001", "002"):
-        (tmp_path / str(replace(parse_case(CASE), run=run))).mkdir()
-    assert next_free_run(CASE, tmp_path) == "003"
+def test_a_case_built_from_attrs_carries_no_version_or_member():
+    assert str(case_from_attrs(ATTRS)) == CASE
 
 
-def test_next_free_run_fills_a_gap(tmp_path):
-    from dataclasses import replace
-    for run in ("001", "003"):
-        (tmp_path / str(replace(parse_case(CASE), run=run))).mkdir()
-    assert next_free_run(CASE, tmp_path) == "002"
+def test_paths_are_flat():
+    """No case directory: the leaf already carries the whole case id."""
+    from pathlib import Path
+    fwd = fwd_relpath(CASE)
+    inv = inv_relpath(CASE, "U1482", scenario="no3_modern")
+    assert fwd.parent == Path("."), fwd
+    assert inv.parent == Path("."), inv
+    assert fwd.name == f"{CASE}.fwd.nc"
+    assert inv.name.startswith(f"{CASE}.inv.U1482.")
 
 
-def test_next_free_run_ignores_other_calibrations(tmp_path):
-    """A different proxy is a different case, not another member of this one."""
-    from dataclasses import replace
-    other = replace(parse_case(CASE), proxy="tex")
-    (tmp_path / str(other)).mkdir()
-    assert next_free_run(CASE, tmp_path) == "001"
-
-
-# --- saving -----------------------------------------------------------------
-
-def test_a_refit_does_not_overwrite_the_run_it_repeats(tmp_path):
-    first = save_posterior(_posterior(), cache_dir=tmp_path)
-    second = save_posterior(_posterior(), cache_dir=tmp_path)
-    assert first != second, "the refit landed on top of the original"
-    assert first.exists() and second.exists()
-    assert parse_case(first.parent.name).run == "001"
-    assert parse_case(second.parent.name).run == "002"
-
-
-def test_no_date_appears_in_the_filename(tmp_path):
+def test_no_member_and_no_date_in_a_written_name(tmp_path):
     import re
     path = save_posterior(_posterior(), cache_dir=tmp_path)
-    # six consecutive digits is what a MMDDYY stamp looked like
-    assert not re.search(r"\d{6}", path.name), path.name
+    assert path.name == f"{CASE}.fwd.nc"
+    assert not re.search(r"\d{6}", path.name), path.name        # no date stamp
+    assert not re.search(r"\.\d{3}\.", path.name), path.name    # no member
 
 
-def test_the_run_date_is_recorded_in_attrs(tmp_path):
-    """
-    The date has to live somewhere. The attr is the only place left, so a
-    posterior without it has lost when it was run.
-    """
-    from TEXAS.stan.metadata import extract_and_update_metadata
-    ds = extract_and_update_metadata(
-        _posterior(), data={"N_crtp": 3}, stan_filename="m.stan")
-    stamp = ds.attrs.get("run_timestamp")
-    assert stamp, "no run_timestamp attr; the run date is now unrecorded"
-    from datetime import datetime
-    datetime.fromisoformat(stamp)          # parses, so it is a real timestamp
+def test_the_site_name_survives_verbatim():
+    """Dots delimit the fields, so a hyphen inside a site name is safe."""
+    assert ".inv.MD98-2152." in str(inv_relpath(CASE, "MD98-2152"))
 
 
-def test_an_explicit_run_is_honoured(tmp_path):
-    path = save_posterior(_posterior(), cache_dir=tmp_path, run="007")
-    assert parse_case(path.parent.name).run == "007"
+# --- write semantics: overwrite on re-run -----------------------------------
 
-
-# --- loading ----------------------------------------------------------------
-
-def test_a_legacy_name_resolves_to_the_newest_member(tmp_path):
-    """
-    The quiet failure: a name that pins no member must not hand back the first
-    fit forever. Nothing downstream reports which member it loaded, so an
-    ascending scan would draw every figure from a superseded posterior.
-    """
-    save_posterior(_posterior(), cache_dir=tmp_path)          # .001
-    newest = save_posterior(_posterior(), cache_dir=tmp_path)  # .002
-
-    legacy = ("gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv"
-              "_SST_gdgt23ratio_no3_1.0_scaledRI_cren3")
-    found = resolve_posterior_path(legacy, tmp_path)
-    assert found is not None, "legacy name no longer resolves at all"
-    assert found == newest, f"resolved to {found}, expected the newest {newest}"
-
-
-def test_an_exact_case_id_still_pins_its_member(tmp_path):
+def test_a_rerun_overwrites_rather_than_accumulating(tmp_path):
     first = save_posterior(_posterior(), cache_dir=tmp_path)
-    save_posterior(_posterior(), cache_dir=tmp_path)
-    assert resolve_posterior_path(first.parent.name, tmp_path) == first
+    second = save_posterior(_posterior(), cache_dir=tmp_path)
+    assert first == second
+    assert len(list(tmp_path.glob("*.nc"))) == 1
 
 
-def test_next_free_run_sees_old_token_spellings(tmp_path):
+def test_overwrite_false_refuses_an_existing_file(tmp_path):
     """
-    A directory written before the 2026-08-11 token rename holds the same
-    calibration under `ri3`/`none` where it is now `sri03`/`p0`. parse_case
-    preserves what it read, so comparing raw makes them look like different
-    cases -- and this function would hand out a member the old directory
-    already holds. Two files on one member of one calibration is exactly what
-    the member exists to prevent, and it blocks a flat publish where both would
-    claim the same leaf name.
-    """
-    (tmp_path / "tx.v026.GHPU.sst.ri3.none.001").mkdir()
-    assert next_free_run("tx.v026.GHPU.sst.sri03.p0.001", tmp_path) == "002"
-
-
-def test_flattened_leaves_are_unique_per_member(tmp_path):
-    """
-    Zenodo's namespace is flat, so the leaf alone must identify the file. Two
-    members of one calibration must therefore not share a leaf name.
-    """
-    a = save_posterior(_posterior(), cache_dir=tmp_path)
-    b = save_posterior(_posterior(), cache_dir=tmp_path)
-    assert a.name != b.name, f"both members flatten to {a.name}"
-    assert a.parent.name in a.name and b.parent.name in b.name
-
-
-def test_next_free_run_pads_to_three_even_beside_a_legacy_stamp(tmp_path):
-    """
-    A legacy date stamp is a legitimate run token, and deriving the width from
-    the longest one seen returned "000001" -- a new directory holding the same
-    logical member as .001. It also defeats resolve_posterior_path's descending
-    scan, which sorts as strings: ".002" orders above ".000002", so a legacy
-    name would resolve to the OLDER posterior.
-    """
-    from dataclasses import replace
-    for run in ("001", "050126"):
-        (tmp_path / str(replace(parse_case(CASE), run=run))).mkdir()
-    got = next_free_run(CASE, tmp_path)
-    assert got == "002", got
-    assert len(got) == 3
-
-
-def test_a_legacy_stamp_alone_does_not_consume_member_001(tmp_path):
-    from dataclasses import replace
-    (tmp_path / str(replace(parse_case(CASE), run="050126"))).mkdir()
-    assert next_free_run(CASE, tmp_path) == "001"
-
-
-def test_overwrite_false_still_refuses_when_a_member_exists(tmp_path):
-    """
-    Auto-increment never lands on an existing path, so the exists() guard could
-    never fire: overwrite=False silently produced a second full copy instead of
-    an error, and a re-executed notebook cell duplicated the file every run.
+    With a deterministic path this guard means something again. Under the
+    member counter it could never fire, because a fresh member never collides.
     """
     save_posterior(_posterior(), cache_dir=tmp_path)
     with pytest.raises(FileExistsError):
@@ -187,5 +91,80 @@ def test_overwrite_false_still_refuses_when_a_member_exists(tmp_path):
 
 
 def test_overwrite_false_is_fine_for_a_first_save(tmp_path):
-    path = save_posterior(_posterior(), cache_dir=tmp_path, overwrite=False)
-    assert path.exists()
+    assert save_posterior(_posterior(), cache_dir=tmp_path,
+                          overwrite=False).exists()
+
+
+def test_a_run_can_still_be_pinned_deliberately(tmp_path):
+    path = save_posterior(_posterior(), cache_dir=tmp_path, run="007")
+    assert parse_case(path.name.replace(".fwd.nc", "")).run == "007"
+
+
+def test_different_proxies_do_not_collide(tmp_path):
+    a = save_posterior(_posterior("scaledRI_cren3"), cache_dir=tmp_path)
+    b = save_posterior(_posterior("TEX86"), cache_dir=tmp_path)
+    assert a != b
+
+
+# --- what the run recorded instead ------------------------------------------
+
+def test_run_date_and_package_version_are_recorded_as_attrs():
+    """Both left the filename, so the attrs are now the only record."""
+    from datetime import datetime
+    from TEXAS.stan.metadata import extract_and_update_metadata
+    ds = extract_and_update_metadata(_posterior(), data={"N_crtp": 3},
+                                     stan_filename="m.stan")
+    datetime.fromisoformat(ds.attrs["run_timestamp"])   # parses => real
+    assert ds.attrs.get("texas_version"), "no texas_version attr"
+
+
+# --- reads must cover every historical form ---------------------------------
+
+def test_parse_accepts_the_versioned_and_membered_form():
+    """
+    Every id written before 2026-08-12 carries both, in the cache, in the
+    notebooks and in case_ids.json. Strict parsing would strand all of them.
+    """
+    old = parse_case("tx.v026.GHEA.sst.sri03.G23-N10.002")
+    assert old.version == "v026" and old.run == "002"
+    assert str(old) == "tx.v026.GHEA.sst.sri03.G23-N10.002"   # lossless
+
+
+def test_parse_reports_no_member_when_there_is_none():
+    assert parse_case(CASE).run == ""
+
+
+def test_a_flat_leaf_resolves(tmp_path):
+    written = save_posterior(_posterior(), cache_dir=tmp_path)
+    assert resolve_posterior_path(CASE, tmp_path) == written
+
+
+def test_a_versioned_request_finds_the_short_file(tmp_path):
+    """A notebook still holding the old id must not break."""
+    written = save_posterior(_posterior(), cache_dir=tmp_path)
+    assert resolve_posterior_path("tx.v026.GHEA.sst.sri03.G23-N10",
+                                  tmp_path) == written
+
+
+def test_a_case_directory_written_earlier_still_resolves(tmp_path):
+    """Nothing has to move on disk for reads to keep working."""
+    old = "tx.v026.GHEA.sst.sri03.G23-N10.001"
+    d = tmp_path / old
+    d.mkdir()
+    (d / f"{old}.fwd.nc").write_bytes(b"")
+    assert resolve_posterior_path(old, tmp_path) == d / f"{old}.fwd.nc"
+
+
+def test_the_pre_2026_08_11_bare_leaf_still_resolves(tmp_path):
+    old = "tx.v026.GHEA.sst.sri03.G23-N10.001"
+    d = tmp_path / old
+    d.mkdir()
+    (d / "fwd.nc").write_bytes(b"")
+    assert resolve_posterior_path(old, tmp_path) == d / "fwd.nc"
+
+
+def test_a_legacy_long_name_still_resolves(tmp_path):
+    written = save_posterior(_posterior(), cache_dir=tmp_path)
+    legacy = ("gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv"
+              "_SST_gdgt23ratio_no3_1.0_scaledRI_cren3")
+    assert resolve_posterior_path(legacy, tmp_path) == written

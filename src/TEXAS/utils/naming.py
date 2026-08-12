@@ -98,7 +98,6 @@ __all__ = [
     "is_case_id",
     "encode_predictors",
     "decode_predictors",
-    "next_free_run",
     "DEFAULT_RUN",
 ]
 
@@ -191,9 +190,21 @@ LEGACY_NO_PREDICTORS = "none"
 
 DEFAULT_RUN = "001"
 
+# Version and run are OPTIONAL on read and never written.
+#
+# Both were dropped on 2026-08-12. The version was the pip version, which is
+# the wrong signal in both directions -- a docs-only release orphaned every
+# case id on disk, while a prior change without a release let two incompatible
+# posteriors share one identity. The run/member counter went with it: `.001`
+# beside `N10` reads as two numbers when only one is, and one canonical path
+# per configuration is what a cache should have. A re-run overwrites; callers
+# skip when the file is already there.
+#
+# They stay parseable because every case id written before that date carries
+# them, in the cache, in notebooks and in case_ids.json.
 _CASE_RE = re.compile(
     r"^(?P<project>[a-z]{2,4})\."
-    r"(?P<version>v[0-9a-z]+)\."
+    r"(?:(?P<version>v[0-9a-z]+)\.)?"
     r"(?P<compset>[A-Z]{4})\."
     r"(?P<temptype>[a-z]{2,4})\."
     r"(?P<proxy>[a-z0-9]{2,5})\."
@@ -358,15 +369,25 @@ class CaseName:
     run: str = DEFAULT_RUN
 
     def __post_init__(self):
-        if not self.version:
-            object.__setattr__(self, "version", default_version())
         object.__setattr__(self, "compset", self.compset.upper())
-        object.__setattr__(self, "run", slug(self.run) or DEFAULT_RUN)
+        object.__setattr__(self, "run", slug(self.run))
         decode_compset(self.compset)  # validate eagerly
 
     def __str__(self) -> str:
-        return ".".join([self.project, self.version, self.compset,
-                         self.temptype, self.proxy, self.predictors, self.run])
+        """
+        The canonical id: ``tx.GHEB.sst.sri03.G23-N10``.
+
+        Version and run are carried when parsed from an older id, so a
+        round-trip is lossless, but neither is synthesised. A CaseName built
+        from attrs therefore renders short, which is what gets written.
+        """
+        parts = [self.project]
+        if self.version:
+            parts.append(self.version)
+        parts += [self.compset, self.temptype, self.proxy, self.predictors]
+        if self.run:
+            parts.append(self.run)
+        return ".".join(parts)
 
     # -- convenience ------------------------------------------------------
     @property
@@ -465,8 +486,12 @@ def case_from_attrs(attrs: Dict[str, Any], *, version: Optional[str] = None,
             bool(int(attrs.get("use_no3", 0) or 0)),
             attrs.get("no3_cutoff"),
         ),
-        version=version or default_version(),
-        run=run if run is not None else (run_from_attrs(attrs) or DEFAULT_RUN),
+        # Neither is synthesised any more. A case built from attrs is the
+        # canonical short form, and it is the only form written; both remain
+        # settable so an older id can be reconstructed exactly when one is
+        # being matched against.
+        version=version or "",
+        run=run if run is not None else "",
     )
 
 
@@ -487,8 +512,8 @@ def parse_case(text: str) -> CaseName:
         )
     g = m.groupdict()
     return CaseName(compset=g["compset"], temptype=g["temptype"], proxy=g["proxy"],
-                    predictors=g["predictors"], version=g["version"],
-                    project=g["project"], run=g["run"] or DEFAULT_RUN)
+                    predictors=g["predictors"], version=g["version"] or "",
+                    project=g["project"], run=g["run"] or "")
 
 
 def is_case_id(text: str) -> bool:
@@ -499,81 +524,6 @@ def is_case_id(text: str) -> bool:
     except ValueError:
         return False
 
-
-def next_free_run(case: Union["CaseName", str],
-                  indir: Union[str, Path]) -> str:
-    """
-    The lowest unused run/member token for *case* under *indir*.
-
-    This is what replaced the date stamp. Filenames used to carry one
-    (``..._050126_eiv.nc``) and it was doing real work: it kept a refit from
-    overwriting the run it was repeating. A date is the wrong tool for that --
-    it collides for two runs on one day, sorts lexically only by luck, and
-    encodes in a path something that belongs in metadata (see the
-    ``run_timestamp`` attr). CESM's ensemble-member field does the job
-    properly, and counting is unambiguous.
-
-    Scans existing case directories that differ from *case* only in the run
-    position and returns the next free three-digit token. ``001`` when none
-    exist.
-
-    >>> next_free_run("tx.v026.GHEB.sst.sri03.G23-N10.001", "/tmp/empty")
-    '001'
-    """
-    indir = Path(indir)
-    case = parse_case(case) if isinstance(case, str) else case
-    if not indir.is_dir():
-        return DEFAULT_RUN
-
-    def canonical(c: "CaseName") -> "CaseName":
-        """
-        Re-encode the tokens so old and current spellings compare equal.
-
-        ``parse_case`` deliberately preserves what it read, so a directory
-        written before 2026-08-11 keeps ``ri3``/``none`` where the same
-        calibration is now ``sri03``/``p0``. Comparing raw, those look like
-        different cases -- and this function would then hand out a member that
-        the old directory already holds, putting two files on one member of one
-        calibration. That is precisely what the member exists to prevent, and it
-        blocks a flat publish, where both would want the same leaf name.
-        """
-        try:
-            return replace(c,
-                           proxy=PROXY_CODES.get(c.proxy_full, c.proxy),
-                           predictors=encode_predictors(
-                               decode_predictors(c.predictors)))
-        except Exception:
-            return c
-
-    want = canonical(replace(case, run=DEFAULT_RUN))
-    used = set()
-    for d in indir.iterdir():
-        if not d.is_dir():
-            continue
-        try:
-            other = parse_case(d.name)
-        except Exception:
-            continue
-        # Same calibration identity, different member.
-        if canonical(replace(other, run=DEFAULT_RUN)) == want:
-            used.add(other.run)
-
-    # Width is FIXED at the default. Deriving it from the longest token seen
-    # breaks as soon as one is not a 3-digit counter: a legacy date stamp is a
-    # legitimate run token (save_posterior(filename_suffix="050126") writes
-    # <case>.050126), and widening to 6 returns "000001" -- a new directory
-    # holding the same logical member as .001, with numbering desynced from
-    # there. It also defeats resolve_posterior_path's descending scan, which
-    # sorts as strings: ".002" orders above ".000002", so a legacy-name load
-    # would return the OLDER posterior, the exact failure that scan prevents.
-    #
-    # Non-numeric tokens still count as taken, so a member is never handed out
-    # twice; they just do not influence the counter.
-    numeric = {int(u) for u in used if u.isdigit()}
-    n = 1
-    while n in numeric or f"{n:0{len(DEFAULT_RUN)}d}" in used:
-        n += 1
-    return f"{n:0{len(DEFAULT_RUN)}d}"
 
 
 # ---------------------------------------------------------------------------
@@ -592,11 +542,17 @@ def fwd_relpath(case: Union[CaseName, str]) -> Path:
     named ``fwd.nc`` cannot coexist. Repeating the case costs nothing -- the
     full path is the same length either way, only the separator moves.
 
-    >>> str(fwd_relpath("tx.v026.GHEB.sst.ri3.G23-N10.001"))
-    'tx.v026.GHEB.sst.ri3.G23-N10.001/tx.v026.GHEB.sst.ri3.G23-N10.001.fwd.nc'
+    >>> str(fwd_relpath("tx.GHEB.sst.sri03.G23-N10"))
+    'tx.GHEB.sst.sri03.G23-N10.fwd.nc'
     """
     c = str(case)
-    return Path(c) / f"{c}.fwd.nc"
+    # Flat. The case directory was dropped on 2026-08-12: the leaf already
+    # carries the whole case id, so the directory only repeated it, doubled the
+    # path length, and gave the cache two layouts at once (some files flat,
+    # some nested) which was the thing that made it hard to read. Flat also
+    # matches Zenodo, whose namespace has no directories, and still groups a
+    # calibration with its reconstructions because they sort adjacent.
+    return Path(f"{c}.fwd.nc")
 
 
 #: Pre-2026-08-11 leaf name, kept so existing caches still resolve.
@@ -615,7 +571,7 @@ def inv_relpath(
     constraint: str = "unconstrained",
     kind: str = "direct",
     scenario: Optional[str] = None,
-    run: Union[int, str] = 1,
+    run: Union[int, str, None] = None,
 ) -> Path:
     """
     ``<case>/<case>.inv.<site>.<constraint><kind>[-<scenario>]-<NNN>.nc``
@@ -635,13 +591,17 @@ def inv_relpath(
     if k is None:
         raise ValueError(f"kind must be one of {sorted(KIND_CODES)}")
 
-    run_str = f"{int(run):03d}" if str(run).isdigit() else slug(run)
+    # No run by default: one canonical path per (case, site, scenario). A run
+    # can still be pinned explicitly, but nothing synthesises one -- ".001"
+    # beside "N10" reads as two numbers when only one is.
     parts = [f"{c}{k}"]
     if scenario:
         parts.append(slug(scenario))
-    parts.append(run_str)
+    if run is not None:
+        parts.append(f"{int(run):03d}" if str(run).isdigit() else slug(run))
     c = str(case)
-    return Path(c) / f"{c}.inv.{slug(site)}.{'-'.join(parts)}.nc"
+    # Flat, for the reasons given on fwd_relpath.
+    return Path(f"{c}.inv.{slug(site)}.{'-'.join(parts)}.nc")
 
 
 def slug(x: Any) -> str:
@@ -681,9 +641,21 @@ def resolve_posterior_path(name: str, indir: Union[str, Path]) -> Optional[Path]
     """
     indir = Path(indir)
 
+    # Every historical form, cheapest first. The layout changed twice -- case
+    # directory with a bare fwd.nc, then with a repeated leaf, then flat -- and
+    # a request may name the versioned or the short id. Reads must cover all of
+    # them, which is what keeps a migration optional rather than required.
     flat = indir / f"{name}.nc"
     if flat.exists():
         return flat
+
+    if is_case_id(name):
+        case = parse_case(name)
+        bare = str(replace(case, version="", run=""))
+        for candidate in (f"{name}.fwd.nc", f"{bare}.fwd.nc"):
+            hit = indir / candidate
+            if hit.exists():
+                return hit
 
     for leaf in fwd_leaf_candidates(name):
         cased = indir / name / leaf
@@ -713,17 +685,26 @@ def resolve_posterior_path(name: str, indir: Union[str, Path]) -> Optional[Path]
                 return f
         return None
 
-    # name looks like a legacy long name -> hunt through the case directories.
+    # name looks like a legacy long name -> hunt for the file whose attrs
+    # reproduce it. Both layouts are searched: flat `<case>.fwd.nc` files, and
+    # case directories from before the 2026-08-12 flattening. Searching only
+    # directories -- as this did -- means every legacy name stops resolving the
+    # moment the cache is flattened, and legacy names are exactly what
+    # SI_code2, SI_code3 and download.py still pass.
     #
-    # Sorted DESCENDING so the highest run wins. A legacy name pins no member,
-    # and save_posterior now takes the next free one on every refit, so one
-    # name can match .001, .002, .003 ... Ascending order would hand back the
-    # oldest fit of a configuration -- silently, and forever, since nothing
-    # downstream reports which member it loaded.
-    matches = []
-    for d in sorted((p for p in indir.iterdir() if p.is_dir()), reverse=True):
-        fwd = next((d / leaf for leaf in fwd_leaf_candidates(d.name)
-                    if (d / leaf).exists()), None)
+    # Descending, so that where several candidates reproduce one legacy name
+    # (older members of the same calibration), the last one wins rather than
+    # the first. Nothing downstream reports which file it loaded, so silently
+    # preferring the oldest would be invisible.
+    candidates = []
+    for entry in sorted(indir.iterdir(), reverse=True):
+        if entry.is_dir():
+            fwd = next((entry / leaf for leaf in fwd_leaf_candidates(entry.name)
+                        if (entry / leaf).exists()), None)
+        elif entry.suffix == ".nc" and entry.name.endswith(".fwd.nc"):
+            fwd = entry
+        else:
+            continue
         if fwd is None:
             continue
         try:
@@ -736,10 +717,10 @@ def resolve_posterior_path(name: str, indir: Union[str, Path]) -> Optional[Path]
             return fwd
         try:
             if legacy_fwd_name(attrs) == name:
-                matches.append(fwd)
+                candidates.append(fwd)
         except Exception:
             continue
-    return matches[0] if matches else None
+    return candidates[0] if candidates else None
 
 
 def legacy_fwd_name(attrs: Dict[str, Any], filename_suffix: str = "") -> str:

@@ -129,6 +129,16 @@ def extract_and_update_metadata(
     # the path, and it survives a rename. Matches the ``run_timestamp`` the
     # inverse path already records, so both halves agree on the key.
     metadata.setdefault("run_timestamp", datetime.now().isoformat(timespec="seconds"))
+    # The package version, recorded rather than encoded in the path. It used to
+    # be the "v026" position of the case id, where a docs-only release orphaned
+    # every existing name while a prior change without a release left two
+    # incompatible posteriors sharing one. As an attr it is simply the truth
+    # about what produced this file.
+    try:
+        from .. import __version__ as _texas_version
+        metadata.setdefault("texas_version", str(_texas_version))
+    except Exception:  # pragma: no cover - metadata unavailable
+        pass
 
     # 7) attach & return
     ds.attrs.update(metadata)
