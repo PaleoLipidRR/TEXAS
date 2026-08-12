@@ -276,40 +276,34 @@ def save_invT_posterior(
     posterior: xr.Dataset,
     cache_dir: Optional[Union[str, Path]] = None,
     overwrite: bool = True,
+    filename_tag: Optional[Union[str, Sequence[str]]] = None,
 ) -> Path:
     """
     Save an inverse-T posterior to disk as compressed NetCDF.
 
     Default location: repo/.../TEXAS/invT_posterior_cache/
+
+    The filename comes from :func:`_generate_filename_base`, the same builder
+    the internal save path uses, so a reconstruction lands in one place however
+    it was produced.
+
+    This function used to build ``{site}_{model}_{temptype}.nc`` itself, which
+    omitted ``proxy_name``: a ``scaledRI`` and a ``TEX86`` reconstruction of one
+    site collided on a single path, and with the default ``overwrite=True`` the
+    second silently replaced the first. It was also case-unaware, so it could
+    not place a reconstruction inside its calibration's case directory. Nothing
+    on disk used that spelling -- every cached invT posterior came from the
+    internal path -- so unifying them changes no existing file.
     """
     if not isinstance(posterior, xr.Dataset):
         raise TypeError("posterior must be an xarray.Dataset")
 
-    outdir = Path(cache_dir) if cache_dir else DEFAULT_INVT_DIR
-    outdir.mkdir(exist_ok=True, parents=True)
-
-    site  = posterior.attrs.get("SiteName", "unknown_site")
-    name  = posterior.attrs.get("stan_model_name", "unknown_model")
-    ttype = posterior.attrs.get("temptype", "unknown")
-    if posterior.attrs.get("use_gdgt23ratio", 0):
-        ttype += "_gdgt23ratio"
-    if posterior.attrs.get("use_no3", 0):
-        cutoff = posterior.attrs.get("no3_cutoff")
-        if cutoff is None:
-            raise ValueError("no3_cutoff must be set when use_no3=1")
-        ttype += f"_no3_{cutoff}"
-
-    outpath = outdir / f"{site}_{name}_{ttype}.nc"
-    if outpath.exists() and not overwrite:
-        raise FileExistsError(f"{outpath} exists and overwrite=False")
-
-    posterior.attrs["filename"] = outpath.name
-    posterior.attrs.setdefault("proxy_name", "")
-    encoding = {var: {"zlib": True} for var in posterior.data_vars}
-    sanitized = _sanitize_attrs_for_netcdf(posterior)
-    sanitized.to_netcdf(outpath, encoding=encoding)
-    print(f"Saved inverse-T posterior to {outpath}")
-    return outpath
+    return _save_invT_posterior(
+        posterior=posterior,
+        cache_dir=cache_dir,
+        overwrite=overwrite,
+        filename_tag=filename_tag,
+    )
 
 
 # ─── Private helpers for invT I/O ──────────────────────────────────────────
@@ -428,6 +422,10 @@ def _save_invT_posterior(
     if filepath.exists() and not overwrite:
         raise FileExistsError(f"{filepath} already exists and overwrite=False.")
     posterior.attrs.setdefault("proxy_name", "")
+    # Record the name we wrote, as save_posterior does for forward posteriors.
+    # It is what lets a file renamed later still be resolved by its original
+    # name, and what run_from_attrs() reads to recover a run token.
+    posterior.attrs["filename"] = filepath.name
     encoding = {var: {"zlib": True} for var in posterior.data_vars}
     sanitized = _sanitize_attrs_for_netcdf(posterior)
     sanitized.to_netcdf(filepath, encoding=encoding)
