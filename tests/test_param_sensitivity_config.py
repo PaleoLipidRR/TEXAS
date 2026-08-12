@@ -48,6 +48,16 @@ SHARED = {
     "GRID_MODELS": False,
     "PROXIES": False,
     "CRITERIA": False,
+    # Part 3 (invT budget + M). Listed before the notebook grows a Part 3
+    # section: names absent from the notebook are skipped, so this costs
+    # nothing now and starts guarding the moment the section lands.
+    "INVT_BUDGETS": False,
+    "INVT_M_VALUES": False,
+    "INVT_N_SITES": True,
+    "INVT_N_BINS": True,
+    "INVT_PRIOR_SIGMA_T": True,
+    "INVT_CONSTRAINT": True,
+    "INVT_CRITERIA": False,
 }
 
 
@@ -164,3 +174,101 @@ def test_core_params_cover_both_slope_conventions(configs):
                 f"{label} sweeps the additive EIV model but CORE_PARAMS has no "
                 "beta_* entries"
             )
+
+
+# --- Part 3 behaviour -------------------------------------------------------
+# These exercise logic rather than configuration, but this is the only test
+# module the runner has, and the logic below is what makes Part 3's answer
+# generalise (or not) to the paleo sites the tuning is ultimately for.
+
+@pytest.fixture(scope="module")
+def runner():
+    """Import the runner as a module. Its TEXAS imports are all function-local."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("_run_param_sensitivity", SCRIPT)
+    mod = importlib.util.module_from_spec(spec)
+    try:
+        spec.loader.exec_module(mod)
+    except Exception as exc:                      # pragma: no cover
+        pytest.skip(f"runner not importable: {exc}")
+    return mod
+
+
+def _skewed_pool(n=1500, seed=0):
+    """A proxy distribution shaped like the real one: dense middle, thin warm tail."""
+    import numpy as np
+    import pandas as pd
+    rng = np.random.default_rng(seed)
+    x = np.clip(rng.beta(2.5, 3.0, n), 0.01, 0.99) * 0.55 + 0.32
+    return pd.DataFrame({"SST": 30 * (x - 0.32) / 0.55, "proxy": x})
+
+
+def test_subset_covers_the_full_proxy_range(runner):
+    """
+    The warm, near-saturated end is where t_est is worst identified, and it is
+    also where the paleo sites sit. A subset that stops short of the top of the
+    range would tune the sampler on the easy part of the curve only.
+    """
+    import numpy as np
+    pool = _skewed_pool()
+    sub = runner.invt_subset(pool, "proxy", n=200)
+    assert len(sub) == 200
+    assert len(sub.drop_duplicates()) == 200, "sites were sampled twice"
+    span = pool["proxy"].max() - pool["proxy"].min()
+    assert sub["proxy"].max() >= pool["proxy"].max() - 0.05 * span
+    assert sub["proxy"].min() <= pool["proxy"].min() + 0.05 * span
+
+
+def test_subset_oversamples_the_saturated_tail_versus_random(runner):
+    """
+    The whole point of stratifying: a random draw would leave the flat end of
+    the logistic barely represented, and the tuning would then not generalise
+    to exactly the samples that stress it.
+    """
+    import numpy as np
+    pool = _skewed_pool()
+    sub = runner.invt_subset(pool, "proxy", n=200)
+    edges = np.linspace(pool["proxy"].min(), pool["proxy"].max(), 11)
+    top_pool = float((pool["proxy"] >= edges[-3]).mean())
+    top_sub = float((sub["proxy"] >= edges[-3]).mean())
+    assert top_sub > 1.5 * top_pool, (
+        f"top of the proxy range is {top_sub:.1%} of the subset vs "
+        f"{top_pool:.1%} of the pool -- barely better than random"
+    )
+
+
+def test_subset_is_deterministic(runner):
+    """Same seed, same sites -- or two Part 3 cells are not comparable."""
+    pool = _skewed_pool()
+    a = runner.invt_subset(pool, "proxy", n=120)
+    b = runner.invt_subset(pool, "proxy", n=120)
+    assert a.equals(b)
+
+
+def test_lock_is_not_released_by_a_forced_run(runner, tmp_path, monkeypatch):
+    """
+    --force-lock steals a live run's lockfile. Releasing it on the way out
+    would leave that run unprotected against a third instance -- the very
+    collision the lock exists to prevent.
+    """
+    import json
+    import os
+    lockfile = tmp_path / ".run.lock"
+    monkeypatch.setattr(runner, "LOCKFILE", lockfile)
+    monkeypatch.setattr(runner, "RESULTS_DIR", tmp_path)
+    monkeypatch.setattr(runner, "_pid_alive", lambda pid: True)
+    lockfile.write_text(json.dumps({"pid": os.getpid() + 1, "started": "x"}))
+
+    with runner.single_instance(force=True):
+        pass
+
+    assert lockfile.exists(), "a forced run deleted the live run's lock"
+    assert json.loads(lockfile.read_text())["pid"] != os.getpid()
+
+
+def test_lock_is_released_by_its_owner(runner, tmp_path, monkeypatch):
+    monkeypatch.setattr(runner, "LOCKFILE", tmp_path / ".run.lock")
+    monkeypatch.setattr(runner, "RESULTS_DIR", tmp_path)
+    with runner.single_instance():
+        assert (tmp_path / ".run.lock").exists()
+    assert not (tmp_path / ".run.lock").exists()

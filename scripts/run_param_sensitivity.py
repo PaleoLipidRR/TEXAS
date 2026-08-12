@@ -16,6 +16,14 @@ results and skips the work.
     python scripts/run_param_sensitivity.py part1
     python scripts/run_param_sensitivity.py part1 --models bnd
     python scripts/run_param_sensitivity.py part2 --proxies SRI04 SRI05
+    python scripts/run_param_sensitivity.py part3 --invt-m 300 500
+
+Three parts. Part 1 sweeps the forward calibration's warmup/sampling budget,
+Part 2 refits it under three crenarchaeol ring conventions, and Part 3 sweeps
+the INVERSE model's budget and its number of marginalised calibration draws M.
+Part 3 is separate rather than an extension of Part 1 because the two models
+have unrelated geometry -- see the INVT_BUDGETS comment -- and because only the
+inverse side can be scored against a known temperature.
 
     # a 12-minute smoke run that exercises every path
     python scripts/run_param_sensitivity.py all --quick
@@ -42,7 +50,7 @@ import os
 import signal
 import sys
 import time
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -69,6 +77,9 @@ COMPILATION = "ds_gridded_screened_global_compilation_finalized.csv"
 GRID_CSV = RESULTS_DIR / "mcmc_budget_grid.csv"
 PARAM_CSV = RESULTS_DIR / "mcmc_budget_params.csv"
 RECO_JSON = RESULTS_DIR / "recommended_budget.json"
+INVT_CSV = RESULTS_DIR / "invt_budget_grid.csv"
+INVT_SITES_CSV = RESULTS_DIR / "invt_budget_sites.csv"
+INVT_RECO_JSON = RESULTS_DIR / "recommended_invt_budget.json"
 LOCKFILE = RESULTS_DIR / ".run.lock"
 
 
@@ -107,6 +118,36 @@ CORE_PARAMS = ["t0_crtp", "k_crtp", "b_crtp", "v_crtp", "sigma_proxyObs_crtp",
 
 CRITERIA = dict(max_rhat=1.01, min_ess_bulk=400.0, pct_divergent=0.0, max_z_mean=0.1)
 
+# ── Part 3: the inverse model's budget, and M ───────────────────────────────
+# Part 1's answer does not transfer here. The forward EIV model is hierarchical
+# with ~3000 correlated latent variables, which is why its warmup binds. The
+# invT model declares one parameter block -- vector[N] t_est -- and its target
+# is a sum of per-sample terms with no coupling between samples, so the
+# posterior factorises into N independent 1-D posteriors and a diagonal metric
+# is exact rather than approximate. Different question, different answer.
+#
+# What binds instead is M, the number of calibration draws marginalised in the
+# log_sum_exp (~5.8% Monte Carlo error at 300, ~4.5% at 500 per builder.py),
+# and saturation -- where RI approaches the upper asymptote the likelihood goes
+# flat in T and t_est is prior-dominated. Neither is fixed by more iterations.
+#
+# The two budgets already in use are both undocumented magic numbers: 500/1000
+# (build_invT_inputData's sampler_kwargs default) and 300/1000 (the commented
+# coretop cell in SI_code2). Both are swept here so the choice stops being one.
+INVT_BUDGETS = [(300, 500), (300, 1000), (500, 1000), (1000, 1000)]
+INVT_M_VALUES = [300, 500]
+INVT_N_SITES = 200
+INVT_N_BINS = 10
+INVT_PRIOR_SIGMA_T = 10.0
+INVT_CONSTRAINT = "unconstrained"
+
+# Drift is measured against the richest cell (largest budget x largest M) and
+# is in degrees, because that is the unit the reader cares about: 0.1 degC is
+# far below the reconstruction's own uncertainty, so a cell that lands within
+# it is indistinguishable in any figure we publish.
+INVT_CRITERIA = dict(max_rhat=1.01, min_ess_bulk=400.0, pct_divergent=0.0,
+                     max_p50_drift=0.1)
+
 # Measured 2026-08-12, N=1513, 4 parallel chains, uncontended. Used only for
 # the ETA; being wrong costs nothing but a misleading progress line.
 SEC_PER_ITER = {"univ": 0.013, "eiv": 0.132, "bnd": 0.132}
@@ -138,29 +179,48 @@ def _pid_alive(pid: int) -> bool:
 @contextmanager
 def single_instance(force: bool = False):
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    stolen = None               # a LIVE holder's lock that --force-lock overrode
     if LOCKFILE.exists():
+        raw = LOCKFILE.read_text()
         try:
-            info = json.loads(LOCKFILE.read_text())
+            info = json.loads(raw)
             pid, started = int(info["pid"]), info.get("started", "?")
         except Exception:
             pid, started = -1, "?"
-        if pid > 0 and _pid_alive(pid) and not force:
-            sys.exit(
-                f"Another run appears to be live (pid {pid}, started {started}).\n"
-                f"Two concurrent Stan jobs share ~/.texas/stan_cache and the same\n"
-                f"cores; running both roughly triples per-iteration cost and can\n"
-                f"kill a notebook kernel with no traceback.\n"
-                f"If you are certain it is dead:  rm {LOCKFILE}\n"
-                f"or re-run with --force-lock."
-            )
-        if pid > 0 and not _pid_alive(pid):
+        if pid > 0 and _pid_alive(pid):
+            if not force:
+                sys.exit(
+                    f"Another run appears to be live (pid {pid}, started {started}).\n"
+                    f"Two concurrent Stan jobs share ~/.texas/stan_cache and the same\n"
+                    f"cores; running both roughly triples per-iteration cost and can\n"
+                    f"kill a notebook kernel with no traceback.\n"
+                    f"If you are certain it is dead:  rm {LOCKFILE}\n"
+                    f"or re-run with --force-lock."
+                )
+            # --force-lock is for clearing a stale lock. Used against a run that
+            # is genuinely alive, it must not leave that run unprotected once we
+            # exit, so remember its lock and hand it back.
+            stolen = raw
+            log(f"--force-lock: overriding a LIVE run (pid {pid}); "
+                "its lock is restored when this one exits")
+        elif pid > 0:
             log(f"clearing stale lock from dead pid {pid}")
     LOCKFILE.write_text(json.dumps(
         {"pid": os.getpid(), "started": f"{datetime.now():%Y-%m-%d %H:%M:%S}"}))
     try:
         yield
     finally:
-        LOCKFILE.unlink(missing_ok=True)
+        if stolen is not None:
+            LOCKFILE.write_text(stolen)
+        else:
+            # Only clear a lock that is still ours: if someone else forced their
+            # way in while we ran, the file now describes them, not us.
+            try:
+                mine = int(json.loads(LOCKFILE.read_text())["pid"]) == os.getpid()
+            except Exception:
+                mine = True     # unreadable or gone: nothing worth preserving
+            if mine:
+                LOCKFILE.unlink(missing_ok=True)
 
 
 # ── graceful shutdown ───────────────────────────────────────────────────────
@@ -607,6 +667,300 @@ def run_part2(proxies=None, quick=False, force=False, dry_run=False):
     return posteriors
 
 
+# ── Part 3 ──────────────────────────────────────────────────────────────────
+def invt_subset(coretop, proxy_col, n=INVT_N_SITES, n_bins=INVT_N_BINS,
+                seed=SEED):
+    """
+    A stress-test subset of coretop sites, spread evenly over the proxy RANGE.
+
+    Not a random sample, deliberately. Because the invT posterior factorises
+    across samples, N is a cost knob and not a difficulty knob -- 200 sites and
+    1513 sites have identical per-sample geometry. What matters is therefore the
+    per-sample worst case, and a random draw is dominated by mid-range
+    temperatures where the logistic is steep and t_est is sharply identified.
+    The hard samples sit near the upper asymptote, where the curve flattens, the
+    likelihood goes nearly flat in T, and the posterior turns prior-dominated
+    and heavy-tailed -- which is also the regime the warm paleo sites live in.
+
+    Equal-width bins over the observed proxy range with an equal quota per
+    non-empty bin gives the sparse tails representation proportional to range
+    rather than to density. That makes this a stress set, not a validation set:
+    error statistics over it are not population statistics for the compilation.
+    """
+    rng = np.random.default_rng(seed)
+    x = coretop[proxy_col].to_numpy(dtype=float)
+    edges = np.linspace(np.nanmin(x), np.nanmax(x), n_bins + 1)
+    edges[-1] = np.nextafter(edges[-1], np.inf)   # make the top edge inclusive
+    which = np.digitize(x, edges) - 1
+
+    pools = [np.flatnonzero(which == b) for b in range(n_bins)]
+    pools = [p for p in pools if p.size]
+    if not pools:
+        raise RuntimeError(f"no usable {proxy_col} values to subset")
+
+    # Quota per bin, with whatever a sparse bin cannot supply redistributed
+    # across the bins that still have sites left.
+    picked: list[np.ndarray] = []
+    remaining, live = n, list(pools)
+    while remaining > 0 and live:
+        quota = max(1, remaining // len(live))
+        still = []
+        for pool in live:
+            if remaining <= 0:
+                break
+            take = min(quota, pool.size, remaining)
+            sel = rng.choice(pool, size=take, replace=False)
+            picked.append(sel)
+            remaining -= take
+            left = np.setdiff1d(pool, sel, assume_unique=False)
+            if left.size:
+                still.append(left)
+        live = still
+
+    idx = np.sort(np.concatenate(picked))
+    return coretop.iloc[idx].reset_index(drop=True)
+
+
+def run_invt_case(fwd_name, subset, proxy_col, iter_warmup, iter_sampling, M,
+                  seed=SEED, chains=CHAINS):
+    """One invT fit over the subset; returns (metrics row, per-site frame)."""
+    from TEXAS.data.builder import InvTConfig
+    from TEXAS.stan.invT import predict_temperature_from_proxyObs
+
+    truth = subset["SST"].to_numpy(dtype=float)
+
+    # A CONSTANT prior mean, not the measured SST. The commented coretop cell in
+    # SI_code2 passes prior_mu_t = df["SST"], i.e. the very quantity being
+    # reconstructed; with prior_sigma_t = 10 that is weak, but it still centres
+    # every prior on the answer, which both flatters the error statistics and
+    # makes the geometry easier than any real paleo run. One climatological
+    # guess for the whole set is what a paleo reconstruction actually has.
+    prior_mu = float(np.mean(truth))
+
+    predictors = {}
+    if "gdgt23ratio" in fwd_name:
+        predictors["gdgt23ratio"] = subset["gdgt23ratio"].to_numpy(dtype=float)
+    if "no3" in fwd_name:
+        predictors["no3"] = subset["no3_sf2tc_avg"].to_numpy(dtype=float)
+
+    t_start = time.time()
+    res = predict_temperature_from_proxyObs(
+        proxyObs           = subset[proxy_col].to_numpy(dtype=float),
+        prior_mu_t         = np.full(len(subset), prior_mu),
+        prior_sigma_t      = INVT_PRIOR_SIGMA_T,
+        fwd_posterior_name = fwd_name,
+        site_name          = f"budgettest_n{len(subset)}",
+        temptype           = TEMPTYPE,
+        proxy_name         = proxy_col,
+        predictors         = predictors or None,
+        config             = InvTConfig(n_draws=M),
+        chains             = chains,
+        iter_warmup        = iter_warmup,
+        iter_sampling      = iter_sampling,
+        seed               = seed,
+        constraint_type    = INVT_CONSTRAINT,
+        save_results       = False,   # a tuning run is not a reconstruction
+    )
+    wall = time.time() - t_start
+
+    meta = res["metadata"]
+    p50, p16, p84 = res["p50"], res["p16"], res["p84"]
+    p05, p95 = res["p5"], res["p95"]
+    err = p50 - truth
+
+    row = {
+        "fwd_posterior": fwd_name,
+        "iter_warmup": iter_warmup, "iter_sampling": iter_sampling, "M": M,
+        "chains": chains, "n_sites": len(subset),
+        "wall_sec": wall,
+        "max_rhat": meta.get("stan_diag_max_rhat", np.nan),
+        "min_ess_bulk": meta.get("stan_diag_min_ess_bulk", np.nan),
+        "pct_divergent": meta.get("stan_diag_pct_divergent", np.nan),
+        "pct_max_treedepth": meta.get("stan_diag_pct_max_treedepth", np.nan),
+        # Accuracy against the measured SST. In-sample -- these sites trained
+        # the forward calibration -- so this is a tuning diagnostic, never a
+        # validation statistic.
+        "bias_degC": float(np.mean(err)),
+        "mae_degC": float(np.mean(np.abs(err))),
+        "rmse_degC": float(np.sqrt(np.mean(err ** 2))),
+        "coverage68": float(np.mean((truth >= p16) & (truth <= p84))),
+        "coverage90": float(np.mean((truth >= p05) & (truth <= p95))),
+        "mean_ci68_width": float(np.mean(p84 - p16)),
+    }
+    sites = pd.DataFrame({
+        "iter_warmup": iter_warmup, "iter_sampling": iter_sampling, "M": M,
+        "site_row": np.arange(len(subset)),
+        "proxy": subset[proxy_col].to_numpy(dtype=float),
+        "sst_measured": truth, "p16": p16, "p50": p50, "p84": p84,
+    })
+    return row, sites
+
+
+_INVT_KEY = ["iter_warmup", "iter_sampling", "M"]
+
+
+def _invt_fwd_name():
+    """The calibration Part 3 tunes against: the production forward posterior."""
+    col = PROXIES[PRODUCTION_PROXY]["column"]
+    return (f"gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_{TEMPTYPE}"
+            f"_gdgt23ratio_no3_{NO3_CUTOFF}_{col}")
+
+
+def run_part3(quick=False, force=False, dry_run=False, m_values=None):
+    from TEXAS.stan.io import load_posterior
+
+    budgets = [(300, 300), (500, 500)] if quick else INVT_BUDGETS
+    m_values = m_values or ([100, 200] if quick else INVT_M_VALUES)
+    n_sites = 40 if quick else INVT_N_SITES
+
+    grid_df, site_df = (pd.DataFrame(), pd.DataFrame()) if force else (
+        _read(INVT_CSV), _read(INVT_SITES_CSV))
+
+    todo = [(w, s, m) for w, s in budgets for m in m_values
+            if grid_df.empty or not
+            ((grid_df["iter_warmup"] == w) & (grid_df["iter_sampling"] == s)
+             & (grid_df["M"] == m)).any()]
+
+    log(f"Part 3: {len(todo)} invT fit(s) to run "
+        f"({len(budgets)} budget(s) x {len(m_values)} M value(s), "
+        f"n={n_sites} coretop sites)")
+    if not todo:
+        log("Part 3: everything cached, nothing to sample")
+        return grid_df, site_df
+    if dry_run:
+        for w, s, m in todo:
+            log(f"    warmup={w} sampling={s} M={m}")
+        return grid_df, site_df
+
+    fwd_name = _invt_fwd_name()
+    # Fail here rather than 200 sites into a fit: Part 3 tunes against the
+    # calibration Part 2 writes, so running it first is a sequencing error.
+    try:
+        load_posterior(fwd_name)
+    except Exception as exc:
+        raise RuntimeError(
+            f"forward posterior {fwd_name!r} not found ({exc}). Part 3 tunes "
+            "the inverse model against the production calibration, so Part 2 "
+            "must have run first."
+        ) from None
+
+    _, coretop = load_frames()
+    needed = ["SST", PROXIES[PRODUCTION_PROXY]["column"], "gdgt23ratio",
+              "no3_sf2tc_avg"]
+    pool = coretop[needed].dropna().reset_index(drop=True)
+    subset = invt_subset(pool, PROXIES[PRODUCTION_PROXY]["column"], n=n_sites)
+    log(f"    subset: {len(subset)} sites, "
+        f"SST {subset['SST'].min():.1f}-{subset['SST'].max():.1f} degC, "
+        f"proxy {subset.iloc[:, 1].min():.3f}-{subset.iloc[:, 1].max():.3f}")
+
+    for i, (w, s, m) in enumerate(todo, 1):
+        if STOP.requested:
+            log("stopping as requested; progress is saved")
+            break
+        log(f"[{i}/{len(todo)}] invT warmup={w} sampling={s} M={m} ...")
+        try:
+            row, sites = run_invt_case(
+                fwd_name, subset, PROXIES[PRODUCTION_PROXY]["column"], w, s, m)
+            row["status"] = "ok"
+            log(f"          {row['wall_sec']:.0f}s  R-hat={row['max_rhat']:.4f}  "
+                f"ESS={row['min_ess_bulk']:.0f}  RMSE={row['rmse_degC']:.2f}degC  "
+                f"cov68={row['coverage68']:.2f}")
+        except Exception as exc:
+            log(f"          FAILED {type(exc).__name__}: {exc}")
+            row = {"fwd_posterior": fwd_name, "iter_warmup": w,
+                   "iter_sampling": s, "M": m, "chains": CHAINS,
+                   "n_sites": len(subset),
+                   "status": f"failed: {type(exc).__name__}"}
+            sites = pd.DataFrame()
+
+        grid_df = pd.concat([grid_df, pd.DataFrame([row])], ignore_index=True)
+        if not sites.empty:
+            site_df = pd.concat([site_df, sites], ignore_index=True)
+        RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+        grid_df.to_csv(INVT_CSV, index=False)      # write after every fit
+        site_df.to_csv(INVT_SITES_CSV, index=False)
+
+    return grid_df, site_df
+
+
+def recommend_invt():
+    """Cheapest invT cell that converges AND is indistinguishable from the richest."""
+    grid_df, site_df = _read(INVT_CSV), _read(INVT_SITES_CSV)
+    if grid_df.empty:
+        raise RuntimeError(f"no Part 3 results in {INVT_CSV}")
+    ok = grid_df[grid_df.get("status", "ok") == "ok"].copy()
+    if ok.empty:
+        raise RuntimeError("every Part 3 cell failed")
+
+    # Reference = richest cell actually run. Drift is per-site so a cell cannot
+    # hide a warm-end error inside a flattering mean.
+    ref = ok.sort_values(["iter_warmup", "iter_sampling", "M"]).iloc[-1]
+    ref_key = (int(ref["iter_warmup"]), int(ref["iter_sampling"]), int(ref["M"]))
+    drift = {}
+    if not site_df.empty:
+        keyed = {k: g.set_index("site_row")["p50"]
+                 for k, g in site_df.groupby(_INVT_KEY)}
+        base = keyed.get(ref_key)
+        for k, series in keyed.items():
+            if base is None:
+                break
+            common = series.index.intersection(base.index)
+            drift[k] = float((series[common] - base[common]).abs().max())
+    ok["max_p50_drift"] = [
+        drift.get((int(r.iter_warmup), int(r.iter_sampling), int(r.M)), np.nan)
+        for r in ok.itertuples()]
+    ok.to_csv(INVT_CSV, index=False)
+
+    log("")
+    log("=" * 66)
+    log("RECOMMENDED invT BUDGET")
+    log("=" * 66)
+    log(f"reference cell: warmup={ref_key[0]} sampling={ref_key[1]} M={ref_key[2]}")
+
+    passing = ok[(ok["max_rhat"] < INVT_CRITERIA["max_rhat"])
+                 & (ok["min_ess_bulk"] >= INVT_CRITERIA["min_ess_bulk"])
+                 & (ok["pct_divergent"] <= INVT_CRITERIA["pct_divergent"])
+                 & (ok["max_p50_drift"].fillna(np.inf)
+                    <= INVT_CRITERIA["max_p50_drift"])]
+    if passing.empty:
+        log("  no swept cell meets all four criteria")
+        out = {}
+    else:
+        best = passing.sort_values("wall_sec").iloc[0]
+        out = {
+            "iter_warmup": int(best["iter_warmup"]),
+            "iter_sampling": int(best["iter_sampling"]),
+            "M": int(best["M"]),
+            "wall_sec": float(best["wall_sec"]),
+            "reference_cell": {"iter_warmup": ref_key[0],
+                               "iter_sampling": ref_key[1], "M": ref_key[2]},
+            "speedup_vs_reference": float(ref["wall_sec"] / best["wall_sec"]),
+            "max_rhat": float(best["max_rhat"]),
+            "min_ess_bulk": float(best["min_ess_bulk"]),
+            "max_p50_drift_degC": float(best["max_p50_drift"]),
+            "rmse_degC": float(best["rmse_degC"]),
+            "coverage68": float(best["coverage68"]),
+            "n_sites": int(best["n_sites"]),
+        }
+        log(f"  warmup/sampling : {out['iter_warmup']}/{out['iter_sampling']}")
+        log(f"  M               : {out['M']}")
+        log(f"  max R-hat       : {out['max_rhat']:.4f}   "
+            f"min ESS: {out['min_ess_bulk']:.0f}")
+        log(f"  worst p50 drift : {out['max_p50_drift_degC']:.3f} degC vs reference")
+        log(f"  RMSE / cov68    : {out['rmse_degC']:.2f} degC / {out['coverage68']:.2f}")
+        log(f"  wall            : {out['wall_sec']:.0f}s vs {ref['wall_sec']:.0f}s "
+            f"({out['speedup_vs_reference']:.2f}x faster)")
+
+    INVT_RECO_JSON.write_text(json.dumps(
+        {"criteria": INVT_CRITERIA, "in_sample": True,
+         "prior": {"mu": "constant, subset mean SST",
+                   "sigma_t": INVT_PRIOR_SIGMA_T},
+         "recommendation": out}, indent=2))
+    log("")
+    log(f"wrote {INVT_RECO_JSON}")
+    return out
+
+
 # ── CLI ─────────────────────────────────────────────────────────────────────
 def main(argv=None):
     ap = argparse.ArgumentParser(
@@ -614,12 +968,16 @@ def main(argv=None):
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="nohup python scripts/run_param_sensitivity.py all "
                "> sensitivity.log 2>&1 &")
-    ap.add_argument("stage", choices=["part1", "part2", "all", "recommend"],
+    ap.add_argument("stage",
+                    choices=["part1", "part2", "part3", "all", "recommend"],
                     help="which stage to run")
     ap.add_argument("--models", nargs="+", choices=[k for k, _ in GRID_MODELS],
                     help="Part 1 models (default: all)")
     ap.add_argument("--proxies", nargs="+", choices=list(PROXIES),
                     help="Part 2 ring conventions (default: all)")
+    ap.add_argument("--invt-m", nargs="+", type=int, metavar="M",
+                    help="Part 3 calibration-draw counts (default: "
+                         f"{' '.join(map(str, INVT_M_VALUES))})")
     ap.add_argument("--quick", action="store_true",
                     help="small grid and short chains; NOT publishable")
     ap.add_argument("--force", action="store_true",
@@ -636,7 +994,12 @@ def main(argv=None):
     if args.quick:
         log("QUICK mode — results are a smoke test, not publishable")
 
-    with single_instance(force=args.force_lock):
+    # A dry run samples nothing, so it must not need -- or take -- the lock:
+    # asking "what would run?" while a run is in flight is the most natural
+    # thing to want, and it was rejected.
+    lock = (nullcontext() if args.dry_run
+            else single_instance(force=args.force_lock))
+    with lock:
         t0 = time.time()
         if args.stage in ("part1", "all"):
             run_grid(models=args.models, quick=args.quick, force=args.force,
@@ -648,9 +1011,23 @@ def main(argv=None):
                     log(f"recommendation skipped: {exc}")
         if args.stage == "recommend":
             recommend(quick=args.quick)
+            try:
+                recommend_invt()
+            except RuntimeError as exc:
+                log(f"invT recommendation skipped: {exc}")
         if args.stage in ("part2", "all") and not STOP.requested:
             run_part2(proxies=args.proxies, quick=args.quick, force=args.force,
                       dry_run=args.dry_run)
+        # Part 3 runs last in "all" on purpose: it tunes the inverse model
+        # against the forward posterior Part 2 writes.
+        if args.stage in ("part3", "all") and not STOP.requested:
+            run_part3(quick=args.quick, force=args.force,
+                      dry_run=args.dry_run, m_values=args.invt_m)
+            if not args.dry_run and not STOP.requested:
+                try:
+                    recommend_invt()
+                except RuntimeError as exc:
+                    log(f"invT recommendation skipped: {exc}")
         log("")
         log(f"done in {timedelta(seconds=int(time.time() - t0))}")
         if not args.dry_run:
