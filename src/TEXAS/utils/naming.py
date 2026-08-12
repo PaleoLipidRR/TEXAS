@@ -582,8 +582,16 @@ def resolve_posterior_path(name: str, indir: Union[str, Path]) -> Optional[Path]
        2026-08-11, when the leaf was a bare ``fwd.nc``
     4. *name* is a case id           -- scan flat ``.nc`` files and match the
        case computed from each file's attrs
-    5. *name* is a legacy long name  -- scan case directories and match the
-       legacy name computed from each forward posterior's attrs
+    5. *name* is a legacy long name  -- scan case directories and match either
+       the legacy name computed from each posterior's attrs *or* the original
+       filename it recorded when it was saved
+
+    The second half of step 5 is what keeps **date-stamped** legacy names
+    working after a migration. ``legacy_fwd_name()`` reconstructs the unstamped
+    form, so a request for ``..._cren3_041626_eiv`` would never match it -- and
+    that stamped form is exactly what the SI notebooks ask for. The ``filename``
+    attr records what the file was actually called, so comparing against it
+    resolves every suffixed variant exactly.
 
     Steps 4 and 5 open files, so they run only when the exact lookups miss.
     Returns ``None`` when nothing matches, leaving the caller to raise.
@@ -633,6 +641,9 @@ def resolve_posterior_path(name: str, indir: Union[str, Path]) -> Optional[Path]
                 attrs = dict(ds.attrs)
         except Exception:
             continue
+        # The name it was saved as, stamp and all. Exact, and free of guesswork.
+        if Path(str(attrs.get("filename", "") or "")).stem == name:
+            return fwd
         try:
             if legacy_fwd_name(attrs) == name:
                 return fwd

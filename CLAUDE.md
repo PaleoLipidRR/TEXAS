@@ -235,6 +235,27 @@ legacy flat names, `<case>/fwd.nc`, and `<case>/<case>.fwd.nc` alike, and old
 `ri3` / `none` tokens still parse. Migration is a tidiness step, not a
 correctness one.
 
+##### Renaming and re-running are NOT equivalent for old names
+
+| you ask `load_posterior()` for | after **migrating** | after **re-running Stan** |
+|---|---|---|
+| the new case id | ✅ | ✅ |
+| the unstamped legacy name (`..._scaledRI_cren3`) | ✅ | ✅ |
+| a **date-stamped** legacy name (`..._cren3_050126_eiv`) | ✅ | ❌ |
+
+The difference is where the old name lives. Migration **copies the `filename`
+attr through untouched**, so the file still remembers what it was called and
+`resolve_posterior_path` matches on it. A re-run writes a *new* file and
+`save_posterior` stamps the *new* leaf name onto `filename` — nothing on disk
+remembers the old one. The unstamped form keeps working either way because it
+is reconstructed from attrs by `legacy_fwd_name()` rather than remembered.
+
+This matters because `SI_code3_paleo_showcases.ipynb` and
+`SI03_paleo_showcases_modelswitch.ipynb` both request a stamped name
+(`..._scaledRI_cren3_050126_eiv`). **If you re-run those calibrations rather
+than migrating, update the notebooks to the case id.** Both behaviours are
+pinned by tests in `tests/test_naming.py`.
+
 ### Streamlit app (`streamlit_app/`)
 
 Three-tab GUI:

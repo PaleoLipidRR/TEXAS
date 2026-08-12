@@ -429,3 +429,51 @@ def test_explicit_run_still_wins_over_recovery():
     attrs = {"stan_model_name": "gen_logi_fixed_culmeso", "temptype": "cultureT",
              "proxy_name": "scaledRI_cren3", "filename": "old_050126.nc"}
     assert case_from_attrs(attrs, version="v026", run="001").run == "001"
+
+
+def test_stamped_legacy_name_still_resolves_after_migration(tmp_path, fwd_posterior):
+    """
+    A date-stamped legacy name must survive the *migration* into a case dir.
+
+    legacy_fwd_name() reconstructs only the unstamped form, so a request for
+    "..._041626_eiv" would miss it -- and that stamped form is exactly what the
+    SI notebooks pass. The `filename` attr, which the migration copies through
+    untouched, is what closes the gap.
+    """
+    from TEXAS.stan.io import load_posterior
+    from TEXAS.utils.naming import case_from_attrs, fwd_relpath, resolve_posterior_path
+
+    stamped = "gen_logi_fixed_run_041626_eiv"
+    fwd_posterior.attrs["filename"] = f"{stamped}.nc"
+
+    # Exactly what migrate_cache_layout.py produces: the file lands in its case
+    # directory with its original attrs, `filename` included.
+    case = case_from_attrs(fwd_posterior.attrs)
+    dest = tmp_path / fwd_relpath(case)
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    fwd_posterior.to_netcdf(dest)
+
+    assert case.run == "041626", "the stamp is recovered as the run token"
+    assert resolve_posterior_path(stamped, tmp_path) == dest
+    assert load_posterior(stamped, cache_dir=tmp_path) is not None
+
+
+def test_a_rerun_does_not_answer_to_the_old_stamped_name(tmp_path, fwd_posterior):
+    """
+    The other half of the story, and the one that surprises people.
+
+    Re-running Stan writes a *new* file, and save_posterior stamps the new leaf
+    name onto `filename`. Nothing on disk remembers the old stamped name any
+    more, so a notebook asking for "..._050126_eiv" will not find it -- while
+    the *unstamped* legacy name still resolves, because that one is
+    reconstructed from attrs rather than remembered.
+    """
+    from TEXAS.stan.io import save_posterior
+    from TEXAS.utils.naming import legacy_fwd_name, resolve_posterior_path
+
+    fwd_posterior.attrs["filename"] = "gen_logi_fixed_run_050126_eiv.nc"
+    save_posterior(fwd_posterior, cache_dir=tmp_path, layout="case",
+                   filename_suffix="050126")
+
+    assert resolve_posterior_path("gen_logi_fixed_run_050126_eiv", tmp_path) is None
+    assert resolve_posterior_path(legacy_fwd_name(fwd_posterior.attrs), tmp_path) is not None
