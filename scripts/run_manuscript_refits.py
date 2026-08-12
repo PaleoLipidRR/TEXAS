@@ -483,9 +483,14 @@ def _predict(site, temptype, proxy_vals, prior_mu, predictors, tag, key,
     from TEXAS.predict import predict_T_from_proxyObs
 
     t0 = time.time()
+    # `fwd_posterior` takes the NAME here -- TEXAS.predict's wrapper accepts a
+    # str or a Dataset under that one parameter, unlike stan.invT's lower-level
+    # function, which has a separate fwd_posterior_name. Passing the case id as
+    # a string is what routes this through resolve_posterior_path to the exact
+    # member this run wrote.
     predict_T_from_proxyObs(
         proxyObs=proxy_vals, prior_mu_t=prior_mu, prior_sigma_t=PRIOR_SIGMA_T,
-        fwd_posterior_name=fwd_name, predictors=predictors or None,
+        fwd_posterior=fwd_name, predictors=predictors or None,
         site_name=site, temptype=temptype, proxy_name=PROXY,
         config=InvTConfig(n_draws=INV_M),
         chains=CHAINS, iter_warmup=INV_WARMUP, iter_sampling=INV_SAMPLING,

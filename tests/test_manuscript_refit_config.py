@@ -119,3 +119,31 @@ def test_audit_reports_not_ready_on_an_empty_manifest(runner, tmp_path, monkeypa
     monkeypatch.setattr(runner, "AUDIT_JSON", tmp_path / "audit.json")
     report = runner.audit()
     assert report["ok"] is False
+
+
+def test_inverse_call_binds_against_the_real_signature(runner):
+    """
+    The refit's inverse stage failed on its first reconstruction with an
+    unexpected-keyword TypeError, an hour into a run, after the whole forward
+    stage had completed. stan.invT's low-level function takes
+    fwd_posterior_name; TEXAS.predict's wrapper takes fwd_posterior for both a
+    name and a Dataset. Binding the call is free and catches that at import
+    time rather than after the expensive part.
+    """
+    import inspect
+    import numpy as np
+    pytest.importorskip("TEXAS.predict")
+    from TEXAS.data.builder import InvTConfig
+    from TEXAS.predict import predict_T_from_proxyObs
+
+    call = dict(
+        proxyObs=[0.5, 0.6], prior_mu_t=20.0, prior_sigma_t=runner.PRIOR_SIGMA_T,
+        fwd_posterior="tx.v026.GHPU.sst.sri03.p0.001",
+        predictors={"gdgt23ratio": np.array([1.0, 1.1]), "no3": 0.1},
+        site_name="X", temptype="SST", proxy_name=runner.PROXY,
+        config=InvTConfig(n_draws=runner.INV_M),
+        chains=runner.CHAINS, iter_warmup=runner.INV_WARMUP,
+        iter_sampling=runner.INV_SAMPLING, seed=runner.SEED,
+        save_results=True, filename_tag="no3_01",
+    )
+    inspect.signature(predict_T_from_proxyObs).bind(**call)
