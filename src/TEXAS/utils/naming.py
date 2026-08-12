@@ -156,9 +156,15 @@ TEMPTYPE_DECODE = {"sst": "SST", "thm": "thermoT", "cul": "cultureT"}
 # TEXRI_cren3 previously shared the "ri3" code with scaledRI_cren3, so two
 # distinct proxies collapsed onto one case id and one would silently overwrite
 # the other. It now has its own code.
+#
+# scaledRI is the RI(0-4) convention itself, so it and scaledRI_cren4 describe
+# the same quantity under two spellings; both are listed because the training
+# compilation ships the column as the bare "scaledRI".
 PROXY_CODES = {"scaledRI_cren3": "sri03", "scaledRI_cren4": "sri04",
+               "scaledRI_cren2": "sri02", "scaledRI_cren5": "sri05",
                "scaledRI": "sri", "TEX86": "tex", "TEXRI_cren3": "tri03"}
 PROXY_DECODE = {"sri03": "scaledRI_cren3", "sri04": "scaledRI_cren4",
+                "sri02": "scaledRI_cren2", "sri05": "scaledRI_cren5",
                 "sri": "scaledRI", "tex": "TEX86", "tri03": "TEXRI_cren3",
                 # pre-2026-08-11 codes, so existing case ids still parse
                 "ri3": "scaledRI_cren3", "ri4": "scaledRI_cren4",

@@ -20,6 +20,8 @@ from TEXAS.utils.naming import (
     legacy_fwd_name,
     legacy_invT_name,
     parse_case,
+    PROXY_CODES,
+    PROXY_DECODE,
 )
 
 # The models this project actually ships, with their expected compset codes.
@@ -387,6 +389,25 @@ def test_texri_no_longer_collides_with_scaledri():
     a = case_from_attrs({**base, "proxy_name": "scaledRI_cren3"}, version="v026")
     b = case_from_attrs({**base, "proxy_name": "TEXRI_cren3"}, version="v026")
     assert str(a) != str(b), "scaledRI_cren3 and TEXRI_cren3 shared the code 'ri3'"
+
+
+@pytest.mark.parametrize("proxy", sorted(PROXY_CODES))
+def test_every_proxy_code_round_trips(proxy):
+    assert PROXY_DECODE[PROXY_CODES[proxy]] == proxy
+
+
+# Every scaled-RI ring convention carried by the training compilation needs its
+# own code. Without one, case_from_attrs falls back to slugging the first five
+# characters of the name -- and "scaledRI_cren5" slugs to "scale", which is what
+# every other unmapped scaledRI_* variant would slug to as well.
+@pytest.mark.parametrize("proxy", ["scaledRI_cren2", "scaledRI_cren3",
+                                   "scaledRI_cren5", "scaledRI"])
+def test_ring_conventions_get_distinct_case_ids(proxy):
+    base = {"stan_model_name": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv",
+            "temptype": "SST"}
+    case = case_from_attrs({**base, "proxy_name": proxy}, version="v026")
+    assert case.proxy != "scale", f"{proxy} fell through to the slug fallback"
+    assert case.proxy_full == proxy
 
 
 # --- run-token recovery (Phase 5C) -----------------------------------------
