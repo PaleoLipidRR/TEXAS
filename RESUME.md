@@ -189,6 +189,36 @@ Two decisions, both to run once the refit lands. Neither is safe mid-run: the
 job writes into this cache, and a restart under changed layout code would give
 one refit two layouts.
 
+**0. Drop the version token, in the same change.** Decided 2026-08-12. `v026`
+is `TEXAS.__version__` with separators stripped, and the pip version is the
+wrong signal for what that position does — wrong in both directions. A
+docs-only release bumps it and orphans every existing case directory, because
+resolution matches the token as an exact string (verified, not hypothetical).
+A `.stan` prior change without a release does not bump it, so two genuinely
+incompatible posteriors share one identity — and CLAUDE.md logs several such
+changes (Q removal 2026-03-24, the `sigma_proxyObs_crtp` prior 2026-04-08).
+
+The position existed for collision avoidance. **The run/member token now does
+that job properly**: two fits of one configuration get `.001` and `.002`
+whatever the reason they differ. So the version is removed from the name and
+recorded as a `texas_version` attr beside `run_timestamp`.
+
+```
+tx.GHEA.sst.sri03.G23-N10.001.fwd.nc          <- 29 chars, from 41
+```
+
+Accepted tradeoff: two Zenodo deposits from different paper versions could each
+carry `...001.fwd.nc` for one configuration from different model code. Zenodo's
+DOI versioning covers it, since a reader downloads one deposit.
+
+- [ ] `CaseName.version` removed from the dotted form; `default_version()`
+      retired or kept only to populate the attr
+- [ ] `parse_case()` accepts BOTH forms — every case id on disk and in the
+      notebooks has `v026` in it, so parsing must stay backward compatible
+- [ ] `texas_version` written in `extract_and_update_metadata` alongside
+      `run_timestamp`
+- [ ] the `case_id` attr and `case_ids.json` regenerate to the short form
+
 **1. Flatten both caches.** Today they hold two layouts at once — forward 17
 flat + 18 in case directories, invT 35 flat + 46 in 6 directories — which is
 the confusion this fixes. The case directory earns nothing: the leaf already
