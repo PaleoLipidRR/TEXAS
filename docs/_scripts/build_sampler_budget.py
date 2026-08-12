@@ -395,6 +395,43 @@ def render_part2(s: dict) -> str:
   </div>"""
 
 
+def adopted_budgets() -> dict:
+    """
+    The budgets the manuscript refit actually uses, read from the runner.
+
+    The page reports what the sweep found; this reports what was chosen from
+    it. They are not always the same -- the recommender can only pick a cell
+    that clears every gate, and when the gate cannot discriminate it falls back
+    to the reference. Leaving the adopted budget off the page is how a reader
+    concludes the reference was adopted.
+
+    Parsed rather than imported: the runner pulls in TEXAS and pandas at import
+    time, which the docs job should not need.
+    """
+    import ast
+    runner = REPO / "scripts" / "run_manuscript_refits.py"
+    if not runner.exists():
+        return {}
+    out = {}
+    for node in ast.parse(runner.read_text(encoding="utf-8")).body:
+        if not isinstance(node, ast.Assign):
+            continue
+        names = [t.id for t in node.targets if isinstance(t, ast.Name)]
+        # handles both `INV_M = 300` and `INV_WARMUP, INV_SAMPLING = 500, 1000`
+        if not names and isinstance(node.targets[0], ast.Tuple):
+            names = [e.id for e in node.targets[0].elts if isinstance(e, ast.Name)]
+            values = [v.value for v in node.value.elts
+                      if isinstance(v, ast.Constant)]
+        else:
+            values = ([node.value.value] if isinstance(node.value, ast.Constant)
+                      else [])
+        for n, v in zip(names, values):
+            if n in ("INV_WARMUP", "INV_SAMPLING", "INV_M",
+                     "FWD_WARMUP", "FWD_SAMPLING"):
+                out[n] = v
+    return out
+
+
 def render_part3(s: dict) -> str:
     p3 = s.get("part3") or {}
     cells = p3.get("cells") or []
@@ -428,7 +465,37 @@ def render_part3(s: dict) -> str:
     floor = (p3.get("reco") or {}).get("seed_to_seed_floor_degC")
 
     verdict = ""
-    if reco:
+    ref_cell = (reco or {}).get("reference_cell") or {}
+    degenerate = bool(reco) and all(
+        reco.get(k) == ref_cell.get(k)
+        for k in ("iter_warmup", "iter_sampling", "M")) and ref_cell
+
+    if degenerate:
+        # The recommender picks the cheapest passing cell. When the only cell
+        # that passes IS the reference, it "won" by being compared with itself
+        # -- drift 0.000, speed-up 1.00x. Rendering that as a recommendation
+        # reads as an endorsement of the most expensive budget swept, which is
+        # the opposite of what the sweep found.
+        verdict = (
+            f'<div class="finding caution">'
+            f'<h3>No cheaper cell cleared the gate &mdash; and that is a gate artefact</h3>'
+            f'<p>The only cell passing all four criteria is the reference itself: '
+            f'drift <strong>0.000&nbsp;&deg;C</strong> and <strong>1.00&times;</strong> '
+            f'its own speed, because a cell compared with itself cannot differ. '
+            f'That is not a finding that {reco["iter_warmup"]}/{reco["iter_sampling"]} '
+            f'at M&nbsp;=&nbsp;{reco["M"]} is needed.</p>'
+            f'<p>Every other cell drifts 0.31&ndash;0.42&nbsp;&deg;C against a gate of '
+            f'<strong>{floor:.3f}&nbsp;&deg;C</strong> &mdash; the seed-to-seed floor, '
+            f'measured from a <em>single</em> replicate pair. The cells fail by a hair, '
+            f'and their drifts are the same order as the floor itself. Had that one '
+            f'replicate landed at 0.42, several cheaper cells would have passed. The '
+            f'gate is separating one realisation from another, not one budget from '
+            f'another &mdash; which two or three more replicates would settle.</p>'
+            f'<p class="was">Meanwhile the substantive columns are flat across the whole '
+            f'grid: RMSE spans 4.517&ndash;4.530&nbsp;&deg;C over a 3.7&times; range in '
+            f'cost, and coverage 0.590&ndash;0.610. Nothing distinguishes these cells on '
+            f'accuracy.</p></div>')
+    elif reco:
         verdict = (
             f'<div class="finding"><h3>Recommended: warmup {reco["iter_warmup"]}, '
             f'sampling {reco["iter_sampling"]}, M = {reco["M"]}</h3>'
@@ -474,7 +541,27 @@ def render_part3(s: dict) -> str:
             'deliberately weighted toward the hard end &mdash; but systematic '
             'under-coverage deserves an explanation before it reaches an SI.</p>')
 
-    return (table + "\n\n  " + verdict
+    adopted = adopted_budgets()
+    chosen = ""
+    if adopted.get("INV_WARMUP"):
+        chosen = (
+            f'<div class="finding"><h3>What the manuscript refit uses</h3>'
+            f'<p>Forward <strong>{adopted.get("FWD_WARMUP")}/'
+            f'{adopted.get("FWD_SAMPLING")}</strong>, inverse '
+            f'<strong>{adopted["INV_WARMUP"]}/{adopted["INV_SAMPLING"]}</strong> with '
+            f'<strong>M&nbsp;=&nbsp;{adopted["INV_M"]}</strong> '
+            f'(<code>scripts/run_manuscript_refits.py</code>).</p>'
+            f'<p>The inverse budget is a deliberate choice over the recommender’s '
+            f'output, on three grounds: it clears R&#770;&nbsp;&lt;&nbsp;1.01 and '
+            f'ESS&nbsp;&ge;&nbsp;400 with room; its accuracy is indistinguishable from '
+            f'every other cell; and it avoids warmup&nbsp;300, which is the one place '
+            f'the grid genuinely does discriminate &mdash; two of its three cells fail '
+            f'R&#770;. Over 64 reconstructions it costs about three hours rather than '
+            f'six.</p>'
+            f'<p class="was">Stated plainly because it is a judgement call: the drift '
+            f'gate does not pass this cell, for the reason given above. More seed '
+            f'replicates would either vindicate it or move it on evidence.</p></div>')
+    return (table + "\n\n  " + verdict + "\n\n  " + chosen
             + '\n\n  <div class="prose" style="margin-top:1.4rem">\n    '
             + prose + "\n  </div>")
 

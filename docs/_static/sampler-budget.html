@@ -567,7 +567,9 @@
     </table>
   </div>
 
-  <div class="finding"><h3>Recommended: warmup 1000, sampling 1000, M = 500</h3><p>R&#770;&nbsp;=&nbsp;1.0077 &middot; ESS&nbsp;=&nbsp;1242 &middot; worst-site drift 0.000&nbsp;&deg;C against a measured seed-to-seed floor of 0.271&nbsp;&deg;C. At <strong>381&nbsp;s</strong> that is <strong>1.00&times;</strong> faster than the richest cell swept.</p></div>
+  <div class="finding caution"><h3>No cheaper cell cleared the gate &mdash; and that is a gate artefact</h3><p>The only cell passing all four criteria is the reference itself: drift <strong>0.000&nbsp;&deg;C</strong> and <strong>1.00&times;</strong> its own speed, because a cell compared with itself cannot differ. That is not a finding that 1000/1000 at M&nbsp;=&nbsp;500 is needed.</p><p>Every other cell drifts 0.31&ndash;0.42&nbsp;&deg;C against a gate of <strong>0.271&nbsp;&deg;C</strong> &mdash; the seed-to-seed floor, measured from a <em>single</em> replicate pair. The cells fail by a hair, and their drifts are the same order as the floor itself. Had that one replicate landed at 0.42, several cheaper cells would have passed. The gate is separating one realisation from another, not one budget from another &mdash; which two or three more replicates would settle.</p><p class="was">Meanwhile the substantive columns are flat across the whole grid: RMSE spans 4.517&ndash;4.530&nbsp;&deg;C over a 3.7&times; range in cost, and coverage 0.590&ndash;0.610. Nothing distinguishes these cells on accuracy.</p></div>
+
+  <div class="finding"><h3>What the manuscript refit uses</h3><p>Forward <strong>400/1000</strong>, inverse <strong>500/1000</strong> with <strong>M&nbsp;=&nbsp;300</strong> (<code>scripts/run_manuscript_refits.py</code>).</p><p>The inverse budget is a deliberate choice over the recommender’s output, on three grounds: it clears R&#770;&nbsp;&lt;&nbsp;1.01 and ESS&nbsp;&ge;&nbsp;400 with room; its accuracy is indistinguishable from every other cell; and it avoids warmup&nbsp;300, which is the one place the grid genuinely does discriminate &mdash; two of its three cells fail R&#770;. Over 64 reconstructions it costs about three hours rather than six.</p><p class="was">Stated plainly because it is a judgement call: the drift gate does not pass this cell, for the reason given above. More seed replicates would either vindicate it or move it on evidence.</p></div>
 
   <div class="prose" style="margin-top:1.4rem">
     <p>RMSE varies by <strong>0.02&nbsp;&deg;C across a 3.7&times; spread in cost</strong>, and M&nbsp;=&nbsp;300 is indistinguishable from M&nbsp;=&nbsp;500. The defensible SI statement is therefore not &ldquo;we picked this budget&rdquo; but <em>&ldquo;the answer does not depend on it&rdquo;</em>, which is the stronger claim.</p><p>Coverage is the open question: 68% intervals contain the measured SST 59%&ndash;61% of the time and 90% intervals 84%&ndash;84%, stable across every cell, so it is not sampling noise. Some of that is by construction &mdash; a constant prior mean, an in-sample set, a subset deliberately weighted toward the hard end &mdash; but systematic under-coverage deserves an explanation before it reaches an SI.</p>
@@ -620,7 +622,7 @@
 </section>
 
 <footer>
-  Generated from <code>data/revision1/groupA/param_sensitivity/</code> by <code>docs/_scripts/build_sampler_budget.py</code> on 2026-08-12 20:47 UTC &middot; 81 forward fits, 9 inverse cells. Every figure on this page is read from the sweep output, so the page cannot drift from the run.
+  Generated from <code>data/revision1/groupA/param_sensitivity/</code> by <code>docs/_scripts/build_sampler_budget.py</code> on 2026-08-12 22:43 UTC &middot; 81 forward fits, 9 inverse cells. Every figure on this page is read from the sweep output, so the page cannot drift from the run.
 </footer>
 
 </div>
