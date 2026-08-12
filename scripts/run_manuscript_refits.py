@@ -314,12 +314,16 @@ def fit_culmeso(force=False):
     from TEXAS.stan.sampler import get_posterior
 
     key = f"fwd|culmeso|cultureT|{PROXY}"
-    name = f"{CULMESO_STEM}_cultureT_{PROXY}"
-    if not force:
-        try:
-            return load_posterior(name)
-        except Exception:
-            pass
+    # Resume off the MANIFEST, not off the cache. Reusing whatever posterior
+    # happens to be cached would silently mix budgets -- the cached culmeso was
+    # sampled at the old one -- and, because the reused run is never recorded,
+    # the audit's "one forward budget" check would pass by not looking at it.
+    if not force and already_done(key):
+        prior = read_manifest()
+        path = prior[prior["key"] == key].iloc[-1]["path"]
+        log(f"    culmeso: already refit by this runner -> {Path(path).name}")
+        import xarray as xr
+        return xr.open_dataset(path)
     df = compilation()
     cul = df[df["datatype"] == "culture"].dropna(subset=[PROXY, "SST"])
     meso = df[df["datatype"] == "mesocosm"].dropna(subset=[PROXY, "SST"])
@@ -343,12 +347,15 @@ def fit_univ(temptype, culmeso_post, force=False):
     from TEXAS.stan.sampler import get_posterior
 
     key = f"fwd|univ|{temptype}|{PROXY}"
-    name = f"{UNIV_STEM}_{temptype}_{PROXY}"
-    if not force:
-        try:
-            return load_posterior(name)
-        except Exception:
-            pass
+    # As above: resume off the manifest so the budget this stage was actually
+    # sampled at is the one recorded. R2_thermal comes from here and feeds both
+    # arms, so a stale univariate fit would propagate into every EIV run.
+    if not force and already_done(key):
+        prior = read_manifest()
+        path = prior[prior["key"] == key].iloc[-1]["path"]
+        log(f"    univ {temptype}: already refit by this runner -> {Path(path).name}")
+        import xarray as xr
+        return xr.open_dataset(path)
     col = TEMPTYPES[temptype]
     reg = coretop()[[col, PROXY]].dropna()
     data = build_fwd_data(t_crtp=reg[col].values, proxy_crtp=reg[PROXY].values,
@@ -565,6 +572,21 @@ def audit() -> dict:
 
     fwd = df[df["stage"] == "forward"]
     inv = df[df["stage"] == "inverse"]
+
+    # Every forward stage must be present, or "one budget" is a claim about
+    # whichever subset happened to be recorded. culmeso and the univariate fits
+    # are the ones most likely to be silently reused from an older budget --
+    # they are cheap, they already exist in the cache, and R2_thermal from the
+    # univariate fit feeds both arms.
+    models = set(fwd["model"])
+    check("culmeso refit by this runner", "culmeso" in models,
+          f"forward models recorded: {sorted(models)}")
+    expected_univ = {tt for tt in TEMPTYPES
+                     if tt in set(fwd[fwd["model"] == "univ"]["temptype"])}
+    check("univariate refit for every target",
+          expected_univ == set(fwd[fwd["variant"].isin(VARIANTS)]["temptype"]),
+          f"univariate: {sorted(expected_univ)}, "
+          f"multivariate: {sorted(set(fwd[fwd['variant'].isin(VARIANTS)]['temptype']))}")
 
     check("one forward budget",
           fwd["iter_warmup"].nunique() <= 1 and fwd["iter_sampling"].nunique() <= 1,
