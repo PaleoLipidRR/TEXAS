@@ -688,7 +688,27 @@ def audit() -> dict:
                if re.search(r"\d{6}", Path(p).name)]
     check("no date stamps in filenames", not stamped, f"{len(stamped)} stamped")
 
+    # The case ids this run produced, ready to paste into a notebook.
+    #
+    # This is what makes the case id usable as the canonical identity. Loading
+    # by legacy name cannot address these posteriors at all: the cache still
+    # holds flat files with exactly those names, and an exact flat hit is the
+    # first thing resolution tries, so a legacy name silently returns the
+    # pre-refit posterior. The flat files stay -- SI_code3, the original
+    # submission, reads them -- so the way forward is to name the new ones
+    # explicitly rather than to delete the old ones.
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+    case_ids = {}
+    for r in fwd.itertuples():
+        path = Path(str(r.path))
+        if path.parent.name.startswith("tx."):
+            label = (f"{r.model}|{r.temptype}" if r.variant == "-"
+                     else f"{r.variant}|{r.temptype}")
+            case_ids[label] = path.parent.name
+    report["case_ids"] = case_ids
+    (RESULTS_DIR / "case_ids.json").write_text(
+        json.dumps(case_ids, indent=2) + "\n")
+
     AUDIT_JSON.write_text(json.dumps(report, indent=2) + "\n")
 
     log("")
