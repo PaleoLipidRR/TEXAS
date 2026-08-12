@@ -179,6 +179,9 @@ def download_posteriors(
     dest_dir = Path(cache_dir) if cache_dir else POSTERIOR_CACHE_DIR
     dest_dir.mkdir(parents=True, exist_ok=True)
 
+    aliases = _case_aliases()
+    POSTERIOR_REGISTRY.update(aliases)      # case ids resolve to the same files
+
     for name in targets:
         if name not in POSTERIOR_REGISTRY:
             available = "\n  ".join(POSTERIOR_REGISTRY)
@@ -207,6 +210,48 @@ def download_posteriors(
         paths.append(dest)
 
     return paths
+
+
+def _case_aliases() -> dict:
+    """
+    Case-id aliases onto the registry's legacy keys.
+
+    Two names refer to one file and both must work. The **key** is what a user
+    asks for, and case ids are canonical from the resubmission on. The
+    **filename** is what exists on the published Zenodo record, which is a
+    frozen DOI carrying the legacy long names -- so it cannot change until a
+    new deposit is made, and inventing a case-named URL now would 404.
+
+    Built rather than hand-listed so it cannot fall out of step with the
+    registry, and failures are silent because an alias is a convenience: a
+    posterior this naming scheme cannot classify simply keeps its legacy key.
+    """
+    from .naming import case_from_attrs, legacy_fwd_name  # noqa: F401
+    out = {}
+    for key, entry in POSTERIOR_REGISTRY.items():
+        try:
+            out[_case_id_for(key)] = entry
+        except Exception:
+            continue
+    return {k: v for k, v in out.items() if k and k not in POSTERIOR_REGISTRY}
+
+
+def _case_id_for(legacy_key: str) -> str:
+    """Derive a case id from a legacy registry key, by re-reading its parts."""
+    from .naming import case_from_attrs
+    import re
+    m = re.match(r"^(?P<model>.+?)_(?P<temptype>SST|thermoT|cultureT)"
+                 r"(?P<g23>_gdgt23ratio)?(?:_no3_(?P<cut>[0-9.]+))?"
+                 r"_(?P<proxy>.+)$", legacy_key)
+    if not m:
+        return ""
+    g = m.groupdict()
+    attrs = {"stan_model_name": g["model"], "temptype": g["temptype"],
+             "proxy_name": g["proxy"], "use_gdgt23ratio": int(bool(g["g23"])),
+             "use_no3": int(g["cut"] is not None)}
+    if g["cut"] is not None:
+        attrs["no3_cutoff"] = float(g["cut"])
+    return str(case_from_attrs(attrs))
 
 
 def _local_dest(dest_dir: Path, name: str) -> Path:

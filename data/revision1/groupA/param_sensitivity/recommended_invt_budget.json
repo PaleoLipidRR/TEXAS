@@ -1,0 +1,35 @@
+{
+  "criteria": {
+    "max_rhat": 1.01,
+    "min_ess_bulk": 400.0,
+    "pct_divergent": 0.0,
+    "max_p50_drift": 0.1
+  },
+  "in_sample": true,
+  "seed_to_seed_floor_degC": 0.2709806999999999,
+  "drift_gate_degC": 0.2709806999999999,
+  "prior": {
+    "mu": "constant, subset mean SST",
+    "sigma_t": 10.0
+  },
+  "recommendation": {
+    "iter_warmup": 1000,
+    "iter_sampling": 1000,
+    "M": 500,
+    "wall_sec": 380.8189830780029,
+    "reference_cell": {
+      "iter_warmup": 1000,
+      "iter_sampling": 1000,
+      "M": 500
+    },
+    "seed_to_seed_floor_degC": 0.2709806999999999,
+    "drift_gate_degC": 0.2709806999999999,
+    "speedup_vs_reference": 1.0,
+    "max_rhat": 1.00769,
+    "min_ess_bulk": 1241.98,
+    "max_p50_drift_degC": 0.0,
+    "rmse_degC": 4.529470399845595,
+    "coverage68": 0.605,
+    "n_sites": 200
+  }
+}

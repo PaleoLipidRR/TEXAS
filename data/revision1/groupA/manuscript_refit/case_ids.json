@@ -1,0 +1,9 @@
+{
+  "culmeso|cultureT": "tx.GCDU.cul.sri03.p0",
+  "univ|SST": "tx.GHPU.sst.sri03.p0",
+  "univ|thermoT": "tx.GHPU.thm.sri03.p0",
+  "eiv|SST": "tx.GHEA.sst.sri03.G23-N10",
+  "bnd|SST": "tx.GHEB.sst.sri03.G23-N10",
+  "eiv|thermoT": "tx.GHEA.thm.sri03.G23-N10",
+  "bnd|thermoT": "tx.GHEB.thm.sri03.G23-N10"
+}

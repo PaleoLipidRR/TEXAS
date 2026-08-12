@@ -430,7 +430,7 @@ def fit_multiv(variant, temptype, culmeso_post, univ_post, force=False):
     path = save_posterior(post)
     wall = round(time.time() - t0, 1)
     log(f"    {variant} {temptype}: {wall}s  R-hat="
-        f"{post.attrs.get('stan_diag_max_rhat')}  -> {Path(path).parent.name}")
+        f"{post.attrs.get('stan_diag_max_rhat')}  -> {case_of(path)}")
     record(dict(key=key, stage="forward", model=VARIANTS[variant]["fwd"],
                 variant=variant, temptype=temptype, site="-", scenario="-",
                 iter_warmup=FWD_WARMUP, iter_sampling=FWD_SAMPLING, M="-",
@@ -473,6 +473,25 @@ def run_forward(temptypes=None, force=False, dry_run=False):
 
 
 # ── stage 2: inverse ───────────────────────────────────────────────────────
+def case_of(path) -> str:
+    """
+    The case id of a saved forward posterior, from its filename.
+
+    Posteriors are flat since 2026-08-12, so the case is the leaf minus its
+    ".fwd.nc" role suffix -- it is NOT the parent directory any more, which is
+    now just the cache. Reading the parent silently yielded
+    "TEXAS_posterior_cache", which is not a case id, so every reconstruction
+    would have fallen back to a legacy name and marginalised over a pre-refit
+    calibration. Handles the older nested layout too.
+    """
+    path = Path(path)
+    stem = path.name[:-len(".fwd.nc")] if path.name.endswith(".fwd.nc") else path.stem
+    for candidate in (stem, path.parent.name):
+        if candidate.startswith("tx."):
+            return candidate
+    return ""
+
+
 def _legacy_fwd_name(variant, temptype, univ=False):
     if univ:
         return f"{UNIV_STEM}_{temptype}_{PROXY}"
@@ -501,9 +520,9 @@ def _fwd_name(variant, temptype, univ=False):
     if not df.empty and "key" in df:
         hit = df[(df["key"] == key) & (df.get("status", "ok") == "ok")]
         if not hit.empty:
-            path = Path(str(hit.iloc[-1]["path"]))
-            if path.parent.name.startswith("tx."):
-                return path.parent.name          # the case id, member and all
+            case = case_of(hit.iloc[-1]["path"])
+            if case:
+                return case
     return _legacy_fwd_name(variant, temptype, univ=univ)
 
 
@@ -738,11 +757,11 @@ def audit() -> dict:
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     case_ids = {}
     for r in fwd.itertuples():
-        path = Path(str(r.path))
-        if path.parent.name.startswith("tx."):
+        case = case_of(r.path)
+        if case:
             label = (f"{r.model}|{r.temptype}" if r.variant == "-"
                      else f"{r.variant}|{r.temptype}")
-            case_ids[label] = path.parent.name
+            case_ids[label] = case
     report["case_ids"] = case_ids
     (RESULTS_DIR / "case_ids.json").write_text(
         json.dumps(case_ids, indent=2) + "\n")

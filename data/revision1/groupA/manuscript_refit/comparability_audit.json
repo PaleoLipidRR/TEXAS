@@ -1,0 +1,89 @@
+{
+  "checks": [
+    {
+      "check": "manifest exists",
+      "ok": true,
+      "detail": "71 rows"
+    },
+    {
+      "check": "culmeso refit by this runner",
+      "ok": true,
+      "detail": "forward models recorded: ['culmeso', 'gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv', 'gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT', 'univ']"
+    },
+    {
+      "check": "univariate refit for every target",
+      "ok": true,
+      "detail": "univariate: ['SST', 'thermoT'], multivariate: ['SST', 'thermoT']"
+    },
+    {
+      "check": "one forward budget",
+      "ok": true,
+      "detail": "warmups=[np.int64(400)], samplings=[np.int64(1000)]"
+    },
+    {
+      "check": "one inverse budget",
+      "ok": true,
+      "detail": "warmups=[np.int64(500)], M=['300']"
+    },
+    {
+      "check": "both arms fitted for SST",
+      "ok": true,
+      "detail": "have ['bnd', 'eiv']"
+    },
+    {
+      "check": "identical training rows for SST",
+      "ok": true,
+      "detail": "n_obs=[np.int64(1513)]"
+    },
+    {
+      "check": "identical R2_thermal for SST",
+      "ok": true,
+      "detail": "r2=[np.float64(0.74558372475)]"
+    },
+    {
+      "check": "both arms fitted for thermoT",
+      "ok": true,
+      "detail": "have ['bnd', 'eiv']"
+    },
+    {
+      "check": "identical training rows for thermoT",
+      "ok": true,
+      "detail": "n_obs=[np.int64(1513)]"
+    },
+    {
+      "check": "identical R2_thermal for thermoT",
+      "ok": true,
+      "detail": "r2=[np.float64(0.7571108695000001)]"
+    },
+    {
+      "check": "every reconstruction is paired across arms",
+      "ok": true,
+      "detail": "0 unpaired: []"
+    },
+    {
+      "check": "no forward posterior fails the strict R-hat gate",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "check": "reconstructions used this run's calibrations",
+      "ok": true,
+      "detail": "0 used a legacy name: []"
+    },
+    {
+      "check": "no date stamps in filenames",
+      "ok": true,
+      "detail": "0 stamped"
+    }
+  ],
+  "ok": true,
+  "case_ids": {
+    "culmeso|cultureT": "tx.GCDU.cul.sri03.p0",
+    "univ|SST": "tx.GHPU.sst.sri03.p0",
+    "univ|thermoT": "tx.GHPU.thm.sri03.p0",
+    "eiv|SST": "tx.GHEA.sst.sri03.G23-N10",
+    "bnd|SST": "tx.GHEB.sst.sri03.G23-N10",
+    "eiv|thermoT": "tx.GHEA.thm.sri03.G23-N10",
+    "bnd|thermoT": "tx.GHEB.thm.sri03.G23-N10"
+  }
+}
