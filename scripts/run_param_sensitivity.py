@@ -957,7 +957,13 @@ def recommend_invt():
         drift.get((int(r.iter_warmup), int(r.iter_sampling), int(r.M),
                    int(r.seed)), np.nan)
         for r in ok.itertuples()]
-    ok.to_csv(INVT_CSV, index=False)
+    # Merge back onto the FULL frame. Writing `ok` alone would drop every
+    # failed cell from the results CSV permanently -- the record of what failed
+    # and why, gone, and a later --dry-run misreporting the work remaining
+    # because those cells now look un-run.
+    merged = grid_df.drop(columns=["max_p50_drift"], errors="ignore").merge(
+        ok[_INVT_KEY + ["max_p50_drift"]], on=_INVT_KEY, how="left")
+    merged.to_csv(INVT_CSV, index=False)
 
     # The seed replicate: same configuration as the reference, different seed.
     # Its drift is what two identical runs differ by, so no cell can be asked
@@ -984,7 +990,16 @@ def recommend_invt():
         log(f"no seed replicate present; drift gate is the fixed "
             f"{drift_gate:.3f} degC and may sit below the noise floor")
 
-    candidates = ok[ok["seed"] == SEED]      # never recommend the replicate
+    # Exclude the replicate AND the reference, as recommend() does for Part 1.
+    # The reference's drift is 0.0 by construction -- it is the baseline every
+    # other cell is measured against -- so leaving it in means it passes the
+    # drift gate unconditionally and gets reported as "the recommendation"
+    # whenever nothing cheaper qualifies. That published 1000/1000 M=500 with
+    # "speedup_vs_reference: 1.0", which reads as a finding and is not one.
+    candidates = ok[(ok["seed"] == SEED)
+                    & ~((ok["iter_warmup"] == ref_key[0])
+                        & (ok["iter_sampling"] == ref_key[1])
+                        & (ok["M"] == ref_key[2]))]
     passing = candidates[
         (candidates["max_rhat"] < INVT_CRITERIA["max_rhat"])
         & (candidates["min_ess_bulk"] >= INVT_CRITERIA["min_ess_bulk"])

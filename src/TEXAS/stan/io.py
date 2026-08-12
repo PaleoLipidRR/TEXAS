@@ -62,8 +62,10 @@ def save_posterior(
         Run/member token under the case layout.  ``"auto"`` (default) takes the
         next free member for this calibration, so re-running a configuration
         writes ``.002`` beside ``.001`` instead of overwriting it.  Pass an
-        explicit value to pin one.  Ignored when *filename_suffix* is given, so
-        existing callers keep their behaviour.
+        explicit value to pin one — an explicit *run* wins over
+        *filename_suffix* for the case path.  With ``overwrite=False`` and
+        ``run="auto"``, a ``FileExistsError`` is raised when the calibration
+        already has any member, rather than quietly adding another.
     layout : {"auto", "case", "legacy"}
         Where to write.  ``"case"`` uses the CESM-style case directory
         (``tx.v026.GHEB.sst.ri3.G23-N10/fwd.nc``); ``"legacy"`` uses the
@@ -107,6 +109,7 @@ def save_posterior(
     # name whenever a case id cannot be derived (e.g. a model this naming
     # scheme does not know), so saving can never fail on naming alone.
     outpath = legacy_path
+    taken = None            # set when overwrite=False and a member already exists
     if layout in ("case", "auto"):
         try:
             from dataclasses import replace
@@ -122,7 +125,22 @@ def save_posterior(
                 case = case_from_attrs(posterior.attrs,
                                        run=explicit or DEFAULT_RUN)
                 if not explicit:
-                    case = replace(case, run=next_free_run(case, outdir))
+                    nxt = next_free_run(case, outdir)
+                    # overwrite=False must still mean something. Auto-increment
+                    # never lands on an existing path, so the exists() guard
+                    # below can never fire -- a caller protecting an existing
+                    # posterior would instead get a silent second copy, and a
+                    # re-executed notebook cell would duplicate a multi-hundred-
+                    # MB file every run.
+                    #
+                    # Recorded rather than raised here: the except below is a
+                    # catch-all implementing the legacy fallback, so raising
+                    # inside the try would be swallowed and turned into a
+                    # warning plus a legacy-named write -- the opposite of
+                    # refusing.
+                    if not overwrite and nxt != DEFAULT_RUN:
+                        taken = outdir / str(replace(case, run=DEFAULT_RUN))
+                    case = replace(case, run=nxt)
             else:
                 case = case_from_attrs(posterior.attrs, run=str(run))
             outpath = outdir / fwd_relpath(case)
@@ -140,6 +158,10 @@ def save_posterior(
             )
             outpath = legacy_path
 
+    if taken is not None:
+        raise FileExistsError(
+            f"{taken} already exists (and possibly later members); "
+            f"pass overwrite=True to add another member, or run= to pin one.")
     if outpath.exists() and not overwrite:
         raise FileExistsError(f"{outpath} exists and overwrite=False")
 

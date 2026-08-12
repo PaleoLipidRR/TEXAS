@@ -151,3 +151,41 @@ def test_flattened_leaves_are_unique_per_member(tmp_path):
     b = save_posterior(_posterior(), cache_dir=tmp_path)
     assert a.name != b.name, f"both members flatten to {a.name}"
     assert a.parent.name in a.name and b.parent.name in b.name
+
+
+def test_next_free_run_pads_to_three_even_beside_a_legacy_stamp(tmp_path):
+    """
+    A legacy date stamp is a legitimate run token, and deriving the width from
+    the longest one seen returned "000001" -- a new directory holding the same
+    logical member as .001. It also defeats resolve_posterior_path's descending
+    scan, which sorts as strings: ".002" orders above ".000002", so a legacy
+    name would resolve to the OLDER posterior.
+    """
+    from dataclasses import replace
+    for run in ("001", "050126"):
+        (tmp_path / str(replace(parse_case(CASE), run=run))).mkdir()
+    got = next_free_run(CASE, tmp_path)
+    assert got == "002", got
+    assert len(got) == 3
+
+
+def test_a_legacy_stamp_alone_does_not_consume_member_001(tmp_path):
+    from dataclasses import replace
+    (tmp_path / str(replace(parse_case(CASE), run="050126"))).mkdir()
+    assert next_free_run(CASE, tmp_path) == "001"
+
+
+def test_overwrite_false_still_refuses_when_a_member_exists(tmp_path):
+    """
+    Auto-increment never lands on an existing path, so the exists() guard could
+    never fire: overwrite=False silently produced a second full copy instead of
+    an error, and a re-executed notebook cell duplicated the file every run.
+    """
+    save_posterior(_posterior(), cache_dir=tmp_path)
+    with pytest.raises(FileExistsError):
+        save_posterior(_posterior(), cache_dir=tmp_path, overwrite=False)
+
+
+def test_overwrite_false_is_fine_for_a_first_save(tmp_path):
+    path = save_posterior(_posterior(), cache_dir=tmp_path, overwrite=False)
+    assert path.exists()

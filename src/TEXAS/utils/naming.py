@@ -558,11 +558,22 @@ def next_free_run(case: Union["CaseName", str],
         if canonical(replace(other, run=DEFAULT_RUN)) == want:
             used.add(other.run)
 
+    # Width is FIXED at the default. Deriving it from the longest token seen
+    # breaks as soon as one is not a 3-digit counter: a legacy date stamp is a
+    # legitimate run token (save_posterior(filename_suffix="050126") writes
+    # <case>.050126), and widening to 6 returns "000001" -- a new directory
+    # holding the same logical member as .001, with numbering desynced from
+    # there. It also defeats resolve_posterior_path's descending scan, which
+    # sorts as strings: ".002" orders above ".000002", so a legacy-name load
+    # would return the OLDER posterior, the exact failure that scan prevents.
+    #
+    # Non-numeric tokens still count as taken, so a member is never handed out
+    # twice; they just do not influence the counter.
+    numeric = {int(u) for u in used if u.isdigit()}
     n = 1
-    width = max(len(DEFAULT_RUN), *(len(u) for u in used)) if used else len(DEFAULT_RUN)
-    while f"{n:0{width}d}" in used:
+    while n in numeric or f"{n:0{len(DEFAULT_RUN)}d}" in used:
         n += 1
-    return f"{n:0{width}d}"
+    return f"{n:0{len(DEFAULT_RUN)}d}"
 
 
 # ---------------------------------------------------------------------------

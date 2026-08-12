@@ -444,15 +444,23 @@ def render_part3(s: dict) -> str:
     for c in sorted(cells, key=lambda c: c.get("wall_sec") or 0):
         rep = c.get("seed") not in (None, 42)
         drift = c.get("max_p50_drift")
+        row_cls = ' class="ref"' if rep else ""
+        rep_chip = ' &nbsp;<span class="chip">replicate</span>' if rep else ""
+        rhat_txt = ("%.4f" % c["max_rhat"]) if c.get("max_rhat") is not None else "&mdash;"
+        ess_txt = ("%.0f" % c["min_ess_bulk"]) if c.get("min_ess_bulk") is not None else "&mdash;"
+        drift_txt = ("%.3f" % drift) if drift is not None else "&mdash;"
         rows.append(
-            f'        <tr{" class=\"ref\"" if rep else ""}>'
-            f'<td>{c["iter_warmup"]} / {c["iter_sampling"]}'
-            f'{" &nbsp;<span class=\"chip\">replicate</span>" if rep else ""}</td>'
+            # Built outside the f-strings: a backslash inside an f-string
+            # expression is PEP 701 syntax and needs Python >= 3.12, while the
+            # docs workflow pins 3.11 and pyproject declares >= 3.10. It parses
+            # here and dies in CI.
+            f'        <tr{row_cls}>'
+            f'<td>{c["iter_warmup"]} / {c["iter_sampling"]}{rep_chip}</td>'
             f'<td>{c["M"]}</td><td>{(c.get("wall_sec") or 0):.0f} s</td>'
-            f'<td>{("%.4f" % c["max_rhat"]) if c.get("max_rhat") is not None else "&mdash;"}</td>'
-            f'<td>{("%.0f" % c["min_ess_bulk"]) if c.get("min_ess_bulk") is not None else "&mdash;"}</td>'
+            f'<td>{rhat_txt}</td>'
+            f'<td>{ess_txt}</td>'
             f'<td>{c["rmse_degC"]:.3f}</td><td>{c["coverage68"]:.3f}</td>'
-            f'<td>{("%.3f" % drift) if drift is not None else "&mdash;"}</td></tr>')
+            f'<td>{drift_txt}</td></tr>')
 
     rmses = [c["rmse_degC"] for c in cells if c.get("rmse_degC") is not None]
     spread = (max(rmses) - min(rmses)) if rmses else 0.0
