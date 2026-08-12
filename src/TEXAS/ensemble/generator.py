@@ -104,10 +104,24 @@ def generate_ensemble(
             raise RuntimeError(f"Draw {i} failed with {params}: {e}")
 
     # 6) package results
+    #
+    # The key must not truncate. int(2.5) is 2, so a caller asking for the
+    # 2.5th percentile used to get a key it never named -- and asking for 2.5
+    # and 2.9 together silently collapsed both onto "p2", the second
+    # overwriting the first. ``:g`` keeps integers integral (5 -> "p5", so
+    # every existing caller is unaffected) while giving fractional percentiles
+    # the key they actually asked for (2.5 -> "p2.5").
     out: Dict[str, Any] = {"x_vals": x}
     for q in percentiles:
-        out[f"p{int(q)}"] = np.percentile(ensemble, q, axis=0)
-        
+        out[f"p{q:g}"] = np.percentile(ensemble, q, axis=0)
+
+    if len({f"p{q:g}" for q in percentiles}) != len(percentiles):
+        raise ValueError(
+            f"percentiles {percentiles} do not map to distinct keys; "
+            "two entries would overwrite each other"
+        )
+
+
     if return_full_ensemble:
         out["ensemble"] = ensemble
         out["metadata"] = {
