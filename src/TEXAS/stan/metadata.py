@@ -285,16 +285,10 @@ def extract_priors_from_stan(
 
     return priors
 
-def infer_use_flags_from_attrs(attrs: Dict[str, Any]) -> Dict[str, bool]:
-    """
-    Infer optional predictor use_flags (like use_gdgt23ratio, use_no3)
-    from the attributes of a posterior xarray.Dataset.
-
-    Returns a dict like:
-    {"gdgt23ratio": True, "no3": False}
-    """
-    return {
-        pred: attrs.get(f"use_{pred}", 0) == 1
-        for pred in OPTIONAL_PREDICTORS
-        if f"use_{pred}" in attrs
-    }
+# infer_use_flags_from_attrs was removed here on 2026-08-12 together with the
+# same-named function in stan/utils.py. Neither had a caller, and the two were
+# not equivalent -- this one omitted predictors whose use_* key was absent,
+# the other returned False for them -- so keeping both invited a future caller
+# to import whichever came to hand and get a different answer. Live code reads
+# the attrs directly; see ensemble/detection.py, which keys off attr presence
+# deliberately.

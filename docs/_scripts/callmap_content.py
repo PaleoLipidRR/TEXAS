@@ -189,7 +189,6 @@ INVERSE = {
             "nodes": [
                 "stan.invT._select_invT_stan_file",
                 "stan.utils.patch_optional_predictors",
-                "stan.utils.infer_optional_predictor_usage",
                 "utils.system_info.simple_memory_check",
                 "utils.system_info.get_system_info",
                 "utils.system_info.suggest_stan_sampling_kwargs",
@@ -444,19 +443,4 @@ LOOSE_ENDS = {
     "models.calibration.TEX86Calibration.predict_tex86":
         "The forward direction of the classical (non-Bayesian) calibrations. Only predict_sst() is "
         "used; this half of the pair has no caller.",
-    "stan.metadata.infer_use_flags_from_attrs":
-        "Duplicate of the function with the same name in stan/utils.py, and both are dead. The two "
-        "are not equivalent: this one omits predictors whose use_* key is absent, while the "
-        "stan/utils.py version returns False for them. Live code does not use either — "
-        "ensemble/detection.py reads the attrs directly. Pick one or delete both.",
-    "stan.utils.infer_use_flags_from_attrs":
-        "See stan.metadata.infer_use_flags_from_attrs — same name, subtly different fallback "
-        "behaviour, both unreferenced.",
-    "stan.utils.infer_optional_predictor_usage":
-        "Superseded by auto_detect_predictors() in stan/sampler.py, which does the same inference "
-        "plus validation and legacy-key translation.",
-    "stan.utils.check_tbb_env":
-        "Warns when TBB_CXX_TYPE is unset. Never called, and the TBB failure it was written for is "
-        "now handled properly: _windows_compile_path() fixes the toolchain up front, and "
-        "StanSampler.sample_from_model() recovers from the exit-127 mismatch at run time.",
 }

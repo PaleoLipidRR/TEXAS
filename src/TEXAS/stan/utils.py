@@ -1,26 +1,29 @@
 # TEXAS/stan/utils.py
 from __future__ import annotations
 
-import os
-import warnings
 import numpy as np
-from typing import Dict, Any
 from TEXAS.constants import OPTIONAL_PREDICTORS
 
-def check_tbb_env():
-    if "TBB_CXX_TYPE" not in os.environ:
-        warnings.warn(
-            "TBB_CXX_TYPE not set. Stan model compilation may fail. "
-            "Run `export TBB_CXX_TYPE=gcc` before launching."
-        )
-
-def infer_use_flags_from_attrs(attrs: Dict[str, Any]) -> Dict[str, bool]:
-    """Infer which optional predictors were used from dataset.attrs."""
-    return {k: bool(attrs.get(f"use_{k}", 0)) for k in OPTIONAL_PREDICTORS}
-
-def infer_optional_predictor_usage(data: dict) -> dict:
-    """Infer 'use_*' flags from a Stan data dict."""
-    return {f"use_{k}": bool(data.get(f"use_{k}", 0)) for k in OPTIONAL_PREDICTORS}
+# Removed 2026-08-12, all four unreferenced by any caller in the package, the
+# SI notebooks, the scripts or the app:
+#
+#   check_tbb_env                   warned when TBB_CXX_TYPE was unset. The
+#                                   failure it guarded is handled properly now
+#                                   -- _windows_compile_path() fixes the
+#                                   toolchain up front and sample_from_model()
+#                                   recovers from the exit-127 mismatch.
+#   infer_optional_predictor_usage  superseded by auto_detect_predictors() in
+#                                   stan/sampler.py, which infers the same
+#                                   flags plus validation and legacy-key
+#                                   translation.
+#   infer_use_flags_from_attrs      existed HERE and in stan/metadata.py under
+#                                   one name with different behaviour: this
+#                                   copy returned False for an absent use_*
+#                                   key, the other omitted the key entirely.
+#                                   Both were dead, so the divergence was a
+#                                   trap for whoever wired one up next rather
+#                                   than a live bug. Live code reads the attrs
+#                                   directly (ensemble/detection.py).
 
 def patch_optional_predictors(data: dict) -> dict:
     """
