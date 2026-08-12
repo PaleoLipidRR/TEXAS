@@ -272,3 +272,83 @@ def test_lock_is_released_by_its_owner(runner, tmp_path, monkeypatch):
     with runner.single_instance():
         assert (tmp_path / ".run.lock").exists()
     assert not (tmp_path / ".run.lock").exists()
+
+
+def test_recommend_survives_being_run_twice(runner, tmp_path, monkeypatch):
+    """
+    Annotating an already-annotated grid must not suffix the columns away.
+
+    Both the runner and the notebook merge per-cell deviation statistics onto
+    the grid and write the result back to the shared CSV. Merging onto a frame
+    that already carries those columns makes pandas rename them to
+    max_z_mean_x / max_z_mean_y -- so the column every downstream gate asks for
+    by name disappears, and because the frame is written back, the damage
+    outlives the process and breaks the other entry point too.
+    """
+    import numpy as np
+    import pandas as pd
+
+    grid = tmp_path / "mcmc_budget_grid.csv"
+    params = tmp_path / "mcmc_budget_params.csv"
+    monkeypatch.setattr(runner, "RESULTS_DIR", tmp_path)
+    monkeypatch.setattr(runner, "GRID_CSV", grid)
+    monkeypatch.setattr(runner, "PARAM_CSV", params)
+    monkeypatch.setattr(runner, "RECO_JSON", tmp_path / "recommended_budget.json")
+
+    budgets = [(400, 800), runner.REF_WARMUP and (runner.REF_WARMUP, runner.REF_SAMPLING)]
+    rows, prows = [], []
+    for w, s in budgets:
+        rows.append({"model": "eiv", "stan_file": "m", "iter_warmup": w,
+                     "iter_sampling": s, "multiplier": s / w, "chains": 4,
+                     "wall_sec": 10.0, "max_rhat": 1.002, "min_ess_bulk": 900.0,
+                     "pct_divergent": 0.0, "status": "ok"})
+        for p in ("t0_crtp", "k_crtp"):
+            prows.append({"model": "eiv", "iter_warmup": w, "iter_sampling": s,
+                          "param": p, "mean": 1.0, "sd": 0.5, "rhat": 1.001,
+                          "ess_bulk": 900.0})
+    pd.DataFrame(rows).to_csv(grid, index=False)
+    pd.DataFrame(prows).to_csv(params, index=False)
+
+    runner.recommend()
+    first = set(pd.read_csv(grid).columns)
+    assert "max_z_mean" in first
+
+    runner.recommend()                      # the second pass is the regression
+    second = pd.read_csv(grid).columns
+    assert "max_z_mean" in second, "the deviation column was suffixed away"
+    assert not [c for c in second if c.endswith(("_x", "_y"))], (
+        f"merge suffixes leaked into the shared CSV: {list(second)}")
+    assert sorted(second) == sorted(first), "column set changed on re-annotation"
+
+
+def test_recommend_repairs_a_suffixed_csv(runner, tmp_path, monkeypatch):
+    """A CSV already damaged by the old behaviour must heal, not accumulate."""
+    import pandas as pd
+
+    grid = tmp_path / "mcmc_budget_grid.csv"
+    params = tmp_path / "mcmc_budget_params.csv"
+    monkeypatch.setattr(runner, "RESULTS_DIR", tmp_path)
+    monkeypatch.setattr(runner, "GRID_CSV", grid)
+    monkeypatch.setattr(runner, "PARAM_CSV", params)
+    monkeypatch.setattr(runner, "RECO_JSON", tmp_path / "recommended_budget.json")
+
+    rows, prows = [], []
+    for w, s in [(400, 800), (runner.REF_WARMUP, runner.REF_SAMPLING)]:
+        rows.append({"model": "eiv", "stan_file": "m", "iter_warmup": w,
+                     "iter_sampling": s, "multiplier": s / w, "chains": 4,
+                     "wall_sec": 10.0, "max_rhat": 1.002, "min_ess_bulk": 900.0,
+                     "pct_divergent": 0.0, "status": "ok",
+                     # the damage the old notebook cell left behind
+                     "max_z_mean_x": 0.01, "max_z_mean_y": 0.01,
+                     "worst_z_param_x": "t0_crtp", "worst_z_param_y": "t0_crtp"})
+        for p in ("t0_crtp", "k_crtp"):
+            prows.append({"model": "eiv", "iter_warmup": w, "iter_sampling": s,
+                          "param": p, "mean": 1.0, "sd": 0.5, "rhat": 1.001,
+                          "ess_bulk": 900.0})
+    pd.DataFrame(rows).to_csv(grid, index=False)
+    pd.DataFrame(prows).to_csv(params, index=False)
+
+    runner.recommend()
+    cols = pd.read_csv(grid).columns
+    assert "max_z_mean" in cols
+    assert not [c for c in cols if c.endswith(("_x", "_y"))], list(cols)

@@ -522,8 +522,18 @@ def recommend(quick=False):
                 max_sd_ratio_dev=("sd_ratio", lambda s: float((s - 1).abs().max())))
            .reset_index())
     dev["worst_z_param"] = dev["worst_z_param"].map(param_df["param"])
-    grid_df = grid_df.drop(columns=[c for c in dev.columns if c in grid_df.columns
-                                    and c not in _KEY], errors="ignore")
+    # Drop previous deviation columns before merging, INCLUDING ones a merge
+    # has already suffixed. The notebook used to merge without this guard and
+    # wrote the result back to GRID_CSV, leaving max_z_mean_x / max_z_mean_y
+    # and no max_z_mean at all -- which then broke both files. Sweeping the
+    # suffixed forms up here means a damaged CSV repairs itself on the next run
+    # instead of accumulating another pair.
+    _dev_cols = [c for c in dev.columns if c not in _KEY]
+    grid_df = grid_df.drop(
+        columns=[c for c in grid_df.columns
+                 if c in _dev_cols
+                 or (c[-2:] in ("_x", "_y") and c[:-2] in _dev_cols)],
+        errors="ignore")
     grid_df = grid_df.merge(dev, on=_KEY, how="left")
     grid_df.to_csv(GRID_CSV, index=False)
     param_df.to_csv(PARAM_CSV, index=False)
