@@ -115,6 +115,102 @@ assigned to exactly one step, none double-assigned, none missed.
 
 ---
 
+## HANDOFF — 2026-08-12, mid-refit (read this first)
+
+A refit job is **running in the background right now**. Everything else below
+this section predates it.
+
+```bash
+tail -f refits.log                                   # progress
+cat data/revision1/groupA/manuscript_refit/manifest.csv    # what finished
+python scripts/run_manuscript_refits.py audit        # is it submission-ready?
+```
+
+### What is running
+
+`scripts/run_manuscript_refits.py all` — **7 forward calibrations + 64
+reconstructions**, started 14:07, expect roughly 4-5 hours. It refits every
+manuscript case at one budget so the parent additive-EIV and bounded-T arms
+differ in the model and nothing else.
+
+- Forward **400/1000**: not the cheapest cell for any single model, but the
+  cheapest clearing all four gates for all three. A per-model budget would
+  sample the two arms differently, which is a confound in exactly the
+  comparison being made.
+- Inverse **500/1000, M=300**.
+- Seed 42, 4 chains, proxy `scaledRI_cren3`, NO3 cutoff 1.0, both SST and
+  thermoT.
+
+**It is resumable and safe to interrupt.** Every completed run is appended to
+`manifest.csv` immediately and skipped next time. `kill -TERM <pid>` finishes
+the run in flight, writes it, and exits; a second signal aborts. Restart with
+the same command. The lockfile is
+`data/revision1/groupA/manuscript_refit/.run.lock`, and the script refuses to
+start while the sensitivity sweep holds its own lock — two Stan jobs on this
+box share one binary cache and one set of cores.
+
+**When it finishes, run the audit.** It re-reads what was written and reports
+READY or NOT READY: one budget throughout, culmeso and a univariate fit present
+for every target, identical training rows and R2_thermal across arms, every
+reconstruction paired between arms, no date stamps in any filename. An empty
+manifest reports NOT READY, so it cannot pass by doing nothing.
+
+### What this does NOT disturb
+
+`SI_code3_paleo_showcases.ipynb` is the **original submission's** paleo
+analysis. Nothing it reads is overwritten: forward refits take the next free
+member (`.002` beside `.001`) and the reconstructions carry new scenario tags,
+so the date-stamped files it loads stay exactly where they are.
+
+`SI03_paleo_showcases_modelswitch.ipynb` is the **revision** notebook and is
+what the refit feeds. Until the job finishes, its load cells will report the
+old reconstructions missing — the scenario tags changed (see below).
+
+### Naming changed: no more dates in filenames
+
+The run date is now recorded in the **`run_timestamp` attr** instead. It was
+not recorded anywhere before — the date lived only in the filename, so this had
+to be added first or the date would have been lost outright.
+
+The date was also doing collision-avoidance, which the **run/member token** now
+does properly: `save_posterior(run="auto")` takes the next free member, so a
+refit lands beside the run it repeats rather than on top of it. Because a
+legacy name pins no member, `resolve_posterior_path` now returns the **newest**
+member — an ascending scan would have served the first fit of a configuration
+forever, silently, since nothing downstream reports which member it loaded.
+
+SI03's NO3 scenarios are named rather than dated (`no3_modern`, `no3_01`,
+`no3_001`, `no3_10`). Stripping the date exposed that it was load-bearing: the
+modern-NO3 scenario's tag *was* the bare date.
+
+### Still open when you get back
+
+- [ ] Run `audit` and read it. Fix anything NOT READY before quoting numbers.
+- [ ] Re-run SI03's figure cells against the new posteriors.
+- [ ] **Under-coverage in the inverse model.** Part 3 found 68% intervals
+      containing measured SST only 59-61% of the time and 90% intervals 84%,
+      stable across all nine cells so it is not noise. Partly by construction
+      (constant prior, in-sample, stress-weighted subset) but it deserves an
+      explanation before it reaches an SI.
+- [ ] **The invT drift floor rests on one seed replicate** (0.271 degC). Two or
+      three more would make the "budget does not matter" claim rigorous.
+- [ ] Phase 5A: `inv_relpath()` is still dead code with a competing leaf format.
+- [ ] The branch is **6 commits behind `main`** — merge before opening any PR.
+- [ ] `data/README.md` cites DOI `19666745`; `README.md`, `CITATION.cff` and
+      `download.py` use `20032542`. Reconcile before submission.
+- [ ] `streamlit_app/pages/calibration_data.py` reads `post["Q_crtp"]`, and Q
+      was removed from every Stan model on 2026-03-24. That page is broken
+      against any current posterior.
+
+### Uncommitted, deliberately
+
+`SI_code2_TEXAS_analysis.ipynb` and the regenerated
+`AppendixA_culmesoT_prior_distributions.pdf` are live edits — the run cells were
+uncommented and one switched to a case id. Left alone; commit when you are happy
+with them.
+
+---
+
 ## STATUS: Phases 0, 1 and 2 are DONE — resume at Phase 3 (2026-08-10)
 
 > ### Handoff — Linux box → Windows, 2026-08-11
