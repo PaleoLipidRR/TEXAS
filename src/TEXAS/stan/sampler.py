@@ -3,6 +3,7 @@
 import time
 import importlib.util
 import os
+import warnings
 from pathlib import Path
 import numpy as np
 import xarray as xr
@@ -15,6 +16,29 @@ from .metadata import extract_and_update_metadata, extract_priors_from_stan
 from ..diagnostics import summarize_sampler_diagnostics
 from ..utils.system_info import suggest_stan_sampling_kwargs
 
+
+
+def _with_diagnostics(fit) -> xr.Dataset:
+    """
+    Convert a fit to draws and stamp the stan_diag_* summary onto it.
+
+    This has to happen here, not in a caller. The CmdStanMCMC object is the only
+    thing that knows R-hat, ESS and the divergence count, and it goes out of
+    scope when this returns; the inverse-temperature path then reduces the draws
+    to quantiles before saving, so a reconstruction that lost its diagnostics
+    here can never have them recomputed from the saved file.
+
+    Diagnostics are advisory, so a failure to summarise must not lose a
+    completed fit -- the sampling is the expensive part.
+    """
+    ds = fit.draws_xr()
+    try:
+        for key, val in summarize_sampler_diagnostics(fit).items():
+            ds.attrs[key] = val
+    except Exception as exc:                                   # pragma: no cover
+        warnings.warn(f"could not summarise sampler diagnostics: {exc}",
+                      RuntimeWarning)
+    return ds
 
 
 # ─── SAMPLER CLASS ─────────────────────────────────────────────────────────
@@ -38,7 +62,7 @@ class StanSampler:
         try:
             fit = model.sample(data=data, **kwargs)
             print("✅ Stan sampling completed successfully")
-            return fit.draws_xr()
+            return _with_diagnostics(fit)
         except RuntimeError as e:
             # Exit code 127 means the compiled binary is incompatible with the
             # current runtime (e.g. TBB version mismatch between Docker image and
@@ -73,7 +97,7 @@ class StanSampler:
                         del self.compiler.cache[key]
                 fit = model.sample(data=data, **kwargs)
                 print("✅ Stan sampling completed after recompilation")
-                return fit.draws_xr()
+                return _with_diagnostics(fit)
             print(f"❌ Stan sampling failed: {e}")
             raise
 
