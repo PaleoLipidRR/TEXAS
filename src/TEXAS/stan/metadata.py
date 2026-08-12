@@ -120,7 +120,17 @@ def extract_and_update_metadata(
     if "posteriors_used" in data:
         metadata["posteriors_used"] = data["posteriors_used"]
 
-    # 6) attach & return
+    # 6) when the run happened
+    #
+    # This is the only record of it. Forward filenames used to carry a date
+    # stamp ("..._050126_eiv.nc") and nothing else wrote the date down, so
+    # dropping the stamp from the name would have lost it entirely. The attr
+    # is the right home for it regardless: a date belongs to the run, not to
+    # the path, and it survives a rename. Matches the ``run_timestamp`` the
+    # inverse path already records, so both halves agree on the key.
+    metadata.setdefault("run_timestamp", datetime.now().isoformat(timespec="seconds"))
+
+    # 7) attach & return
     ds.attrs.update(metadata)
     return ds
 

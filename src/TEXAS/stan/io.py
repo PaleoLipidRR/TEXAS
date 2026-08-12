@@ -28,6 +28,7 @@ def save_posterior(
     overwrite: bool = True,
     filename_suffix: str = "",
     layout: Literal["auto", "case", "legacy"] = "auto",
+    run: Union[str, int] = "auto",
 ) -> Path:
     """
     Save a forward-model posterior to disk as compressed NetCDF.
@@ -51,9 +52,18 @@ def save_posterior(
         If ``False``, raise ``FileExistsError`` when the output path
         already exists.  Default ``True``.
     filename_suffix : str, optional
-        Extra tag appended before ``.nc``, e.g. ``"032326"`` for a
-        date-stamped run.  Leading/trailing underscores are stripped.
-        Under the case layout this becomes the run/member token.
+        Extra tag appended before ``.nc`` under the *legacy* layout, and the
+        run/member token under the case layout.  Leading/trailing underscores
+        are stripped.  **Do not pass a date here.**  Filenames no longer carry
+        date stamps; the run date is recorded in the ``run_timestamp`` attr,
+        where it survives a rename and does not have to be parsed back out of
+        a path.  Prefer ``run=`` for an explicit member.
+    run : str or int, optional
+        Run/member token under the case layout.  ``"auto"`` (default) takes the
+        next free member for this calibration, so re-running a configuration
+        writes ``.002`` beside ``.001`` instead of overwriting it.  Pass an
+        explicit value to pin one.  Ignored when *filename_suffix* is given, so
+        existing callers keep their behaviour.
     layout : {"auto", "case", "legacy"}
         Where to write.  ``"case"`` uses the CESM-style case directory
         (``tx.v026.GHEB.sst.ri3.G23-N10/fwd.nc``); ``"legacy"`` uses the
@@ -99,11 +109,22 @@ def save_posterior(
     outpath = legacy_path
     if layout in ("case", "auto"):
         try:
-            from ..utils.naming import case_from_attrs, fwd_relpath, DEFAULT_RUN
-            # A date-stamped suffix becomes the run/member token, which is what
-            # keeps two refits of one configuration from colliding.
-            case = case_from_attrs(posterior.attrs,
-                                   run=filename_suffix.strip("_") or DEFAULT_RUN)
+            from dataclasses import replace
+            from ..utils.naming import (case_from_attrs, fwd_relpath,
+                                        next_free_run, DEFAULT_RUN)
+            # The run/member token is what keeps a refit from overwriting the
+            # run it repeats. It used to be a date lifted from filename_suffix;
+            # dates are now recorded in the run_timestamp attr instead, and the
+            # token counts. "auto" takes the next free member, so re-running a
+            # configuration adds .002 beside .001 rather than replacing it.
+            explicit = filename_suffix.strip("_")
+            if run == "auto":
+                case = case_from_attrs(posterior.attrs,
+                                       run=explicit or DEFAULT_RUN)
+                if not explicit:
+                    case = replace(case, run=next_free_run(case, outdir))
+            else:
+                case = case_from_attrs(posterior.attrs, run=str(run))
             outpath = outdir / fwd_relpath(case)
             outpath.parent.mkdir(exist_ok=True, parents=True)
             posterior.attrs["case_id"] = str(case)

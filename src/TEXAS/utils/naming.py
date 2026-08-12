@@ -98,6 +98,7 @@ __all__ = [
     "is_case_id",
     "encode_predictors",
     "decode_predictors",
+    "next_free_run",
     "DEFAULT_RUN",
 ]
 
@@ -499,6 +500,50 @@ def is_case_id(text: str) -> bool:
         return False
 
 
+def next_free_run(case: Union["CaseName", str],
+                  indir: Union[str, Path]) -> str:
+    """
+    The lowest unused run/member token for *case* under *indir*.
+
+    This is what replaced the date stamp. Filenames used to carry one
+    (``..._050126_eiv.nc``) and it was doing real work: it kept a refit from
+    overwriting the run it was repeating. A date is the wrong tool for that --
+    it collides for two runs on one day, sorts lexically only by luck, and
+    encodes in a path something that belongs in metadata (see the
+    ``run_timestamp`` attr). CESM's ensemble-member field does the job
+    properly, and counting is unambiguous.
+
+    Scans existing case directories that differ from *case* only in the run
+    position and returns the next free three-digit token. ``001`` when none
+    exist.
+
+    >>> next_free_run("tx.v026.GHEB.sst.sri03.G23-N10.001", "/tmp/empty")
+    '001'
+    """
+    indir = Path(indir)
+    case = parse_case(case) if isinstance(case, str) else case
+    if not indir.is_dir():
+        return DEFAULT_RUN
+
+    used = set()
+    for d in indir.iterdir():
+        if not d.is_dir():
+            continue
+        try:
+            other = parse_case(d.name)
+        except Exception:
+            continue
+        # Same calibration identity, different member.
+        if replace(other, run=case.run) == case:
+            used.add(other.run)
+
+    n = 1
+    width = max(len(DEFAULT_RUN), *(len(u) for u in used)) if used else len(DEFAULT_RUN)
+    while f"{n:0{width}d}" in used:
+        n += 1
+    return f"{n:0{width}d}"
+
+
 # ---------------------------------------------------------------------------
 # Paths within a case
 # ---------------------------------------------------------------------------
@@ -636,8 +681,15 @@ def resolve_posterior_path(name: str, indir: Union[str, Path]) -> Optional[Path]
                 return f
         return None
 
-    # name looks like a legacy long name -> hunt through the case directories
-    for d in sorted(p for p in indir.iterdir() if p.is_dir()):
+    # name looks like a legacy long name -> hunt through the case directories.
+    #
+    # Sorted DESCENDING so the highest run wins. A legacy name pins no member,
+    # and save_posterior now takes the next free one on every refit, so one
+    # name can match .001, .002, .003 ... Ascending order would hand back the
+    # oldest fit of a configuration -- silently, and forever, since nothing
+    # downstream reports which member it loaded.
+    matches = []
+    for d in sorted((p for p in indir.iterdir() if p.is_dir()), reverse=True):
         fwd = next((d / leaf for leaf in fwd_leaf_candidates(d.name)
                     if (d / leaf).exists()), None)
         if fwd is None:
@@ -652,10 +704,10 @@ def resolve_posterior_path(name: str, indir: Union[str, Path]) -> Optional[Path]
             return fwd
         try:
             if legacy_fwd_name(attrs) == name:
-                return fwd
+                matches.append(fwd)
         except Exception:
             continue
-    return None
+    return matches[0] if matches else None
 
 
 def legacy_fwd_name(attrs: Dict[str, Any], filename_suffix: str = "") -> str:
