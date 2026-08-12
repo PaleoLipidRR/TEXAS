@@ -145,6 +145,20 @@ INVT_CONSTRAINT = "unconstrained"
 # is in degrees, because that is the unit the reader cares about: 0.1 degC is
 # far below the reconstruction's own uncertainty, so a cell that lands within
 # it is indistinguishable in any figure we publish.
+#
+# But a fixed threshold alone is not a usable gate, as the first run of this
+# sweep showed: worst-site drift came in at 0.24-0.45 degC and did NOT fall as
+# the budget rose -- 1000/1000 with M=300 drifted further from the reference
+# than 300/1000 with M=500 did. That is not a budget effect. It is Monte Carlo
+# jitter in the single reference realisation, and it puts a floor under every
+# comparison. A threshold below that floor can never be met at any cost, and
+# would read as "the sampler failed" when nothing failed.
+#
+# So the floor is measured rather than assumed: one extra cell repeats the
+# reference configuration at a different seed, and the gate is whichever is
+# larger, the threshold or the seed-to-seed drift. Comparing a cell against the
+# reference is only meaningful once you know what two identical runs differ by.
+INVT_REPLICATE_SEED = 43
 INVT_CRITERIA = dict(max_rhat=1.01, min_ess_bulk=400.0, pct_divergent=0.0,
                      max_p50_drift=0.1)
 
@@ -771,7 +785,7 @@ def run_invt_case(fwd_name, subset, proxy_col, iter_warmup, iter_sampling, M,
     row = {
         "fwd_posterior": fwd_name,
         "iter_warmup": iter_warmup, "iter_sampling": iter_sampling, "M": M,
-        "chains": chains, "n_sites": len(subset),
+        "seed": seed, "chains": chains, "n_sites": len(subset),
         "wall_sec": wall,
         "max_rhat": meta.get("stan_diag_max_rhat", np.nan),
         "min_ess_bulk": meta.get("stan_diag_min_ess_bulk", np.nan),
@@ -789,14 +803,14 @@ def run_invt_case(fwd_name, subset, proxy_col, iter_warmup, iter_sampling, M,
     }
     sites = pd.DataFrame({
         "iter_warmup": iter_warmup, "iter_sampling": iter_sampling, "M": M,
-        "site_row": np.arange(len(subset)),
+        "seed": seed, "site_row": np.arange(len(subset)),
         "proxy": subset[proxy_col].to_numpy(dtype=float),
         "sst_measured": truth, "p16": p16, "p50": p50, "p84": p84,
     })
     return row, sites
 
 
-_INVT_KEY = ["iter_warmup", "iter_sampling", "M"]
+_INVT_KEY = ["iter_warmup", "iter_sampling", "M", "seed"]
 
 
 def _invt_fwd_name():
@@ -816,20 +830,34 @@ def run_part3(quick=False, force=False, dry_run=False, m_values=None):
     grid_df, site_df = (pd.DataFrame(), pd.DataFrame()) if force else (
         _read(INVT_CSV), _read(INVT_SITES_CSV))
 
-    todo = [(w, s, m) for w, s in budgets for m in m_values
-            if grid_df.empty or not
-            ((grid_df["iter_warmup"] == w) & (grid_df["iter_sampling"] == s)
-             & (grid_df["M"] == m)).any()]
+    cells = [(w, s, m, SEED) for w, s in budgets for m in m_values]
+    # The replicate: the reference configuration again at a different seed. It
+    # is what turns "this cell drifts 0.3 degC from the reference" into a
+    # statement about the budget rather than about the reference's own noise.
+    rw, rs = max(budgets)
+    cells.append((rw, rs, max(m_values), INVT_REPLICATE_SEED))
+
+    def _done(w, s, m, sd):
+        if grid_df.empty:
+            return False
+        seeds = (grid_df["seed"] if "seed" in grid_df.columns
+                 else pd.Series(SEED, index=grid_df.index))
+        return bool(((grid_df["iter_warmup"] == w)
+                     & (grid_df["iter_sampling"] == s)
+                     & (grid_df["M"] == m) & (seeds == sd)).any())
+
+    todo = [c for c in cells if not _done(*c)]
 
     log(f"Part 3: {len(todo)} invT fit(s) to run "
-        f"({len(budgets)} budget(s) x {len(m_values)} M value(s), "
-        f"n={n_sites} coretop sites)")
+        f"({len(budgets)} budget(s) x {len(m_values)} M value(s) "
+        f"+ 1 seed replicate, n={n_sites} coretop sites)")
     if not todo:
         log("Part 3: everything cached, nothing to sample")
         return grid_df, site_df
     if dry_run:
-        for w, s, m in todo:
-            log(f"    warmup={w} sampling={s} M={m}")
+        for w, s, m, sd in todo:
+            tag = "  <- seed replicate" if sd != SEED else ""
+            log(f"    warmup={w} sampling={s} M={m} seed={sd}{tag}")
         return grid_df, site_df
 
     fwd_name = _invt_fwd_name()
@@ -853,14 +881,17 @@ def run_part3(quick=False, force=False, dry_run=False, m_values=None):
         f"SST {subset['SST'].min():.1f}-{subset['SST'].max():.1f} degC, "
         f"proxy {subset.iloc[:, 1].min():.3f}-{subset.iloc[:, 1].max():.3f}")
 
-    for i, (w, s, m) in enumerate(todo, 1):
+    for i, (w, s, m, sd) in enumerate(todo, 1):
         if STOP.requested:
             log("stopping as requested; progress is saved")
             break
-        log(f"[{i}/{len(todo)}] invT warmup={w} sampling={s} M={m} ...")
+        tag = "  (seed replicate)" if sd != SEED else ""
+        log(f"[{i}/{len(todo)}] invT warmup={w} sampling={s} M={m} "
+            f"seed={sd}{tag} ...")
         try:
             row, sites = run_invt_case(
-                fwd_name, subset, PROXIES[PRODUCTION_PROXY]["column"], w, s, m)
+                fwd_name, subset, PROXIES[PRODUCTION_PROXY]["column"], w, s, m,
+                seed=sd)
             row["status"] = "ok"
             log(f"          {row['wall_sec']:.0f}s  R-hat={row['max_rhat']:.4f}  "
                 f"ESS={row['min_ess_bulk']:.0f}  RMSE={row['rmse_degC']:.2f}degC  "
@@ -868,7 +899,7 @@ def run_part3(quick=False, force=False, dry_run=False, m_values=None):
         except Exception as exc:
             log(f"          FAILED {type(exc).__name__}: {exc}")
             row = {"fwd_posterior": fwd_name, "iter_warmup": w,
-                   "iter_sampling": s, "M": m, "chains": CHAINS,
+                   "iter_sampling": s, "M": m, "seed": sd, "chains": CHAINS,
                    "n_sites": len(subset),
                    "status": f"failed: {type(exc).__name__}"}
             sites = pd.DataFrame()
@@ -892,12 +923,18 @@ def recommend_invt():
     if ok.empty:
         raise RuntimeError("every Part 3 cell failed")
 
-    # Reference = richest cell actually run. Drift is per-site so a cell cannot
-    # hide a warm-end error inside a flattering mean.
-    ref = ok.sort_values(["iter_warmup", "iter_sampling", "M"]).iloc[-1]
-    ref_key = (int(ref["iter_warmup"]), int(ref["iter_sampling"]), int(ref["M"]))
+    if "seed" not in ok.columns:
+        ok["seed"] = SEED
+    # Reference = richest cell at the primary seed. Drift is per-site so a cell
+    # cannot hide a warm-end error inside a flattering mean.
+    primary = ok[ok["seed"] == SEED]
+    ref = primary.sort_values(["iter_warmup", "iter_sampling", "M"]).iloc[-1]
+    ref_key = (int(ref["iter_warmup"]), int(ref["iter_sampling"]),
+               int(ref["M"]), int(ref["seed"]))
     drift = {}
     if not site_df.empty:
+        if "seed" not in site_df.columns:
+            site_df["seed"] = SEED
         keyed = {k: g.set_index("site_row")["p50"]
                  for k, g in site_df.groupby(_INVT_KEY)}
         base = keyed.get(ref_key)
@@ -907,21 +944,42 @@ def recommend_invt():
             common = series.index.intersection(base.index)
             drift[k] = float((series[common] - base[common]).abs().max())
     ok["max_p50_drift"] = [
-        drift.get((int(r.iter_warmup), int(r.iter_sampling), int(r.M)), np.nan)
+        drift.get((int(r.iter_warmup), int(r.iter_sampling), int(r.M),
+                   int(r.seed)), np.nan)
         for r in ok.itertuples()]
     ok.to_csv(INVT_CSV, index=False)
+
+    # The seed replicate: same configuration as the reference, different seed.
+    # Its drift is what two identical runs differ by, so no cell can be asked
+    # to beat it -- that would be demanding the sampler be more reproducible
+    # than it is with itself.
+    rep = ok[(ok["seed"] != SEED)
+             & (ok["iter_warmup"] == ref_key[0])
+             & (ok["iter_sampling"] == ref_key[1]) & (ok["M"] == ref_key[2])]
+    floor = float(rep["max_p50_drift"].max()) if not rep.empty else np.nan
+    drift_gate = INVT_CRITERIA["max_p50_drift"]
+    if np.isfinite(floor):
+        drift_gate = max(drift_gate, floor)
 
     log("")
     log("=" * 66)
     log("RECOMMENDED invT BUDGET")
     log("=" * 66)
-    log(f"reference cell: warmup={ref_key[0]} sampling={ref_key[1]} M={ref_key[2]}")
+    log(f"reference cell: warmup={ref_key[0]} sampling={ref_key[1]} "
+        f"M={ref_key[2]} seed={ref_key[3]}")
+    if np.isfinite(floor):
+        log(f"seed-to-seed floor: {floor:.3f} degC (same config, seed "
+            f"{int(rep['seed'].iloc[0])}) -> drift gate {drift_gate:.3f} degC")
+    else:
+        log(f"no seed replicate present; drift gate is the fixed "
+            f"{drift_gate:.3f} degC and may sit below the noise floor")
 
-    passing = ok[(ok["max_rhat"] < INVT_CRITERIA["max_rhat"])
-                 & (ok["min_ess_bulk"] >= INVT_CRITERIA["min_ess_bulk"])
-                 & (ok["pct_divergent"] <= INVT_CRITERIA["pct_divergent"])
-                 & (ok["max_p50_drift"].fillna(np.inf)
-                    <= INVT_CRITERIA["max_p50_drift"])]
+    candidates = ok[ok["seed"] == SEED]      # never recommend the replicate
+    passing = candidates[
+        (candidates["max_rhat"] < INVT_CRITERIA["max_rhat"])
+        & (candidates["min_ess_bulk"] >= INVT_CRITERIA["min_ess_bulk"])
+        & (candidates["pct_divergent"] <= INVT_CRITERIA["pct_divergent"])
+        & (candidates["max_p50_drift"].fillna(np.inf) <= drift_gate)]
     if passing.empty:
         log("  no swept cell meets all four criteria")
         out = {}
@@ -934,6 +992,8 @@ def recommend_invt():
             "wall_sec": float(best["wall_sec"]),
             "reference_cell": {"iter_warmup": ref_key[0],
                                "iter_sampling": ref_key[1], "M": ref_key[2]},
+            "seed_to_seed_floor_degC": floor,
+            "drift_gate_degC": drift_gate,
             "speedup_vs_reference": float(ref["wall_sec"] / best["wall_sec"]),
             "max_rhat": float(best["max_rhat"]),
             "min_ess_bulk": float(best["min_ess_bulk"]),
@@ -953,6 +1013,7 @@ def recommend_invt():
 
     INVT_RECO_JSON.write_text(json.dumps(
         {"criteria": INVT_CRITERIA, "in_sample": True,
+         "seed_to_seed_floor_degC": floor, "drift_gate_degC": drift_gate,
          "prior": {"mu": "constant, subset mean SST",
                    "sigma_t": INVT_PRIOR_SIGMA_T},
          "recommendation": out}, indent=2))
