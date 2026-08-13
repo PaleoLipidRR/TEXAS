@@ -323,6 +323,11 @@ differ in bytes while agreeing in content.
       not tidiness: legacy names hit the surviving flat files first, so those
       figures were mixing a pre-refit culmeso and univariate baseline with a
       post-refit bounded-T layer, silently (culmeso t0 35.80 vs 35.64).
+- [x] **SI03 runs clean end to end (cells 0-88, 0 failures).** fig11-14 all
+      regenerated in one pass from the audited cache. The fig14 cell held two
+      more dead names: one raised, and one -- the `draws_tag` -- failed
+      SILENTLY into a Gaussian fallback, so the KDE branch had been dead. Both
+      sites now plot real posterior KDEs (4000 draws).
 - [x] **Rebuilt the extreme-RI section of SI03.** Its generator was pinned to a
       date-stamped posterior that no longer exists. Now case ids, both arms,
       per-variant pickles that do **not** collide with SI_code3's. bounded-T
@@ -330,12 +335,6 @@ differ in bytes while agreeing in content.
 
 ### Still open when you get back
 
-- [ ] **`fig14` is still not regenerated.** The extreme-RI *data* is rebuilt
-      (below), but the figure cell is fed by cells 79-87, which load external
-      data — a NOAA URL and two published spreadsheets — and have never been
-      executed in this notebook. Run those, then the fig14 cell, and check it
-      writes `fig14_extreme_RI_examples_boundedT.pdf` (it already reads
-      `FIG_TAG`, so the variant suffix is automatic).
 - [ ] **`AppendixA_culmesoT_prior_distributions_boundedT.pdf` is stale** —
       written 17:29 on 2026-08-12, before the four single-predictor fits landed
       and from the pre-rename cell sources. Regenerate from SI_code02.
