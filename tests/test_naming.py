@@ -359,6 +359,47 @@ def test_invT_name_lands_in_the_parent_case_directory():
     assert base == "tx.v025.GHEB.sst.sri03.G23-N10.001.inv.U1482.ud-050126"
 
 
+def test_invT_name_is_built_by_inv_relpath_and_not_a_second_spelling():
+    """
+    The production leaf and the documented builder must be the same code.
+
+    They were not: ``io._generate_filename_base`` reimplemented the leaf inline
+    and ``naming.inv_relpath`` was reachable only from tests, so the two drifted
+    (inv_relpath still documented the pre-flattening ``<case>/<leaf>`` layout
+    after the production branch had gone flat). A parametrised equality check is
+    what makes a future divergence fail here rather than in the cache.
+    """
+    from TEXAS.stan.io import _generate_filename_base
+    from TEXAS.utils.naming import inv_relpath
+
+    case = "tx.GHEB.sst.sri03.G23-N10.001"
+    for model, kind in [
+        ("invT_gen_logi_fixed_multiv_marginal_unconstrained", "direct"),
+        ("invT_gen_logi_fixed_multiv_unconstrained", "ensemble"),
+    ]:
+        for tag in [None, "050126", ["no3", "modern"]]:
+            meta = {"SiteName": "U1482", "stan_model_name": model,
+                    "temptype": "sst", "proxy_name": "scaledRI_cren3",
+                    "fwd_case": case}
+            assert _generate_filename_base(meta, tag) == inv_relpath(
+                case, "U1482", constraint="unconstrained", kind=kind,
+                scenario=tag,
+            ).stem
+
+
+def test_inv_relpath_takes_several_scenario_tags():
+    """A sequence and its pre-joined equivalent must give one leaf."""
+    from TEXAS.utils.naming import inv_relpath
+    seq = inv_relpath("tx.GHEB.sst.sri03.G23-N10", "U1482",
+                      scenario=["no3", "modern"]).name
+    assert seq == "tx.GHEB.sst.sri03.G23-N10.inv.U1482.ud-no3-modern.nc"
+    # empty tags drop out rather than leaving a doubled separator
+    assert inv_relpath("tx.GHEB.sst.sri03.G23-N10", "U1482",
+                       scenario=["no3", "", "modern"]).name == seq
+    # a run is appended only when one is asked for
+    assert inv_relpath("tx.GHEB.sst.sri03.G23-N10", "U1482").name.endswith(".ud.nc")
+
+
 def test_invT_without_provenance_keeps_the_legacy_name():
     """Posteriors predating the fwd_case attr must keep working unchanged."""
     from TEXAS.stan.io import _generate_filename_base

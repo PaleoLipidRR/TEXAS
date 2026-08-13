@@ -351,28 +351,37 @@ def _generate_filename_base(
         clean_stan_model = stan_model
 
     # Case layout: a reconstruction belongs to the calibration it marginalised
-    # over, so it is written inside that calibration's case directory under a
-    # short leaf name. Requires the fwd_case attr that build_invT_inputData
-    # attaches; posteriors produced before that fall through to the legacy name.
+    # over, so it is named for that calibration's case. Requires the fwd_case
+    # attr that build_invT_inputData attaches; posteriors produced before that
+    # fall through to the legacy name below.
+    #
+    # The leaf comes from naming.inv_relpath() rather than being spelled out
+    # again here. This function used to reimplement it, which is how the two
+    # drifted: inv_relpath still described the pre-flattening <case>/<leaf>
+    # layout in its docstring while this branch had already gone flat, and only
+    # one of them was reachable from production. There is now one builder, so a
+    # change to the inverse naming scheme cannot land in half of it.
     fwd_case = meta.get("fwd_case", "")
     if fwd_case:
         try:
-            from ..utils.naming import CONSTRAINT_CODES, KIND_CODES, is_case_id
+            from ..utils.naming import CONSTRAINT_CODES, inv_relpath, is_case_id
             if is_case_id(fwd_case):
                 constraint = next(
                     (c for c in CONSTRAINT_CODES if c in stan_model), "unconstrained"
                 )
-                parts = [f"{CONSTRAINT_CODES[constraint]}{KIND_CODES[model_type]}"]
-                if filename_tag:
-                    tags = [filename_tag] if isinstance(filename_tag, str) else filename_tag
-                    parts.extend(_slug(t) for t in tags if t)
-                # Leaf repeats the case so a reconstruction copied out of its
-                # case directory still names the calibration it came from.
-                # NOTE: this still duplicates naming.inv_relpath() rather than
-                # calling it (it omits the run number). Consolidating the two is
-                # Phase 5A in RESUME.md; do not add a third spelling here.
-                # Flat, matching the forward side and Zenodo.
-                return f"{fwd_case}.inv.{site_name}.{'-'.join(parts)}"
+                leaf = inv_relpath(
+                    fwd_case,
+                    site_name,
+                    constraint=constraint,
+                    kind=model_type,
+                    scenario=filename_tag,
+                    # No run number: a reconstruction is identified by its
+                    # (case, site, scenario), and the case already carries the
+                    # member of the calibration it marginalised over.
+                    run=None,
+                )
+                # Callers append the suffix themselves; .stem drops only ".nc".
+                return leaf.stem
         except Exception:
             pass  # naming is a convenience; never block a save on it
 

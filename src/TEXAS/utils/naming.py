@@ -570,19 +570,28 @@ def inv_relpath(
     *,
     constraint: str = "unconstrained",
     kind: str = "direct",
-    scenario: Optional[str] = None,
+    scenario: Union[str, Sequence[str], None] = None,
     run: Union[int, str, None] = None,
 ) -> Path:
     """
-    ``<case>/<case>.inv.<site>.<constraint><kind>[-<scenario>]-<NNN>.nc``
+    ``<case>.inv.<site>.<constraint><kind>[-<scenario>][-<NNN>].nc``
 
     The case is repeated in the leaf for the same reason as in
     :func:`fwd_relpath` -- a reconstruction that is copied out of its case
     directory must still say which calibration it came from.
 
-    >>> p = inv_relpath("tx.v026.GHEB.sst.ri3.G23-N10", "U1482", scenario="mod")
+    *scenario* takes a sequence as well as a single string, because the
+    production caller (``io._generate_filename_base``, via ``filename_tag``)
+    genuinely has more than one tag to spend. Each is slugged separately and
+    they join on hyphens, so a sequence and its pre-joined equivalent give the
+    same leaf.
+
+    >>> p = inv_relpath("tx.GHEB.sst.sri03.G23-N10", "U1482", scenario="mod")
     >>> p.name
-    'tx.v026.GHEB.sst.ri3.G23-N10.inv.U1482.ud-mod-001.nc'
+    'tx.GHEB.sst.sri03.G23-N10.inv.U1482.ud-mod.nc'
+    >>> inv_relpath("tx.GHEB.sst.sri03.G23-N10", "U1482",
+    ...             scenario=["no3", "modern"], run=2).name
+    'tx.GHEB.sst.sri03.G23-N10.inv.U1482.ud-no3-modern-002.nc'
     """
     c = CONSTRAINT_CODES.get(constraint)
     if c is None:
@@ -596,7 +605,8 @@ def inv_relpath(
     # beside "N10" reads as two numbers when only one is.
     parts = [f"{c}{k}"]
     if scenario:
-        parts.append(slug(scenario))
+        tags = [scenario] if isinstance(scenario, str) else scenario
+        parts.extend(slug(t) for t in tags if t)
     if run is not None:
         parts.append(f"{int(run):03d}" if str(run).isdigit() else slug(run))
     c = str(case)
