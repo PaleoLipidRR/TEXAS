@@ -338,11 +338,23 @@ differ in bytes while agreeing in content.
 - [ ] **`AppendixA_culmesoT_prior_distributions_boundedT.pdf` is stale** —
       written 17:29 on 2026-08-12, before the four single-predictor fits landed
       and from the pre-rename cell sources. Regenerate from SI_code02.
-- [ ] **Under-coverage in the inverse model.** Part 3 found 68% intervals
-      containing measured SST only 59-61% of the time and 90% intervals 84%,
-      stable across all nine cells so it is not noise. Partly by construction
-      (constant prior, in-sample, stress-weighted subset) but it deserves an
-      explanation before it reaches an SI.
+- [x] **Under-coverage explained 2026-08-12 — it is interval WIDTH, not bias.**
+      One number accounts for both figures: the mean 68% half-width is
+      **0.863-0.867x the residual SD** (3.83 degC against 4.43 degC). Feed that
+      ratio through a Gaussian and it predicts cov68 = 0.612 against 0.60
+      observed, and cov90 = 0.846 against 0.84 observed. Both, to within a
+      couple of points, from one quantity.
+
+      The +0.93 degC bias is **not** the cause: removing it changes coverage by
+      -0.005, i.e. it slightly *lowers* it. And the ratio is stable to 0.004
+      across every budget cell, which is why this was never sampler noise --
+      more draws cannot widen an interval the model does not think is wide.
+
+      So the honest statement for the SI is that the predictive intervals
+      understate the true error by about 14%: the residual spread contains
+      site-level variability (oceanographic, depth-habitat, bioturbation) that
+      the calibration's noise model does not carry. Reproduce with
+      `data/revision1/groupA/param_sensitivity/invt_budget_sites.csv`.
 - [ ] **The invT drift floor rests on one seed replicate** (0.271 degC). Two or
       three more would make the "budget does not matter" claim rigorous.
 - [ ] Phase 5A: `inv_relpath()` is still dead code with a competing leaf format.
