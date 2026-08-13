@@ -8,6 +8,7 @@ from ..models.logistics import (
 from ..models.multivariate import (
     simple_logistic_fixed_upper_multivariate,
     generalized_logistic_fixed_upper_multivariate,
+    generalized_logistic_fixed_upper_bounded_t,
 )
 
 # --- Shared suffix utilities ---
@@ -59,14 +60,24 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
     has_gdz_any = ("use_gdgt23ratio" in attrs_)
     has_no3_any = ("use_no3" in attrs_)
 
+    # Additive (beta-on-mu) or bounded-T (gamma-on-T0)? Decided from the
+    # variables present, not from stan_model_name — this module has always
+    # inferred structure from data_vars, and a posterior renamed or downloaded
+    # from Zenodo still carries its parameters.
+    is_bounded_t = any(v == "gamma_G23" or v.startswith("gamma_G23_")
+                       or v == "gamma_NO3" or v.startswith("gamma_NO3_")
+                       for v in vars_)
+    coef_G23 = "gamma_G23" if is_bounded_t else "beta_G23"
+    coef_NO3 = "gamma_NO3" if is_bounded_t else "beta_NO3"
+
     # Build candidate basenames up-front for suffix selection
     basenames = ["t0", "b", "k"]
     if has_v_any:
         basenames.append("v")
     if has_gdz_any:
-        basenames += ["beta_G23"]
+        basenames += [coef_G23]
     if has_no3_any:
-        basenames += ["beta_NO3"]
+        basenames += [coef_NO3]
 
     # Choose suffix by priority (or validate preferred)
     suffix = choose_suffix(posterior_ds, basenames, preferred=suffix)
@@ -87,22 +98,33 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
         if has_v:
             params.append("v")
         if has_gdz:
-            params.append("beta_G23")
+            params.append(coef_G23)
         if has_no3:
-            params.append("beta_NO3")
-        
-        model_fn = (
-            generalized_logistic_fixed_upper_multivariate
-            if has_gdz or has_no3 else
-            generalized_logistic_fixed_upper
-        )
+            params.append(coef_NO3)
+
+        if has_gdz or has_no3:
+            model_fn = (generalized_logistic_fixed_upper_bounded_t
+                        if is_bounded_t else
+                        generalized_logistic_fixed_upper_multivariate)
+        else:
+            model_fn = generalized_logistic_fixed_upper
     else:
         params = ["t0", "b", "k"]
         if has_gdz:
-            params.append("beta_G23")
+            params.append(coef_G23)
         if has_no3:
-            params.append("beta_NO3")
-        
+            params.append(coef_NO3)
+
+        # There is no simple-logistic bounded-T model: bounded-T exists only as
+        # the generalized curve. Raise rather than silently fitting the additive
+        # form to gamma coefficients, which would be wrong by a whole
+        # parameterisation and would look plausible.
+        if is_bounded_t:
+            raise ValueError(
+                "Bounded-T coefficients (gamma_*) found on a posterior with no "
+                "v parameter. Bounded-T is only defined for the generalized "
+                "logistic; this posterior looks malformed."
+            )
         model_fn = (
             simple_logistic_fixed_upper_multivariate
             if has_gdz or has_no3 else

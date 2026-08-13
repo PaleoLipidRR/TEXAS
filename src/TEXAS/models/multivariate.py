@@ -125,6 +125,76 @@ def generalized_logistic_fixed_upper_multivariate(
     return mu
 
 
+def generalized_logistic_fixed_upper_bounded_t(
+    x: np.ndarray,
+    t0: float = None,
+    x0: float = None,
+    b: float = None,
+    k: float = None,
+    v: float = None,
+    gamma_G23: float = None,
+    gdgt23ratio: np.ndarray = None,
+    gamma_NO3: float = None,
+    no3: np.ndarray = None,
+    no3_cutoff: float = 50.0
+) -> np.ndarray:
+    """
+    Bounded-T counterpart of :func:`generalized_logistic_fixed_upper_multivariate`.
+
+    The corrections shift the inflection temperature rather than the mean::
+
+        t0_eff = t0 + gamma_G23 * gdgt23ratio
+                    + gamma_NO3 * log10(no3)   [only where 0 < no3 < no3_cutoff]
+        y      = b + (1 - b) / (1 + exp(-k*(x - t0_eff)))^(1/v)
+
+    That keeps ``y`` inside ``(b, 1)`` for every finite predictor value, which is
+    the entire point of the parameterisation — the additive form can push the
+    mean outside the proxy's range. Mirrors ``bounded_mu()`` in
+    ``gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT.stan``, including
+    the NO3 gate.
+
+    One deliberate difference from the Stan model: there, the gate is applied to
+    the OBSERVED nitrate while ``log10`` is taken of the LATENT (EIV) value. A
+    plotted curve has only one nitrate array to work from, so it is used for
+    both — exactly as the additive Python function already does.
+
+    **That difference is not cosmetic.** Fed this function's own convention, the
+    per-draw ``mu_max`` sits ~0.1 above the ``mu_max`` Stan recorded in generated
+    quantities; fed the latent values from ``true_no3_crtp`` /
+    ``true_gdgt23ratio_crtp``, it reproduces Stan to 8e-7 (float32 storage
+    precision), which is how the formula here was verified. So a curve drawn
+    from observed predictors is the right thing for plotting against observed
+    data, but it is not the in-sample fit and should not be compared to one
+    digit for digit. The additive model has the same property.
+
+    If v is None it defaults to 1.0 (reducing to the standard logistic).
+    """
+    inf = t0 if t0 is not None else x0
+    if inf is None:
+        raise ValueError("Missing required parameter: t0 (or x0).")
+
+    v_val = v if v is not None else 1.0
+
+    x_arr = np.asarray(x, dtype=float)
+    t0_eff = np.full(x_arr.shape, float(inf))
+
+    if gamma_G23 is not None and gdgt23ratio is not None:
+        arr = np.asarray(gdgt23ratio)
+        if arr.shape != x_arr.shape:
+            raise ValueError(f"gdgt23ratio.shape {arr.shape} != x.shape {x_arr.shape}")
+        t0_eff = t0_eff + gamma_G23 * arr
+
+    if gamma_NO3 is not None and no3 is not None:
+        arr = np.asarray(no3)
+        if arr.shape != x_arr.shape:
+            raise ValueError(f"no3.shape {arr.shape} != x.shape {x_arr.shape}")
+        mask = (arr > 0) & (arr < no3_cutoff)
+        t0_eff = t0_eff.copy()
+        t0_eff[mask] += gamma_NO3 * np.log10(arr[mask])
+
+    return b + (1.0 - b) / np.power(1.0 + np.exp(-k * (x_arr - t0_eff)), 1.0 / v_val)
+
+
 def inverse_generalized_logistic_fixed_upper_multivariate(
     y: np.ndarray,
     t0: float = None,

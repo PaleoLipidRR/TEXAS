@@ -219,3 +219,80 @@ class TestInverseGeneralizedLogisticMultivariate:
             inverse_generalized_logistic_fixed_upper_multivariate(
                 y=0.5, t0=None, b=0.05, k=0.4
             )
+
+
+class TestBoundedTMultivariate:
+    """Bounded-T shifts T0 instead of mu, so the curve cannot leave (b, 1).
+
+    Added 2026-08-12 with the function itself: bounded-T support landed across
+    the package (builder, invT, metadata, naming, prior_plot) but the ensemble
+    path was missed, so generate_ensemble_auto() raised
+    "Missing parameters: ['beta_G23_crtp', 'beta_NO3_crtp']" on every bounded-T
+    posterior -- it has gamma_* coefficients, not beta_*.
+    """
+
+    def _kw(self):
+        return dict(t0=25.0, b=0.4, k=0.3, v=1.5)
+
+    def test_reduces_to_plain_curve_without_predictors(self):
+        import numpy as np
+        from TEXAS.models.multivariate import (
+            generalized_logistic_fixed_upper_bounded_t as fbnd)
+        from TEXAS.models.logistics import generalized_logistic_fixed_upper
+
+        x = np.linspace(0, 40, 25)
+        np.testing.assert_allclose(
+            fbnd(x, **self._kw()),
+            generalized_logistic_fixed_upper(x, **self._kw()),
+            rtol=1e-12)
+
+    def test_stays_inside_open_interval_for_extreme_predictors(self):
+        import numpy as np
+        from TEXAS.models.multivariate import (
+            generalized_logistic_fixed_upper_bounded_t as fbnd,
+            generalized_logistic_fixed_upper_multivariate as fadd)
+
+        x = np.linspace(0, 40, 25)
+        b = self._kw()["b"]
+        huge = np.full_like(x, 50.0)          # absurd G2/3, to make the point
+
+        y = fbnd(x, **self._kw(), gamma_G23=3.0, gdgt23ratio=huge)
+        assert np.all(y > b) and np.all(y < 1.0)
+
+        # the additive form is what bounded-T exists to fix: it leaves (b, 1)
+        y_add = fadd(x, **self._kw(), beta_G23=3.0, gdgt23ratio=huge)
+        assert np.any(y_add > 1.0)
+
+    def test_no3_gate_matches_the_stan_model(self):
+        import numpy as np
+        from TEXAS.models.multivariate import (
+            generalized_logistic_fixed_upper_bounded_t as fbnd)
+
+        x = np.linspace(0, 40, 4)
+        # only the middle two are inside (0, cutoff) and may be shifted
+        no3 = np.array([0.0, 0.5, 0.9, 5.0])
+        base = fbnd(x, **self._kw())
+        y = fbnd(x, **self._kw(), gamma_NO3=4.0, no3=no3, no3_cutoff=1.0)
+        np.testing.assert_allclose(y[[0, 3]], base[[0, 3]], rtol=1e-12)
+        assert not np.allclose(y[[1, 2]], base[[1, 2]])
+
+    def test_detector_dispatches_on_gamma_coefficients(self):
+        import numpy as np
+        import xarray as xr
+        from TEXAS.ensemble.detection import detect_model_and_params
+        from TEXAS.models.multivariate import (
+            generalized_logistic_fixed_upper_bounded_t as fbnd)
+
+        dims = ("chain", "draw")
+        shape = (1, 3)
+        ds = xr.Dataset(
+            {n: (dims, np.ones(shape)) for n in
+             ("t0_crtp", "b_crtp", "k_crtp", "v_crtp",
+              "gamma_G23_crtp", "gamma_NO3_crtp")},
+            attrs={"use_gdgt23ratio": 1, "use_no3": 1, "no3_cutoff": 1.0},
+        )
+        det = detect_model_and_params(ds)
+        assert det["model_function"] is fbnd
+        assert det["param_names"] == ["t0", "b", "k", "v",
+                                      "gamma_G23", "gamma_NO3"]
+        assert det["suffix"] == "crtp"
