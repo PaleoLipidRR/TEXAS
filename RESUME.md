@@ -348,8 +348,13 @@ differ in bytes while agreeing in content.
 - [ ] Phase 5A: `inv_relpath()` is still dead code with a competing leaf format.
 - [ ] The branch is **6 commits behind `main`** (and 75 ahead) — merge before
       opening any PR.
-- [ ] `data/README.md` cites DOI `19666745`; `README.md`, `CITATION.cff` and
-      `download.py` use `20032542`. Reconcile before submission.
+- [x] **DOI reconciled 2026-08-12.** `data/README.md` cited `19666745` while
+      `README.md`, `CITATION.cff` and `download.py` used `20032542`. Aligned on
+      `20032542`, which `download.py` documents as the currently published
+      record and actually fetches from. **Check this if 19666745 was the
+      *concept* DOI** (all-versions) rather than a superseded version DOI — in
+      that case the right move is the opposite one, and citing the concept DOI
+      is better practice. Could not verify from here without network access.
 - [ ] `streamlit_app/pages/calibration_data.py` reads `post["Q_crtp"]`, and Q
       was removed from every Stan model on 2026-03-24. That page is broken
       against any current posterior.

@@ -5,7 +5,7 @@ Everything downloads into it; notebooks and the package API read from it;
 the Docker container bind-mounts it from your host machine.
 
 ```
-Zenodo data record (DOI: https://doi.org/10.5281/zenodo.19666745)
+Zenodo data record (DOI: https://doi.org/10.5281/zenodo.20032542)
   ├── posteriors (.nc)   ──→  download_posteriors()    ──→  data/cache/TEXAS_posterior_cache/
   └── training CSVs      ──→  download_training_data() ──→  data/spreadsheets/
                                        ↑
@@ -113,7 +113,7 @@ These are not hosted on the TEXAS Zenodo record — download them separately:
 
 ## Zenodo record
 
-**Data DOI**: https://doi.org/10.5281/zenodo.19666745
+**Data DOI**: https://doi.org/10.5281/zenodo.20032542
 
 You can also download files manually from the Zenodo record page
 and place them in the directories above.
