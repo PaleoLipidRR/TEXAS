@@ -118,3 +118,7 @@ uv.lock
 
 # Run logs from headless notebook/script execution (regenerable)
 logs/
+
+# Run lockfiles written by the long-running Stan drivers in scripts/ (they
+# carry a live pid, so they are machine-local by construction).
+data/revision1/**/.run.lock
