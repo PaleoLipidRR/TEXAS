@@ -121,7 +121,7 @@ Where \(\mu_T\) and \(\sigma_T\) come from prior knowledge (e.g., modern climato
 
 - **Mechanistic**: Based on GDGT biosynthesis behavior, not just empirical regression.
 - **Flexible**: Can include ecological and nutrient effects.
-- **Transparent Uncertainty**: Directly quantifies confidence intervals on temperature estimates.
+- **Transparent Uncertainty**: Directly quantifies credible intervals on temperature estimates.
 - **Culture Integration**: Uses lab data as informative priors, bridging modern process understanding with ancient climate reconstructions.
 
 ---
