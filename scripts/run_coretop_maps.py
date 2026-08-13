@@ -53,6 +53,7 @@ import run_manuscript_refits as R  # noqa: E402
 MANIFEST_BY_ARM = {
     "bnd": "coretop_maps_boundedT_manifest.csv",
     "eiv": "coretop_maps_eiv_manifest.csv",
+    "univ": "coretop_maps_univ_manifest.csv",
 }
 BATCH = 250
 PRIOR_MU_T, PRIOR_SIGMA_T = 20.0, 10.0
@@ -84,7 +85,8 @@ def coretop_frame() -> pd.DataFrame:
 def fwd_case(arm: str, temptype: str, g23: bool, no3: bool) -> str:
     from TEXAS.utils.naming import case_from_attrs
     attrs = {
-        "stan_model_name": R.VARIANTS[arm]["fwd"],
+        "stan_model_name": (R.UNIV_STEM if arm == "univ"
+                            else R.VARIANTS[arm]["fwd"]),
         "temptype": temptype,
         "proxy_name": R.PROXY,
         "use_gdgt23ratio": int(g23),
@@ -120,8 +122,10 @@ def done_keys(arm: str) -> set:
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--arm", choices=("bnd", "eiv"), default="bnd",
-                    help="bnd = bounded-T (default), eiv = additive parent")
+    ap.add_argument("--arm", choices=("bnd", "eiv", "univ"), default="bnd",
+                    help="bnd = bounded-T, eiv = additive parent, "
+                         "univ = thermal-only baseline (run ONCE; it has no "
+                         "predictors, so it is shared by both arms)")
     ap.add_argument("--temptypes", nargs="+", choices=list(R.TEMPTYPES),
                     default=list(R.TEMPTYPES))
     ap.add_argument("--batch", type=int, default=BATCH)
@@ -158,8 +162,14 @@ def main(argv=None) -> int:
           f"{R.CHAINS} chains, seed {R.SEED}; prior N({PRIOR_MU_T}, {PRIOR_SIGMA_T})")
 
     todo = []
+    # The thermal-only baseline is a single predictor-free configuration per
+    # target. It is shared by both arms -- bounded-T only changes where the
+    # predictors enter, and there are none here -- so it is run once under its
+    # own manifest rather than duplicated per arm. fig9/fig10 need it as the
+    # "univ" layer, which is why it cannot simply be skipped.
+    configs = [("p0", False, False)] if args.arm == "univ" else CONFIGS
     for tt in args.temptypes:
-        for cell, g23, no3 in CONFIGS:
+        for cell, g23, no3 in configs:
             case = fwd_case(args.arm, tt, g23, no3)
             if resolve_posterior_path(case, POSTERIOR_CACHE_DIR) is None:
                 R.log(f"  SKIP {tt} {cell}: forward posterior {case} not in cache")
@@ -188,7 +198,8 @@ def main(argv=None) -> int:
                     R.log("stopping between batches, as requested")
                     return 0
                 sub = df.iloc[s0:s0 + args.batch]
-                preds = {"gdgt23ratio": sub["gdgt23ratio"].values}
+                preds = ({"gdgt23ratio": sub["gdgt23ratio"].values}
+                         if g23 else None)
                 if no3:
                     preds["no3"] = sub["no3_sf2tc_avg"].values
                 t0 = time.time()
