@@ -333,6 +333,23 @@ differ in bytes while agreeing in content.
       per-variant pickles that do **not** collide with SI_code3's. bounded-T
       moves ODP1259 by 3.33 degC and Co1010 by 0.38 degC.
 
+### Decided, do not relitigate
+
+- **`tx.GHPU.sst.sri05.p0` fails the strict R-hat gate (1.01407) and that is
+  accepted.** Checked 2026-08-13. The failing fit is the SRI05 *univariate*
+  stage, which enters the analysis only through `R2_thermal`, i.e. as a prior
+  scale. The fits that actually produce the coefficients both pass — SRI05 eiv
+  1.00887, SRI05 bnd 1.00827 — and MCSE on `gamma_G23` is 0.00123 on a median
+  of 0.7641 (0.16%), so the 20.5% G23 spread statistic is precise to a fraction
+  of a point. SRI05 is a comparator, not a production calibration; no refit.
+  Note it *does* set the upper end of that spread, so "unused" is the wrong
+  reason to dismiss it — "its coefficient fit converged" is the right one.
+- **The univariate model is the SLOWEST of the three to converge**, not the
+  fastest, despite having no predictors: only 9 of 27 budget cells clear
+  R-hat <= 1.01, and the worst parameter rotates among k/v/t0 trading off
+  against each other. The production 400/1000 budget clears it comfortably
+  (1.00465, ESS 760); the cheapest clearing cell is 400/600.
+
 ### Still open when you get back
 
 - [ ] **`AppendixA_culmesoT_prior_distributions_boundedT.pdf` is stale** —
