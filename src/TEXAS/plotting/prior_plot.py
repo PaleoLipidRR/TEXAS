@@ -31,6 +31,18 @@ if TYPE_CHECKING:
 # module hardcodes coefficient names.
 CORE_GROUPS: Sequence[str] = ("t0", "k", "b", "v", "a")
 
+# The observation-noise scales. Kept OUT of CORE_GROUPS and appended last in
+# DEFAULT_INCLUDE_GROUPS on purpose: panels are filled row-major, so adding a
+# group anywhere but the end shifts every later panel and silently invalidates
+# the index-based axis limits the manuscript figures set.
+#
+# These were absent from the figures entirely until 2026-08-13, which is what a
+# reviewer noticed -- the noise terms are part of the probabilistic model
+# (sigma_proxyObs_cul / _meso for the culture+mesocosm layer, sigma_proxyObs_crtp
+# for the coretop layer), not ancillary diagnostics, and a parameter figure that
+# omits them is incomplete rather than merely terse.
+NOISE_GROUPS: Sequence[str] = ("sigma_proxyObs",)
+
 PREDICTOR_GROUPS: Dict[str, Dict[str, str]] = {
     "beta_G23":      {"use_flag": "use_gdgt23ratio",
                       "label": r"$\beta_{G_{2/3}}$",
@@ -52,7 +64,8 @@ PREDICTOR_GROUPS: Dict[str, Dict[str, str]] = {
                       "label_culmeso": r"$\beta^{\,\mathrm{logit}}_{NO_3,culmeso}$"},
 }
 
-DEFAULT_INCLUDE_GROUPS: Sequence[str] = (*CORE_GROUPS, *PREDICTOR_GROUPS)
+DEFAULT_INCLUDE_GROUPS: Sequence[str] = (*CORE_GROUPS, *PREDICTOR_GROUPS,
+                                         *NOISE_GROUPS)
 
 # Axis labels for the thermal parameters.  Predictor labels come from
 # PREDICTOR_GROUPS above.  Both tables carry the _culmeso form explicitly —
@@ -63,6 +76,10 @@ _CORE_LABELS: Dict[str, Dict[str, str]] = {
     "b":  {"label": "b",       "label_culmeso": r"b$_{culmeso}$"},
     "v":  {"label": r"$\nu$",  "label_culmeso": r"$\nu_{culmeso}$"},
     "a":  {"label": "a",       "label_culmeso": r"a$_{culmeso}$"},
+    # One entry serves every layer; the per-suffix legend labels below
+    # distinguish cul / meso / crtp.
+    "sigma_proxyObs": {"label": r"$\sigma_{proxyObs}$",
+                       "label_culmeso": r"$\sigma_{proxyObs, culmeso}$"},
 }
 
 
@@ -82,9 +99,17 @@ def _build_label_maps(groups: Sequence[str]) -> Dict[str, str]:
     coincidentally-prefixed key.
     """
     labels: Dict[str, str] = {}
+    _SUFFIX_LABEL = {"cul": "cul", "meso": "meso"}
     for group in groups:
         for suffix in ("crtp", "culmeso"):
             labels[f"{group}_{suffix}"] = _group_label(group, suffix)
+        # gen_logi_fixed_culmeso estimates a separate noise scale per data type,
+        # so the top layer has sigma_proxyObs_cul AND sigma_proxyObs_meso.
+        for suffix, tag in _SUFFIX_LABEL.items():
+            base = _group_label(group, suffix)
+            labels[f"{group}_{suffix}"] = (
+                base.replace("}$", f", {tag}}}$") if base.endswith("}$")
+                else f"{base} ({tag})")
     return dict(sorted(labels.items(), key=lambda kv: -len(kv[0])))
 
 
