@@ -115,3 +115,6 @@ uv.lock
 # .claude/agents/ and .claude/skills/ ARE tracked - they are shared tooling.
 .claude/settings.json
 .claude/settings.local.json
+
+# Run logs from headless notebook/script execution (regenerable)
+logs/
