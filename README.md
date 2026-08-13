@@ -7,7 +7,12 @@
 [![PyPI](https://img.shields.io/pypi/v/texas-psm.svg)](https://pypi.org/project/texas-psm/)
 [![Zenodo](https://img.shields.io/badge/data-10.5281%2Fzenodo.20032542-blue.svg)](https://doi.org/10.5281/zenodo.20032542)
 
-**TEXAS** (`texas-psm`) is a Python package for **Bayesian calibration** of the TEX86 paleothermometer. It fits hierarchical generalized-logistic Stan models to isoGDGT proxy data (Scaled RI) for thermal responses — with optional non-thermal corrections for AOA ecology (GDGT-2/3 ratio) and nutrient effects (NO₃) — and reconstructs paleotemperatures from new sediment records with full posterior uncertainty.
+**TEXAS-PSM** (`texas-psm`) is a Python package implementing a **Bayesian proxy
+system model** for the TEX86 paleothermometer. **TEXAS** is its sensor model —
+the calibration linking temperature to the index — while TEXAS-PSM is the whole
+chain around it: sensor, archive, observation, and the inversion back to
+temperature. The distribution name and the import already carry that split
+(`pip install texas-psm`, `import TEXAS`). It fits hierarchical generalized-logistic Stan models to isoGDGT proxy data (Scaled RI) for thermal responses — with optional non-thermal corrections for AOA ecology (GDGT-2/3 ratio) and nutrient effects (NO₃) — and reconstructs paleotemperatures from new sediment records with full posterior uncertainty.
 
 <p align="center">
   <kbd><a href="docs/installation.md">📦 Installation</a></kbd> &nbsp;

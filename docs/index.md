@@ -6,7 +6,7 @@
 [![PyPI](https://img.shields.io/pypi/v/texas-psm)](https://pypi.org/project/texas-psm/)
 [![Zenodo](https://img.shields.io/badge/data-10.5281%2Fzenodo.20032542-blue.svg)](https://doi.org/10.5281/zenodo.20032542)
 
-TEXAS is a **Bayesian proxy system model (PSM)** for TEX86-based sea surface temperature (SST) reconstruction. It fits hierarchical generalized-logistic Stan models to isoGDGT Ring Index data — with optional non-thermal corrections for GDGT-2/3 ratio (AOA ecology) and NO₃ (nutrient effect) — and reconstructs paleotemperatures with full posterior uncertainty.
+TEXAS-PSM is a **Bayesian proxy system model (PSM)** for TEX86-based sea surface temperature (SST) reconstruction, built around the **TEXAS** sensor model. It fits hierarchical generalized-logistic Stan models to isoGDGT Ring Index data — with optional non-thermal corrections for GDGT-2/3 ratio (AOA ecology) and NO₃ (nutrient effect) — and reconstructs paleotemperatures with full posterior uncertainty.
 
 The result is a **posterior distribution of temperature** for each downcore sample, not just a point estimate with a fixed RMSE.
 

@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-The TEXAS Proxy System Model (PSM) is designed to link **environmental variables** (e.g., sea surface temperature, archaeal community composition, nutrient availability) to **proxy measurements** (e.g., GDGT-based Ring Index, TEX₈₆) using a **Bayesian framework**.
+TEXAS-PSM, the proxy system model built around the TEXAS sensor model, is designed to link **environmental variables** (e.g., sea surface temperature, archaeal community composition, nutrient availability) to **proxy measurements** (e.g., GDGT-based Ring Index, TEX₈₆) using a **Bayesian framework**.
 
 It has two complementary components:
 
