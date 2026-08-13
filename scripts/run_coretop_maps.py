@@ -21,10 +21,25 @@ Budget matches the manuscript refit's inverse settings (500/1000, M=300,
 4 chains, seed 42), imported rather than retyped, so these are comparable with
 every reconstruction already in the cache.
 
-Prior: constant mu=20 degC, sigma=10 degC at every site. Constant on purpose --
-a per-site prior informed by modern SST would make the residual map partly a
-map of the prior. It is also what makes the coverage numbers in RESUME.md
-conservative, and it keeps this comparable with the additive run.
+Prior: PER-SITE mean at the measured temperature, sigma = 10 degC. This matches
+the published method (the commented-out generator in SI_code2, which sets
+``prior_mu_t = df[x_param]``), and it is not a free choice.
+
+An earlier version of this script used a CONSTANT N(20, 10) at every site, on
+the reasoning that a per-site prior would make the residual map partly a map of
+the prior. That reasoning is defensible in the abstract and wrong here: it pulls
+every site toward 20 degC, which wrecks exactly the regions the map exists to
+show. Measured against the 1513 coretops it produced
+
+    observed SST < 2 degC   mean residual  +8.13 degC   (p50 7.81 vs obs -0.32)
+    2-10                                   +3.28
+    10-20                                  -0.45
+    20-30                                  -1.11
+
+-- a monotonic decay toward zero as the site temperature approaches the prior
+mean, which is the signature of prior pull and nothing else. It also suppressed
+the widening of the posterior at the cold end, where the calibration curve
+flattens and the proxy genuinely stops constraining temperature.
 
 Batched at 250 sites so a kill loses at most one batch; each batch is recorded
 in a manifest and skipped on restart. Batches concatenate along t_est_dim_0,
@@ -56,7 +71,8 @@ MANIFEST_BY_ARM = {
     "univ": "coretop_maps_univ_manifest.csv",
 }
 BATCH = 250
-PRIOR_MU_T, PRIOR_SIGMA_T = 20.0, 10.0
+#: prior_mu_t is per-site (the measured temperature); only the width is fixed.
+PRIOR_SIGMA_T = 10.0
 
 # predictor set -> (use G23, use NO3)
 CONFIGS = [
@@ -159,7 +175,8 @@ def main(argv=None) -> int:
     R.log(f"coretop {args.arm} maps: {n} sites, batches of {args.batch} "
           f"({len(starts)} per configuration)")
     R.log(f"budget {R.INV_WARMUP}/{R.INV_SAMPLING}, M={R.INV_M}, "
-          f"{R.CHAINS} chains, seed {R.SEED}; prior N({PRIOR_MU_T}, {PRIOR_SIGMA_T})")
+          f"{R.CHAINS} chains, seed {R.SEED}; "
+          f"prior N(measured T per site, {PRIOR_SIGMA_T})")
 
     todo = []
     # The thermal-only baseline is a single predictor-free configuration per
@@ -205,7 +222,9 @@ def main(argv=None) -> int:
                 t0 = time.time()
                 predict_T_from_proxyObs(
                     proxyObs=sub[R.PROXY].values,
-                    prior_mu_t=PRIOR_MU_T, prior_sigma_t=PRIOR_SIGMA_T,
+                    # per-site: the measured temperature for THIS target
+                    prior_mu_t=sub[col].to_numpy(dtype=float),
+                    prior_sigma_t=PRIOR_SIGMA_T,
                     fwd_posterior=case,
                     predictors=preds,
                     site_name=f"global_coretop_b{bi:02d}",
@@ -219,7 +238,7 @@ def main(argv=None) -> int:
                 record(args.arm, dict(key=key, arm=args.arm, temptype=tt, cell=cell, batch=bi,
                             fwd_case=case, n_sites=len(sub),
                             iter_warmup=R.INV_WARMUP, M=R.INV_M,
-                            prior_mu_t=PRIOR_MU_T, prior_sigma_t=PRIOR_SIGMA_T,
+                            prior_mu_t="per-site", prior_sigma_t=PRIOR_SIGMA_T,
                             wall_sec=wall, status="ok"))
 
     R.log("")
