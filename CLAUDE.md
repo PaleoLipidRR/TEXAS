@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Project Is
 
-**TEXAS** (`texas-psm`) is a Python package for **Bayesian GDGT–temperature calibration** using Stan models. TEXAS stands for "TetraEther indeX for Ammonia oxidizerS" and it is a proxy system model for TEX86 paleothermometer; an organic proxy for past sea surface temperature reconstructions. It implements a two-stage workflow:
+**TEXAS** (`texas-psm`) is a Python package for **Bayesian GDGT–temperature calibration** using Stan models. TEXAS stands for "TetraEther indeX of Ammonia oxidizerS" and it is a proxy system model for TEX86 paleothermometer; an organic proxy for past sea surface temperature reconstructions. It implements a two-stage workflow:
 
 1. **Forward calibration**: Fit a generalized logistic curve (Ring Index → temperature) using hierarchical Bayesian Stan models, producing posterior samples stored as `.nc` files.
 2. **Inverse temperature (invT) reconstruction**: Predict paleotemperatures from new Ring Index observations by marginalizing over M parameter sets sampled from the forward posterior.

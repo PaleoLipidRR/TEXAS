@@ -1,6 +1,6 @@
 # TEXAS
 
-**TetraEther indeX for Ammonia oxidizerS — Bayesian proxy system model for TEX86 paleothermometry**
+**TetraEther indeX of Ammonia oxidizerS — Bayesian proxy system model for TEX86 paleothermometry**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/PaleoLipidRR/TEXAS/blob/main/LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/texas-psm)](https://pypi.org/project/texas-psm/)
