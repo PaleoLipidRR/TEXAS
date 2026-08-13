@@ -47,7 +47,6 @@ def patch_optional_predictors(data: dict) -> dict:
         for name in ("gdgt23ratio", "no3"):
             arr_key = f"{name}{suffix}"
             use_key = f"use_{name}{suffix}"
-            beta_key = f"beta0_{name}{suffix}"
 
             v = out.get(arr_key, None)
             if v is None or (np.isscalar(v) or np.asarray(v).ndim == 0):
@@ -70,12 +69,15 @@ def patch_optional_predictors(data: dict) -> dict:
             # Remember if ANY group uses this predictor
             any_used[name] = any_used[name] or bool(out[use_key])
 
-            # Beta containers
-            if M is not None:
-                out.setdefault(beta_key, np.zeros(M, dtype=float))
-            else:
-                out.setdefault(f"mu_{beta_key}", 0.0)
-                out.setdefault(f"std_{beta_key}", 0.1)
+            # NOTE: this used to also seed "beta0_<name><suffix>" containers
+            # (or mu_/std_ variants). Nothing consumed them: no .stan file in
+            # stan_models/ mentions beta0 at all, and the coefficient vectors
+            # the invT models actually declare are named beta_G23 / beta_NO3
+            # (gamma_G23 / gamma_NO3 under bounded-T) and are supplied by
+            # build_invT_inputData, not here. The names also predate the
+            # beta0_* -> beta_G23 rename. Dropped 2026-08-12: seeding a
+            # differently-named zero vector could only ever mask a real missing
+            # coefficient by looking like it had been handled.
 
         # Group-level NO3 cutoff handling (only if that group uses no3)
         use_no3_key = f"use_no3{suffix}"
