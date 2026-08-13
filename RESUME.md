@@ -311,14 +311,34 @@ differ in bytes while agreeing in content.
       work names case ids explicitly.
 - [x] Re-ran SI03's figure cells against the new posteriors; four bounded-T
       panels committed.
+- [x] **Filled the bounded-T grid.** `run_manuscript_refits.py` fits each arm
+      with the full predictor set only, so bounded-T had 2 of the 6 cells the
+      additive arm has, and SI_code02's five-layer prior figures were two
+      layers short. `scripts/fit_boundedT_single_predictors.py` fitted
+      `tx.GHEB.{sst,thm}.sri03.{G23,N10}` at the refit's budget, loading
+      culmeso and the univariate baseline **from the refit manifest** rather
+      than resampling. All 0 divergences, max R-hat 1.0096. It writes its own
+      manifest, so `audit` still reports READY 15/15.
+- [x] **Put SI_code02 on case ids.** 21 name sites across 10 cells. This was
+      not tidiness: legacy names hit the surviving flat files first, so those
+      figures were mixing a pre-refit culmeso and univariate baseline with a
+      post-refit bounded-T layer, silently (culmeso t0 35.80 vs 35.64).
+- [x] **Rebuilt the extreme-RI section of SI03.** Its generator was pinned to a
+      date-stamped posterior that no longer exists. Now case ids, both arms,
+      per-variant pickles that do **not** collide with SI_code3's. bounded-T
+      moves ODP1259 by 3.33 degC and Co1010 by 0.38 degC.
 
 ### Still open when you get back
 
-- [ ] **The extreme-RI section of SI03 cannot run here.** Cell 78 needs
-      `data/cache/TEXAS_posterior_cache/data_list_extreme_example.pkl`, which
-      this machine does not have; 13 cells and `fig14` depend on it. Either
-      recover the pickle from the machine that made it (`fig14` is dated
-      07-06) or rebuild it from the cell that writes it.
+- [ ] **`fig14` is still not regenerated.** The extreme-RI *data* is rebuilt
+      (below), but the figure cell is fed by cells 79-87, which load external
+      data — a NOAA URL and two published spreadsheets — and have never been
+      executed in this notebook. Run those, then the fig14 cell, and check it
+      writes `fig14_extreme_RI_examples_boundedT.pdf` (it already reads
+      `FIG_TAG`, so the variant suffix is automatic).
+- [ ] **`AppendixA_culmesoT_prior_distributions_boundedT.pdf` is stale** —
+      written 17:29 on 2026-08-12, before the four single-predictor fits landed
+      and from the pre-rename cell sources. Regenerate from SI_code02.
 - [ ] **Under-coverage in the inverse model.** Part 3 found 68% intervals
       containing measured SST only 59-61% of the time and 90% intervals 84%,
       stable across all nine cells so it is not noise. Partly by construction
