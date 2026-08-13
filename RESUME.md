@@ -115,23 +115,24 @@ assigned to exactly one step, none double-assigned, none missed.
 
 ---
 
-## HANDOFF — 2026-08-12, mid-refit (read this first)
+## HANDOFF — 2026-08-12, refit DONE and READY (read this first)
 
-A refit job is **running in the background right now**. Everything else below
-this section predates it.
+The refit **finished at 16:20** and the audit passed. The main-text figures were
+re-run against it and are committed. Everything below this section predates the
+refit; this section is the current state.
 
 ```bash
-tail -f refits.log                                   # progress
-cat data/revision1/groupA/manuscript_refit/manifest.csv    # what finished
-python scripts/run_manuscript_refits.py audit        # is it submission-ready?
+python scripts/run_manuscript_refits.py audit        # re-run the audit any time
+cat data/revision1/groupA/manuscript_refit/comparability_audit.json
+cat data/revision1/groupA/manuscript_refit/case_ids.json
 ```
 
-### What is running
+### What ran, and what it produced
 
-`scripts/run_manuscript_refits.py all` — **7 forward calibrations + 64
-reconstructions**, started 14:07, expect roughly 4-5 hours. It refits every
-manuscript case at one budget so the parent additive-EIV and bounded-T arms
-differ in the model and nothing else.
+`scripts/run_manuscript_refits.py all` — started 14:07, **done in 1:54:52**,
+**71 runs = 7 forward + 64 reconstructions**. It refit every manuscript case at
+one budget so the parent additive-EIV and bounded-T arms differ in the model and
+nothing else.
 
 - Forward **400/1000**: not the cheapest cell for any single model, but the
   cheapest clearing all four gates for all three. A per-model budget would
@@ -141,19 +142,52 @@ differ in the model and nothing else.
 - Seed 42, 4 chains, proxy `scaledRI_cren3`, NO3 cutoff 1.0, both SST and
   thermoT.
 
-**It is resumable and safe to interrupt.** Every completed run is appended to
-`manifest.csv` immediately and skipped next time. `kill -TERM <pid>` finishes
-the run in flight, writes it, and exits; a second signal aborts. Restart with
-the same command. The lockfile is
+**The comparability audit reports READY — all 15 checks ok.** The ones that
+carry the argument:
+
+| check | result |
+|---|---|
+| one forward budget / one inverse budget | 400/1000 · 500/1000, M=300 |
+| both arms fitted, SST **and** thermoT | `['bnd', 'eiv']` for each |
+| identical training rows across arms | n_obs = 1513, both targets |
+| identical `R2_thermal` across arms | 0.74558 (SST), 0.75711 (thermoT) |
+| every reconstruction paired across arms | 0 unpaired |
+| reconstructions used *this* run's calibrations | 0 used a legacy name |
+| no date stamps in filenames | 0 stamped |
+| strict R-hat gate on forward posteriors | no failures |
+
+The seven case ids it wrote (`case_ids.json`) are **already the short form** —
+the version token is gone, so that decision has landed in what is on disk:
+
+```
+culmeso|cultureT  tx.GCDU.cul.sri03.p0
+univ|SST          tx.GHPU.sst.sri03.p0        univ|thermoT  tx.GHPU.thm.sri03.p0
+eiv|SST           tx.GHEA.sst.sri03.G23-N10   eiv|thermoT   tx.GHEA.thm.sri03.G23-N10
+bnd|SST           tx.GHEB.sst.sri03.G23-N10   bnd|thermoT   tx.GHEB.thm.sri03.G23-N10
+```
+
+Rerunning is resumable and safe to interrupt: every completed run is already in
+`manifest.csv` and is skipped. `kill -TERM <pid>` finishes the run in flight,
+writes it, and exits; a second signal aborts. The lockfile is
 `data/revision1/groupA/manuscript_refit/.run.lock`, and the script refuses to
 start while the sensitivity sweep holds its own lock — two Stan jobs on this
 box share one binary cache and one set of cores.
 
-**When it finishes, run the audit.** It re-reads what was written and reports
-READY or NOT READY: one budget throughout, culmeso and a univariate fit present
-for every target, identical training rows and R2_thermal across arms, every
-reconstruction paired between arms, no date stamps in any filename. An empty
-manifest reports NOT READY, so it cannot pass by doing nothing.
+### Figures re-run against the refit — committed 2026-08-12
+
+SI03 now runs **both** temperature targets, not SST alone: the GIG run plan goes
+28 → 56 Stan runs and all 56 invT posteriors load. Four bounded-T panels were
+written from it and committed beside the additive-EIV originals rather than over
+them (`figures(boundedT): main-text panels from the post-refit posteriors`):
+
+`fig7` calibration curves · `fig11` Tasman Sea · `fig12` GIG · `fig13` PETM
+
+The SI sweep panels under `figures/manuscript/revision1/` are committed too.
+
+**SI03 stops at the extreme-RI load cell** (cell 78, `In[63]`):
+`data_list_extreme_example.pkl` is not in this machine's posterior cache, so 13
+cells below it never ran. It is a missing input, not a broken cell — `fig14`
+dates from 07-06 and was made elsewhere.
 
 ### What this does NOT disturb
 
@@ -163,8 +197,8 @@ member (`.002` beside `.001`) and the reconstructions carry new scenario tags,
 so the date-stamped files it loads stay exactly where they are.
 
 `SI03_paleo_showcases_modelswitch.ipynb` is the **revision** notebook and is
-what the refit feeds. Until the job finishes, its load cells will report the
-old reconstructions missing — the scenario tags changed (see below).
+what the refit feeds. It has been switched to the case ids and re-run; its load
+cells now find all 56 reconstructions.
 
 ### Naming changed: no more dates in filenames
 
@@ -263,21 +297,28 @@ date-stamping:
 Compare draws, not file size, before deleting anything: two of the three pairs
 differ in bytes while agreeing in content.
 
-### Still open when you get back
+### Done since the refit landed (2026-08-12)
 
-- [ ] Run `audit` and read it. Fix anything NOT READY before quoting numbers.
-      It also writes `case_ids.json` — the case id of every calibration this run
-      produced.
-- [ ] **Point SI03 at the case ids** (decided 2026-08-12: case ids are the
-      canonical identity from the resubmission on). Its `fwd_name()` builds
+- [x] Ran `audit` — **READY**, 15/15. `case_ids.json` written.
+- [x] **Pointed SI03 at the case ids** (decided 2026-08-12: case ids are the
+      canonical identity from the resubmission on). Its `fwd_name()` built
       legacy names, and a legacy name cannot reach the refit posteriors at all:
       the cache holds 17 flat files with exactly those names, and an exact flat
-      hit is the first thing `resolve_posterior_path` tries. So SI03 silently
-      loads the pre-refit fits until it is switched over.
+      hit is the first thing `resolve_posterior_path` tries — so SI03 was
+      silently loading the pre-refit fits.
       **Do not delete the flat files** — `SI_code3_paleo_showcases.ipynb`, the
       original submission, reads them. They are the compatibility layer; new
       work names case ids explicitly.
-- [ ] Re-run SI03's figure cells against the new posteriors.
+- [x] Re-ran SI03's figure cells against the new posteriors; four bounded-T
+      panels committed.
+
+### Still open when you get back
+
+- [ ] **The extreme-RI section of SI03 cannot run here.** Cell 78 needs
+      `data/cache/TEXAS_posterior_cache/data_list_extreme_example.pkl`, which
+      this machine does not have; 13 cells and `fig14` depend on it. Either
+      recover the pickle from the machine that made it (`fig14` is dated
+      07-06) or rebuild it from the cell that writes it.
 - [ ] **Under-coverage in the inverse model.** Part 3 found 68% intervals
       containing measured SST only 59-61% of the time and 90% intervals 84%,
       stable across all nine cells so it is not noise. Partly by construction
@@ -286,7 +327,8 @@ differ in bytes while agreeing in content.
 - [ ] **The invT drift floor rests on one seed replicate** (0.271 degC). Two or
       three more would make the "budget does not matter" claim rigorous.
 - [ ] Phase 5A: `inv_relpath()` is still dead code with a competing leaf format.
-- [ ] The branch is **6 commits behind `main`** — merge before opening any PR.
+- [ ] The branch is **6 commits behind `main`** (and 75 ahead) — merge before
+      opening any PR.
 - [ ] `data/README.md` cites DOI `19666745`; `README.md`, `CITATION.cff` and
       `download.py` use `20032542`. Reconcile before submission.
 - [ ] `streamlit_app/pages/calibration_data.py` reads `post["Q_crtp"]`, and Q
