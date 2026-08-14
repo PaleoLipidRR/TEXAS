@@ -47,7 +47,7 @@ $$
 Where:
 - \( T \) = temperature.
 - \( X_j \) = additional predictors (e.g., GDGT-2/GDGT-3 ratio, nitrate concentration).
-- \( b \) = lower asymptote; the upper asymptote is **fixed at 1**; \( T_0 \) = inflection temperature, \( k \) = steepness, \( v \) = shape (curve asymmetry).
+- \( b \) = lower asymptote; the upper asymptote is **fixed at 1**; \( T_0 \) = curve location (the steepest response is at \( T_0 - \ln v / k \), not at \( T_0 \)), \( k \) = steepness, \( v \) = shape (curve asymmetry).
 - \( \beta_j \) = coefficients for optional predictors.
 - \( RI_{\text{scaled}} \) is normalized between 0 and 1 for comparability.
 

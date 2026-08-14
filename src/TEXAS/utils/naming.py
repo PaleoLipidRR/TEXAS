@@ -140,7 +140,7 @@ _EST_LABEL = {"P": "two-stage prior approximation", "E": "prior approximation + 
               "D": "full hierarchical (single stage)"}
 _STRUCT_LABEL = {"U": "univariate (thermal only)",
                  "A": "additive corrections (beta on the response)",
-                 "B": "bounded-T corrections (gamma on the inflection point)"}
+                 "B": "bounded-T corrections (gamma on the curve location T0)"}
 
 # --- other axes -----------------------------------------------------------
 

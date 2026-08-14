@@ -141,7 +141,7 @@ def generalized_logistic_fixed_upper_bounded_t(
     """
     Bounded-T counterpart of :func:`generalized_logistic_fixed_upper_multivariate`.
 
-    The corrections shift the inflection temperature rather than the mean::
+    The corrections shift the curve's location parameter rather than the mean::
 
         t0_eff = t0 + gamma_G23 * gdgt23ratio
                     + gamma_NO3 * log10(no3)   [only where 0 < no3 < no3_cutoff]

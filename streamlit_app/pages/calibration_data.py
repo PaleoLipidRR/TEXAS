@@ -28,7 +28,7 @@ DATA_SUBDIR = Path("data") / "spreadsheets"
 # model on 2026-03-24, `sigma_scaledRI_crtp` was renamed `sigma_proxyObs_crtp`,
 # and the gamma pair arrived with bounded-T and was never added.
 PARAM_LABELS = {
-    "t0_crtp":              "T₀ — inflection point (°C)",
+    "t0_crtp":              "T₀ — curve location (°C)",
     "k_crtp":               "k — slope",
     "b_crtp":               "b — lower asymptote",
     "v_crtp":               "ν — asymmetry",

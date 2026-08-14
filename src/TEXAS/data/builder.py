@@ -250,7 +250,8 @@ def build_invT_inputData(
     # STEP 7: EXTRACT CORE CALIBRATION PARAMETERS
     # ═══════════════════════════════════════════════════════════════════════════
     # Extract the M samples of each core parameter:
-    #   t0[m] = inflection temperature for draw m
+    #   t0[m] = curve location temperature for draw m (NOT the inflection point:
+    #           the steepest response is at t0 - ln(v)/k)
     #   k[m]  = growth rate for draw m
     #   b[m]  = lower asymptote for draw m
     # These will be passed to Stan as FIXED data (not sampled again).
@@ -300,7 +301,7 @@ def build_invT_inputData(
     # ───────────────────────────────────────────────────────────────────────────
     predictor_usage = {}
     # BoundedT forward models move the covariates inside the logistic (a shift of
-    # the inflection point) and name the slopes gamma_* instead of beta_*. Detect
+    # the curve location T0) and name the slopes gamma_* instead of beta_*. Detect
     # by coefficient presence so it holds regardless of the model-name string.
     is_bounded = any(f"gamma_{n}_{used_suffix}" in P for n in ("G23", "NO3"))
     coef_names = ({"gdgt23ratio": "gamma_G23", "no3": "gamma_NO3"}
