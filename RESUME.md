@@ -350,6 +350,31 @@ differ in bytes while agreeing in content.
   against each other. The production 400/1000 budget clears it comfortably
   (1.00465, ESS 760); the cheapest clearing cell is 400/600.
 
+### Both thermoT uncertainty maps are STALE — regenerate first (2026-08-13)
+
+Each was written **before the reconstructions it draws finished**. The maps glob
+the `global_coretop_*` invT posteriors, so an early run silently renders a
+subset of the 1513 sites rather than failing.
+
+| figure | inputs written | figure written | verdict |
+|---|---|---|---|
+| `figXX_..._thermoT_..._boundedT` | 13:53 → **16:12** | **13:23** | built before *any* input existed |
+| `figXX_..._thermoT_...` (additive-EIV) | 12:34 → **13:47** | **13:13** | missing the last batches |
+| `fig10_..._SST_..._boundedT` | 09:53 → 11:02 | 13:23 | OK |
+| `fig9`, `figS13` | (SST) | — | OK, SST only |
+
+Both are committed — the bounded-T one in `16bfb3e`, the additive-EIV one in
+`04a5b24` (committed 2026-08-13 believing it was a clean recache; it was not).
+**SST maps are fine**; only thermoT is affected, in both arms.
+
+Now safe to regenerate: the bounded-T arm reached 28/28 at 16:12 and the
+additive-EIV arm is 28/28, so both sets are complete for the first time. Re-run
+the map cells in `SI_code2` (untagged) and `SI_code02` (`_boundedT`).
+
+- [ ] regenerate `figXX_..._thermoT_...` from SI_code2
+- [ ] regenerate `figXX_..._thermoT_..._boundedT` from SI_code02
+- [ ] confirm each covers all 1513 sites, not a subset
+
 ### Still open when you get back
 
 - [ ] **`AppendixA_culmesoT_prior_distributions_boundedT.pdf` is stale** —
@@ -374,9 +399,20 @@ differ in bytes while agreeing in content.
       `data/revision1/groupA/param_sensitivity/invt_budget_sites.csv`.
 - [ ] **The invT drift floor rests on one seed replicate** (0.271 degC). Two or
       three more would make the "budget does not matter" claim rigorous.
-- [ ] Phase 5A: `inv_relpath()` is still dead code with a competing leaf format.
-- [ ] The branch is **6 commits behind `main`** (and 75 ahead) — merge before
-      opening any PR.
+- [x] **Phase 5A done 2026-08-13** (`58ddb86`). `_generate_filename_base` now
+      calls `inv_relpath` instead of respelling the leaf; `scenario` widened to
+      take a sequence, which was the only real difference between them. Names
+      unchanged byte for byte, checked over 216 combinations before committing.
+      The drift this closes had already happened and was invisible: only the
+      *unreachable* copy was wrong (it still documented `<case>/<leaf>` and a
+      run number), so nothing broke and nothing could have caught it. The test
+      now asserts the two builders agree rather than asserting a literal.
+      **The other two Phase 5A items were already fixed** — `save_invT_posterior`
+      no longer drops `proxy_name` (it delegates to the shared builder), and the
+      cache flattening has landed (`fwd_relpath`/`inv_relpath` both return a
+      bare leaf).
+- [x] The branch is **0 behind `main`** as of 2026-08-13 (110 ahead). The
+      "6 behind" note was stale.
 - [x] **DOI reconciled 2026-08-12.** `data/README.md` cited `19666745` while
       `README.md`, `CITATION.cff` and `download.py` used `20032542`. Aligned on
       `20032542`, which `download.py` documents as the currently published
@@ -384,9 +420,21 @@ differ in bytes while agreeing in content.
       *concept* DOI** (all-versions) rather than a superseded version DOI — in
       that case the right move is the opposite one, and citing the concept DOI
       is better practice. Could not verify from here without network access.
-- [ ] `streamlit_app/pages/calibration_data.py` reads `post["Q_crtp"]`, and Q
-      was removed from every Stan model on 2026-03-24. That page is broken
-      against any current posterior.
+- [x] ~~`streamlit_app/pages/calibration_data.py` reads `post["Q_crtp"]`~~ —
+      **already fixed** (checked 2026-08-13). `Q_crtp` survives only in two
+      comments explaining the repair; there is no live read of it anywhere in
+      `streamlit_app/` or `src/`. The page also lost its private copy of the
+      curve in the same pass, which is what let it drift out of step.
+- [ ] **`fig6_ODR_regression_dilution.pdf` is stale** (found 2026-08-13). The
+      PDF dates 2026-07-06; the training spreadsheets were revised four times
+      after that (`c9ed284` 07-15, `7143b72` 07-27, `a0b3887` 07-30, `a9a8d9f`
+      08-10). It is built by `SI_code1_PreProcessing_finalized.ipynb` cell 123
+      off `res_hier` (cell 121) and `gridded_combined_df` — **no Stan posterior**,
+      so the manuscript refit does not touch it, but the revised training rows
+      do. It is the prior-elicitation figure: the same two-step OLS it plots
+      prints `beta_G23_crtp` / `beta_NO3_crtp ~ normal(mu, sigma)`, so if the
+      slopes moved, the Stan priors on disk were elicited from superseded data.
+      **Check the printed priors against the ones the models actually use.**
 
 ### Uncommitted, deliberately
 
