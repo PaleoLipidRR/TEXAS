@@ -425,6 +425,20 @@ the map cells in `SI_code2` (untagged) and `SI_code02` (`_boundedT`).
       comments explaining the repair; there is no live read of it anywhere in
       `streamlit_app/` or `src/`. The page also lost its private copy of the
       curve in the same pass, which is what let it drift out of step.
+- [ ] **fig6: three of its four slopes VERIFIED unchanged (2026-08-13).**
+      Recomputed from the current training data, outside the notebook: thermal
+      R² 0.749 (draft 0.75), G2/3 OLS −0.0057 (−0.0058), G2/3 ODR −0.0058
+      (−0.0059), NO₃ OLS −0.0287 (−0.029). So the four spreadsheet revisions did
+      **not** move them, and the manuscript numbers stand.
+      **The NO₃ ODR did not reproduce: −0.052 against the draft's −0.072.** Do
+      not treat that as a data-revision effect — the standalone re-fit converged
+      to a degenerate optimum (ν at its lower bound, T₀ = −86) rather than the
+      hierarchical culmeso→coretop path `run_variance_partitioning` takes, and
+      the ODR is the one quantity sensitive to that. Re-run SI_code1 to settle
+      it. Either value preserves §6.3's bracket claim: the Bayesian estimate of
+      2.8 °C/log₁₀-unit sits inside 1.7–4.3 (ODR −0.072) and inside 1.7–3.1
+      (ODR −0.052).
+      **Also unconfirmed: ρ for NO₃ came out −0.328 against the draft's −0.38.**
 - [ ] **`fig6_ODR_regression_dilution.pdf` is stale** (found 2026-08-13). The
       PDF dates 2026-07-06; the training spreadsheets were revised four times
       after that (`c9ed284` 07-15, `7143b72` 07-27, `a0b3887` 07-30, `a9a8d9f`
