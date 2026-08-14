@@ -178,6 +178,217 @@ verified dead individually rather than bulk-autofixed. `ruff check` passes, 277 
 
 ---
 
+## PLAN — resubmission, then the archive split, then v1.0.0 (written 2026-08-14)
+
+Three phases, strictly ordered. **Phase A blocks resubmission. Do not start
+Phase B until the revised manuscript is out** — moving files while the SI
+notebooks are still being edited is how a figure quietly loses its source.
+
+### The line the split is drawn on
+
+The initial submission (tag **`v0.1.10`**, 2026-04-24) fitted the **additive-EIV**
+model: the nonthermal predictors added an offset to the response, outside the
+logistic. Compset **`GHEA`**, Stan file `..._priorApprox_eiv.stan`, coefficients
+`beta_G23_crtp` / `beta_NO3_crtp`.
+
+The revision fits the **bounded-T** model: the predictors shift T₀, inside the
+logistic. Compset **`GHEB`**, Stan file `..._priorApprox_eiv_boundedT.stan`,
+coefficients `gamma_G23_crtp` / `gamma_NO3_crtp`.
+
+Everything that exists *only* to reproduce the `GHEA` arm is archive. Everything
+the bounded-T arm runs on is the package. That is the whole rule.
+
+---
+
+### Phase A — finish the revision (blocking)
+
+- [ ] **15 of 31 R2R responses are still `[RESPONSES]` placeholders.** This is the
+      largest single piece of remaining work, and nothing else on this list is
+      close. Unwritten: **R1C2, R1C3, R1C4, R1C5, R1C6, R2C3, R2C5, R2C9, R2C11,
+      R2C12, R2C13, R2C14, R2C17, R2C18, R2C19**. Note that R1C1, R2C1, R2C2,
+      R2C4, R3C1–R3C4 — the structural ones — *are* written.
+- [ ] **The `[TO BE CONFIRMED BY THE AUTHORS]` red box** in R3C3 (`main.tex:640`):
+      one sentence on whether the screening criteria and the index choice were
+      fixed independently of the final calibration results. Not draftable from
+      the repository.
+- [ ] **Two stale thermoT uncertainty maps** — both were rendered before their
+      inputs finished and silently show a subset of the 1513 sites. Regenerate
+      `figXX_..._thermoT_...` from `SI_code2` and `figXX_..._thermoT_..._boundedT`
+      from `SI_code02`, then confirm the site count.
+- [ ] **`AppendixA_culmesoT_prior_distributions_boundedT.pdf` is stale** — predates
+      the four single-predictor fits.
+- [ ] **fig11 / fig12 lost their manual annotation.** They now point at the freshly
+      generated `_boundedT.pdf`, which is the right data with none of the hand
+      editing that `_revised.pdf` carried. Re-annotate, or accept the plain version.
+- [ ] **Commit the four dirty SI notebooks.** `SI_code2` is the dangerous one — its
+      run cells are uncommented and executing it overwrites the audited 400/1000
+      posteriors.
+- [ ] **The Open Research Section cites Zenodo v0.2.1**; tags run to v0.2.5 and the
+      package reports 0.2.6. Cut a tag and update the citation as part of resubmission.
+
+**Done this session** (all uncommitted):
+
+- The R2R now opens with a **Summary of revisions** table (ten rows, each keyed to
+  the comments it answers). Builds under xelatex, 28 pages.
+- **Every Stan header rewritten to read standalone.** No file describes itself as a
+  diff against a superseded design any more — the two bounded-T headers were the
+  worst offenders (the forward one opened with "THE PROBLEM THIS ADDRESSES
+  (reviewer comment)" and a measured indictment of the additive model). Six files
+  that had no header, or a header naming the wrong file, now have one. All 17
+  parse under `stanc` 2.36.0; 279 tests pass.
+- **Tutorial Module 3 rebuilt** on the bounded-T design: slider defaults are the
+  published posterior medians rather than illustrative values (t₀ 34.8, k 0.275,
+  b 0.412, ν 4.0), and there are new G₂/₃ and NO₃ sliders that slide the curve
+  sideways while the thermal-only curve stays put, so the boundedness is visible
+  rather than asserted.
+- **README and `docs/index.md` describe the γ-on-T₀ formulation**, and the
+  forward-calibration example now names `..._eiv_boundedT`.
+
+⚠️ **`docs/index.md` carries a new warning that the two multivariate posteriors on
+Zenodo are the additive-EIV formulation.** That warning is a stopgap for the
+`download.py` problem in Phase C, not a fix — remove it when the bounded-T
+posteriors are published.
+
+### Two defects found in passing
+
+- **The `inflection_point` generated quantity had the wrong sign** in
+  `gen_logi_fixed_hier_crtp_univ_priorApprox.stan` and
+  `gen_logi_fixed_culmesocore.stan`: both computed `t0 + ln(v)/k`. Setting
+  d²f/dT² = 0 gives `exp(-k(T-T0)) = v`, hence **`t0 − ln(v)/k`**. Verified
+  numerically against the production posterior — the true max-slope temperature
+  is 29.85 °C against t₀ = 34.8 °C, i.e. 4.95 °C *below* t₀ and matching the
+  4.2–5.2 °C range CLAUDE.md already records. The old formula returned 39.75 °C,
+  wrong by 9.9 °C and on the wrong side. Both are fixed and the variable renamed
+  to **`max_slope_temp`**, which is what it actually is. Nothing in Python or the
+  notebooks read the old variable, so this renames cleanly; cached `.nc` files
+  carry the old name and value, so **regenerate before quoting it**.
+- **`SI_code1` repeats the same sign error in Python** —
+  `generalized_logistic_inflection_point()` returns `x0 + np.log(v)/k`, and it is
+  plotted as a marker on the parameter-sweep panels. The marker therefore sits on
+  the wrong side of x₀. **Not fixed here**: that notebook is deliberately
+  uncommitted, and correcting it moves a published figure. Decide before
+  resubmission.
+
+### The archive already half-exists inside the package
+
+`src/TEXAS/stan_models/` contains **`archive/` (16 tracked files) and
+`archive_pre_annotated/` (4)** — the earlier `gen_logi_free_*`, `logistic_*` and
+ensemble invT models, with their own README. The non-recursive `ls *.stan` used
+when Phase B was drafted missed them. They are **already excluded from the wheel**
+(package-data is `stan_models/*.stan`, not `**`), so no packaging change is needed
+— but they should fold into `archive/submission-2026-04/` in Phase B rather than
+leaving three archives in two places.
+
+---
+
+### Phase B — the archive split
+
+Decided 2026-08-14: **repo-root `archive/`, not installed.** The final package
+ships production models only; the archive is a readable folder rather than a git
+tag, and reproduction goes through an explicit `model_dir=`.
+
+```
+archive/
+  submission-2026-04/
+    README.md              <- what this reproduces (v0.1.10), and the exact commands
+    stan_models/           <- 9 files
+    notebooks/             <- SI_code2, SI_code3
+    figures/               <- the additive-fit parents
+```
+
+#### B1 — Stan models: 17 → 8 shipped, 9 archived
+
+**Stays in `src/TEXAS/stan_models/` (8):**
+
+| file | why it stays |
+|---|---|
+| `gen_logi_fixed_culmeso.stan` | stage-1 culture+mesocosm hyperpriors |
+| `gen_logi_fixed_hier_crtp_univ_priorApprox.stan` | thermal-only fit; also produces `R2_thermal` |
+| `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT.stan` | **the production calibration** |
+| `invT_gen_logi_fixed_multiv_marginal_unconstrained_boundedT.stan` | production inverse |
+| `invT_gen_logi_fixed_univ_marginal_unconstrained.stan` | univariate inverse (quickstart, SI03) |
+| `invT_gen_logi_fixed_multiv_marginal_unconstrained.stan` | multivariate inverse comparator in SI03 |
+| `invT_gen_logi_fixed_*_marginal_truncated_prior.stan` (2) | **live docs** — `docs/why_plugin_p50_differs.md` is in `_toc.yml` and explains the plug-in/marginal gap through them |
+| `linear_model.stan` | used by `SI_code1` and every SI notebook |
+
+**Moves to `archive/submission-2026-04/stan_models/` (9):**
+
+| file | why it moves |
+|---|---|
+| `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv.stan` | **the initial submission's production model** (`GHEA`) |
+| `gen_logi_fixed_hier_crtp_multiv_priorApprox.stan` | superseded non-EIV intermediate |
+| `gen_logi_fixed_hier_crtp_multiv.stan` | superseded full-hierarchical intermediate |
+| `gen_logi_fixed_culmesocore.stan` | not used by any manuscript notebook (Streamlit only) |
+| `invT_gen_logi_fixed_univ_unconstrained.stan` | non-marginal inverse; `SI_code3` only |
+| `invT_gen_logi_fixed_multiv_unconstrained.stan` | non-marginal inverse; `SI_code3` only |
+| `invT_gen_logi_fixed_*_marginal_hard_constraint.stan` (2) | **zero references anywhere** |
+
+> **Verified, not assumed:** `SI_code02`'s only mention of the additive `_eiv`
+> model is in its header markdown table (documenting the difference) and in
+> commented-out code. The bounded-T arm never compiles it.
+
+**Before moving, these break and must be handled:**
+
+- `src/TEXAS/utils/naming.py` — the compset decoder maps `A` (additive) and the
+  `culmesocore` training set. **Keep the decoder intact**; it must still parse
+  `tx.GHEA.*` case ids or every archived posterior becomes unreadable.
+- `streamlit_app/pages/{prediction,computation}.py` reference `culmesocore`.
+- `tests/test_naming.py`, `tests/test_run_tokens.py` assert on archived names —
+  they are testing the *name grammar*, not the models, so they stay.
+- `scripts/prepare_review_archive.sh` is written entirely against the legacy flat
+  names of the initial submission. It belongs in `archive/`, not `scripts/`.
+- `src/TEXAS/stan_models/archive/` (16 files) and `archive_pre_annotated/` (4)
+  already exist and are tracked. Fold both into `archive/submission-2026-04/`
+  rather than leaving three archive locations. Neither ships in the wheel today.
+
+#### B2 — Notebooks
+
+Move `SI_code2_TEXAS_analysis.ipynb` and `SI_code3_paleo_showcases.ipynb` to
+`archive/submission-2026-04/notebooks/`. Superseded by `SI_code02_*_boundedT`
+and `SI03_*_modelswitch` respectively.
+
+**`SI_code3` is the one with a trap.** It requests date-stamped legacy posterior
+names (`..._scaledRI_cren3_050126_eiv`). Those resolve only because the files on
+disk still carry the old name in their `filename` attr — a re-run would break
+them. Archive the notebook *and* the posteriors it needs, together, or it stops
+being reproducible.
+
+#### B3 — Figures and posteriors
+
+- Additive-fit parents (`fig7`–`fig14`, the three Appendix prior plots) → archive.
+  **`fig6`'s parent stays where it is** — its `_boundedT` counterpart contains the
+  additive-vs-bounded comparison, which must never appear in the paper.
+- `data/cache/.../superseded/` and the flat legacy `.nc` names → the Zenodo
+  archive record, not the repo (the cache is gitignored either way).
+- `review_archive_v0.1.8/` at the repo root is untracked staging from April.
+  Delete it, or fold it into `archive/`.
+
+#### B4 — Root cleanup
+
+`site/`, `dist/`, `html_figures/`, `outputs/`, `logs/` are all untracked and
+gitignored, but Zenodo archives the working tree as a tarball. Clear them before
+tagging.
+
+---
+
+### Phase C — v1.0.0
+
+- [ ] **`download.py` still ships the additive posteriors as the public default.**
+      `_ZENODO_FILES` has five entries — two of them the additive multivariate
+      (`GHEA`), the rest univariate/culmeso — and **no bounded-T entry at all**.
+      A user who follows the README today downloads the superseded calibration.
+      **This is the single most important v1.0.0 fix** — it is a correctness
+      problem, not tidiness.
+- [ ] Same repointing in `README.md:153`, `docs/index.md:119,136,137,186,203,265`.
+- [ ] Upload the bounded-T posteriors to Zenodo; keep the `GHEA` ones in the record
+      as the submission archive, clearly labelled.
+- [ ] `pyproject.toml` package-data stays `stan_models/*.stan` — correct, since the
+      archive lives outside `src/`. Confirm the wheel drops from 17 to 8 models.
+- [ ] `CITATION.cff` / `.zenodo.json` → 1.0.0; drop the "in prep" / "prepared to
+      submit" language once accepted.
+
+---
+
 ## Bootstrap on a different machine (Linux or Windows)
 
 This file is tracked, so it arrives with the clone. Everything below assumes
@@ -567,6 +778,42 @@ the map cells in `SI_code2` (untagged) and `SI_code02` (`_boundedT`).
       site-level variability (oceanographic, depth-habitat, bioturbation) that
       the calibration's noise model does not carry. Reproduce with
       `data/revision1/groupA/param_sensitivity/invt_budget_sites.csv`.
+
+      > ### CORRECTED 2026-08-14 — this is a STRESS-SET result, not a population one
+      >
+      > **Do not quote the 14% figure as the model's interval calibration.**
+      > `invt_budget_sites.csv` is the 200-site sampler-tuning subset built by
+      > `invt_subset()` in `scripts/run_param_sensitivity.py`, which fills
+      > equal-width bins over the proxy *range* with an equal quota each. Its own
+      > docstring is explicit: *"a stress set, not a validation set: error
+      > statistics over it are not population statistics for the compilation."*
+      > It deliberately over-weights the asymptote regions, where intervals are
+      > worst. The 200 sites are also **not held out** — they are drawn from the
+      > same coretops the calibration was fitted on.
+      >
+      > Recomputed over **all 1513 sites** from the `global_coretop_b01..b07`
+      > invT posteriors (`tx.GHEB.sst.sri03.G23-N10`, alignment checked per site
+      > against `scaledRI_cren3`), the production calibration is close to
+      > calibrated, and the bias even **flips sign**:
+      >
+      > | | stress set (n=200) | population (n=1513) |
+      > |---|---|---|
+      > | bias | **+0.93** degC | **-0.99** degC |
+      > | RMSE | 4.52 | 4.35 |
+      > | R2 | — | 0.824 |
+      > | half-width / residual SD | 0.865 | **1.05** |
+      > | cov68 (nominal 0.68) | 0.60 | **0.664** |
+      > | cov90 (nominal 0.90) | 0.84 | 0.853 |
+      >
+      > The population RMSE/R2 reproduce the manuscript's reported inverse
+      > in-sample figures (4.4 degC, 0.82), which is the check that the
+      > alignment is right. Univariate for comparison: RMSE 3.87, R2 0.860,
+      > cov68 0.770 — **inverse skill is better without the predictors**, which
+      > is the evidence behind R2C4 and R1C2.
+      >
+      > The stress-set numbers remain valid *as a statement about the asymptote
+      > regime* — coverage really does degrade there — and R1C2 in the R2R now
+      > says exactly that, sourced to the population figures.
 - [ ] **The invT drift floor rests on one seed replicate** (0.271 degC). Two or
       three more would make the "budget does not matter" claim rigorous.
 - [x] **Phase 5A done 2026-08-13** (`58ddb86`). `_generate_filename_base` now
