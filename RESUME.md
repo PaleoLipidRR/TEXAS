@@ -8,6 +8,55 @@ bottom; tick the boxes as you go.
 
 ---
 
+## Latest session — 2026-08-14
+
+Everything below is pushed. Branch `feat/revision1-validation-groupA` is level
+with origin; the manuscript and R2R repos are level with their `main`.
+
+**The manuscript restructured Sections 6 and 7.** Eq. 10 (the multivariate
+forward model) no longer exists in §6.2. The bounded-T model is introduced once,
+in §7.1.2, as **Eq. 13** — and the two duplicate statements of it that used to
+sit there (`eq:bottomlayer-general`, `eq:bottomlayer-full`) were folded into it.
+§6 is now confined to the S-curve, the temperature-only fit, and the evidence
+that the nonthermal effects exist. **Equation numbers downstream of §6.2 all
+shifted**; the R2R's noise-term table was updated to match (Eq. 11 → 10,
+Eq. 14 → 13). If you cite an equation number from memory, re-check it.
+
+**New Appendix C, "Running TEXAS on your own data"** — answers R1C1's request for
+a practical "list of ingredients". Two facts in it were verified against the
+package, not assumed: `compute_scaledRI` is scale-invariant, so peak areas and
+fractional abundances give identical results and no normalization is needed; and
+**nothing in the package consumes an age model**, so chronological uncertainty is
+not propagated. The Open Research Section was trimmed to availability only.
+
+**`arydshln` removed from the manuscript preamble.** It was loaded ahead of
+`array`/`colortbl`, which broke `\hline`, `\midrule` and `\toprule` alike —
+LaTeX did not fail cleanly, it ground for >10 min in an error cascade. Nothing in
+the document uses dashed rules. **If a table ever stops compiling, check this
+first.**
+
+**New notebook**: `SI_code01_boundedT_variance_partitioning.ipynb` — the
+frequentist additive-vs-bounded-T comparison, one fitter with
+`parameterization=` and `beta_fit=` switches. Reproduces the submitted additive
+numbers and settles the fig6 NO₃ ODR question (see below).
+
+**Explainer**: `working-repo/TEXAS-revision/boundedT-explainer.html` — plain-language
+derivation of the bounded-T model from the production posterior, written for the
+§6–7 rewrite.
+
+### Still open after this session
+
+- **R3C3's response is half-drafted.** The reorganization paragraph is written;
+  the screening-independence and robustness claims are marked with a bracketed
+  placeholder because they are statements about how the analysis was sequenced.
+- **ρ for NO₃ in fig6** is still unconfirmed (see the fig6 item below).
+- **The R2R says the frequentist comparison "is provided as a supplementary
+  notebook."** It is committed now, but it is not yet in the Zenodo software
+  record. Note that `data/spreadsheets/` is gitignored, so the summary CSV that
+  notebook writes needs `git add -f` if it should travel with the release.
+
+---
+
 ## Bootstrap on a different machine (Linux or Windows)
 
 This file is tracked, so it arrives with the clone. Everything below assumes
@@ -425,37 +474,37 @@ the map cells in `SI_code2` (untagged) and `SI_code02` (`_boundedT`).
       comments explaining the repair; there is no live read of it anywhere in
       `streamlit_app/` or `src/`. The page also lost its private copy of the
       curve in the same pass, which is what let it drift out of step.
-- [ ] **fig6: three of its four slopes VERIFIED unchanged (2026-08-13).**
-      Recomputed from the current training data, outside the notebook: thermal
-      R² 0.749 (draft 0.75), G2/3 OLS −0.0057 (−0.0058), G2/3 ODR −0.0058
-      (−0.0059), NO₃ OLS −0.0287 (−0.029). So the four spreadsheet revisions did
-      **not** move them, and the manuscript numbers stand.
-      **The NO₃ ODR did not reproduce: −0.052 against the draft's −0.072.** Do
-      not treat that as a data-revision effect — the standalone re-fit converged
-      to a degenerate optimum (ν at its lower bound, T₀ = −86) rather than the
-      hierarchical culmeso→coretop path `run_variance_partitioning` takes, and
-      the ODR is the one quantity sensitive to that. Re-run SI_code1 to settle
-      it. Either value preserves §6.3's bracket claim: the Bayesian estimate of
-      2.8 °C/log₁₀-unit sits inside 1.7–4.3 (ODR −0.072) and inside 1.7–3.1
-      (ODR −0.052).
-      **Also unconfirmed: ρ for NO₃ came out −0.328 against the draft's −0.38.**
-- [ ] **`fig6_ODR_regression_dilution.pdf` is stale** (found 2026-08-13). The
-      PDF dates 2026-07-06; the training spreadsheets were revised four times
-      after that (`c9ed284` 07-15, `7143b72` 07-27, `a0b3887` 07-30, `a9a8d9f`
-      08-10). It is built by `SI_code1_PreProcessing_finalized.ipynb` cell 123
-      off `res_hier` (cell 121) and `gridded_combined_df` — **no Stan posterior**,
-      so the manuscript refit does not touch it, but the revised training rows
-      do. It is the prior-elicitation figure: the same two-step OLS it plots
-      prints `beta_G23_crtp` / `beta_NO3_crtp ~ normal(mu, sigma)`, so if the
-      slopes moved, the Stan priors on disk were elicited from superseded data.
-      **Check the printed priors against the ones the models actually use.**
+- [x] **fig6's four slopes RESOLVED 2026-08-14.** All four reproduce, including
+      the one that did not on 08-13. Thermal R² 0.747, G2/3 OLS −0.0058, G2/3
+      ODR −0.0059, NO₃ OLS −0.0296, and **NO₃ ODR −0.072 — the draft value is
+      correct.** The 08-13 figure of −0.052 was the degenerate standalone re-fit,
+      exactly as suspected; running the hierarchical culmeso→coretop path
+      reproduces −0.072. §6.3's bracket claim stands on 1.7–4.3.
+      Settled by `notebooks/manuscripts/SI_code01_boundedT_variance_partitioning.ipynb`
+      (`35a256d`), which reimplements the two-step protocol with a switch for the
+      parameterization. **ρ for NO₃ is still unconfirmed** (−0.328 computed
+      against the draft's −0.38) — that is a Spearman on the plotted subset, not
+      an output of the fitter, so it needs checking in SI_code1 cell 123 itself.
+- [x] **`fig6_ODR_regression_dilution.pdf` — superseded, not regenerated
+      (2026-08-14).** The manuscript moved to the bounded-T formulation, so the
+      relevant figure is now `fig6_ODR_regression_dilution_boundedT.pdf`
+      (`35a256d`), built from the current spreadsheets by SI_code01. The parent
+      PDF stays as the record of the original submission and is deliberately
+      **not** rebuilt. The prior-elicitation worry is closed by the slopes above:
+      they did not move, so the β priors on disk were not elicited from
+      superseded data.
 
 ### Uncommitted, deliberately
 
-`SI_code2_TEXAS_analysis.ipynb` and the regenerated
-`AppendixA_culmesoT_prior_distributions.pdf` are live edits — the run cells were
-uncommented and one switched to a case id. Left alone; commit when you are happy
-with them.
+**Four SI notebooks only** (2026-08-14): `SI_code1_PreProcessing_finalized`,
+`SI_code2_TEXAS_analysis`, `SI_code02_boundedT_TEXAS_analysis`,
+`SI_code2a_model_param_sensitivity_test`. `SI_code2` is the dangerous one — its
+run cells are uncommented, so executing it overwrites the audited 400/1000
+posteriors. Left alone; commit when you are happy with them.
+
+The figures and the two LFS training spreadsheets that used to sit here **are now
+committed** (`cca55ca`), so a fresh clone gets the same inputs and figures rather
+than silently different ones.
 
 ---
 
