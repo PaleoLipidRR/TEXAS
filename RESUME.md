@@ -59,6 +59,23 @@ R² 0.75 → 0.80 is *in-sample*, and gives the cross-validated counterparts (0.
 random, 0.70 spatially blocked). R3C3's robustness half is drafted from the CV
 run and SI_code2a.
 
+**Section 6.3's methodology moved to Text S3**; §6.3 now carries the argument and
+ends on a prediction §7.1.2 tests. **Bounded-T is presented as the formulation, not as
+the winner of a comparison** — the additive model appears nowhere in the manuscript or
+SI, only in the R2R. §7.2's results were still in β from the additive fit and are now
+γ from the production posterior, with 68% and 95% intervals.
+
+**R² convention decided 2026-08-14**: report `R2_full` (1 − RSS/TSS), because published
+TEX₈₆ calibrations are mostly not Bayesian and report that quantity. Univariate 0.746,
+multivariate 0.813 — an internally consistent pair. Bayesian R² (0.874) is named once,
+cited to Gelman et al. 2019, and never quoted interchangeably. The Conclusions moved
+0.80 → 0.81 to match.
+
+**The length argument is now on the record.** The Introduction closes with a roadmap
+naming each section; the R2R has a full response to the Associate Editor (there was
+none before) arguing that the length is intrinsic to a methods paper making two
+structural departures, and that the answer is navigability rather than brevity.
+
 ### Still open after this session
 
 - **One sentence of R3C3 is for the authors** — whether the screening criteria and
