@@ -123,8 +123,39 @@ or it will report the struck-through half as if it were live text.
 guarantee, and similar). It is not a full read-through, and it did not audit numerical
 claims other than the two above.
 
+**Full read-through audit done 2026-08-14** (the earlier one was a term-list scan;
+this one read the whole manuscript as a reader sees it). Twenty findings, all fixed.
+Three were serious:
+
+1. **Eleven figures were still the additive fit** — fig7–fig14 and all three appendix
+   prior plots pointed at the superseded versions. Copied from the TEXAS repo and
+   repointed. **`fig6` deliberately stays the parent**: its `_boundedT` counterpart
+   contains the additive-vs-bounded comparison, which must never appear in the paper.
+2. **§7.2's curve parameters were the additive fit's.** T₀ = 36.2±1.6, b = 0.437,
+   k = 0.20, ν = 2.8 matches `tx.GHEA` (additive) to three decimals; the production
+   `tx.GHEB` gives 34.8±0.7, 0.412, 0.28, 4.0. Replaced for SST and Thermo-T, and the
+   *interpretation* with them — T₀ is no longer "virtually unchanged" but 1.7/3.5 °C
+   cooler, and b no longer shifts "marginally higher". Fig. 8's caption had the same
+   stale R²/RMSE.
+3. **The manuscript addressed a reviewer by name** in §7 ("which Reviewer 3 rightly
+   noted") — my wording, the same fault already fixed in Appendix C.
+
+Plus: §7.1.1 and §7.2 both said 1000 warm-up against §7's 400 (budget now stated once);
+three places called T₀ the inflection point when §6.1 says it is not; two cross-references
+pointed at figure labels while typeset "Eq." and "Table"; the acronym read "indeX **for**";
+a doubled period; a lowercase sentence start; four grammar slips. One regression of my own
+— the claim pass had dropped "the nonlinear temperature response" from §6.1 — restored.
+
+**CI was red and is now green.** Nine ruff F401/F841 failures on this branch, each
+verified dead individually rather than bulk-autofixed. `ruff check` passes, 277 tests pass.
+
 ### Still open after this session
 
+- **Two figure choices need your eye.** fig11 and fig12 previously pointed at
+  hand-edited `_revised.pdf` files (they have paired `.svg`); they now point at the
+  freshly generated `_boundedT.pdf`, which is the right *data* but carries **none of
+  the manual annotation**. Also `fig1_..._boundedT.pdf` exists and is unused — the
+  manuscript still shows `fig1_..._revised.pdf`.
 - **One sentence of R3C3 is for the authors** — whether the screening criteria and
   the index choice were fixed independently of the final calibration results. It is
   a red box in the R2R titled `[TO BE CONFIRMED BY THE AUTHORS]`. Everything else
