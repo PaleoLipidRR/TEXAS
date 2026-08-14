@@ -42,6 +42,32 @@ def _with_diagnostics(fit) -> xr.Dataset:
 
 
 # ─── SAMPLER CLASS ─────────────────────────────────────────────────────────
+def _attach_sampler_config(ds: xr.Dataset, fit: CmdStanMCMC) -> xr.Dataset:
+    """Record the sampler budget that produced these draws.
+
+    arviz supplies ``num_draws_sampling``, but nothing recorded the warmup
+    length, and it cannot be recovered from the file afterwards -- so a
+    posterior could not say what budget produced it, which matters once a
+    sensitivity analysis starts recommending budgets.
+
+    Read from the fit rather than from the caller's kwargs, so CmdStan's own
+    defaults are recorded too and not just the arguments that were passed
+    explicitly.
+    """
+    for src, key in (("num_draws_warmup", "iter_warmup"),
+                     ("num_draws_sampling", "iter_sampling"),
+                     ("chains", "chains"),
+                     ("thin", "thin")):
+        value = getattr(fit, src, None)
+        if value is not None:
+            try:
+                ds.attrs[key] = int(value)
+            except (TypeError, ValueError):
+                pass
+    return ds
+
+
+
 class StanSampler:
     """A simple wrapper for running the Stan sampler."""
     def __init__(self, compiler: StanCompiler):
@@ -137,6 +163,7 @@ class StanSampler:
         # Convert to xarray and attach all metadata
         ds = self._to_xarray(fit)
         ds = extract_and_update_metadata(ds, data, stan_file, site_name, version)
+        ds = _attach_sampler_config(ds, fit)
         ds.attrs["run_duration (sec)"] = round(duration, 2)
         if temptype:
             ds.attrs["temptype"] = temptype
