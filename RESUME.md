@@ -44,16 +44,42 @@ numbers and settles the fig6 NO₃ ODR question (see below).
 derivation of the bounded-T model from the production posterior, written for the
 §6–7 rewrite.
 
+**The sampler budget is now recorded and reported.** `sampler.py` stamps
+`iter_warmup`, `iter_sampling`, `chains` and `thin` on every new posterior, read
+from the CmdStan fit so defaults are captured too. `scripts/backfill_iter_warmup.py`
+retrofits existing files **only where a refit manifest names the specific file** —
+a blanket stamp would be wrong, because the cache mixes 400 (refit script), 300
+(`SI_code02_boundedT`) and CmdStan's default 1000, all indistinguishable in the
+file. 11 forward posteriors stamped and verified; **the 173 inverse posteriors are
+deliberately left unstamped**, since the manifest records no path for inverse runs.
+§7 now states the budget, and **Text S2** in the SI carries the sweep.
+
+**Two more manuscript edits landed**: the Conclusions now says explicitly that
+R² 0.75 → 0.80 is *in-sample*, and gives the cross-validated counterparts (0.74
+random, 0.70 spatially blocked). R3C3's robustness half is drafted from the CV
+run and SI_code2a.
+
 ### Still open after this session
 
-- **R3C3's response is half-drafted.** The reorganization paragraph is written;
-  the screening-independence and robustness claims are marked with a bracketed
-  placeholder because they are statements about how the analysis was sequenced.
-- **ρ for NO₃ in fig6** is still unconfirmed (see the fig6 item below).
-- **The R2R says the frequentist comparison "is provided as a supplementary
-  notebook."** It is committed now, but it is not yet in the Zenodo software
-  record. Note that `data/spreadsheets/` is gitignored, so the summary CSV that
-  notebook writes needs `git add -f` if it should travel with the release.
+- **One sentence of R3C3 is for the authors** — whether the screening criteria and
+  the index choice were fixed independently of the final calibration results. It is
+  a red box in the R2R titled `[TO BE CONFIRMED BY THE AUTHORS]`. Everything else
+  in R3C3 is drafted.
+- **Two manuscript edits the R2R promises but that are NOT made** — flagged in a
+  second red box in the R2R. (1) Move §6.3's per-site uncertainty assignments,
+  OLS/ODR implementation and delta-method propagation to the SI; **that becomes
+  Text S3**, since Text S2 is now taken. (2) The Conclusions half of this is done.
+- **ρ for NO₃ — RESOLVED 2026-08-14, was never wrong.** The draft's −0.38 is quoted
+  at threshold **1.8** and reproduces exactly (−0.382, n=701). The −0.328 that
+  looked like a discrepancy was computed at threshold 1.0, a number the manuscript
+  never claims. G2/3 reproduces at −0.360 too. **No manuscript change needed.**
+- **The Open Research Section cites Zenodo v0.2.1**, but tags run to v0.2.5 and the
+  installed package reports 0.2.6. Three releases stale.
+- **The frequentist notebook is committed but not yet in the Zenodo record** — it is
+  on this branch only, and releases are tagged from `main`. Zenodo archives the whole
+  repo tarball (no `export-ignore`), so it travels automatically once the branch
+  merges and a tag is cut; no manual step. Its input CSV is tracked in LFS, so it is
+  reproducible from the archive.
 
 ---
 
