@@ -340,7 +340,7 @@ def _fwd_kwargs() -> dict:
 
 def fit_culmeso(force=False):
     from TEXAS.data import build_fwd_data
-    from TEXAS.stan.io import load_posterior, save_posterior
+    from TEXAS.stan.io import save_posterior
     from TEXAS.stan.sampler import get_posterior
 
     key = f"fwd|culmeso|cultureT|{PROXY}"
@@ -373,7 +373,7 @@ def fit_culmeso(force=False):
 
 def fit_univ(temptype, culmeso_post, force=False):
     from TEXAS.data import build_fwd_data
-    from TEXAS.stan.io import load_posterior, save_posterior
+    from TEXAS.stan.io import save_posterior
     from TEXAS.stan.sampler import get_posterior
 
     key = f"fwd|univ|{temptype}|{PROXY}"

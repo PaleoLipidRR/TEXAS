@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import numpy as np
-from TEXAS.constants import OPTIONAL_PREDICTORS
 
 # Removed 2026-08-12, all four unreferenced by any caller in the package, the
 # SI notebooks, the scripts or the app:
@@ -35,8 +34,6 @@ def patch_optional_predictors(data: dict) -> dict:
     """
     out = dict(data)
     N_keys = [k for k in out if k == "N" or k.startswith("N_")]
-    M = int(out["M"]) if "M" in out else None
-
     # Track whether ANY group uses each predictor to set unsuffixed flags later
     any_used = {"gdgt23ratio": False, "no3": False}
 

@@ -47,7 +47,7 @@ from __future__ import annotations
 import argparse
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import timedelta
 from pathlib import Path
 
 import pandas as pd

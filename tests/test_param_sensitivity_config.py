@@ -209,7 +209,6 @@ def test_subset_covers_the_full_proxy_range(runner):
     also where the paleo sites sit. A subset that stops short of the top of the
     range would tune the sampler on the easy part of the curve only.
     """
-    import numpy as np
     pool = _skewed_pool()
     sub = runner.invt_subset(pool, "proxy", n=200)
     assert len(sub) == 200
@@ -285,7 +284,6 @@ def test_recommend_survives_being_run_twice(runner, tmp_path, monkeypatch):
     by name disappears, and because the frame is written back, the damage
     outlives the process and breaks the other entry point too.
     """
-    import numpy as np
     import pandas as pd
 
     grid = tmp_path / "mcmc_budget_grid.csv"
