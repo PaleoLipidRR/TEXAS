@@ -76,6 +76,53 @@ naming each section; the R2R has a full response to the Associate Editor (there 
 none before) arguing that the length is intrinsic to a methods paper making two
 structural departures, and that the answer is navigability rather than brevity.
 
+**Claim audit done 2026-08-14 — six moderated, two numbers reconciled.** Anchored to
+what the reviewers actually objected to (R2C4 and R2's closing paragraph on in-sample
+metrics and forward-vs-inverse; R3 on "outperforming all existing"; the AE endorsing
+both), not to general adjective-hunting. Method: render the text as a *reader* sees it
+— resolve `\change{old}{new}` to the new half, strip `\note{}` — then scan for
+evaluative language and check each hit against the evidence actually in hand.
+
+Two were factual inconsistencies, now fixed:
+
+- The **abstract still said R² = 0.80 (RMSE 0.052)** for the multivariate fit while §7.2
+  and the Conclusions had moved to the production posterior. The temperature-only pair
+  (0.75, 0.058) already matched; only the multivariate one did not. Now **0.81 (0.050)**.
+- The **inverse figures (R² = 0.82, RMSE 4.4 °C) were unlabelled** as in-sample, which
+  R2C4 and R3 both asked for explicitly. Now labelled, with the spatially blocked
+  counterpart given.
+
+Six were overstatements against the paper's own evidence or its own hedged wording
+elsewhere. All use `\change{}` except the heading:
+
+| where | was | now |
+|---|---|---|
+| Conclusions (Tasman) | "**removes** the persistent warm bias" | "reduces", **plus** an explicit statement that these are sensitivity tests conditional on assumed nutrient depletion |
+| §7.2 heading | "**resolves** first-order spatial biases" | "reduces" — §8.1's heading had already been softened the same way |
+| §7.2 | "captures the **universal**, nonlinear physiological response" | "captures the nonlinear response" |
+| §8.3 PETM | nonthermal controls are "**essential** for reliable reconstruction" | "illustrates how much reconstructed temperature can depend on the assumed nonthermal state" |
+| Plain Language Summary | "**more geologically reasonable** … **more reliable** window" | "agree more closely with independent proxy and model evidence", uncertainty reported |
+| §6.1 / §7.2 | "**superior** ability"; maps "**unambiguously**" | "better represents"; maps onto |
+
+The Tasman one was the important one: §8.1 says TEXAS "can recover realistic SST
+amplitudes *once the extent of past nutrient depletion is constrained*" and labels those
+runs sensitivity reconstructions, so the Conclusions was arguing against the body. It was
+also the sentence most exposed to R2C2.
+
+**The R2R's AE response now enumerates all six** rather than asserting that claims "have
+been moderated", so an editor can spot-check each against the revised text.
+
+**Two gotchas worth remembering.** A section heading cannot take `\change{}` — soul
+markup in a sectioning command propagates into the ToC and the `.aux`; edit the heading
+directly and record it in a `\note{}`. And a naive `\change` regex fails on nested
+braces like `[NO$_{\text{3}}^-$]`, so a verification script needs a real brace matcher
+or it will report the struck-through half as if it were live text.
+
+**Scope limit, so nobody assumes more than was done:** the scan used a fixed term list
+(outperform, superior, resolves, demonstrates, universal, essential, unambiguous,
+guarantee, and similar). It is not a full read-through, and it did not audit numerical
+claims other than the two above.
+
 ### Still open after this session
 
 - **One sentence of R3C3 is for the authors** — whether the screening criteria and
