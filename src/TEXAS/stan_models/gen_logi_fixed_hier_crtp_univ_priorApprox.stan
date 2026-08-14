@@ -39,8 +39,10 @@ model {
 }
 
 generated quantities {
-    // Inflection point of the Richards curve (where curvature changes sign)
-    real inflection_point = t0_crtp + log(v_crtp) / k_crtp;
+    // Temperature of steepest response for the Richards curve. Setting
+    // d2f/dT2 = 0 gives exp(-k(T - T0)) = nu, hence T = T0 - ln(nu)/k, which
+    // lies BELOW T0 for nu > 1. T0 itself is only the location parameter.
+    real max_slope_temp = t0_crtp - log(v_crtp) / k_crtp;
 
     // -- In-sample R^2 for this model -------------------------------------------
     // R2_full     : frequentist 1 - RSS/TSS  (matches figure; fixed denominator)

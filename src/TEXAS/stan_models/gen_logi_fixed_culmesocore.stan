@@ -51,6 +51,9 @@ model {
 }
 
 generated quantities {
-  real inflection_point;
-  inflection_point = t0_culmesocore + log(v_culmesocore) / k_culmesocore;
+  // Temperature of steepest response for the Richards curve. Setting
+  // d2f/dT2 = 0 gives exp(-k(T - T0)) = nu, hence T = T0 - ln(nu)/k, which lies
+  // BELOW T0 for nu > 1. T0 itself is only the location parameter.
+  real max_slope_temp;
+  max_slope_temp = t0_culmesocore - log(v_culmesocore) / k_culmesocore;
 }
