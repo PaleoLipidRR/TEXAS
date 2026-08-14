@@ -1,3 +1,29 @@
+// ===============================================================================
+// invT_gen_logi_fixed_multiv_unconstrained.stan
+//
+// PURPOSE: Bayesian paleotemperature reconstruction from observed Scaled Ring
+//          Index values, with non-thermal corrections (GDGT-2/3 ratio and/or
+//          NO3) applied on the response.
+//
+// MEAN FUNCTION:
+//   mu = b + beta_G23*g23 + beta_NO3*log10(no3) + (1-b)/(1+exp(-k*(T-T0)))^(1/v)
+//   beta carries Scaled-RI units per unit predictor. The NO3 term applies only
+//   where the observed value falls inside (0, no3_cutoff).
+//
+// APPROACH - "Ensemble": one temperature is estimated for each of the N samples
+//   under each of the M forward-posterior draws, giving an N x M parameter
+//   block. Calibration uncertainty is carried by spreading across draws rather
+//   than by marginalizing inside the likelihood.
+//
+//   This costs N*M parameters instead of N. The marginal (log-sum-exp) files in
+//   this directory solve the same inference problem with N parameters and are
+//   what production runs use.
+//
+// TEMPERATURE CONSTRAINT: "unconstrained" - t_est has no lower bound, so
+//   reconstructions may fall below the seawater freezing point where the data
+//   drive them there.
+// ===============================================================================
+
 data {
   int<lower=1> N;
   int<lower=1> M;

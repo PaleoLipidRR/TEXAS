@@ -1,42 +1,59 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // invT_gen_logi_fixed_multiv_marginal_unconstrained_boundedT.stan
 //
-// PURPOSE: Inverse (paleotemperature) counterpart of the BOUNDED-T forward model
-//          gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT.stan.
+// PURPOSE: Bayesian paleotemperature reconstruction from observed Scaled Ring
+//          Index values, with non-thermal predictors (G2/3 ratio, NO3) entering
+//          as a shift of the calibration curve's location parameter.
+//          This is the inverse of the forward calibration
+//          gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT.stan, and it
+//          must be paired with a posterior from that model.
 //
-// WHY THIS FILE HAS TO EXIST
-//   Every other invT_* model applies the non-thermal corrections additively on the
-//   RESPONSE:
-//       mu = b + beta_G23*g23 + beta_NO3*log10(no3) + (1-b)/(1+exp(-k(T-T0)))^(1/v)
-//   The bounded-T forward model instead moves them INSIDE the logistic, as a shift
-//   of the inflection point:
-//       T0_eff = T0 + gamma_G23*g23 + gamma_NO3*log10(no3)
-//       mu     = b + (1-b)/(1+exp(-k(T - T0_eff)))^(1/v)
-//   Those are different likelihoods. Feeding a bounded-T posterior into the
-//   additive inverse would silently reconstruct temperatures under a model that was
-//   never fitted — so the inverse must be reparameterized to match.
+// ─── THE MEAN FUNCTION ────────────────────────────────────────────────────────
+//   T0_eff = T0 + gamma_G23*g23 + gamma_NO3*log10(no3)
+//   mu     = b + (1-b) / (1 + exp(-k*(T - T0_eff)))^(1/v)
 //
-// WHAT IS UNCHANGED from invT_gen_logi_fixed_multiv_marginal_unconstrained.stan:
-//   the marginal (log-sum-exp) strategy over M calibration draws, the reduce_sum
-//   parallelization, the per-sample Normal prior on T computed inside ll_chunk,
-//   the NO3 gating rule, and the "unconstrained" treatment of t_est (no lower
-//   bound). Only the mean function differs, and only in where the predictors enter.
+//   Because the predictors shift T0 rather than mu, mu stays inside (b, 1) for
+//   every finite gamma. The inverse therefore exists everywhere except for
+//   samples whose observed proxy genuinely falls outside the curve's range.
 //
-// WHAT CHANGES IN THE DATA BLOCK:
-//   beta_G23 / beta_NO3  ->  gamma_G23 / gamma_NO3
-//   Same shape (length M, one value per forward-posterior draw), different units:
-//   gamma is degC per unit predictor, not Scaled-RI units per unit predictor.
-//   Pass zeros for a predictor that is switched off, exactly as before.
+//   T0 is the curve's LOCATION parameter, not its inflection point; the steepest
+//   response sits at T0 - ln(v)/k.
 //
-// A USEFUL PROPERTY: because the predictors shift T0 rather than mu, the inverse
-//   is better behaved than the additive one. In the additive model a large
-//   correction can push mu outside [b, 1], where the inverse does not exist; here
-//   mu stays in (b, 1) for every finite gamma, so the only samples without a
-//   solution are those whose proxy genuinely falls outside the curve's range.
+// ─── APPROACH: marginal (direct sampling) ─────────────────────────────────────
+//   The forward calibration leaves uncertainty in the curve parameters
+//   theta = {T0, k, b, v, gamma_G23, gamma_NO3, sigma}. This model marginalizes
+//   over it rather than re-estimating it: for each sample n the Normal
+//   likelihood is averaged over M draws from the forward posterior,
 //
-// NOTE ON VARIANTS: the truncated-prior and hard-constraint flavours differ from
-//   this file only in the prior/parameter declaration for t_est (a lower bound, or
-//   a truncated normal_lpdf). Copy this mean function into those if they are needed.
+//     p(RI_n | T_n) ~= (1/M) Sum_m Normal(RI_n | mu(T_n; theta_m), sigma_m)
+//
+//   evaluated as a log-sum-exp. The only free parameters here are the N
+//   temperatures t_est.
+//
+// CRITICAL: ALL PARAMETERS MUST USE THE SAME DRAW INDEX m. Mixing indices across
+//   parameters would break their posterior correlations and inflate calibration
+//   uncertainty. build_invT_inputData() enforces this on the Python side.
+//
+// ─── DATA BLOCK ───────────────────────────────────────────────────────────────
+//   gamma_G23 and gamma_NO3 are each length M, one value per forward-posterior
+//   draw, in degC per unit predictor (degC per log10 unit for NO3). Pass zeros
+//   for a predictor that is switched off. The NO3 term applies only where the
+//   observed value falls inside (0, no3_cutoff).
+//
+// ─── PARALLELIZATION via reduce_sum ───────────────────────────────────────────
+//   The outer loop over N samples is the bottleneck; reduce_sum splits it into
+//   chunks processed on separate CPU threads. grainsize = 1 gives maximum
+//   parallelism, grainsize = N gives none. Requires STAN_THREADS=True and
+//   threads_per_chain > 1.
+//
+//   The per-sample Normal prior on T is computed INSIDE ll_chunk, not in the
+//   model block: because p(T_n | prior_mu_t_n) depends on n, each chunk must
+//   contribute the prior for its own subset. Summing across chunks is
+//   mathematically identical to a single non-parallel loop.
+//
+// ─── TEMPERATURE CONSTRAINT: "unconstrained" ──────────────────────────────────
+//   t_est has no lower bound, so reconstructions may fall below the seawater
+//   freezing point where the data drive them there.
 // ═══════════════════════════════════════════════════════════════════════════════
 
 functions {
@@ -81,10 +98,9 @@ functions {
       vector[M] llk;  // Log-likelihood under each of the M calibration draws
 
       for (m in 1:M) {
-        // ─── THE ONE STRUCTURAL DIFFERENCE FROM THE ADDITIVE MODEL ───────────
-        // Predictors shift the inflection point, not the response. Read it as:
-        // "this community structure / nutrient level makes the curve turn over at
-        // a different temperature", rather than "it offsets the index".
+        // The predictors shift the curve's location, not the response. Read it
+        // as: "this community structure / nutrient level makes the curve turn
+        // over at a different temperature", rather than "it offsets the index".
         real t0_eff = t0[m];
 
         // Ecology correction: gamma_{G2/3} degC per unit gdgt23ratio.
@@ -92,9 +108,8 @@ functions {
           t0_eff += gamma_gd[m] * gd_seg[i];
 
         // NO3 correction: gamma_{NO3} degC per log10 unit, applied conditionally.
-        // logno3 = 0 when NO3 is outside the valid range, so no correction applied
-        // — identical gating to the additive model, so the same samples are
-        // corrected in both.
+        // logno3 = 0 when NO3 is outside the valid range, so no correction is
+        // applied — the same gate the forward calibration was fitted under.
         if (use_no3 == 1) {
           real logno3 = 0.0;
           if (n3_seg[i] > 0.0 && n3_seg[i] < no3_cutoff)
@@ -102,7 +117,7 @@ functions {
           t0_eff += gamma_no3[m] * logno3;
         }
 
-        // The Richards curve, evaluated against the shifted inflection point.
+        // The Richards curve, evaluated against the shifted location t0_eff.
         // Bounded in (b[m], 1) by construction for any finite t0_eff.
         real mu = b[m] + (1 - b[m])
             / pow(1 + exp(-k[m] * (t_seg[i] - t0_eff)), 1.0 / v[m]);

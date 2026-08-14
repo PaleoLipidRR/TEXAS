@@ -24,13 +24,18 @@
 //   The total log-probability is the sum across all chunks - mathematically
 //   identical to computing prior + likelihood in a single non-parallel loop.
 //
-// TEMPERATURE CONSTRAINT: "hard_constraint" variant
-//   t_est is declared as vector<lower=min_temp>[N], which imposes a strict
-//   physical lower bound on all reconstructed temperatures. Stan enforces this
-//   via an internal change-of-variables (log-Jacobian adjustment), so HMC
-//   never proposes temperatures below min_temp.
-//   Typical value: min_temp = -1.8degC (seawater freezing point).
-//   Use the "_unconstrained" variant if no lower bound is needed.
+// TEMPERATURE CONSTRAINT: "hard_constraint"
+//   t_est is declared as vector<lower=min_temp>[N], imposing a strict physical
+//   lower bound on every reconstructed temperature. Stan enforces this via an
+//   internal change-of-variables, so HMC never proposes temperatures below
+//   min_temp. Typical value: min_temp = -1.8degC (seawater freezing point).
+//
+//   The change-of-variables adds a log(t - min_temp) Jacobian to the log-target,
+//   which multiplies the effective prior by (t - min_temp) and so pushes the
+//   posterior away from the boundary. That is worth knowing for sites whose
+//   temperature sits close to min_temp. Sibling files in this directory leave
+//   t_est unbounded ("_unconstrained") or impose the bound through a
+//   truncated-Normal prior instead ("_truncated_prior").
 // ===============================================================================
 
 functions {

@@ -38,9 +38,11 @@
 //   and artificially inflate calibration uncertainty.
 //   This constraint is enforced in build_invT_inputData() (Python side).
 //
-// TEMPERATURE CONSTRAINT: "unconstrained" variant
-//   t_est has no lower bound - temperatures can be reconstructed below 0degC.
-//   Use the "_hard_constraint" variant for a physical lower bound (e.g., -1.8degC).
+// TEMPERATURE CONSTRAINT: "unconstrained"
+//   t_est has no lower bound, so reconstructions may fall below the seawater
+//   freezing point where the data drive them there. Sibling files in this
+//   directory impose a lower bound instead ("_hard_constraint") or place a
+//   truncated-Normal prior on t_est ("_truncated_prior").
 // ===============================================================================
 
 functions {

@@ -1,13 +1,22 @@
 // ===============================================================================
 // invT_gen_logi_fixed_multiv_marginal_unconstrained.stan
 //
-// PURPOSE: Bayesian paleotemperature reconstruction with non-thermal corrections
-//          (GDGT-2/3 ratio and/or NO3), parallelized via Stan's reduce_sum.
-//          Multivariate counterpart of invT_gen_logi_fixed_univ_marginal_unconstrained.stan.
+// PURPOSE: Bayesian paleotemperature reconstruction from observed Scaled Ring
+//          Index values, with non-thermal corrections (GDGT-2/3 ratio and/or
+//          NO3) applied on the response, parallelized via Stan's reduce_sum.
 //
-// APPROACH - same marginal (log-sum-exp) strategy as the univariate model:
-//   For each sample n, average the Normal likelihood over M calibration draws:
+// MEAN FUNCTION:
+//   mu = b + beta_G23*g23 + beta_NO3*log10(no3) + (1-b)/(1+exp(-k*(T-T0)))^(1/v)
+//   beta carries Scaled-RI units per unit predictor. The NO3 term applies only
+//   where the observed value falls inside (0, no3_cutoff).
+//
+// APPROACH - "Marginal" (direct sampling):
+//   The forward calibration leaves uncertainty in the curve parameters theta.
+//   This model marginalizes over it rather than re-estimating it: for each
+//   sample n the Normal likelihood is averaged over M draws from the forward
+//   posterior, evaluated as a log-sum-exp.
 //     p(RI_n | T_n) ~= (1/M) Sum_m Normal(RI_n | f(T_n; theta_m) + corrections_m, sigma_m)
+//   The only free parameters here are the N temperatures t_est.
 //
 // PARALLELIZATION via reduce_sum:
 //   The outer loop over N samples is the bottleneck. reduce_sum splits those N

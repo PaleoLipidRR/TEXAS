@@ -1,22 +1,34 @@
 // ===============================================================================
 // invT_gen_logi_fixed_multiv_marginal_truncated_prior.stan
 //
-// PURPOSE: Bayesian paleotemperature reconstruction with non-thermal corrections
-//          (GDGT-2/3 ratio and/or NO3), parallelized via Stan's reduce_sum.
-//          Multivariate counterpart of invT_gen_logi_fixed_univ_marginal_truncated_prior.stan.
+// PURPOSE: Bayesian paleotemperature reconstruction from observed Scaled Ring
+//          Index values, with non-thermal corrections (GDGT-2/3 ratio and/or
+//          NO3) applied on the response, parallelized via Stan's reduce_sum.
 //
-// TEMPERATURE CONSTRAINT: "truncated_prior" variant
-//   See invT_gen_logi_fixed_univ_marginal_truncated_prior.stan for the full
-//   explanation. In short: the hard_constraint Jacobian biases P50 warm for
-//   polar sites; the inverse-CDF reparameterization fixes this.
+// MEAN FUNCTION:
+//   mu = b + beta_G23*g23 + beta_NO3*log10(no3) + (1-b)/(1+exp(-k*(T-T0)))^(1/v)
+//   beta carries Scaled-RI units per unit predictor. The NO3 term applies only
+//   where the observed value falls inside (0, no3_cutoff).
 //
-//   q[n] ~ Uniform(0,1) is mapped to t_est[n] (in transformed parameters) via
-//   the quantile function of TruncNormal(prior_mu_t[n], prior_sigma_t, lower=min_temp).
+// APPROACH - "Marginal" (direct sampling):
+//   The Normal likelihood is averaged over M draws from the forward calibration
+//   posterior, evaluated as a log-sum-exp, so calibration uncertainty is
+//   marginalized rather than re-estimated. The only free parameters are the N
+//   temperatures t_est.
 //
-// KEY DIFFERENCE from the hard_constraint multiv model:
-//   The prior on t_est is embedded in the q -> t_est reparameterization, so
-//   ll_chunk does NOT include a prior contribution - only the likelihood.
-//   prior_mu_t and prior_sigma_t are used only in transformed parameters.
+// TEMPERATURE CONSTRAINT: "truncated_prior"
+//   The prior on temperature is a Normal truncated below at min_temp, imposed by
+//   inverse-CDF reparameterization rather than by a parameter bound:
+//   q[n] ~ Uniform(0,1) is mapped to t_est[n] (in transformed parameters) via the
+//   quantile function of TruncNormal(prior_mu_t[n], prior_sigma_t, lower=min_temp).
+//
+//   The implied prior on t_est is then exactly the truncated Normal, with no
+//   Jacobian term entering the log-target, so the posterior keeps its intended
+//   shape at the boundary rather than being repelled from it.
+//
+//   Because the prior enters through that reparameterization, ll_chunk
+//   contributes the likelihood only; prior_mu_t and prior_sigma_t are used
+//   solely in transformed parameters.
 //
 // PARALLELIZATION via reduce_sum:
 //   The outer loop over N samples is split across CPU threads.

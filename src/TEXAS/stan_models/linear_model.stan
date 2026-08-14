@@ -1,4 +1,16 @@
-// linear model
+// ===============================================================================
+// linear_model.stan
+//
+// PURPOSE: Straight-line regression of a proxy against temperature, used as the
+//          reference functional form the sigmoid calibrations are compared
+//          against in the SI figures.
+//
+//   proxy = slope * T + intercept,   proxy ~ Normal(mu, sigma)
+//
+// slope and intercept are both constrained non-negative, which suits the
+// positively sloped proxy-temperature relationships this is applied to; it is
+// not a general-purpose linear regression.
+// ===============================================================================
 
 data {
     int<lower=1> N;

@@ -16,31 +16,30 @@
 //   This is a Monte Carlo approximation of the integral using M pre-sampled
 //   calibration curves. The only free parameter in this Stan model is T.
 //
-// TEMPERATURE CONSTRAINT: "truncated_prior" variant
+// TEMPERATURE CONSTRAINT: "truncated_prior"
 //
-//   PROBLEM WITH HARD CONSTRAINT:
-//   Declaring t_est as vector<lower=min_temp>[N] causes Stan to reparameterize
-//   internally: t_est = min_temp + exp(eta). The resulting Jacobian log(t-min_temp)
-//   is automatically added to the log-target, making the effective prior:
-//     p_eff(t) proportional to Normal(t | mu, sigma) * (t - min_temp)
-//   The linear factor repels the posterior away from the boundary, shifting P50
-//   unrealistically warm for polar sites where t is close to min_temp.
+//   The prior on temperature is a Normal truncated below at min_temp (typically
+//   -1.8 degC, the seawater freezing point), imposed by inverse-CDF
+//   reparameterization rather than by a parameter bound.
 //
-//   THIS MODEL'S SOLUTION - inverse-CDF reparameterization:
-//   Instead of sampling t directly, we sample q ~ Uniform(0,1) and map it to
-//   temperature via the quantile function of the truncated Normal:
+//   Rather than sampling t directly, this model samples q ~ Uniform(0,1) and maps
+//   it to temperature through the quantile function of the truncated Normal:
 //
 //     p_lower = Phi((min_temp - mu_n) / sigma)          // CDF at lower bound
 //     t_n = Normal_QF(p_lower + (1-p_lower)*q_n, mu_n, sigma)
 //
-//   Because q ~ Uniform(0,1) (the default for a <lower=0,upper=1> parameter),
-//   the implied prior on t is exactly the truncated Normal - no Jacobian distortion.
-//   The posterior is correctly shaped near min_temp and P50 remains data-driven.
+//   Because q ~ Uniform(0,1) is the default for a <lower=0,upper=1> parameter,
+//   the implied prior on t is exactly the truncated Normal, with no Jacobian
+//   term entering the log-target. This matters at the boundary: a declared
+//   lower bound would be reparameterized internally as t = min_temp + exp(eta),
+//   whose Jacobian log(t - min_temp) multiplies the effective prior by
+//   (t - min_temp) and repels the posterior away from min_temp. Here the
+//   posterior keeps its intended shape at the boundary, so P50 stays data-driven
+//   while P5 remains bounded at min_temp.
 //
-//   SUMMARY:
-//     hard_constraint : t can't go below min_temp, but Jacobian biases P50 warm
-//     unconstrained   : P50 correct, but P5 can reach unrealistically cold values
-//     truncated_prior : P50 correct AND P5 bounded at min_temp - best of both
+//   The prior enters through this reparameterization, so ll_chunk contributes
+//   the likelihood only; prior_mu_t and prior_sigma_t are used solely in
+//   transformed parameters.
 // ===============================================================================
 
 data {

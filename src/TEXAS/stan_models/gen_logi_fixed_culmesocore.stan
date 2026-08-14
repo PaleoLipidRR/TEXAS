@@ -1,3 +1,26 @@
+// ===============================================================================
+// gen_logi_fixed_culmesocore.stan
+//
+// PURPOSE: Forward calibration fitting ONE generalized logistic curve jointly to
+//          all three data sources - culture, mesocosm and coretop - with a
+//          single shared parameter set and no hierarchy between them.
+//
+//          This is the fully pooled fit: it treats a coretop sample as exchangeable
+//          with a culture experiment. That is the assumption it exists to
+//          represent, and it is a strong one.
+//
+// CALIBRATION CURVE - generalized logistic (Richards), upper asymptote fixed at
+// 1 and Q fixed at 1:
+//
+//   RI = b + (1 - b) / (1 + exp(-k * (T - T0)))^(1/nu)
+//
+// T0 is the curve's LOCATION parameter, not its inflection point; the steepest
+// response sits at T0 - ln(nu)/k, reported as max_slope_temp.
+//
+// Only the residual scales are estimated per data source; all four curve
+// parameters are shared.
+// ===============================================================================
+
 data {
   int<lower=1> N_cul;         // number of culture observations
   vector[N_cul] t_cul;        // temperatures

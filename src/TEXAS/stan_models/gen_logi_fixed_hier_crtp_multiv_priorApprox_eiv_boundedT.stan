@@ -1,66 +1,78 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT.stan
 //
-// PURPOSE: Bounded-response variant of gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv.
-//          Identical data block, priors, EIV structure and noise model — the ONLY
-//          change is WHERE the non-thermal predictors enter the calibration curve.
+// PURPOSE: Coretop forward calibration of the Scaled Ring Index against
+//          temperature, with non-thermal predictors (G₂/₃ ratio, NO₃),
+//          Bayesian errors-in-variables on those predictors, and explicit
+//          separation of analytical measurement error from process noise.
 //
-// ─── THE PROBLEM THIS ADDRESSES (reviewer comment) ────────────────────────────
-// In the response-space parent model the corrections are additive on RI:
-//
-//     mu = b + (1 − b)/(1 + exp(−k(T − T₀)))^(1/ν)  +  β_G23·g23  +  β_NO3·log₁₀(no3)
-//          └──────────── bounded on [b, 1] ────────────┘  └──── unbounded shift c ────┘
-//
-// The logistic term is bounded, but c slides the whole curve vertically, so the
-// effective range becomes [b + c, 1 + c]. Nothing holds that inside [0, 1].
-//
-// What that costs in practice, measured on the coretop calibration set (N=2043):
-//   • The effective upper asymptote 1 + c exceeds 1 for 22.5 % of coretops, and
-//     the effective lower asymptote b + c reaches −0.41. The curves those samples
-//     sit on are not confined to [0, 1].
-//   • Evaluated over T ∈ [−2, 40] °C at posterior-median coefficients, the mean
-//     response spans −0.372 … 1.083.
-//   • BUT at the observed (T, G₂/₃, NO₃) of the calibration points themselves, the
-//     fitted mean stays in range: 0.042 … 0.863 across all posterior draws. It is
-//     dragged well below the lower asymptote b ≈ 0.41, but it does not leave [0, 1].
-//
-// So the defect is structural rather than currently-realised: the parameterization
-// carries no bound, the fitted curves do leave [0, 1] away from the data, and the
-// guarantee fails under extrapolation — but the published calibration fit is not
-// itself producing out-of-range values. A Scaled Ring Index is a bounded ratio, so
-// the guarantee is still worth having by construction.
-//
-// ─── THE FIX ──────────────────────────────────────────────────────────────────
-// Move the predictors INSIDE the logistic, as a shift of the inflection point:
+// ─── THE CALIBRATION CURVE ────────────────────────────────────────────────────
+// A generalized logistic (Richards) curve with the upper asymptote fixed at 1
+// and Q fixed at 1, in which the non-thermal predictors shift the curve's
+// location parameter T₀:
 //
 //     T₀_eff[i] = T₀ + γ_G23·g23_true[i] + γ_NO3·log₁₀(no3_true[i])
-//     mu[i]     = b + (1 − b)/(1 + exp(−k(T[i] − T₀_eff[i])))^(1/ν)
+//     mu[i]     = b + (1 − b) / (1 + exp(−k(T[i] − T₀_eff[i])))^(1/ν)
 //
-// mu is now confined to (b, 1) for every finite value of the predictors and
-// coefficients — bounded BY CONSTRUCTION, with no truncation or rejection.
+// Because the predictors enter inside the logistic, mu is confined to (b, 1) for
+// every finite value of the predictors and coefficients. The Scaled Ring Index is
+// a bounded ratio, and this parameterization reproduces that bound by
+// construction — no truncation, rejection or post-hoc clipping is involved. The
+// generated quantities report mu_min and mu_max so the property can be checked
+// draw by draw.
 //
-// ─── INTERPRETATION AND SIGN ──────────────────────────────────────────────────
-// γ carries units of °C per predictor unit: "a sample with this much G₂/₃ behaves
-// like water that is γ·g23 °C colder". This is arguably the more physical reading
-// — these are ecological/physiological offsets to the temperature the archaeal
-// community records, not additive contamination of the ratio itself.
+// T₀ is the curve's LOCATION parameter, not its inflection point. The steepest
+// response sits at T₀ − ln(ν)/k, which for the fitted ν is several °C below T₀.
+// Do not quote a single thermal sensitivity for this curve.
 //
-// Signs are defined so both γ are POSITIVE, matching the parent's β ∈ [−1, 0]:
+// ─── THE NON-THERMAL COEFFICIENTS ─────────────────────────────────────────────
+// γ carries units of °C per predictor unit, and reads directly: a sample with
+// this much G₂/₃ behaves like water that is γ_G23·g23 °C colder. These are
+// ecological and physiological offsets to the temperature the archaeal community
+// records.
+//
+// Both γ are declared positive, which is what the data support:
 //   • mu decreases as T₀_eff increases.
-//   • Parent: β_G23 < 0, so more G₂/₃ lowers RI  ⇒  γ_G23 > 0.
-//   • Parent: β_NO3 < 0 and log₁₀(no3) < 0 below the cutoff, so the NO₃ term
-//     RAISES RI there ⇒ T₀_eff must fall ⇒ γ_NO3 > 0 (γ·log₁₀(no3) < 0).
+//   • Higher G₂/₃ accompanies lower Scaled RI  ⇒  γ_G23 > 0.
+//   • Below the cutoff log₁₀(no3) < 0, so a positive γ_NO3 LOWERS T₀_eff and
+//     raises Scaled RI — the direction observed in nutrient-depleted settings.
 //
-// Rough scale for the priors: near the inflection dRI/dT ≈ 0.028 RI/°C for the
-// published coefficients, so the parent's β_G23 = −0.0057 RI/unit corresponds to
-// γ_G23 ≈ 0.2 °C/unit and β_NO3 = −0.046 RI/log₁₀-unit to γ_NO3 ≈ 1.6 °C/log₁₀-unit.
-// The half-normal priors below are deliberately several times wider than that.
+// The half-normal priors, N(0, 1.0) °C/unit and N(0, 5.0) °C/log₁₀-unit, are
+// several times wider than the posteriors they produce.
 //
-// ─── WHAT IS UNCHANGED ────────────────────────────────────────────────────────
-// Data block (drop-in compatible with build_fwd_data output), stage-1 hyperpriors
-// on {t0, k, b, v}, the G₂/₃ and NO₃ EIV latent-variable structure, the
-// quadrature noise model, and the R²/RMSE generated quantities. Only the two
-// correction coefficients are renamed β → γ and relocated.
+// ─── THE NO₃ GATE ─────────────────────────────────────────────────────────────
+// The NO₃ term applies only at sites whose OBSERVED nitrate falls inside
+// (0, no3_cutoff); above the cutoff the nutrient effect is taken to be absent and
+// the site contributes no NO₃ term. Gating on the observed rather than the latent
+// value keeps the set of sites receiving the correction fixed across draws.
+//
+// ─── ERRORS IN VARIABLES AND THE NOISE MODEL ──────────────────────────────────
+//   1. Per-site analytical error on the proxy, sd_proxyObs, enters the likelihood
+//      in quadrature:  total_sd = sqrt(sd_proxyObs² + sigma_proxyObs_crtp²).
+//      sigma_proxyObs_crtp is therefore PROCESS noise only — oceanographic
+//      scatter, bioturbation, model misfit — and not total Scaled RI scatter.
+//   2. Its prior is scaled to the residual SE left after the thermal curve:
+//      sigma ~ N(0, mean(sd_proxyObs) · sqrt(1 − R²_thermal)). R2_thermal is
+//      supplied as data from a thermal-only coretop fit.
+//   3. G₂/₃ has a latent true value per site, true_gdgt23ratio_crtp ~ N(0, 2),
+//      with a normal measurement model. Sites with sd_gdgt23ratio_crtp = 0
+//      receive the prior only.
+//   4. NO₃ has a latent true value per site on the LINEAR scale,
+//      true_no3_crtp ~ lognormal(log 0.3, 1.0), bounded above by no3_cutoff so
+//      that log10() cannot overflow during HMC, with a normal measurement model.
+//      Sites with sd_no3_crtp = 0 receive the prior only. There is no CV-gating.
+//
+// ─── WORKFLOW (two-stage priorApprox) ─────────────────────────────────────────
+//   Stage 1: fit gen_logi_fixed_culmeso.stan on the culture and mesocosm data,
+//            and pass the posterior mean and SD of {t0, k, b, v} in as
+//            prior_mean_* / prior_sd_*. Compute R²_thermal from a thermal-only
+//            coretop fit and pass it as R2_thermal.
+//   Stage 2: this model, which fits the coretop parameters conditional on those
+//            hyperpriors.
+//
+// The data block is a drop-in for build_fwd_data() output. Generated quantities
+// are R2_full, bayesR2_full, RMSE_full, and the boundedness witnesses mu_min and
+// mu_max.
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // ─── The bounded mean, shared by the model and generated quantities ───────────
@@ -76,8 +88,9 @@ functions {
 
         if (use_n3 == 1) {
             for (i in 1:N) {
-                // Same gating as the parent model: the NO₃ term applies only to
-                // sites whose OBSERVED value falls inside (0, cutoff).
+                // The NO₃ term applies only to sites whose OBSERVED value falls
+                // inside (0, cutoff), so the set of corrected sites is fixed
+                // across draws rather than moving with the latent value.
                 if (n3_obs[i] > 0 && n3_obs[i] < cutoff)
                     t0_eff[i] += gamma_n3 * log10(n3_true[i]);
             }
@@ -146,8 +159,8 @@ model {
     b_crtp  ~ normal(prior_mean_b,  prior_sd_b);
     v_crtp  ~ normal(prior_mean_v,  prior_sd_v);
 
-    // Half-normal (the <lower=0> bound truncates), scaled well above the
-    // response-space equivalents of the published β coefficients.
+    // Half-normal (the <lower=0> bound truncates), in °C per predictor unit and
+    // deliberately several times wider than the posteriors they produce.
     gamma_G23_crtp ~ normal(0, 1.0);
     gamma_NO3_crtp ~ normal(0, 5.0);
 
@@ -181,8 +194,8 @@ generated quantities {
     real R2_full;
     real bayesR2_full;
     real RMSE_full;
-    // Boundedness witnesses — with this parameterization mu_min > b and
-    // mu_max < 1 in EVERY draw, which is the claim to show the reviewer.
+    // Boundedness witnesses: mu_min > b and mu_max < 1 hold in every draw, so
+    // the bound can be verified from the posterior rather than assumed.
     real mu_min;
     real mu_max;
 

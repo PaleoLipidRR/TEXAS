@@ -1,3 +1,41 @@
+// ===============================================================================
+// gen_logi_fixed_hier_crtp_univ_priorApprox.stan
+//
+// PURPOSE: Coretop forward calibration of the Scaled Ring Index against
+//          temperature alone, with no non-thermal predictors. This is the
+//          thermal-only fit: it gives the univariate calibration, and its
+//          R2_full supplies the R2_thermal that the errors-in-variables models
+//          need to scale their process-noise prior.
+//
+// CALIBRATION CURVE - generalized logistic (Richards), upper asymptote fixed at
+// 1 and Q fixed at 1:
+//
+//   RI = b + (1 - b) / (1 + exp(-k * (T - T0)))^(1/nu)
+//
+// T0 is the curve's LOCATION parameter, not its inflection point. The steepest
+// response sits at T0 - ln(nu)/k, several degC below T0 for the fitted nu, and
+// the slope varies severalfold across the sampled range - so there is no single
+// thermal sensitivity to quote for this curve.
+//
+// WORKFLOW (two-stage priorApprox):
+//   Stage 1: fit gen_logi_fixed_culmeso.stan on the culture and mesocosm data
+//            and pass the posterior mean and SD of {t0, k, b, v} in as
+//            prior_mean_* / prior_sd_*.
+//   Stage 2: this model, which fits the coretop parameters conditional on those
+//            hyperpriors. Because the coretop stage is separate, it can be
+//            re-run without refitting the culture and mesocosm data.
+//
+// GENERATED QUANTITIES:
+//   R2_full      frequentist 1 - RSS/TSS, the quantity reported in the
+//                manuscript and comparable with published TEX86 calibrations
+//   bayesR2_full var(mu) / (var(mu) + sigma^2), Gelman et al. (2019)
+//   RMSE_full    root mean squared residual, in Scaled RI units
+//   max_slope_temp  the temperature of steepest response, T0 - ln(nu)/k
+//
+//   R2_full is the one to difference across posteriors for sequential variance
+//   partitioning in Python; the two R2 definitions are not interchangeable.
+// ===============================================================================
+
 data {
   int<lower=1> N_crtp;
   vector[N_crtp] t_crtp;
@@ -15,7 +53,7 @@ data {
 }
 
 parameters {
-  real<lower=10, upper=50> t0_crtp;            // center (not necessarily inflection point)
+  real<lower=10, upper=50> t0_crtp;            // curve location (steepest response at t0 - ln(v)/k)
   real<lower=0.01, upper=0.5> k_crtp;          // growth rate
   real<lower=0.1, upper=1.0> b_crtp;           // lower asymptote (upper=1 matches joint model)
   real<lower=0.1, upper=10> v_crtp;           // asymmetry / shape parameter (nu)
