@@ -27,17 +27,18 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="in"
-     inkscape:zoom="1.4530176"
-     inkscape:cx="356.49946"
-     inkscape:cy="306.25919"
+     inkscape:zoom="2.0548772"
+     inkscape:cx="359.87552"
+     inkscape:cy="211.69148"
      inkscape:window-width="2560"
-     inkscape:window-height="1371"
+     inkscape:window-height="1355"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:current-layer="layer1"
      inkscape:export-bgcolor="#ffffffff"
-     showguides="false">
+     showguides="false"
+     showgrid="false">
     <inkscape:page
        x="0"
        y="0"
@@ -13737,7 +13738,7 @@
          x="77.550056"
          y="114.86979">link via <tspan
    style="fill:#217821"
-   id="tspan38">surfuce ocean nitrate levels</tspan></tspan></text>
+   id="tspan38">surface ocean nitrate levels</tspan></tspan></text>
     <rect
        style="fill:#87cdde;fill-opacity:1;stroke:none;stroke-width:0.367905;stroke-dasharray:none"
        id="rect16-8"
@@ -13811,14 +13812,14 @@
       <text
          id="text1492"
          xml:space="preserve"
-         x="25.111055"
-         y="6.8027987"
-         style="font-size:1.28743px;stroke-width:0.107286"><tspan
+         x="17.786982"
+         y="7.1542883"
+         style="font-size:0.964837px;stroke-width:0.0804031"><tspan
            id="tspan1492"
-           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.32481px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.107286"
-           x="25.111055"
-           dx="0 0 0 0 0 0 0 0 0 -0.30273706 0 0 0.021624077 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.10812039"
-           y="6.8027987">TEXAS = TetraEther indeX of Ammonia oxidizerS</tspan></text>
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:3.24114px;font-family:'TeX Gyre Heros';-inkscape-font-specification:'TeX Gyre Heros, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;writing-mode:lr-tb;fill:#4d4d4d;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.0804031"
+           x="17.786982"
+           dx="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.22687964 0 0 0.016205689 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -0.081028454"
+           y="7.1542883">TEXAS-PSM | A Proxy System Model for TetraEther indeX of Ammonia oxidizerS</tspan></text>
       <path
          id="path7852"
          d="M 21.548891,11.262265 H 45.11914 v 5.098993 H 21.548891 Z"
