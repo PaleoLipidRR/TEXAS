@@ -136,6 +136,20 @@ Available forward posteriors:
 | `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3` | EIV multivariate coretop | SST | ~78 MB |
 | `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3` | EIV multivariate coretop | Thermo T | ~78 MB |
 
+```{warning}
+**The two multivariate posteriors above are the response-offset formulation, not
+the bounded-T one.** They carry `beta_G23_crtp` / `beta_NO3_crtp`, in Scaled-RI
+units per predictor unit. The current calibration applies the predictors inside
+the logistic instead, as a shift of T₀ in °C
+(`gamma_G23_crtp` / `gamma_NO3_crtp` — see
+[Running forward calibration from scratch](#running-forward-calibration-from-scratch)
+below). The bounded-T
+posteriors are published with the v1.0.0 Zenodo record; until then, refit locally
+with `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT` if you need them.
+The univariate and culture/mesocosm posteriors listed above are unaffected —
+they have no non-thermal predictors.
+```
+
 ---
 
 ### Step 3 — Forward prediction (temperature → proxy)
@@ -262,12 +276,26 @@ data = build_fwd_data(
 
 posterior, diagnostics = get_posterior(
     data,
-    stan_file="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv",
+    stan_file="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT",
     temptype="SST",
     proxy_name="scaledRI_cren3",
 )
 save_posterior(posterior)
 ```
+
+`..._eiv_boundedT` is the published calibration. The non-thermal predictors enter
+inside the logistic, shifting the curve's location parameter T₀ rather than adding
+an offset to the response:
+
+```
+T₀_eff = T₀ + γ_{G₂/₃}·G₂/₃ + γ_{NO₃}·log₁₀(NO₃)
+Scaled RI = b + (1 − b) / (1 + exp(−k·(T − T₀_eff)))^(1/ν)
+```
+
+so the fitted coefficients are `gamma_G23_crtp` and `gamma_NO3_crtp`, in °C per
+predictor unit, and the predicted Scaled RI is confined to (b, 1) by construction.
+`R2_thermal` must be supplied to this model — compute it from a thermal-only
+coretop fit with `gen_logi_fixed_hier_crtp_univ_priorApprox`.
 
 ---
 
