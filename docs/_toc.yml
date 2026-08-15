@@ -27,3 +27,6 @@ parts:
       - file: reduce_sum_for_geologists
       - file: Prior_Choice_Normal_vs_Cauchy
       - file: ckdtree_nearest_ocean_explainer
+  - caption: Archive
+    chapters:
+      - file: preprint_additive_archive

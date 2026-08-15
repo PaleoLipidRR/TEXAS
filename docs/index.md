@@ -174,7 +174,9 @@ alike.
 
 ```{warning}
 **The two multivariate posteriors above are the response-offset formulation, not
-the T₀-shift one.** They carry `beta_G23_crtp` / `beta_NO3_crtp`, in Scaled-RI
+the T₀-shift one** — they are the preprint's calibration (see the
+[preprint archive page](preprint_additive_archive.md)). They carry
+`beta_G23_crtp` / `beta_NO3_crtp`, in Scaled-RI
 units per predictor unit. The current calibration applies the predictors inside
 the logistic instead, as a shift of T₀ in °C
 (`gamma_G23_crtp` / `gamma_NO3_crtp` — see

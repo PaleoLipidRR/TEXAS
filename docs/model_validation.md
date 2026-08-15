@@ -93,25 +93,16 @@ noise σ²_proxyObs from nested fits:
 
 Temperature dominates (≈ 75 %), confirming Scaled RI is primarily a
 thermometer, while the non-thermal predictors each explain a small but
-**robustly non-zero** slice. The corresponding regression coefficients are
-resolved away from zero with essentially full posterior probability:
+**robustly non-zero** slice. In the published calibration these effects enter
+as temperature-equivalent shifts of the curve location — the *T₀-shift
+parameterization* (`..._priorApprox_eiv_t0shift`), with
+γ_{G₂/₃} = 0.63 ± 0.04 °C per G₂/₃ unit and γ_{NO₃} = 2.79 ± 0.24 °C per
+tenfold increase in [NO₃⁻], both resolved away from zero with essentially
+full posterior probability.
 
-| Coefficient | Posterior mean ± SD | P(β < 0) |
-|---|---|---:|
-| β_{G₂/₃} | −0.0058 ± 0.0004 | ≈ 1.0 |
-| β_{NO₃} | −0.0329 ± 0.0025 | ≈ 1.0 |
-
-Because the model is Bayesian, significance is reported as the posterior
-probability that each coefficient has the expected sign — not a frequentist
-p-value.
-
-> **Note.** The β values above are **response-space slopes** (Scaled-RI units
-> per predictor unit) from the additive-arm analysis used to *detect* the
-> nonthermal effects. The published calibration applies these effects
-> **inside** the logistic instead — the *T₀-shift parameterization*
-> (`..._priorApprox_eiv_t0shift`), whose coefficients are temperature-equivalent:
-> γ_{G₂/₃} = 0.63 ± 0.04 °C per G₂/₃ unit and γ_{NO₃} = 2.79 ± 0.24 °C per
-> tenfold increase in [NO₃⁻].
+The preprint expressed the same effects as response-space β offsets; those
+estimates, and the archived posteriors that carry them, are preserved on the
+[preprint archive page](preprint_additive_archive.md).
 
 > **Note.** Variance partitioning applies to the **forward** calibration only.
 > An inverse (invT) reconstruction's posterior width mixes the temperature

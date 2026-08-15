@@ -159,8 +159,8 @@ result = predict_T_from_proxyObs(
 )
 
 # ── Multivariate model with NO₃ and GDGT-2/3 correction ──────────────────────
-# Note: the Zenodo multivariate posteriors are the earlier response-offset
-# formulation (beta on the response). The published T₀-shift posteriors ship
+# Note: the Zenodo multivariate posteriors are the preprint's response-offset
+# formulation (beta on the response; see docs/preprint_additive_archive.md). The published T₀-shift posteriors ship
 # with the v1.0.0 record; to use T₀-shift now, refit locally with
 # gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift.
 result = predict_T_from_proxyObs(
