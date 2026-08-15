@@ -60,19 +60,22 @@ pip install texas-psm
 import TEXAS
 
 # Download pre-computed posteriors from Zenodo (~0.3 MB for univariate)
-TEXAS.download_posteriors(["gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3"])
+TEXAS.download_posteriors(["tx.GHPU.sst.sri03.p0"])   # univariate SST calibration
+# Posterior names are CESM-style case ids (tx.<compset>.<temp>.<proxy>.<predictors>);
+# legacy long names (gen_logi_fixed_...) are also accepted everywhere. See
+# "How posterior files are named" in the docs quickstart.
 
 # Forward: temperature → Scaled RI
 result = TEXAS.predict_proxy_from_T(
     temperatures=[15, 20, 25, 30],
-    posterior="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
+    posterior="tx.GHPU.sst.sri03.p0",
 )
 
 # Inverse: Scaled RI → temperature
 result = TEXAS.predict_T_from_proxyObs(
     proxyObs=my_ri_array,
     prior_mu_t=15.0, prior_sigma_t=10.0,
-    fwd_posterior="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
+    fwd_posterior="tx.GHPU.sst.sri03.p0",
     temptype="SST",
 )
 result["p50"]   # median temperature (°C)
@@ -102,7 +105,7 @@ Pass `names=` to download only what you need:
 
 ```python
 # Univariate SST posterior — ~0.3 MB
-TEXAS.download_posteriors(["gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3"])
+TEXAS.download_posteriors(["tx.GHPU.sst.sri03.p0"])
 ```
 
 Load a posterior directly from disk (no cache lookup):
@@ -142,7 +145,7 @@ df["scaledRI_cren3"] = compute_scaledRI(
 # ── Forward prediction (temperature → proxy) ──────────────────────────────────
 result = predict_proxy_from_T(
     temperatures=np.linspace(5, 35, 100),
-    posterior="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
+    posterior="tx.GHPU.sst.sri03.p0",
 )
 # result["p50"], result["p5"], result["p95"] — numpy arrays
 
@@ -150,7 +153,7 @@ result = predict_proxy_from_T(
 result = predict_T_from_proxyObs(
     proxyObs=df["scaledRI_cren3"].values,
     prior_mu_t=15.0, prior_sigma_t=10.0,
-    fwd_posterior="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
+    fwd_posterior="tx.GHPU.sst.sri03.p0",
     temptype="SST",
     save_results=True,   # write quantile .nc + .npz to the invT cache dir
 )
@@ -163,13 +166,14 @@ result = predict_T_from_proxyObs(
 result = predict_T_from_proxyObs(
     proxyObs=df["scaledRI_cren3"].values,
     prior_mu_t=15.0, prior_sigma_t=10.0,
-    fwd_posterior="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3",
+    fwd_posterior="tx.GHEA.sst.sri03.G23-N10",
     temptype="SST",
     gdgt23ratio=df["gdgt23ratio"].values,
     no3=df["no3"].values,           # or: site_lat=, site_lon=, no3_dataset= for WOA23 lookup
 )
 
 # ── Pass a pre-loaded dataset (Colab / Google Drive) ──────────────────────────
+# (files downloaded straight from Zenodo keep the archived legacy name)
 ds = xr.load_dataset("/content/drive/MyDrive/posteriors/gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc")
 result = predict_T_from_proxyObs(..., fwd_posterior=ds)
 ```

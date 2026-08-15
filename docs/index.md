@@ -112,11 +112,11 @@ Pre-computed posteriors are hosted on [Zenodo](https://doi.org/10.5281/zenodo.20
 import TEXAS
 
 # Univariate SST — recommended starting point (~0.3 MB)
-TEXAS.download_posteriors(["gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3"])
+TEXAS.download_posteriors(["tx.GHPU.sst.sri03.p0"])
 
 # Multivariate EIV (GDGT-2/3 + NO₃ corrections) — ~78 MB each
 TEXAS.download_posteriors([
-    "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3",
+    "tx.GHEA.sst.sri03.G23-N10",
 ])
 
 # Or download everything at once (~158 MB total)
@@ -130,11 +130,47 @@ Available forward posteriors:
 
 | Name (no `.nc`) | Model | Temperature | Size |
 |---|---|---|---|
-| `gen_logi_fixed_culmeso_cultureT_scaledRI_cren3` | Culture + mesocosm | Culture T | <1 MB |
-| `gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3` | Univariate coretop | SST | <1 MB |
-| `gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3` | Univariate coretop | Thermo T | <1 MB |
-| `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3` | EIV multivariate coretop | SST | ~78 MB |
-| `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3` | EIV multivariate coretop | Thermo T | ~78 MB |
+| `tx.GCDU.cul.sri03.p0` | Culture + mesocosm | Culture T | <1 MB |
+| `tx.GHPU.sst.sri03.p0` | Univariate coretop | SST | <1 MB |
+| `tx.GHPU.thm.sri03.p0` | Univariate coretop | Thermo T | <1 MB |
+| `tx.GHEA.sst.sri03.G23-N10` | EIV multivariate coretop | SST | ~78 MB |
+| `tx.GHEA.thm.sri03.G23-N10` | EIV multivariate coretop | Thermo T | ~78 MB |
+
+The Zenodo record's flat files still carry the pre-revision legacy names
+(e.g. `gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc`).
+`download_posteriors()` and `load_posterior()` accept **either** spelling —
+downloads are unpacked into the case-directory layout shown below.
+
+#### How posterior files are named
+
+Posteriors use CESM-style **case ids**: fixed dot-delimited positions instead
+of ever-growing concatenated descriptions.
+
+```
+tx . GHEB . sst . sri03 . G23-N10 . fwd.nc
+│    │      │     │       │         └ role: fwd = forward calibration;
+│    │      │     │       │           inv.<site>.<tags> = a reconstruction
+│    │      │     │       └ predictors: G23, N10 (NO₃ with cutoff 1.0), p0 = none
+│    │      │     └ proxy: sri03 = scaledRI_cren3, sri = scaledRI, tex = TEX86
+│    │      └ target temperature: sst, thm (Thermo-T), cul (culture T)
+│    └ compset — the model recipe, one letter per axis (see table)
+└ project prefix
+```
+
+The four **compset** letters encode, in order:
+
+| Axis | Letters |
+|---|---|
+| Curve | `G` generalized logistic · `L` logistic · `N` linear |
+| Training set | `H` hierarchical coretop · `C` culture+mesocosm · `J` culture+mesocosm+coretop · `T` coretop-only |
+| Estimator | `P` priorApprox · `E` priorApprox + errors-in-variables · `D` full hierarchical |
+| Predictor structure | `U` univariate · `A` additive (β on the response) · `B` **T₀-shift** (γ on T₀) |
+
+So `tx.GHEB.sst.sri03.G23-N10` is the published T₀-shift multivariate SST
+calibration, and `tx.GHPU.sst.sri03.p0` the univariate SST one. A date/run
+token may be appended to distinguish refits of the same configuration. Every
+function that takes a posterior name resolves case ids and legacy long names
+alike.
 
 ```{warning}
 **The two multivariate posteriors above are the response-offset formulation, not
@@ -162,7 +198,7 @@ from TEXAS import predict_proxy_from_T
 
 result = predict_proxy_from_T(
     temperatures=np.linspace(5, 35, 100),
-    posterior="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
+    posterior="tx.GHPU.sst.sri03.p0",
 )
 result["p50"]   # median Scaled RI (numpy array, length 100)
 result["p5"]    # 5th percentile
@@ -182,7 +218,7 @@ result["p95"]   # 95th percentile
         proxyObs=df["scaledRI_cren3"].values,
         prior_mu_t=15.0,        # prior mean temperature (°C) — geological estimate
         prior_sigma_t=10.0,     # prior uncertainty (°C) — use wide prior if unsure
-        fwd_posterior="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
+        fwd_posterior="tx.GHPU.sst.sri03.p0",
         temptype="SST",
     )
     result["p50"]   # median SST (°C), one value per sample
@@ -197,7 +233,7 @@ result["p95"]   # 95th percentile
         proxyObs=df["scaledRI_cren3"].values,
         prior_mu_t=15.0,
         prior_sigma_t=10.0,
-        fwd_posterior="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3",
+        fwd_posterior="tx.GHEA.sst.sri03.G23-N10",
         temptype="SST",
         gdgt23ratio=df["gdgt23ratio"].values,
         no3=df["no3"].values,   # µmol/L; scalar or per-sample array
@@ -214,7 +250,7 @@ result["p95"]   # 95th percentile
     result = predict_T_from_proxyObs(
         proxyObs=df["scaledRI_cren3"].values,
         prior_mu_t=15.0, prior_sigma_t=10.0,
-        fwd_posterior="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3",
+        fwd_posterior="tx.GHEA.sst.sri03.G23-N10",
         temptype="SST",
         gdgt23ratio=df["gdgt23ratio"].values,
         site_lat=15.3, site_lon=-23.7,   # modern drill-site coordinates
@@ -232,6 +268,7 @@ result["p95"]   # 95th percentile
     from TEXAS import predict_T_from_proxyObs
 
     # Colab: mount Google Drive first, then load
+    # (files downloaded straight from Zenodo keep the archived legacy name)
     ds = xr.load_dataset("/content/drive/MyDrive/posteriors/gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc")
 
     result = predict_T_from_proxyObs(

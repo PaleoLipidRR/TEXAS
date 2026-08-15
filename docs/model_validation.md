@@ -29,11 +29,13 @@ is directly comparable across calibrations.
 | TEX₈₆ᴴ (Kim et al. 2010) | — | 0.085 |
 | BAYSPAR (Tierney & Tingley 2014) | — | 0.069 |
 | **TEXAS** | thermal only | **0.066** |
-| **TEXAS** | + GDGT-2/3 (β_{G₂/₃}) | **0.060** |
+| **TEXAS** | + GDGT-2/3 (γ_{G₂/₃}) | **0.060** |
 | **TEXAS** | + GDGT-2/3 + NO₃ | **0.059** |
 
-*Values as reported in the manuscript / AGU25 PP33D-1102. Reproduce them from
-`SI_code2` (Fig. 7, Fig. 8, Fig. S11).*
+*Values as reported in the initial submission / AGU25 PP33D-1102 (additive-arm
+fits). The revised T₀-shift calibration reaches RMSE ≈ 0.05 for the full
+multivariate model — reproduce from `SI_code02_t0shift` (and `SI_code2` for the
+additive arm).*
 
 The thermal-only TEXAS model already beats the linear and TEX₈₆ᴴ calibrations,
 and adding the non-thermal corrections lowers RMSE further — without the
@@ -48,7 +50,7 @@ from TEXAS import predict_proxy_from_T
 
 pred = predict_proxy_from_T(
     temperatures=coretop_df["SST"].values,
-    posterior="gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3",
+    posterior="tx.GHPU.sst.sri03.p0",
 )
 rmse = np.sqrt(np.mean((coretop_df["scaledRI_cren3"] - pred["p50"]) ** 2))
 ```

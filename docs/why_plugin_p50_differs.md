@@ -24,7 +24,7 @@ and the calibration spread, and watch the gap decompose in real time. It grid-in
 the *same* marginalized likelihood × truncated-Normal prior that
 `invT_gen_logi_fixed_univ_marginal_truncated_prior.stan` samples, using an embedded
 ensemble drawn from the real forward posterior
-`gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3`.
+`tx.GHPU.sst.sri03.p0`.
 
 ```{note}
 The sandbox is for building intuition. Production numbers should still come from
