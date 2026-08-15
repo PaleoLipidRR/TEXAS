@@ -96,7 +96,7 @@ CULMESO_STEM = "gen_logi_fixed_culmeso"
 VARIANTS = {
     "eiv": dict(fwd="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv",
                 label="additive EIV"),
-    "bnd": dict(fwd="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT",
+    "bnd": dict(fwd="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift",
                 label="bounded-T"),
 }
 

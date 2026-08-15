@@ -138,9 +138,19 @@ Optional predictor flags (`_gdgt23ratio`, `_no3_1.5`) are appended to `temptype`
 > `L` logistic, `N` linear), training set (`H` hier_crtp, `C` culmeso,
 > `J` culmesocore, `T` crtp), estimator (`P` priorApprox, `E` priorApprox+EIV,
 > `D` full hierarchical), and predictor structure (`U` univariate, `A` additive
-> β-on-μ, `B` bounded-T γ-on-T₀). So `..._hier_crtp_multiv_priorApprox_eiv_boundedT`
-> → `GHEB`. Predictors are `G23` and `N` + cutoff×10 (`N10` = cutoff 1.0), or
-> `p0` when there are none.
+> β-on-μ, `B` T₀-shift γ-on-T₀ — the manuscript's "T₀-shift parameterization").
+> So `..._hier_crtp_multiv_priorApprox_eiv_t0shift` → `GHEB`. Predictors are
+> `G23` and `N` + cutoff×10 (`N10` = cutoff 1.0), or `p0` when there are none.
+>
+> > **`boundedT` → `t0shift` rename (2026-08-15).** The variant token in Stan
+> > file names, figure names, notebook names, and scripts is now `t0shift`,
+> > matching the revised manuscript's "T₀-shift parameterization". The legacy
+> > `boundedT` spelling still *parses* (`encode_compset` maps both to `B`), so
+> > cached posteriors with old `stan_model_name` attrs and legacy `.nc`/`.pkl`
+> > cache files resolve unchanged — nothing in `data/cache/` was renamed.
+> > Notebook-internal switch keys (`MODEL_VARIANT = "boundedT"`, `COMPSET`
+> > dict keys) deliberately keep the old spelling; they name runtime branches,
+> > not artifacts. Renamed Stan models recompile on next use.
 >
 > **Proxy codes** read as *s*caled + *ri* + crenarchaeol ring count:
 > `sri03` = `scaledRI_cren3` (crenarchaeol counted as 3 rings), `sri04` =

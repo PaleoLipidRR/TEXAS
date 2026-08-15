@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 # gates it and to the label used on the axis:
 #
 #   beta_*       parent model — additive shift of RI          (RI units per predictor unit)
-#   gamma_*      boundedT     — shift of the curve location T0 (°C per predictor unit)
+#   gamma_*      t0shift      — shift of the curve location T0 (°C per predictor unit)
 #   betaLogit_*  boundedCeil  — shift of the logit floor      (logit units per predictor unit)
 #
 # To support a new parameterization, add its prefixes here — nothing else in this
@@ -303,7 +303,7 @@ def plot_prior_distributions(
         include_groups: Parameter-group prefixes to draw, in panel order.  The
             default covers the thermal parameters plus every coefficient naming
             scheme in ``PREDICTOR_GROUPS`` (``beta_*`` for the parent model,
-            ``gamma_*`` for boundedT, ``betaLogit_*`` for boundedCeil), so the
+            ``gamma_*`` for t0shift, ``betaLogit_*`` for boundedCeil), so the
             same call works for any of them and for figures mixing several.
             A group with no matching variable in any dataset is skipped, as is a
             coefficient group whose predictor no dataset switched on.

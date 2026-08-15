@@ -66,7 +66,7 @@ import run_manuscript_refits as R  # noqa: E402
 # The bnd filename is kept exactly as first written so the run already on disk
 # stays resumable across this rename.
 MANIFEST_BY_ARM = {
-    "bnd": "coretop_maps_boundedT_manifest.csv",
+    "bnd": "coretop_maps_t0shift_manifest.csv",
     "eiv": "coretop_maps_eiv_manifest.csv",
     "univ": "coretop_maps_univ_manifest.csv",
 }

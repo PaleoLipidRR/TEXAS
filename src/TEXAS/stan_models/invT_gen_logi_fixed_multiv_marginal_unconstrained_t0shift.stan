@@ -1,11 +1,11 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// invT_gen_logi_fixed_multiv_marginal_unconstrained_boundedT.stan
+// invT_gen_logi_fixed_multiv_marginal_unconstrained_t0shift.stan
 //
 // PURPOSE: Bayesian paleotemperature reconstruction from observed Scaled Ring
 //          Index values, with non-thermal predictors (G2/3 ratio, NO3) entering
 //          as a shift of the calibration curve's location parameter.
 //          This is the inverse of the forward calibration
-//          gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT.stan, and it
+//          gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift.stan, and it
 //          must be paired with a posterior from that model.
 //
 // ─── THE MEAN FUNCTION ────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════════
-// gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT.stan
+// gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift.stan
 //
 // PURPOSE: Coretop forward calibration of the Scaled Ring Index against
 //          temperature, with non-thermal predictors (G₂/₃ ratio, NO₃),

@@ -12,7 +12,7 @@ manifests that ``scripts/run_manuscript_refits.py`` writes, which record
 
 **Why a blanket stamp would be wrong.** The cache holds posteriors from more than
 one budget: ``run_manuscript_refits.py`` uses 400 warm-up iterations for forward
-fits and 500 for inverse ones, while ``SI_code02_boundedT_TEXAS_analysis.ipynb``
+fits and 500 for inverse ones, while ``SI_code02_t0shift_TEXAS_analysis.ipynb``
 uses 300, and anything sampled without an explicit argument got CmdStan's default
 of 1,000. Stamping one number across the cache would record a fabrication as
 provenance on the files that came from somewhere else. Files with no manifest row

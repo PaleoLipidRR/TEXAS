@@ -387,7 +387,7 @@ def build_invT_inputData(
             "used_suffix": used_suffix,  # e.g., "crtp"
             "predictor_usage": predictor_usage,  # Which covariates are active
             "no3ratio": "_no3ratio" in fwd_model_name,  # Forward model used centred NO₃ form
-            "is_bounded": is_bounded,  # BoundedT forward model → select boundedT invT model
+            "is_bounded": is_bounded,  # T0-shift forward model → select t0shift invT model
             # Forward-calibration provenance. An invT model name records the
             # curve and the constraint but not the training set or the
             # estimator, so without these two the saved .nc cannot be traced

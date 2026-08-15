@@ -152,7 +152,7 @@ def test_runner_covers_every_notebook_model(configs):
 
 def test_core_params_cover_both_slope_conventions(configs):
     """
-    The parent EIV model names its slopes beta_*, boundedT names them gamma_*.
+    The parent EIV model names its slopes beta_*, t0shift names them gamma_*.
 
     The accuracy check only measures parameters it finds by name, so dropping a
     convention would quietly exclude that model's two hardest-to-identify
@@ -164,9 +164,9 @@ def test_core_params_cover_both_slope_conventions(configs):
             continue
         params = set(cfg["CORE_PARAMS"])
         models = {m for _, m in cfg.get("GRID_MODELS", [])}
-        if any("boundedT" in m for m in models):
+        if any(("boundedT" in m) or ("t0shift" in m) for m in models):
             assert {"gamma_G23_crtp", "gamma_NO3_crtp"} <= params, (
-                f"{label} sweeps a boundedT model but CORE_PARAMS has no gamma_* "
+                f"{label} sweeps a t0shift model but CORE_PARAMS has no gamma_* "
                 "entries, so its slope parameters would be silently unchecked"
             )
         if any(m.endswith("_eiv") for m in models):

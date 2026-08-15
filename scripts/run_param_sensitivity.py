@@ -95,7 +95,7 @@ DEFAULT_WARMUP, DEFAULT_SAMPLING = 1000, 1000
 GRID_MODELS = [
     ("univ", "gen_logi_fixed_hier_crtp_univ_priorApprox"),
     ("eiv",  "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv"),
-    ("bnd",  "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT"),
+    ("bnd",  "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift"),
 ]
 
 PROXIES = {
@@ -110,7 +110,7 @@ NO3_CUTOFF = 1.0
 SD_PROXYOBS_MODE = "scaled_constant"
 SD_PROXYOBS_BASE = 0.03
 
-# Both slope conventions: the parent model names them beta_*, boundedT gamma_*.
+# Both slope conventions: the parent model names them beta_*, t0shift gamma_*.
 # Listing both keeps the accuracy check honest for either model.
 CORE_PARAMS = ["t0_crtp", "k_crtp", "b_crtp", "v_crtp", "sigma_proxyObs_crtp",
                "beta_G23_crtp", "beta_NO3_crtp",
@@ -301,7 +301,7 @@ def build_part1_data(model_key: str, proxy_col: str | None = None):
                               proxy_crtp=reg[proxy_col].values,
                               culmeso_posterior=culmeso_post), len(reg)
 
-    # The parent EIV model and boundedT declare byte-identical Stan data
+    # The parent EIV model and t0shift declare byte-identical Stan data
     # blocks (16 keys), so one builder serves both.
     if model_key in ("eiv", "bnd"):
         reg = coretop[["SST", proxy_col, "gdgt23ratio", "gdgt23ratio_se",

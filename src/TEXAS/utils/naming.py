@@ -53,10 +53,11 @@ pos  axis                   codes
 1    curve family           ``G`` gen_logi_fixed, ``L`` logistic, ``N`` linear
 2    training set           ``H`` hier_crtp, ``C`` culmeso, ``J`` culmesocore, ``T`` crtp
 3    estimator              ``P`` priorApprox, ``E`` priorApprox+EIV, ``D`` full hierarchical
-4    predictor structure    ``U`` univariate, ``A`` additive (beta on mu), ``B`` bounded-T (gamma on T0)
+4    predictor structure    ``U`` univariate, ``A`` additive (beta on mu), ``B`` T0-shift (gamma on T0; legacy token ``boundedT``)
 ===  =====================  ==========================================
 
-So ``gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT`` -> ``GHEB``
+So ``gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift`` -> ``GHEB``
+(the legacy ``_boundedT`` spelling of the same model also encodes to ``GHEB``)
 and ``gen_logi_fixed_hier_crtp_univ_priorApprox`` -> ``GHPU``.  The
 univ/multiv distinction is absorbed into position 4, where it belongs: a
 univariate model *is* the no-predictor member of that axis.
@@ -140,7 +141,7 @@ _EST_LABEL = {"P": "two-stage prior approximation", "E": "prior approximation + 
               "D": "full hierarchical (single stage)"}
 _STRUCT_LABEL = {"U": "univariate (thermal only)",
                  "A": "additive corrections (beta on the response)",
-                 "B": "bounded-T corrections (gamma on the curve location T0)"}
+                 "B": "T0-shift corrections (gamma on the curve location T0)"}
 
 # --- other axes -----------------------------------------------------------
 
@@ -231,7 +232,9 @@ def encode_compset(stan_model_name: str) -> str:
     """
     Collapse a long Stan model name into the four-character compset code.
 
-    >>> encode_compset("gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT")
+    >>> encode_compset("gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift")
+    'GHEB'
+    >>> encode_compset("gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT")  # legacy spelling
     'GHEB'
     >>> encode_compset("gen_logi_fixed_hier_crtp_univ_priorApprox")
     'GHPU'
@@ -260,7 +263,7 @@ def encode_compset(stan_model_name: str) -> str:
 
     est = _first_code(stem, EST_CODES) or EST_DEFAULT
 
-    if "boundedT" in stem:
+    if "boundedT" in stem or "t0shift" in stem:
         struct = STRUCT_BOUNDED
     elif "multiv" in stem:
         struct = STRUCT_ADDITIVE
@@ -418,7 +421,7 @@ class CaseName:
         )
 
     def with_variant(self, structure: str) -> "CaseName":
-        """Same case with position 4 swapped -- the additive/bounded-T switch."""
+        """Same case with position 4 swapped -- the additive/T0-shift switch."""
         code = structure.upper()[0]
         if code not in _STRUCT_LABEL:
             raise ValueError(f"structure must be one of {sorted(_STRUCT_LABEL)}")

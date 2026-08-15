@@ -219,12 +219,12 @@ def get_invT_posterior(
             no3ratio=no3ratio,
             bounded=meta.get("is_bounded", False))
         if not (STAN_MODELS_DIR / stan_file).exists():
-            available = sorted(p.name for p in STAN_MODELS_DIR.glob("invT_*boundedT*.stan"))
+            available = sorted(p.name for p in STAN_MODELS_DIR.glob("invT_*t0shift*.stan"))
             raise FileNotFoundError(
                 f"Selected invT model '{stan_file}' is not available in {STAN_MODELS_DIR}.\n"
-                f"BoundedT currently ships only the multiv/unconstrained variant "
+                f"The T0-shift arm currently ships only the multiv/unconstrained variant "
                 f"(use predictors + constraint_type='unconstrained').\n"
-                f"Available boundedT models: {available or 'none'}")
+                f"Available t0shift models: {available or 'none'}")
         print(f"🔧 Automatically selected Stan file: {stan_file}")
 
     _stan_path = STAN_MODELS_DIR / stan_file
@@ -387,7 +387,7 @@ def _select_invT_stan_file(
     model_name += f"_{constraint_type}"
 
     if bounded:
-        model_name += "_boundedT"
+        model_name += "_t0shift"
 
     if no3ratio:
         model_name += "_no3ratio"

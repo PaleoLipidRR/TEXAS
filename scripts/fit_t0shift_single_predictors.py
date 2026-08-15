@@ -8,7 +8,7 @@ piecemeal, also has the two single-predictor cells:
     GHEA  sst/thm  G23   G23-N10   N10          <- all six present
     GHEB  sst/thm        G23-N10                <- only two
 
-``SI_code02_boundedT_TEXAS_analysis.ipynb`` draws a five-layer prior-comparison
+``SI_code02_t0shift_TEXAS_analysis.ipynb`` draws a five-layer prior-comparison
 figure per temperature target (culmeso, univariate, +G23, +NO3, +G23+NO3), so
 the two missing cells are two missing layers in each of those figures.
 
@@ -38,9 +38,9 @@ and its forward keys are ``fwd|<variant>|<temptype>|<proxy>`` -- appending
 these would collide with the full-predictor rows under the same key and make
 the audit describe something that never happened.
 
-    python scripts/fit_boundedT_single_predictors.py --dry-run
-    python scripts/fit_boundedT_single_predictors.py
-    python scripts/fit_boundedT_single_predictors.py --force      # refit existing
+    python scripts/fit_t0shift_single_predictors.py --dry-run
+    python scripts/fit_t0shift_single_predictors.py
+    python scripts/fit_t0shift_single_predictors.py --force      # refit existing
 """
 from __future__ import annotations
 

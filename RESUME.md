@@ -8,6 +8,30 @@ bottom; tick the boxes as you go.
 
 ---
 
+## Latest session — 2026-08-15: `boundedT` → `t0shift` rename
+
+The manuscript now calls the model the **T₀-shift parameterization** (the
+"bounded-T" name invited the question *which temperature is bounded?* — the
+bound is on the response). The code/figure token was renamed to match:
+
+- **Stan files** `git mv`'d to `..._priorApprox_eiv_t0shift.stan` and
+  `invT_..._unconstrained_t0shift.stan`; binaries recompile on next use.
+- **All 30 figure files** `*_boundedT.*` → `*_t0shift.*`; notebooks emit the
+  new names (`FIG_TAG`/`fig_tag` = `_t0shift`).
+- **Notebooks renamed**: `SI_code01_t0shift_variance_partitioning.ipynb`,
+  `SI_code02_t0shift_TEXAS_analysis.ipynb`. `scripts/fit_t0shift_single_predictors.py`.
+- **Backward compatible**: `encode_compset` maps *both* spellings to `B`;
+  nothing in `data/cache/` was renamed; notebook variant keys
+  (`MODEL_VARIANT = "boundedT"`) intentionally unchanged.
+- Manuscript placeholder + R2R updated to "T₀-shift" wording and the new
+  figure names. **`_draft` untouched** — its tex still references
+  `_boundedT` figure names and its own `figures/` copies still carry them,
+  so it stays internally consistent until the author transcribes.
+- Historical entries below this one keep the old spelling on purpose — they
+  record what was true when written.
+
+---
+
 ## Latest session — 2026-08-14 (evening): the R2R is fully drafted
 
 **All 31 R2R responses are now written.** The 15 `[RESPONSES]` placeholders are

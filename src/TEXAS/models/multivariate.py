@@ -150,7 +150,7 @@ def generalized_logistic_fixed_upper_bounded_t(
     That keeps ``y`` inside ``(b, 1)`` for every finite predictor value, which is
     the entire point of the parameterisation — the additive form can push the
     mean outside the proxy's range. Mirrors ``bounded_mu()`` in
-    ``gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT.stan``, including
+    ``gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift.stan``, including
     the NO3 gate.
 
     One deliberate difference from the Stan model: there, the gate is applied to

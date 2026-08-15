@@ -26,7 +26,8 @@ from TEXAS.utils.naming import (
 
 # The models this project actually ships, with their expected compset codes.
 REAL_MODELS = [
-    ("gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT", "GHEB"),
+    ("gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift", "GHEB"),
+    ("gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT", "GHEB"),  # legacy spelling
     ("gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv", "GHEA"),
     ("gen_logi_fixed_hier_crtp_multiv_priorApprox", "GHPA"),
     ("gen_logi_fixed_hier_crtp_univ_priorApprox", "GHPU"),

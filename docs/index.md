@@ -145,7 +145,7 @@ the logistic instead, as a shift of T₀ in °C
 [Running forward calibration from scratch](#running-forward-calibration-from-scratch)
 below). The bounded-T
 posteriors are published with the v1.0.0 Zenodo record; until then, refit locally
-with `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT` if you need them.
+with `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift` if you need them.
 The univariate and culture/mesocosm posteriors listed above are unaffected —
 they have no non-thermal predictors.
 ```
@@ -276,14 +276,14 @@ data = build_fwd_data(
 
 posterior, diagnostics = get_posterior(
     data,
-    stan_file="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT",
+    stan_file="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift",
     temptype="SST",
     proxy_name="scaledRI_cren3",
 )
 save_posterior(posterior)
 ```
 
-`..._eiv_boundedT` is the published calibration. The non-thermal predictors enter
+`..._eiv_t0shift` is the published calibration. The non-thermal predictors enter
 inside the logistic, shifting the curve's location parameter T₀ rather than adding
 an offset to the response:
 
