@@ -95,6 +95,29 @@ cov68 **0.664** vs 0.68 nominal. Univariate is *better* in the inverse direction
 > and an order of magnitude below the reconstruction uncertainty. **Avoid "more
 > than sufficient" for the inverse.**
 
+### THE SIDECAR LIVES ON THE LaCie DRIVE (2026-08-15)
+
+```
+/media/rrattan/LaCie/Postdoc/TEXAS-PSM/texas-psm-export/
+    texas-sidecar-20260814.tar     3.7 GB, 557 members
+    texas-sidecar.md5              df997b86506723d41e860380bc8b3cc5
+```
+
+Verified with an **O_DIRECT read back from the device**, not from page cache —
+a `cp` of this size completes in seconds against cache and tells you nothing, so
+if you ever re-copy it, verify with
+`dd if=<file> iflag=direct bs=4M | md5sum` rather than a plain `md5sum -c`.
+
+Local copies and the Google Drive parts have both been **deleted** — the LaCie
+drive is now the only copy outside git. On the desktop: clone, `git lfs pull`,
+check the `--skip` smudge filter, then untar this over the clone.
+
+> **Text S numbering — the R2R was wrong and is now fixed (2026-08-15).**
+> The SI numbers them **Text S2 = Frequentist Attenuation-Bias Analysis** and
+> **Text S3 = MCMC Sampling Budget Sensitivity**. The R2R had both swapped in all
+> five places and was corrected in `589f19b`. Anything written earlier in this
+> file calling the budget sweep "Text S2" is **wrong** — it is Text S3.
+
 ### Moving this work to another machine (the zip question)
 
 **Do not zip the whole repo.** The working tree is 4.9 GB before `.git` (7.8 GB)
