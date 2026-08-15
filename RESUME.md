@@ -130,6 +130,39 @@ On the other machine: `git clone`, `git checkout feat/revision1-validation-group
 the clone. Tracked files are overwritten with identical content, so the order does
 not matter. Do **not** copy `src/TEXAS/stan_models/` binaries — let them recompile.
 
+> ### Do NOT push this to Google Drive through the gvfs mount (tested 2026-08-14)
+>
+> The GNOME/gvfs Drive backend (`/run/user/1000/gvfs/google-drive:host=...`) is
+> **unfit for multi-GB transfers.** Measured over an hour: a 64 MB probe ran at
+> 15.4 MB/s, but sustained throughput collapsed to 1–2 MB/s, a direct `cp` of the
+> 3.7 GB tar failed outright with `Input/output error`, and the backend wedged
+> **twice** after roughly 1–1.5 GB — the second time taking the mount down with it.
+> Only 3 of 8 512 MB parts landed in ~55 minutes.
+>
+> Two traps if you ever debug this:
+> - **An in-progress upload is listed under its Drive file ID, not its filename.**
+>   `stat` on the destination filename reads 0 while the transfer is actually
+>   running, so it looks stalled when it is not. Check `du -sh` on the folder
+>   instead. (I killed a healthy upload at 49% believing it was hung.)
+> - **`kill`ing `gvfsd-google` does not respawn it** — it removes the mount.
+>   Recover with `gio mount "google-drive://<account>@gmail.com/"`, which does not
+>   re-prompt for auth. Restarting the backend *is* what cleared the wedge, so if
+>   you must persist, remount **proactively between parts** rather than reactively.
+>
+> **Use the browser instead** — drag the tar into Drive. It is resumable, chunked,
+> and runs at your full uplink. Or install `rclone` (needs a one-time OAuth in a
+> browser, so it cannot be set up unattended). Splitting is only worth it as a
+> hedge against a transport with no resume:
+>
+> ```bash
+> split -b 512M -d -a 2 texas-sidecar-YYYYMMDD.tar texas-sidecar-YYYYMMDD.tar.part
+> cat texas-sidecar-*.tar.part* > texas-sidecar.tar   # reassemble
+> md5sum -c texas-sidecar.md5                         # verify BEFORE untarring
+> ```
+>
+> Verified 2026-08-14 that the split/rejoin round-trip reproduces the original
+> md5 exactly, so parts are safe to rely on if you do go that route.
+
 ### Still open
 
 - **`.gitignore` boundary is backwards in one place, NOT yet fixed.** A blanket
