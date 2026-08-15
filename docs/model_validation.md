@@ -103,6 +103,14 @@ Because the model is Bayesian, significance is reported as the posterior
 probability that each coefficient has the expected sign — not a frequentist
 p-value.
 
+> **Note.** The β values above are **response-space slopes** (Scaled-RI units
+> per predictor unit) from the additive-arm analysis used to *detect* the
+> nonthermal effects. The published calibration applies these effects
+> **inside** the logistic instead — the *T₀-shift parameterization*
+> (`..._priorApprox_eiv_t0shift`), whose coefficients are temperature-equivalent:
+> γ_{G₂/₃} = 0.63 ± 0.04 °C per G₂/₃ unit and γ_{NO₃} = 2.79 ± 0.24 °C per
+> tenfold increase in [NO₃⁻].
+
 > **Note.** Variance partitioning applies to the **forward** calibration only.
 > An inverse (invT) reconstruction's posterior width mixes the temperature
 > prior, the likelihood, and propagated calibration uncertainty, and cannot be

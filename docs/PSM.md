@@ -41,14 +41,22 @@ The forward model predicts **scaled Ring Index** (\( RI_{\text{scaled}} \)) from
 Example for a **generalized logistic forward model**:
 
 $$
-RI_{\text{scaled}}(T, X) = b + \frac{1 - b}{\left( 1 + e^{-k (T - T_{0})} \right)^{1/v}} + \sum_{j} \beta_j X_j
+T_{0,\text{eff}} = T_{0} + \sum_{j} \gamma_j X_j,
+\qquad
+RI_{\text{scaled}}(T, X) = b + \frac{1 - b}{\left( 1 + e^{-k (T - T_{0,\text{eff}})} \right)^{1/v}}
 $$
 
 Where:
 - \( T \) = temperature.
 - \( X_j \) = additional predictors (e.g., GDGT-2/GDGT-3 ratio, nitrate concentration).
 - \( b \) = lower asymptote; the upper asymptote is **fixed at 1**; \( T_0 \) = curve location (the steepest response is at \( T_0 - \ln v / k \), not at \( T_0 \)), \( k \) = steepness, \( v \) = shape (curve asymmetry).
-- \( \beta_j \) = coefficients for optional predictors.
+- \( \gamma_j \) = coefficients for optional predictors, in °C per predictor
+  unit. They shift the curve's location **inside** the logistic (the
+  *T₀-shift parameterization*), so a sample with elevated predictors records
+  the Scaled RI of apparently colder water, and the predicted \( RI_{\text{scaled}} \)
+  stays confined to \( (b, 1) \) by construction. (An earlier formulation added
+  \( \beta_j X_j \) to the response instead; it is superseded because it can
+  push predictions outside the index's physical bounds.)
 - \( RI_{\text{scaled}} \) is normalized between 0 and 1 for comparability.
 
 **Forward Model Role:**  
@@ -88,7 +96,7 @@ $$
 ### 4.2 Priors
 
 - **From cultures** — tightly constrain curve shape parameters (\( T_0, k, v \)) for known archaeal clades.
-- **From core-tops** — set broader priors for environmental effects (\( \beta_j \)).
+- **From core-tops** — set broader priors for environmental effects (\( \gamma_j \)).
 
 Example prior for the temperature:
 
@@ -135,7 +143,9 @@ $$
 
 2. **Forward Logistic Model**
 $$
-RI_{\text{scaled}}(T, X) = b + \frac{1 - b}{\left( 1 + e^{-k (T - T_{0})} \right)^{1/v}} + \sum_{j} \beta_j X_j
+T_{0,\text{eff}} = T_{0} + \sum_{j} \gamma_j X_j,
+\qquad
+RI_{\text{scaled}}(T, X) = b + \frac{1 - b}{\left( 1 + e^{-k (T - T_{0,\text{eff}})} \right)^{1/v}}
 $$
 
 3. **Likelihood**

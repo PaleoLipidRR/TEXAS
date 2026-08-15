@@ -138,12 +138,12 @@ Available forward posteriors:
 
 ```{warning}
 **The two multivariate posteriors above are the response-offset formulation, not
-the bounded-T one.** They carry `beta_G23_crtp` / `beta_NO3_crtp`, in Scaled-RI
+the T₀-shift one.** They carry `beta_G23_crtp` / `beta_NO3_crtp`, in Scaled-RI
 units per predictor unit. The current calibration applies the predictors inside
 the logistic instead, as a shift of T₀ in °C
 (`gamma_G23_crtp` / `gamma_NO3_crtp` — see
 [Running forward calibration from scratch](#running-forward-calibration-from-scratch)
-below). The bounded-T
+below). The T₀-shift
 posteriors are published with the v1.0.0 Zenodo record; until then, refit locally
 with `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift` if you need them.
 The univariate and culture/mesocosm posteriors listed above are unaffected —

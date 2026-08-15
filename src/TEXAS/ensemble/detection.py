@@ -8,7 +8,7 @@ from ..models.logistics import (
 from ..models.multivariate import (
     simple_logistic_fixed_upper_multivariate,
     generalized_logistic_fixed_upper_multivariate,
-    generalized_logistic_fixed_upper_bounded_t,
+    generalized_logistic_fixed_upper_t0shift,
 )
 
 # --- Shared suffix utilities ---
@@ -103,7 +103,7 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
             params.append(coef_NO3)
 
         if has_gdz or has_no3:
-            model_fn = (generalized_logistic_fixed_upper_bounded_t
+            model_fn = (generalized_logistic_fixed_upper_t0shift
                         if is_bounded_t else
                         generalized_logistic_fixed_upper_multivariate)
         else:

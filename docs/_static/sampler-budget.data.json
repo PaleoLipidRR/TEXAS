@@ -31,7 +31,7 @@
    "latent_worst": 27
   },
   "bnd": {
-   "label": "bounded-T",
+   "label": "T0-shift",
    "n_cells": 26,
    "n_passing": 8,
    "complete": 27,
@@ -187,7 +187,7 @@
    "n_params": 1834
   },
   "bnd": {
-   "label": "bounded-T",
+   "label": "T0-shift",
    "warmups": [
     100,
     200,
@@ -281,7 +281,7 @@
    "n_cells": 26
   },
   {
-   "model": "bounded-T",
+   "model": "T0-shift",
    "gate": "all parameters",
    "warmup": 300,
    "sampling": 900,
@@ -292,7 +292,7 @@
    "n_cells": 26
   },
   {
-   "model": "bounded-T",
+   "model": "T0-shift",
    "gate": "calibration only",
    "warmup": 200,
    "sampling": 200,

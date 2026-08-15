@@ -156,6 +156,10 @@ result = predict_T_from_proxyObs(
 )
 
 # ── Multivariate model with NO₃ and GDGT-2/3 correction ──────────────────────
+# Note: the Zenodo multivariate posteriors are the earlier response-offset
+# formulation (beta on the response). The published T₀-shift posteriors ship
+# with the v1.0.0 record; to use T₀-shift now, refit locally with
+# gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift.
 result = predict_T_from_proxyObs(
     proxyObs=df["scaledRI_cren3"].values,
     prior_mu_t=15.0, prior_sigma_t=10.0,
@@ -184,7 +188,7 @@ src/TEXAS/
   models/           Logistic curve functions and classical calibrations
   utils/            Path constants, system info, Zenodo download utilities
 notebooks/
-  manuscripts/      Finalized SI notebooks (SI_code1, SI_code2, SI_code3)
+  manuscripts/      Finalized SI notebooks (SI_code1, SI_code2, SI_code02_t0shift, SI_code3)
   quickstart_demo.ipynb
 streamlit_app/      Drag-and-drop web interface (Streamlit)
 docker/             Dockerfile and compose configuration

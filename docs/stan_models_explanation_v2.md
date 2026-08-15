@@ -95,16 +95,21 @@ p(T|data) = ∫ p(T|data,θ) p(θ) dθ
 ## Available Model Files
 
 ### Ensemble Models (Traditional)
-- `invT_logistic_fixed_univ.stan` - Simple logistic, no predictors
-- `invT_logistic_fixed_multiv.stan` - Logistic with optional predictors
-- `invT_gen_logi_fixed_univ.stan` - Generalized logistic, no predictors  
-- `invT_gen_logi_fixed_multiv.stan` - Generalized logistic with predictors
+- `invT_gen_logi_fixed_univ_unconstrained.stan` - Generalized logistic, no predictors
+- `invT_gen_logi_fixed_multiv_unconstrained.stan` - Generalized logistic with predictors
 
 ### Direct/Marginal Models (Recommended)
-- `invT_logistic_fixed_univ_marginal.stan` - Simple logistic, no predictors
-- `invT_logistic_fixed_multiv_marginal.stan` - Logistic with optional predictors
-- `invT_gen_logi_fixed_univ_marginal.stan` - Generalized logistic, no predictors
-- `invT_gen_logi_fixed_multiv_marginal.stan` - Generalized logistic with predictors
+Each ships in three prior-constraint variants (`unconstrained`,
+`truncated_prior`, `hard_constraint`); `unconstrained` is the default.
+- `invT_gen_logi_fixed_univ_marginal_unconstrained.stan` - No predictors
+- `invT_gen_logi_fixed_multiv_marginal_unconstrained.stan` - With predictors (additive arm)
+- `invT_gen_logi_fixed_multiv_marginal_unconstrained_t0shift.stan` - With
+  predictors entering inside the logistic (**T₀-shift**; pairs with the
+  published `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift`
+  forward calibration)
+
+The `invT_logistic_*` (plain-logistic) variants listed in earlier versions of
+this page no longer ship.
 
 ## Usage Recommendations
 

@@ -237,7 +237,7 @@ class TestBoundedTMultivariate:
     def test_reduces_to_plain_curve_without_predictors(self):
         import numpy as np
         from TEXAS.models.multivariate import (
-            generalized_logistic_fixed_upper_bounded_t as fbnd)
+            generalized_logistic_fixed_upper_t0shift as fbnd)
         from TEXAS.models.logistics import generalized_logistic_fixed_upper
 
         x = np.linspace(0, 40, 25)
@@ -249,7 +249,7 @@ class TestBoundedTMultivariate:
     def test_stays_inside_open_interval_for_extreme_predictors(self):
         import numpy as np
         from TEXAS.models.multivariate import (
-            generalized_logistic_fixed_upper_bounded_t as fbnd,
+            generalized_logistic_fixed_upper_t0shift as fbnd,
             generalized_logistic_fixed_upper_multivariate as fadd)
 
         x = np.linspace(0, 40, 25)
@@ -266,7 +266,7 @@ class TestBoundedTMultivariate:
     def test_no3_gate_matches_the_stan_model(self):
         import numpy as np
         from TEXAS.models.multivariate import (
-            generalized_logistic_fixed_upper_bounded_t as fbnd)
+            generalized_logistic_fixed_upper_t0shift as fbnd)
 
         x = np.linspace(0, 40, 4)
         # only the middle two are inside (0, cutoff) and may be shifted
@@ -281,7 +281,7 @@ class TestBoundedTMultivariate:
         import xarray as xr
         from TEXAS.ensemble.detection import detect_model_and_params
         from TEXAS.models.multivariate import (
-            generalized_logistic_fixed_upper_bounded_t as fbnd)
+            generalized_logistic_fixed_upper_t0shift as fbnd)
 
         dims = ("chain", "draw")
         shape = (1, 3)
@@ -296,3 +296,12 @@ class TestBoundedTMultivariate:
         assert det["param_names"] == ["t0", "b", "k", "v",
                                       "gamma_G23", "gamma_NO3"]
         assert det["suffix"] == "crtp"
+
+
+def test_bounded_t_legacy_alias():
+    """The pre-rename callable name must keep working (2026-08-15 rename)."""
+    from TEXAS.models.multivariate import (
+        generalized_logistic_fixed_upper_bounded_t,
+        generalized_logistic_fixed_upper_t0shift,
+    )
+    assert generalized_logistic_fixed_upper_bounded_t is generalized_logistic_fixed_upper_t0shift

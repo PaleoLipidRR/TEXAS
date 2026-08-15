@@ -49,7 +49,7 @@ SNAPSHOT = DOCS / "_static" / "sampler-budget.data.json"
 CRITERIA = dict(max_rhat=1.01, min_ess_bulk=400.0, pct_divergent=0.0,
                 max_z_mean=0.1)
 MODEL_LABELS = {"univ": "univariate", "eiv": "EIV multivariate",
-                "bnd": "bounded-T"}
+                "bnd": "T0-shift"}
 CORE_PARAMS = ["t0_crtp", "k_crtp", "b_crtp", "v_crtp", "sigma_proxyObs_crtp",
                "beta_G23_crtp", "beta_NO3_crtp",
                "gamma_G23_crtp", "gamma_NO3_crtp"]

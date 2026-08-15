@@ -125,7 +125,7 @@ def generalized_logistic_fixed_upper_multivariate(
     return mu
 
 
-def generalized_logistic_fixed_upper_bounded_t(
+def generalized_logistic_fixed_upper_t0shift(
     x: np.ndarray,
     t0: float = None,
     x0: float = None,
@@ -649,3 +649,8 @@ def find_optimal_no3_threshold_nointercept(
 
     optimal = float(valid_rows.loc[valid_rows["r2_nointercept"].idxmax(), "threshold"])
     return optimal, results
+
+
+# Legacy alias — the T0-shift model was called "bounded-T" before the
+# 2026-08-15 rename; keep the old callable name working.
+generalized_logistic_fixed_upper_bounded_t = generalized_logistic_fixed_upper_t0shift
