@@ -8,6 +8,148 @@ bottom; tick the boxes as you go.
 
 ---
 
+## Latest session — 2026-08-14 (evening): the R2R is fully drafted
+
+**All 31 R2R responses are now written.** The 15 `[RESPONSES]` placeholders are
+filled and `main.tex` compiles clean under xelatex (0 errors, 36 pages, was 28).
+Committed as `27a7ab5` in the R2R repo.
+
+Three responses rest on evidence extracted for the first time this session:
+
+- **R2C14** — the reviewer is right that coretops do not constrain the warm end,
+  and more strongly than they put it. All **28 observations above the warmest
+  coretop (29.80 °C) are culture (24) or mesocosm (4)**; not one coretop exceeds
+  it. T₀ = 34.8 °C lies above the entire coretop range and the max-slope
+  temperature (29.85 °C) sits at its very top edge. Also clarified: the upper
+  asymptote is **fixed at 1 by construction**, not estimated — what culture and
+  mesocosm constrain is the *approach* to it.
+- **R2C13** — the `>= 0.75` retention rule keeps **39 samples (1.9%)** the 90%
+  ellipse would drop, mean SST **27.7 °C** against 16.3 °C for the rest. The
+  warm-end leverage R2 suspected is real. (Reproduced on the processed coretop
+  table, n=2024; the production chain grids to 1513, so treat as indicative.)
+- **R1C5 / R2C3 / R2C18** — **the PETM is demonstrably not prior-driven**, so the
+  planned prior-sensitivity refit is no longer needed. See below.
+
+### The PETM prior question is CLOSED — no run required
+
+Every reconstruction used `prior_sigma_t = 10` (verified in SI03 cell 61 for the
+PETM block and cell 77 for the extreme cases — **not 15**). Because prior and
+posterior share a scale, the posterior/prior variance ratio bounds the prior's
+contribution directly:
+
+| record | 68% half-width | post/prior var | variance from data |
+|---|---|---|---|
+| South Dover Bridge (PETM) | 2.2 °C | 0.05 | **95%** |
+| ODP 959 (PETM) | 3.8–4.1 °C | 0.14–0.16 | 84–86% |
+| ODP 1259 (upper asymptote) | 5.4 °C | 0.29 | 71% |
+| Co1010 (Antarctic, lower asymptote) | 5.9 °C | 0.35 | 65% |
+
+A prior 4–20× wider than the posterior it produces is not setting the answer.
+The same table **independently confirms the asymptote argument** (prior influence
+rises monotonically toward both asymptotes) and **confirms R1C5's Antarctic
+criticism** — Co1010 is the most prior-influenced record in the study.
+
+Nitrate-scenario sensitivity at the PETM sites is also second-order: **−1.34 °C
+(SDB), −0.96 °C (ODP 959)**, both smaller than a single run's 68% half-width —
+against **−4.5 to −5.3 °C** at the Quaternary sites.
+
+### CORRECTION: the "intervals are 14% too narrow" result was wrong
+
+It came from `invt_budget_sites.csv`, the 200-site **stress set** (tail-weighted
+by construction, and *not* held out). Over all 1513 sites the production
+calibration is calibrated and the bias flips sign — see the corrected entry
+further down this file. Population: bias **−0.99 °C**, RMSE **4.35**, R² **0.824**,
+cov68 **0.664** vs 0.68 nominal. Univariate is *better* in the inverse direction
+(RMSE 3.87, R² 0.860), which is the evidence behind R2C4 and R1C2.
+
+### Section 6.2 / Section 7 drafting (2026-08-14)
+
+- **§6.2's new closing paragraph** (replacing the dissolved §6.3): refined draft in
+  `scratchpad/sec62_para3.tex`. The fix was that it estimated **β** coefficients and
+  then pointed at §7 for "posterior coefficients" — but §7 reports **γ**, a
+  different quantity in different units. It now says the two parameterizations are
+  not numerically comparable and that only the *qualitative* result carries forward.
+  Verified: thermal R² 0.75, both G₂/₃ slopes, both NO₃ slopes, n=1513, and
+  **n=562** for `no3_sf2tc_avg` ≤ 1.0 all check out; divergence factor 2.48.
+- **§7's sampler paragraph**: corrected draft in `scratchpad/sec7_sampler_para.tex`.
+  Four numbers were wrong — the budget sweep is **Text S2 not S3**; forward runs
+  take **9.8–212.0 s** not 11–186; agreement is within **0.06** posterior SD at the
+  production 400/1000 cell (0.0677 belongs to a *different* budget, bounded-T's
+  recommended 300/900); and median ESS across the seven fits is **1247.6**, not
+  1341 (1340.9 is one fit's value). Also narrowed "All model fits" → "All
+  calibrations reported here", because the SRI05 univariate comparator has
+  R̂ = 1.01407.
+
+> **Where M=300 came from — do not claim the sweep recommended it.** It did not:
+> `recommended_invt_budget.json` recommends **1000/1000 with M=500**. Production
+> runs 500/1000 with M=300, i.e. *cheaper* than the recommendation. The reason the
+> recommender returned the reference cell is that its drift gate is the
+> **seed-to-seed floor (0.271 °C)**, measured by rerunning the reference at a new
+> seed — but any cheaper cell carries a budget effect *plus* seed noise, so it
+> essentially cannot come in under a pure-noise threshold. **The gate is close to
+> unpassable by construction**, so "no cheaper cell passed" is not evidence that
+> M=300 is inadequate. What the grid actually shows: across all eight cells bias
+> 0.921–0.934, RMSE 4.511–4.529, cov68 0.590–0.610. The production cell drifts
+> 0.339 °C against the 0.271 °C floor — ~13× smaller than the 4.5 °C RMSE.
+> Defensible claim: the budget moves medians by ~0.3 °C, comparable to seed noise
+> and an order of magnitude below the reconstruction uncertainty. **Avoid "more
+> than sufficient" for the inverse.**
+
+### Moving this work to another machine (the zip question)
+
+**Do not zip the whole repo.** The working tree is 4.9 GB before `.git` (7.8 GB)
+and `.venv` (1.9 GB), and it contains **6 compiled Linux Stan binaries** in
+`src/TEXAS/stan_models/` that are actively harmful elsewhere (TEXAS detects the
+exit-127 cross-environment failure and recompiles, but only after confusion).
+
+Clone + `git lfs pull` already carries everything tracked. What git does **not**
+carry is 459 files under `data/`, 3.9 GB:
+
+| what | size | needed? |
+|---|---|---|
+| `data/cache/TEXAS_posterior_cache/` | 3.5 G | yes — the expensive thing |
+| `data/cache/TEXAS_invT_posterior_cache/` | 18 M | yes — 173 `.nc` + 175 `.npz` |
+| `data/revision1/**` untracked (18 files) | <1 M | yes — SI evidence tables |
+| `data/spreadsheets/` untracked (9 files) | small | **yes** — incl. `predT_bayspar_p16_p50_p84.csv`, which SI_code02 loads |
+| `data/cache/kriged_grids_*.npz` | 332 M | optional, regenerable (slow) |
+| `data/cache/superseded_halo_cache/` | 111 M | no |
+
+Build the sidecar (~3.5 GB; `.nc`/`.npz` are already compressed, so `-z` buys
+little and costs a lot of time):
+
+```bash
+cd /home/rrattan/Documents/GitHub/TEXAS
+tar -cf ../texas-sidecar-$(date +%Y%m%d).tar \
+    --exclude='data/cache/superseded_halo_cache' \
+    --exclude='data/cache/kriged_grids_*' \
+    data/cache data/revision1 data/spreadsheets
+```
+
+On the other machine: `git clone`, `git checkout feat/revision1-validation-groupA`,
+`git lfs pull`, **check the `--skip` smudge filter** (see below), then untar over
+the clone. Tracked files are overwritten with identical content, so the order does
+not matter. Do **not** copy `src/TEXAS/stan_models/` binaries — let them recompile.
+
+### Still open
+
+- **`.gitignore` boundary is backwards in one place, NOT yet fixed.** A blanket
+  `*.csv` ignores SI evidence (`mcmc_budget_grid.csv`, the Text S2 sweep;
+  `proxy_definition_summary.csv`) while off-scope material is tracked:
+  `TEXAS-revision/` (9 files — gridT poster/explainer, **zero references** from
+  main text, SI, docs or package) and `notebooks/current/IMOG_presentation.ipynb`.
+  Also note `proxy_parameter_comparison_by_arm.csv` is tracked but its sibling
+  `proxy_parameter_comparison.csv` is not — almost certainly accidental.
+  > ⚠️ **`.gitignore:89` reads `figures/   # ← uncomment if you want...`** — it is
+  > inert **only** because the trailing text makes the pattern match nothing.
+  > "Tidying" that comment would ignore all 92 tracked manuscript figures.
+- **Two R2R red boxes remain, both genuinely unrun**: the Mahalanobis threshold
+  sweep (R2C12) and the refit without the `>= 0.75` retention rule (R2C13). The
+  latter also closes R3C3's screening-robustness request. The PETM prior box is
+  **gone** — answered above.
+- The `[TO BE CONFIRMED BY THE AUTHORS]` box in R3C3 is still for you.
+
+---
+
 ## Latest session — 2026-08-14
 
 Everything below is pushed. Branch `feat/revision1-validation-groupA` is level
