@@ -138,7 +138,8 @@ Optional predictor flags (`_gdgt23ratio`, `_no3_1.5`) are appended to `temptype`
 > `L` logistic, `N` linear), training set (`H` hier_crtp, `C` culmeso,
 > `J` culmesocore, `T` crtp), estimator (`P` priorApprox, `E` priorApprox+EIV,
 > `D` full hierarchical), and predictor structure (`U` univariate, `A` additive
-> β-on-μ, `B` T₀-shift γ-on-T₀ — the manuscript's "T₀-shift parameterization").
+> β-on-μ, `B` bounded-by-construction — the manuscript's "T₀-shift parameterization",
+> γ-on-T₀; the letter names the property, the paper names the mechanism).
 > So `..._hier_crtp_multiv_priorApprox_eiv_t0shift` → `GHEB`. Predictors are
 > `G23` and `N` + cutoff×10 (`N10` = cutoff 1.0), or `p0` when there are none.
 >

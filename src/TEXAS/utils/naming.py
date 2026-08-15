@@ -53,7 +53,7 @@ pos  axis                   codes
 1    curve family           ``G`` gen_logi_fixed, ``L`` logistic, ``N`` linear
 2    training set           ``H`` hier_crtp, ``C`` culmeso, ``J`` culmesocore, ``T`` crtp
 3    estimator              ``P`` priorApprox, ``E`` priorApprox+EIV, ``D`` full hierarchical
-4    predictor structure    ``U`` univariate, ``A`` additive (beta on mu), ``B`` T0-shift (gamma on T0; legacy token ``boundedT``)
+4    predictor structure    ``U`` univariate, ``A`` additive (beta on mu), ``B`` bounded-by-construction (the T0-shift structure: gamma on T0; legacy token ``boundedT``)
 ===  =====================  ==========================================
 
 So ``gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift`` -> ``GHEB``
@@ -141,7 +141,7 @@ _EST_LABEL = {"P": "two-stage prior approximation", "E": "prior approximation + 
               "D": "full hierarchical (single stage)"}
 _STRUCT_LABEL = {"U": "univariate (thermal only)",
                  "A": "additive corrections (beta on the response)",
-                 "B": "T0-shift corrections (gamma on the curve location T0)"}
+                 "B": "bounded-by-construction (the T0-shift structure: gamma on the curve location T0)"}
 
 # --- other axes -----------------------------------------------------------
 

@@ -164,7 +164,7 @@ The four **compset** letters encode, in order:
 | Curve | `G` generalized logistic · `L` logistic · `N` linear |
 | Training set | `H` hierarchical coretop · `C` culture+mesocosm · `J` culture+mesocosm+coretop · `T` coretop-only |
 | Estimator | `P` priorApprox · `E` priorApprox + errors-in-variables · `D` full hierarchical |
-| Predictor structure | `U` univariate · `A` additive (β on the response) · `B` **T₀-shift** (γ on T₀) |
+| Predictor structure | `U` univariate · `A` additive (β on the response, unbounded) · `B` bounded-by-construction (the **T₀-shift** structure: γ on T₀) |
 
 So `tx.GHEB.sst.sri03.G23-N10` is the published T₀-shift multivariate SST
 calibration, and `tx.GHPU.sst.sri03.p0` the univariate SST one. A date/run
