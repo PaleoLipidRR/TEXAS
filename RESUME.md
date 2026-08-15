@@ -95,6 +95,22 @@ cov68 **0.664** vs 0.68 nominal. Univariate is *better* in the inverse direction
 > and an order of magnitude below the reconstruction uncertainty. **Avoid "more
 > than sufficient" for the inverse.**
 
+### TWO manuscript repos — know which one you are in (2026-08-15)
+
+| repo | role | edit it? |
+|---|---|---|
+| `~/Documents/GitHub/AGU_PALO_TEXAS_PSM_draft` | **the main project.** `main.tex` and `si_template_2019.tex` are edited **by the author**, with active track changes; Overleaf-synced. | **NO — hands off those two files** |
+| `~/Documents/GitHub/AGU_PALO_TEXAS_PSM_revised_submission` | working **placeholder** for Claude's text edits | yes |
+
+The names differ by one word, so check `git remote -v` before editing. An edit in
+the placeholder is a drafting aid and does **not** reach the submission — the
+author transcribes what they want into `_draft`. Editing `_draft` directly would
+collide with the author's track-changes work and with the Overleaf sync.
+
+> The manuscript work recorded in this file (the §6.2/§7 paragraphs, the Text S2/S3
+> restructure, figS14–S15) was committed to the **placeholder** repo
+> (`fcbed66`). It still has to be carried into `_draft` by hand.
+
 ### THE SIDECAR LIVES ON THE LaCie DRIVE (2026-08-15)
 
 ```
