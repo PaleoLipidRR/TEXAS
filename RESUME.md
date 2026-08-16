@@ -8,6 +8,63 @@ bottom; tick the boxes as you go.
 
 ---
 
+## Latest session — 2026-08-15 (evening): rename finished, docs synced, all pushed
+
+**Pick up from the laptop — read this first.**
+
+### What is pushed where (everything below is on the remotes)
+
+| repo | branch | head | contents |
+|---|---|---|---|
+| TEXAS | `feat/revision1-validation-groupA` | `72871376` | `boundedT`→`t0shift` rename (`6379e4de`), docs sync (`58ff1ef7`), case-id-first docs + naming explainer (`1baea32c`), preprint β archive page (`da76808d`), compset-B re-gloss (`fab01622`), re-executed notebooks + σ in panel (b) (`72871376`) |
+| `AGU_PALO_TEXAS_PSM_revised_submission` | `main` | `0874a02` | "T₀-shift" terminology + figure renames; compiles clean |
+| `R2R-report-...2026PA005459` | `main` | `e6c307e` | names the T₀-shift parameterization in R3C1 + the Bayesian-R² remark |
+
+### The rename, in one paragraph
+
+The variant token is now **`t0shift`** everywhere it names an artifact (Stan
+files, all 30+ figure files, `SI_code01/02_t0shift_*` notebooks,
+`fit_t0shift_single_predictors.py`); the manuscript term is the **"T₀-shift
+parameterization"**. `encode_compset` maps *both* spellings to compset letter
+`B` — re-glossed as **bounded-by-construction** (user decision: letter names
+the property, paper names the mechanism; never migrate `GHEB` ids). Nothing in
+`data/cache/` was renamed; legacy `.nc`/`.pkl` names and old `stan_model_name`
+attrs resolve unchanged. Notebook switch keys (`MODEL_VARIANT = "boundedT"`)
+intentionally keep the old spelling. The Python curve function is
+`generalized_logistic_fixed_upper_t0shift` (old `_bounded_t` name aliased).
+
+### Still to do (laptop)
+
+- [ ] **Re-run the two bottom-layer calibration cells** in
+      `SI_code02_t0shift_TEXAS_analysis.ipynb` (SST + thermoT): panel (b) now
+      lists `sigma_proxyObs_crtp` (σ_crtp, coretop colour, stack starts at
+      y=0.31) but the committed figures predate the edit.
+- [ ] **Re-run the fig10/fig11 cells in `SI03_paleo_showcases_modelswitch.ipynb`**
+      and eyeball the new code-drawn annotations (`site_annot_dict`, elbow
+      leaders) against the hand-revised PDFs in `~/Downloads/*_revised.pdf`;
+      nudge `xy`/`xytext` as needed. The `axs[-1,1]` SubplotGrid bug that ate
+      the age ticks is fixed (`bottom_ax = axs[n_sites]`, compare with `is`).
+- [ ] **`_draft` repo untouched** (hands-off): still references `_boundedT`
+      figure names; author transcribes from the placeholder, then its
+      `figures/` copies need the same `_boundedT`→`_t0shift` rename.
+- [ ] Public docs site updates only when this branch merges to `main`
+      (gh-pages builds from `main`). New docs: `preprint_additive_archive.md`
+      (Archive section), naming explainer in `index.md` + `quickstart_demo`.
+
+### Laptop environment caveats
+
+- **LFS budget**: clone/pull with `GIT_LFS_SKIP_SMUDGE=1`, then
+  `git lfs checkout` selectively (see the LFS memory note). The rename
+  commits carry **no LFS objects** (figures are plain git).
+- **`data/cache` does not travel.** The laptop needs the 2026-08-14 GHEB
+  refits (`tx.GHEB.{sst,thm}.sri03.G23-N10.fwd.nc`) to re-run SI_code02 —
+  restore from the LaCie sidecar (`texas-sidecar-20260814.tar`, see below)
+  or refit. Two fits of the SST case exist on this desktop (legacy-named
+  July 29 + case-named Aug 14); differences are MCMC noise only.
+- Renamed Stan models recompile on first use.
+
+---
+
 ## Latest session — 2026-08-15: `boundedT` → `t0shift` rename
 
 The manuscript now calls the model the **T₀-shift parameterization** (the
