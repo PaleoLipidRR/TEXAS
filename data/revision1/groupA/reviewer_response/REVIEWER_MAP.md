@@ -1,7 +1,11 @@
 # Reviewer comments → what exists in this repo
 
-**Written 2026-08-13.** Source: `working-repo/TEXAS-revision/ReviewerComments.md`.
-Deadline: **2026-09-08**.
+**Written 2026-08-13 · statuses updated 2026-08-17.** Source:
+`working-repo/TEXAS-revision/ReviewerComments.md`. Deadline: **2026-09-08**.
+
+> Entries 1.5, 2.3, 2.4 and 3.4 were stale and are now corrected. 3.4 in
+> particular carried a **retracted** result — read its warning box before
+> quoting anything about interval width.
 
 The point of this file is to separate three things that are easy to confuse when
 a review is long: what is **already answered and computed**, what is **a writing
@@ -91,24 +95,23 @@ Plot change is small; the figures are the work.
 > uncertainty in the fitted mean relationship or the full uncertainty of
 > reconstructed temperatures, including the residual noise term.
 
-**This is the same question as the coverage result, from the other direction,
-and the honest answer is unflattering:** the predictive intervals are ~14% too
-narrow. Half-width / residual SD = 0.863–0.867, which reproduces the observed
-coverage of both nominal levels from one number:
+> ⚠️ **RETRACTED 2026-08-14 — do not quote the "~14% too narrow" result.**
+> An earlier version of this entry reported half-width / residual SD ≈ 0.865
+> and a +0.93 °C bias, concluding the predictive intervals were ~14% too
+> narrow. That came from `param_sensitivity/invt_budget_sites.csv`, which is
+> the **200-site stress set** — tail-weighted by construction, and not held
+> out. It is not a population estimate and must not be quoted as one.
 
-| nominal | predicted from the ratio | observed |
-|---|---|---|
-| 68% | 0.612 | 0.600 |
-| 90% | 0.846 | 0.840 |
+Over all **1513** sites the production calibration is essentially calibrated
+and **the bias flips sign**: bias **−0.99 °C**, RMSE **4.35**, R² **0.824**,
+cov68 **0.664** against 0.68 nominal. Univariate is *better* in the inverse
+direction (RMSE 3.87, R² 0.860) — which is the evidence behind 2.5 and R1.2,
+and the reason the forward-vs-inverse asymmetry is conceded rather than
+explained away.
 
-The +0.93 degC bias contributes essentially nothing (removing it moves coverage
-by −0.005). Stable to 0.004 across every budget cell, so it is a property of the
-model, not the sampler. Mechanism: the residual spread carries site-level
-variability (oceanographic, depth-habitat, bioturbation) the noise model does
-not.
-
-Data: `param_sensitivity/invt_budget_sites.csv`. **No figure is drawn from it
-yet** — this is the strongest candidate for a new SI panel.
+The plot change (adding 95% alongside 68%) still stands, and so does stating
+explicitly which quantity the intervals describe. The answer is the **full
+predictive** uncertainty including the residual noise term.
 
 ### 3.5 Streamline technical detail; move screening/index selection to SI — **TEXT**
 
@@ -154,29 +157,68 @@ abstract, Figure 2. (Also: "surfuce" → "surface" in Fig 2.)
 Frame deep-time nitrate as conditional reconstructions / sensitivity tests.
 Soften "corrects for", "resolves", "reconciles".
 
-### 2.3 PETM depends on priors and nitrate scenario — **PARTLY DONE**
+### 2.3 PETM depends on priors and nitrate scenario — **DONE** (closed 2026-08-14)
 
 SI03 already runs four NO3 scenarios (`no3_modern`, `no3_01`, `no3_001`,
-`no3_10`) across both arms — that is the nitrate half. **Alternative temperature
-priors are NEW**; R1 asks the same thing independently (see 1.5).
+`no3_10`) across both arms — that is the nitrate half.
 
-### 2.4 Validation / performance claims — **NEW, and the biggest one**
+**The prior half needed no run after all.** Every reconstruction used
+`prior_sigma_t = 10` (verified in SI03 cell 61 for the PETM block, cell 77 for
+the extreme cases — *not* 15), and because prior and posterior share a scale
+the posterior/prior variance ratio bounds the prior's contribution directly:
+South Dover Bridge 0.05 (95% of the variance from data), ODP 959 0.14–0.16,
+ODP 1259 0.29, Co1010 0.35. A prior 4–20× wider than the posterior it produces
+is not setting the answer.
+
+The same table does two more jobs: prior influence rises monotonically toward
+both asymptotes, which is the asymptote argument independently confirmed, and
+Co1010 is the most prior-influenced record in the study, which confirms R1's
+Antarctic criticism (see 1.5). Nitrate-scenario sensitivity at the PETM sites
+is second-order too — −1.34 °C (SDB), −0.96 °C (ODP 959), both smaller than a
+single run's 68% half-width, against −4.5 to −5.3 °C at the Quaternary sites.
+
+### 2.4 Validation / performance claims — **DONE** (run 2026-08-13)
 
 > claims that TEXAS outperforms existing calibrations should be softened or
 > supported with clearer cross-validation, ideally using spatially blocked tests
 
-**A script for exactly this already exists and has never been run properly:**
-`working-repo/TEXAS-revision/scripts/fit_boundedT_comparison.py` implements
-`spatial_folds()`, WAIC and paired elpd differences, fitting parent and
-bounded-T on identical subsets. Its `outputs/manifest.json` says
-`"smoke": true, "folds": 2`. Full mode is 5 folds at 500/1000, roughly an hour
-of Stan.
+**This has been run in full** — `working-repo/TEXAS-revision/scripts/fit_boundedT_comparison.py`,
+`"smoke": false`, 5 folds, n = 2043, ~1 h. It needs working-repo's own uv
+environment; `uv.lock` there is the record of what produced these numbers, so
+do **not** re-run it under TEXAS's venv.
 
-Running it answers R2's validation demand **and** gives R3 a formal
-parent-vs-bounded model comparison. Highest value-per-hour item in this file.
+Exports (CSV/JSON, readable anywhere) live in `../model_comparison_cv/` with a
+`PROVENANCE.md`; `results.pkl` is deliberately not the record, because it is a
+pandas-3 pickle that will not load under TEXAS's pandas 2. The analysis is
+`notebooks/manuscripts/SI_code04_model_comparison_cv.ipynb`, which reads only
+the exports and never samples.
 
-Note it needs working-repo's own uv environment — `uv.lock` there is the record
-of what produced reviewer-facing numbers, so do not run it under TEXAS's venv.
+What it gives each comment:
+
+* **R2's validation demand.** Spatial blocking degrades both arms
+  (R² 0.743 → 0.699, cov95 0.944 → 0.925), so the in-sample figures are
+  labelled as such and the blocked counterparts quoted beside them.
+* **R3.1's formal comparison** (see 3.1). T₀-shift beats additive on every
+  metric; Δelpd = **+68.4 ± 27.6** (2.5 SE). The additive fitted mean reaches
+  **0.008** where the T₀-shift floor is **0.375**.
+* **The outperformance claim itself.** Multivariate TEXAS and BAYSPAR are
+  statistically indistinguishable on RMSE (Δ = +0.041 °C, p = 0.786) — claim
+  neither outperformance nor concede underperformance. Univariate TEXAS
+  significantly beats BAYSPAR (−0.456 °C, p = 0.001), which is safe to claim.
+  The residual-structure ordering (Moran's I 0.423 multivariate < 0.579
+  univariate < 0.650 BAYSPAR < 0.769 Schouten02 < 0.810 Kim2010) is monotonic
+  in how much mechanism each model represents — the *reverse* of the RMSE
+  ranking, i.e. the multivariate model converts systematic regional error into
+  random error.
+
+> Three different n are in play — always state which: **2043** (the CV),
+> **1513** (production), **1298** (the comparison against other calibrations,
+> after 215 sites drop for unmatched or ambiguous TEX₈₆ joins). TEXAS is
+> **in-sample** in that comparison and the others are not; say so.
+
+Still optional, and not needed for the argument: a spatially blocked **refit**
+of TEXAS (~3.5 h) so its side is genuinely held out. The 8.7% in-sample →
+spatial penalty measured above currently stands in as a bound.
 
 ### 2.5 Forward vs inverse performance — **WRITE**
 
@@ -238,11 +280,16 @@ Cite at the cold-water discussion; step-changes in community across the Polar
 Front complicate a single low-temperature relationship. Relevant to the polar
 behaviour in fig9/fig10.
 
-### 1.5 PETM priors not tested — **NEW** (same as 2.3)
+### 1.5 PETM priors not tested — **DONE** (same as 2.3, closed 2026-08-14)
 
 Were iCESM-derived priors tested against data-driven alternatives? Also the
 Antarctic 10 degC prior against reconstructions near 0 degC, and Fig 14b showing
 temperatures below seawater freezing.
+
+Answered by the variance-ratio argument in **2.3** — no refit required. Note
+that the ratio table **confirms this reviewer's Antarctic criticism** rather
+than rebutting it: Co1010 is the most prior-influenced record in the study
+(0.35, i.e. 35% of its posterior variance traceable to the prior). Say so.
 
 ### 1.6 Cite Bijl et al. (2025) — **TEXT**
 
@@ -250,15 +297,28 @@ temperatures below seawater freezing.
 
 ## What actually needs new compute
 
-Ordered by value per hour.
+**Updated 2026-08-17.** Two of the original four are closed; what is left is
+the screening pair.
 
-1. **Spatially blocked CV + WAIC** (2.4, and gives 3.1 a formal comparison).
-   ~1 h. Script exists, never run in full.
-2. **An uncertainty-calibration figure** (3.4). Data exists, no figure. Answers
-   the "fitted mean or full predictive?" question directly.
-3. **PETM prior sensitivity** (1.5 / 2.3). Alternative temperature priors;
-   nitrate scenarios already done.
-4. **Screening sensitivity** (3.6 / 2.8): Mahalanobis threshold, and the
-   `>= 0.75` retention rule.
+1. **Screening sensitivity** (3.6 / 2.8) — the only genuinely unrun items.
+   Two separate runs: the **Mahalanobis threshold sweep**, and a **refit
+   without the `>= 0.75` retention rule**. The latter also closes 3.3's
+   screening-robustness request. Worth knowing before you start: that rule
+   keeps 39 samples (1.9%) the 90% ellipse would drop, at mean SST 27.7 °C
+   against 16.3 °C for the rest — so the warm-end leverage the reviewer
+   suspected is real, and the refit is answering a live question, not a
+   formality. (Reproduced on the processed coretop table, n = 2024; the
+   production chain grids to 1513, so treat the 39 as indicative.)
+2. **Optional, not needed for the argument** — a spatially blocked *refit* of
+   TEXAS (~3.5 h) so its side of the calibration comparison is genuinely held
+   out. The 8.7% in-sample → spatial penalty from the CV stands in as a bound.
+
+Closed since this file was written:
+
+* ~~Spatially blocked CV + WAIC~~ — **run in full 2026-08-13**, see 2.4.
+* ~~PETM prior sensitivity~~ — **no run needed**, closed by the variance-ratio
+  argument, see 2.3.
+* ~~An uncertainty-calibration figure~~ — the result it was meant to show was
+  an artifact of the stress set and has been retracted; see the warning in 3.4.
 
 Everything else is writing against numbers that already exist.
