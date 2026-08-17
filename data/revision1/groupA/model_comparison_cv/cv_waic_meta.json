@@ -1,0 +1,33 @@
+{
+  "n": 2043,
+  "smoke": false,
+  "folds": 5,
+  "finished": "2026-08-13 12:03:52",
+  "models": [
+    "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv",
+    "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT"
+  ],
+  "R2_thermal": 0.7002382115159331,
+  "elpd_diff_bounded_minus_parent": 68.36207717077966,
+  "elpd_diff_se": 27.612170094606576,
+  "sampler": {
+    "chains": "4",
+    "iter_warmup": "500",
+    "iter_sampling": "1000",
+    "seed": "20260727",
+    "adapt_delta": "0.9",
+    "show_progress": "False",
+    "refresh": "500"
+  },
+  "mu_range": {
+    "parent": [
+      0.008131000923351818,
+      0.9644737462740008
+    ],
+    "bounded": [
+      0.37541797690296463,
+      0.9744485157703351
+    ]
+  },
+  "note": "n here is the coretop subset with complete G23 + NO3 + SST + RI; the production TEXAS chain grids to a different count, so these metrics are not directly comparable to the headline calibration."
+}

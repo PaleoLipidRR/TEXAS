@@ -1,0 +1,10 @@
+{
+  "finished": "2026-08-13 12:03:52",
+  "smoke": false,
+  "n": 2043,
+  "folds": 5,
+  "models": [
+    "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv",
+    "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT"
+  ]
+}

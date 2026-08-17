@@ -96,6 +96,15 @@ data/spreadsheets/*.csv
 data/*.xlsx
 data/*.csv
 
+# Reviewer-facing evidence for revision 1 is deliberately exempt from the
+# blanket *.csv / *.log rules above. These are small, hand-curated result
+# tables that back specific responses to reviewers -- losing them means
+# re-running Stan, not re-deriving a cache. Scoped to this tree only.
+!data/revision1/**/*.csv
+!data/revision1/**/*.json
+!data/revision1/**/*.log
+!data/revision1/**/*.md
+
 # Jupyter Book tutorial build output
 tutorial/_build/
 docs/_build/

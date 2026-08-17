@@ -1,0 +1,12 @@
+\begin{tabular}{llrrrr}
+\toprule
+Scheme & Model & R² & RMSE & 95% coverage & elpd (WAIC) \\
+\midrule
+In-sample & Additive ($\beta$ on $\mu$) & 0.730 & 0.0663 & — & 2620.3 \\
+In-sample & T$_0$-shift & 0.745 & 0.0645 & — & 2688.7 \\
+5-fold CV (random) & Additive ($\beta$ on $\mu$) & 0.713 & 0.0683 & 0.943 & — \\
+5-fold CV (random) & T$_0$-shift & 0.743 & 0.0647 & 0.944 & — \\
+5-fold CV (spatially blocked) & Additive ($\beta$ on $\mu$) & 0.686 & 0.0716 & 0.923 & — \\
+5-fold CV (spatially blocked) & T$_0$-shift & 0.699 & 0.0701 & 0.925 & — \\
+\bottomrule
+\end{tabular}

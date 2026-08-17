@@ -1,0 +1,55 @@
+[11:02:59] mode=FULL  sampler={'chains': 4, 'iter_warmup': 500, 'iter_sampling': 1000, 'seed': 20260727, 'adapt_delta': 0.9, 'show_progress': False, 'refresh': 500}
+[11:03:00] coretop subset N=2043  R2_thermal=0.7002
+[11:03:56] both models compiled
+[11:03:56] [full] fitting parent …
+[11:10:29] [full] parent done in 6.1 min | R2=0.7297 RMSE=0.0663 elpd=2620.3 mu∈(0.008,0.964)
+[11:10:29] [full] fitting bounded …
+[11:13:19] [full] bounded done in 2.4 min | R2=0.7447 RMSE=0.0645 elpd=2688.7 mu∈(0.375,0.974)
+[11:13:19] [full] elpd_diff (bounded − parent) = 68.4 ± 27.6
+[11:13:21] [cv:random] fold sizes [409, 409, 409, 408, 408]
+[11:13:21] [cv:random 1/5] parent: train 1634 → predict 409
+[11:16:05] [cv:random 1/5] parent done in 2.7 min
+[11:16:05] [cv:random 2/5] parent: train 1634 → predict 409
+[11:18:54] [cv:random 2/5] parent done in 2.8 min
+[11:18:54] [cv:random 3/5] parent: train 1634 → predict 409
+[11:21:47] [cv:random 3/5] parent done in 2.9 min
+[11:21:47] [cv:random 4/5] parent: train 1635 → predict 408
+[11:24:45] [cv:random 4/5] parent done in 3.0 min
+[11:24:45] [cv:random 5/5] parent: train 1635 → predict 408
+[11:27:45] [cv:random 5/5] parent done in 3.0 min
+[11:27:45] [cv:random] parent: out-of-sample RMSE=0.0683 R2=0.7132 cover95=0.943
+[11:27:45] [cv:random 1/5] bounded: train 1634 → predict 409
+[11:29:54] [cv:random 1/5] bounded done in 2.1 min
+[11:29:54] [cv:random 2/5] bounded: train 1634 → predict 409
+[11:31:57] [cv:random 2/5] bounded done in 2.0 min
+[11:31:57] [cv:random 3/5] bounded: train 1634 → predict 409
+[11:34:09] [cv:random 3/5] bounded done in 2.2 min
+[11:34:09] [cv:random 4/5] bounded: train 1635 → predict 408
+[11:36:08] [cv:random 4/5] bounded done in 2.0 min
+[11:36:08] [cv:random 5/5] bounded: train 1635 → predict 408
+[11:38:13] [cv:random 5/5] bounded done in 2.1 min
+[11:38:13] [cv:random] bounded: out-of-sample RMSE=0.0647 R2=0.7426 cover95=0.944
+[11:38:13] [cv:spatial] fold sizes [485, 363, 555, 246, 394]
+[11:38:13] [cv:spatial 1/5] parent: train 1558 → predict 485
+[11:41:20] [cv:spatial 1/5] parent done in 3.1 min
+[11:41:20] [cv:spatial 2/5] parent: train 1680 → predict 363
+[11:44:42] [cv:spatial 2/5] parent done in 3.4 min
+[11:44:42] [cv:spatial 3/5] parent: train 1488 → predict 555
+[11:47:27] [cv:spatial 3/5] parent done in 2.8 min
+[11:47:27] [cv:spatial 4/5] parent: train 1797 → predict 246
+[11:51:00] [cv:spatial 4/5] parent done in 3.5 min
+[11:51:00] [cv:spatial 5/5] parent: train 1649 → predict 394
+[11:53:03] [cv:spatial 5/5] parent done in 2.1 min
+[11:53:03] [cv:spatial] parent: out-of-sample RMSE=0.0716 R2=0.6855 cover95=0.923
+[11:53:03] [cv:spatial 1/5] bounded: train 1558 → predict 485
+[11:55:04] [cv:spatial 1/5] bounded done in 2.0 min
+[11:55:04] [cv:spatial 2/5] bounded: train 1680 → predict 363
+[11:57:26] [cv:spatial 2/5] bounded done in 2.4 min
+[11:57:26] [cv:spatial 3/5] bounded: train 1488 → predict 555
+[11:59:25] [cv:spatial 3/5] bounded done in 2.0 min
+[11:59:25] [cv:spatial 4/5] bounded: train 1797 → predict 246
+[12:01:55] [cv:spatial 4/5] bounded done in 2.5 min
+[12:01:55] [cv:spatial 5/5] bounded: train 1649 → predict 394
+[12:03:52] [cv:spatial 5/5] bounded done in 1.9 min
+[12:03:52] [cv:spatial] bounded: out-of-sample RMSE=0.0701 R2=0.6985 cover95=0.925
+[12:03:52] ALL DONE
