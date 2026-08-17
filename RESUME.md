@@ -8,6 +8,198 @@ bottom; tick the boxes as you go.
 
 ---
 
+## Latest session — 2026-08-17 (desktop): everything committed and pushed
+
+**The 2026-08-16 work below is now committed and pushed in all three repos.**
+Nothing is left dirty. Start from this section, not the one under it.
+
+| repo | branch | head | what landed |
+|---|---|---|---|
+| TEXAS | `feat/revision1-validation-groupA` | `aac9c48` | figure renumbering (`2363c20`), `.gitignore` + 30 evidence files (`9c76045`), SI_code04 (`68cc2b6`), REVIEWER_MAP corrections (`3cd36b5`), figS17 region labels (`aac9c48`) |
+| working-repo | `main` | `0d3cab0` | CV/WAIC exports made portable |
+| placeholder | `main` | `e5dd0af` | ODR move + renumbering (`c2d0d89`), SI label realignment (`e5dd0af`) |
+
+### What this session did beyond committing
+
+- **`REVIEWER_MAP.md` had four stale entries, not one.** 2.4 (CV never run) was
+  the known one. Also stale: **2.3 / 1.5** (PETM priors listed as NEW — closed
+  without a run on 2026-08-14) and, worst, **3.4**, which still reported the
+  **retracted** "intervals are ~14% too narrow" result from the 200-site stress
+  set. 3.4 now opens with a RETRACTED box. The "needs new compute" list drops
+  from four items to the screening pair.
+- **figS17 is relabelled by ocean region**, and two labels came out wider than
+  the Part 3 prose had them: the red block reaches into the equatorial
+  E. Pacific (10% of its sites west of 93°W) and the green one includes the
+  equatorial E. Atlantic. Labels are derived from each fold's spherical
+  centroid, and an assertion refuses to plot if a fold moves — a reseeded run
+  fails loudly instead of mislabelling itself.
+- **SI slots confirmed: S17 and S18 are correct**, against a placeholder SI that
+  now runs S1–S16 continuous. Still staged, not promoted — see below.
+- **The placeholder's SI labels were off by one** on five figures after the ODR
+  move (two of them both starting `fig:s11-`). Renamed to match what they
+  render as; clean si→main build gives 66 pp / 32 pp, zero undefined refs.
+
+### `_draft` has moved on, and has 7 unresolved refs
+
+The author already fixed the `main.tex:525` dangling ODR ref that the previous
+session flagged — that item is **done**, and `_draft`'s SI has independently
+renumbered `s11→s12` and `s12→s13` exactly as the placeholder now does. But
+`_draft` is mid-transcription and currently does not resolve. **Hands off, so
+this is an author list:**
+
+| file:line | ref | fix |
+|---|---|---|
+| `main.tex:679,694,699` | `S-fig:s11-residual-plots-existing-models` | → `s12-` |
+| `main.tex:694,696,699` | `S-fig:s12-thermoT-residual-maps-multivariate` | → `s13-` |
+| `main.tex:701` | `S-fig:S13-residual-diff` | the residual-difference figure **is not in `_draft`'s SI at all** yet |
+| `main.tex:713`, `si:M-` | `sec:regression-dilution` | label exists in neither file |
+| `si:342` | `M-fig:ODR-regression-dilution` | ODR is in the SI now → local `fig:s11-ODR-regression-dilution` |
+| `si:483` | `tab:multivariate_results` | label exists in neither file |
+| `si:490` | `sec:secondary-environmental-effects` | lives in `main.tex:519` → needs the `M-` prefix |
+
+(`M-...` and `M-<label>` also show as unresolved; those are comments in the
+template, not real refs.)
+
+**Why figS17/S18 are not promoted yet:** `_draft`'s SI figures stop at **S13**.
+It has not received the residual-difference figure or the two MCMC-budget
+figures that occupy S14–S16 in the placeholder. Promote out of
+`figures/manuscript/revision1/` only once `_draft` carries those; until then the
+number could still shift by up to three.
+
+### Still to do
+
+- [ ] The `_draft` ref table above (author).
+- [ ] Promote figS17/figS18 to `finalized/supplementary/` once `_draft` catches up.
+- [ ] The two genuinely unrun items: **Mahalanobis threshold sweep** (R2C12) and
+      the **refit without the `>= 0.75` retention rule** (R2C13, also closes R3C3).
+- [ ] The `[TO BE CONFIRMED BY THE AUTHORS]` box in R3C3.
+- [ ] Optional: spatially blocked **refit** of TEXAS (~3.5 h).
+
+> **Notebook churn to keep reverting.** `SI_code1_PreProcessing_finalized.ipynb`
+> and `SI_code2_TEXAS_analysis.ipynb` show kernel-metadata-only diffs
+> (3.12.8 → 3.13.5) whenever they are opened. Not ours; reverted, do not commit.
+
+> **Re-running SI_code04 dirties four files it did not change.** figS18 and two
+> `SI_table_*.csv` come out byte-different but content-identical (pdftotext diff
+> clean; CSVs differ in the last float digit from summation order). Revert them
+> rather than committing LFS churn.
+
+---
+
+## Session — 2026-08-16 (laptop): figure renumbering + model comparison
+
+> ✅ **Committed and pushed 2026-08-17** — see the section above. The warnings
+> below about uncommitted state are historical.
+
+### 1. Figure renumbering — the ODR figure moved to the SI
+
+The author moved `fig6_ODR_regression_dilution` out of the main text into the SI,
+so main text is now **13 figures** and everything after fig5 shifts down one.
+`_draft` is authoritative and the TEXAS notebooks already matched it; the
+**placeholder** repo did not, and was compiling with stale figures.
+
+| repo | what changed |
+|---|---|
+| TEXAS | `SI_code01` writes `supplementary/figS11_ODR_..._t0shift.pdf` (was `main-text/fig6_...`); `SI_code02` cell 67 → `figS12_comparison_all_...`; cell 85 `save_dir` → `supplementary`. Renamed the PDFs rather than re-executing (filename does not affect the render). Deleted 13 old-numbered `_t0shift` orphans — each verified as a *different* render from its replacement first. |
+| placeholder | ODR lifted from `main.tex` into the SI as `figS11` (label `fig:s11-ODR-regression-dilution`); main text fig7→6 … fig14→13; SI figS11→12 … figS15→16; all files renamed; **11 stale figures refreshed from TEXAS**, incl. Fig 7 which now carries σ_crtp = 0.0391. |
+| `_draft` | untouched (hands-off) |
+
+**Cross-references fixed** (all consequences of the move): `\ref{fig:ODR-...}` ×2
+in main.tex → `S-` prefixed; `\ref{M-fig:ODR-...}` ×3 in the SI → local;
+`\ref{sec:secondary-environmental-effects}` in the moved caption → `M-` prefixed;
+dropped a now-false "of the main text" in Text S2.
+
+**Both documents compile clean: 66 pp main, 32 pp SI, zero undefined refs.**
+
+> `xr-hyper` is circular — build si→main from clean **2–3 times**. A halted run
+> leaves a truncated `.aux` and the next build dies with `File ended within
+> \read`. `rm -f *.aux *.log` and redo the loop; it is not a content error.
+
+> ⚠️ **`_draft` has a dangling reference I could not fix.** `main.tex:525` still
+> has `\ref{fig:ODR-regression-dilution}` for the **G23** citation; that label now
+> lives in the SI as `fig:s11-ODR-regression-dilution`, so it renders `??`. The
+> NO₃ citation on the same line was already repointed. Author must fix.
+
+### 2. `.gitignore` boundary fixed (the one flagged "backwards, NOT yet fixed")
+
+Blanket `*.csv` / `*.log` were swallowing SI evidence. Added negations scoped to
+`data/revision1/**` only. This un-ignores **17** previously-untracked evidence
+files, incl. `mcmc_budget_grid.csv` and `proxy_definition_summary.csv`.
+`data/spreadsheets/` and `data/cache/` remain ignored — verified.
+The inert `figures/   # ← uncomment…` line was **not** touched.
+
+### 3. WAIC / cross-validation — found, made durable, and extended
+
+**It had already been run in full** (2026-08-13, `smoke:false`, 5 folds, n=2043,
+~1 h). `REVIEWER_MAP.md` still says it never was — **that entry is stale, fix it.**
+
+Code lives in `working-repo/TEXAS-revision/`, under **its own uv env (pandas 3)**.
+Do not re-run it under `texas-env`; `uv.lock` is the provenance record.
+`results.pkl` will **not** unpickle under TEXAS's pandas 2 (`StringDtype`), so it
+cannot be the record — added `scripts/export_cv_results.py` → CSV/JSON, plus
+`.gitignore` negations so `run.log`, `manifest.json` and the four exports are
+tracked. Copied to `TEXAS/data/revision1/groupA/model_comparison_cv/` with a
+`PROVENANCE.md`.
+
+**New notebook `notebooks/manuscripts/SI_code04_model_comparison_cv.ipynb`** —
+43 cells, executed clean, reads only CSV/JSON, never samples. Three parts:
+
+- **Part 1 — TEXAS variants.** T₀-shift beats additive on every metric;
+  Δelpd = **+68.4 ± 27.6** (2.5 SE). Spatial blocking degrades both
+  (R² 0.743→0.699, cov95 0.944→0.925). Boundedness for R3.1: additive fitted
+  mean reaches **0.008**, T₀-shift floor **0.375**. → `figS17_spatial_cv_folds`
+- **Part 2 — vs existing calibrations, in °C** (n=**1298**; 215 sites dropped for
+  unmatched/ambiguous TEX₈₆ joins). TEXAS is **in-sample** here, the others are
+  not. → `figS18_inverse_skill_by_block`
+- **Part 3 — significance + residual structure.** The key result.
+
+| model | RMSE °C | Moran's I | bias SD | bias range |
+|---|---|---|---|---|
+| TEXAS multivariate | 4.38 | **0.423** | **0.86** | **2.25** |
+| TEXAS univariate | **3.88** | 0.579 | 1.54 | 3.81 |
+| BAYSPAR | 4.34 | 0.650 | 2.66 | 7.29 |
+| Schouten02 | 5.34 | 0.769 | 3.23 | 9.33 |
+| Kim2010 TEX₈₆^H | 5.99 | 0.810 | 3.81 | 10.41 |
+
+**The argument for the paper** (author's framing, now quantified): multivariate
+TEXAS and BAYSPAR are **statistically indistinguishable** on RMSE
+(Δ = +0.041 °C, p = 0.786) — so claim neither outperformance nor concede
+underperformance. **Univariate TEXAS significantly beats BAYSPAR**
+(−0.456 °C, p = 0.001) — safe to claim. And the residual-structure ordering is
+**monotonic in how much mechanism each model represents**, the reverse of the
+RMSE ranking: the multivariate model converts *systematic regional* error into
+*random* error. ΔMoran's I is robust (vs univariate −0.156 [−0.185, −0.128];
+vs BAYSPAR −0.227 [−0.277, −0.179]). BAYSPAR's competitive global RMSE conceals
+a **+5.7 °C Arctic-block bias** — the signature of empirical regional
+recalibration. Southern Ocean confirms the mechanism: NO₃ 15.5 vs 2.3 µmol/L
+global, only 13.9% below cutoff, and multivariate improves *bias* (−2.34 vs
+−2.66) while worsening RMSE — variance, not bias. Pair with **figS14**.
+
+> **Three different n in play — always state which:** 2043 (Part 1 CV),
+> 1513 (production), 1298 (Part 2/3 comparison).
+
+> **figS17 and figS18 use DIFFERENT partitions** — same construction (k-means on
+> unit vectors, seed 20260727, k=5) but n=2043 vs n=1298, so fold **indices do
+> not correspond**. The five geographic regions do line up. Part 3's markdown
+> says so; figS17's legend still reads "Fold 1…5" and should be relabelled by
+> region.
+
+### Still to do — all closed 2026-08-17 except the refit
+
+- [x] **Commit + push all three repos** (TEXAS, working-repo, placeholder).
+- [x] Fix the stale `REVIEWER_MAP.md` entry — four were stale, not one.
+- [x] Relabel `figS17` legend by region.
+- [x] Confirm SI slots for figS17/figS18 — S17/S18 are correct; still staged.
+- [x] `_draft` dangling `\ref{fig:ODR-regression-dilution}` — the author fixed
+      it, but `_draft` has seven *other* unresolved refs now; see above.
+- [ ] Optional, not needed for the argument: spatially blocked **refit** of TEXAS
+      (~3.5 h) so its side is genuinely held out. The 8.7% in-sample→spatial
+      penalty from Part 1 currently stands in as a bound.
+- [x] Unrelated churn in the tree: `SI_code1_PreProcessing_finalized.ipynb` and
+      `SI_code2_TEXAS_analysis.ipynb` kernel-metadata diffs — reverted, not committed.
+
+---
+
 ## Latest session — 2026-08-15 (evening): rename finished, docs synced, all pushed
 
 **Pick up from the laptop — read this first.**
