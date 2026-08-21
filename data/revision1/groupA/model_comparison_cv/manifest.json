@@ -1,7 +1,8 @@
 {
-  "finished": "2026-08-13 12:03:52",
+  "finished": "2026-08-21 09:29:43",
   "smoke": false,
-  "n": 2043,
+  "n": 1513,
+  "dataset": "gridded",
   "folds": 5,
   "models": [
     "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv",

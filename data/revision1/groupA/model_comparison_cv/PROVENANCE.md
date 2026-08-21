@@ -8,7 +8,7 @@ different locked environment, and that is where they are regenerated:
 | code | `working-repo/TEXAS-revision/scripts/fit_boundedT_comparison.py` |
 | export | `working-repo/TEXAS-revision/scripts/export_cv_results.py` |
 | environment | that repo's `pyproject.toml` + `uv.lock` (pandas 3.x) — **not** `texas-env` |
-| run | 2026-08-13 12:03, `smoke: false`, 5 folds, n = 2043, ~1 h of Stan |
+| run | 2026-08-21 09:29, `smoke: false`, 5 folds, n = 1513 (**gridded**), ~3 h of Stan |
 
 Do not re-run the fit from a TEXAS notebook. It needs the uv environment above;
 `uv.lock` is the record of what produced these numbers, and running it under
@@ -26,8 +26,17 @@ cannot serve as a record. The CSV/JSON here are the portable form.
   under both blocking schemes; the spatial-fold figure is built from this.
 - `cv_folds_map.csv` — fold sizes and extents.
 
-## Caveat that must travel with these numbers
+## Which dataset these are fitted to
 
-n = 2043 is the coretop subset with complete G23 + NO3 + SST + RI. The production
-TEXAS chain grids to 1513, so these metrics are **not** directly comparable to the
-headline calibration RMSE. State the n wherever they are quoted.
+n = 1513 is the **gridded** coretop set the reported calibration is fitted to
+(`datatype == "coretop"` in `ds_gridded_screened_global_compilation_finalized.csv`),
+so these metrics sit on the same footing as the headline ones and can be quoted
+beside them.
+
+An earlier run used the ungridded n = 2043 subset and its numbers are **not**
+comparable with the headline calibration — the two differ in more than n, since
+the ungridded fit gives `R2_thermal` = 0.700 against 0.748 here, so the sigma
+prior was scaled off a different thermal curve. That run is preserved at
+`working-repo/TEXAS-revision/outputs/`; regenerate with `--dataset gridded`
+(now the default) and check `cv_waic_meta.json["dataset"]` before quoting
+anything from here.

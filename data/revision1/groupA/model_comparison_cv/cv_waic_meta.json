@@ -1,15 +1,15 @@
 {
-  "n": 2043,
+  "n": 1513,
   "smoke": false,
   "folds": 5,
-  "finished": "2026-08-13 12:03:52",
+  "finished": "2026-08-21 09:29:43",
   "models": [
     "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv",
     "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT"
   ],
-  "R2_thermal": 0.7002382115159331,
-  "elpd_diff_bounded_minus_parent": 68.36207717077966,
-  "elpd_diff_se": 27.612170094606576,
+  "R2_thermal": 0.7483293554414755,
+  "elpd_diff_bounded_minus_parent": 24.3087020479393,
+  "elpd_diff_se": 11.56133363780833,
   "sampler": {
     "chains": "4",
     "iter_warmup": "500",
@@ -21,13 +21,14 @@
   },
   "mu_range": {
     "parent": [
-      0.008131000923351818,
-      0.9644737462740008
+      0.3425502487063864,
+      0.9374289102394214
     ],
     "bounded": [
-      0.37541797690296463,
-      0.9744485157703351
+      0.420348910886541,
+      0.9759658985453412
     ]
   },
-  "note": "n here is the coretop subset with complete G23 + NO3 + SST + RI; the production TEXAS chain grids to a different count, so these metrics are not directly comparable to the headline calibration."
+  "dataset": "gridded",
+  "note": "n is the gridded coretop set the reported calibration is fitted to, so these metrics are on the same footing as the headline ones."
 }
