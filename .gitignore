@@ -105,6 +105,11 @@ data/*.csv
 !data/revision1/**/*.log
 !data/revision1/**/*.md
 
+# Same exemption for the numbers behind the revision-1 SI figures. Each figure
+# writes a small companion table next to it; that table is the figure's evidence
+# and a reviewer asking "where does 6.92 -> 2.13 degC come from" needs it.
+!figures/manuscript/revision1/*.csv
+
 # Jupyter Book tutorial build output
 tutorial/_build/
 docs/_build/
