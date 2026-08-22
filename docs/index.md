@@ -51,12 +51,14 @@ df = pd.read_csv("my_gdgt_data.csv")
 
 df["scaledRI_cren3"] = compute_scaledRI(
     df["GDGT-0"], df["GDGT-1"], df["GDGT-2"], df["GDGT-3"],
-    df["cren"],   df["cren_prime"],   # cren_rings=3 by default → RI₀₋₃
+    df["cren"],   df["cren_prime"],   # cren_weight=3 by default → RI₀₋₃
 )
 ```
 
 !!! note "Which Ring Index convention?"
-    The canonical TEXAS posteriors are calibrated against **RI₀₋₃** (`cren_rings=3`, crenarchaeol counted as 3 rings). Pass `cren_rings=4` to reproduce the RI₀₋₄ convention of Zhang et al. (2016), but the canonical posteriors were **not** calibrated against that convention.
+    The canonical TEXAS posteriors are calibrated against **RI₀₋₃** (`cren_weight=3`, crenarchaeol and its regioisomer weighted 3). Pass `cren_weight=4` to reproduce the RI₀₋₄ convention of Zhang et al. (2016), but the canonical posteriors were **not** calibrated against that convention — the weight also sets the scale the index is expressed on, so the two are not interchangeable inputs.
+
+    `cren_weight` was called `cren_rings` before 2026-08-21. The old keyword still works and warns.
 
 ---
 

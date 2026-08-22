@@ -33,11 +33,25 @@ class TestComputeScaledRI:
         b = compute_scaledRI(4.5, 1.0, 0.8, 0.5, 3.0, 0.2)
         assert float(a) == pytest.approx(float(b), abs=1e-12)
 
-    def test_cren_rings_changes_result(self):
-        """cren_rings=4 (RI₀₋₄) differs from the default cren_rings=3."""
+    def test_cren_weight_changes_result(self):
+        """cren_weight=4 (RI₀₋₄) differs from the default cren_weight=3."""
         v3 = compute_scaledRI(0.45, 0.10, 0.08, 0.05, 0.30, 0.02)
-        v4 = compute_scaledRI(0.45, 0.10, 0.08, 0.05, 0.30, 0.02, cren_rings=4)
+        v4 = compute_scaledRI(0.45, 0.10, 0.08, 0.05, 0.30, 0.02, cren_weight=4)
         assert float(v3) != pytest.approx(float(v4))
+
+    def test_cren_rings_alias_warns_and_matches(self):
+        """The old `cren_rings` keyword still works, and still warns.
+
+        Pinned because silently accepting it would be worse than rejecting it:
+        the value defines which posterior can read the resulting index, so a
+        caller passing 4 under either spelling has to see the same number.
+        """
+        with pytest.warns(DeprecationWarning, match="cren_weight"):
+            old = compute_scaledRI(0.45, 0.10, 0.08, 0.05, 0.30, 0.02,
+                                   cren_rings=4)
+        new = compute_scaledRI(0.45, 0.10, 0.08, 0.05, 0.30, 0.02,
+                               cren_weight=4)
+        assert float(old) == pytest.approx(float(new))
 
     def test_all_gdgt0_gives_zero(self):
         """A sample that is pure GDGT-0 has no rings → scaledRI = 0."""

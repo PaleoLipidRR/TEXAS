@@ -405,7 +405,8 @@ def compute_scaledRI(
     cren,
     cren_prime,
     *,
-    cren_rings: int = 3,
+    cren_weight: float = 3,
+    cren_rings: int = None,
 ) -> np.ndarray:
     """
     Compute Scaled Ring Index from six isoGDGT abundances.
@@ -413,7 +414,7 @@ def compute_scaledRI(
     Accepts raw LC/MS peak areas or fractional abundances — both give identical
     results because the formula divides by the total sum of all six GDGTs, so
     any common scale factor drops out.
-    Default ``cren_rings=3`` produces **scaledRI_cren3** (RI₀₋₃), the canonical
+    Default ``cren_weight=3`` produces **scaledRI_cren3** (RI₀₋₃), the canonical
     proxy used in TEXAS calibration posteriors.
 
     Parameters
@@ -422,10 +423,13 @@ def compute_scaledRI(
         isoGDGT abundances — GDGT-0, GDGT-1, GDGT-2, GDGT-3, crenarchaeol,
         crenarchaeol regioisomer (cren').  Raw LC/MS peak areas and fractional
         abundances give the same result (see above).
-    cren_rings : int
-        Ring count assigned to both crenarchaeol and its regioisomer.
+    cren_weight : float
+        Weight carried by both crenarchaeol and its regioisomer, which also
+        sets the normalisation (see Notes).
         ``3`` → scaledRI_cren3 / RI₀₋₃ (default, recommended).
         ``4`` → scaledRI / RI₀₋₄ (Zhang et al. 2016 convention).
+    cren_rings : int, optional
+        Deprecated alias for ``cren_weight``. Emits a ``DeprecationWarning``.
 
     Returns
     -------
@@ -436,9 +440,22 @@ def compute_scaledRI(
     -----
     The formula is::
 
-        RI      = (1·GDGT1 + 2·GDGT2 + 3·GDGT3 + cren_rings·cren + cren_rings·cren')
+        RI      = (1·GDGT1 + 2·GDGT2 + 3·GDGT3 + cren_weight·cren + cren_weight·cren')
                   / (GDGT0 + GDGT1 + GDGT2 + GDGT3 + cren + cren')
-        scaledRI = RI / cren_rings
+        scaledRI = RI / cren_weight
+
+    The parameter does two jobs at once: it is the coefficient on cren and
+    cren' in the numerator *and* the constant the whole index is divided by, so
+    it fixes the scale on which every sample is expressed, not just the two
+    crenarchaeol terms. That second job is what makes a value chosen here part
+    of the proxy's definition rather than a detail — a posterior calibrated at
+    3 cannot read an index built at 4.
+
+    It was called ``cren_rings`` until 2026-08-21, which was misleading twice
+    over:
+    it named only the first job, and it implied a count of cyclic moieties.
+    Neither 3 nor 4 is that count. They are calibration conventions, which is
+    why both are offered and why neither is "correct".
 
     Examples
     --------
@@ -452,6 +469,16 @@ def compute_scaledRI(
     ...     df["cren"],   df["cren_prime"],
     ... )
     """
+    if cren_rings is not None:
+        import warnings
+        warnings.warn(
+            "compute_scaledRI(cren_rings=...) is deprecated; use "
+            "'cren_weight' instead. The value is a weight and a normalisation "
+            "constant, not a count of rings.",
+            DeprecationWarning, stacklevel=2,
+        )
+        cren_weight = cren_rings
+
     g0 = np.asarray(gdgt0, dtype=float)
     g1 = np.asarray(gdgt1, dtype=float)
     g2 = np.asarray(gdgt2, dtype=float)
@@ -459,8 +486,8 @@ def compute_scaledRI(
     cr = np.asarray(cren, dtype=float)
     cp = np.asarray(cren_prime, dtype=float)
 
-    numerator = g1 + 2 * g2 + 3 * g3 + cren_rings * cr + cren_rings * cp
-    denominator = (g0 + g1 + g2 + g3 + cr + cp) * cren_rings
+    numerator = g1 + 2 * g2 + 3 * g3 + cren_weight * cr + cren_weight * cp
+    denominator = (g0 + g1 + g2 + g3 + cr + cp) * cren_weight
     return numerator / denominator
 
 

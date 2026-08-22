@@ -139,7 +139,7 @@ from TEXAS import compute_scaledRI, predict_proxy_from_T, predict_T_from_proxyOb
 # ── Compute Scaled Ring Index from raw GDGT abundances ────────────────────────
 df["scaledRI_cren3"] = compute_scaledRI(
     df["GDGT-0"], df["GDGT-1"], df["GDGT-2"], df["GDGT-3"],
-    df["cren"],   df["cren_prime"],          # cren_rings=3 by default (RI₀₋₃)
+    df["cren"],   df["cren_prime"],          # cren_weight=3 by default (RI₀₋₃)
 )
 
 # ── Forward prediction (temperature → proxy) ──────────────────────────────────

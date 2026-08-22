@@ -150,7 +150,7 @@ TEMPTYPE_CODES = {"SST": "sst", "sst": "sst", "thermoT": "thm",
 TEMPTYPE_DECODE = {"sst": "SST", "thm": "thermoT", "cul": "cultureT"}
 
 # Proxy codes read as: s=scaled, ri=Ring Index, NN=crenarchaeol ring count.
-# "cren3" means crenarchaeol counted as 3 rings; cren_rings=4 reproduces the
+# "cren3" means crenarchaeol weighted 3; cren_weight=4 reproduces the
 # RI(0-4) convention of Zhang et al. The bare "ri3" used before 2026-08-11 read
 # like "ring index variant 3", which is not what it means.
 #
