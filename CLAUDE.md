@@ -149,9 +149,30 @@ Optional predictor flags (`_gdgt23ratio`, `_no3_1.5`) are appended to `temptype`
 > > `boundedT` spelling still *parses* (`encode_compset` maps both to `B`), so
 > > cached posteriors with old `stan_model_name` attrs and legacy `.nc`/`.pkl`
 > > cache files resolve unchanged — nothing in `data/cache/` was renamed.
-> > Notebook-internal switch keys (`MODEL_VARIANT = "boundedT"`, `COMPSET`
-> > dict keys) deliberately keep the old spelling; they name runtime branches,
-> > not artifacts. Renamed Stan models recompile on next use.
+> > Renamed Stan models recompile on next use.
+> >
+> > **Notebook switch keys followed on 2026-08-21.** They were left alone
+> > initially on the grounds that they name runtime branches, not artifacts —
+> > which was wrong: `SI03_paleo_showcases_modelswitch` interpolates
+> > `MODEL_VARIANT` straight into two output names
+> > (`figSI_variant_comparison_{variant}_vs_{other}.pdf`,
+> > `data_list_extreme_example_{variant}.pkl`), so the branch key *is* an
+> > artifact name. `MODEL_VARIANT`, the `VARIANTS`/`COMPSET`/`MU` dict keys,
+> > and `parameterization=` in `SI_code01` now all read `t0shift`, and those
+> > two outputs were renamed on disk to match. Executed cell *outputs* still
+> > show the old spelling until each notebook is re-run; that is a record of
+> > what ran, not stale code.
+> >
+> > The same pass renamed `coretop_maps_boundedT_manifest.csv` →
+> > `coretop_maps_t0shift_manifest.csv` (`run_coretop_maps.py` already looked
+> > for the new name, so a resumed `--arm bnd` run had been finding no manifest
+> > at all) and deleted `coretop_maps_boundedT_sites.csv`, a byte-identical
+> > leftover of the arm-independent `coretop_maps_sites.csv` that `SI_code04`
+> > now reads. In `working-repo/TEXAS-revision`: `fit_boundedT_comparison.py` →
+> > `fit_t0shift_comparison.py`, `inspect_boundedT.ipynb` →
+> > `inspect_t0shift.ipynb`, and the local `..._eiv_boundedT.stan` →
+> > `..._eiv_t0shift.stan`. Only `boundedT-explainer.html` keeps the old token,
+> > because its prose does too.
 >
 > **Proxy codes** read as *s*caled + *ri* + crenarchaeol ring count:
 > `sri03` = `scaledRI_cren3` (crenarchaeol counted as 3 rings), `sri04` =

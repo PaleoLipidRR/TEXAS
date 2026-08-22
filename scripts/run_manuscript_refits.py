@@ -120,7 +120,10 @@ PETM_RENAME = {"South Dover Bridge": "SDB", "Wilson Lake": "WL"}
 PETM_WINDOW_SAMPLEDEPTH = {"SDB": (630, 670)}
 PETM_WINDOW_MBSF = {"ODP959": (802.7, 804.1)}
 # site -> (prior inside the PETM interval, prior outside it), degC
-PETM_PRIORS = {"ODP959": (38, 33), "SDB": (32, 28)}
+# One pair for both sites as of 2026-08-21: 35 degC inside (6x CO2 iPETM) and
+# 30 degC outside (3x CO2 iPETM), following SI03. The per-site split that used
+# to be here (ODP959 38/33, SDB 32/28) no longer matches the notebook.
+PETM_PRIORS = {"ODP959": (35, 30), "SDB": (35, 30)}
 PETM_TEMPTYPES = ["SST"]          # PETM analysis is SST-only in the manuscript
 
 

@@ -5,7 +5,7 @@ different locked environment, and that is where they are regenerated:
 
 | | |
 |---|---|
-| code | `working-repo/TEXAS-revision/scripts/fit_boundedT_comparison.py` |
+| code | `working-repo/TEXAS-revision/scripts/fit_t0shift_comparison.py` |
 | export | `working-repo/TEXAS-revision/scripts/export_cv_results.py` |
 | environment | that repo's `pyproject.toml` + `uv.lock` (pandas 3.x) — **not** `texas-env` |
 | run | 2026-08-21 09:29, `smoke: false`, 5 folds, n = 1513 (**gridded**), ~3 h of Stan |

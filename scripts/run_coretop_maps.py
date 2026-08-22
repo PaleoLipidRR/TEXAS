@@ -63,8 +63,11 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import run_manuscript_refits as R  # noqa: E402
 
-# The bnd filename is kept exactly as first written so the run already on disk
-# stays resumable across this rename.
+# Named for the arm, in the post-rename spelling. The comment here used to claim
+# the bnd manifest kept its original `_boundedT_` spelling for resumability --
+# but the value had already been changed to `_t0shift_` while the file on disk
+# had not, so a resumed --arm bnd run found no manifest and would have re-run
+# every batch. The file was renamed to match on 2026-08-21.
 MANIFEST_BY_ARM = {
     "bnd": "coretop_maps_t0shift_manifest.csv",
     "eiv": "coretop_maps_eiv_manifest.csv",

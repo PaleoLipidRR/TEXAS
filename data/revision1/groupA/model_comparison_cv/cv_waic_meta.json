@@ -5,7 +5,7 @@
   "finished": "2026-08-21 09:29:43",
   "models": [
     "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv",
-    "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT"
+    "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift"
   ],
   "R2_thermal": 0.7483293554414755,
   "elpd_diff_bounded_minus_parent": 24.3087020479393,

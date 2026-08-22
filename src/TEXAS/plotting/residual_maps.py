@@ -700,6 +700,8 @@ def plot_residual_maps(
     # Zoom panel annotation (RMSE only by default; R² omitted as it is often
     # negative for regional subsets evaluated with a global calibration)
     zoom_show_rmse: bool = True,
+    # Median of the mapped field in each zoom region (e.g. median ±1σ for an
+    # uncertainty map, where measured/predicted are None so RMSE is undefined)
     zoom_show_median_sigma: bool = False,
     # Metrics formatting
     rmse_fmt: str = ".3f",           # e.g. ".1f" for temperature residuals
@@ -987,6 +989,7 @@ def plot_residual_maps(
             )
         else:
             med_rmse = rs_rmse = None
+        _rmse_drawn = zoom_show_rmse and med_rmse is not None
 
         if residuals is not None:
             res_vals = residuals.values if hasattr(residuals, "values") else np.array(residuals)
@@ -1015,11 +1018,14 @@ def plot_residual_maps(
                 # bbox=dict(facecolor="white", alpha=0.85, edgecolor="none"),
             )
         if zoom_show_median_sigma and med_median_sigma is not None:
+            # Sit in the RMSE slot (bottom-left) whenever RMSE is not drawn,
+            # so a σ map annotates in the same place as a residual map.
+            _y, _va = (0.98, "top") if _rmse_drawn else (0.02, "bottom")
             ax_med.text(
-                0.02, 0.98,
-                f"Median σ {med_median_sigma:.1f}{rmse_unit}",
+                0.02, _y,
+                f"Median σ {med_median_sigma:{rmse_fmt}}{rmse_unit}",
                 transform=ax_med.transAxes, fontsize=10,
-                ha="left", va="top", zorder=12, clip_on=False,
+                ha="left", va=_va, zorder=12, clip_on=False,
                 color='white'
             )
         if annotations:
@@ -1042,11 +1048,13 @@ def plot_residual_maps(
                 # bbox=dict(facecolor="white", alpha=0.85, edgecolor="none"),
             )
         if zoom_show_median_sigma and rs_median_sigma is not None:
+            # Bare number, as with RMSE: the Mediterranean panel carries the label.
+            _y, _va = (0.98, "top") if _rmse_drawn else (0.02, "bottom")
             ax_rs.text(
-                0.02, 0.98,
-                f"Median σ {rs_median_sigma:.1f}{rmse_unit}",
+                0.02, _y,
+                f"{rs_median_sigma:{rmse_fmt}}{rmse_unit}",
                 transform=ax_rs.transAxes, fontsize=10,
-                ha="left", va="top", zorder=12, clip_on=False,
+                ha="left", va=_va, zorder=12, clip_on=False,
                 color='white'
             )
         if annotations and len(annotations) >= 2:

@@ -6,6 +6,6 @@
   "folds": 5,
   "models": [
     "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv",
-    "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT"
+    "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift"
   ]
 }
