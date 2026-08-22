@@ -8,10 +8,85 @@ bottom; tick the boxes as you go.
 
 ---
 
-## Latest session — 2026-08-17 (desktop): everything committed and pushed
+## Latest session — 2026-08-21 (desktop): rename finished, Fig. S15 landed
+
+Two sessions' worth of uncommitted work (2026-08-20 and 2026-08-21) is now in.
+Start here, not below.
+
+| commit | what |
+|---|---|
+| `732434a` | finish `boundedT` → `t0shift`; regenerate SI_code04's tables + figS18 |
+| `cefd058` | SI_code02's new **Fig. S15**, prediction skill by ocean basin |
+
+### What actually changed
+
+- **The rename reached the notebook switch keys.** They were left alone on
+  2026-08-15 as "runtime branches, not artifacts". Wrong for
+  `SI03_paleo_showcases_modelswitch`, which interpolates `MODEL_VARIANT` into
+  `figSI_variant_comparison_{variant}_vs_{other}.pdf` and
+  `data_list_extreme_example_{variant}.pkl` — the branch key *is* an artifact
+  name. Fixed, and the two outputs renamed on disk.
+- **A live bug fell out of it.** `run_coretop_maps.py` already looked for
+  `coretop_maps_t0shift_manifest.csv`, but only the `boundedT` spelling existed,
+  so a resumed `--arm bnd` run had been finding **no manifest at all**.
+- **SI_code04's three tables and figS18 are regenerated**, closing the "Not done
+  here" note in `121c294`. Numbers are unchanged to float noise; the row label is
+  not. `TEXAS (T$_0$-shift, G23+NO$_3$)` named a parameterization that the
+  neighbouring `TEXAS (univariate)` row does not share — that row is `GHPU`, not
+  `GHEB` — so the contrast the table draws is the *predictor set*, and it now
+  says so.
+- **Fig. S15** (`figures/manuscript/revision1/figS15_basin_skill_SST_scaledRI_cren3_t0shift.*`):
+  RMSE by ocean basin, all three TEXAS arms as separate rows. Headline is
+  *uniformity*, not a lower mean — across-basin SD 1.1–1.2 °C for TEXAS against
+  2.1–3.4 °C for the published forms, and no arm above 6.9 °C in any basin where
+  every published calibration fails somewhere by ~10 °C. G23+NO₃ improves four
+  basins, the two big ones being the **Red Sea (6.92 → 2.13 °C)** and the
+  **Arabian Sea (5.18 → 2.52 °C)** — found without any basin being named to the
+  model. **Number is provisional (S19 ± 3)**; stays in `revision1/` until
+  `_draft` catches up, same gate as figS17/S18.
+- `.gitignore` now exempts `figures/manuscript/revision1/*.csv`, the same
+  evidence carve-out `9c76045` gave `data/revision1`. Each figure writes a
+  companion table; that table is where a reviewer checks the caption's numbers.
+
+### ⚠️ figS17 is stale — this is the one thing left undone
+
+`figS17_spatial_cv_folds` still renders **n = 2043**, the *ungridded* CV, while
+`cv_sites.csv`, `cv_folds_map.csv` and `cv_waic_meta.json` are the **gridded
+n = 1513** run that `121c294` staged. The commit message predicted the figure
+would need refreshing and it never was — the 2026-08-21 re-run only reached the
+table cells.
+
+```bash
+# in SI_code04_model_comparison_cv.ipynb, re-run the figS17 cell and confirm:
+pdftotext -layout figures/manuscript/revision1/figS17_spatial_cv_folds.pdf - | head -3
+# must say n = 1513, and the five per-fold n's must sum to 1513, not 2043
+```
+
+Note the assertion guarding the region labels: it refuses to plot if a fold
+moves. With a different site set the folds *will* move, so expect it to fire —
+that is the guard working. Re-derive the labels from the new centroids rather
+than loosening it.
+
+### Housekeeping done
+
+- `figXX_basin_*` (9 files) removed from `figures/manuscript/revision1/` —
+  superseded drafts of Fig. S15 under its pre-rename name. The `_SST_` skill
+  pair was byte-identical to the committed `figS15_`; the `basin_RMSE` pair and
+  the `t_sf2tc_avg` variant are regenerable by re-running the cell with
+  `sel_temp_param` switched. Never tracked, so nothing left git.
+- **Still untracked, unresolved:**
+  `main-text/fig8_comparison_all_calibrations_proxy_residuals_maps_scaledRI_cren3_SST_and_scatterplots.{pdf,png}`
+  (2026-08-18). Today's full SI_code02 re-run did **not** rewrite them, so no
+  live cell emits that name — either a superseded orphan of figS12 or a cell
+  that no longer runs. Decide before submission; do not commit blind.
+
+---
+
+## Session — 2026-08-17 (desktop): everything committed and pushed
 
 **The 2026-08-16 work below is now committed and pushed in all three repos.**
-Nothing is left dirty. Start from this section, not the one under it.
+Nothing was left dirty as of that date. (Superseded as the entry point by the
+2026-08-21 section above.)
 
 | repo | branch | head | what landed |
 |---|---|---|---|
@@ -79,10 +154,13 @@ number could still shift by up to three.
 > and `SI_code2_TEXAS_analysis.ipynb` show kernel-metadata-only diffs
 > (3.12.8 → 3.13.5) whenever they are opened. Not ours; reverted, do not commit.
 
-> **Re-running SI_code04 dirties four files it did not change.** figS18 and two
-> `SI_table_*.csv` come out byte-different but content-identical (pdftotext diff
-> clean; CSVs differ in the last float digit from summation order). Revert them
-> rather than committing LFS churn.
+> ~~**Re-running SI_code04 dirties four files it did not change.**~~
+> **Superseded 2026-08-21 — do not revert these any more.** The advice was right
+> while the only difference was float noise. It stopped being right at `121c294`,
+> which changed the inverse-skill row label from `TEXAS (T$_0$-shift, G23+NO$_3$)`
+> to `TEXAS (T + G23 + NO$_3$)` in the notebook but did not regenerate the tables.
+> figS18 and the three `SI_table_*.csv` now carry a genuine label change; they
+> were regenerated and committed in `732434a`.
 
 ---
 
