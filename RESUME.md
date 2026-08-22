@@ -8,15 +8,18 @@ bottom; tick the boxes as you go.
 
 ---
 
-## Latest session — 2026-08-21 (desktop): rename finished, Fig. S15 landed
+## Latest session — 2026-08-21/22 (desktop): rename finished, Fig. S15 landed
 
-Two sessions' worth of uncommitted work (2026-08-20 and 2026-08-21) is now in.
-Start here, not below.
+Three sessions' worth of uncommitted work (2026-08-20, -21, -22) is now in.
+**Start here, not below.** Written as a handoff across a PC restart.
 
 | commit | what |
 |---|---|
 | `732434a` | finish `boundedT` → `t0shift`; regenerate SI_code04's tables + figS18 |
 | `cefd058` | SI_code02's new **Fig. S15**, prediction skill by ocean basin |
+| `d164355` | this file |
+| `b51f9c4` | SI03 extreme cases: σ back to 10, Co1010 μ stays 5 |
+| `c1318b7` | `compute_scaledRI`: `cren_rings` → `cren_weight` |
 
 ### What actually changed
 
@@ -47,6 +50,16 @@ Start here, not below.
 - `.gitignore` now exempts `figures/manuscript/revision1/*.csv`, the same
   evidence carve-out `9c76045` gave `data/revision1`. Each figure writes a
   companion table; that table is where a reviewer checks the caption's numbers.
+- **`compute_scaledRI(cren_rings=)` is now `cren_weight=`** (`c1318b7`). The old
+  name described half the parameter: the value is the coefficient on cren and
+  cren' in the numerator *and* the constant the index is divided by, so it fixes
+  the scale every sample is expressed on — which is why a posterior calibrated
+  at 3 cannot read an index built at 4. "Rings" also implied a count of cyclic
+  moieties, and neither 3 nor 4 is that count; they are conventions. The old
+  keyword still works and warns, with a test pinning that both spellings return
+  the same number. The `cren_rings` dict keys in `run_param_sensitivity.py` and
+  `SI_code2a` are each file's own config keys, never reach the function, and
+  were deliberately left alone.
 
 ### ⚠️ figS17 is stale — this is the one thing left undone
 
@@ -67,13 +80,70 @@ moves. With a different site set the folds *will* move, so expect it to fire —
 that is the guard working. Re-derive the labels from the new centroids rather
 than loosening it.
 
+### Picking this up after the restart
+
+- [ ] **Nothing is dirty and nothing is pushed.** Five commits sit on
+      `feat/revision1-validation-groupA` ahead of `origin`. A restart does not
+      touch them, but nothing else has a copy — `git push` first.
+- [ ] **The Jupyter kernels die with the restart.** SI_code02 had been run end
+      to end and SI03 was open; both notebooks are saved and committed, so
+      only the live namespaces are lost. Re-running is the only way back.
+- [ ] `docs/_build/` is gitignored and disappears if you clean; rebuild with the
+      three commands under "Reading the docs before they are published" below.
+
+### Two edits waiting on a re-run
+
+Neither is in effect yet — both change inputs that are cached:
+
+1. **σ = 10 for the extreme cases** (`b51f9c4`). `RUN_EXTREME` is `False` and
+   the cached reconstructions are all σ = 15:
+   `tx.GHE[AB].sst.sri03.G23-N10.inv.{ODP1259,Co1010}.ud.{nc,npz}` and both
+   `data_list_extreme_example_*.pkl`, built 2026-08-21 12:44–12:48. Set
+   `RUN_EXTREME = True`, re-run cell 77, then redraw **fig13** and
+   **figSI_variant_comparison** — both are committed from the σ = 15 pickles.
+2. **figS17 is still the ungridded n = 2043 CV** — see the warning above.
+
+> **The invT `.nc` attrs do not record `prior_mu_t` / `prior_sigma_t`, and the
+> filename does not vary with them either.** Nothing on disk distinguishes a
+> σ = 10 reconstruction from a σ = 15 one, which is why the two edits above have
+> to be tracked by hand. Both values already reach `build_fwd_data`'s output
+> dict, so surfacing them as attrs is a small change — worth doing before the
+> re-run, so the new files carry their own provenance.
+
+### Reading the docs before they are published
+
+<https://paleolipidrr.github.io/TEXAS/> is **not stale — it is `main`**.
+`.github/workflows/docs.yml` deploys on `push: branches: [main]` only, and this
+branch carries ~5,150 lines of docs `main` has never seen (rewritten
+`index.md`, `callmap.md`, `sampler_budget.md`, `preprint_additive_archive.md`).
+
+```bash
+python docs/_scripts/build_callmap.py
+python docs/_scripts/build_sampler_budget.py
+jupyter-book build docs/      # jupyter-book<2 is in pyproject's dev extras
+# open docs/_build/html/index.html
+```
+
+⚠️ The second command regenerates `docs/_static/sampler-budget.data.json` from
+**this machine's** posterior cache — on 2026-08-21 it added 16 entries the
+committed snapshot lacks (`sri05`, `GHEA`). CI publishes from the committed
+snapshot, so revert that file after building unless you mean to update the
+published table.
+
+To put the new docs live: merge to `main`. Do **not** reach for
+`workflow_dispatch` from this branch — it deploys whatever ref it runs from and
+`force_orphan: true` replaces `gh-pages` wholesale, so it would publish
+unmerged revision-1 docs to the public site.
+
 ### Housekeeping done
 
 - `figXX_basin_*` (9 files) removed from `figures/manuscript/revision1/` —
   superseded drafts of Fig. S15 under its pre-rename name. The `_SST_` skill
   pair was byte-identical to the committed `figS15_`; the `basin_RMSE` pair and
   the `t_sf2tc_avg` variant are regenerable by re-running the cell with
-  `sel_temp_param` switched. Never tracked, so nothing left git.
+  `sel_temp_param` switched. Never tracked, so nothing left git. Copies kept
+  at `~/.texas-superseded/20260821-figXX-basin/` (moved out of `/tmp` before
+  the 2026-08-22 restart).
 - **Still untracked, unresolved:**
   `main-text/fig8_comparison_all_calibrations_proxy_residuals_maps_scaledRI_cren3_SST_and_scatterplots.{pdf,png}`
   (2026-08-18). Today's full SI_code02 re-run did **not** rewrite them, so no
