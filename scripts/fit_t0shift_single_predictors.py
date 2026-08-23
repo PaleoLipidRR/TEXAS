@@ -5,8 +5,8 @@ The 2026-08-12 refit (``run_manuscript_refits.py``) fitted each arm with the
 FULL predictor set only -- G23 + NO3. The additive-EIV arm, fitted earlier and
 piecemeal, also has the two single-predictor cells:
 
-    GHEA  sst/thm  G23   G23-N10   N10          <- all six present
-    GHEB  sst/thm        G23-N10                <- only two
+    GHEA  sst/thm  G23   G23-N1p0   N1p0         <- all six present
+    GHEB  sst/thm        G23-N1p0                <- only two
 
 ``SI_code02_t0shift_TEXAS_analysis.ipynb`` draws a five-layer prior-comparison
 figure per temperature target (culmeso, univariate, +G23, +NO3, +G23+NO3), so
@@ -14,8 +14,8 @@ the two missing cells are two missing layers in each of those figures.
 
 This script fills exactly those four:
 
-    tx.GHEB.sst.sri03.G23    tx.GHEB.sst.sri03.N10
-    tx.GHEB.thm.sri03.G23    tx.GHEB.thm.sri03.N10
+    tx.GHEB.sst.sri03.G23    tx.GHEB.sst.sri03.N1p0
+    tx.GHEB.thm.sri03.G23    tx.GHEB.thm.sri03.N1p0
 
 Comparability is the whole point, so nothing here is re-derived:
 
@@ -30,7 +30,7 @@ Comparability is the whole point, so nothing here is re-derived:
   N_crtp = 1513 in all three GHEA cells).
 * ``culmeso`` and the univariate baseline are **loaded from the refit
   manifest**, never resampled, so the hyperpriors and R2_thermal feeding these
-  fits are byte-identical to the ones behind the G23-N10 runs.
+  fits are byte-identical to the ones behind the G23-N1p0 runs.
 
 Results go to their own manifest, NOT the refit's. The refit manifest is what
 ``run_manuscript_refits.py audit`` reads to certify one-budget comparability,
@@ -60,7 +60,7 @@ MANIFEST = R.RESULTS_DIR / "single_predictor_manifest.csv"
 # predictor cell -> (use G23, use NO3). The full cell is the refit's job.
 CELLS = [
     ("G23", True, False),
-    ("N10", False, True),
+    ("N1p0", False, True),
 ]
 
 

@@ -159,14 +159,13 @@ result = predict_T_from_proxyObs(
 )
 
 # ── Multivariate model with NO₃ and GDGT-2/3 correction ──────────────────────
-# Note: the Zenodo multivariate posteriors are the preprint's response-offset
-# formulation (beta on the response; see docs/preprint_additive_archive.md). The published T₀-shift posteriors ship
-# with the v1.0.0 record; to use T₀-shift now, refit locally with
-# gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift.
+# This is the default: omitting fwd_posterior selects the full multivariate
+# T₀-shift calibration, which ships inside the package — no download needed.
+# Pass temptype="thermoT" for the thermocline-integrated calibration.
 result = predict_T_from_proxyObs(
     proxyObs=df["scaledRI_cren3"].values,
     prior_mu_t=15.0, prior_sigma_t=10.0,
-    fwd_posterior="tx.GHEA.sst.sri03.G23-N10",
+    fwd_posterior="tx.GHEB.sst.sri03.G23-N1p0",   # the default; may be omitted
     temptype="SST",
     gdgt23ratio=df["gdgt23ratio"].values,
     no3=df["no3"].values,           # or: site_lat=, site_lon=, no3_dataset= for WOA23 lookup

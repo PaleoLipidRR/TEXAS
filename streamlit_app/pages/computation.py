@@ -33,15 +33,19 @@ def render_computation_tab(get_posterior_fn):
 
     # JSON input interface
     st.markdown("Provide keyword arguments as JSON. Example:")
+    # Mirrors get_posterior(data, stan_file, temptype, proxy_name, ...) --
+    # `stan_file` names the Stan program, and the calibration target and proxy
+    # are separate arguments rather than being folded into one string.
     example_json = (
         '{\n'
-        '  "model": "gen_logi_fixed_culmesocore_thermoT",\n'
-        '  "data": { "N": 123 },\n'
+        '  "stan_file": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift",\n'
+        '  "temptype": "SST",\n'
+        '  "proxy_name": "scaledRI_cren3",\n'
+        '  "data": { "N_crtp": 1513 },\n'
         '  "chains": 4,\n'
         '  "iter_sampling": 1000,\n'
         '  "iter_warmup": 500,\n'
-        '  "seed": 42,\n'
-        '  "save_results": true\n'
+        '  "seed": 42\n'
         '}'
     )
     st.code(example_json, language="json")

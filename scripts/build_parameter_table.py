@@ -36,11 +36,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 CASES = [
     ("culture + mesocosm (top layer, Eq 11)", "tx.GCDU.cul.sri03.p0"),
     ("coretop, thermal only (SST)", "tx.GHPU.sst.sri03.p0"),
-    ("coretop, additive EIV (SST)", "tx.GHEA.sst.sri03.G23-N10"),
-    ("coretop, bounded-T (SST)", "tx.GHEB.sst.sri03.G23-N10"),
+    ("coretop, additive EIV (SST)", "tx.GHEA.sst.sri03.G23-N1p0"),
+    ("coretop, bounded-T (SST)", "tx.GHEB.sst.sri03.G23-N1p0"),
     ("coretop, thermal only (thermoT)", "tx.GHPU.thm.sri03.p0"),
-    ("coretop, additive EIV (thermoT)", "tx.GHEA.thm.sri03.G23-N10"),
-    ("coretop, bounded-T (thermoT)", "tx.GHEB.thm.sri03.G23-N10"),
+    ("coretop, additive EIV (thermoT)", "tx.GHEA.thm.sri03.G23-N1p0"),
+    ("coretop, bounded-T (thermoT)", "tx.GHEB.thm.sri03.G23-N1p0"),
 ]
 
 # Ordered so the noise terms sit with the parameters, not in a diagnostics

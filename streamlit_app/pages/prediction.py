@@ -50,8 +50,10 @@ def render_prediction_tab(predict_fn):
     st.subheader("Inference settings")
     prior_mu_t = st.number_input("prior_mu_t", value=30.0)
     prior_sigma_t = st.number_input("prior_sigma_t", value=6.0, min_value=0.01)
-    fwd_posterior_name = st.text_input("Forward posterior name", 
-                                     value="gen_logi_fixed_culmesocore_thermoT")
+    # The bundled default: ships with the package, so it resolves with nothing
+    # downloaded. Any other case id or legacy long name is accepted here too.
+    fwd_posterior_name = st.text_input("Forward posterior name",
+                                     value="tx.GHEB.sst.sri03.G23-N1p0")
     no3_cutoff = st.number_input("no3_cutoff (µmol/L)", value=0.0, min_value=0.0)
     site_name = st.text_input("site_name", value="Uploaded CSV")
 

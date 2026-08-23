@@ -128,9 +128,9 @@ Optional predictor flags (`_gdgt23ratio`, `_no3_1.5`) are appended to `temptype`
 > with fixed dot-delimited positions, so tokens stay short:
 >
 > ```
-> tx.v026.GHEB.sst.sri03.G23-N10.001/                          <- the case
->     tx.v026.GHEB.sst.sri03.G23-N10.001.fwd.nc                <- forward posterior
->     tx.v026.GHEB.sst.sri03.G23-N10.001.inv.U1482.ud-050126.nc <- a reconstruction
+> tx.v026.GHEB.sst.sri03.G23-N1p0.001/                          <- the case
+>     tx.v026.GHEB.sst.sri03.G23-N1p0.001.fwd.nc                <- forward posterior
+>     tx.v026.GHEB.sst.sri03.G23-N1p0.001.inv.U1482.ud-050126.nc <- a reconstruction
 > ```
 >
 > Positions: project, version, **compset**, target temperature, proxy,
@@ -141,8 +141,52 @@ Optional predictor flags (`_gdgt23ratio`, `_no3_1.5`) are appended to `temptype`
 > β-on-μ, `B` bounded-by-construction — the manuscript's "T₀-shift parameterization",
 > γ-on-T₀; the letter names the property, the paper names the mechanism).
 > So `..._hier_crtp_multiv_priorApprox_eiv_t0shift` → `GHEB`. Predictors are
-> `G23` and `N` + cutoff×10 (`N10` = cutoff 1.0), or `p0` when there are none.
+> `G23` and `N` + the cutoff with `p` for the decimal point (`N1p0` = cutoff
+> 1.0), or `p0` when there are none.
 >
+> > **`N10` → `N1p0` rename (2026-08-23).** The nitrate token was `N` + cutoff×10,
+> > so a cutoff of 1.0 µmol/L was written `N10` — misreadable in the one way that
+> > matters, since **10 is also the documented value for switching the NO₃
+> > correction off**. A token could therefore be read as the opposite of what it
+> > means. `encode_predictors` now writes `N1p0` (`_fmt_cutoff`, `p` for the
+> > decimal point since `.` delimits the fields); `N10` still *parses*, so every
+> > case id in the cache, in notebooks and in `case_ids.json` keeps resolving.
+> > Nothing on disk was renamed except the two bundled posteriors.
+> >
+> > Files on disk were renamed on 2026-08-23 by
+> > `scripts/rename_cache_files.py` (dry-run by default, refuses on any
+> > destination clash, `--revert` to undo): 191 files across both caches,
+> > `.npz` siblings moved with their `.nc`. This is per-machine — `data/cache/**`
+> > is gitignored, so run it on the Windows box too.
+> >
+> > `resolve_posterior_path` now normalises the predictor token on **both**
+> > sides before comparing, and tries both spellings on the exact-path lookups,
+> > because an id and the file it names can sit on opposite sides of the rename
+> > in either direction — a notebook holding `N10` must find a posterior written
+> > today, and `N1p0` must find one in an old cache. Pinned by
+> > `tests/test_naming.py`.
+>
+> > **Posterior attrs normalised (2026-08-23).** `scripts/normalize_posterior_attrs.py`
+> > edits cached posteriors' attrs in place through netCDF4 (append mode, so the
+> > draws are never rewritten — verified byte-identical, +87 bytes of header):
+> > `stan_model_name` `..._eiv_boundedT` → `..._eiv_t0shift` on the 8 `GHEB`
+> > files, `case_id` refreshed to the current predictor token, and the duplicate
+> > **`model` and `version` attrs dropped**, and `generated_by` corrected from
+> > `culRI-Bayesian` (the project's name years before it was TEXAS) to
+> > `texas-psm`. `model` was arviz echoing CmdStan's own config key —
+> > `stan_model_name` + `"_model"`, identical in all 33 cached files — and it is
+> > the reason a rename could leave one name stale while the other was current.
+> > `version` was `extract_and_update_metadata()`'s own default argument,
+> > literally `"1.0.0"` everywhere, set by no caller and read by nothing.
+> > `sampler.py` and `metadata.py` no longer write either: **`stan_model_name`
+> > is the single model name and `texas_version` the single version**, and
+> > `texas_version` is *not* backfilled onto older files, because which package
+> > produced them is not recoverable and absent is the honest answer. The
+> > bundled pair additionally carries `bundled_with`, which is a different fact
+> > — the version that built the bundle, not the one that sampled the draws. `filename` is deliberately left as written (it is history, not
+> > identity, and legacy stamped lookups match on it), and `superseded/` is not
+> > touched at all. Dry-run by default.
+> >
 > > **`boundedT` → `t0shift` rename (2026-08-15).** The variant token in Stan
 > > file names, figure names, notebook names, and scripts is now `t0shift`,
 > > matching the revised manuscript's "T₀-shift parameterization". The legacy

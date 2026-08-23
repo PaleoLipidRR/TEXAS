@@ -50,8 +50,8 @@ fits — compset `GHEA` (`A` = additive):
 
 | Case id | Legacy (archived) file name |
 |---|---|
-| `tx.GHEA.sst.sri03.G23-N10` | `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc` |
-| `tx.GHEA.thm.sri03.G23-N10` | `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3.nc` |
+| `tx.GHEA.sst.sri03.G23-N1p0` | `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc` |
+| `tx.GHEA.thm.sri03.G23-N1p0` | `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3.nc` |
 
 They carry `beta_G23_crtp` / `beta_NO3_crtp` variables. The revised
 calibration (`GHEB`, T₀-shift, `gamma_*` variables in °C per predictor unit)

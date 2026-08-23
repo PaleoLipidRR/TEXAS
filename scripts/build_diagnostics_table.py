@@ -35,10 +35,10 @@ MANUSCRIPT_CASES = [
     ("culture + mesocosm (top layer)", "tx.GCDU.cul.sri03.p0"),
     ("coretop thermal-only, SST", "tx.GHPU.sst.sri03.p0"),
     ("coretop thermal-only, thermoT", "tx.GHPU.thm.sri03.p0"),
-    ("coretop additive EIV, SST", "tx.GHEA.sst.sri03.G23-N10"),
-    ("coretop additive EIV, thermoT", "tx.GHEA.thm.sri03.G23-N10"),
-    ("coretop bounded-T, SST", "tx.GHEB.sst.sri03.G23-N10"),
-    ("coretop bounded-T, thermoT", "tx.GHEB.thm.sri03.G23-N10"),
+    ("coretop additive EIV, SST", "tx.GHEA.sst.sri03.G23-N1p0"),
+    ("coretop additive EIV, thermoT", "tx.GHEA.thm.sri03.G23-N1p0"),
+    ("coretop bounded-T, SST", "tx.GHEB.sst.sri03.G23-N1p0"),
+    ("coretop bounded-T, thermoT", "tx.GHEB.thm.sri03.G23-N1p0"),
 ]
 
 RHAT_GATE, ESS_GATE = 1.01, 400.0

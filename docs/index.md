@@ -106,25 +106,37 @@ df_screened = df[df['TEXRI_cren3_mahalDist_low23ratio_outliers_manual'] == False
 
 ---
 
-### Step 2 — Download a forward posterior
+### Step 2 — Choose a calibration posterior
 
-Pre-computed posteriors are hosted on [Zenodo](https://doi.org/10.5281/zenodo.20032542). Download only what you need:
+**You can skip this step.** The full multivariate T₀-shift calibration ships
+inside the package, and is used whenever you do not name another one, so a
+reconstruction needs no download and no network access:
+
+```python
+from TEXAS import predict_T_from_proxyObs
+
+result = predict_T_from_proxyObs(          # fwd_posterior omitted →
+    proxyObs=df["scaledRI_cren3"].values,  # tx.GHEB.sst.sri03.G23-N1p0
+    prior_mu_t=15.0, prior_sigma_t=10.0,
+    gdgt23ratio=df["gdgt23ratio"].values,
+    no3=df["no3"].values,
+)
+```
+
+Pass `temptype="thermoT"` to get the thermocline-integrated calibration
+instead; it ships too. Any other posterior is fetched once from
+[Zenodo](https://doi.org/10.5281/zenodo.20032542) and cached:
 
 ```python
 import TEXAS
 
-# Univariate SST — recommended starting point (~0.3 MB)
+# Univariate SST — the temperature-only calibration (<1 MB)
 TEXAS.download_posteriors(["tx.GHPU.sst.sri03.p0"])
 
-# Multivariate EIV (GDGT-2/3 + NO₃ corrections) — ~78 MB each
-TEXAS.download_posteriors([
-    "tx.GHEA.sst.sri03.G23-N10",
-])
-
-# Or download everything at once (~158 MB total)
+# Everything currently in the Zenodo record (~158 MB)
 TEXAS.download_all()
 
-# Check what is already cached
+# What you already have — bundled and downloaded alike
 TEXAS.list_posteriors()
 ```
 
@@ -132,11 +144,19 @@ Available forward posteriors:
 
 | Name (no `.nc`) | Model | Temperature | Size |
 |---|---|---|---|
+| `tx.GHEB.sst.sri03.G23-N1p0` | **T₀-shift multivariate coretop (default)** | SST | bundled |
+| `tx.GHEB.thm.sri03.G23-N1p0` | **T₀-shift multivariate coretop (default)** | Thermo T | bundled |
 | `tx.GCDU.cul.sri03.p0` | Culture + mesocosm | Culture T | <1 MB |
 | `tx.GHPU.sst.sri03.p0` | Univariate coretop | SST | <1 MB |
 | `tx.GHPU.thm.sri03.p0` | Univariate coretop | Thermo T | <1 MB |
-| `tx.GHEA.sst.sri03.G23-N10` | EIV multivariate coretop | SST | ~78 MB |
-| `tx.GHEA.thm.sri03.G23-N10` | EIV multivariate coretop | Thermo T | ~78 MB |
+| `tx.GHEA.sst.sri03.G23-N1p0` | Response-offset multivariate coretop (preprint) | SST | ~78 MB |
+| `tx.GHEA.thm.sri03.G23-N1p0` | Response-offset multivariate coretop (preprint) | Thermo T | ~78 MB |
+
+The bundled pair is the same posterior as the archived one with the
+error-in-variables model's per-site latent variables removed — everything the
+forward and inverse models read is present and unmodified, which is what takes
+the file from ~80 MB to 0.37 MB. The complete versions, latents included, are
+archived on Zenodo with the release record that the paper cites.
 
 The Zenodo record's flat files still carry the pre-revision legacy names
 (e.g. `gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc`).
@@ -149,10 +169,11 @@ Posteriors use CESM-style **case ids**: fixed dot-delimited positions instead
 of ever-growing concatenated descriptions.
 
 ```
-tx . GHEB . sst . sri03 . G23-N10 . fwd.nc
+tx . GHEB . sst . sri03 . G23-N1p0 . fwd.nc
 │    │      │     │       │         └ role: fwd = forward calibration;
 │    │      │     │       │           inv.<site>.<tags> = a reconstruction
-│    │      │     │       └ predictors: G23, N10 (NO₃ with cutoff 1.0), p0 = none
+│    │      │     │       └ predictors: G23, N1p0 (NO₃, cutoff 1.0 — `p`
+│    │      │     │         is the decimal point), p0 = none
 │    │      │     └ proxy: sri03 = scaledRI_cren3, sri = scaledRI, tex = TEX86
 │    │      └ target temperature: sst, thm (Thermo-T), cul (culture T)
 │    └ compset — the model recipe, one letter per axis (see table)
@@ -168,25 +189,25 @@ The four **compset** letters encode, in order:
 | Estimator | `P` priorApprox · `E` priorApprox + errors-in-variables · `D` full hierarchical |
 | Predictor structure | `U` univariate · `A` additive (β on the response, unbounded) · `B` bounded-by-construction (the **T₀-shift** structure: γ on T₀) |
 
-So `tx.GHEB.sst.sri03.G23-N10` is the published T₀-shift multivariate SST
+So `tx.GHEB.sst.sri03.G23-N1p0` is the published T₀-shift multivariate SST
 calibration, and `tx.GHPU.sst.sri03.p0` the univariate SST one. A date/run
 token may be appended to distinguish refits of the same configuration. Every
 function that takes a posterior name resolves case ids and legacy long names
 alike.
 
-```{warning}
-**The two multivariate posteriors above are the response-offset formulation, not
-the T₀-shift one** — they are the preprint's calibration (see the
-[preprint archive page](preprint_additive_archive.md)). They carry
-`beta_G23_crtp` / `beta_NO3_crtp`, in Scaled-RI
-units per predictor unit. The current calibration applies the predictors inside
-the logistic instead, as a shift of T₀ in °C
-(`gamma_G23_crtp` / `gamma_NO3_crtp` — see
-[Running forward calibration from scratch](#running-forward-calibration-from-scratch)
-below). The T₀-shift
-posteriors are published with the v1.0.0 Zenodo record; until then, refit locally
-with `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift` if you need them.
-The univariate and culture/mesocosm posteriors listed above are unaffected —
+```{note}
+**Two formulations of the non-thermal terms exist, and they are not
+interchangeable.** The current calibration — the bundled `GHEB` pair — applies
+G₂/₃ and NO₃ *inside* the logistic, as a shift of the curve location T₀ in °C
+(`gamma_G23_crtp` / `gamma_NO3_crtp`), so the predicted Scaled RI stays inside
+its bounds for any predictor value. The `GHEA` posteriors on Zenodo are the
+preprint's response-offset formulation (`beta_G23_crtp` / `beta_NO3_crtp`, in
+Scaled-RI units per predictor unit); they are kept for reproducing the preprint
+and are documented on the [preprint archive page](preprint_additive_archive.md).
+
+You do not have to choose between them by hand: TEXAS reads which formulation a
+posterior uses from the coefficients it carries and selects the matching inverse
+model. The univariate and culture/mesocosm posteriors are unaffected either way —
 they have no non-thermal predictors.
 ```
 
@@ -213,6 +234,16 @@ result["p95"]   # 95th percentile
 
 ### Step 4 — Inverse reconstruction (proxy → temperature)
 
+```{note}
+`temptype=` is optional here. It does not change the reconstruction, which
+follows whichever calibration you supply — the target is read from that
+posterior's own attributes, and a `temptype` that contradicts it warns. It
+matters in exactly one case: when `fwd_posterior` is omitted, it picks which
+bundled calibration is used, `"SST"` (the default) or `"thermoT"`. On the
+forward side, `get_posterior(..., temptype=...)` is a real argument — that is
+where the target is decided.
+```
+
 === "Univariate"
 
     ```python
@@ -222,8 +253,7 @@ result["p95"]   # 95th percentile
         proxyObs=df["scaledRI_cren3"].values,
         prior_mu_t=15.0,        # prior mean temperature (°C) — geological estimate
         prior_sigma_t=10.0,     # prior uncertainty (°C) — use wide prior if unsure
-        fwd_posterior="tx.GHPU.sst.sri03.p0",
-        temptype="SST",
+        fwd_posterior="tx.GHPU.sst.sri03.p0",   # temperature-only calibration
     )
     result["p50"]   # median SST (°C), one value per sample
     result["p5"]    # 5th percentile
@@ -237,8 +267,7 @@ result["p95"]   # 95th percentile
         proxyObs=df["scaledRI_cren3"].values,
         prior_mu_t=15.0,
         prior_sigma_t=10.0,
-        fwd_posterior="tx.GHEA.sst.sri03.G23-N10",
-        temptype="SST",
+        # fwd_posterior omitted → the bundled tx.GHEB.sst.sri03.G23-N1p0
         gdgt23ratio=df["gdgt23ratio"].values,
         no3=df["no3"].values,   # µmol/L; scalar or per-sample array
     )
@@ -254,8 +283,6 @@ result["p95"]   # 95th percentile
     result = predict_T_from_proxyObs(
         proxyObs=df["scaledRI_cren3"].values,
         prior_mu_t=15.0, prior_sigma_t=10.0,
-        fwd_posterior="tx.GHEA.sst.sri03.G23-N10",
-        temptype="SST",
         gdgt23ratio=df["gdgt23ratio"].values,
         site_lat=15.3, site_lon=-23.7,   # modern drill-site coordinates
         no3_dataset=ocean_ds,
@@ -279,7 +306,6 @@ result["p95"]   # 95th percentile
         proxyObs=df["scaledRI_cren3"].values,
         prior_mu_t=15.0, prior_sigma_t=10.0,
         fwd_posterior=ds,    # xr.Dataset — skips all file I/O
-        temptype="SST",
     )
     ```
 

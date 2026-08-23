@@ -10,8 +10,8 @@ produces them from scratch, for either arm (--arm bnd | eiv).
 Scope: 2 predictor sets x 2 temperature targets = 4 configurations, each over
 the 1513 coretop sites that have every multivariate column.
 
-    bnd   G23 / G23-N10   tx.GHEB.{sst,thm}.sri03.*
-    eiv   G23 / G23-N10   tx.GHEA.{sst,thm}.sri03.*
+    bnd   G23 / G23-N1p0   tx.GHEB.{sst,thm}.sri03.*
+    eiv   G23 / G23-N1p0   tx.GHEA.{sst,thm}.sri03.*
 
 The thermal-only (univariate) layer is deliberately NOT re-run: it has no
 predictors, so it is identical in both arms -- bounded-T only changes where the
@@ -80,7 +80,7 @@ PRIOR_SIGMA_T = 10.0
 # predictor set -> (use G23, use NO3)
 CONFIGS = [
     ("G23", True, False),
-    ("G23-N10", True, True),
+    ("G23-N1p0", True, True),
 ]
 
 

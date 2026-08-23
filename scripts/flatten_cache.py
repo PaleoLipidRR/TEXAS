@@ -2,8 +2,8 @@
 """
 Flatten both posterior caches onto the canonical short names.
 
-    data/cache/TEXAS_posterior_cache/tx.GHEA.sst.sri03.G23-N10.fwd.nc
-    data/cache/TEXAS_invT_posterior_cache/tx.GHEA.sst.sri03.G23-N10.inv.U1482.ud-no3_modern.nc
+    data/cache/TEXAS_posterior_cache/tx.GHEA.sst.sri03.G23-N1p0.fwd.nc
+    data/cache/TEXAS_invT_posterior_cache/tx.GHEA.sst.sri03.G23-N1p0.inv.U1482.ud-no3_modern.nc
 
 Moves files out of case directories and drops the `v026` version and the
 `.001` member from the case prefix. Both left the naming scheme on 2026-08-12:
