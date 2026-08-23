@@ -164,6 +164,13 @@ class StanSampler:
         ds = self._to_xarray(fit)
         ds = extract_and_update_metadata(ds, data, stan_file, site_name, version)
         ds = _attach_sampler_config(ds, fit)
+        # arviz echoes CmdStan's own config key `model`, which is just the
+        # executable name with "_model" appended -- the same string as
+        # stan_model_name, in a second place. One model name per posterior:
+        # anything that renames a Stan program then has one attr to keep in
+        # step, not two that can disagree. stan_model_name is the one TEXAS
+        # writes and everything reads; stan_version stays, being real provenance.
+        ds.attrs.pop("model", None)
         ds.attrs["run_duration (sec)"] = round(duration, 2)
         if temptype:
             ds.attrs["temptype"] = temptype

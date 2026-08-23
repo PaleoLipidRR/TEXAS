@@ -12,6 +12,12 @@
 *.csv filter=lfs diff=lfs merge=lfs -text
 *.xlsx filter=lfs diff=lfs merge=lfs -text
 data/cache/** filter=lfs diff=lfs merge=lfs -text
+# Bundled calibration posteriors ship inside the wheel, so every clone and
+# sdist must contain the real NetCDF -- an LFS pointer would be installed as a
+# broken file by anyone who has not run `git lfs pull`. They are 0.37 MB each,
+# so keeping them in git proper costs little and removes that failure mode.
+src/TEXAS/bundled_posteriors/*.nc -filter -diff -merge -text
+
 *.sh text eol=lf
 *.bash text eol=lf
 *.pdf !text !filter !merge !diff

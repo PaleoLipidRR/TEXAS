@@ -18,7 +18,7 @@ stream, field, time range.
 
 TEXAS uses the same idea.  The **case** is the calibration identity::
 
-    tx . v026 . GHEB . sst . ri3 . G23-N10
+    tx . v026 . GHEB . sst . ri3 . G23-N1p0
     |     |      |      |     |      |
     |     |      |      |     |      +-- active predictors
     |     |      |      |     +--------- proxy
@@ -30,10 +30,10 @@ TEXAS uses the same idea.  The **case** is the calibration identity::
 and the case is a *directory*, so everything derived from one calibration
 lives together and individual filenames stay short::
 
-    tx.v026.GHEB.sst.ri3.G23-N10/
-        tx.v026.GHEB.sst.ri3.G23-N10.fwd.nc                  <- forward posterior
-        tx.v026.GHEB.sst.ri3.G23-N10.inv.U1482.ud-mod-001.nc <- a reconstruction
-        tx.v026.GHEB.sst.ri3.G23-N10.inv.MD98-2152.ud-n01-001.nc
+    tx.v026.GHEB.sst.ri3.G23-N1p0/
+        tx.v026.GHEB.sst.ri3.G23-N1p0.fwd.nc                  <- forward posterior
+        tx.v026.GHEB.sst.ri3.G23-N1p0.inv.U1482.ud-mod-001.nc <- a reconstruction
+        tx.v026.GHEB.sst.ri3.G23-N1p0.inv.MD98-2152.ud-n01-001.nc
 
 Each leaf repeats the case, the way CESM names data output for its case
 (``b.e12.B1850C5CN.f19_g16.iPETM09x.01.pop.h.1901-2000.climo.nc``) rather than
@@ -98,6 +98,7 @@ __all__ = [
     "resolve_posterior_path",
     "is_case_id",
     "encode_predictors",
+    "swap_no3_token",
     "decode_predictors",
     "DEFAULT_RUN",
 ]
@@ -197,7 +198,7 @@ DEFAULT_RUN = "001"
 # the wrong signal in both directions -- a docs-only release orphaned every
 # case id on disk, while a prior change without a release let two incompatible
 # posteriors share one identity. The run/member counter went with it: `.001`
-# beside `N10` reads as two numbers when only one is, and one canonical path
+# beside `N1p0` reads as two numbers when only one is, and one canonical path
 # per configuration is what a cache should have. A re-run overwrites; callers
 # skip when the file is already there.
 #
@@ -309,18 +310,42 @@ def describe_compset(code: str) -> str:
 # Predictor token
 # ---------------------------------------------------------------------------
 
+def _fmt_cutoff(cutoff: float) -> str:
+    """
+    The nitrate cutoff with ``p`` standing in for the decimal point.
+
+    ``p`` rather than ``.`` because the dot delimits the case name's fields,
+    and always at least one decimal place so the token cannot be read as a
+    bare concentration: ``N1p0``, not ``N1``.
+
+    >>> _fmt_cutoff(1.0), _fmt_cutoff(1.5), _fmt_cutoff(0.25)
+    ('1p0', '1p5', '0p25')
+    """
+    text = f"{float(cutoff):.3f}".rstrip("0")
+    if text.endswith("."):
+        text += "0"
+    return text.replace(".", "p")
+
+
 def encode_predictors(use_gdgt23ratio: bool = False,
                       use_no3: bool = False,
                       no3_cutoff: Optional[float] = None) -> str:
     """
-    ``G23`` for the GDGT-2/3 ratio, ``N`` + cutoff x10 for nitrate.
+    ``G23`` for the GDGT-2/3 ratio, ``N`` + the cutoff for nitrate.
 
     >>> encode_predictors(True, True, 1.0)
-    'G23-N10'
+    'G23-N1p0'
     >>> encode_predictors(True, False)
     'G23'
     >>> encode_predictors()
     'none'
+
+    The nitrate token was ``N`` + cutoff x10 until 2026-08-23, so a cutoff of
+    1.0 was written ``N10``. That is misreadable in the one way that matters:
+    10 is also the value the documentation gives for *disabling* the nitrate
+    correction, so the token could be read as the opposite of what it means.
+    It is written ``N1p0`` now, and ``N10`` still parses (see
+    :func:`decode_predictors`), so every case id already on disk resolves.
     """
     parts = []
     if use_gdgt23ratio:
@@ -328,8 +353,57 @@ def encode_predictors(use_gdgt23ratio: bool = False,
     if use_no3:
         if no3_cutoff is None:
             raise ValueError("no3_cutoff is required when use_no3 is set.")
-        parts.append(f"N{int(round(float(no3_cutoff) * 10)):02d}")
+        parts.append(f"N{_fmt_cutoff(no3_cutoff)}")
     return "-".join(parts) if parts else NO_PREDICTORS
+
+
+def swap_no3_token(name: str) -> Optional[str]:
+    """
+    The same name with its nitrate token in the other spelling, or None.
+
+    Works in both directions -- ``...G23-N10.inv.U1482.ud`` <-> ``...G23-N1p0.inv.U1482.ud``
+    -- and on any string, not just a parseable case id, because the names that
+    most need this are the inverse leaves: they carry a site and scenario after
+    the case, so they never parse as a case id, and they are opened by literal
+    path from notebooks.
+
+    >>> swap_no3_token("tx.GHEB.sst.sri03.G23-N10.fwd.nc")
+    'tx.GHEB.sst.sri03.G23-N1p0.fwd.nc'
+    >>> swap_no3_token("tx.GHEB.sst.sri03.G23-N1p0.fwd.nc")
+    'tx.GHEB.sst.sri03.G23-N10.fwd.nc'
+    >>> swap_no3_token("tx.GHPU.sst.sri03.p0.fwd.nc") is None
+    True
+    """
+    text = str(name)
+
+    new = re.sub(r"(?<=[.\-])N(\d)(\d)(?=[.\-]|$)", r"N\1p\2", text)
+    if new != text:
+        return new
+
+    def _to_legacy(m: "re.Match") -> str:
+        cutoff = float(f"{m.group(1)}.{m.group(2)}")
+        return f"N{int(round(cutoff * 10)):02d}"
+
+    old = re.sub(r"(?<=[.\-])N(\d+)p(\d+)(?=[.\-]|$)", _to_legacy, text)
+    return old if old != text else None
+
+
+def _normalize_case(case: "CaseName") -> str:
+    """
+    A case id with its predictor token rewritten in the current spelling.
+
+    :func:`parse_case` is deliberately lossless -- it keeps whatever token the
+    caller passed, which is what lets a legacy id resolve to a legacy file by
+    exact path. That losslessness is wrong for *comparison*: a request spelled
+    ``G23-N10`` and a file whose attrs encode to ``G23-N1p0`` describe the same
+    calibration and must match. Normalising both sides through the codec is the
+    only comparison that survives a token rename in either direction.
+    """
+    try:
+        token = encode_predictors(**decode_predictors(case.predictors))
+    except Exception:
+        token = case.predictors
+    return str(replace(case, predictors=token))
 
 
 def decode_predictors(token: str) -> Dict[str, Any]:
@@ -340,7 +414,13 @@ def decode_predictors(token: str) -> Dict[str, Any]:
     for part in str(token).split("-"):
         if part == "G23":
             out["use_gdgt23ratio"] = True
+        elif re.fullmatch(r"N\d+p\d+", part):
+            out["use_no3"] = True
+            out["no3_cutoff"] = float(part[1:].replace("p", "."))
         elif re.fullmatch(r"N\d{2}", part):
+            # Legacy: N + cutoff x10, written until 2026-08-23. Kept on read so
+            # that case ids in existing caches, notebooks and case_ids.json
+            # keep resolving; never written.
             out["use_no3"] = True
             out["no3_cutoff"] = int(part[1:]) / 10.0
         elif part:
@@ -355,7 +435,7 @@ def decode_predictors(token: str) -> Dict[str, Any]:
 @dataclass(frozen=True)
 class CaseName:
     """
-    One calibration identity: ``tx.v026.GHEB.sst.ri3.G23-N10.001``.
+    One calibration identity: ``tx.v026.GHEB.sst.ri3.G23-N1p0.001``.
 
     The trailing *run* position is CESM's ensemble-member field.  It keeps two
     refits of the same configuration -- a date-stamped rerun, a seed sweep, a
@@ -378,7 +458,7 @@ class CaseName:
 
     def __str__(self) -> str:
         """
-        The canonical id: ``tx.GHEB.sst.sri03.G23-N10``.
+        The canonical id: ``tx.GHEB.sst.sri03.G23-N1p0``.
 
         Version and run are carried when parsed from an older id, so a
         round-trip is lossless, but neither is synthesised. A CaseName built
@@ -499,7 +579,7 @@ def case_from_attrs(attrs: Dict[str, Any], *, version: Optional[str] = None,
 
 
 def parse_case(text: str) -> CaseName:
-    """Parse ``tx.v026.GHEB.sst.ri3.G23-N10.001`` back into a :class:`CaseName`.
+    """Parse ``tx.v026.GHEB.sst.ri3.G23-N1p0.001`` back into a :class:`CaseName`.
 
     The run position may be omitted, in which case it defaults to ``001``.
     """
@@ -511,7 +591,7 @@ def parse_case(text: str) -> CaseName:
         raise ValueError(
             f"{text!r} is not a case id. Expected "
             f"<project>.<version>.<COMPSET>.<temptype>.<proxy>.<predictors>[.<run>], "
-            f"e.g. 'tx.v026.GHEB.sst.ri3.G23-N10.001'."
+            f"e.g. 'tx.v026.GHEB.sst.ri3.G23-N1p0.001'."
         )
     g = m.groupdict()
     return CaseName(compset=g["compset"], temptype=g["temptype"], proxy=g["proxy"],
@@ -545,8 +625,8 @@ def fwd_relpath(case: Union[CaseName, str]) -> Path:
     named ``fwd.nc`` cannot coexist. Repeating the case costs nothing -- the
     full path is the same length either way, only the separator moves.
 
-    >>> str(fwd_relpath("tx.GHEB.sst.sri03.G23-N10"))
-    'tx.GHEB.sst.sri03.G23-N10.fwd.nc'
+    >>> str(fwd_relpath("tx.GHEB.sst.sri03.G23-N1p0"))
+    'tx.GHEB.sst.sri03.G23-N1p0.fwd.nc'
     """
     c = str(case)
     # Flat. The case directory was dropped on 2026-08-12: the leaf already
@@ -589,12 +669,12 @@ def inv_relpath(
     they join on hyphens, so a sequence and its pre-joined equivalent give the
     same leaf.
 
-    >>> p = inv_relpath("tx.GHEB.sst.sri03.G23-N10", "U1482", scenario="mod")
+    >>> p = inv_relpath("tx.GHEB.sst.sri03.G23-N1p0", "U1482", scenario="mod")
     >>> p.name
-    'tx.GHEB.sst.sri03.G23-N10.inv.U1482.ud-mod.nc'
-    >>> inv_relpath("tx.GHEB.sst.sri03.G23-N10", "U1482",
+    'tx.GHEB.sst.sri03.G23-N1p0.inv.U1482.ud-mod.nc'
+    >>> inv_relpath("tx.GHEB.sst.sri03.G23-N1p0", "U1482",
     ...             scenario=["no3", "modern"], run=2).name
-    'tx.GHEB.sst.sri03.G23-N10.inv.U1482.ud-no3-modern-002.nc'
+    'tx.GHEB.sst.sri03.G23-N1p0.inv.U1482.ud-no3-modern-002.nc'
     """
     c = CONSTRAINT_CODES.get(constraint)
     if c is None:
@@ -605,7 +685,7 @@ def inv_relpath(
 
     # No run by default: one canonical path per (case, site, scenario). A run
     # can still be pinned explicitly, but nothing synthesises one -- ".001"
-    # beside "N10" reads as two numbers when only one is.
+    # beside "N1p0" reads as two numbers when only one is.
     parts = [f"{c}{k}"]
     if scenario:
         tags = [scenario] if isinstance(scenario, str) else scenario
@@ -664,8 +744,16 @@ def resolve_posterior_path(name: str, indir: Union[str, Path]) -> Optional[Path]
 
     if is_case_id(name):
         case = parse_case(name)
-        bare = str(replace(case, version="", run=""))
-        for candidate in (f"{name}.fwd.nc", f"{bare}.fwd.nc"):
+        bare = replace(case, version="", run="")
+        # Both spellings of the predictor token, because the request and the
+        # file may have been written on opposite sides of a token rename: an
+        # id held in a notebook can be older than the file it names, or newer.
+        for candidate in dict.fromkeys((
+            f"{name}.fwd.nc",
+            f"{str(bare)}.fwd.nc",
+            f"{_normalize_case(case)}.fwd.nc",
+            f"{_normalize_case(bare)}.fwd.nc",
+        )):
             hit = indir / candidate
             if hit.exists():
                 return hit
@@ -681,7 +769,7 @@ def resolve_posterior_path(name: str, indir: Union[str, Path]) -> Optional[Path]
     import xarray as xr
 
     if is_case_id(name):
-        want = str(parse_case(name))
+        want = _normalize_case(parse_case(name))
         for f in sorted(indir.glob("*.nc")):
             try:
                 with xr.open_dataset(f) as ds:
@@ -694,7 +782,8 @@ def resolve_posterior_path(name: str, indir: Union[str, Path]) -> Optional[Path]
                 got = case_from_attrs(attrs)
             except Exception:
                 continue
-            if str(got) == want or str(replace(got, run=parse_case(name).run)) == want:
+            if (_normalize_case(got) == want
+                    or _normalize_case(replace(got, run=parse_case(name).run)) == want):
                 return f
         return None
 

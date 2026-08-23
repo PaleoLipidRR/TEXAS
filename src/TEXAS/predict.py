@@ -27,7 +27,7 @@ Example
 ...     proxyObs=my_ri_array,
 ...     prior_mu_t=15.0,
 ...     prior_sigma_t=10.0,
-...     fwd_posterior_name="gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3",
+...     fwd_posterior="tx.GHPU.thm.sri03.p0",
 ...     temptype="thermoT",
 ... )
 >>> result["p50"]   # median temperature reconstruction
@@ -46,6 +46,7 @@ from .stan.io import load_posterior
 from .ensemble.generator import generate_ensemble_auto
 from .stan.invT import predict_temperature_from_proxyObs as _predict_temperature_from_proxyObs
 from .data.builder import InvTConfig
+from .constants import DEFAULT_FWD_POSTERIOR
 from .data.ocean_lookup import lookup_no3_from_woa
 
 
@@ -189,7 +190,10 @@ def predict_T_from_proxyObs(
         Prior temperature uncertainty (°C).  Use a diffuse value (e.g. 10)
         when little prior information is available.
     fwd_posterior : str or xr.Dataset, optional
-        The forward calibration posterior.  Accepts either:
+        The forward calibration posterior.  When omitted, the full multivariate
+        T0-shift calibration for *temptype* is used --- ``tx.GHEB.sst.sri03.G23-N1p0``
+        for SST, ``tx.GHEB.thm.sri03.G23-N1p0`` for thermoT --- which ships with
+        the package, so no download is required.  Accepts either:
 
         - **str** — name of the saved posterior (without ``.nc`` extension)
           in the posterior cache directory.  The file is loaded automatically.
@@ -201,8 +205,13 @@ def predict_T_from_proxyObs(
               result = predict_T_from_proxyObs(..., fwd_posterior=ds)
 
     temptype : str, optional
-        Temperature type: ``"SST"`` or ``"thermoT"``.  Used for metadata
-        and output file naming.
+        Temperature type: ``"SST"`` or ``"thermoT"``.  **Optional.**  It does
+        not change the reconstruction, which follows the calibration supplied:
+        when *fwd_posterior* is given, the target is read from that posterior's
+        own attributes and *temptype* only labels the metadata and output
+        filenames (a value conflicting with the calibration raises a warning).
+        It matters in exactly one case --- when *fwd_posterior* is omitted, it
+        chooses which default calibration is used, SST or thermoT.
     site_name : str, optional
         Label attached to result metadata and output filenames.
     predictors : dict, optional
@@ -306,6 +315,20 @@ def predict_T_from_proxyObs(
         ``"p95"``        — 95th percentile temperature (°C), shape (N,)
         ``"metadata"``   — run metadata dict (model name, attrs, etc.)
     """
+    # ── Default calibration ──────────────────────────────────────────────────
+    # Omitting fwd_posterior selects the full multivariate T0-shift calibration
+    # for the requested target, which ships inside the package. It is the
+    # default because the nonthermal effects are in the coretop data whether or
+    # not a user models them: a temperature-only calibration does not remove
+    # them, it absorbs them into the thermal parameters.
+    if fwd_posterior is None:
+        _target = temptype if temptype in DEFAULT_FWD_POSTERIOR else "SST"
+        fwd_posterior = DEFAULT_FWD_POSTERIOR[_target]
+        print(
+            f"📚 No fwd_posterior given — using the default {_target} calibration "
+            f"'{fwd_posterior}' (full multivariate, G23 + NO3)."
+        )
+
     # ── Normalise fwd_posterior: split str vs pre-loaded Dataset ─────────────
     if isinstance(fwd_posterior, xr.Dataset):
         _fwd_ds: Optional[xr.Dataset] = fwd_posterior
@@ -359,6 +382,26 @@ def predict_T_from_proxyObs(
                 "parameters (use_gdgt23ratio=False) — the predictor will be silently ignored. "
                 "To apply the GDGT-2/3 correction, use a multivariate posterior "
                 "(e.g. gen_logi_fixed_hier_crtp_multiv_priorApprox_*).",
+                UserWarning, stacklevel=2,
+            )
+        _fwd_temptype = _attrs.get("temptype")
+        if temptype and _fwd_temptype and temptype != _fwd_temptype:
+            warnings.warn(
+                f"temptype={temptype!r} was passed, but this calibration was "
+                f"fitted against {_fwd_temptype!r}. The reconstruction follows "
+                f"the calibration, not the label, so the result is "
+                f"{_fwd_temptype}; only the metadata and output filenames would "
+                f"say otherwise. Drop temptype= to take it from the calibration.",
+                UserWarning, stacklevel=2,
+            )
+        if predictors.get("gdgt23ratio") is None and _attrs.get("use_gdgt23ratio", False):
+            warnings.warn(
+                "This calibration uses the GDGT-2/3 ratio, but none was supplied — "
+                "it will be treated as 0, which is not the same as switching the "
+                "correction off: it asserts a ratio of zero and biases the "
+                "reconstruction cold by roughly gamma_G23 x (true ratio) degC. "
+                "Pass gdgt23ratio=, or use a temperature-only calibration "
+                "(e.g. 'tx.GHPU.sst.sri03.p0').",
                 UserWarning, stacklevel=2,
             )
         if predictors.get("no3") is not None and not _attrs.get("use_no3", False):

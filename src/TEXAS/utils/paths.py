@@ -154,6 +154,12 @@ PROJECT_ROOT = get_project_root()
 REPO_ROOT = PROJECT_ROOT                      # back-compat alias
 STAN_MODELS_DIR = (PACKAGE_ROOT / "stan_models").resolve()
 
+# Calibration posteriors that ship inside the wheel, so that a reconstruction
+# works on a bare `pip install texas-psm` with no network access. These are the
+# full multivariate T0-shift calibrations with the per-site EIV latents dropped
+# (81 MB -> 0.4 MB); rebuild with scripts/make_bundled_posteriors.py.
+BUNDLED_POSTERIOR_DIR = (PACKAGE_ROOT / "bundled_posteriors").resolve()
+
 # Stan build artifacts (.hpp, binaries) go here — outside the source/bind-mount
 # tree so container users (different UID) can always write compilation output.
 # Override with TEXAS_STAN_BUILD_DIR env var.

@@ -80,20 +80,41 @@ def test_empty_model_name_is_an_error():
 # --- predictors -----------------------------------------------------------
 
 @pytest.mark.parametrize("g23,no3,cutoff,expected", [
-    (True, True, 1.0, "G23-N10"),
-    (True, True, 1.5, "G23-N15"),
+    (True, True, 1.0, "G23-N1p0"),
+    (True, True, 1.5, "G23-N1p5"),
+    (True, True, 0.25, "G23-N0p25"),
     (True, False, None, "G23"),
-    (False, True, 1.0, "N10"),
+    (False, True, 1.0, "N1p0"),
     (False, False, None, "p0"),
 ])
 def test_encode_predictors(g23, no3, cutoff, expected):
     assert encode_predictors(g23, no3, cutoff) == expected
 
 
-@pytest.mark.parametrize("token", ["G23-N10", "G23", "N15", "p0"])
+@pytest.mark.parametrize("token", ["G23-N1p0", "G23", "N1p5", "p0"])
 def test_predictors_round_trip(token):
     d = decode_predictors(token)
     assert encode_predictors(d["use_gdgt23ratio"], d["use_no3"], d["no3_cutoff"]) == token
+
+
+# The nitrate token was N + cutoff x10 until 2026-08-23, which read as the
+# concentration that *disables* the correction rather than the threshold that
+# scopes it. Every case id written before then carries the old spelling, in
+# caches, notebooks and case_ids.json, so it has to keep parsing.
+@pytest.mark.parametrize("legacy,cutoff", [
+    ("G23-N1p0", 1.0),
+    ("N10", 1.0),
+    ("G23-N15", 1.5),
+])
+def test_legacy_no3_token_still_parses(legacy, cutoff):
+    d = decode_predictors(legacy)
+    assert d["use_no3"] is True
+    assert d["no3_cutoff"] == cutoff
+
+
+def test_legacy_no3_token_is_never_written():
+    d = decode_predictors("G23-N1p0")
+    assert encode_predictors(**d) == "G23-N1p0"
 
 
 def test_no3_without_cutoff_is_an_error():
@@ -105,22 +126,22 @@ def test_no3_without_cutoff_is_an_error():
 
 def test_case_round_trips_through_text():
     case = CaseName(compset="GHEB", temptype="sst", proxy="sri03",
-                    predictors="G23-N10", version="v026", run="001")
+                    predictors="G23-N1p0", version="v026", run="001")
     # Explicitly set, so both render: a parsed older id round-trips losslessly.
-    assert str(case) == "tx.v026.GHEB.sst.sri03.G23-N10.001"
+    assert str(case) == "tx.v026.GHEB.sst.sri03.G23-N1p0.001"
     assert str(parse_case(str(case))) == str(case)
 
 
 def test_run_position_defaults_and_separates_refits():
-    a = CaseName("GHEB", "sst", "sri03", "G23-N10", version="v026")
-    b = CaseName("GHEB", "sst", "sri03", "G23-N10", version="v026", run="050126")
+    a = CaseName("GHEB", "sst", "sri03", "G23-N1p0", version="v026")
+    b = CaseName("GHEB", "sst", "sri03", "G23-N1p0", version="v026", run="050126")
     assert a.run == "001"
     assert str(a) != str(b), "a refit must not collide with the original"
 
 
 def test_parse_case_tolerates_a_missing_run():
     # Nothing is synthesised: an absent member reports as absent.
-    assert parse_case("tx.v026.GHEB.sst.sri03.G23-N10").run == ""
+    assert parse_case("tx.v026.GHEB.sst.sri03.G23-N1p0").run == ""
 
 
 def test_parse_case_rejects_junk():
@@ -136,8 +157,8 @@ def test_invalid_compset_rejected_at_construction():
 
 
 def test_with_variant_swaps_only_the_structure_axis():
-    case = CaseName("GHEA", "sst", "sri03", "G23-N10", version="v026")
-    assert str(case.with_variant("B")) == "tx.v026.GHEB.sst.sri03.G23-N10.001"
+    case = CaseName("GHEA", "sst", "sri03", "G23-N1p0", version="v026")
+    assert str(case.with_variant("B")) == "tx.v026.GHEB.sst.sri03.G23-N1p0.001"
 
 
 def test_case_from_attrs():
@@ -148,9 +169,9 @@ def test_case_from_attrs():
     }
     case = case_from_attrs(attrs, version="v026")
     # The member is not synthesised any more; the version only appears because
-    # it was passed. A case built from attrs alone is "tx.GHEB.sst.sri03.G23-N10".
-    assert str(case) == "tx.v026.GHEB.sst.sri03.G23-N10"
-    assert str(case_from_attrs(attrs)) == "tx.GHEB.sst.sri03.G23-N10"
+    # it was passed. A case built from attrs alone is "tx.GHEB.sst.sri03.G23-N1p0".
+    assert str(case) == "tx.v026.GHEB.sst.sri03.G23-N1p0"
+    assert str(case_from_attrs(attrs)) == "tx.GHEB.sst.sri03.G23-N1p0"
     assert case.temptype_full == "SST"
     assert case.proxy_full == "scaledRI_cren3"
 
@@ -180,10 +201,10 @@ def test_additive_and_boundedT_do_not_collide():
 def test_fwd_relpath():
     # Flat since 2026-08-12: the leaf already carries the case, so the
     # directory only repeated it.
-    assert fwd_relpath("tx.v026.GHEB.sst.sri03.G23-N10.001").as_posix() == \
-        "tx.v026.GHEB.sst.sri03.G23-N10.001.fwd.nc"
-    assert fwd_relpath("tx.GHEB.sst.sri03.G23-N10").as_posix() == \
-        "tx.GHEB.sst.sri03.G23-N10.fwd.nc"
+    assert fwd_relpath("tx.v026.GHEB.sst.sri03.G23-N1p0.001").as_posix() == \
+        "tx.v026.GHEB.sst.sri03.G23-N1p0.001.fwd.nc"
+    assert fwd_relpath("tx.GHEB.sst.sri03.G23-N1p0").as_posix() == \
+        "tx.GHEB.sst.sri03.G23-N1p0.fwd.nc"
 
 
 def test_fwd_leaf_is_self_describing_when_detached():
@@ -191,7 +212,7 @@ def test_fwd_leaf_is_self_describing_when_detached():
     A posterior copied out of its case directory must still name its case --
     Zenodo's namespace is flat, so many bare ``fwd.nc`` cannot coexist there.
     """
-    case = "tx.v026.GHEB.sst.sri03.G23-N10.001"
+    case = "tx.v026.GHEB.sst.sri03.G23-N1p0.001"
     assert fwd_relpath(case).name == f"{case}.fwd.nc"
 
 
@@ -205,7 +226,7 @@ def test_repeating_the_case_costs_path_but_buys_a_portable_leaf():
     the Zenodo record is a flat namespace. The full path is still well under
     the legacy flat name.
     """
-    case = "tx.v026.GHEB.sst.sri03.G23-N10.001"
+    case = "tx.v026.GHEB.sst.sri03.G23-N1p0.001"
     full = str(fwd_relpath(case))
     # The case directory was dropped on 2026-08-12, so the path no longer
     # pays for the repetition -- the leaf IS the path.
@@ -214,11 +235,11 @@ def test_repeating_the_case_costs_path_but_buys_a_portable_leaf():
 
 
 def test_inv_relpath():
-    p = inv_relpath("tx.GHEB.sst.sri03.G23-N10", "U1482", scenario="mod")
-    assert p.as_posix() == "tx.GHEB.sst.sri03.G23-N10.inv.U1482.ud-mod.nc"
+    p = inv_relpath("tx.GHEB.sst.sri03.G23-N1p0", "U1482", scenario="mod")
+    assert p.as_posix() == "tx.GHEB.sst.sri03.G23-N1p0.inv.U1482.ud-mod.nc"
     # A member is opt-in, not synthesised.
-    q = inv_relpath("tx.GHEB.sst.sri03.G23-N10", "U1482", scenario="mod", run=1)
-    assert q.as_posix() == "tx.GHEB.sst.sri03.G23-N10.inv.U1482.ud-mod-001.nc"
+    q = inv_relpath("tx.GHEB.sst.sri03.G23-N1p0", "U1482", scenario="mod", run=1)
+    assert q.as_posix() == "tx.GHEB.sst.sri03.G23-N1p0.inv.U1482.ud-mod-001.nc"
 
 
 def test_inv_relpath_slugs_a_site_with_spaces():
@@ -352,12 +373,12 @@ def test_invT_name_lands_in_the_parent_case_directory():
         "stan_model_name": "invT_gen_logi_fixed_multiv_marginal_unconstrained_boundedT",
         "temptype": "sst", "proxy_name": "scaledRI_cren3",
         "use_gdgt23ratio": 1, "use_no3": 1, "no3_cutoff": 1.0,
-        "fwd_case": "tx.v025.GHEB.sst.sri03.G23-N10.001",
+        "fwd_case": "tx.v025.GHEB.sst.sri03.G23-N1p0.001",
     }
     base = _generate_filename_base(meta, "050126")
     # Flat: named for its parent calibration, but beside it rather than inside.
     assert "/" not in base
-    assert base == "tx.v025.GHEB.sst.sri03.G23-N10.001.inv.U1482.ud-050126"
+    assert base == "tx.v025.GHEB.sst.sri03.G23-N1p0.001.inv.U1482.ud-050126"
 
 
 def test_invT_name_is_built_by_inv_relpath_and_not_a_second_spelling():
@@ -373,7 +394,7 @@ def test_invT_name_is_built_by_inv_relpath_and_not_a_second_spelling():
     from TEXAS.stan.io import _generate_filename_base
     from TEXAS.utils.naming import inv_relpath
 
-    case = "tx.GHEB.sst.sri03.G23-N10.001"
+    case = "tx.GHEB.sst.sri03.G23-N1p0.001"
     for model, kind in [
         ("invT_gen_logi_fixed_multiv_marginal_unconstrained", "direct"),
         ("invT_gen_logi_fixed_multiv_unconstrained", "ensemble"),
@@ -391,14 +412,14 @@ def test_invT_name_is_built_by_inv_relpath_and_not_a_second_spelling():
 def test_inv_relpath_takes_several_scenario_tags():
     """A sequence and its pre-joined equivalent must give one leaf."""
     from TEXAS.utils.naming import inv_relpath
-    seq = inv_relpath("tx.GHEB.sst.sri03.G23-N10", "U1482",
+    seq = inv_relpath("tx.GHEB.sst.sri03.G23-N1p0", "U1482",
                       scenario=["no3", "modern"]).name
-    assert seq == "tx.GHEB.sst.sri03.G23-N10.inv.U1482.ud-no3-modern.nc"
+    assert seq == "tx.GHEB.sst.sri03.G23-N1p0.inv.U1482.ud-no3-modern.nc"
     # empty tags drop out rather than leaving a doubled separator
-    assert inv_relpath("tx.GHEB.sst.sri03.G23-N10", "U1482",
+    assert inv_relpath("tx.GHEB.sst.sri03.G23-N1p0", "U1482",
                        scenario=["no3", "", "modern"]).name == seq
     # a run is appended only when one is asked for
-    assert inv_relpath("tx.GHEB.sst.sri03.G23-N10", "U1482").name.endswith(".ud.nc")
+    assert inv_relpath("tx.GHEB.sst.sri03.G23-N1p0", "U1482").name.endswith(".ud.nc")
 
 
 def test_invT_without_provenance_keeps_the_legacy_name():
@@ -422,8 +443,8 @@ def test_invT_without_provenance_keeps_the_legacy_name():
 # directories already on disk become unreadable.
 
 @pytest.mark.parametrize("old,proxy", [
-    ("tx.v026.GHEB.sst.ri3.G23-N10.001", "scaledRI_cren3"),
-    ("tx.v026.GHEB.sst.ri4.G23-N10.001", "scaledRI_cren4"),
+    ("tx.v026.GHEB.sst.ri3.G23-N1p0.001", "scaledRI_cren3"),
+    ("tx.v026.GHEB.sst.ri4.G23-N1p0.001", "scaledRI_cren4"),
     ("tx.v026.GCDU.cul.ri3.none.001", "scaledRI_cren3"),
 ])
 def test_pre_20260811_case_ids_still_parse(old, proxy):
@@ -556,3 +577,36 @@ def test_a_rerun_does_not_answer_to_the_old_stamped_name(tmp_path, fwd_posterior
 
     assert resolve_posterior_path("gen_logi_fixed_run_050126_eiv", tmp_path) is None
     assert resolve_posterior_path(legacy_fwd_name(fwd_posterior.attrs), tmp_path) is not None
+
+
+# --- the nitrate token rename, across spellings ----------------------------
+# The load-bearing case: an id and the file it names can sit on opposite sides
+# of the rename, in either direction. A notebook holding the old id must find a
+# posterior written today, and a new id must find a posterior in an old cache.
+
+def _fixture(tmp_path, leaf):
+    import xarray as xr
+    import numpy as np
+    ds = xr.Dataset(
+        {"t0_crtp": ("draw", np.zeros(4))},
+        attrs={
+            "stan_model_name": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift",
+            "temptype": "SST", "proxy_name": "scaledRI_cren3",
+            "use_gdgt23ratio": 1, "use_no3": 1, "no3_cutoff": 1.0,
+        },
+    )
+    path = tmp_path / leaf
+    ds.to_netcdf(path)
+    return path
+
+
+def test_legacy_id_finds_a_file_written_under_the_new_token(tmp_path):
+    from TEXAS.utils.naming import resolve_posterior_path
+    written = _fixture(tmp_path, "tx.GHEB.sst.sri03.G23-N1p0.fwd.nc")
+    assert resolve_posterior_path("tx.GHEB.sst.sri03.G23-N10", tmp_path) == written
+
+
+def test_new_id_finds_a_file_written_under_the_legacy_token(tmp_path):
+    from TEXAS.utils.naming import resolve_posterior_path
+    written = _fixture(tmp_path, "tx.GHEB.sst.sri03.G23-N10.fwd.nc")
+    assert resolve_posterior_path("tx.GHEB.sst.sri03.G23-N1p0", tmp_path) == written

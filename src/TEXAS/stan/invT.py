@@ -314,6 +314,10 @@ def get_invT_posterior(
     _name_hint = fwd_posterior_name or (fwd_posterior.attrs.get("stan_model_name", "") if fwd_posterior is not None else "")
     if temptype:
         ds.attrs["temptype"] = temptype
+    elif meta.get("fwd_temptype"):
+        # The calibration itself says what it was fitted against, which is why
+        # `temptype=` is optional: it is metadata, not a modelling choice.
+        ds.attrs["temptype"] = meta["fwd_temptype"]
     elif 'thermoT' in _name_hint:
         ds.attrs["temptype"] = "thermoT"
     elif 'sst' in _name_hint.lower():

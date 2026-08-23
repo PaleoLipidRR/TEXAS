@@ -7,7 +7,7 @@ rename, and collides for two runs on one day. A **version**, taken from the pip
 release, which was wrong in both directions: a docs-only release orphaned every
 name on disk, while a prior change without a release let two incompatible
 posteriors share one identity. And a **member counter**, which read as a second
-number beside the nitrate cutoff (`.001` next to `N10`) and made `overwrite`
+number beside the nitrate cutoff (`.001` next to `N1p0`) and made `overwrite`
 meaningless, because a fresh member can never collide with anything.
 
 What replaces them: the run date and package version are attrs, and a re-run
@@ -24,7 +24,7 @@ from TEXAS.stan.io import save_posterior
 from TEXAS.utils.naming import (case_from_attrs, fwd_relpath, inv_relpath,
                                 parse_case, resolve_posterior_path)
 
-CASE = "tx.GHEA.sst.sri03.G23-N10"
+CASE = "tx.GHEA.sst.sri03.G23-N1p0"
 ATTRS = {
     "stan_model_name": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv",
     "temptype": "SST", "proxy_name": "scaledRI_cren3",

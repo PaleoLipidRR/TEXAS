@@ -66,7 +66,7 @@ def save_posterior(
         ``overwrite=False`` an existing file raises ``FileExistsError``.
     layout : {"auto", "case", "legacy"}
         Where to write.  ``"case"`` uses the CESM-style case directory
-        (``tx.v026.GHEB.sst.ri3.G23-N10/fwd.nc``); ``"legacy"`` uses the
+        (``tx.v026.GHEB.sst.ri3.G23-N1p0/fwd.nc``); ``"legacy"`` uses the
         historical long flat filename; ``"auto"`` (default) prefers the case
         layout and falls back to legacy with a warning if no case id can be
         derived.  See :mod:`TEXAS.utils.naming`.
@@ -189,7 +189,7 @@ def load_posterior(
     # Ensure directory exists
     indir.mkdir(exist_ok=True, parents=True)
 
-    # Dual-read: accept either a case id (tx.v026.GHEB.sst.ri3.G23-N10) or a
+    # Dual-read: accept either a case id (tx.v026.GHEB.sst.ri3.G23-N1p0) or a
     # historical long name, and find the file under either layout. Exact-path
     # lookups come first; the attr-matching scan only runs if those miss.
     fpath = None
@@ -202,6 +202,37 @@ def load_posterior(
     if fpath is None:
         candidate = indir / f"{model_name}.nc"
         fpath = candidate if candidate.exists() else None
+
+    if fpath is None:
+        # The nitrate token was respelled (N10 -> N1p0) on 2026-08-23, and a
+        # name and the file it points at can sit on either side of that. This
+        # covers the inverse cache and any leaf too specific to parse as a case
+        # id -- an invT leaf carries a site and scenario after the case, so the
+        # case-id machinery above never sees it.
+        try:
+            from ..utils.naming import swap_no3_token
+            alt = swap_no3_token(model_name)
+        except Exception:
+            alt = None
+        if alt:
+            candidate = indir / f"{alt}.nc"
+            fpath = candidate if candidate.exists() else None
+
+    if fpath is None and model_type == "forward":
+        # Last resort before failing: the posteriors that ship inside the wheel.
+        # This is what lets a bare `pip install texas-psm` reconstruct without a
+        # download; the cache still wins, so a user's own refit of the same case
+        # is never shadowed by the bundled copy.
+        try:
+            from ..utils.paths import BUNDLED_POSTERIOR_DIR
+            from ..utils.naming import resolve_posterior_path as _resolve
+            if BUNDLED_POSTERIOR_DIR.is_dir():
+                fpath = _resolve(model_name, BUNDLED_POSTERIOR_DIR)
+                if fpath is None:
+                    candidate = BUNDLED_POSTERIOR_DIR / f"{model_name}.nc"
+                    fpath = candidate if candidate.exists() else None
+        except Exception:
+            fpath = None
 
     if fpath is None:
         # Case dirs hold "<case>.fwd.nc"; dirs written before 2026-08-11 hold a
@@ -280,6 +311,21 @@ def list_posteriors(
 
     if model_type in ("forward", "both"):
         result["forward"] = _list(fwd_dir, "Forward calibration")
+        # Also report what ships with the package, so a user who has downloaded
+        # nothing still sees the calibrations they can use right now.
+        try:
+            from ..utils.paths import BUNDLED_POSTERIOR_DIR
+            bundled = sorted(
+                f.name[: -len(".fwd.nc")]
+                for f in BUNDLED_POSTERIOR_DIR.glob("*.fwd.nc")
+            )
+        except Exception:
+            bundled = []
+        if bundled:
+            print(f"\nBundled with the package  [{BUNDLED_POSTERIOR_DIR}]")
+            for name in bundled:
+                print(f"  {name}")
+            result["bundled"] = bundled
     if model_type in ("invT", "both"):
         if model_type == "both":
             print()

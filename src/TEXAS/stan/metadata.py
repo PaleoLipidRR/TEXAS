@@ -51,7 +51,9 @@ def extract_and_update_metadata(
     site_name : str, optional
       A label for this run (e.g. coretop site).
     version : str, optional
-      Your package or model version.
+      Deprecated and no longer written. Accepted so existing callers keep
+      working; read ``texas_version`` instead, which records the installed
+      package version rather than a literal passed at the call site.
     suffixes : list of str, optional
       Which suffixes to scan for proxyObs_* and predictor_* arrays.
     direct_keys : list of str, optional
@@ -63,8 +65,14 @@ def extract_and_update_metadata(
     # 1) base metadata
     metadata: Dict[str, Any] = {
         "stan_model_name":      stan_filename,
-        "generated_by":         "culRI-Bayesian",
-        "version":              version,
+        # What produced the file, named as a reader would install it. It said
+        # "culRI-Bayesian" until 2026-08-23 -- the project's name years before
+        # it was TEXAS, carried forward on every posterior since.
+        "generated_by":         "texas-psm",
+        # The `version` attr is gone. It was this function's default argument,
+        # "1.0.0", in all 35 cached posteriors: nothing ever set it and nothing
+        # read it, so it recorded only that a default existed. `texas_version`
+        # below is the real package version and the one to read.
         "run_time":             datetime.now().isoformat(),
         "run_duration (sec)":   None,
         "temptype":             None,    # sampler may fill this

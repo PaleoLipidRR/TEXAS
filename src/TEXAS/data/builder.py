@@ -394,6 +394,11 @@ def build_invT_inputData(
             # back to the calibration it marginalised over.
             "fwd_posterior_name": fwd_posterior_name or fwd_model_name,
             "fwd_case": _fwd_case_id(post.attrs),
+            # What the calibration was fitted against. The authoritative answer
+            # lives here, in the forward posterior's own attrs -- inferring it
+            # from a name works for legacy names carrying "SST"/"thermoT" but
+            # not for case ids, whose target token is "sst"/"thm".
+            "fwd_temptype": post.attrs.get("temptype"),
         },
     }
 

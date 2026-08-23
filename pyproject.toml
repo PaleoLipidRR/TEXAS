@@ -101,7 +101,7 @@ where = ["src"]
 include = ["TEXAS*"]
 
 [tool.setuptools.package-data]
-TEXAS = ["stan_models/*.stan"]
+TEXAS = ["stan_models/*.stan", "bundled_posteriors/*.nc"]
 
 [project.urls]
 "Homepage" = "https://github.com/PaleoLipidRR/TEXAS"
