@@ -1,13 +1,73 @@
-# Appendix C2.4 — copy-paste LaTeX
+# Appendix C — copy-paste LaTeX (complete section)
 
-Each paragraph is a single line. Tables and `verbatim` blocks keep their line structure.
+Your current text, updated where the package changed under it. Each paragraph is a single line; tables and `verbatim` blocks keep their line structure. Changed passages are listed at the bottom.
 
 ---
 
-## C2.4 (new subsection)
-
 ```latex
-\textbf{C2.4 | Forward-model posterior distributions of calibration parameters (Required)}
+\section{Running TEXAS on your own data}
+\label{sec:AppendixC-using-TEXAS}
+
+This appendix guides a user on how to use the TEXAS Python package to reconstruct ocean temperatures with one's own GDGT record. The full documentation for the \texttt{texas-psm} package can be found at \url{https://paleolipidrr.github.io/TEXAS/}.
+
+\subsection{Installation}
+
+TEXAS is a Python package. It is installed with \mbox{\texttt{pip install texas-psm}}, and the calibration models are compiled Stan programs, so a working CmdStan toolchain (version 2.23 or later; developed against 2.36) and a C++ compiler are also required. Two commands cover the setup: \mbox{\texttt{texas-install-cmdstan}} performs a one-call install if CmdStan is not already present, and \mbox{\texttt{texas-doctor}} reports on the whole toolchain---including, Python package, CmdStan path and version, compiler, and cache directories---and is the first thing to run if anything fails. Users who prefer not to manage a compiler can use the Docker image or the Colab-ready quickstart notebook in the repository, both of which ship a working toolchain. Pre-generated \mbox{\texttt{conda-lock}} and \mbox{\texttt{uv}} lock files are provided for reproducible python environments.
+
+The calibration posterior used by default is distributed with the package, so a reconstruction can be run immediately after installation, with no download and no network access. The remaining calibrations---the single-predictor and temperature-only specifications, and the complete archival copies of the default pair---are retrieved on demand from the Zenodo archive via \mbox{\texttt{TEXAS.download\_posteriors()}}. All of them correspond to the forward-model calibrations described in \textbf{Section \ref{sec:TEXAS-models}} and illustrated in \textbf{\ref{sec:AppendixA}}, and they are required as inputs for the inverse-model temperature reconstructions (\textbf{C2.4}).
+
+\subsection{Prerequisites}
+
+\textbf{Table \ref{tab:texas-ingredients}} lists the mandatory and optional input parameters for the temperature prediction function \texttt{predict\_T\_from\_proxyObs()}.
+
+\vspace{0.5em}
+\begin{table}[!h]
+\caption{Inputs required for a TEXAS reconstruction. Only the first two groups must be assembled by the user; the calibration posterior is required by the inversion but defaults to the one distributed with the package.}
+\label{tab:texas-ingredients}
+\centering
+\small
+\begin{tabular}{p{0.3\textwidth}p{0.10\textwidth}p{0.5\textwidth}}
+\toprule
+\textbf{Input} & \textbf{Status} & \textbf{Notes} \\
+\midrule
+Six isoGDGT abundances & Required & Either peak areas or fractional abundances; both give the same result \\
+Temperature prior ($\mu_T$, $\sigma_T$) & Required & In $\degree$C; a broad prior is acceptable. $\mu_T$ may vary by sample; $\sigma_T$ is a single value shared across samples \\
+GDGT-2/GDGT-3 (G23) & Optional & Calculated from the same set of six compounds \\
+$[$NO$_{\text{3}}^-]$ & Optional & May be supplied as a single, time-invariant value or as sample-specific, time-varying values; users may also provide site latitude and longitude, together with the CMEMS gridded product used here, to retrieve modern $[$NO$_{\text{3}}^-]$ at those coordinates \\
+Forward calibration posterior & Default provided & The full multivariate calibration is distributed with the package and is used unless another is named (\textbf{C2.4}) \\
+\bottomrule
+\end{tabular}
+\end{table}
+\vspace{0.5em}
+
+\textbf{C2.1 | Calculate Scaled RI (Required)}
+
+Because TEXAS uses the Scaled RI as its predictand (\textbf{Section \ref{sec:RI-as-predictand}}), you must provide either absolute or relative abundances for the six isoprenoid GDGTs: GDGT-0, GDGT-1, GDGT-2, GDGT-3, Cren, and Cren'. Similar to TEX$_{86}$, the Scaled RI is a dimensionless ratio that varies between 0 and 1. To compute this index, the user can call the \texttt{compute\_scaledRI} function. The \texttt{cren\_weight} argument in the function signature specifies the weighting factor applied to the cren and cren' fractions and, at the same time, the constant by which the whole index is normalized; it defaults to 3. Because that second role fixes the scale on which every sample is expressed, the weight is part of the definition of the proxy rather than a setting: a calibration fitted at 3 cannot read an index built at 4.
+
+\begin{verbatim}
+    import pandas as pd
+    from TEXAS import compute_scaledRI
+    
+    df = pd.read_csv("my_gdgt_data.csv")
+    
+    df["scaledRI_cren3"] = compute_scaledRI(
+        df["GDGT-0"], df["GDGT-1"], df["GDGT-2"], df["GDGT-3"],
+        df["cren"],   df["cren_prime"],
+        # cren_weight = 3 by default
+    )
+\end{verbatim}
+
+\textbf{C2.2 | Set the temperature prior (Required)}
+
+The user needs to supply a prior for temperature: a mean ($\mu_T$; \texttt{prior\_mu\_t}) and a standard deviation ($\sigma_T$; \texttt{prior\_sigma\_t}), in \mbox{$\degree$C}. This is the expectation the reconstruction starts from, not a constraint on the answer, and a deliberately wide prior is the appropriate choice when little is known about the site. The $\mu_T$ parameter can be passed as a single value (\textit{time-invariant}) or a per-sample array (\textit{time-variant}); $\sigma_T$ is a single value shared across all samples.
+
+\textbf{C2.3 | Secondary nonthermal predictors (Optional)}
+
+Because the TEXAS sensor incorporates both G23 and $[$NO$_{\text{3}}^-]$ into its calibration scheme, users may supply these variables to account for nonthermal influences that could otherwise bias the reconstructed temperatures (\textbf{Section~\ref{sec:TEXAS-models-bottomlayer}}). Similar to $\mu_T$, each of these predictors can be provided either as a single constant value or as an array specified for each sample.
+
+The G23 ratio can be directly derived from the individual GDGT fractional abundances. For [NO$_{3}^{-}$], users may either (i) input a modern concentration obtained from the associated CMEMS ocean nitrate product we provide, or (ii) supply the modern latitude/longitude to \texttt{predict\_T\_from\_proxyObs} together with that gridded product, in which case the built-in helper routine interpolates it to those coordinates. The $[$NO$_{\text{3}}^-]$ correction is applied only to values inside \mbox{(0, 1.0]}~\mbox{$\mu$mol$\cdot$L$^{\text{-1}}$}, the threshold recorded in the calibration posterior itself. To effectively turn off the [NO$_{3}^{-}$] correction, users can therefore set [NO$_{3}^{-}$] = 10, i.e., a value that exceeds the [NO$_{3}^{-}$] $<$ 1 threshold.
+
+\textbf{C2.4 | Forward-model posterior distributions of calibration parameters (Required; supplied by default)}
 
 Every reconstruction is conditioned on a forward calibration posterior: the MCMC draws of the calibration parameters $\boldsymbol{\theta}$ = ($T_{\text{0}}$, $k$, $b$, $\nu$, $\gamma_{\text{G}_{\text{2/3}}}$, $\gamma_{\text{NO}_3^-}$, $\sigma_{proxyObs}$) estimated in \textbf{Section~\ref{sec:TEXAS-models}} and shown in \textbf{\ref{sec:AppendixA}}. \texttt{predict\_T\_from\_proxyObs} does not refit the calibration; it draws $M$ parameter sets from this posterior and marginalizes over them (\textbf{Equation~\ref{eq:post-pred}}), so the posterior is an input to the inversion in the same sense that the GDGT abundances are. The full multivariate calibration ships inside the package, and is used whenever no other posterior is named, so the minimal call in \textbf{C2.5} requires no download and no network access.
 
@@ -72,16 +132,10 @@ Given a posterior, the package configures the inversion from the file itself rat
 One consequence of using a multivariate calibration deserves emphasis, because it is otherwise silent: a predictor the user does not supply is taken to be zero, and zero is not equivalent to "off" for both predictors. For \mbox{[NO$_{\text{3}}^-$]} it is, because the nitrate term is active only for values inside \mbox{(0, 1.0]}~\mbox{$\mu$mol$\cdot$L$^{\text{-1}}$}, so an omitted, zero, or deliberately large value (\textbf{C2.3}) all leave the reconstruction unshifted. For G23 it is not: an omitted ratio asserts G23 = 0, which displaces the curve by $\gamma_{\text{G}_{\text{2/3}}}$ per unit of the true ratio ($\approx$0.6~$\degree$C per unit for the SST calibration) and biases the reconstruction cold. The package warns when this happens, and because G23 is computed from abundances the user already has (\textbf{C2.3}), it should always be supplied alongside a multivariate calibration.
 
 Users who wish to calibrate on their own training data, rather than apply ours, can do so with \mbox{\texttt{build\_fwd\_data()}} and \mbox{\texttt{get\_posterior()}}; that path requires a working CmdStan toolchain and is documented in the package guides rather than here.
-```
 
----
+\textbf{C2.5 | Run the reconstruction}
 
-## C2.5 (suggested; the worked call that C2.4 refers to)
-
-```latex
-\textbf{C2.5 | Putting it together}
-
-With the four ingredients in hand, a complete reconstruction is a single call. Nothing is downloaded, and nothing is written to disk unless \mbox{\texttt{save\_results=True}} is passed.
+With the four ingredients in hand, a reconstruction is a single call. Omitting \texttt{fwd\_posterior} selects the default calibration of \textbf{C2.4}, so nothing is downloaded; nothing is written to disk unless \mbox{\texttt{save\_results=True}} is passed.
 
 \begin{verbatim}
     from TEXAS import predict_T_from_proxyObs
@@ -92,53 +146,34 @@ With the four ingredients in hand, a complete reconstruction is a single call. N
         prior_sigma_t = 10.0,   # deliberately wide
         gdgt23ratio   = df["gdgt23ratio"].values,
         no3           = 10.0,   # above the 1.0 umol/L threshold: correction off
-    )                           # fwd_posterior omitted -> default calibration
+    )
 
     result["p50"]                 # median reconstructed temperature, per sample
     result["p16"], result["p84"]  # 68% credible interval
 \end{verbatim}
 
-The returned object holds the input observations, temperature percentiles from p1 to p99 for every sample, and the run metadata, which records the calibration the reconstruction was conditioned on so that a result remains traceable to its parent afterwards. Where the local posterior cache is unavailable or a calibration is held elsewhere, an already-opened dataset may be passed to \mbox{\texttt{fwd\_posterior}} in place of a name, and no file access is attempted.
+The returned object holds the input observations, temperature percentiles from p1 to p99 for every sample, and the run metadata, which records the calibration the reconstruction was conditioned on so that a result remains traceable to its parent afterwards. Where the local posterior cache is unavailable, as in a hosted notebook, an already-opened dataset may be passed to \mbox{\texttt{fwd\_posterior}} in place of a name, and no file access is attempted.
+
+\subsection{Documentation}
+
+Full API (Application Programming Interface) documentation, guides, and an interactive tutorial are published at \mbox{\url{https://paleolipidrr.github.io/TEXAS/}}, and the repository README at \mbox{\url{https://github.com/PaleoLipidRR/TEXAS}} carries the quickstart. The notebooks that generate every figure in this manuscript are archived with the software release, so any analysis reported here can be reproduced end to end.
 ```
 
 ---
 
-## Corrections to the earlier subsections
+## What changed from your version
 
-### C2.1 — the argument was renamed, and it does two jobs
-
-```latex
-Because TEXAS uses the Scaled RI as its predictand (\textbf{Section \ref{sec:RI-as-predictand}}), you must provide either absolute or relative abundances for the six isoprenoid GDGTs: GDGT-0, GDGT-1, GDGT-2, GDGT-3, Cren, and Cren'. Similar to TEX$_{86}$, the Scaled RI is a dimensionless ratio that varies between 0 and 1. To compute this index, the user can call the \texttt{compute\_scaledRI} function. The \texttt{cren\_weight} argument sets the weight carried by both crenarchaeol and its regioisomer and, at the same time, the constant by which the whole index is normalized; it defaults to 3, giving Scaled RI$_{\text{0--3}}$. Because it fixes the scale on which every sample is expressed, it is part of the definition of the proxy rather than a tuning choice, and a calibration fitted at 3 cannot read an index built at 4.
-```
-
-```latex
-\begin{verbatim}
-    import pandas as pd
-    from TEXAS import compute_scaledRI
-    
-    df = pd.read_csv("my_gdgt_data.csv")
-    
-    df["scaledRI_cren3"] = compute_scaledRI(
-        df["GDGT-0"], df["GDGT-1"], df["GDGT-2"], df["GDGT-3"],
-        df["cren"],   df["cren_prime"],
-        # cren_weight = 3 by default
-    )
-\end{verbatim}
-```
-
-### C2.3 — the nitrate lookup needs the gridded field passed in
-
-```latex
-The G23 ratio can be directly derived from the individual GDGT fractional abundances. For [NO$_{3}^{-}$], users may either (i) input a modern concentration taken from the CMEMS ocean nitrate product distributed with this study, or (ii) supply the modern latitude and longitude together with that gridded field, in which case \texttt{predict\_T\_from\_proxyObs} interpolates it to those coordinates. The nitrate correction is applied only to values inside \mbox{(0, 1.0]}~\mbox{$\mu$mol$\cdot$L$^{\text{-1}}$}, the threshold recorded in the calibration posterior, so it can be switched off deliberately by passing a value above it, for example [NO$_{3}^{-}$] = 10.
-```
-
-### C2.2 — one clause to add
-
-```latex
-The $\mu_T$ parameter can be passed as a single value (\textit{time-invariant}) or a per-sample array (\textit{time-variant}); $\sigma_T$ is a single value shared across all samples.
-```
-
-### C1 — two typographical fixes
-
-- `pythong` → `Python`
-- `uv-lock` → `uv.lock`
+| Where | Change | Why |
+|---|---|---|
+| Opening | `pythong` → `Python` | typo |
+| Installation | `uv-lock` → `\mbox{\texttt{uv}} lock files` | the file is `uv.lock`; `conda-lock` is the tool |
+| Installation | Second paragraph rewritten | "the calibration posteriors are not distributed directly with the package" is no longer true — the default pair ships in the wheel |
+| Table `tab:texas-ingredients` | NO₃ row: lat/lon lookup now says "together with the CMEMS gridded product" | the helper does not fetch the field itself; it raises unless the dataset is passed as `no3_dataset=` |
+| Table | Prior row notes σ_T is shared | `prior_sigma_t` is scalar-only; only μ_T may vary by sample |
+| Table + caption | New row for the calibration posterior | it is an input of `predict_T_from_proxyObs`, and the caption's "only the first two are mandatory" needed to account for it |
+| C2.1 | `cren_rings` → `cren_weight`, and the sentence extended | renamed in the package; the argument is also the normalizer, which is what makes it part of the proxy's definition rather than a setting |
+| C2.2 | σ_T clause added | same as the table |
+| C2.3 | "the built-in helper routine will retrieve … from the nearest grid cell" → interpolates, and only with the gridded product supplied | it is bilinear by default, and it is not automatic |
+| C2.3 | Threshold stated as (0, 1.0] and read from the posterior | makes the "set NO₃ = 10" instruction follow from something |
+| C2.4 | Heading → "(Required; supplied by default)" | it is required by the inversion but no longer by the user |
+| C2.5 | Added | your version referred to "the minimal call in C2.5" but the section had no worked `predict_T_from_proxyObs` example at all |
