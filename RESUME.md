@@ -8,10 +8,217 @@ bottom; tick the boxes as you go.
 
 ---
 
-## Latest session — 2026-08-21/22 (desktop): rename finished, Fig. S15 landed
+## Latest session — 2026-08-23 (desktop): the default calibration now ships, and the nitrate token is readable
+
+**Start here.** Three things changed that a reader of the paper will touch on
+day one: a reconstruction no longer needs a download, `N10` no longer reads as
+"nitrate = 10", and posterior attrs no longer carry two names for one model.
+Nothing on the science side moved.
+
+### 1. The full multivariate T₀-shift calibration ships inside the wheel
+
+`predict_T_from_proxyObs` with no `fwd_posterior` now uses
+`tx.GHEB.sst.sri03.G23-N1p0` (or `.thm.` for `temptype="thermoT"`), and both
+ship in `src/TEXAS/bundled_posteriors/`. This is possible because the archived
+posterior's 81 MB is *entirely* the EIV per-site latents (`true_*`, 1513 sites x
+4000 draws), which the inverse model never reads: dropping them gives **0.37 MB**
+with every parameter the forward and inverse paths touch present and unmodified.
+`scripts/make_bundled_posteriors.py` rebuilds them; `--check` verifies.
+
+- Cache still beats the bundle in `load_posterior`, so a local refit is never shadowed.
+- `*.nc` is LFS-routed here, so `.gitattributes` exempts the bundled dir — an LFS
+  pointer would install as a broken posterior for anyone who has not run `git lfs pull`.
+- Wheel and sdist verified to contain the real NetCDF (wheel 823 KB total).
+- New: a warning when a multivariate calibration is used **without** `gdgt23ratio`.
+  Zero is not "off" for G23 — it asserts a ratio of zero and biases the
+  reconstruction cold by ~γ_G23 x (true ratio) ≈ 0.6 °C per unit.
+
+### 2. `N10` → `N1p0` (and `temptype=` is now genuinely optional)
+
+`N` + cutoff x10 was misreadable in the one way that matters: **10 is also the
+documented value for switching the NO₃ correction off**, so the token read as the
+opposite of what it means. `encode_predictors` writes `N1p0` (`p` for the decimal
+point); `N10` still parses and is never written.
+
+- **191 cache files renamed** by `scripts/rename_cache_files.py` (dry-run default,
+  refuses on clash, `--revert`, `.npz` siblings move together). Per-machine —
+  **run it on the Windows box too**.
+- Every read path is spelling-tolerant in both directions first:
+  `resolve_posterior_path` normalises the token on both sides and tries both
+  spellings on exact-path lookups, and `naming.swap_no3_token()` covers invT
+  leaves, which carry a site and scenario after the case and so never parse as a
+  case id. Verified: old id → renamed file, and renamed id → old cache.
+- `temptype` was inferred by string-matching the posterior *name* for
+  `"thermoT"`, which case ids spell `thm` — so every thermocline reconstruction
+  was silently labelled `unknown_temptype`. It now comes from the calibration's
+  own attrs, and a contradicting `temptype=` warns.
+
+### 3. One fact, one attr
+
+Posteriors carried **two model names** (`stan_model_name`, plus arviz's echo of
+CmdStan's `model` = the same string + `"_model"`) and **two versions**
+(`texas_version`, plus `version` = `extract_and_update_metadata()`'s own default
+`"1.0.0"`, set by no caller and read by nothing). That duplication is exactly why
+`stan_model_name` could say `_t0shift` while `model` still said `_boundedT`.
+Both duplicates are gone at the writer, and `generated_by` no longer says
+`culRI-Bayesian` — the project's name from before it was TEXAS.
+
+`scripts/normalize_posterior_attrs.py` fixed the 35 forward + 173 inverse files
+in place through netCDF4 append mode: **draws never rewritten**, verified
+byte-identical (md5 over every data var), +87 bytes of header on an 81 MB file.
+`superseded/` is skipped — an archive that gets edited is not an archive.
+
+> ⚠️ **The dry run caught a hazard before it wrote anything.** For inverse
+> posteriors `case_from_attrs` cheerfully encodes the *invT* model name into a
+> compset and proposes `case_id = tx.GTDA...`, a calibration that never existed.
+> An invT run is a member of its parent case and never has one of its own; the
+> script now refuses to compute one. Unguarded it would have stamped 173 files
+> with invented provenance.
+
+### Cache audit (this machine, 2026-08-23)
+
+| | files | size |
+|---|---|---|
+| forward | 33 | 1.89 GB |
+| `superseded/` (archive) | 33 | 1.80 GB |
+| inverse | 173 | 0.01 GB |
+| halo archive + loose npz | 10 | 0.53 GB |
+
+- **Five calibrations are stored twice and the copies are different fits** —
+  e.g. GHPU sst: legacy 2026-05-01 t₀ = 34.709 vs case 2026-08-12 t₀ = 34.446.
+  Addressing is deterministic today (case id → case file, legacy name → legacy
+  file), but this is the 5C collision, and `SI_code3` still asks for the May copy.
+- **35 inverse posteriors have no `fwd_case`** — parent calibration unrecoverable.
+  Unchanged recommendation: do not migrate, let them age out.
+- ~1.9 GB (45%) is archive that nothing reads. Keep until after submission.
+
+### Also done
+
+- **Appendix C2.4 drafted** (`/tmp/.../scratchpad/appendixC_C2.4.md`, copy-paste
+  LaTeX, one line per paragraph) with a compset table and the full multivariate
+  as the recommended default, plus corrections to C2.1–C2.3: `cren_rings` →
+  `cren_weight`, and the NO₃ lat/lon lookup needs the gridded field passed in
+  (`no3_dataset=`) — it is not automatic, and it interpolates bilinearly rather
+  than snapping to the nearest cell.
+- `docs/index.md` Step 2 rewritten around the bundled default; the stale
+  "Zenodo multivariate posteriors are additive-EIV" warning replaced with an
+  accurate note on the two formulations.
+- Streamlit: the prediction page defaulted to `gen_logi_fixed_culmesocore_thermoT`,
+  **a posterior that exists in no cache**, so the app failed out of the box.
+- Fixed in passing: `predict.py`'s module docstring passed `fwd_posterior_name=`
+  to a function that has no such parameter.
+
+### ⚠️ Still open
+
+- **`download_posteriors()` cannot fetch any `GHEB` posterior** — the registry
+  holds only the five preprint-era files. The bundled pair removes this from the
+  default path, but the `.G23` / `.N1p0` singles and the archival copies need the
+  re-deposit. `docs/index.md` is worded to promise only what is true today.
+- **The SI notebooks were not re-run.** All 11 token edits were comments or
+  docstrings, so no result changes; a re-run would re-sample every cached inverse
+  (the invT cache key changed spelling) and rewrite tracked figures for nothing.
+- The `lookup_no3_from_woa` name and docstrings say WOA23, but its default
+  variable `no3_sf2tc_avg` is the **CMEMS** field. Decide which is authoritative.
+
+---
+
+## Latest session — 2026-08-22 (desktop): the gridded CV finally reached Part 1
+
+**Start here.** figS17 was not the only thing left behind by the ungridded →
+gridded CV switch: *all* of SI_code04 Part 1 was. The notebook is now executed
+top to bottom against the gridded exports and every Part 1 number has changed.
+
+### The scope was bigger than "re-run one cell"
+
+`121c294` staged the gridded `cv_*` exports and added a
+`meta["dataset"] == "gridded"` guard to the load cell, but nothing after that
+cell had been re-executed since 2026-08-13. Stored outputs in cells 7–18 were
+all still the n = 2043 run, and `SI_table_model_comparison.{csv,tex}` on disk
+were dated Aug 17. So the notebook's saved state, its two committed tables, and
+figS17 were a consistent picture of a superseded dataset.
+
+| | n = 2043 (was) | n = 1513 gridded (now) |
+|---|---|---|
+| in-sample R², additive / T₀-shift | 0.730 / 0.745 | **0.796 / 0.803** |
+| spatial-CV R² | 0.686 / 0.699 | **0.748 / 0.750** |
+| spatial-CV RMSE | 0.0716 / 0.0701 | **0.0574 / 0.0572** |
+| spatial-CV cov95 | 0.923 / 0.925 | **0.904 / 0.899** |
+| Δelpd (T₀-shift − additive) | +68.4 ± 27.6 (2.5 SE) | **+24.3 ± 11.6 (2.1 SE)** |
+| fitted-mean floor, additive / T₀-shift | 0.008 / 0.375 | **0.343 / 0.420** |
+| in-sample → spatial RMSE penalty | +8.7% | **+12.9%** |
+
+### ⚠️ Two claims must be softened in the response to reviewers
+
+1. **R3.1's headline weakens.** "The additive fitted mean reaches essentially
+   zero" is gone: on the gridded set it reaches **0.343**. The claim still
+   holds — 0.343 is below the curve's own lower asymptote *b* ≈ 0.412, a value
+   the generalized logistic cannot produce — but it is a ~0.07 violation, not a
+   ~0.40 one. Gridding removes the dense clusters of near-duplicate sites that
+   were dragging the additive mean down.
+2. **T₀-shift's predictive edge all but vanishes under spatial blocking.**
+   ΔRMSE was 0.0015; it is now **0.0002**. The case for T₀-shift is
+   *boundedness and elpd*, not accuracy. Say that.
+
+`REVIEWER_MAP.md` §2.4 carried the old numbers verbatim and is updated; §3.1's
+`_boundedT.stan` paths and `fig7/11/12/13/14` numbering were rename/renumber
+leftovers and are fixed too. `PROVENANCE.md` was already correct.
+
+### What changed in the notebook
+
+- **figS17 now renders n = 1513** and the five per-fold n's sum to it
+  (361 + 365 + 312 + 254 + 221).
+- **The centroid assertion fired, as predicted.** The five regions came back
+  intact but under **permuted fold indices** (old 1↔3, 2↔4); the boxes
+  themselves needed no change. Labels re-derived from the new centroids, not
+  loosened.
+- **Colour is now keyed to the region name, not the fold index** (`COLOR` dict,
+  cell 16), so the palette and legend order are byte-for-byte what they were.
+  Without this the permutation would have silently recoloured the map — the
+  Part 3 prose about "the red block" and "the green one" would have gone wrong
+  with no error anywhere. Both those observations still hold on the new figure.
+- **Cell 29 was `sk`, a leftover that referenced a name cell 30 defines.** The
+  notebook had never run top-to-bottom; it does now.
+- **Cell 14 is data-driven.** It reads the floor out of `meta` and states the
+  b-asymptote comparison instead of hardcoding "essentially zero".
+- Stale prose fixed in cells 0, 18, 19, 28, 33 — there is no "third n" any more
+  (Part 1 and the production calibration are both 1513).
+
+### What is dirty and why
+
+`SI03_paleo_showcases_modelswitch.ipynb` and `fig10`–`fig13`,
+`figSI_variant_comparison_t0shift_vs_eiv.pdf` were rewritten at 14:21–14:22 by
+**a live VS Code kernel, not by this session** — presumably the σ = 10
+`RUN_EXTREME` re-run listed below. Left untouched; check them before committing.
+
+`SI_table_inverse_skill.csv` and `SI_table_residual_structure.csv` (Part 2–3)
+re-emitted with **last-digit float noise only** — verified against the LFS blobs
+in HEAD. figS18 likewise re-rendered with no numeric change.
+
+### Resolved: the untracked fig8 pair
+
+`fig8_comparison_all_calibrations_proxy_residuals_maps_..._and_scatterplots.{pdf,png}`
+was a **superseded orphan**. The stem appears in SI_code02 (cell 71) and
+SI_code2 (cell 69) *only inside commented-out* `fname=` lines; no live cell
+emits it. Moved to `~/.texas-superseded/20260822-fig8-comparison-orphan/` with a
+`WHY.md`. Never tracked, so nothing left git.
+
+### Still open
+
+- [ ] **Push.** Seven commits sit on `feat/revision1-validation-groupA` ahead of
+      `origin`, plus this session's work. Nothing else has a copy.
+- [ ] **σ = 10 extreme cases** — see "Two edits waiting on a re-run" below; may
+      be what the live kernel is doing right now.
+- [ ] Surface `prior_mu_t` / `prior_sigma_t` as invT `.nc` attrs before that
+      re-run, so σ = 10 and σ = 15 reconstructions stop being indistinguishable
+      on disk.
+
+---
+
+## Session — 2026-08-21/22 (desktop): rename finished, Fig. S15 landed
 
 Three sessions' worth of uncommitted work (2026-08-20, -21, -22) is now in.
-**Start here, not below.** Written as a handoff across a PC restart.
+Written as a handoff across a PC restart. (Superseded as the entry point by the
+2026-08-22 section above.)
 
 | commit | what |
 |---|---|
@@ -61,7 +268,10 @@ Three sessions' worth of uncommitted work (2026-08-20, -21, -22) is now in.
   `SI_code2a` are each file's own config keys, never reach the function, and
   were deliberately left alone.
 
-### ⚠️ figS17 is stale — this is the one thing left undone
+### ~~⚠️ figS17 is stale~~ — RESOLVED 2026-08-22, see the section above
+
+> It was not "the one thing left undone": all of Part 1 was stale with it.
+
 
 `figS17_spatial_cv_folds` still renders **n = 2043**, the *ungridded* CV, while
 `cv_sites.csv`, `cv_folds_map.csv` and `cv_waic_meta.json` are the **gridded
