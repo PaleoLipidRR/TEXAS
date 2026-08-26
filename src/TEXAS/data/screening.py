@@ -21,7 +21,7 @@ class MahalanobisOutlierDetector:
     Examples
     --------
     >>> # Fit on coretop data
-    >>> detector = MahalanobisOutlierDetector(['TEX86', 'ringIndex'], confidence=0.99)
+    >>> detector = MahalanobisOutlierDetector(['TEX86', 'ringIndex'])  # default confidence=0.90
     >>> detector.fit(coretop_df)
     >>> coretop_df['mahal_dist'] = detector.transform(coretop_df)
     >>> coretop_df['outliers'] = detector.detect_outliers(coretop_df)
@@ -34,7 +34,7 @@ class MahalanobisOutlierDetector:
     def __init__(
         self,
         features: list[str],
-        confidence: float = 0.99,
+        confidence: float = 0.90,
         method: Literal['chi2', 'chi2_rounddown'] = 'chi2',
         use_pinv_if_singular: bool = True
     ):
@@ -43,7 +43,7 @@ class MahalanobisOutlierDetector:
         ----------
         features : list[str]
             Feature column names to use for distance calculation
-        confidence : float, default=0.99
+        confidence : float, default=0.90
             Confidence level for outlier threshold (0-1)
         method : {'chi2', 'chi2_rounddown'}, default='chi2'
             Method for threshold calculation
