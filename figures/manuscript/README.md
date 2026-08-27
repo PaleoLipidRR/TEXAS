@@ -15,6 +15,14 @@ same plots — larger files, because fonts are embedded for the publisher. Do no
 try to sync the two byte-for-byte; regenerate here, then re-run the submission
 prep on the manuscript side.
 
+## Two figures are hand-finished
+
+`fig1_existing_calibrations…` and `fig2_TEXAS-PSM-framework` are edited by hand
+after the notebook draws them: the notebook writes the `_t0shift` PDF here, the
+editable file lives in `sources/`, and the exported `_revised.pdf` that the
+paper prints lives only in the manuscript repo. Re-running the notebook does
+**not** update what the paper shows for these two.
+
 ## The numbering trap
 
 Figure numbers moved as the paper evolved (the MCMC-budget pair went S16/S17 →
