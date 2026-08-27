@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
 """
-Upload review_archive_v0.2.0/ to Zenodo as a new draft version.
+Upload the staged resubmission archive to Zenodo as a new draft version.
 
-Usage
------
-    ZENODO_TOKEN=<your_token> python scripts/zenodo_upload.py [--publish]
+Stage first:  python scripts/prepare_resubmission_archive.py --apply
+Then:         ZENODO_TOKEN=<your_token> python scripts/zenodo_upload.py [--publish]
 
 The script:
   1. Creates a new draft version from the existing data record (RECORD_ID below)
-  2. Deletes files inherited from the previous version
-  3. Uploads all files in INDIVIDUAL_FILES + a bundled invT ZIP
-  4. Updates the version metadata to "0.2.0"
+  2. Deletes files inherited from the previous version (they stay on the old,
+     permanently accessible version — nothing is lost)
+  3. Uploads the archive's forward posteriors, data files, MANIFEST.csv and
+     README.md as individual flat files + a bundled invT ZIP
+  4. Updates the version metadata to the package version
   5. Leaves the record as a DRAFT (add --publish to publish immediately)
+
+The draft's record id is FINAL even before publishing — as soon as this
+script prints it, put it into ``download.py::ZENODO_RECORD_ID`` so the tagged
+release ships pointing at the record that will exist.
 
 Uses the Zenodo InvenioRDM REST API (/api/records/).
 Get a personal token at: https://zenodo.org/account/settings/applications/tokens/new/
@@ -22,6 +27,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import sys
 import tempfile
 import zipfile
@@ -30,39 +36,43 @@ from pathlib import Path
 import requests
 
 # ─── Configuration ─────────────────────────────────────────────────────────────
-RECORD_ID = "20032542"          # Zenodo data record (v0.2.0, doi:10.5281/zenodo.20032542)
+RECORD_ID = "20032542"          # latest published version of the data record
+                                # (concept doi:10.5281/zenodo.19666744)
 ZENODO_BASE = "https://zenodo.org/api"
-ARCHIVE_DIR = Path(__file__).parent.parent / "review_archive_v0.2.0"
-VERSION = "0.2.0"
+REPO = Path(__file__).resolve().parent.parent
+VERSION = re.search(r'^version = "(.+)"', (REPO / "pyproject.toml").read_text(),
+                    re.M).group(1)
+ARCHIVE_DIR = REPO / f"review_archive_v{VERSION}"
 
-# Files to upload as individual flat files (filename on Zenodo → local path).
-# Filenames must match POSTERIOR_REGISTRY and TRAINING_DATA_REGISTRY in download.py.
-INDIVIDUAL_FILES: dict[str, Path] = {
-    # ── Forward calibration posteriors ──────────────────────────────────────
-    "gen_logi_fixed_culmeso_cultureT_scaledRI_cren3.nc":
-        ARCHIVE_DIR / "posteriors/forward/gen_logi_fixed_culmeso_cultureT_scaledRI_cren3.nc",
-    "gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc":
-        ARCHIVE_DIR / "posteriors/forward/gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc",
-    "gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3.nc":
-        ARCHIVE_DIR / "posteriors/forward/gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3.nc",
-    "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc":
-        ARCHIVE_DIR / "posteriors/forward/gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc",
-    "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3.nc":
-        ARCHIVE_DIR / "posteriors/forward/gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3.nc",
-    # ── Training data ────────────────────────────────────────────────────────
-    "combined_coretop_culture_mesocosm_rev20260210.csv":
-        ARCHIVE_DIR / "data/combined_coretop_culture_mesocosm_rev20260210.csv",
-    "ds_gridded_screened_global_compilation_finalized.csv":
-        ARCHIVE_DIR / "data/ds_gridded_screened_global_compilation_finalized.csv",
-    "cmems_no3_uncertainty_field.nc":
-        ARCHIVE_DIR / "data/cmems_no3_uncertainty_field.nc",
-    # ── README ───────────────────────────────────────────────────────────────
-    "README.md":
-        ARCHIVE_DIR / "README.md",
-}
+# Expected archive shape — a mismatch means the staging script and this one
+# disagree, so stop rather than upload a partial record.
+EXPECTED_FORWARD = 9
+EXPECTED_INVT_MIN = 40
+
+
+def collect_individual_files() -> dict[str, Path]:
+    """Flat files: forward posteriors + data + MANIFEST.csv + README.md.
+
+    Forward-posterior filenames are the case ids ``download.py``'s
+    POSTERIOR_REGISTRY points at; data filenames must match
+    TRAINING_DATA_REGISTRY.
+    """
+    files: dict[str, Path] = {}
+    fwd = sorted((ARCHIVE_DIR / "posteriors/forward").glob("*.nc"))
+    if len(fwd) != EXPECTED_FORWARD:
+        sys.exit(f"ERROR: expected {EXPECTED_FORWARD} forward posteriors, "
+                 f"found {len(fwd)} — re-run prepare_resubmission_archive.py")
+    for f in fwd:
+        files[f.name] = f
+    for f in sorted((ARCHIVE_DIR / "data").iterdir()):
+        files[f.name] = f
+    for name in ("MANIFEST.csv", "README.md"):
+        files[name] = ARCHIVE_DIR / name
+    return files
+
 
 # InvT posteriors bundled as a single ZIP for SI reproducibility
-INVT_ZIP_NAME = "texas-psm-invT-posteriors-v0.2.0.zip"
+INVT_ZIP_NAME = f"texas-psm-invT-posteriors-v{VERSION}.zip"
 INVT_DIRS = [
     ARCHIVE_DIR / "posteriors/invT/coretop",
     ARCHIVE_DIR / "posteriors/invT/paleo",
@@ -142,12 +152,17 @@ def upload_file(session: requests.Session, draft_id: str, zenodo_name: str, loca
 def build_invt_zip(tmp_path: Path) -> Path:
     """Bundle all invT posteriors into a ZIP and return its path."""
     zip_path = tmp_path / INVT_ZIP_NAME
+    n = 0
     with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
         for d in INVT_DIRS:
             for f in sorted(d.rglob("*.nc")):
                 arcname = f"invT/{d.name}/{f.name}"
                 zf.write(f, arcname)
-    print(f"  Built {INVT_ZIP_NAME} ({_fmt_size(zip_path)})")
+                n += 1
+    if n < EXPECTED_INVT_MIN:
+        sys.exit(f"ERROR: only {n} invT files staged (expected ≥ "
+                 f"{EXPECTED_INVT_MIN}) — re-run prepare_resubmission_archive.py")
+    print(f"  Built {INVT_ZIP_NAME} ({n} files, {_fmt_size(zip_path)})")
     return zip_path
 
 
@@ -199,7 +214,11 @@ def main() -> None:
             "  Required scopes: deposit:write, deposit:actions"
         )
 
-    missing = [name for name, path in INDIVIDUAL_FILES.items() if not path.exists()]
+    if not ARCHIVE_DIR.is_dir():
+        sys.exit(f"ERROR: {ARCHIVE_DIR} not found — run "
+                 "prepare_resubmission_archive.py --apply first")
+    individual_files = collect_individual_files()
+    missing = [name for name, path in individual_files.items() if not path.exists()]
     if missing:
         sys.exit("ERROR: local files not found:\n" + "\n".join(f"  {m}" for m in missing))
 
@@ -213,7 +232,7 @@ def main() -> None:
     delete_existing_files(session, draft_id)
 
     print("\n── Step 3: upload individual files ──")
-    for zenodo_name, local_path in INDIVIDUAL_FILES.items():
+    for zenodo_name, local_path in individual_files.items():
         upload_file(session, draft_id, zenodo_name, local_path)
 
     print("\n── Step 4: bundle and upload invT posteriors ──")
@@ -232,11 +251,10 @@ def main() -> None:
     else:
         print("\nDraft saved (not published).")
         print(f"Review at: https://zenodo.org/uploads/{draft_id}")
+        print("\nNOW, before tagging the release (the draft id is final):")
+        print(f"  src/TEXAS/utils/download.py  →  ZENODO_RECORD_ID = \"{draft_id}\"")
         print("\nWhen ready to publish:")
         print("  ZENODO_TOKEN=<token> python scripts/zenodo_upload.py --publish")
-        print("\nAfter publishing, update:")
-        print("  CITATION.cff  →  doi field")
-        print("  src/TEXAS/utils/download.py  →  ZENODO_RECORD_ID (if the ID changed)")
 
 
 if __name__ == "__main__":

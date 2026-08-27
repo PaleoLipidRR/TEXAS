@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """
-Headless runner for the SI_code2a sensitivity tests.
+Headless runner for the SI_code02a sensitivity tests.
 
-The notebook (``notebooks/manuscripts/SI_code2a_model_param_sensitivity_test.ipynb``)
+The notebook (``notebooks/manuscripts/SI_code02a_model_param_sensitivity_test.ipynb``)
 exists to explain the analysis and draw the figures. This script exists to do
 the sampling, unattended, so nobody has to babysit a kernel for an hour. Both
 write and read the same files, so whichever runs first, the other picks up the
@@ -134,8 +134,19 @@ CRITERIA = dict(max_rhat=1.01, min_ess_bulk=400.0, pct_divergent=0.0, max_z_mean
 # The two budgets already in use are both undocumented magic numbers: 500/1000
 # (build_invT_inputData's sampler_kwargs default) and 300/1000 (the commented
 # coretop cell in SI_code2). Both are swept here so the choice stops being one.
-INVT_BUDGETS = [(300, 500), (300, 1000), (500, 1000), (1000, 1000)]
-INVT_M_VALUES = [300, 500]
+# M is swept DOWN to where it visibly fails, which the original {300, 500}
+# could not do: those two differ by a factor 1.29 in Monte Carlo error (5.8%
+# vs 4.5%), i.e. by less than the seed-to-seed floor this sweep uses as its own
+# yardstick. A null result was guaranteed by construction. The ladder below
+# spans 4.5% to 20% error, so the plateau -- and therefore the justification
+# for running at 300 rather than 100 -- is something the data can show.
+#
+# The warmup x sampling axis is genuinely flat (the invT posterior factorises
+# across samples, so a diagonal metric is exact and there is little for warmup
+# to adapt), so it keeps only the two budgets actually in production use
+# instead of spending cells re-confirming a known null.
+INVT_BUDGETS = [(300, 1000), (500, 1000)]
+INVT_M_VALUES = [25, 50, 100, 200, 300, 500]
 INVT_N_SITES = 200
 INVT_N_BINS = 10
 INVT_PRIOR_SIGMA_T = 10.0
@@ -761,10 +772,18 @@ def run_invt_case(fwd_name, subset, proxy_col, iter_warmup, iter_sampling, M,
     # guess for the whole set is what a paleo reconstruction actually has.
     prior_mu = float(np.mean(truth))
 
+    # Which predictors the calibration wants is a property of the POSTERIOR,
+    # not of its file name. This used to test `"no3" in fwd_name`, which happens
+    # to be true of the legacy long name and false of a case id
+    # (tx.GHEB.sst.sri03.G23-N1p0) -- so switching to case ids silently dropped
+    # both predictors and every fit died on "use_no3=1 but no NO3 supplied".
+    # Reading the attrs is the same question asked of the authoritative source.
+    from TEXAS.stan.io import load_posterior
+    _attrs = load_posterior(fwd_name).attrs
     predictors = {}
-    if "gdgt23ratio" in fwd_name:
+    if int(_attrs.get("use_gdgt23ratio", 0)):
         predictors["gdgt23ratio"] = subset["gdgt23ratio"].to_numpy(dtype=float)
-    if "no3" in fwd_name:
+    if int(_attrs.get("use_no3", 0)):
         predictors["no3"] = subset["no3_sf2tc_avg"].to_numpy(dtype=float)
 
     t_start = time.time()
@@ -824,14 +843,30 @@ _INVT_KEY = ["iter_warmup", "iter_sampling", "M", "seed"]
 
 
 def _invt_fwd_name():
-    """The calibration Part 3 tunes against: the production forward posterior."""
-    col = PROXIES[PRODUCTION_PROXY]["column"]
-    return (f"gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_{TEMPTYPE}"
-            f"_gdgt23ratio_no3_{NO3_CUTOFF}_{col}")
+    """The calibration Part 3 tunes against: the reported forward posterior.
+
+    Two things were wrong with the hand-written legacy name this used to
+    return. It named the ADDITIVE errors-in-variables model, not the T0-shift
+    model the manuscript reports; and because an old flat file still exists for
+    SRI03, the legacy name resolved to the PRE-2026-08-12 copy rather than the
+    refit. Building the case id from attrs fixes both -- it is the same call
+    save_posterior makes, so it cannot drift from what is on disk.
+    """
+    from TEXAS.utils.naming import case_from_attrs
+    return str(case_from_attrs({
+        "stan_model_name": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift",
+        "temptype": TEMPTYPE,
+        "proxy_name": PROXIES[PRODUCTION_PROXY]["column"],
+        "use_gdgt23ratio": 1,
+        "use_no3": 1,
+        "no3_cutoff": float(NO3_CUTOFF),
+    }))
 
 
 def run_part3(quick=False, force=False, dry_run=False, m_values=None):
     from TEXAS.stan.io import load_posterior
+
+    fwd_name = _invt_fwd_name()
 
     budgets = [(300, 300), (500, 500)] if quick else INVT_BUDGETS
     m_values = m_values or ([100, 200] if quick else INVT_M_VALUES)
@@ -848,11 +883,19 @@ def run_part3(quick=False, force=False, dry_run=False, m_values=None):
     cells.append((rw, rs, max(m_values), INVT_REPLICATE_SEED))
 
     def _done(w, s, m, sd):
+        # NB: the fwd_posterior check is load-bearing. Without it a cached row
+        # from a DIFFERENT forward calibration counts as satisfying this cell,
+        # and the table silently ends up spanning two calibrations with no way
+        # to tell which row came from which.
         if grid_df.empty:
             return False
         seeds = (grid_df["seed"] if "seed" in grid_df.columns
                  else pd.Series(SEED, index=grid_df.index))
-        return bool(((grid_df["iter_warmup"] == w)
+        same_fwd = (grid_df["fwd_posterior"] == fwd_name
+                    if "fwd_posterior" in grid_df.columns
+                    else pd.Series(True, index=grid_df.index))
+        return bool((same_fwd
+                     & (grid_df["iter_warmup"] == w)
                      & (grid_df["iter_sampling"] == s)
                      & (grid_df["M"] == m) & (seeds == sd)).any())
 
@@ -870,7 +913,6 @@ def run_part3(quick=False, force=False, dry_run=False, m_values=None):
             log(f"    warmup={w} sampling={s} M={m} seed={sd}{tag}")
         return grid_df, site_df
 
-    fwd_name = _invt_fwd_name()
     # Fail here rather than 200 sites into a fit: Part 3 tunes against the
     # calibration Part 2 writes, so running it first is a sequencing error.
     try:
@@ -1050,7 +1092,7 @@ def recommend_invt():
 # ── CLI ─────────────────────────────────────────────────────────────────────
 def main(argv=None):
     ap = argparse.ArgumentParser(
-        description="Headless runner for the SI_code2a sensitivity tests.",
+        description="Headless runner for the SI_code02a sensitivity tests.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="nohup python scripts/run_param_sensitivity.py all "
                "> sensitivity.log 2>&1 &")

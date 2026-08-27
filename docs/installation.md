@@ -182,7 +182,7 @@ Once the image is pulled and the container starts, open **http://localhost:8890*
     `run.sh` uses port **8890** to avoid conflicts with any native JupyterLab or Anaconda installation that may already be running on port 8888 — common on Windows and macOS with Anaconda installed. The JupyterLab startup log will print `http://127.0.0.1:8890/lab` — use that URL.
 
 !!! note "Windows/WSL2 — kernel selector on first open"
-    When you open a notebook for the first time in the Docker container, JupyterLab may show a kernel name like `SI_code1_PreProcessing_finalized.ipynb (3bf86915)` in the kernel selection dialog instead of "Python 3". This is a leftover preference saved inside the `.ipynb` file from a previous session on a different machine. Click the dropdown, select **Python 3 (ipykernel)**, and click **Select** — it will work normally after that.
+    When you open a notebook for the first time in the Docker container, JupyterLab may show a kernel name like `SI_code00_PreProcessing.ipynb (3bf86915)` in the kernel selection dialog instead of "Python 3". This is a leftover preference saved inside the `.ipynb` file from a previous session on a different machine. Click the dropdown, select **Python 3 (ipykernel)**, and click **Select** — it will work normally after that.
 
 !!! tip "Disk space — plan for ~3.5 GB total"
     | Component | Size | Location |

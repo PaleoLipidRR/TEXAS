@@ -1,6 +1,6 @@
 # Finding the Nearest Ocean Pixel: How `cKDTree` Works
 
-> **Context**: Used in `SI_code1_PreProcessing_finalized.ipynb` — the `get_nearest_valid_value()` function snaps each sediment core site to the nearest valid (non-land) pixel in a gridded dataset.
+> **Context**: Used in `SI_code00_PreProcessing.ipynb` — the `get_nearest_valid_value()` function snaps each sediment core site to the nearest valid (non-land) pixel in a gridded dataset.
 
 ---
 
@@ -350,4 +350,4 @@ This version is insensitive to longitude convention and works correctly across t
 
 - [`scipy.spatial.cKDTree` documentation](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.cKDTree.html)
 - [`xarray.DataArray.stack`](https://docs.xarray.dev/en/stable/generated/xarray.DataArray.stack.html)
-- Notebook: `notebooks/manuscripts/SI_code1_PreProcessing_finalized.ipynb`
+- Notebook: `notebooks/manuscripts/SI_code00_PreProcessing.ipynb`

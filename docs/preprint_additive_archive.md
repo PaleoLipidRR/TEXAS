@@ -53,13 +53,14 @@ fits — compset `GHEA` (`A` = additive):
 | `tx.GHEA.sst.sri03.G23-N1p0` | `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc` |
 | `tx.GHEA.thm.sri03.G23-N1p0` | `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3.nc` |
 
-They carry `beta_G23_crtp` / `beta_NO3_crtp` variables. The revised
-calibration (`GHEB`, T₀-shift, `gamma_*` variables in °C per predictor unit)
-will be archived with the v1.0.0 Zenodo record at paper acceptance; until
-then, refit it locally with the
-`gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift` Stan model. The
-package's ensemble and inverse machinery auto-detects which arm a posterior
-belongs to from its variable names, so both remain fully usable.
+They carry `beta_G23_crtp` / `beta_NO3_crtp` variables. From **v0.3.0** of the
+data record, the archive carries the revised calibration instead (`GHEB`,
+T₀-shift, `gamma_*` variables in °C per predictor unit) under case-id file
+names; the additive posteriors remain permanently available on the record's
+**v0.2.0 version**, and `TEXAS.download_posteriors()` still resolves their
+legacy names (and the `tx.GHEA.*` case ids) to that version. The package's
+ensemble and inverse machinery auto-detects which arm a posterior belongs to
+from its variable names, so both remain fully usable.
 
 ## What carries over unchanged
 

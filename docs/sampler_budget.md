@@ -35,7 +35,7 @@ python scripts/run_param_sensitivity.py part3    # inverse budget and M
 python docs/_scripts/build_sampler_budget.py     # rebuild this page
 ```
 
-`notebooks/manuscripts/SI_code2a_model_param_sensitivity_test.ipynb` runs the
+`notebooks/manuscripts/SI_code02a_model_param_sensitivity_test.ipynb` runs the
 same analysis interactively and draws the figures; a test fails if the two
 configurations drift apart.
 

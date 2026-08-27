@@ -3,7 +3,7 @@
 How well does a TEXAS calibration actually fit, and how do we know the
 generalized-logistic Bayesian model improves on existing TEX₈₆ calibrations?
 This page summarises the validation strategy used in the manuscript; the full
-analysis (with figures) lives in `notebooks/manuscripts/SI_code2_TEXAS_analysis.ipynb`.
+analysis (with figures) lives in `notebooks/manuscripts/SI_code02_t0shift_TEXAS_analysis.ipynb`.
 
 Validation rests on three complementary checks:
 
@@ -121,7 +121,7 @@ reported R² a meaningful measure of skill rather than an artefact of an
 informative prior.
 
 See `SI_code2` (T-residual plots, Fig. 9) and the paleo applications in
-`SI_code3_paleo_showcases.ipynb` for downcore reconstructions with full
+`SI_code03_paleo_showcases.ipynb` for downcore reconstructions with full
 posterior uncertainty.
 
 ---
