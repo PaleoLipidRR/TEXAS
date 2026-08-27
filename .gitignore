@@ -122,8 +122,10 @@ docs/superpowers/
 # (Was ignored as scratch until 2026-08-10; it now has to travel to the Linux
 # boxes, so it lives in the repo.)
 
-# uv lockfile (not tracked — conda is the canonical env; see docs)
-uv.lock
+# uv.lock IS tracked (since 2026-08-27). Conda remains the canonical environment,
+# but the manuscript's Open Research statement promises "pre-generated conda-lock
+# and uv lock files", so the uv lock has to actually ship. Regenerate with
+# `uv lock` whenever pyproject dependencies or the version change.
 
 # Claude Code local permission allowlist (machine-specific absolute paths).
 # .claude/agents/ and .claude/skills/ ARE tracked - they are shared tooling.
