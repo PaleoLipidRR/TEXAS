@@ -31,10 +31,14 @@ dependencies:
   - h5netcdf
   - cftime
 
-  # --- Plotting (Stable Pinned Versions) ---
+  # --- Plotting ---
   # NOTE: Multiple pins here increase solver complexity.
-  - matplotlib<3.5
-  - matplotlib-inline<0.2.0
+  # matplotlib was pinned <3.5 for proplot, which this project no longer uses.
+  # ultraplot needs matplotlib >=3.9, so the old pin made it uninstallable:
+  # the solver fell back to ultraplot 1.0, which then failed to import at all
+  # (matplotlib.cm.ColormapRegistry arrived in 3.5). Unpinned 2026-08-27.
+  - matplotlib>=3.9,<3.11
+  - matplotlib-inline
   - setuptools<81
   - cmocean
   - plotly
@@ -69,7 +73,7 @@ dependencies:
 
   # --- Pip-only packages (conda-lock skips these if listed under conda) ---
   - pip:
-    - ultraplot
+    - ultraplot>=2.4.0      # keep in step with pyproject; <2.4 cannot import
     - pykrige
     - regionmask>=0.9
     - odrpack

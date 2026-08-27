@@ -107,6 +107,38 @@ resolves their legacy names — pinned to that old version.
   "at acceptance / v1.0.0" — it now says v0.3.0 and explains the version
   pinning.
 
+### The proplot -> ultraplot migration had not reached environment.yml
+
+Found 2026-08-27 while verifying the locks before tagging. `environment.yml`
+still carried `matplotlib<3.5`, which was a **proplot** constraint. ultraplot
+2.4 needs `matplotlib>=3.9,<3.11`, so the solver could not install it and fell
+back to **ultraplot 1.0** — which `pyproject.toml` forbids (`>=2.4.0`) and
+which cannot even be imported against matplotlib 3.4.3
+(`matplotlib.cm.ColormapRegistry` arrived in 3.5).
+
+Confirmed inside the built image, not just theorised:
+
+    ultraplot metadata version: 1.0
+    matplotlib metadata version: 3.4.3
+    import ultraplot -> AttributeError: module 'matplotlib.cm' has no
+                        attribute 'ColormapRegistry'
+
+The SI notebooks guard with `except ImportError`, which does **not** catch an
+`AttributeError`, so a notebook cell crashes outright rather than degrading to
+`plot = None`. In other words the recommended Docker image could not run the
+SI notebooks, and `texas-env` on this machine has no ultraplot at all — the
+figures were in fact being drawn in `base` (ultraplot 2.4.0, matplotlib
+3.10.9). `uv.lock` always had it right, because `pyproject.toml` sets no upper
+matplotlib bound; the conda pin was the anomaly.
+
+Fix: `matplotlib<3.5` -> `matplotlib>=3.9,<3.11` and `ultraplot` ->
+`ultraplot>=2.4.0` in `environment.yml`, re-solve `conda-lock.yml`, re-render
+the four platform locks, rebuild the image. This moves the shipped environment
+*toward* the one the figures were actually made in.
+
+**Do not restore the matplotlib upper-bound-below-3.5 pin.** It is only
+correct for proplot, which this project left behind.
+
 ### Release sequence (order matters — the record id must be in the tag)
 
 1. ~~Commit everything.~~ **Done 2026-08-27** — eight commits, tree clean.
