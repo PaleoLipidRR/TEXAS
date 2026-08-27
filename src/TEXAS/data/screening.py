@@ -61,6 +61,55 @@ class MahalanobisOutlierDetector:
         self.threshold = None
         self.is_fitted = False
         
+    # Path to the frozen reference ellipse of manuscript Section 5.1, built by
+    # scripts/build_calibration_domain.py from the core-top reference cluster.
+    _DOMAIN_FILE = "calibration_domain.json"
+
+    def _load_calibration_domain(self) -> bool:
+        """Adopt the published calibration ellipse. False if it does not apply."""
+        import json
+        from pathlib import Path
+        f = Path(__file__).parent / self._DOMAIN_FILE
+        if not f.exists():
+            return False
+        spec = json.loads(f.read_text(encoding="utf-8"))
+        if list(self.features) != list(spec["features"]):
+            return False
+        self.mean_vec = np.asarray(spec["mean"], dtype=float)
+        self.inv_cov = np.asarray(spec["inv_cov"], dtype=float)
+        self.threshold = float(np.sqrt(chi2.ppf(self.confidence, df=len(spec["features"]))))
+        self.is_fitted = True
+        self.fitted_on = "TEXAS published calibration domain"
+        self.n_reference = spec["n_reference"]
+        return True
+
+    @classmethod
+    def from_calibration(cls, confidence: float = 0.90) -> "MahalanobisOutlierDetector":
+        """Return a detector fixed to TEXAS's published calibration domain.
+
+        Explicit form of the default behaviour: a detector on the standard
+        features screens against this domain without being fitted at all.
+
+        The ellipse is a property of the *calibration* -- Section 5.1 fits it to
+        core-top samples with GDGT-2/GDGT-3 <= 5 -- not of the data being
+        screened. Fitting on your own record instead re-centres the ellipse onto
+        that record, so the more unusual the record the less it flags: an
+        all-warm Paleogene section would report nothing.
+
+        Examples
+        --------
+        >>> detector = MahalanobisOutlierDetector.from_calibration()
+        >>> df["flagged"] = detector.detect_outliers(df)
+        """
+        det = cls(["TEX86", "scaledRI_cren3"], confidence=confidence)
+        if not det._load_calibration_domain():
+            raise FileNotFoundError(
+                "The bundled calibration domain is missing or does not match "
+                "the default features; rebuild it with "
+                "scripts/build_calibration_domain.py."
+            )
+        return det
+
     def fit(
         self,
         df: pd.DataFrame,
@@ -219,8 +268,14 @@ class MahalanobisOutlierDetector:
         distances : pd.Series
             Mahalanobis distances (NaN for invalid rows)
         """
-        if not self.is_fitted:
-            raise ValueError("Must call fit() before computing distances")
+        if not self.is_fitted and not self._load_calibration_domain():
+            raise ValueError(
+                "This detector is not fitted, and no bundled calibration domain "
+                f"exists for features {list(self.features)}. Either call fit() on "
+                "your reference set, or use the standard "
+                "['TEX86', 'scaledRI_cren3'] features to screen against TEXAS's "
+                "published calibration domain."
+            )
 
         X = self._resolve_features(df, columns=columns, on_unscorable=on_unscorable)
         X = X.replace([np.inf, -np.inf], np.nan)
@@ -415,10 +470,15 @@ class MahalanobisOutlierDetector:
         """
         Fit on *df* and flag its rows in one call (sklearn-style).
 
-        Equivalent to ``fit(df)`` followed by ``detect_outliers(df)`` — the
-        one-liner documented in the manuscript's Appendix C:
+        Equivalent to ``fit(df)`` followed by ``detect_outliers(df)``.
 
-            df["flagged"] = detector.fit_predict(df)
+        .. warning::
+           This fits the ellipse on *df itself*, which is right when *df* is a
+           reference/training set and **wrong for screening a record against the
+           calibration** -- the domain would move with the data, so an unusual
+           record flags less rather than more. To screen your own data, just
+           call :meth:`detect_outliers`: an unfitted detector on the standard
+           features uses TEXAS's published calibration domain automatically.
 
         Parameters
         ----------

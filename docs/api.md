@@ -86,16 +86,23 @@ training set. A flagged sample is an extrapolation, not necessarily a bad
 measurement — the recommendation is to flag and interpret with caution rather
 than exclude.
 
+The ellipse is a fixed property of the published calibration (the core-top
+reference cluster of Section 5.1), so **nothing needs fitting** — an unfitted
+detector on the standard features adopts it automatically:
+
 ```python
 from TEXAS.data import MahalanobisOutlierDetector
 
 detector = MahalanobisOutlierDetector(["TEX86", "scaledRI_cren3"], confidence=0.90)
-df["flagged"] = detector.fit_predict(df)
+df["flagged"] = detector.detect_outliers(df)
 ```
+
+Do **not** call `fit()` or `fit_predict()` on your own record: that re-centres
+the ellipse onto the record, so the more unusual your data the less it flags.
 
 ```{eval-rst}
 .. autoclass:: TEXAS.data.screening.MahalanobisOutlierDetector
-   :members: fit, fit_predict, transform, detect_outliers, detect_outliers_manual, fit_transform, get_params
+   :members: from_calibration, fit, fit_predict, transform, detect_outliers, detect_outliers_manual, fit_transform, get_params
    :member-order: bysource
 ```
 

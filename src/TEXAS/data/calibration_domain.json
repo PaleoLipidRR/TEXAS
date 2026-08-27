@@ -1,0 +1,24 @@
+{
+  "features": [
+    "TEX86",
+    "scaledRI_cren3"
+  ],
+  "mean": [
+    0.5038919114067659,
+    0.5775583234628273
+  ],
+  "inv_cov": [
+    [
+      217.62209855838552,
+      -169.97367315029817
+    ],
+    [
+      -169.97367315029817,
+      187.20667027413145
+    ]
+  ],
+  "n_reference": 1198,
+  "reference_cluster": "core-top samples, lowAbundanceFlag == False, GDGT-2/GDGT-3 <= 5.0 (manuscript Section 5.1)",
+  "source": "combined_coretop_culture_mesocosm_rev20260210.csv",
+  "threshold_at_0.90": 2.145966026289347
+}

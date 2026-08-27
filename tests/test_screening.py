@@ -234,3 +234,48 @@ class TestFitPredict:
         # ~10% of a well-behaved sample sits outside the 90% ellipse
         frac = df["flagged"].mean()
         assert 0.0 <= frac <= 0.35
+
+
+class TestCalibrationDomainDefault:
+    """Screening must use the PUBLISHED ellipse, not one fitted to the record.
+
+    Section 5.1 defines the ellipse on a fixed reference cluster (core-tops with
+    GDGT-2/GDGT-3 <= 5). Fitting on the record being screened lets the domain
+    move with the data, so an all-warm section recentres the ellipse onto itself
+    and flags nothing -- the exact opposite of the intended behaviour.
+    """
+
+    WARM = pd.DataFrame({"TEX86": [0.86, 0.88, 0.90, 0.91, 0.93],
+                         "scaledRI_cren3": [0.80, 0.82, 0.84, 0.85, 0.87]})
+
+    def test_unfitted_detector_screens_against_published_domain(self):
+        det = MahalanobisOutlierDetector(["TEX86", "scaledRI_cren3"], confidence=0.90)
+        flags = det.detect_outliers(self.WARM)          # no fit() call
+        assert det.is_fitted
+        assert flags.all(), "warm samples must fall outside the calibration domain"
+
+    def test_from_calibration_matches_the_default(self):
+        a = MahalanobisOutlierDetector.from_calibration()
+        b = MahalanobisOutlierDetector(["TEX86", "scaledRI_cren3"], confidence=0.90)
+        b.detect_outliers(self.WARM)
+        assert np.allclose(a.mean_vec, b.mean_vec)
+        assert np.allclose(a.inv_cov, b.inv_cov)
+
+    def test_self_fitting_is_the_trap_this_guards(self):
+        """fit_predict on the record flags nothing -- why it must not be the default."""
+        self_fit = MahalanobisOutlierDetector(
+            ["TEX86", "scaledRI_cren3"], confidence=0.90).fit_predict(self.WARM)
+        published = MahalanobisOutlierDetector(
+            ["TEX86", "scaledRI_cren3"], confidence=0.90).detect_outliers(self.WARM)
+        assert not self_fit.any()
+        assert published.all()
+
+    def test_published_threshold_is_the_manuscript_value(self):
+        det = MahalanobisOutlierDetector.from_calibration(confidence=0.90)
+        assert det.threshold == pytest.approx(2.1460, abs=1e-3)
+        assert det.n_reference == 1198
+
+    def test_nonstandard_features_still_require_fit(self):
+        det = MahalanobisOutlierDetector(["TEX86", "fGDGT_0"])
+        with pytest.raises(ValueError, match="not fitted"):
+            det.detect_outliers(pd.DataFrame({"TEX86": [0.5], "fGDGT_0": [0.2]}))
