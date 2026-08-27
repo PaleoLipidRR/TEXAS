@@ -1,8 +1,8 @@
 """
-Guard against drift between the SI_code2a notebook and its headless runner.
+Guard against drift between the SI_code02a notebook and its headless runner.
 
 ``scripts/run_param_sensitivity.py`` and
-``notebooks/manuscripts/SI_code2a_model_param_sensitivity_test.ipynb`` do the
+``notebooks/manuscripts/SI_code02a_model_param_sensitivity_test.ipynb`` do the
 same sampling and write the same files, so a reviewer can run either one. That
 only holds while their configurations agree -- and they are separate files, so
 nothing but this test makes them agree. Edit one, and this fails until you edit
@@ -21,12 +21,12 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[1]
 NOTEBOOK = (REPO / "notebooks" / "manuscripts"
-            / "SI_code2a_model_param_sensitivity_test.ipynb")
+            / "SI_code02a_model_param_sensitivity_test.ipynb")
 SCRIPT = REPO / "scripts" / "run_param_sensitivity.py"
 
 pytestmark = pytest.mark.skipif(
     not (NOTEBOOK.exists() and SCRIPT.exists()),
-    reason="SI_code2a notebook or its runner is not present",
+    reason="SI_code02a notebook or its runner is not present",
 )
 
 # name -> whether order matters (lists compared as sets when it does not)

@@ -8,7 +8,119 @@ bottom; tick the boxes as you go.
 
 ---
 
-## Latest session — 2026-08-23 (desktop): the default calibration now ships, and the nitrate token is readable
+## Latest session — 2026-08-27 (desktop): v0.3.0 resubmission prep — the Zenodo swap is staged
+
+The revised manuscript's Zenodo upload is prepared end to end. The data
+record's new version replaces the additive (`GHEA`) files with the T₀-shift
+refits under case-id names; the additive files stay on the v0.2.0 version of
+the record (Zenodo keeps every published version), and `download.py` still
+resolves their legacy names — pinned to that old version.
+
+### Done this session
+
+- **Version → 0.3.0** (`pyproject.toml`). `CITATION.cff` fixed: `cff-version`
+  1.5.0 → 1.2.0 (1.5.0 is not a real CFF schema), `doi` now the **software**
+  concept DOI 10.5281/zenodo.19671664 (it pointed at the *data* record), and a
+  comment names the data concept DOI 10.5281/zenodo.19666744.
+- **`fit_predict` added** to `MahalanobisOutlierDetector` — Appendix C
+  documents `df["flagged"] = detector.fit_predict(df)` and the method did not
+  exist. Pinned by `TestFitPredict` in `tests/test_screening.py`.
+- **`download.py` registry rewritten** to the nine case ids (6× GHEB, 2× GHPU,
+  GCDU). Legacy v0.2.0 entries kept but pinned via `"record":` to the old
+  version and excluded from the no-argument download; `tx.GHEA.*` case ids
+  alias onto them. ⚠️ `ZENODO_RECORD_ID` still says 20032542 — **update it to
+  the new draft's id the moment `zenodo_upload.py` prints it, before tagging**
+  (a draft's record id is final before publication).
+- **`scripts/prepare_resubmission_archive.py`** (new; replaces the deleted
+  `prepare_review_archive.sh`, which staged legacy 050126 names that no longer
+  exist). Stages `review_archive_v0.3.0/`: 9 forward posteriors, 6 compiled
+  global-coretop reconstructions (b01–b07 concatenated; row order =
+  `coretop_maps_sites.csv`), 40 paleo invT files (30 GHEB + 8 GHPU + the two
+  Fig. 13 `ud_draws`), 4 data files, `MANIFEST.csv` (117 runs — the "archive
+  manifest" of SI Text S3.3, warm-up lengths included), and a README written
+  from Appendix C (this is the fix for R1C1's "I checked the Zenodo site and
+  can't see this information"). Dry-run default; `--apply` verifies every .nc.
+  **Built and verified this session: 0.48 GB.**
+- **`scripts/zenodo_upload.py` retargeted**: version/archive dir from
+  pyproject, file list collected from the staged tree with count guards,
+  invT zip name versioned.
+- **`scripts/add_retained_flag.py`** (new, applied): the R2R promised (R2C13)
+  that retained warm-end samples are flagged in the archived calibration
+  dataset — no flag column existed. The gridded CSV now carries
+  `mahalDist_TEXRI_cren3`, `mahal_outlier_090`, `warm_end_retained`
+  (27 warm-corner rows; ellipse fitted on the RAW sample-level coretops,
+  lowAbundance-screened, G2/3 ≤ 5 — fitting on the gridded set itself gives a
+  tighter ellipse and 150 false flags; one Arctic row sits marginally outside
+  from gridding and is deliberately NOT flagged as retained).
+- **Notebook cleanup**: `SI_code2_TEXAS_analysis` and `SI_code3_paleo_showcases`
+  (additive-era) → `notebooks/superseded/` with a README;
+  `SI_code1_PreProcessing_finalized` → `SI_code00_PreProcessing` so that
+  "*SI Code 1*", which the SI cites for `run_variance_partitioning()`, resolves
+  uniquely to `SI_code01_t0shift_variance_partitioning`. Live references
+  (docs, skills, figure-sync agent) repointed; checkpoints and a scratch png
+  removed. **SI_code04 moved out of `manuscripts/`** (2026-08-27): its
+  subject -- WAIC, 5-fold random and spatially blocked CV, elpd, Moran's I,
+  paired bootstrap -- appears in **neither** main.tex, si_template_2019.tex,
+  nor R2R_main.tex (verified by concept words AND signature numbers: 24.3,
+  0.750, 0.343, "elpd", 1298 all absent), and its two figures are in no SI.
+  R2C4 was answered a different way -- everything labelled *in-sample* plus
+  the 21-basin breakdown (Fig. S16, from `SI_code02`) -- and the letter says
+  outright "not an out-of-sample validation ... we do not make any
+  out-of-sample claims anywhere in the revised manuscript", which publishing
+  the CV table would contradict. It now lives in
+  `notebooks/reviewer_response/` with a README recording why, so the Open
+  Research claim "the notebooks that generate every figure in this
+  manuscript" describes `manuscripts/` exactly.
+  **SI_code02a figure numbers fixed**: it wrote `figS16_mcmcBudget_convergence_curves`
+  and `figS17_mcmcBudget_heatmaps_bothArms`, but the SI renumbered them +1 and
+  includes `figS17_`/`figS18_`. The manuscript repo holds byte-identical copies
+  under BOTH numbers, so the stale pair would have silently survived a re-run.
+  Notebook now writes S17/S18; `figS18_uncertainty_calibration` (in no SI, and
+  colliding with the real S18) became `figS_uncertaintyCalibration` in the
+  notebook and in `scripts/plot_uncertainty_calibration.py`.
+  ⚠️ Stale duplicate figures still sit in the manuscript repo's
+  `figures/supplementary/` (`figS15_basin_skill`, `figS16_mcmcBudget_convergence_curves`,
+  `figS17_mcmcBudget_heatmaps_bothArms`, plus older figS11/12/13 leftovers) --
+  unreferenced by the SI; delete when convenient, but not mid-Overleaf-sync.
+  Second pass completed the ladder:
+  `SI03_paleo_showcases_modelswitch` → **`SI_code03_paleo_showcases`** and
+  `SI_code2a_…` → **`SI_code02a_…`**, with every repo reference updated
+  (including `tests/test_manuscript_refit_config.py` /
+  `test_param_sensitivity_config.py`, which load the notebooks by path —
+  both pass). The manuscripts folder now reads
+  `SI_code00 · 01 · 02 · 02a · 03`. ⚠️ The *text* repos still say
+  "SI_code2a" in a `\note{}` (revised main.tex ~755) and OVERLEAF-EDITS
+  mentions the old SI03 name — margin notes only, but sweep them when
+  editing there.
+- `docs/preprint_additive_archive.md` no longer promises the GHEB archive
+  "at acceptance / v1.0.0" — it now says v0.3.0 and explains the version
+  pinning.
+
+### Release sequence (order matters — the record id must be in the tag)
+
+1. Commit everything (incl. the pre-session dirty figure/CSV files), push.
+2. Merge `feat/revision1-validation-groupA` → `main` (plan: top of this file).
+3. `python scripts/prepare_resubmission_archive.py --apply` (if not fresh).
+4. `ZENODO_TOKEN=… python scripts/zenodo_upload.py` → **draft**; put the
+   printed draft id into `download.py::ZENODO_RECORD_ID`; commit.
+5. Tag `v0.3.0`, push tag → GitHub release → software Zenodo version DOI.
+6. `zenodo_upload.py --publish`; verify `TEXAS.download_posteriors()` cold.
+7. Manuscript: restore the Open Research availability paragraph (deleted in
+   `_draft` — the track-change `\remove{}` at main-track-change.tex:1164–1177;
+   SI still cites `rattanasriampaipong_2026_ZenodoSoftware`). Final wording
+   agreed 2026-08-27 (see the pre-flight artifact, card B1): v0.3.0
+   accompanies the submission and **the version of record will be v1.0.0 at
+   publication** — so the software bib entry should cite the CONCEPT DOI
+   10.5281/zenodo.19671664 (survives the bump; update only `version=` at
+   proofs). Fix the bib: `…_ZenodoData` is a byte-copy of
+   `…_ZenodoSoftware` — retype as `@dataset`, doi 10.5281/zenodo.19666744.
+8. **At acceptance**: tag `v1.0.0`, publish v1.0.0 versions of both Zenodo
+   records (re-run `prepare_resubmission_archive.py` + `zenodo_upload.py`),
+   update `version=` in both bib entries and the prose at proofs.
+
+---
+
+## Previous session — 2026-08-23 (desktop): the default calibration now ships, and the nitrate token is readable
 
 **Start here.** Three things changed that a reader of the paper will touch on
 day one: a reconstruction no longer needs a download, `N10` no longer reads as
@@ -185,7 +297,7 @@ leftovers and are fixed too. `PROVENANCE.md` was already correct.
 
 ### What is dirty and why
 
-`SI03_paleo_showcases_modelswitch.ipynb` and `fig10`–`fig13`,
+`SI_code03_paleo_showcases.ipynb` and `fig10`–`fig13`,
 `figSI_variant_comparison_t0shift_vs_eiv.pdf` were rewritten at 14:21–14:22 by
 **a live VS Code kernel, not by this session** — presumably the σ = 10
 `RUN_EXTREME` re-run listed below. Left untouched; check them before committing.
@@ -232,7 +344,7 @@ Written as a handoff across a PC restart. (Superseded as the entry point by the
 
 - **The rename reached the notebook switch keys.** They were left alone on
   2026-08-15 as "runtime branches, not artifacts". Wrong for
-  `SI03_paleo_showcases_modelswitch`, which interpolates `MODEL_VARIANT` into
+  `SI_code03_paleo_showcases`, which interpolates `MODEL_VARIANT` into
   `figSI_variant_comparison_{variant}_vs_{other}.pdf` and
   `data_list_extreme_example_{variant}.pkl` — the branch key *is* an artifact
   name. Fixed, and the two outputs renamed on disk.
@@ -265,7 +377,7 @@ Written as a handoff across a PC restart. (Superseded as the entry point by the
   moieties, and neither 3 nor 4 is that count; they are conventions. The old
   keyword still works and warns, with a test pinning that both spellings return
   the same number. The `cren_rings` dict keys in `run_param_sensitivity.py` and
-  `SI_code2a` are each file's own config keys, never reach the function, and
+  `SI_code02a` are each file's own config keys, never reach the function, and
   were deliberately left alone.
 
 ### ~~⚠️ figS17 is stale~~ — RESOLVED 2026-08-22, see the section above
@@ -430,7 +542,7 @@ number could still shift by up to three.
 - [ ] The `[TO BE CONFIRMED BY THE AUTHORS]` box in R3C3.
 - [ ] Optional: spatially blocked **refit** of TEXAS (~3.5 h).
 
-> **Notebook churn to keep reverting.** `SI_code1_PreProcessing_finalized.ipynb`
+> **Notebook churn to keep reverting.** `SI_code00_PreProcessing.ipynb`
 > and `SI_code2_TEXAS_analysis.ipynb` show kernel-metadata-only diffs
 > (3.12.8 → 3.13.5) whenever they are opened. Not ours; reverted, do not commit.
 
@@ -499,7 +611,7 @@ cannot be the record — added `scripts/export_cv_results.py` → CSV/JSON, plus
 tracked. Copied to `TEXAS/data/revision1/groupA/model_comparison_cv/` with a
 `PROVENANCE.md`.
 
-**New notebook `notebooks/manuscripts/SI_code04_model_comparison_cv.ipynb`** —
+**New notebook `notebooks/reviewer_response/SI_code04_model_comparison_cv.ipynb`** —
 43 cells, executed clean, reads only CSV/JSON, never samples. Three parts:
 
 - **Part 1 — TEXAS variants.** T₀-shift beats additive on every metric;
@@ -553,7 +665,7 @@ global, only 13.9% below cutoff, and multivariate improves *bias* (−2.34 vs
 - [ ] Optional, not needed for the argument: spatially blocked **refit** of TEXAS
       (~3.5 h) so its side is genuinely held out. The 8.7% in-sample→spatial
       penalty from Part 1 currently stands in as a bound.
-- [x] Unrelated churn in the tree: `SI_code1_PreProcessing_finalized.ipynb` and
+- [x] Unrelated churn in the tree: `SI_code00_PreProcessing.ipynb` and
       `SI_code2_TEXAS_analysis.ipynb` kernel-metadata diffs — reverted, not committed.
 
 ---
@@ -589,7 +701,7 @@ intentionally keep the old spelling. The Python curve function is
       `SI_code02_t0shift_TEXAS_analysis.ipynb` (SST + thermoT): panel (b) now
       lists `sigma_proxyObs_crtp` (σ_crtp, coretop colour, stack starts at
       y=0.31) but the committed figures predate the edit.
-- [ ] **Re-run the fig10/fig11 cells in `SI03_paleo_showcases_modelswitch.ipynb`**
+- [ ] **Re-run the fig10/fig11 cells in `SI_code03_paleo_showcases.ipynb`**
       and eyeball the new code-drawn annotations (`site_annot_dict`, elbow
       leaders) against the hand-revised PDFs in `~/Downloads/*_revised.pdf`;
       nudge `xy`/`xytext` as needed. The `axs[-1,1]` SubplotGrid bug that ate
@@ -902,7 +1014,7 @@ deliberately left unstamped**, since the manifest records no path for inverse ru
 **Two more manuscript edits landed**: the Conclusions now says explicitly that
 R² 0.75 → 0.80 is *in-sample*, and gives the cross-validated counterparts (0.74
 random, 0.70 spatially blocked). R3C3's robustness half is drafted from the CV
-run and SI_code2a.
+run and SI_code02a.
 
 **Section 6.3's methodology moved to Text S3**; §6.3 now carries the argument and
 ends on a prediction §7.1.2 tests. **Bounded-T is presented as the formulation, not as
@@ -1422,7 +1534,7 @@ analysis. Nothing it reads is overwritten: forward refits take the next free
 member (`.002` beside `.001`) and the reconstructions carry new scenario tags,
 so the date-stamped files it loads stay exactly where they are.
 
-`SI03_paleo_showcases_modelswitch.ipynb` is the **revision** notebook and is
+`SI_code03_paleo_showcases.ipynb` is the **revision** notebook and is
 what the refit feeds. It has been switched to the case ids and re-run; its load
 cells now find all 56 reconstructions.
 
@@ -1709,9 +1821,9 @@ the map cells in `SI_code2` (untagged) and `SI_code02` (`_boundedT`).
 
 ### Uncommitted, deliberately
 
-**Four SI notebooks only** (2026-08-14): `SI_code1_PreProcessing_finalized`,
+**Four SI notebooks only** (2026-08-14): `SI_code00_PreProcessing`,
 `SI_code2_TEXAS_analysis`, `SI_code02_boundedT_TEXAS_analysis`,
-`SI_code2a_model_param_sensitivity_test`. `SI_code2` is the dangerous one — its
+`SI_code02a_model_param_sensitivity_test`. `SI_code2` is the dangerous one — its
 run cells are uncommented, so executing it overwrites the audited 400/1000
 posteriors. Left alone; commit when you are happy with them.
 
@@ -1972,7 +2084,7 @@ Verify: `git show --stat HEAD | grep -c _scripts` → at least 3 (the three scri
 - [ ] **1.6 SI03 model-switch notebook**
 
 ```bash
-git add notebooks/manuscripts/SI03_paleo_showcases_modelswitch.ipynb
+git add notebooks/manuscripts/SI_code03_paleo_showcases.ipynb
 git commit -m "notebook(SI03): model-switchable paleo showcases (additive EIV vs bounded-T)
 
 One MODEL_VARIANT flag drives the whole notebook. The active variant fills the
@@ -1997,7 +2109,7 @@ without recording a content change. Only `ds_gridded_...csv` really changed
 (2 lines).
 
 ```bash
-git add data/spreadsheets/ notebooks/manuscripts/SI_code1_PreProcessing_finalized.ipynb \
+git add data/spreadsheets/ notebooks/manuscripts/SI_code00_PreProcessing.ipynb \
         notebooks/manuscripts/SI_code2_TEXAS_analysis.ipynb \
         notebooks/manuscripts/SI_code3_paleo_showcases.ipynb \
         figures/manuscript/finalized/main-text/AppendixA_culmesoT_prior_distributions.pdf

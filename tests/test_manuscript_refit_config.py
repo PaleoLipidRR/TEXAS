@@ -18,7 +18,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[1]
-NOTEBOOK = REPO / "notebooks" / "manuscripts" / "SI03_paleo_showcases_modelswitch.ipynb"
+NOTEBOOK = REPO / "notebooks" / "manuscripts" / "SI_code03_paleo_showcases.ipynb"
 SCRIPT = REPO / "scripts" / "run_manuscript_refits.py"
 
 pytestmark = pytest.mark.skipif(

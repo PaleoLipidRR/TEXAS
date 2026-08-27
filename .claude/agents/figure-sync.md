@@ -15,29 +15,29 @@ Use `Bash` with `stat` (or `ls -l --time-style=+%s`) to get modification timesta
 ## Step 2 — collect notebook timestamps
 
 Get modification timestamps for:
-- `notebooks/manuscripts/SI_code1_PreProcessing_finalized.ipynb`
-- `notebooks/manuscripts/SI_code2_TEXAS_analysis.ipynb`
-- `notebooks/manuscripts/SI_code3_paleo_showcases.ipynb` (if it exists)
+- `notebooks/manuscripts/SI_code00_PreProcessing.ipynb`
+- `notebooks/manuscripts/SI_code02_t0shift_TEXAS_analysis.ipynb`
+- `notebooks/manuscripts/SI_code03_paleo_showcases.ipynb` (if it exists)
 
 ## Step 3 — known figure-to-notebook mapping
 
 Use this mapping to decide which notebook each figure belongs to:
 
-### SI_code1_PreProcessing_finalized.ipynb generates:
+### SI_code00_PreProcessing.ipynb generates:
 - `figS1_*` (fractional GDGTs vs Temp)
 - `figS2_*` (QC indices, Mahalanobis)
 - `figS3_*` (QC comparisons)
 - `figS4_*` (violin/heatmap)
 - Any figure with "preprocessing", "QC", "mahalanobis", "cren", or "BIT" in the name
 
-### SI_code2_TEXAS_analysis.ipynb generates:
+### SI_code02_t0shift_TEXAS_analysis.ipynb generates:
 - `fig3_*` (coretop TEX86 SST RI scatter)
 - `fig5_*`, `fig6_*`, `fig7_*`, `fig8_*`, `fig9_*`, `fig10_*`, `fig11_*`
 - `AppendixA_*`, `AppendixB_*`, `AppendixC_*` (prior distributions)
 - `figS5_*` through `figS10_*`
 - Any figure with "posterior", "calibration", "scatter", "residual", "functional", or "prior" in the name
 
-### SI_code3_paleo_showcases.ipynb generates (if file exists):
+### SI_code03_paleo_showcases.ipynb generates (if file exists):
 - Any figure with "paleo", "showcase", "GIG", "TasmanSea", "ODP", or "reconstruction" in the name
 
 ### Unclassified:
@@ -56,12 +56,12 @@ For each figure, compare its modification time to its source notebook's modifica
 Print a summary grouped by notebook:
 
 ```
-NOTEBOOK: SI_code2_TEXAS_analysis.ipynb  (last modified: YYYY-MM-DD HH:MM)
+NOTEBOOK: SI_code02_t0shift_TEXAS_analysis.ipynb  (last modified: YYYY-MM-DD HH:MM)
   [STALE]   fig3_coretop_TEX86_SST_RI_scatter.pdf  (figure: YYYY-MM-DD, notebook: YYYY-MM-DD, delta: Xd Yh)
   [CURRENT] AppendixA_SST_prior_distributions_new.pdf
   ...
 
-NOTEBOOK: SI_code1_PreProcessing_finalized.ipynb  (last modified: YYYY-MM-DD HH:MM)
+NOTEBOOK: SI_code00_PreProcessing.ipynb  (last modified: YYYY-MM-DD HH:MM)
   ...
 
 UNCLASSIFIED (no notebook match):
@@ -75,5 +75,5 @@ Then print a one-line verdict:
 ## Notes
 
 - Do not read figure file contents — only check timestamps.
-- If `SI_code3_paleo_showcases.ipynb` does not exist, skip it silently.
+- If `SI_code03_paleo_showcases.ipynb` does not exist, skip it silently.
 - Figures in `figures/manuscript/finalized/` with clearly exploratory names (e.g. `concept2_logistic_likelihood.*`, `variance_partition_venn.png`) are non-manuscript figures — mark them as SKIP and exclude from the staleness count.

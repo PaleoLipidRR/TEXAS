@@ -197,7 +197,7 @@ Optional predictor flags (`_gdgt23ratio`, `_no3_1.5`) are appended to `temptype`
 > >
 > > **Notebook switch keys followed on 2026-08-21.** They were left alone
 > > initially on the grounds that they name runtime branches, not artifacts —
-> > which was wrong: `SI03_paleo_showcases_modelswitch` interpolates
+> > which was wrong: `SI_code03_paleo_showcases` interpolates
 > > `MODEL_VARIANT` straight into two output names
 > > (`figSI_variant_comparison_{variant}_vs_{other}.pdf`,
 > > `data_list_extreme_example_{variant}.pkl`), so the branch key *is* an
@@ -327,7 +327,7 @@ remembers the old one. The unstamped form keeps working either way because it
 is reconstructed from attrs by `legacy_fwd_name()` rather than remembered.
 
 This matters because `SI_code3_paleo_showcases.ipynb` and
-`SI03_paleo_showcases_modelswitch.ipynb` both request a stamped name
+`SI_code03_paleo_showcases.ipynb` both request a stamped name
 (`..._scaledRI_cren3_050126_eiv`). **If you re-run those calibrations rather
 than migrating, update the notebooks to the case id.** Both behaviours are
 pinned by tests in `tests/test_naming.py`.

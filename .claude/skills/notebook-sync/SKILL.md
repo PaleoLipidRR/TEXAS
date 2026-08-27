@@ -7,9 +7,9 @@ allowed-tools: Read Glob Grep
 Audit all finalized SI notebooks in `notebooks/manuscripts/`. Check each one against every rule below and report PASS / FAIL / WARN per notebook per category.
 
 Target notebooks (read each):
-- `SI_code1_PreProcessing_finalized.ipynb`
-- `SI_code2_TEXAS_analysis.ipynb`
-- `SI_code3_paleo_showcases.ipynb` (if present)
+- `SI_code00_PreProcessing.ipynb`
+- `SI_code02_t0shift_TEXAS_analysis.ipynb`
+- `SI_code03_paleo_showcases.ipynb` (if present)
 
 ---
 
@@ -76,7 +76,7 @@ Check that all imports resolve against the current package layout:
 
 ## 7. Proplot guard (SI_code2 only)
 
-In `SI_code2_TEXAS_analysis.ipynb`, confirm that `proplot` import is wrapped in a try/except:
+In `SI_code02_t0shift_TEXAS_analysis.ipynb`, confirm that `proplot` import is wrapped in a try/except:
 ```python
 try:
     import proplot as pplt
