@@ -153,9 +153,13 @@ def main() -> int:
     clean = {
         "resource_type": {"id": "dataset"},
         "creators": creators,
-        "title": meta.get("title") or parent_meta.get("title") or DEFAULT_TITLE,
+        # The deposit now carries inverse reconstructions as well, so the
+        # inherited "forward posteriors" title understates it.
+        "title": DEFAULT_TITLE,
         "publication_date": meta.get("publication_date") or datetime.date.today().isoformat(),
         "version": _version(),
+        # Required for DOI registration; the parent record never set it.
+        "publisher": meta.get("publisher") or parent_meta.get("publisher") or "Zenodo",
     }
     desc = meta.get("description") or parent_meta.get("description")
     if desc:
@@ -165,7 +169,8 @@ def main() -> int:
     meta = clean
 
     print(f"  will write  : creators={len(creators)}, resource_type={{'id': 'dataset'}}, "
-          f"version={meta['version']!r}")
+          f"version={meta['version']!r}, publisher={meta['publisher']!r}")
+    print(f"  title       : {meta['title']}")
     for c in creators:
         p = c["person_or_org"]
         orcid = next((i["identifier"] for i in p.get("identifiers", [])), "-")
