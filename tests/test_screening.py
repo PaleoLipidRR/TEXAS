@@ -279,3 +279,32 @@ class TestCalibrationDomainDefault:
         det = MahalanobisOutlierDetector(["TEX86", "fGDGT_0"])
         with pytest.raises(ValueError, match="not fitted"):
             det.detect_outliers(pd.DataFrame({"TEX86": [0.5], "fGDGT_0": [0.2]}))
+
+
+class TestRecommendedScreeningCriterion:
+    """detect_outliers_manual is the manuscript's criterion and needs no fit().
+
+    Section 5.1 / Fig. 4: "data with TEX86 and Scaled RI above 0.75 are retained
+    in the calibration dataset". Screening a record with the bare ellipse would
+    flag warm samples the calibration itself covers, so the warm-end exception
+    has to travel with the published domain.
+    """
+
+    PROBE = pd.DataFrame(
+        {"TEX86": [0.55, 0.05, 0.86], "scaledRI_cren3": [0.58, 0.05, 0.80]},
+        index=["typical", "cold outlier", "warm corner"],
+    )
+
+    def test_warm_corner_retained_but_cold_outlier_flagged(self):
+        det = MahalanobisOutlierDetector(["TEX86", "scaledRI_cren3"], confidence=0.90)
+        flags = det.detect_outliers_manual(self.PROBE)      # no fit()
+        assert not flags["typical"]
+        assert flags["cold outlier"]
+        assert not flags["warm corner"], (
+            "the warm-end exception must retain samples the calibration retains"
+        )
+
+    def test_bare_ellipse_would_flag_the_warm_corner(self):
+        """Why the manual variant is the recommended one, not detect_outliers."""
+        det = MahalanobisOutlierDetector(["TEX86", "scaledRI_cren3"], confidence=0.90)
+        assert det.detect_outliers(self.PROBE)["warm corner"]

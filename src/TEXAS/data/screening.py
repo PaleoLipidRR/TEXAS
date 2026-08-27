@@ -380,7 +380,19 @@ class MahalanobisOutlierDetector:
         on_unscorable: Literal['warn', 'raise', 'ignore'] = 'warn',
     ) -> pd.Series:
         """
-        Detect outliers with manual exception rules.
+        Detect outliers using the manuscript's screening criterion.
+
+        **This is the recommended call for screening a record.** It applies the
+        calibration-domain ellipse and then restores the warm-end exception:
+        samples with TEX86 > 0.75 *and* Scaled RI(0-3) > 0.75 are retained, not
+        flagged, because the calibration itself retains them (Section 5.1,
+        Fig. 4 -- "data with TEX86 and Scaled RI above 0.75 are retained in the
+        calibration dataset"). Screening with the bare ellipse instead
+        (:meth:`detect_outliers`) would flag warm samples the calibration
+        actually covers.
+
+        Needs no ``fit()``: on the standard features the published calibration
+        domain is adopted automatically.
 
         Parameters
         ----------

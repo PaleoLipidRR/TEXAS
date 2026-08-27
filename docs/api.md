@@ -10,7 +10,7 @@
 | [`download_posteriors`](#download-posteriors) | Download forward posteriors from Zenodo |
 | [`download_training_data`](#download-training-data) | Download training CSVs + CMEMS NO₃ field |
 | [`list_posteriors`](#list-posteriors) | Print and return `.nc` stems in the local cache |
-| [`MahalanobisOutlierDetector`](#screen-a-record) | Flag samples outside the calibration domain (90% χ² ellipse) |
+| [`MahalanobisOutlierDetector`](#screen-a-record) | Flag samples outside the published calibration domain (no fitting required) |
 | [`InvTConfig`](#invt-configuration) | Control the number of forward draws *M* a reconstruction marginalises over |
 | [`build_fwd_data`](#build-forward-data) | Build validated Stan data dict for forward calibration |
 | [`get_posterior`](#get-posterior) | Run forward calibration Stan sampling |
@@ -94,8 +94,14 @@ detector on the standard features adopts it automatically:
 from TEXAS.data import MahalanobisOutlierDetector
 
 detector = MahalanobisOutlierDetector(["TEX86", "scaledRI_cren3"], confidence=0.90)
-df["flagged"] = detector.detect_outliers(df)
+df["flagged"] = detector.detect_outliers_manual(df)
 ```
+
+`detect_outliers_manual` is the manuscript's criterion: the ellipse **plus** the
+warm-end exception, so samples with TEX₈₆ > 0.75 and Scaled RI₀₋₃ > 0.75 are
+retained rather than flagged — the calibration retains them too (Section 5.1,
+Fig. 4). `detect_outliers` applies the bare ellipse and would flag warm samples
+the calibration actually covers.
 
 Do **not** call `fit()` or `fit_predict()` on your own record: that re-centres
 the ellipse onto the record, so the more unusual your data the less it flags.
