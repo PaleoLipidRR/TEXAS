@@ -380,8 +380,18 @@ the two full-draws files behind the extreme-RI examples (Fig. 13).
 
 ### MANIFEST.csv
 
-One row per Stan run of the revision: sampler budget (warm-up, sampling
-draws, M), training size, wall time, and convergence diagnostics.
+The run log of the revision: one row per Stan run (117), giving the sampler
+budget (warm-up, sampling draws, and M forward draws for reconstructions),
+training size, wall-clock time, convergence diagnostics, and the output file
+the run produced. `source_manifest` names which of the four run manifests the
+row came from. This is the archive manifest referred to in SI Text S3.3, where
+warm-up length is recorded for runs whose posteriors predate that attribute.
+
+Two caveats. It logs the **whole revision**, so some rows describe the additive
+(`GHEA`) comparison arm whose posteriors are on version 0.2.0 of this record
+rather than here. And `max_rhat` / `divergences` are blank for a few early
+rows, where those manifests did not record them; for those runs the values are
+in the posterior's own attributes.
 
 ---
 
