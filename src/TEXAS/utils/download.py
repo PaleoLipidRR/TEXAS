@@ -36,7 +36,7 @@ from .paths import POSTERIOR_CACHE_DIR, SPREADSHEETS_DIR
 # TODO(v0.3.0 release): replace with the record id of the v0.3.0 deposit as soon
 # as `scripts/zenodo_upload.py` creates the draft — the draft's id is final even
 # before it is published — then tag the release.
-ZENODO_RECORD_ID: str = "20032542"
+ZENODO_RECORD_ID: str = "22131367"
 
 # Registry entries may pin an older version of the record ("record": "<id>");
 # files without a pin are fetched from ZENODO_RECORD_ID.
