@@ -136,6 +136,20 @@ Fix: `matplotlib<3.5` -> `matplotlib>=3.9,<3.11` and `ultraplot` ->
 the four platform locks, rebuild the image. This moves the shipped environment
 *toward* the one the figures were actually made in.
 
+**Done 2026-08-27.** All four platforms now lock to matplotlib 3.10.9 +
+ultraplot 2.6.0, and the rebuilt image passes the acceptance test that the old
+one failed:
+
+    matplotlib : 3.10.9
+    ultraplot  : 2.6.0 -> import OK
+    uplt.subplots() OK
+
+> **conda-lock is flaky on a cold cache.** The four-platform
+> `conda-lock lock` failed twice and then succeeded on the third attempt with
+> no edits in between. Locking each platform singly worked every time, and
+> plain `mamba` solved every platform's spec list directly. If it fails,
+> **retry before hunting for a dependency conflict.**
+
 **Do not restore the matplotlib upper-bound-below-3.5 pin.** It is only
 correct for proplot, which this project left behind.
 
