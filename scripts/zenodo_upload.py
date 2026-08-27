@@ -174,17 +174,32 @@ def build_invt_zip(tmp_path: Path) -> Path:
 
 
 def update_metadata(session: requests.Session, draft_id: str) -> None:
-    """Bump the version string in the draft metadata."""
+    """Bump the version string, keeping the metadata InvenioRDM-valid.
+
+    The published record serves metadata in LEGACY Zenodo form
+    (``creators: [{name, affiliation, orcid}]``, ``resource_type: {type: ...}``).
+    Reading that and PUT-ing it back makes InvenioRDM drop both fields, and the
+    publish then fails with "Missing data for required field". So verify the
+    round-trip and say so loudly rather than failing later at publish time.
+    """
     r = session.get(f"{ZENODO_BASE}/records/{draft_id}/draft")
     _check(r, "fetch draft metadata")
-    meta = r.json().get("metadata", {}).copy()
+    draft = r.json()
+    meta = dict(draft.get("metadata") or {})
     meta["version"] = VERSION
     r2 = session.put(
         f"{ZENODO_BASE}/records/{draft_id}/draft",
-        json={"metadata": meta},
+        json={**draft, "metadata": meta},
     )
     _check(r2, "update metadata")
     print(f"  version → {VERSION}")
+
+    after = session.get(f"{ZENODO_BASE}/records/{draft_id}/draft").json().get("metadata", {})
+    missing = [f for f in ("creators", "resource_type") if not after.get(f)]
+    if missing:
+        print(f"  WARNING: the draft has no {', '.join(missing)} -- publishing will")
+        print("  fail with 'Missing data for required field'. Repair it with:")
+        print("      python scripts/zenodo_fix_draft_metadata.py --apply")
 
 
 def describe_draft(session: requests.Session, draft_id: str) -> None:
