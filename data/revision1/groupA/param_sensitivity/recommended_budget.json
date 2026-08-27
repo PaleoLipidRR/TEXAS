@@ -32,7 +32,7 @@
       "max_z_mean": 0.049011189124607085
     },
     "bnd": {
-      "stan_file": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT",
+      "stan_file": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift",
       "iter_warmup": 300,
       "iter_sampling": 900,
       "wall_sec": 79.31855392456055,

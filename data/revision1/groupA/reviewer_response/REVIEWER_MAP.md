@@ -34,11 +34,12 @@ This is the bounded-T model, and it is fitted, audited and plotted.
 so `mu` stays in `(b, 1)` for any finite predictor value — which is precisely
 what the reviewer asks for.
 
-* models: `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT.stan`,
-  `invT_gen_logi_fixed_multiv_marginal_unconstrained_boundedT.stan`
+* models: `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift.stan`,
+  `invT_gen_logi_fixed_multiv_marginal_unconstrained_t0shift.stan`
 * both temperature targets, fitted at one budget against the parent with
   identical training rows and R2_thermal (`comparability_audit.json`, 15/15)
-* figures: `fig7/11/12/13/14_*_boundedT.pdf`, `Appendix{A,B,C}_*_boundedT.pdf`
+* figures: `fig7/10/11/12/13_*_t0shift.pdf`, `Appendix{A,B,C}_*_t0shift.pdf`
+  (renumbered after the ODR figure moved to the SI; `boundedT` → `t0shift`)
 * coefficients: `gamma_G23 = 0.634 [0.592, 0.673]` degC per unit G23,
   `gamma_NO3 = 2.791 [2.550, 3.040]` degC per log10 unit
 
@@ -122,7 +123,7 @@ Editorial restructuring. Nothing to compute.
 > demonstrate that the main conclusions are robust to reasonable alternative
 > screening decisions, index definitions, and prior specifications
 
-* **index definitions — DONE.** `SI_code2a` Part 2 fits SRI03 / SRI04 / SRI05,
+* **index definitions — DONE.** `SI_code02a` Part 2 fits SRI03 / SRI04 / SRI05,
   now under *both* parameterisations. Both rank the conventions identically and
   monotonically; the G23 spread is 12.1% (additive) vs 20.5% (bounded-T), NO3
   ~3.5% in both. Worth stating that the G23 sensitivity is ~1.7x larger under
@@ -177,30 +178,39 @@ Antarctic criticism (see 1.5). Nitrate-scenario sensitivity at the PETM sites
 is second-order too — −1.34 °C (SDB), −0.96 °C (ODP 959), both smaller than a
 single run's 68% half-width, against −4.5 to −5.3 °C at the Quaternary sites.
 
-### 2.4 Validation / performance claims — **DONE** (run 2026-08-13)
+### 2.4 Validation / performance claims — **DONE** (re-run 2026-08-21, gridded)
 
 > claims that TEXAS outperforms existing calibrations should be softened or
 > supported with clearer cross-validation, ideally using spatially blocked tests
 
-**This has been run in full** — `working-repo/TEXAS-revision/scripts/fit_boundedT_comparison.py`,
-`"smoke": false`, 5 folds, n = 2043, ~1 h. It needs working-repo's own uv
-environment; `uv.lock` there is the record of what produced these numbers, so
-do **not** re-run it under TEXAS's venv.
+**This has been run in full** — `working-repo/TEXAS-revision/scripts/fit_t0shift_comparison.py`,
+`"smoke": false`, 5 folds, **n = 1513 (gridded)**, ~1 h. It needs working-repo's
+own uv environment; `uv.lock` there is the record of what produced these
+numbers, so do **not** re-run it under TEXAS's venv.
+
+> The first pass used the **ungridded n = 2043** subset and every number it
+> produced is superseded. The load cell in SI_code04 now asserts
+> `dataset == "gridded"` and refuses to publish the old export. Numbers below
+> are the gridded ones (figures and tables regenerated 2026-08-22).
 
 Exports (CSV/JSON, readable anywhere) live in `../model_comparison_cv/` with a
 `PROVENANCE.md`; `results.pkl` is deliberately not the record, because it is a
 pandas-3 pickle that will not load under TEXAS's pandas 2. The analysis is
-`notebooks/manuscripts/SI_code04_model_comparison_cv.ipynb`, which reads only
+`notebooks/reviewer_response/SI_code04_model_comparison_cv.ipynb`, which reads only
 the exports and never samples.
 
 What it gives each comment:
 
 * **R2's validation demand.** Spatial blocking degrades both arms
-  (R² 0.743 → 0.699, cov95 0.944 → 0.925), so the in-sample figures are
+  (R² 0.802 → 0.750, cov95 0.939 → 0.899), so the in-sample figures are
   labelled as such and the blocked counterparts quoted beside them.
 * **R3.1's formal comparison** (see 3.1). T₀-shift beats additive on every
-  metric; Δelpd = **+68.4 ± 27.6** (2.5 SE). The additive fitted mean reaches
-  **0.008** where the T₀-shift floor is **0.375**.
+  metric; Δelpd = **+24.3 ± 11.6** (2.1 SE). The additive fitted mean reaches
+  **0.343** where the T₀-shift floor is **0.420** — both below/above the fitted
+  lower asymptote *b* ≈ 0.41, which is the physical line being crossed.
+  **Soften this relative to the earlier draft:** under spatial blocking the two
+  arms are within ΔRMSE = 0.0002 of each other (0.0574 vs 0.0572), so the case
+  for T₀-shift is boundedness and elpd, *not* predictive accuracy.
 * **The outperformance claim itself.** Multivariate TEXAS and BAYSPAR are
   statistically indistinguishable on RMSE (Δ = +0.041 °C, p = 0.786) — claim
   neither outperformance nor concede underperformance. Univariate TEXAS
@@ -211,13 +221,14 @@ What it gives each comment:
   ranking, i.e. the multivariate model converts systematic regional error into
   random error.
 
-> Three different n are in play — always state which: **2043** (the CV),
-> **1513** (production), **1298** (the comparison against other calibrations,
-> after 215 sites drop for unmatched or ambiguous TEX₈₆ joins). TEXAS is
-> **in-sample** in that comparison and the others are not; say so.
+> Two n are in play — always state which: **1513** (the CV, and the production
+> calibration — same gridded set, so they are on the same footing) and **1298**
+> (the comparison against other calibrations, after 215 sites drop for unmatched
+> or ambiguous TEX₈₆ joins). TEXAS is **in-sample** in that comparison and the
+> others are not; say so.
 
 Still optional, and not needed for the argument: a spatially blocked **refit**
-of TEXAS (~3.5 h) so its side is genuinely held out. The 8.7% in-sample →
+of TEXAS (~3.5 h) so its side is genuinely held out. The **12.9%** in-sample →
 spatial penalty measured above currently stands in as a bound.
 
 ### 2.5 Forward vs inverse performance — **WRITE**
@@ -234,7 +245,7 @@ coverage90 per configuration. The numbers exist; the framing does not.
 max R-hat 1.00372–1.00909, min ESS(bulk) 796–1633, zero divergences, zero
 treedepth saturations, 4 chains x 1000 draws.
 
-Fuller convergence characterisation, if wanted: `SI_code2a` Part 1 sweeps 27
+Fuller convergence characterisation, if wanted: `SI_code02a` Part 1 sweeps 27
 budget cells x 3 models with per-parameter R-hat.
 
 ### 2.7 Practical guidance section — **TEXT** (overlaps R1.1)
