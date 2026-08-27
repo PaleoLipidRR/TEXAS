@@ -153,6 +153,36 @@ one failed:
 **Do not restore the matplotlib upper-bound-below-3.5 pin.** It is only
 correct for proplot, which this project left behind.
 
+### v0.3.0 RELEASE STATUS (2026-08-27)
+
+| step | state |
+|---|---|
+| main pushed | ✅ `f748db5` (5 later tooling commits still local) |
+| tag `v0.3.0` | ✅ pushed, points at `f748db5` |
+| **data record** | ✅ **published: 10.5281/zenodo.22131367** (v0.3.0, 16 files, 516 MB) |
+| concept DOI 19666744 | ✅ resolves to it — this is what the manuscript cites |
+| v0.2.0 (additive) | ✅ still live, still citable |
+| **PyPI** | ✅ **texas-psm 0.3.0 live**, cold-install verified |
+| Docker image | ✅ builds; GHCR publish fires on the tag |
+| GitHub Release | ⬜ **not yet published — software DOI not minted** |
+| push tooling commits | ⬜ `git push origin main` |
+
+Verified against the live record: `download_posteriors(['tx.GHPU.sst.sri03.p0'])`
+fetched 282,453 bytes; a PyPI install reports 0.3.0, carries both bundled
+posteriors and `fit_predict`, and `compute_scaledRI` reproduces the quickstart's
+committed values (0.477 / 0.540).
+
+> **Zenodo API lessons, all learned the hard way today.** The upload script had
+> three separate defects: `--publish` re-ran the whole upload instead of
+> publishing the existing draft; `update_metadata` round-tripped Zenodo's
+> **legacy** metadata shape (`creators: [{name, affiliation, orcid}]`,
+> `resource_type: {title, type}`) into the InvenioRDM API, which silently
+> dropped both fields; and PUT-ing the whole draft object back returned HTTP
+> 500. Publishing also needs **`publisher`**, which the parent record never had.
+> The required set for a Zenodo DOI is: `resource_type`, `creators`, `title`,
+> `publication_date`, `publisher`. `scripts/zenodo_fix_draft_metadata.py`
+> repairs a draft that is missing any of them.
+
 ### Release sequence (order matters — the record id must be in the tag)
 
 1. ~~Commit everything.~~ **Done 2026-08-27** — eight commits, tree clean.
