@@ -3,8 +3,10 @@
 Utilities for downloading data from the TEXAS Zenodo data record.
 
 Files are downloaded individually from Zenodo so you only fetch what you need.
-The two full multivariate (EIV) posteriors are ~78 MB each; all other files are
-< 2 MB.  A size notice is printed before any download ≥ 5 MB.
+The full multivariate (EIV) posteriors are ~78–81 MB each — they carry the
+per-site latent variables; the wheel already bundles a latent-stripped copy of
+the default pair, so most reconstructions need no download at all. All other
+files are < 2 MB.  A size notice is printed before any download ≥ 5 MB.
 
 Usage
 -----
@@ -14,7 +16,7 @@ Usage
 >>> TEXAS.download_training_data()     # training CSVs + NO₃ field only
 
 Download a specific posterior:
->>> TEXAS.download_posteriors(["gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3"])
+>>> TEXAS.download_posteriors(["tx.GHPU.sst.sri03.p0"])
 
 Docker/devcontainer users: run on the host machine — the container
 bind-mounts ``data/`` automatically.
@@ -30,13 +32,20 @@ from typing import List, Optional
 from .paths import POSTERIOR_CACHE_DIR, SPREADSHEETS_DIR
 
 # ─── Zenodo config ────────────────────────────────────────────────────────────
+# The current version of the data record (concept DOI 10.5281/zenodo.19666744).
+# TODO(v0.3.0 release): replace with the record id of the v0.3.0 deposit as soon
+# as `scripts/zenodo_upload.py` creates the draft — the draft's id is final even
+# before it is published — then tag the release.
 ZENODO_RECORD_ID: str = "20032542"
 
-_ZENODO_BASE = f"https://zenodo.org/records/{ZENODO_RECORD_ID}/files"
+# Registry entries may pin an older version of the record ("record": "<id>");
+# files without a pin are fetched from ZENODO_RECORD_ID.
+_V020_RECORD_ID: str = "20032542"   # v0.2.0: initial-submission (additive) files
 
 
-def _file_url(filename: str) -> str:
-    return f"{_ZENODO_BASE}/{filename}?download=1"
+def _file_url(filename: str, record: Optional[str] = None) -> str:
+    rec = record or ZENODO_RECORD_ID
+    return f"https://zenodo.org/records/{rec}/files/{filename}?download=1"
 
 
 def _fmt_size(size_mb: float) -> str:
@@ -75,28 +84,69 @@ def _download_file(url: str, dest: Path, size_mb: float, force: bool = False) ->
 
 # ─── Registry of forward calibration posteriors ───────────────────────────────
 # Each entry: name (no .nc) → {"filename": str, "size_mb": float}
-# filename is the flat name on the Zenodo record (no subdirectory).
+# filename is the flat name on the Zenodo record (no subdirectory); an optional
+# "record" pins the entry to an older version of the record.
+#
+# From v0.3.0 the record carries the revised manuscript's refits under their
+# case ids (T₀-shift multivariate `GHEB`, thermal-only `GHPU`, culture+mesocosm
+# `GCDU`). The multivariate files are the COMPLETE archival copies, EIV per-site
+# latents included (~78–81 MB); the wheel bundles a 0.4 MB latent-stripped copy
+# of the default pair, so most users never need these downloads.
 POSTERIOR_REGISTRY: dict[str, dict] = {
+    # ── Default calibration: full multivariate T₀-shift (G₂/₃ + NO₃) ─────────
+    "tx.GHEB.sst.sri03.G23-N1p0": {
+        "filename": "tx.GHEB.sst.sri03.G23-N1p0.fwd.nc", "size_mb": 78,
+    },
+    "tx.GHEB.thm.sri03.G23-N1p0": {
+        "filename": "tx.GHEB.thm.sri03.G23-N1p0.fwd.nc", "size_mb": 78,
+    },
+    # ── Single-predictor T₀-shift variants ───────────────────────────────────
+    "tx.GHEB.sst.sri03.G23": {
+        "filename": "tx.GHEB.sst.sri03.G23.fwd.nc", "size_mb": 78,
+    },
+    "tx.GHEB.thm.sri03.G23": {
+        "filename": "tx.GHEB.thm.sri03.G23.fwd.nc", "size_mb": 78,
+    },
+    "tx.GHEB.sst.sri03.N1p0": {
+        "filename": "tx.GHEB.sst.sri03.N1p0.fwd.nc", "size_mb": 81,
+    },
+    "tx.GHEB.thm.sri03.N1p0": {
+        "filename": "tx.GHEB.thm.sri03.N1p0.fwd.nc", "size_mb": 81,
+    },
+    # ── Temperature-only calibrations ────────────────────────────────────────
+    "tx.GHPU.sst.sri03.p0": {
+        "filename": "tx.GHPU.sst.sri03.p0.fwd.nc", "size_mb": 0.3,
+    },
+    "tx.GHPU.thm.sri03.p0": {
+        "filename": "tx.GHPU.thm.sri03.p0.fwd.nc", "size_mb": 0.3,
+    },
+    # ── Stage-1 culture+mesocosm fit ─────────────────────────────────────────
+    "tx.GCDU.cul.sri03.p0": {
+        "filename": "tx.GCDU.cul.sri03.p0.fwd.nc", "size_mb": 0.2,
+    },
+    # ── Initial-submission (additive) posteriors, v0.2.0 record ──────────────
+    # Superseded by the T₀-shift refits above; kept resolvable so preprint-era
+    # notebooks still run. Pinned to the old version of the record, which
+    # Zenodo preserves permanently.
     "gen_logi_fixed_culmeso_cultureT_scaledRI_cren3": {
         "filename": "gen_logi_fixed_culmeso_cultureT_scaledRI_cren3.nc",
-        "size_mb": 0.2,
+        "size_mb": 0.2, "record": _V020_RECORD_ID,
     },
     "gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3": {
         "filename": "gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc",
-        "size_mb": 0.3,
+        "size_mb": 0.3, "record": _V020_RECORD_ID,
     },
     "gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3": {
         "filename": "gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3.nc",
-        "size_mb": 0.3,
+        "size_mb": 0.3, "record": _V020_RECORD_ID,
     },
-    # EIV multivariate posteriors — large due to per-site latent variables (~1500 coretop sites)
     "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3": {
         "filename": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc",
-        "size_mb": 78,
+        "size_mb": 78, "record": _V020_RECORD_ID,
     },
     "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3": {
         "filename": "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3.nc",
-        "size_mb": 78,
+        "size_mb": 78, "record": _V020_RECORD_ID,
     },
 }
 
@@ -128,8 +178,8 @@ def download_all(
     """Download everything from Zenodo: forward posteriors + training data.
 
     Files are downloaded individually; already-cached files are skipped unless
-    *force=True*.  Total download is ~158 MB (dominated by the two EIV
-    multivariate posteriors at ~78 MB each).
+    *force=True*.  Total download is ~490 MB (dominated by the six full EIV
+    multivariate posteriors at ~78–81 MB each).
 
     Parameters
     ----------
@@ -155,10 +205,12 @@ def download_posteriors(
     Parameters
     ----------
     names : list of str, optional
-        Subset of ``POSTERIOR_REGISTRY`` keys to download.  Downloads all
-        five posteriors when omitted (~158 MB total; the two EIV multivariate
-        posteriors are ~78 MB each — pass ``names=`` to download only the
-        univariate ones if you don't need the EIV model).
+        Subset of ``POSTERIOR_REGISTRY`` keys to download.  When omitted,
+        downloads every posterior of the current record version (~475 MB —
+        dominated by the six full multivariate EIV posteriors at ~78–81 MB
+        each; pass ``names=`` to fetch only what you need).  Superseded
+        initial-submission posteriors are pinned to the v0.2.0 record and
+        must be requested by name.
     cache_dir : Path or str, optional
         Destination directory.  Defaults to the standard posterior cache.
     force : bool
@@ -175,7 +227,11 @@ def download_posteriors(
 
     >>> download_posteriors(["gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3"])
     """
-    targets = names if names is not None else list(POSTERIOR_REGISTRY)
+    # By default download only the current-record posteriors; superseded
+    # entries pinned to an older record version must be asked for by name.
+    targets = names if names is not None else [
+        k for k, v in POSTERIOR_REGISTRY.items() if "record" not in v
+    ]
     dest_dir = Path(cache_dir) if cache_dir else POSTERIOR_CACHE_DIR
     dest_dir.mkdir(parents=True, exist_ok=True)
 
@@ -206,7 +262,10 @@ def download_posteriors(
         entry = POSTERIOR_REGISTRY[name]
         dest = local_paths[name]
         dest.parent.mkdir(parents=True, exist_ok=True)
-        _download_file(_file_url(entry["filename"]), dest, entry["size_mb"], force=force)
+        _download_file(
+            _file_url(entry["filename"], entry.get("record")),
+            dest, entry["size_mb"], force=force,
+        )
         paths.append(dest)
 
     return paths
@@ -262,8 +321,8 @@ def _local_dest(dest_dir: Path, name: str) -> Path:
     no subdirectories -- but the local cache is organised by case directory. So
     a registry key that is a case id is unpacked into ``<case>/<case>.fwd.nc``,
     giving one uniform local layout no matter whether a posterior was sampled
-    here or downloaded. Legacy long-name keys stay flat, which is what the
-    currently published record 10.5281/zenodo.20032542 uses.
+    here or downloaded. Legacy long-name keys (the v0.2.0 record's files) stay
+    flat.
     """
     try:
         from .naming import fwd_relpath, is_case_id

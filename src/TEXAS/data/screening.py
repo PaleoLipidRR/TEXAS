@@ -404,6 +404,43 @@ class MahalanobisOutlierDetector:
             return {'scaledRI_cren3': 0.75, 'TEX86': 0.75}
         return None
 
+    def fit_predict(
+        self,
+        df: pd.DataFrame,
+        col_name: Optional[str] = None,
+        *,
+        columns: Optional[dict] = None,
+        on_unscorable: Literal['warn', 'raise', 'ignore'] = 'warn',
+    ) -> pd.Series:
+        """
+        Fit on *df* and flag its rows in one call (sklearn-style).
+
+        Equivalent to ``fit(df)`` followed by ``detect_outliers(df)`` — the
+        one-liner documented in the manuscript's Appendix C:
+
+            df["flagged"] = detector.fit_predict(df)
+
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Data to fit on and screen
+        col_name : str, optional
+            If provided, add outlier flags to df as this column
+        columns : dict, optional
+            Mapping {logical_name: physical_column}.
+        on_unscorable : {'warn', 'raise', 'ignore'}, default 'warn'
+            Policy for rows that map to a present column but are NaN/Inf.
+
+        Returns
+        -------
+        outliers : pd.Series
+            Boolean series (True=outlier, False=inlier, NaN=invalid)
+        """
+        self.fit(df, columns=columns, on_unscorable=on_unscorable)
+        return self.detect_outliers(
+            df, col_name, columns=columns, on_unscorable=on_unscorable
+        )
+
     def fit_transform(
         self,
         df: pd.DataFrame,

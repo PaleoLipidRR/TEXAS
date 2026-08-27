@@ -207,3 +207,30 @@ class TestDetectOutliersManualMapping:
         with pytest.raises(KeyError, match=r"TEX86.*TEX86_typo"):
             det.detect_outliers_manual(phys, columns={"TEX86": "TEX86_typo",
                                                       "scaledRI_cren3": "ScaledRI03_best"})
+
+
+class TestFitPredict:
+    """fit_predict is the one-liner documented in manuscript Appendix C2.6."""
+
+    def test_matches_fit_then_detect_outliers(self):
+        df = _training_df()
+        one_call = MahalanobisOutlierDetector(
+            ["TEX86", "scaledRI_cren3"], confidence=0.90
+        ).fit_predict(df)
+        two_call_det = MahalanobisOutlierDetector(
+            ["TEX86", "scaledRI_cren3"], confidence=0.90
+        ).fit(df)
+        two_call = two_call_det.detect_outliers(df)
+        pd.testing.assert_series_equal(one_call, two_call)
+
+    def test_appendix_c_usage_assigns_column(self):
+        """df["flagged"] = detector.fit_predict(df) — verbatim manuscript usage."""
+        df = _training_df()
+        detector = MahalanobisOutlierDetector(
+            ["TEX86", "scaledRI_cren3"], confidence=0.90)
+        df["flagged"] = detector.fit_predict(df)
+        assert df["flagged"].dtype == "boolean"
+        assert df["flagged"].notna().all()
+        # ~10% of a well-behaved sample sits outside the 90% ellipse
+        frac = df["flagged"].mean()
+        assert 0.0 <= frac <= 0.35

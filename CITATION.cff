@@ -1,4 +1,4 @@
-cff-version: 1.5.0
+cff-version: 1.2.0
 title: "texas-psm: a python package for TEXAS (A proxy system model for TetraEther indeX of Ammonia oxidizerS)"
 message: "The current version is used for data analysis alongside with a manuscript prepared to submit for publication at a peer-reviewed journal. If you use this software, please cite it using the metadata from this file."
 type: software
@@ -19,11 +19,13 @@ authors:
     given-names: Gordon N.
     orcid: "https://orcid.org/0000-0002-0032-4668"
     affiliation: "School of Ocean and Earth Science, University of Southampton"
-version: 0.2.6
-date-released: "2026-07-15"
+version: 0.3.0
+date-released: "2026-08-27"
 license: MIT
 repository-code: "https://github.com/PaleoLipidRR/TEXAS"
-doi: 10.5281/zenodo.20032542
+# Concept DOI of the SOFTWARE record (resolves to the latest release).
+# The data record (training database + posteriors) is 10.5281/zenodo.19666744.
+doi: 10.5281/zenodo.19671664
 abstract: >
   TEXAS (texas-psm) is a Python package for Bayesian GDGT-temperature calibration
   using Stan. It implements a two-stage workflow: forward calibration of a
