@@ -103,7 +103,6 @@ def test_no_duplicate_model_or_version_attrs(case, tmp_path):
 
 def test_metadata_writer_records_one_model_name_and_no_version():
     import numpy as np
-    import xarray as xr
     from TEXAS.stan.metadata import extract_and_update_metadata
 
     # (the arviz `model` attr is dropped one layer up, in StanSampler, so this

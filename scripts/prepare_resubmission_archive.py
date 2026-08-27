@@ -224,7 +224,7 @@ def main(argv=None) -> int:
           f"{len(CORETOP_CONFIGS) * len(CORETOP_BATCHES)} batch files)")
     print(f"  paleo invT files   : {n_paleo}")
     print(f"  data files         : {len(DATA_FILES)}")
-    print(f"  + MANIFEST.csv, README.md")
+    print("  + MANIFEST.csv, README.md")
     if not args.apply:
         print("\nDry run. Files that would be staged:")
         for src, rel in copies:
