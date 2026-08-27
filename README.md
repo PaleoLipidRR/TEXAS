@@ -191,8 +191,11 @@ src/TEXAS/
   models/           Logistic curve functions and classical calibrations
   utils/            Path constants, system info, Zenodo download utilities
 notebooks/
-  manuscripts/      Finalized SI notebooks (SI_code1, SI_code2, SI_code02_t0shift, SI_code3)
-  quickstart_demo.ipynb
+  quickstart_demo.ipynb     Minimal end-to-end path: GDGTs -> Scaled RI -> temperature
+  quickstart_extended.ipynb Longer walkthrough: a published record, model comparison
+  manuscripts/      Finalized SI notebooks behind the paper (SI_code00 .. SI_code03)
+  reviewer_response/ Analyses answering review comments, not cited in the paper
+  superseded/       Pre-revision (additive-formulation) versions, kept for provenance
 streamlit_app/      Drag-and-drop web interface (Streamlit)
 docker/             Dockerfile and compose configuration
 docs/               Jupyter Book documentation source (guides, API, tutorial)
