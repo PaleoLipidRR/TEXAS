@@ -153,6 +153,24 @@ one failed:
 **Do not restore the matplotlib upper-bound-below-3.5 pin.** It is only
 correct for proplot, which this project left behind.
 
+### CI: `actions/checkout` does not fetch Git LFS
+
+The docs deploy failed on the v0.3.0 push with `KeyError: 'model'` from
+`build_sampler_budget.py`. Not a data problem: `.gitattributes` routes
+`*.csv` through LFS, and `actions/checkout@v4` leaves **pointer files**
+unless given `lfs: true`. pandas then read
+`version https://git-lfs.github.com/spec/v1` as the header row.
+
+It could not be reproduced locally in any environment, because a working copy
+has the real files smudged in — the CI log (`gh run view <id> --log`, or
+`gh api .../actions/jobs/<job>/logs`) was the only way to see it. **Reach for
+the log before theorising.**
+
+Fixed by `lfs: true` on the docs checkout. Only `docs.yml` needs it; tests,
+lint and the Docker build pass without LFS content. If another workflow ever
+reads a `*.csv`, `*.nc`, `*.npz`, `*.pkl`, `*.h5` or `*.xlsx`, it needs the
+same flag.
+
 ### v0.3.0 RELEASE STATUS (2026-08-27)
 
 | step | state |
@@ -164,8 +182,9 @@ correct for proplot, which this project left behind.
 | v0.2.0 (additive) | ✅ still live, still citable |
 | **PyPI** | ✅ **texas-psm 0.3.0 live**, cold-install verified |
 | Docker image | ✅ builds; GHCR publish fires on the tag |
-| GitHub Release | ⬜ **not yet published — software DOI not minted** |
-| push tooling commits | ⬜ `git push origin main` |
+| GitHub Release | ⬜ **not yet published — software DOI not minted** (pre-release is fine: v0.2.1 was `prerelease=True` and still got a DOI) |
+| push tooling commits | ✅ pushed through `32d91bb` |
+| CI (tests / lint / docs / docker) | ✅ all green; docs site serves the revised API and concept DOI |
 
 Verified against the live record: `download_posteriors(['tx.GHPU.sst.sri03.p0'])`
 fetched 282,453 bytes; a PyPI install reports 0.3.0, carries both bundled
