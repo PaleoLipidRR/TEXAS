@@ -49,6 +49,17 @@ import requests
 REPO = Path(__file__).resolve().parent.parent
 ZENODO_BASE = "https://zenodo.org/api"
 PARENT_RECORD = "20032542"          # published v0.2.0, source of author details
+
+# Deliberate corrections to what the published record carries, keyed by family
+# name -- a genuine authorship update, not format drift, so it lives here where
+# it is reviewable and survives a re-run rather than being hand-edited in the
+# web form. NOTE: the manuscript gives both of these authors TWO affiliations
+# (Rattanasriampaipong: Arizona + UCAR; Elling: Kiel + Heidelberg). Zenodo
+# accepts a list, so add the second entry here if the record should match.
+AFFILIATION_OVERRIDES: dict[str, str] = {
+    "Rattanasriampaipong": "University of Arizona",   # was UCAR
+    "Elling": "Heidelberg University",                # was Kiel University
+}
 DEFAULT_TITLE = ("GDGT calibration database and Bayesian posteriors for "
                  "TEXAS (texas-psm)")
 
@@ -84,8 +95,9 @@ def creators_from_parent(session: requests.Session) -> list[dict]:
         if c.get("orcid"):
             person["identifiers"] = [{"scheme": "orcid", "identifier": c["orcid"]}]
         entry = {"person_or_org": person}
-        if c.get("affiliation"):
-            entry["affiliations"] = [{"name": c["affiliation"]}]
+        aff = AFFILIATION_OVERRIDES.get(family, c.get("affiliation"))
+        if aff:
+            entry["affiliations"] = [{"name": aff}]
         out.append(entry)
     return out
 
@@ -146,6 +158,11 @@ def main() -> int:
         aff = (c.get("affiliations") or [{}])[0].get("name", "-")
         print(f"      {p['family_name']}, {p['given_name']}  orcid={orcid}  aff={aff}")
 
+    if AFFILIATION_OVERRIDES:
+        print("\n  Applied affiliation corrections (AFFILIATION_OVERRIDES):")
+        for fam, aff in AFFILIATION_OVERRIDES.items():
+            print(f"      {fam} -> {aff}")
+
     cff = citation_cff_affiliations()
     diffs = [(c["person_or_org"]["family_name"],
               (c.get("affiliations") or [{}])[0].get("name", "-"),
@@ -154,10 +171,11 @@ def main() -> int:
              if c["person_or_org"]["family_name"] in cff
              and cff[c["person_or_org"]["family_name"]]
              != (c.get("affiliations") or [{}])[0].get("name")]
+    diffs = [d for d in diffs if d[0] not in AFFILIATION_OVERRIDES]
     if diffs:
-        print("\n  NOTE: affiliations differ from CITATION.cff. Using the published"
-              "\n  record's values, because this is a format fix, not an authorship"
-              "\n  edit. Change them in the Zenodo web form if that is wrong:")
+        print("\n  NOTE: these still differ from CITATION.cff, which spells the same"
+              "\n  institution at department level. Keeping the record's shorter form;"
+              "\n  add an AFFILIATION_OVERRIDES entry if you want the longer one:")
         for fam, rec, cffval in diffs:
             print(f"      {fam}: record={rec!r}  CITATION.cff={cffval!r}")
 
