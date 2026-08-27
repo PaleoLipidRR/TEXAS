@@ -81,6 +81,13 @@ INVT_DIRS = [
 
 # ─── Helpers ───────────────────────────────────────────────────────────────────
 
+def _record_id_from_download_py() -> str | None:
+    """The record id the package currently ships, i.e. the draft made earlier."""
+    f = REPO / "src" / "TEXAS" / "utils" / "download.py"
+    m = re.search(r'^ZENODO_RECORD_ID:\s*str\s*=\s*"(\d+)"', f.read_text(), re.M)
+    return m.group(1) if m else None
+
+
 def _session(token: str) -> requests.Session:
     s = requests.Session()
     s.headers.update({"Authorization": f"Bearer {token}"})
@@ -180,6 +187,21 @@ def update_metadata(session: requests.Session, draft_id: str) -> None:
     print(f"  version → {VERSION}")
 
 
+def describe_draft(session: requests.Session, draft_id: str) -> None:
+    """Print what is actually in a draft, so it can be checked before publishing."""
+    r = session.get(f"{ZENODO_BASE}/records/{draft_id}/draft")
+    _check(r, f"fetch draft {draft_id}")
+    meta = r.json().get("metadata", {})
+    print(f"  draft {draft_id}: version={meta.get('version')!r}  title={meta.get('title','')[:60]!r}")
+    rf = session.get(f"{ZENODO_BASE}/records/{draft_id}/draft/files")
+    _check(rf, "list draft files")
+    entries = rf.json().get("entries", [])
+    total = sum(e.get("size") or 0 for e in entries) / 1_048_576
+    print(f"  {len(entries)} file(s), {total:.0f} MB total")
+    for e in sorted(entries, key=lambda x: x["key"]):
+        print(f"    {e['key']}")
+
+
 def publish_draft(session: requests.Session, draft_id: str) -> str:
     """Publish the draft and return the DOI."""
     r = session.post(f"{ZENODO_BASE}/records/{draft_id}/draft/actions/publish")
@@ -201,7 +223,12 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("--publish", action="store_true",
-                        help="Publish the draft after uploading (default: leave as draft)")
+                        help="Publish the EXISTING draft. Does not upload anything; "
+                             "run this script with no flags first to create the draft.")
+    parser.add_argument("--draft-id", default=None,
+                        help="Draft to publish (default: ZENODO_RECORD_ID in download.py)")
+    parser.add_argument("--yes", action="store_true",
+                        help="Skip the confirmation prompt when publishing")
     parser.add_argument("--token", default=os.environ.get("ZENODO_TOKEN"),
                         help="Zenodo personal access token (or set ZENODO_TOKEN env var)")
     args = parser.parse_args()
@@ -224,6 +251,28 @@ def main() -> None:
 
     session = _session(args.token)
 
+    # --publish acts on the draft that ALREADY exists. It must not create a new
+    # version or re-upload: that would abandon the draft whose id is already
+    # baked into download.py and the tagged release, and repeat a ~500 MB upload.
+    if args.publish:
+        draft_id = args.draft_id or _record_id_from_download_py()
+        if not draft_id:
+            sys.exit(
+                "ERROR: --publish needs the draft id.\n"
+                "  Pass --draft-id <id>, or set ZENODO_RECORD_ID in\n"
+                "  src/TEXAS/utils/download.py to the draft you created earlier."
+            )
+        print(f"\n── Publishing existing draft {draft_id} (no re-upload) ──")
+        describe_draft(session, draft_id)
+        if not args.yes:
+            reply = input("\nPublish this draft? Publication is IRREVERSIBLE [y/N]: ")
+            if reply.strip().lower() not in ("y", "yes"):
+                sys.exit("Aborted; draft left untouched.")
+        doi = publish_draft(session, draft_id)
+        print(f"\nDone! Record: https://zenodo.org/records/{draft_id}")
+        print(f"DOI: {doi}")
+        return 0
+
     print(f"\n── Step 1: create new draft version from record {RECORD_ID} ──")
     draft = create_new_version(session)
     draft_id = str(draft["id"])
@@ -243,12 +292,7 @@ def main() -> None:
     print("\n── Step 5: update metadata ──")
     update_metadata(session, draft_id)
 
-    if args.publish:
-        print("\n── Step 6: publish ──")
-        doi = publish_draft(session, draft_id)
-        print(f"\nDone! Record: https://zenodo.org/records/{draft_id}")
-        print(f"DOI: {doi}")
-    else:
+    if True:
         print("\nDraft saved (not published).")
         print(f"Review at: https://zenodo.org/uploads/{draft_id}")
         print("\nNOW, before tagging the release (the draft id is final):")
