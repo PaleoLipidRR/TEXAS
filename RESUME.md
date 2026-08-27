@@ -78,10 +78,21 @@ resolves their legacy names — pinned to that old version.
   Notebook now writes S17/S18; `figS18_uncertainty_calibration` (in no SI, and
   colliding with the real S18) became `figS_uncertaintyCalibration` in the
   notebook and in `scripts/plot_uncertainty_calibration.py`.
-  ⚠️ Stale duplicate figures still sit in the manuscript repo's
-  `figures/supplementary/` (`figS15_basin_skill`, `figS16_mcmcBudget_convergence_curves`,
-  `figS17_mcmcBudget_heatmaps_bothArms`, plus older figS11/12/13 leftovers) --
-  unreferenced by the SI; delete when convenient, but not mid-Overleaf-sync.
+- **Figure folders cleaned in BOTH repos (2026-08-27).** Manuscript repo:
+  22 byte-identical duplicates under superseded numbers deleted, 8 unique
+  older versions moved to `figures/*/superseded/`, `figures/README.md` added;
+  all 44 `\includegraphics` references across main / SI / track-change /
+  initial-submission verified to resolve. TEXAS repo: `finalized/` now holds
+  exactly the 34 figures the paper prints, under the printed numbers; `.svg`
+  masters moved to `figures/manuscript/sources/`, stale output to
+  `superseded/`, scratch `posterior_check.png` deleted.
+  **The same stale-number bug was found in SI_code02**, not just SI_code02a:
+  it wrote `figS15_basin_skill` (printed S16), `figS14_residual_difference`
+  (printed S15) and `figS13_TEX86_..._t_sf2tc` (printed S14). All corrected.
+  Note the first cleanup pass *archived two live figures* because their names
+  did not match the paper — the trap one level up; they were restored under
+  the printed numbers. `fig1` and `fig2` are hand-finished from
+  `sources/*.svg`, so re-running the notebook does not update what prints.
   Second pass completed the ladder:
   `SI03_paleo_showcases_modelswitch` → **`SI_code03_paleo_showcases`** and
   `SI_code2a_…` → **`SI_code02a_…`**, with every repo reference updated
@@ -98,8 +109,18 @@ resolves their legacy names — pinned to that old version.
 
 ### Release sequence (order matters — the record id must be in the tag)
 
-1. Commit everything (incl. the pre-session dirty figure/CSV files), push.
-2. Merge `feat/revision1-validation-groupA` → `main` (plan: top of this file).
+1. ~~Commit everything.~~ **Done 2026-08-27** — eight commits, tree clean.
+2. ~~Merge `feat/revision1-validation-groupA` → `main`.~~ **Done 2026-08-27,
+   LOCALLY**: fast-forward, 175 commits ahead of `origin/main`, 0 behind,
+   302 tests pass. Currently checked out on `main`; the feature branch points
+   at the same commit.
+   **NOT PUSHED — deliberate (decision 2026-08-27).** The push waits until the
+   Zenodo draft record id is in `download.py` (step 4), so `main`, the tagged
+   release and the docs site tell one story with no window where the published
+   docs name a record id that then changes. The push also fires
+   `.github/workflows/docs.yml`, redeploying <https://paleolipidrr.github.io/TEXAS/>
+   — the URL the manuscript sends readers to, today still serving pre-revision
+   content. When ready: `git push origin main`.
 3. `python scripts/prepare_resubmission_archive.py --apply` (if not fresh).
 4. `ZENODO_TOKEN=… python scripts/zenodo_upload.py` → **draft**; put the
    printed draft id into `download.py::ZENODO_RECORD_ID`; commit.
