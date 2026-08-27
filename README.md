@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
 [![PyPI](https://img.shields.io/pypi/v/texas-psm.svg)](https://pypi.org/project/texas-psm/)
-[![Zenodo](https://img.shields.io/badge/data-10.5281%2Fzenodo.20032542-blue.svg)](https://doi.org/10.5281/zenodo.20032542)
+[![Zenodo](https://img.shields.io/badge/data-10.5281%2Fzenodo.19666744-blue.svg)](https://doi.org/10.5281/zenodo.19666744)
 
 **TEXAS-PSM** (`texas-psm`) is a Python package implementing a **Bayesian proxy
 system model** for the TEX86 paleothermometer. **TEXAS** is its sensor model —
@@ -90,7 +90,7 @@ For Docker, conda-lock, uv, and development installs, see [Installation](docs/in
 ## Data and posteriors
 
 Pre-computed posteriors and training data are hosted on Zenodo:
-**[https://doi.org/10.5281/zenodo.20032542](https://doi.org/10.5281/zenodo.20032542)**
+**[https://doi.org/10.5281/zenodo.19666744](https://doi.org/10.5281/zenodo.19666744)**
 
 ```python
 import TEXAS
@@ -172,8 +172,8 @@ result = predict_T_from_proxyObs(
 )
 
 # ── Pass a pre-loaded dataset (Colab / Google Drive) ──────────────────────────
-# (files downloaded straight from Zenodo keep the archived legacy name)
-ds = xr.load_dataset("/content/drive/MyDrive/posteriors/gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc")
+# (downloads are named by case id; v0.2.0-era files keep their legacy name)
+ds = xr.load_dataset("/content/drive/MyDrive/posteriors/tx.GHPU.sst.sri03.p0.fwd.nc")
 result = predict_T_from_proxyObs(..., fwd_posterior=ds)
 ```
 

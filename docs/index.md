@@ -4,7 +4,7 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/PaleoLipidRR/TEXAS/blob/main/LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/texas-psm)](https://pypi.org/project/texas-psm/)
-[![Zenodo](https://img.shields.io/badge/data-10.5281%2Fzenodo.20032542-blue.svg)](https://doi.org/10.5281/zenodo.20032542)
+[![Zenodo](https://img.shields.io/badge/data-10.5281%2Fzenodo.19666744-blue.svg)](https://doi.org/10.5281/zenodo.19666744)
 
 TEXAS-PSM is a **Bayesian proxy system model (PSM)** for TEX86-based sea surface temperature (SST) reconstruction, built around the **TEXAS** sensor model. It fits hierarchical generalized-logistic Stan models to isoGDGT Ring Index data — with optional non-thermal corrections for GDGT-2/3 ratio (AOA ecology) and NO₃ (nutrient effect) — and reconstructs paleotemperatures with full posterior uncertainty.
 
@@ -125,7 +125,7 @@ result = predict_T_from_proxyObs(          # fwd_posterior omitted →
 
 Pass `temptype="thermoT"` to get the thermocline-integrated calibration
 instead; it ships too. Any other posterior is fetched once from
-[Zenodo](https://doi.org/10.5281/zenodo.20032542) and cached:
+[Zenodo](https://doi.org/10.5281/zenodo.19666744) and cached:
 
 ```python
 import TEXAS
@@ -133,7 +133,8 @@ import TEXAS
 # Univariate SST — the temperature-only calibration (<1 MB)
 TEXAS.download_posteriors(["tx.GHPU.sst.sri03.p0"])
 
-# Everything currently in the Zenodo record (~158 MB)
+# Everything in the current Zenodo record (~490 MB; the six
+# full multivariate posteriors are ~78-81 MB each)
 TEXAS.download_all()
 
 # What you already have — bundled and downloaded alike
@@ -158,10 +159,14 @@ forward and inverse models read is present and unmodified, which is what takes
 the file from ~80 MB to 0.37 MB. The complete versions, latents included, are
 archived on Zenodo with the release record that the paper cites.
 
-The Zenodo record's flat files still carry the pre-revision legacy names
-(e.g. `gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc`).
-`download_posteriors()` and `load_posterior()` accept **either** spelling —
-downloads are unpacked into the case-directory layout shown below.
+From **v0.3.0** the Zenodo record's flat files are named by case id
+(`tx.GHPU.sst.sri03.p0.fwd.nc`). Version 0.2.0 of the record — the
+initial submission's additive fits — carries the older names instead
+(e.g. `gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc`), and
+`download_posteriors()` still resolves those, pinned to that version, so
+preprint-era notebooks keep working. `load_posterior()` accepts **either**
+spelling, and downloads are unpacked into the case-directory layout shown
+below.
 
 #### How posterior files are named
 

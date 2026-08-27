@@ -10,6 +10,8 @@
 | [`download_posteriors`](#download-posteriors) | Download forward posteriors from Zenodo |
 | [`download_training_data`](#download-training-data) | Download training CSVs + CMEMS NO₃ field |
 | [`list_posteriors`](#list-posteriors) | Print and return `.nc` stems in the local cache |
+| [`MahalanobisOutlierDetector`](#screen-a-record) | Flag samples outside the calibration domain (90% χ² ellipse) |
+| [`InvTConfig`](#invt-configuration) | Control the number of forward draws *M* a reconstruction marginalises over |
 | [`build_fwd_data`](#build-forward-data) | Build validated Stan data dict for forward calibration |
 | [`get_posterior`](#get-posterior) | Run forward calibration Stan sampling |
 | [`save_posterior`](#save-posterior) | Persist forward posterior as compressed NetCDF |
@@ -74,6 +76,31 @@
 
 ---
 
+## Screening
+
+### Screen a record
+
+Flags samples lying outside the TEX₈₆–Scaled RI domain the calibration was
+trained on, using the same 90 % χ² Mahalanobis ellipse used to build the
+training set. A flagged sample is an extrapolation, not necessarily a bad
+measurement — the recommendation is to flag and interpret with caution rather
+than exclude.
+
+```python
+from TEXAS.data import MahalanobisOutlierDetector
+
+detector = MahalanobisOutlierDetector(["TEX86", "scaledRI_cren3"], confidence=0.90)
+df["flagged"] = detector.fit_predict(df)
+```
+
+```{eval-rst}
+.. autoclass:: TEXAS.data.screening.MahalanobisOutlierDetector
+   :members: fit, fit_predict, transform, detect_outliers, detect_outliers_manual, fit_transform, get_params
+   :member-order: bysource
+```
+
+---
+
 ## Data builders
 
 ### Build forward data
@@ -86,6 +113,13 @@
 
 ```{eval-rst}
 .. autofunction:: TEXAS.data.builder.build_invT_inputData
+```
+
+### InvT configuration
+
+```{eval-rst}
+.. autoclass:: TEXAS.data.builder.InvTConfig
+   :members:
 ```
 
 ### WOA23 NO₃ lookup
