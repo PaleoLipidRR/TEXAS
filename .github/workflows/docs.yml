@@ -20,6 +20,12 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          # build_sampler_budget.py reads data/revision1/**/*.csv, and *.csv is
+          # LFS-tracked (.gitattributes). Without this, checkout leaves POINTER
+          # files, pandas parses "version https://git-lfs..." as the header, and
+          # the build dies with KeyError: 'model'.
+          lfs: true
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
