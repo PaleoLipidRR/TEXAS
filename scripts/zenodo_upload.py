@@ -189,7 +189,7 @@ def update_metadata(session: requests.Session, draft_id: str) -> None:
     meta["version"] = VERSION
     r2 = session.put(
         f"{ZENODO_BASE}/records/{draft_id}/draft",
-        json={**draft, "metadata": meta},
+        json={"metadata": meta},
     )
     _check(r2, "update metadata")
     print(f"  version → {VERSION}")

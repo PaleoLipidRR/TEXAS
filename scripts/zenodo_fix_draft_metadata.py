@@ -144,11 +144,25 @@ def main() -> int:
           f"resource_type={meta.get('resource_type')!r}, version={meta.get('version')!r}")
 
     creators = creators_from_parent(session)
-    meta["creators"] = creators
-    meta["resource_type"] = {"id": "dataset"}
-    meta.setdefault("title", DEFAULT_TITLE)
-    meta["version"] = _version()
-    meta.setdefault("publication_date", __import__("datetime").date.today().isoformat())
+
+    # Build metadata from scratch rather than mutating what the draft returned.
+    # The draft may carry legacy-shaped or read-only keys, and echoing those back
+    # makes the API return 500. Only the fields below are sent.
+    import datetime
+    parent_meta = session.get(f"{ZENODO_BASE}/records/{PARENT_RECORD}").json().get("metadata", {})
+    clean = {
+        "resource_type": {"id": "dataset"},
+        "creators": creators,
+        "title": meta.get("title") or parent_meta.get("title") or DEFAULT_TITLE,
+        "publication_date": meta.get("publication_date") or datetime.date.today().isoformat(),
+        "version": _version(),
+    }
+    desc = meta.get("description") or parent_meta.get("description")
+    if desc:
+        clean["description"] = desc
+    if meta.get("rights"):
+        clean["rights"] = meta["rights"]
+    meta = clean
 
     print(f"  will write  : creators={len(creators)}, resource_type={{'id': 'dataset'}}, "
           f"version={meta['version']!r}")
@@ -184,7 +198,7 @@ def main() -> int:
         return 0
 
     r2 = session.put(f"{ZENODO_BASE}/records/{draft_id}/draft",
-                     json={**draft, "metadata": meta})
+                     json={"metadata": meta})
     if not r2.ok:
         sys.exit(f"ERROR writing metadata: HTTP {r2.status_code}\n  {r2.text[:600]}")
 
