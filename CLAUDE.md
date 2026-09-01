@@ -118,10 +118,14 @@ Posteriors are saved as compressed NetCDF (`.nc`) in:
 - `data/cache/TEXAS_posterior_cache/` — forward calibration posteriors
 - `data/cache/TEXAS_invT_posterior_cache/` — inverse temperature posteriors
 
-Forward posterior filenames follow: `{model}_{temptype}_{proxy_name}{suffix}.nc`
+Legacy forward posterior filenames follow: `{model}_{temptype}_{proxy_name}{suffix}.nc`
 e.g. `gen_logi_fixed_hier_crtp_multiv_SST_scaledRI.nc`
 Optional predictor flags (`_gdgt23ratio`, `_no3_1.5`) are appended to `temptype` before `proxy_name`.
 `proxy_name` is omitted from the filename only if not set (falls back to old pattern for backward compat).
+**`save_posterior()` defaults to the CESM-style case layout described below**
+(`layout="auto"`, which prefers case naming) — the pattern above is what
+`layout="legacy"` still writes, and what `load_posterior()` still reads
+for old caches and Zenodo downloads pinned to the v0.2.0 record.
 
 > **CESM-style case naming (2026-08-09)**: `utils/naming.py` replaces the
 > concatenated-description filenames (95–122 chars, growing with every new axis)
@@ -383,7 +387,7 @@ data = build_fwd_data(
     no3_crtp=crtp_df["no3"].values,  # no3_cutoff auto-calculated via Spearman if omitted
 )
 post, diag = get_posterior(data, "gen_logi_fixed_hier_crtp_multiv", temptype="SST", proxy_name="scaledRI")
-save_posterior(post)  # → gen_logi_fixed_hier_crtp_multiv_SST_scaledRI.nc
+save_posterior(post)  # → <case_id>/<case_id>.fwd.nc (case layout, the default since v0.3.0)
 
 # 2. Inverse reconstruction
 data_inv, kwargs = build_invT_inputData(proxyObs, prior_mu_t, prior_sigma_t, fwd_posterior_name="...")

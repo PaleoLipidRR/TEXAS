@@ -154,61 +154,57 @@ predict_T_from_proxyObs(
 
 ## Code Usage
 
+`predict_T_from_proxyObs()` — the public, high-level API — always runs the
+direct/marginal model; there is no `model_type=` argument at this level:
+
 ```python
 # Direct sampling with threading (recommended for most cases)
 results = predict_T_from_proxyObs(
-    scaledRI=data,
+    proxyObs=data,
     prior_mu_t=30.0,
     prior_sigma_t=6.0,
-    fwd_posterior_name="my_forward_model",
-    model_type="direct",       # Default: efficient direct sampling
+    fwd_posterior="tx.GHEB.sst.sri03.G23-N1p0",
+    temptype="SST",
     threads_per_chain=4,       # 1-4% additional speedup
     # ... other parameters
 )
 
 # Direct sampling without threading (maximum compatibility)
 results = predict_T_from_proxyObs(
-    scaledRI=data,
+    proxyObs=data,
     prior_mu_t=30.0,
     prior_sigma_t=6.0,
-    fwd_posterior_name="my_forward_model",
-    model_type="direct",       # Still 100× more efficient than ensemble
-    # ... other parameters
+    fwd_posterior="tx.GHEB.sst.sri03.G23-N1p0",
+    temptype="SST",
+    # no threading — still 100x more efficient than ensemble
 )
+```
 
-# Ensemble models (legacy/research use)
-results = predict_T_from_proxyObs(
-    scaledRI=data,
+Ensemble mode is a legacy/research path, not exposed through
+`predict_T_from_proxyObs()`. Reach it through the lower-level
+`TEXAS.stan.invT.get_invT_posterior()`:
+
+```python
+from TEXAS.stan.invT import get_invT_posterior
+
+post_inv = get_invT_posterior(
+    proxyObs=data,
     prior_mu_t=30.0,
     prior_sigma_t=6.0,
-    fwd_posterior_name="my_forward_model",
-    model_type="ensemble",     # Traditional approach
+    fwd_posterior_name="tx.GHEB.sst.sri03.G23-N1p0",
+    temptype="SST",
+    model_type="ensemble",     # traditional approach
     # threads_per_chain not supported with ensemble
-    # ... other parameters
 )
 ```
 
 ## Output Filenames
 
-Results are automatically saved with clear model type identification:
-
-### Direct Sampling Models:
-```
-WilsonLake_invT_logistic_fixed_multiv_thermoT_gdgt23ratio_direct.nc
-WilsonLake_invT_gen_logi_fixed_univ_sst_direct.nc
-```
-
-### Ensemble Models:
-```
-WilsonLake_invT_logistic_fixed_multiv_thermoT_gdgt23ratio_ensemble.nc
-WilsonLake_invT_gen_logi_fixed_univ_sst_ensemble.nc
-```
-
-The model type is clearly indicated at the end of each filename for easy identification and organization.
-
-## Performance Examples
-
-## Performance Examples
+`save_results=True` on `predict_T_from_proxyObs()` records the model type
+(`direct` or `ensemble`) as a `model_type` attr on the saved dataset, and the
+`use_marginal` attr is `1` for direct/marginal models. See the "How posterior
+files are named" section of [the quickstart guide](index.md) for the current
+inverse-reconstruction filename convention (CESM-style case ids).
 
 ## Performance Examples
 

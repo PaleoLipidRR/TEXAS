@@ -3,7 +3,7 @@
 # TEXAS — A proxy system model for TetraEther indeX of Ammonia oxidizerS
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![PyPI](https://img.shields.io/pypi/v/texas-psm.svg)](https://pypi.org/project/texas-psm/)
 [![Zenodo](https://img.shields.io/badge/data-10.5281%2Fzenodo.19666744-blue.svg)](https://doi.org/10.5281/zenodo.19666744)
 

@@ -32,10 +32,8 @@ from typing import List, Optional
 from .paths import POSTERIOR_CACHE_DIR, SPREADSHEETS_DIR
 
 # ─── Zenodo config ────────────────────────────────────────────────────────────
-# The current version of the data record (concept DOI 10.5281/zenodo.19666744).
-# TODO(v0.3.0 release): replace with the record id of the v0.3.0 deposit as soon
-# as `scripts/zenodo_upload.py` creates the draft — the draft's id is final even
-# before it is published — then tag the release.
+# The current version of the data record (concept DOI 10.5281/zenodo.19666744),
+# pointing at the v0.3.0 deposit created by scripts/zenodo_upload.py.
 ZENODO_RECORD_ID: str = "22131367"
 
 # Registry entries may pin an older version of the record ("record": "<id>");

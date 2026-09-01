@@ -45,6 +45,7 @@ sphinx:
   config:
     html_css_files:
       - custom.css
+    html_favicon: _static/texas_logo.svg
     # Generate #slug anchors for H1–H3 so in-page table links resolve
     myst_heading_anchors: 3
     # The codebase mixes Google-style (Args:/Returns:) and NumPy-style

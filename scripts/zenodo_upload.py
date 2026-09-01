@@ -36,8 +36,10 @@ from pathlib import Path
 import requests
 
 # ─── Configuration ─────────────────────────────────────────────────────────────
-RECORD_ID = "20032542"          # latest published version of the data record
-                                # (concept doi:10.5281/zenodo.19666744)
+RECORD_ID = "20032542"          # v0.2.0 (initial-submission) version of the data
+                                # record; the concept DOI 10.5281/zenodo.19666744
+                                # resolves to whichever version is newest — check
+                                # download.py::ZENODO_RECORD_ID for that id
 ZENODO_BASE = "https://zenodo.org/api"
 REPO = Path(__file__).resolve().parent.parent
 VERSION = re.search(r'^version = "(.+)"', (REPO / "pyproject.toml").read_text(),
