@@ -91,8 +91,9 @@ st.caption(
 )
 pcol1, pcol2 = st.columns(2)
 with pcol1:
-    g23_val = st.slider(
-        "GDGT-2/3 ratio (G23)", min_value=0.0, max_value=1.0, value=0.0, step=0.01,
+    g23_val = st.number_input(
+        "GDGT-2/3 ratio (G23)", min_value=0.0, value=0.0, step=0.5,
+        help="Unbounded ratio (GDGT-2 / GDGT-3), not a fraction -- typically < 30 in practice.",
     )
 with pcol2:
     no3_val = st.number_input(
