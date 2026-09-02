@@ -82,9 +82,9 @@ DATA_FILES = [
     REPO / "data/spreadsheets/ds_gridded_screened_global_compilation_finalized.csv",
     REPO / "data/spreadsheets/cmems_no3_uncertainty_field.nc",
     REFIT_DIR / "coretop_maps_sites.csv",
-    # WOA23-derived ocean_prop_ds — filename must match
-    # utils/download.py::TRAINING_DATA_REGISTRY["ocean_prop_ds"]["filename"].
-    REPO / "data/external/ncfiles/ds06_calculated_ocean_properties.nc",
+    # NOTE: ocean_prop_ds (ds06_calculated_ocean_properties.nc) is NOT staged
+    # here -- it isn't a TEXAS-record file. utils/download.py pins it to the
+    # companion GRL paper's own Zenodo record, so it's never uploaded here.
 ]
 
 # run manifests folded into MANIFEST.csv (source label -> path)
@@ -380,7 +380,11 @@ the two full-draws files behind the extreme-RI examples (Fig. 13).
 | ds_gridded_screened_global_compilation_finalized.csv | screened, gridded global coretop compilation (calibration training set) |
 | cmems_no3_uncertainty_field.nc | CMEMS [NO3-] uncertainty field used by the EIV calibration |
 | coretop_maps_sites.csv | coretop site table; join key for the compiled reconstructions |
-| ds06_calculated_ocean_properties.nc | WOA23-derived gridded ocean properties (`ocean_prop_ds`); used for the site_lat/site_lon NO3 lookup at inference time |
+
+Note: `ocean_prop_ds` (`ds06_calculated_ocean_properties.nc`), used for the
+`site_lat`/`site_lon` NO3 lookup at inference time, is NOT part of this
+archive -- it's hosted on the companion GRL paper's own Zenodo record and
+downloaded from there directly (see `utils/download.py`).
 
 ### MANIFEST.csv
 

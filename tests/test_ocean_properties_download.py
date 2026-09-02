@@ -33,6 +33,11 @@ def test_ocean_prop_ds_is_registered():
     # too big to bundle in the wheel (see test_bundled_posteriors.py's 5 MB
     # ceiling) but small enough that "download on first use" is reasonable
     assert 1 < entry["size_mb"] < 50
+    # Hosted on the companion GRL paper's own Zenodo record, not the TEXAS
+    # project's record (download_mod.ZENODO_RECORD_ID) -- this file is never
+    # uploaded/re-hosted by TEXAS's own release tooling.
+    assert entry["record"] == download_mod._GRL_PAPER_RECORD_ID
+    assert entry["record"] != download_mod.ZENODO_RECORD_ID
 
 
 def test_ocean_prop_ds_exported_from_top_level():
@@ -91,6 +96,9 @@ def test_download_ocean_properties_fetches_when_missing(monkeypatch, tmp_path):
     assert len(seen_urls) == 1
     assert entry["filename"] in seen_urls[0]
     assert "zenodo.org" in seen_urls[0]
+    # Pulled from the pinned GRL-paper record, not the main TEXAS record.
+    assert f"/records/{download_mod._GRL_PAPER_RECORD_ID}/" in seen_urls[0]
+    assert f"/records/{download_mod.ZENODO_RECORD_ID}/" not in seen_urls[0]
 
 
 def test_download_ocean_properties_force_redownloads(monkeypatch, tmp_path):
@@ -105,6 +113,26 @@ def test_download_ocean_properties_force_redownloads(monkeypatch, tmp_path):
 
     out = download_ocean_properties(dest_dir=tmp_path, force=True)
     assert out.read_bytes() == b"fresh"
+
+
+def test_download_training_data_also_uses_the_pinned_record(monkeypatch, tmp_path):
+    # download_training_data() sweeps the whole registry, including
+    # ocean_prop_ds -- it must honor that entry's "record" pin too, not just
+    # download_ocean_properties()'s dedicated path.
+    from TEXAS.utils.download import download_training_data, TRAINING_DATA_REGISTRY as REG
+
+    seen_urls = []
+
+    def _fake_urlopen(url):
+        seen_urls.append(url)
+        return _FakeResponse(b"x")
+
+    monkeypatch.setattr(download_mod.urllib.request, "urlopen", _fake_urlopen)
+    download_training_data(dest_dir=tmp_path)
+
+    ocean_urls = [u for u in seen_urls if "ds06_calculated_ocean_properties.nc" in u]
+    assert len(ocean_urls) == 1
+    assert f"/records/{REG['ocean_prop_ds']['record']}/" in ocean_urls[0]
 
 
 # ─── get_ocean_prop_ds() ─────────────────────────────────────────────────────
