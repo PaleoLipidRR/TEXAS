@@ -55,6 +55,11 @@ MAX_DIMENSION_INFO_FILES = 2
 NETCDF_EXTENSIONS = ["nc", "netcdf"]
 CSV_EXTENSIONS = ["csv"]
 
+# Default repo folders to search for CSVs in the "From repo folders" source
+# mode of csv_file_selector() -- nonexistent entries are silently skipped
+# there, so this can list more than exists on a given checkout.
+DEFAULT_CSV_DIRS = ["data/spreadsheets", "data/raw", "data/external"]
+
 # Plot types
 PLOT_TYPES = ["Histogram", "Time series", "2D heatmap"]
 KDE_BANDWIDTH_METHODS = ["scott", "silverman", "custom"]
