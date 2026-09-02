@@ -8,7 +8,6 @@ Network is always mocked here — these never hit Zenodo for real.
 
 from __future__ import annotations
 
-import io
 from pathlib import Path
 
 import numpy as np
