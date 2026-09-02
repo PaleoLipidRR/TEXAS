@@ -29,7 +29,7 @@ from .predict import predict_proxy_from_T, predict_T_from_proxyObs, compute_scal
 from .data.builder import build_invT_inputData, build_fwd_data, InvTConfig
 
 # ─── Ocean property lookups ──────────────────────────────────────────────
-from .data.ocean_lookup import lookup_no3_from_woa
+from .data.ocean_lookup import lookup_no3_from_woa, get_ocean_prop_ds
 
 # ─── Pure-Python logistic helpers ───────────────────────────────────────
 from .models.logistics import (
@@ -60,7 +60,7 @@ from .diagnostics import summarize_sampler_diagnostics, create_summary_table
 # ─── Posterior download utilities ───────────────────────────────────────
 from .utils.download import (
     download_all, download_posteriors, POSTERIOR_REGISTRY,
-    download_training_data, TRAINING_DATA_REGISTRY,
+    download_training_data, download_ocean_properties, TRAINING_DATA_REGISTRY,
 )
 
 # ─── Cache configuration ─────────────────────────────────────────────────
@@ -129,8 +129,12 @@ __all__ = [
     "download_all",
     "download_posteriors",
     "download_training_data",
+    "download_ocean_properties",
     "TRAINING_DATA_REGISTRY",
     "POSTERIOR_REGISTRY",
+    # ocean property lookups
+    "lookup_no3_from_woa",
+    "get_ocean_prop_ds",
     # cache configuration
     "set_cache_dir",
     # environment diagnostic + CmdStan installer

@@ -13,7 +13,8 @@ Usage
 >>> import TEXAS
 >>> TEXAS.download_all()               # everything: posteriors + training data
 >>> TEXAS.download_posteriors()        # forward calibration posteriors only
->>> TEXAS.download_training_data()     # training CSVs + NO₃ field only
+>>> TEXAS.download_training_data()     # training CSVs + NO₃ fields
+>>> TEXAS.download_ocean_properties()  # just the WOA23 ocean_prop_ds field
 
 Download a specific posterior:
 >>> TEXAS.download_posteriors(["tx.GHPU.sst.sri03.p0"])
@@ -38,9 +39,14 @@ from .paths import POSTERIOR_CACHE_DIR, SPREADSHEETS_DIR
 # before it is published — then tag the release.
 ZENODO_RECORD_ID: str = "22131367"
 
-# Registry entries may pin an older version of the record ("record": "<id>");
-# files without a pin are fetched from ZENODO_RECORD_ID.
+# Registry entries may pin a different record ("record": "<id>"); files
+# without a pin are fetched from ZENODO_RECORD_ID.
 _V020_RECORD_ID: str = "20032542"   # v0.2.0: initial-submission (additive) files
+
+# ocean_prop_ds isn't a TEXAS-record file at all -- it's produced and hosted
+# on the Zenodo record for the companion GRL paper, which is the canonical
+# source SI_code00_PreProcessing itself downloads it from.
+_GRL_PAPER_RECORD_ID: str = "14806962"
 
 
 def _file_url(filename: str, record: Optional[str] = None) -> str:
@@ -164,6 +170,20 @@ TRAINING_DATA_REGISTRY: dict[str, dict] = {
     "cmems_no3_uncertainty_field": {
         "filename": "cmems_no3_uncertainty_field.nc",
         "size_mb": 14,
+    },
+    # WOA23-derived gridded ocean properties ("ocean_prop_ds" in the SI
+    # preprocessing notebooks). Unlike the other three entries this one is
+    # also used at inference time — by predict_T_from_proxyObs(site_lat=,
+    # site_lon=) — not only to re-run the SI notebooks from scratch, so it
+    # has its own download_ocean_properties() convenience wrapper below.
+    #
+    # Pinned to the Zenodo record for the companion GRL paper, which is
+    # where this file is actually produced and hosted — not the TEXAS
+    # record, so no re-upload/re-hosting here.
+    "ocean_prop_ds": {
+        "filename": "ds06_calculated_ocean_properties.nc",
+        "size_mb": 20,
+        "record": _GRL_PAPER_RECORD_ID,
     },
 }
 
@@ -340,11 +360,18 @@ def download_training_data(
 ) -> List[Path]:
     """Download GDGT training data files from Zenodo.
 
-    Downloads the coretop/culture/mesocosm training CSVs and the CMEMS
-    NO₃ uncertainty field used in the EIV calibration.  These are needed
-    only to re-run the SI preprocessing and calibration notebooks from
-    scratch; they are NOT required for inverse temperature reconstructions —
-    use :func:`download_posteriors` for that.
+    Downloads the coretop/culture/mesocosm training CSVs, the CMEMS NO₃
+    uncertainty field used in the EIV calibration, and the WOA23-derived
+    ``ocean_prop_ds`` gridded ocean properties.  The CSVs and the CMEMS field
+    are needed only to re-run the SI preprocessing and calibration notebooks
+    from scratch and are NOT required for inverse temperature
+    reconstructions — use :func:`download_posteriors` for that.
+    ``ocean_prop_ds`` is the exception: it is also used at inference time by
+    :func:`~TEXAS.predict.predict_T_from_proxyObs` for the optional
+    ``site_lat``/``site_lon`` NO₃ lookup — see :func:`download_ocean_properties`
+    to fetch just that one file. It also isn't hosted on the TEXAS record at
+    all; it comes from the companion GRL paper's Zenodo record (see
+    ``TRAINING_DATA_REGISTRY["ocean_prop_ds"]["record"]``).
 
     Parameters
     ----------
@@ -377,7 +404,59 @@ def download_training_data(
     paths = []
     for name, entry in TRAINING_DATA_REGISTRY.items():
         out = dest / entry["filename"]
-        _download_file(_file_url(entry["filename"]), out, entry["size_mb"], force=force)
+        _download_file(
+            _file_url(entry["filename"], entry.get("record")),
+            out, entry["size_mb"], force=force,
+        )
         paths.append(out)
 
     return paths
+
+
+def download_ocean_properties(
+    dest_dir: Optional[Path | str] = None,
+    force: bool = False,
+) -> Path:
+    """Download the WOA23-derived ``ocean_prop_ds`` field from Zenodo.
+
+    This is the single file most users need for the ``site_lat``/``site_lon``
+    NO₃ lookup in :func:`~TEXAS.predict.predict_T_from_proxyObs` — a ~20 MB
+    gridded ``(lat, lon)`` dataset of thermocline-depth-integrated WOA23
+    nitrate, previously only obtainable by running ``SI_code00_PreProcessing``
+    locally. Downloading just this entry (rather than the full
+    :func:`download_training_data`, which also fetches the ~17 MB of
+    training CSVs and the CMEMS field) is why this has its own function.
+
+    Fetched from the Zenodo record for the companion GRL paper (not the
+    TEXAS project's own record) — the same source ``SI_code00_PreProcessing``
+    itself downloads it from.
+
+    Idempotent: skips the download if the file is already cached, unless
+    *force=True*.
+
+    Parameters
+    ----------
+    dest_dir : Path or str, optional
+        Destination directory.  Defaults to ``data/spreadsheets/`` in the
+        repo (or ``~/.texas/data/spreadsheets/`` when pip-installed) — the
+        same directory :func:`download_training_data` uses.
+    force : bool
+        Re-download even if the file already exists locally.
+
+    Returns
+    -------
+    Path
+        Local path of the downloaded ``.nc`` file.  Open it with
+        ``xr.open_dataset(path)``, or use
+        :func:`TEXAS.data.ocean_lookup.get_ocean_prop_ds` to download and
+        open it in one call.
+    """
+    dest = Path(dest_dir) if dest_dir else SPREADSHEETS_DIR
+    dest.mkdir(parents=True, exist_ok=True)
+    entry = TRAINING_DATA_REGISTRY["ocean_prop_ds"]
+    out = dest / entry["filename"]
+    _download_file(
+        _file_url(entry["filename"], entry.get("record")),
+        out, entry["size_mb"], force=force,
+    )
+    return out
