@@ -32,14 +32,14 @@ TEXAS implements a two-stage workflow:
 | **Forward calibration** | Fit a generalized logistic curve (Scaled RI → temperature) to culture, mesocosm, and/or coretop data using a hierarchical Bayesian Stan model. Outputs a compressed posterior `.nc` file. |
 | **Inverse reconstruction (invT)** | Predict paleotemperatures from Scaled RI observations by marginalizing over posterior parameter draws. Returns a full posterior temperature distribution per sample. |
 
-Optional non-thermal predictors — the GDGT-2/3 ratio and NO₃ — enter **inside** the logistic, as a shift of the curve's location parameter T₀:
+Optional non-thermal predictors — the GDGT-2/GDGT-3 (G23) and NO₃ — enter **inside** the logistic, as a shift of the curve's location parameter T₀:
 
 ```
-T₀_eff = T₀ + γ_{G₂/₃}·G₂/₃ + γ_{NO₃}·log₁₀(NO₃)
+T₀_eff = T₀ + γ_{G23}·G23 + γ_{NO₃}·log₁₀(NO₃)
 Scaled RI = b + (1 − b) / (1 + exp(−k·(T − T₀_eff)))^(1/ν)
 ```
 
-The γ coefficients are in **°C per predictor unit**, so a sample with a given G₂/₃ behaves like water that is γ·G₂/₃ °C colder. Because the predictors translate the curve rather than adding an offset to the response, the predicted Scaled RI stays inside (b, 1) for any finite predictor value — the bound a ratio has by definition is reproduced by construction, with no truncation or clipping. They are fitted through an Error-in-Variables (EIV) Stan model that separates analytical measurement error from oceanographic process noise. Inverse models use `reduce_sum` for within-chain parallelism.
+The γ coefficients are in **°C per predictor unit**, so a sample with a given G23 behaves like water that is γ·G23 °C colder. Because the predictors translate the curve rather than adding an offset to the response, the predicted Scaled RI stays inside (b, 1) for any finite predictor value — the bound a ratio has by definition is reproduced by construction, with no truncation or clipping. They are fitted through an Error-in-Variables (EIV) Stan model that separates analytical measurement error from oceanographic process noise. Inverse models use `reduce_sum` for within-chain parallelism.
 
 > **T₀ is the curve's location, not its inflection point.** The steepest response sits at `T₀ − ln(ν)/k`, roughly 4–5 °C below T₀ for the fitted ν. Because `dRI/dT` varies about sixfold across the calibrated range, there is no single thermal sensitivity to quote for this proxy.
 
