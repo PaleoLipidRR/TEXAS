@@ -7,6 +7,7 @@
 | [`compute_scaledRI`](#compute-scaled-ring-index) | Compute Scaled RI (RI₀₋₃ by default) from six isoGDGT abundances |
 | [`predict_proxy_from_T`](#predict-proxy-from-t) | Forward: temperature → proxy percentiles (pure Python) |
 | [`predict_T_from_proxyObs`](#predict-t-from-proxy-observations) | Inverse: proxy → temperature with full uncertainty (runs Stan) |
+| [`compute_quality_flags`](#per-observation-quality-flags) | Flag reconstructed samples the calibration cannot support |
 | [`download_posteriors`](#download-posteriors) | Download forward posteriors from Zenodo |
 | [`download_training_data`](#download-training-data) | Download training CSVs + CMEMS NO₃ field |
 | [`list_posteriors`](#list-posteriors) | Print and return `.nc` stems in the local cache |
@@ -38,6 +39,15 @@
 
 ```{eval-rst}
 .. autofunction:: TEXAS.predict.predict_T_from_proxyObs
+```
+
+### Per-observation quality flags
+
+Returned automatically as `result["flags"]`, and callable on its own against a
+saved reconstruction.
+
+```{eval-rst}
+.. autofunction:: TEXAS.quality.compute_quality_flags
 ```
 
 ---

@@ -24,6 +24,7 @@ from .stan.invT import (
     predict_temperature_from_proxyObs,
 )
 from .predict import predict_proxy_from_T, predict_T_from_proxyObs, compute_scaledRI
+from .quality import compute_quality_flags
 
 # ─── Data builder for inverse‐T models ──────────────────────────────────
 from .data.builder import build_invT_inputData, build_fwd_data, InvTConfig
@@ -100,6 +101,7 @@ __all__ = [
     # high-level prediction API
     "predict_proxy_from_T",
     "predict_T_from_proxyObs",
+    "compute_quality_flags",
     "compute_scaledRI",
     # data builder
     "build_invT_inputData",

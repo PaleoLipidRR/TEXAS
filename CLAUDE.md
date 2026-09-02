@@ -63,6 +63,7 @@ docker compose up
 | `ensemble/generator.py` | `generate_ensemble()` / `generate_ensemble_auto()` — samples draws from a posterior and computes calibration curve percentiles |
 | `ensemble/detection.py` | `detect_model_and_params()` — infers suffix, model function, and flags from posterior attributes |
 | `diagnostics.py` | `summarize_sampler_diagnostics()` — divergences, R-hat, ESS, E-BFMI; attaches as `stan_diag_*` attrs |
+| `quality.py` | `compute_quality_flags()` — per-observation flags on a reconstruction (attainable-range, extrapolation, missing predictors, calibration domain, prior dominance); attached as `result["flags"]` |
 | `plotting/` | Range utilities and prior distribution plots |
 | `utils/paths.py` | All path constants (`STAN_MODELS_DIR`, `POSTERIOR_CACHE_DIR`, `INVT_CACHE_DIR`, etc.) |
 | `constants.py` | `OPTIONAL_PREDICTORS`, `DEFAULT_SUFFIXES` |
