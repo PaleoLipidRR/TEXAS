@@ -16,10 +16,16 @@
 #   9. Regenerate conda-lock.yml (resolves texas-psm from PyPI, so this must run after upload)
 #   10. Commit updated conda-lock.yml
 #
-# Note: this script does not touch the Docker image. docker/Dockerfile installs
-# TEXAS from the tagged commit's local pyproject.toml + src/TEXAS, not from
-# either lockfile or PyPI, and .github/workflows/docker.yml rebuilds it
-# automatically on any `v*` tag push (step 7 below triggers it).
+# Note on the Docker image: only the TEXAS package itself bypasses the
+# lockfiles -- docker/Dockerfile installs it from the tagged commit's local
+# pyproject.toml + src/TEXAS, not from either lockfile or PyPI. But the
+# image's base environment (numpy, xarray, cmdstanpy, etc.) IS built from
+# conda-lock.yml (`micromamba create -f conda-lock.yml`), and step 7 below
+# pushes the tag -- which triggers .github/workflows/docker.yml -- BEFORE
+# step 9 regenerates conda-lock.yml. So the image always builds from
+# whatever conda-lock.yml was already committed, not a fresh resolve
+# triggered by this release; that lag is pre-existing and this script does
+# not attempt to close it.
 
 set -euo pipefail
 
@@ -120,7 +126,8 @@ git tag "v${NEW_VERSION}"
 confirm "Push branch and tag to origin?" || abort "Aborted before git push."
 git push origin main
 git push origin "v${NEW_VERSION}"
-info "Tag pushed -- .github/workflows/docker.yml will rebuild and publish the GHCR image."
+info "Tag pushed -- .github/workflows/docker.yml will rebuild and publish the GHCR image"
+info "(from the conda-lock.yml already committed -- not yet refreshed by step 9 below)."
 
 # ── 8. clear caches ───────────────────────────────────────────────────────────
 info "Clearing pip HTTP cache ..."
