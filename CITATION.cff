@@ -19,8 +19,8 @@ authors:
     given-names: Gordon N.
     orcid: "https://orcid.org/0000-0002-0032-4668"
     affiliation: "School of Ocean and Earth Science, University of Southampton"
-version: 0.3.0
-date-released: "2026-08-27"
+version: 0.3.1
+date-released: "2026-09-02"
 license: MIT
 repository-code: "https://github.com/PaleoLipidRR/TEXAS"
 # Concept DOI of the SOFTWARE record (resolves to the latest release).

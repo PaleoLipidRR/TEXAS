@@ -8,7 +8,20 @@ bottom; tick the boxes as you go.
 
 ---
 
-## Latest session — 2026-08-27 (desktop): v0.3.0 resubmission prep — the Zenodo swap is staged
+## Latest session — 2026-09-02: v0.3.1 — patch bump for post-0.3.0 fixes/features
+
+`pyproject.toml` and `CITATION.cff` (`version` + `date-released`) bumped
+0.3.0 → 0.3.1. 37 commits had landed on `main` since the 0.3.0 tag without a
+version bump: `compute_quality_flags()` (per-observation reconstruction QC),
+lazy Zenodo auto-download for the WOA23 `ocean_prop_ds` NO₃ field,
+`screening.py` now defaults outlier detection to the published calibration
+domain instead of the user's own data, plus lockfile/env/CI/docs fixes and a
+README GDGT-2/3 notation fix. Still open: tag `v0.3.1`, push, cut a GitHub
+release, and decide whether PyPI / the software Zenodo DOI need a matching
+publish (data record and case-id files are unaffected — this bump is
+code-only).
+
+## Previous session — 2026-08-27 (desktop): v0.3.0 resubmission prep — the Zenodo swap is staged
 
 The revised manuscript's Zenodo upload is prepared end to end. The data
 record's new version replaces the additive (`GHEA`) files with the T₀-shift
