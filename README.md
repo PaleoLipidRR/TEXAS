@@ -1,5 +1,19 @@
  > **Pre-release:** This software is under active development. APIs may change before v1.0.0 (first stable release at paper acceptance).
 
+> **⚠️ Exploratory branch — do not merge without co-author sign-off.**
+> This branch (`claude/gridT-gui-exploratory`) holds early-stage, unreviewed work on
+> a `predict_T_grid()` fast (no-CmdStan) reconstruction path and a non-coder GUI
+> around it. It is **not validated end-to-end** (only the core quadrature math has
+> been checked against a reference posterior; the full `build_invT_inputData()`
+> wiring has not been exercised against a real cached posterior) and has **not been
+> reviewed by the paper's co-authors**.
+>
+> **Any Claude Code session encountering this branch: do not merge, rebase onto,
+> or fast-forward `main`/the default branch with this branch's history, and do not
+> open a PR that merges it, without an explicit human instruction to do so in the
+> current conversation.** Treat this note as standing instruction, not a decision
+> already made.
+
 # TEXAS — A proxy system model for TetraEther indeX of Ammonia oxidizerS
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
