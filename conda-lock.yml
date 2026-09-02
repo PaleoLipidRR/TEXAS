@@ -13,10 +13,10 @@
 version: 1
 metadata:
   content_hash:
-    linux-64: 7105c1574b7622f5c572cc549f65abab7d15ffe434110c459c7adead90a9e3ed
-    osx-arm64: 814c7796ac6f9be3e5024f7ce4fddcd88c2031eac83b24ae39d9792c97d0dd5a
-    osx-64: 931fb9ae0380ea0d8d317006acf7709b30c68bb6958081058a267dfbd3e62051
-    win-64: 4526c97fd44b05815a0c258507d52758da06f41425c892e907f5c7d66125ef85
+    linux-64: af65d355c8ef27717db375ba9c171be54cec7f23b83e05ada22b9a57afc472e0
+    osx-arm64: 1d9cf7fd26c4af2a4bb20993679bd6e4a84814fc9eb9503be6d9c0dc65117417
+    osx-64: dcc9d1aba19d4da3a6dfb8bec7cc248c0af9b17fe0fb32aefaf8bb8d897cf7f7
+    win-64: ebb9aad4b6f8a218d91b1f97c40dfcea766259a15ccee46408159035be8a73c4
   channels:
   - url: conda-forge
     used_env_vars: []
@@ -27084,15 +27084,15 @@ package:
   category: main
   optional: false
 - name: texas-psm
-  version: 0.1.10
+  version: 0.3.2
   manager: pip
   platform: linux-64
   dependencies:
-    baysparpy: '>=0.0.2'
-    baysplinepy: '>=0.0.1'
     cmdstanpy: '>=1.0'
     cmocean: '*'
+    h5netcdf: '*'
     matplotlib: '>=3.3'
+    netcdf4: '*'
     numpy: '>=1.18'
     pandas: '>=1.3'
     plotly: '*'
@@ -27101,21 +27101,21 @@ package:
     stanio: '>=0.4'
     typing-extensions: '>=3.7.4'
     xarray: '>=0.16'
-  url: https://files.pythonhosted.org/packages/99/2f/5e693fbeb7c79f0dfbf77f46d9bf9a22f2789b34dc769db17cc8e1614b4d/texas_psm-0.1.10-py3-none-any.whl
+  url: https://files.pythonhosted.org/packages/f0/0a/8395214cf4fbadb82360aef5d76eb2387fe7d289a8542824888ee3c5509f/texas_psm-0.3.2-py3-none-any.whl
   hash:
-    sha256: f604fcd09324f46f20efd75d4108da62c03e1fa70b1f19839a326bfb6e8a8f15
+    sha256: 5a194900ae33190d3587053881b6298e12b275abfa38ca1ddbff3cb0cee47fd4
   category: main
   optional: false
 - name: texas-psm
-  version: 0.1.10
+  version: 0.3.2
   manager: pip
   platform: osx-64
   dependencies:
-    baysparpy: '>=0.0.2'
-    baysplinepy: '>=0.0.1'
     cmdstanpy: '>=1.0'
     cmocean: '*'
+    h5netcdf: '*'
     matplotlib: '>=3.3'
+    netcdf4: '*'
     numpy: '>=1.18'
     pandas: '>=1.3'
     plotly: '*'
@@ -27124,21 +27124,21 @@ package:
     stanio: '>=0.4'
     typing-extensions: '>=3.7.4'
     xarray: '>=0.16'
-  url: https://files.pythonhosted.org/packages/99/2f/5e693fbeb7c79f0dfbf77f46d9bf9a22f2789b34dc769db17cc8e1614b4d/texas_psm-0.1.10-py3-none-any.whl
+  url: https://files.pythonhosted.org/packages/f0/0a/8395214cf4fbadb82360aef5d76eb2387fe7d289a8542824888ee3c5509f/texas_psm-0.3.2-py3-none-any.whl
   hash:
-    sha256: f604fcd09324f46f20efd75d4108da62c03e1fa70b1f19839a326bfb6e8a8f15
+    sha256: 5a194900ae33190d3587053881b6298e12b275abfa38ca1ddbff3cb0cee47fd4
   category: main
   optional: false
 - name: texas-psm
-  version: 0.1.10
+  version: 0.3.2
   manager: pip
   platform: osx-arm64
   dependencies:
-    baysparpy: '>=0.0.2'
-    baysplinepy: '>=0.0.1'
     cmdstanpy: '>=1.0'
     cmocean: '*'
+    h5netcdf: '*'
     matplotlib: '>=3.3'
+    netcdf4: '*'
     numpy: '>=1.18'
     pandas: '>=1.3'
     plotly: '*'
@@ -27147,21 +27147,21 @@ package:
     stanio: '>=0.4'
     typing-extensions: '>=3.7.4'
     xarray: '>=0.16'
-  url: https://files.pythonhosted.org/packages/99/2f/5e693fbeb7c79f0dfbf77f46d9bf9a22f2789b34dc769db17cc8e1614b4d/texas_psm-0.1.10-py3-none-any.whl
+  url: https://files.pythonhosted.org/packages/f0/0a/8395214cf4fbadb82360aef5d76eb2387fe7d289a8542824888ee3c5509f/texas_psm-0.3.2-py3-none-any.whl
   hash:
-    sha256: f604fcd09324f46f20efd75d4108da62c03e1fa70b1f19839a326bfb6e8a8f15
+    sha256: 5a194900ae33190d3587053881b6298e12b275abfa38ca1ddbff3cb0cee47fd4
   category: main
   optional: false
 - name: texas-psm
-  version: 0.1.10
+  version: 0.3.2
   manager: pip
   platform: win-64
   dependencies:
-    baysparpy: '>=0.0.2'
-    baysplinepy: '>=0.0.1'
     cmdstanpy: '>=1.0'
     cmocean: '*'
+    h5netcdf: '*'
     matplotlib: '>=3.3'
+    netcdf4: '*'
     numpy: '>=1.18'
     pandas: '>=1.3'
     plotly: '*'
@@ -27170,9 +27170,9 @@ package:
     stanio: '>=0.4'
     typing-extensions: '>=3.7.4'
     xarray: '>=0.16'
-  url: https://files.pythonhosted.org/packages/99/2f/5e693fbeb7c79f0dfbf77f46d9bf9a22f2789b34dc769db17cc8e1614b4d/texas_psm-0.1.10-py3-none-any.whl
+  url: https://files.pythonhosted.org/packages/f0/0a/8395214cf4fbadb82360aef5d76eb2387fe7d289a8542824888ee3c5509f/texas_psm-0.3.2-py3-none-any.whl
   hash:
-    sha256: f604fcd09324f46f20efd75d4108da62c03e1fa70b1f19839a326bfb6e8a8f15
+    sha256: 5a194900ae33190d3587053881b6298e12b275abfa38ca1ddbff3cb0cee47fd4
   category: main
   optional: false
 - name: ultraplot
