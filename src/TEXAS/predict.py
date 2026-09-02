@@ -47,7 +47,7 @@ from .ensemble.generator import generate_ensemble_auto
 from .stan.invT import predict_temperature_from_proxyObs as _predict_temperature_from_proxyObs
 from .data.builder import InvTConfig
 from .constants import DEFAULT_FWD_POSTERIOR
-from .data.ocean_lookup import lookup_no3_from_woa
+from .data.ocean_lookup import lookup_no3_from_woa, get_ocean_prop_ds
 
 
 def predict_proxy_from_T(
@@ -247,11 +247,17 @@ def predict_T_from_proxyObs(
     no3_dataset : xr.Dataset, optional
         WOA23-derived dataset with a ``(lat, lon)`` grid, typically the
         ``ocean_prop_ds`` generated in the preprocessing notebook
-        (SI_code1).  Must contain *no3_dataset_var*.  When provided
+        (SI_code0).  Must contain *no3_dataset_var*.  When provided
         together with *site_lat* / *site_lon*, the NO₃ value at those
         coordinates is looked up via bilinear interpolation and used as
         the predictor.  The result is a scalar (one drill site) or array
         (per-obs sites), and is broadcast to all N observations when scalar.
+        **Optional** when *site_lat* / *site_lon* are given: if omitted, the
+        ~20 MB ``ocean_prop_ds`` field is downloaded from Zenodo and cached
+        automatically (see :func:`TEXAS.data.ocean_lookup.get_ocean_prop_ds`
+        / :func:`TEXAS.download_ocean_properties`) — pass it explicitly to
+        avoid the download (e.g. a pre-loaded copy, or a Colab session with
+        no persistent cache).
     no3_dataset_var : str
         Variable name to extract from *no3_dataset*.
         Default ``"no3_sf2tc_avg"``.
@@ -347,9 +353,19 @@ def predict_T_from_proxyObs(
                 "site_lat and site_lon must both be provided for a WOA23 lookup."
             )
         if no3_dataset is None:
-            raise ValueError(
-                "no3_dataset must be provided when using site_lat/site_lon. "
-                "Pass the WOA23-derived ocean_prop_ds from your preprocessing notebook."
+            try:
+                no3_dataset = get_ocean_prop_ds()
+            except Exception as e:
+                raise ValueError(
+                    "no3_dataset must be provided when using site_lat/site_lon, "
+                    "and the automatic download of the WOA23-derived "
+                    f"ocean_prop_ds from Zenodo failed ({e}). Pass no3_dataset "
+                    "explicitly (e.g. from your preprocessing notebook), or "
+                    "retry with TEXAS.download_ocean_properties()."
+                ) from e
+            print(
+                "🌊 no3_dataset not provided — downloaded/cached the WOA23 "
+                "ocean_prop_ds field from Zenodo."
             )
         no3 = lookup_no3_from_woa(
             lat=site_lat,

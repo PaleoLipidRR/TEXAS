@@ -6,17 +6,57 @@ Typical use: provide the modern lat/lon of a sediment core and extract the
 time-invariant WOA23 nitrate climatology at that location to use as the NO₃
 predictor in an invT reconstruction.
 
-The WOA23-derived dataset is NOT bundled with TEXAS — it is generated in the
-preprocessing notebook (SI_code1) and loaded by the user.  Pass the resulting
-xr.Dataset (with a ``(lat, lon)`` grid) to the functions here.
+The WOA23-derived dataset (``ocean_prop_ds``) is NOT bundled in the wheel —
+at ~20 MB it is too large for that (see ``tests/test_bundled_posteriors.py``'s
+5 MB ceiling) — but it is downloadable on demand from Zenodo via
+:func:`get_ocean_prop_ds`, which fetches and caches it automatically. It can
+also still be generated locally via the preprocessing notebook (SI_code0).
+Either way, pass the resulting xr.Dataset (with a ``(lat, lon)`` grid) to the
+functions here.
 """
 
 from __future__ import annotations
 
-from typing import Literal, Union
+from pathlib import Path
+from typing import Literal, Optional, Union
 
 import numpy as np
 import xarray as xr
+
+
+def get_ocean_prop_ds(
+    cache_dir: Optional[Union[str, Path]] = None,
+    force: bool = False,
+) -> xr.Dataset:
+    """
+    Load the WOA23-derived ``ocean_prop_ds`` field, downloading it from
+    Zenodo on first use.
+
+    This is the same dataset produced locally by ``SI_code00_PreProcessing``
+    (``ds06_calculated_ocean_properties.nc``) — a gridded ``(lat, lon)``
+    dataset carrying, among other variables, the thermocline-depth-integrated
+    WOA23 nitrate climatology (``no3_sf2tc_avg``). The download is cached
+    (``~/.texas/data/spreadsheets/`` for pip installs, ``data/spreadsheets/``
+    in the repo) so it only happens once; pass *force=True* to re-download.
+
+    Parameters
+    ----------
+    cache_dir : Path or str, optional
+        Directory to download/look for the file in.  Defaults to the
+        standard training-data spreadsheets directory.
+    force : bool
+        Re-download even if the file is already cached.
+
+    Returns
+    -------
+    xr.Dataset
+        Opened with ``xr.open_dataset`` — suitable to pass directly as
+        *woa_dataset* to :func:`lookup_no3_from_woa` or as *no3_dataset* to
+        :func:`~TEXAS.predict.predict_T_from_proxyObs`.
+    """
+    from ..utils.download import download_ocean_properties
+    path = download_ocean_properties(dest_dir=cache_dir, force=force)
+    return xr.open_dataset(path)
 
 
 def lookup_no3_from_woa(
