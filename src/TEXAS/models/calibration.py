@@ -3,7 +3,7 @@ TEX86-SST calibration models
 """
 
 import numpy as np
-from typing import Union, Literal
+from typing import Union, Literal, Optional, Sequence, Dict
 
 class TEX86Calibration:
     """
@@ -103,6 +103,138 @@ class TEX86Calibration:
     
     def __repr__(self):
         return f"TEX86Calibration(name='{self.name}', transform='{self.transform}')"
+
+
+class BAYSPARCalibration:
+    """
+    Wrapper around baysparpy (Tierney & Tingley) for Bayesian TEX86->SST/subT
+    reconstruction.
+
+    Unlike TEX86Calibration (a fixed slope/intercept transform), BAYSPAR is
+    itself an inverse Bayesian method: prediction returns a posterior
+    ensemble, not a point value. Requires the optional `baysparpy` package
+    (`pip install baysparpy`; bundled under the `dev` extra).
+
+    Two prediction modes, matched to baysparpy's own split:
+    - 'standard': spatial regression at the nearest calibration grid cell.
+      Requires lon/lat. Appropriate when tex86 is within the modern range
+      at that location.
+    - 'analog': searches the core-top database for locations with similar
+      tex86 values and pools their regression parameters. Requires
+      prior_mean (a prior SST/subT estimate); use for out-of-modern-range
+      values (e.g. hyperthermal samples).
+    """
+
+    def __init__(self, mode: Literal['standard', 'analog'] = 'standard'):
+        if mode not in ('standard', 'analog'):
+            raise ValueError(f"mode must be 'standard' or 'analog', got {mode!r}")
+        self.mode = mode
+        self._bsr = self._import_bayspar()
+
+    @staticmethod
+    def _import_bayspar():
+        try:
+            import bayspar as bsr
+        except ImportError as exc:
+            raise ImportError(
+                "BAYSPARCalibration requires the optional 'baysparpy' package. "
+                "Install with: pip install baysparpy"
+            ) from exc
+        return bsr
+
+    @staticmethod
+    def _percentile(pred, q, method: str = 'nearest') -> np.ndarray:
+        """
+        numpy-2-safe replacement for baysparpy's Prediction.percentile().
+
+        baysparpy <=0.0.3 calls np.percentile(..., interpolation=...), a kwarg
+        removed in numpy 2.0 (renamed to method=). Reimplemented directly
+        against pred.ensemble instead of relying on the library's own call.
+        Handles both the 2D ensemble from predict_seatemp (n_obs, n_draws)
+        and the 3D ensemble from predict_seatemp_analog
+        (n_obs, n_analogs, n_draws), pooling over every non-observation axis.
+        Returns shape (n_obs, len(q)).
+        """
+        q = np.asarray(q, dtype=np.float64)
+        axes = tuple(range(1, pred.ensemble.ndim))
+        return np.percentile(pred.ensemble, q=q, axis=axes, method=method).T
+
+    def predict_sst(
+        self,
+        tex86: Union[np.ndarray, list],
+        *,
+        lon: Optional[float] = None,
+        lat: Optional[float] = None,
+        prior_mean: Optional[Union[float, np.ndarray]] = None,
+        prior_std: float = 10.0,
+        search_tolerance: Optional[float] = None,
+        temptype: Literal['sst', 'subt'] = 'sst',
+        percentiles: Sequence[float] = (16, 50, 84),
+        nens: int = 1000,
+    ) -> Dict[str, np.ndarray]:
+        """
+        Predict SST/subT from TEX86 via BAYSPAR.
+
+        Parameters
+        ----------
+        tex86 : array-like
+            TEX86 values.
+        lon, lat : float, required for mode='standard'
+            Site location, used to select the nearest spatial calibration
+            parameters.
+        prior_mean, prior_std : float, required (prior_mean) for mode='analog'
+            Prior temperature mean/SD (degC) used for the analog search.
+        search_tolerance : float, optional (analog mode only)
+            TEX86 tolerance for the analog search. None -> baysparpy's
+            internal default.
+        temptype : 'sst' or 'subt'
+            Target temperature type.
+        percentiles : sequence of float
+            Percentiles to summarize the posterior ensemble at.
+        nens : int
+            Ensemble draws per analog (analog mode only).
+
+        Returns
+        -------
+        dict with keys:
+            'ensemble' : ndarray -- raw BAYSPAR posterior draws
+            'percentiles' : ndarray, shape (n_obs, len(percentiles))
+            'percentile_labels' : the `percentiles` argument, for column labeling
+        """
+        tex86 = np.asarray(tex86, dtype=float)
+
+        if self.mode == 'standard':
+            if lon is None or lat is None:
+                raise ValueError("mode='standard' requires lon and lat.")
+            pred = self._bsr.predict_seatemp(
+                tex86, lon=lon, lat=lat, prior_std=prior_std, temptype=temptype,
+            )
+        else:  # analog
+            if prior_mean is None:
+                raise ValueError("mode='analog' requires prior_mean.")
+            kwargs = dict(
+                prior_mean=prior_mean, prior_std=prior_std,
+                temptype=temptype, nens=nens,
+            )
+            if search_tolerance is not None:
+                kwargs['search_tol'] = search_tolerance
+            pred = self._bsr.predict_seatemp_analog(tex86, **kwargs)
+
+        if pred.ensemble.size == 0:
+            raise RuntimeError(
+                f"BAYSPAR ({self.mode}) returned an empty ensemble"
+                + (" -- no analogs within the given search tolerance."
+                   if self.mode == 'analog' else ".")
+            )
+
+        return {
+            'ensemble': pred.ensemble,
+            'percentiles': self._percentile(pred, percentiles),
+            'percentile_labels': list(percentiles),
+        }
+
+    def __repr__(self):
+        return f"BAYSPARCalibration(mode='{self.mode}')"
 
 
 class CalibrationRegistry:
