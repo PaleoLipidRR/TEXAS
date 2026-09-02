@@ -153,6 +153,9 @@ def predict_T_from_proxyObs(
     site_lon: Optional[Union[float, np.ndarray]] = None,
     no3_dataset: Optional[xr.Dataset] = None,
     no3_dataset_var: str = "no3_sf2tc_avg",
+    # ── Per-observation quality flags ────────────────────────────────────
+    flags: bool = True,
+    tex86: Optional[Union[float, np.ndarray]] = None,
     # ─────────────────────────────────────────────────────────────────────
     config: Optional[InvTConfig] = None,
     chains: int = 4,
@@ -255,6 +258,18 @@ def predict_T_from_proxyObs(
     no3_dataset_var : str
         Variable name to extract from *no3_dataset*.
         Default ``"no3_sf2tc_avg"``.
+    flags : bool, default True
+        Attach ``result["flags"]``, a DataFrame with one row per observation
+        marking rows the reconstruction cannot support --- most importantly
+        proxy values outside the calibration curve's attainable range, which
+        return a converged, plausible-looking temperature that is really a
+        readout of the prior.  See :func:`TEXAS.quality.compute_quality_flags`.
+        Computing them costs no extra sampling.
+    tex86 : float or array-like, optional
+        TEX86 for the same samples, used only by the flags.  The published
+        calibration-domain ellipse is two-dimensional (TEX86 × Scaled RI), so
+        the ``outside_domain`` check needs both; without this it is reported
+        as ``pd.NA`` rather than as passing.
     config : InvTConfig, optional
         Controls number of forward-posterior draws (M), seed, etc.
         Defaults to ``InvTConfig()`` (M=100).
@@ -314,6 +329,16 @@ def predict_T_from_proxyObs(
         ``"p50"``        — median temperature (°C), shape (N,)
         ``"p95"``        — 95th percentile temperature (°C), shape (N,)
         ``"metadata"``   — run metadata dict (model name, attrs, etc.)
+        ``"flags"``      — DataFrame of per-observation quality flags, N rows,
+                           when *flags* is True
+
+    Examples
+    --------
+    Keep only the observations the calibration can actually support::
+
+        >>> result = predict_T_from_proxyObs(ri, prior_mu_t=25, prior_sigma_t=10)
+        >>> keep = ~result["flags"]["any_flag"].to_numpy(dtype=bool)
+        >>> sst = result["p50"][keep]
     """
     # ── Default calibration ──────────────────────────────────────────────────
     # Omitting fwd_posterior selects the full multivariate T0-shift calibration
@@ -413,7 +438,7 @@ def predict_T_from_proxyObs(
                 UserWarning, stacklevel=2,
             )
 
-    return _predict_temperature_from_proxyObs(
+    _result = _predict_temperature_from_proxyObs(
         proxyObs=proxyObs,
         prior_mu_t=prior_mu_t,
         prior_sigma_t=prior_sigma_t,
@@ -438,6 +463,32 @@ def predict_T_from_proxyObs(
         min_temp=min_temp,
         proxy_name=proxy_name,
     )
+
+    # Per-observation quality flags. The warnings above describe the call; these
+    # describe the rows, so a record can be filtered rather than accepted or
+    # rejected whole. Never fatal: a reconstruction that ran is still returned
+    # if the flags cannot be built.
+    if flags and _ds_for_check is not None:
+        try:
+            from .quality import compute_quality_flags
+
+            _result["flags"] = compute_quality_flags(
+                proxyObs,
+                _ds_for_check,
+                predictors=predictors,
+                prior_sigma_t=prior_sigma_t,
+                result=_result,
+                tex86=tex86,
+            )
+        except Exception as exc:  # noqa: BLE001
+            warnings.warn(
+                f"Quality flags could not be computed ({type(exc).__name__}: "
+                f"{exc}); result['flags'] is absent. The reconstruction itself "
+                "is unaffected.",
+                UserWarning, stacklevel=2,
+            )
+
+    return _result
 
 
 def compute_scaledRI(
