@@ -1382,7 +1382,41 @@ archive/
     figures/               <- the additive-fit parents
 ```
 
-#### B1 — Stan models: 17 → 8 shipped, 9 archived
+#### B1 — Stan models: 17 → 9 shipped, 8 archived
+
+> **DONE 2026-09-03** (`a2153c0` on `main`). The counts in the original heading
+> were transposed — the "stays" table lists 9 files (one row covers two) and the
+> "moves" table 8. Corrected above. Three notes for whoever reads this next:
+>
+> - **The "verified, not assumed" claim below is wrong for `SI_code02a`.** Its
+>   cell 30 has a live `get_posterior(..., stan_file=...)` on the additive
+>   model, as do `scripts/run_param_sensitivity.py` and
+>   `run_manuscript_refits.py`. Handled by a fallback in
+>   `StanCompiler.resolve_stan_path()`: an archived model still resolves by
+>   plain stem, and announces that it is superseded. A path substitution would
+>   not have worked — `stan_model_name` is written verbatim from that argument
+>   and must stay a bare name for case-id resolution.
+> - **The `model_dir=` reproduction route does not exist** through
+>   `get_posterior()`, which builds `StanCompiler()` with no arguments. The
+>   archive README documents the absolute-path route instead, which is verified.
+> - **The Streamlit blocker was not one.** `culmesocore` appears in
+>   `streamlit_app/config.py:45` as a posterior *variable* name
+>   (`t0_culmesocore`), not a model load. `pages/{prediction,computation}.py`
+>   never referenced it.
+>
+> Also done in the same pass, beyond the plan: `_select_invT_stan_file()`
+> narrowed to the two constraints that ship (`hard_constraint`,
+> `reparameterized`, `soft` and `model_type="ensemble"` now raise `ValueError`
+> naming the archive), `utils/naming.py::CONSTRAINT_CODES` left intact with a
+> comment saying why, docs updated, and `tests/test_stan_model_archive.py`
+> added. `tests/test_streamlit_params.py` scans the new archive so the additive
+> `beta_*` labels stay valid. 351 passed, 11 skipped.
+>
+> **Still open:** B1's last bullet — folding
+> `src/TEXAS/stan_models/archive/` (16) and `archive_pre_annotated/` (4) into
+> the one repo-root archive. Three archive locations remain. A banner on the old
+> README points at the new one meanwhile.
+
 
 **Stays in `src/TEXAS/stan_models/` (8):**
 
