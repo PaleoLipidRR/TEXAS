@@ -172,6 +172,12 @@ PROXY_DECODE = {"sri03": "scaledRI_cren3", "sri04": "scaledRI_cren4",
                 "ri3": "scaledRI_cren3", "ri4": "scaledRI_cren4",
                 "ri": "scaledRI"}
 
+# Deliberately still lists every constraint that has ever named a file, including
+# the ones no longer selectable (``hard_constraint`` archived 2026-09;
+# ``reparameterized``/``soft`` never implemented).  This is a name *grammar*: the
+# decoder has to keep parsing case ids of reconstructions already on disk and on
+# Zenodo, exactly as the compset decoder still parses the archived ``A`` and
+# ``culmesocore`` training sets.  Narrowing it would orphan those files.
 CONSTRAINT_CODES = {"unconstrained": "u", "hard_constraint": "h",
                     "truncated_prior": "t", "reparameterized": "r", "soft": "s"}
 CONSTRAINT_DECODE = {v: k for k, v in CONSTRAINT_CODES.items()}

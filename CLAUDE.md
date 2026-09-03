@@ -80,6 +80,52 @@ Model names follow a naming convention: `{transform}_{curve}_{params}_{datasourc
 - **Data sources**: `culmeso` = culture+mesocosm; `culmesocore` = culture+mesocosm+coretop; `crtp` = coretop-only
 - **Variants**: `hier_crtp` = hierarchical coretop; `multiv` = multivariate (GDGT23/NO3); `priorApprox` = prior approximation; `werr` = delta-method EIV (heteroscedastic likelihood, no latent vars); `werr_ver2` = latent-variable EIV with quadrature RI error + process-noise separation (see below); `odr` = delta-method EIV in the full hierarchical (non-priorApprox) model; `marginal_*` = marginalized variants; `reduce_sum` = parallelized with `reduce_sum`
 
+> **Stan models pruned to the shipped set (2026-09-03, RESUME.md Phase B1)**:
+> `src/TEXAS/stan_models/` went from 17 `.stan` files to **9** — the models the
+> revised manuscript and the public API actually use. The other 8 moved to
+> **`archive/submission-2026-04/stan_models/`** at the repo root, with a README
+> naming each one and why. Nothing was deleted.
+>
+> Archived: `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv` (the initial
+> submission's `GHEA` production model, still the revision's comparison arm),
+> `..._multiv_priorApprox`, `..._multiv`, `gen_logi_fixed_culmesocore`, the two
+> non-marginal `invT_gen_logi_fixed_{univ,multiv}_unconstrained`, and the two
+> `invT_gen_logi_fixed_{univ,multiv}_marginal_hard_constraint`.
+>
+> `pyproject.toml` globs `stan_models/*.stan` non-recursively, so the archive
+> never reached the wheel — this is packaging-neutral. **To run an archived
+> model, pass an absolute path**: `StanCompiler.resolve_stan_path()` passes
+> absolute paths straight through, so `get_posterior(..., stan_file=str(abs_path))`
+> works. The `model_dir=` route named in RESUME.md Phase B does *not* exist
+> through `get_posterior()` — it builds `StanCompiler()` with no arguments.
+>
+> **`_select_invT_stan_file()` was narrowed to match.** `constraint_type` now
+> accepts only `"unconstrained"` and `"truncated_prior"`; `"hard_constraint"`
+> (archived) and `"reparameterized"` / `"soft"` (never implemented as Stan
+> models) raise `ValueError` naming the archive, instead of failing later with a
+> missing-file error. `model_type="ensemble"` likewise raises — it built names
+> that were archived back in April, so it had been broken since. Before this,
+> 40 combinations were constructible and only 9 resolved to a file. The three
+> that still don't are the T₀-shift arm's univariate and truncated-prior
+> variants, which never existed; the `FileNotFoundError` at `stan/invT.py`
+> catches those and says so.
+>
+> **`utils/naming.py::CONSTRAINT_CODES` was deliberately left intact**, exactly
+> as the compset decoder still parses `GHEA` and `culmesocore`: it is a name
+> *grammar* that must keep decoding case ids of reconstructions already on disk
+> and on Zenodo. Narrowing it would orphan those files.
+>
+> No notebook breaks on its defaults — every one reads a cached or downloaded
+> posterior. `SI_code02a` recompiles the additive model only on a cold cache or
+> `FORCE_RERUN = True`. (RESUME.md's Phase B claim that only markdown and
+> commented-out code referenced it was checked and is wrong for `SI_code02a`,
+> whose cell 30 has a live `get_posterior(..., stan_file=...)` call.)
+> `tests/test_streamlit_params.py` now scans `archive/submission-2026-04/` too,
+> because the additive posteriors remain downloadable and the app still labels
+> `beta_G23_crtp` / `beta_NO3_crtp`; the two older archive dirs stay excluded,
+> since they declare the `Q_crtp` and `sigma_scaledRI_crtp` that test exists to
+> catch.
+
 ### Parameter suffix convention
 
 Posterior variables carry a suffix indicating which dataset they were estimated from:

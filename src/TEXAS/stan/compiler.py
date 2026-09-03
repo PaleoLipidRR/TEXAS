@@ -12,7 +12,7 @@ from typing import Dict, Optional, Union
 
 from cmdstanpy import CmdStanModel
 
-from ..utils.paths import STAN_MODELS_DIR, STAN_BUILD_DIR
+from ..utils.paths import STAN_MODELS_DIR, STAN_BUILD_DIR, STAN_ARCHIVE_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -196,11 +196,39 @@ class StanCompiler:
     # ── Path helpers ────────────────────────────────────────────────────────
 
     def resolve_stan_path(self, stan_file: Union[str, Path]) -> Path:
-        """Return the absolute path to the .stan source file."""
+        """Return the absolute path to the .stan source file.
+
+        An absolute ``stan_file`` is returned unchanged (``Path.__truediv__``
+        discards the left operand), which is how a model outside the search
+        directory is addressed explicitly.
+
+        Otherwise the name is looked up in ``model_dir`` and, failing that, in
+        ``STAN_ARCHIVE_DIR`` -- the superseded models kept in the repository but
+        not shipped in the wheel. That fallback is what keeps the manuscript's
+        additive-EIV comparison arm refittable by plain stem
+        (``stan_file="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv"``) from
+        the SI notebooks and the refit scripts, without any caller having to
+        build a path -- and, importantly, without an absolute path leaking into
+        the ``stan_model_name`` attr, which is written verbatim from this
+        argument and has to stay a bare model name for case-id resolution.
+
+        The fallback is announced rather than silent: resolving here means the
+        model is superseded. It is inert for a pip install, where no archive
+        directory exists.
+        """
         p = Path(stan_file)
         if p.suffix != ".stan":
             p = p.with_suffix(".stan")
-        return self.model_dir / p
+        primary = self.model_dir / p
+        if primary.exists() or p.is_absolute():
+            return primary
+        if STAN_ARCHIVE_DIR is not None:
+            archived = STAN_ARCHIVE_DIR / p.name
+            if archived.exists():
+                print(f"📦 '{p.name}' is a superseded model; resolving from "
+                      f"{STAN_ARCHIVE_DIR}")
+                return archived
+        return primary
 
     def _build_path(self, stan_source: Path) -> Path:
         """Return the path under STAN_BUILD_DIR that we compile from.

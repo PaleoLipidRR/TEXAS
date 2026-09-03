@@ -162,9 +162,7 @@ def predict_T_from_proxyObs(
     iter_warmup: int = 500,
     iter_sampling: int = 1000,
     seed: int = 42,
-    constraint_type: Literal[
-        "unconstrained", "hard_constraint", "truncated_prior", "reparameterized", "soft"
-    ] = "unconstrained",
+    constraint_type: Literal["unconstrained", "truncated_prior"] = "unconstrained",
     min_temp: Optional[float] = None,
     threads_per_chain: Optional[int] = None,
     save_results: bool = False,
@@ -292,15 +290,21 @@ def predict_T_from_proxyObs(
 
         - ``"unconstrained"`` (default): no lower bound; P5 can be unrealistically cold
           near the calibration curve's lower asymptote.
-        - ``"hard_constraint"``: hard lower bound via ``<lower=min_temp>``; prevents
-          sub-freezing samples but the Jacobian biases P50 warm for polar sites.
         - ``"truncated_prior"`` (recommended when ``min_temp`` is set): proper
           truncated Normal prior via inverse-CDF reparameterization — P50 is
           data-driven and P5 is bounded at ``min_temp`` without warm bias.
-        - ``"reparameterized"``, ``"soft"``: experimental variants.
+
+        ``"hard_constraint"`` (hard lower bound via ``<lower=min_temp>``) was
+        withdrawn in 2026-09: its Jacobian biases P50 warm for polar sites, which
+        is what ``"truncated_prior"`` was written to fix.  The model is kept in
+        ``archive/submission-2026-04/stan_models/`` and can be run by passing its
+        absolute path as ``stan_model_path``.  ``"reparameterized"`` and
+        ``"soft"`` were listed in earlier type hints but never existed as Stan
+        models; all three now raise :class:`ValueError` instead of failing later
+        with a missing-file error.
     min_temp : float, optional
-        Lower temperature bound (°C). Required for ``"hard_constraint"`` and
-        ``"truncated_prior"``. Typically −1.8 (seawater freezing point).
+        Lower temperature bound (°C). Required for ``"truncated_prior"``.
+        Typically −1.8 (seawater freezing point).
         When provided without an explicit ``constraint_type``, automatically
         selects ``"truncated_prior"``.
     threads_per_chain : int, optional

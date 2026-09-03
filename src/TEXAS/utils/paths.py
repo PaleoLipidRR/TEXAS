@@ -154,6 +154,14 @@ PROJECT_ROOT = get_project_root()
 REPO_ROOT = PROJECT_ROOT                      # back-compat alias
 STAN_MODELS_DIR = (PACKAGE_ROOT / "stan_models").resolve()
 
+# Superseded Stan models, kept in the repository for reproducibility but not
+# shipped in the wheel (`pyproject.toml` globs `stan_models/*.stan`, which is
+# non-recursive). Only exists in a source checkout; None for a pip install, in
+# which case the resolver's archive fallback is simply inert.
+_archive = (PROJECT_ROOT / "archive" / "submission-2026-04" / "stan_models")
+STAN_ARCHIVE_DIR = _archive.resolve() if _archive.is_dir() else None
+del _archive
+
 # Calibration posteriors that ship inside the wheel, so that a reconstruction
 # works on a bare `pip install texas-psm` with no network access. These are the
 # full multivariate T0-shift calibrations with the per-site EIV latents dropped

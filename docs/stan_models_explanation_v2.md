@@ -94,13 +94,21 @@ p(T|data) = ∫ p(T|data,θ) p(θ) dθ
 
 ## Available Model Files
 
-### Ensemble Models (Traditional)
-- `invT_gen_logi_fixed_univ_unconstrained.stan` - Generalized logistic, no predictors
-- `invT_gen_logi_fixed_multiv_unconstrained.stan` - Generalized logistic with predictors
+### Ensemble Models (Traditional) — archived
+`invT_gen_logi_fixed_univ_unconstrained.stan` and
+`invT_gen_logi_fixed_multiv_unconstrained.stan` were archived in 2026-09 to
+`archive/submission-2026-04/stan_models/`. The marginal models below supersede
+them and are much faster, so `model_type="ensemble"` now raises `ValueError`
+rather than selecting a file that no longer ships. To run one anyway, pass its
+absolute path as `stan_model_path`.
 
 ### Direct/Marginal Models (Recommended)
-Each ships in three prior-constraint variants (`unconstrained`,
-`truncated_prior`, `hard_constraint`); `unconstrained` is the default.
+Each ships in two prior-constraint variants — `unconstrained` (the default) and
+`truncated_prior`. `hard_constraint` was archived alongside the ensemble models:
+its `<lower=min_temp>` Jacobian biases P50 warm for polar sites, which is the
+bias `truncated_prior` was written to remove (see
+[why the plug-in P50 differs](why_plugin_p50_differs.md)). `reparameterized` and
+`soft` appeared in old type hints but were never implemented.
 - `invT_gen_logi_fixed_univ_marginal_unconstrained.stan` - No predictors
 - `invT_gen_logi_fixed_multiv_marginal_unconstrained.stan` - With predictors (additive arm)
 - `invT_gen_logi_fixed_multiv_marginal_unconstrained_t0shift.stan` - With

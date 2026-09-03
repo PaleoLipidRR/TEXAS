@@ -315,10 +315,11 @@ EXPLAIN = {
         "posterior and the raw draws. Note that cache_dir (where results are written) and "
         "fwd_cache_dir (where the forward posterior is read) are deliberately separate.",
     "stan.invT._select_invT_stan_file":
-        "Picks the .stan file from the shape of the problem: direct vs ensemble sampling, which "
-        "optional predictors are active, and the temperature constraint scheme (unconstrained, "
-        "hard_constraint, truncated_prior, reparameterized, soft). truncated_prior is the one that "
-        "keeps P50 unbiased near a lower bound; hard_constraint is Jacobian-biased there.",
+        "Picks the .stan file from the shape of the problem: which optional predictors are "
+        "active, and the temperature constraint scheme (unconstrained, "
+        "truncated_prior). truncated_prior is the one that keeps P50 unbiased near a lower "
+        "bound; hard_constraint was Jacobian-biased there and was archived in 2026-09, "
+        "along with reparameterized and soft, which never had Stan models.",
     "stan.invT.get_invT_post_quantiles":
         "Reduces draws to percentiles, with shape handling that differs by model family: ensemble "
         "models give t_est as (chain, draw, N, M) and must also reduce over M, marginal models give "

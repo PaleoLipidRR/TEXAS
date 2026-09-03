@@ -22,6 +22,12 @@ from TEXAS.stan.io import (
 from TEXAS.utils.system_info import simple_memory_check, get_system_info, suggest_stan_sampling_kwargs
 from TEXAS.utils.paths import STAN_MODELS_DIR
 
+#: Constraint formulations that have a Stan model in ``src/TEXAS/stan_models/``.
+#: ``hard_constraint`` was archived (2026-09) to
+#: ``archive/submission-2026-04/stan_models/``; ``reparameterized`` and ``soft``
+#: appeared in the old type hints but were never implemented as Stan models.
+_SHIPPED_CONSTRAINTS = frozenset({"unconstrained", "truncated_prior"})
+
 
 # Instantiate once
 _default_compiler = StanCompiler()
@@ -79,8 +85,8 @@ def get_invT_posterior(
     use_opencl: bool = False,
     threads_per_chain: Optional[int] = None,
     stan_model_path: Optional[Union[str, Path]] = None,
-    model_type: Literal["direct", "ensemble"] = "direct",
-    constraint_type: Literal["unconstrained", "hard_constraint", "truncated_prior", "reparameterized", "soft"] = "unconstrained",
+    model_type: Literal["direct"] = "direct",
+    constraint_type: Literal["unconstrained", "truncated_prior"] = "unconstrained",
     min_temp: Optional[float] = None,
     fwd_posterior: Optional[xr.Dataset] = None,
     fwd_cache_dir: Optional[Union[str, Path]] = None,
@@ -191,7 +197,7 @@ def get_invT_posterior(
         constraint_type = "truncated_prior"
         print(f"🔧 Auto-selected constraint_type='truncated_prior' (min_temp={min_temp})")
 
-    if constraint_type in ("hard_constraint", "truncated_prior"):
+    if constraint_type == "truncated_prior":
         if min_temp is None:
             raise ValueError(
                 f"min_temp must be provided when constraint_type='{constraint_type}'. "
@@ -219,12 +225,17 @@ def get_invT_posterior(
             no3ratio=no3ratio,
             bounded=meta.get("is_bounded", False))
         if not (STAN_MODELS_DIR / stan_file).exists():
-            available = sorted(p.name for p in STAN_MODELS_DIR.glob("invT_*t0shift*.stan"))
+            available = sorted(q.name for q in STAN_MODELS_DIR.glob("invT_*.stan"))
+            hint = ""
+            if "t0shift" in stan_file:
+                hint = ("\nThe T0-shift arm ships only the multiv/unconstrained "
+                        "variant (use predictors + constraint_type='unconstrained').")
             raise FileNotFoundError(
-                f"Selected invT model '{stan_file}' is not available in {STAN_MODELS_DIR}.\n"
-                f"The T0-shift arm currently ships only the multiv/unconstrained variant "
-                f"(use predictors + constraint_type='unconstrained').\n"
-                f"Available t0shift models: {available or 'none'}")
+                f"Selected invT model '{stan_file}' is not available in "
+                f"{STAN_MODELS_DIR}.{hint}\n"
+                f"Shipped inverse models: {available or 'none'}\n"
+                f"Superseded variants live in archive/submission-2026-04/stan_models/ "
+                f"and can be run by passing an absolute path as stan_model_path.")
         print(f"🔧 Automatically selected Stan file: {stan_file}")
 
     _stan_path = STAN_MODELS_DIR / stan_file
@@ -351,8 +362,8 @@ def _select_invT_stan_file(
     data: Dict,
     predictor_usage: Dict[str, bool],
     threads_per_chain: Optional[int] = None,
-    model_type: Literal["direct", "ensemble"] = "direct",
-    constraint_type: Literal["unconstrained", "hard_constraint", "truncated_prior", "reparameterized", "soft"] = "unconstrained",
+    model_type: Literal["direct"] = "direct",
+    constraint_type: Literal["unconstrained", "truncated_prior"] = "unconstrained",
     no3ratio: bool = False,
     bounded: bool = False,
 ) -> str:
@@ -361,32 +372,43 @@ def _select_invT_stan_file(
 
     Args:
         model_type:
-            - "direct": Use direct sampling models (more efficient, supports threading)
-            - "ensemble": Use traditional ensemble models
+            - "direct": marginal (direct-sampling) models.  The only mode that
+              ships; the non-marginal "ensemble" models were archived to
+              ``archive/submission-2026-04/stan_models/``.
         constraint_type:
-            - "unconstrained": No temperature constraints
-            - "hard_constraint": Hard lower bound (Jacobian-biased near boundary)
-            - "truncated_prior": Truncated Normal prior via inverse-CDF; P50 unbiased
-            - "reparameterized": Exponential transformation approach
-            - "soft": Soft penalty for temperatures below min_temp
+            - "unconstrained": no temperature constraint (default)
+            - "truncated_prior": truncated Normal prior via inverse-CDF; P50 unbiased
+
+    Raises:
+        ValueError: if ``model_type`` or ``constraint_type`` names a variant that
+            is no longer shipped.  Validated here rather than deferred to a
+            missing-file error at compile time.
     """
     if "M" not in data:
         raise ValueError("Only ensemble mode is supported.")
+
+    if model_type != "direct":
+        raise ValueError(
+            f"model_type={model_type!r} is not supported. Only 'direct' (marginal) "
+            f"models ship. The non-marginal 'ensemble' models were archived to "
+            f"archive/submission-2026-04/stan_models/; to run one, pass its "
+            f"absolute path as stan_model_path."
+        )
+    if constraint_type not in _SHIPPED_CONSTRAINTS:
+        raise ValueError(
+            f"constraint_type={constraint_type!r} is not supported. "
+            f"Valid values: {sorted(_SHIPPED_CONSTRAINTS)}. "
+            f"'hard_constraint' was archived to archive/submission-2026-04/stan_models/ "
+            f"(the truncated_prior formulation replaced it -- see "
+            f"docs/why_plugin_p50_differs.md); 'reparameterized' and 'soft' were "
+            f"never implemented as Stan models."
+        )
     multiv = any(predictor_usage.values())
 
     base = "invT_gen_logi_fixed"
     suffix = "_multiv" if multiv else "_univ"
 
-    if model_type == "direct":
-        model_name = f"{base}{suffix}_marginal"
-    elif model_type == "ensemble":
-        if threads_per_chain:
-            print("⚠️  Threading requires model_type='direct'. Switching to direct sampling model.")
-            model_name = f"{base}{suffix}_marginal"
-        else:
-            model_name = f"{base}{suffix}"
-    else:
-        raise ValueError(f"Unknown model_type: {model_type}. Use 'direct' or 'ensemble'.")
+    model_name = f"{base}{suffix}_marginal"
 
     model_name += f"_{constraint_type}"
 
@@ -452,8 +474,8 @@ def predict_temperature_from_proxyObs(
     use_opencl: bool = False,
     threads_per_chain: Optional[int] = None,
     stan_model_path: Optional[Union[str, Path]] = None,
-    model_type: Literal["direct", "ensemble"] = "direct",
-    constraint_type: Literal["unconstrained", "hard_constraint", "truncated_prior", "reparameterized", "soft"] = "unconstrained",
+    model_type: Literal["direct"] = "direct",
+    constraint_type: Literal["unconstrained", "truncated_prior"] = "unconstrained",
     min_temp: Optional[float] = None,
     fwd_posterior: Optional[xr.Dataset] = None,
     proxy_name: Optional[str] = None,

@@ -21,6 +21,15 @@ import pytest
 REPO = Path(__file__).resolve().parents[1]
 PAGE = REPO / "streamlit_app" / "pages" / "calibration_data.py"
 STAN_DIR = REPO / "src" / "TEXAS" / "stan_models"
+# The additive (beta-on-mu) model was archived in 2026-09, but its posteriors are
+# still downloadable via `TEXAS.download_posteriors()`, so the app still has to
+# label `beta_G23_crtp` / `beta_NO3_crtp`. Scan that archive too.
+#
+# Only that one. `stan_models/archive/` and `archive_pre_annotated/` predate the
+# initial submission and still declare `Q_crtp` and `sigma_scaledRI_crtp` -- the
+# exact two regressions this file exists to catch. Including them would let a
+# genuinely dead label pass.
+ARCHIVE_DIR = REPO / "archive" / "submission-2026-04" / "stan_models"
 
 pytestmark = pytest.mark.skipif(not PAGE.exists(),
                                 reason="streamlit app not present")
@@ -39,7 +48,8 @@ def _module_dict(name: str) -> dict:
 
 def _stan_sources() -> str:
     return "\n".join(p.read_text(encoding="utf-8", errors="replace")
-                     for p in STAN_DIR.glob("*.stan"))
+                     for d in (STAN_DIR, ARCHIVE_DIR)
+                     for p in sorted(d.glob("*.stan")))
 
 
 def test_no_label_names_a_parameter_no_model_declares():
