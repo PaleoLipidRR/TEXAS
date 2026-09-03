@@ -27,3 +27,16 @@ src/TEXAS/bundled_posteriors/*.nc -filter -diff -merge -text
 # Third-party published data downloaded verbatim (NOAA, NICOPP, ...). Keep these
 # byte-identical to the source file; do not renormalize their CRLF endings.
 data/spreadsheets/published_data/**/*.txt -text
+
+# Development tooling and working notes: tracked in git (the .claude/ agents and
+# skills are shared tooling; RESUME.md is the cross-machine handoff note -- see
+# .gitignore), but excluded from `git archive` output. GitHub builds a release
+# tag's source zipball with git archive, and Zenodo deposits that zipball
+# verbatim under a DOI, so anything tracked here otherwise becomes a permanent
+# public artifact of the release. RESUME.md in particular carries peer-review
+# working notes that have no place in an archived software record.
+# Takes effect only from the tagged commit onward; already-published Zenodo
+# versions are immutable.
+/.claude/ export-ignore
+/CLAUDE.md export-ignore
+/RESUME.md export-ignore
