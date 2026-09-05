@@ -8,6 +8,97 @@ bottom; tick the boxes as you go.
 
 ---
 
+## Latest session — 2026-09-05 (web, branch `claude/repo-audit-docs-update-od2dsj`): repo-wide docs/cleanup audit ahead of resubmission
+
+Scope: a deep check of the GitHub repo and the Jupyter Book website for staleness
+before resubmission, requested directly by Ronnie, plus follow-up on the
+manuscript's Appendix B/C text (in the separate `AGU_PALO_TEXAS_PSM_draft` and
+`AGU_PALO_TEXAS_PSM_revised_submission` repos) against the current package API.
+
+### Done this session (commits `318ff47`, `0b3c1c2` on this branch)
+
+- **`data/README.md`**: both Zenodo DOI references pointed at the old v0.2.0
+  record (`20032542`); fixed to the current concept DOI (`19666744`), matching
+  README.md/CITATION.cff.
+- **README.md / `pyproject.toml`**: Python badge said "3.8+" against an actual
+  `requires-python = ">=3.10"`; fixed the badge and added `3.10`/`3.11`/`3.12`
+  classifiers.
+- **`docs/stan_models_explanation_v2.md`**: the "Code Usage" examples called
+  `predict_T_from_proxyObs(scaledRI=..., fwd_posterior_name=..., model_type=...)`
+  — none of those kwargs exist on that function (it hardcodes
+  `model_type="direct"` internally; the real kwargs are `proxyObs=`/
+  `fwd_posterior=`). Fixed to the real signature; moved the ensemble-mode
+  example to the lower-level `get_invT_posterior()` that actually supports
+  `model_type=`. Also deleted a fabricated `WilsonLake_invT_logistic_fixed_...`
+  output-filename example matching no real naming convention (and referencing
+  already-removed `invT_logistic_*` models), and collapsed a tripled
+  `## Performance Examples` heading.
+- **`CLAUDE.md` / `src/TEXAS/data/builder.py` / `src/TEXAS/predict.py`**: the
+  `InvTConfig.n_draws` docstring said auto-mode caps M at 300; the code
+  (`builder.py:218`) caps at 500 with a floor of 100
+  (`min(500, max(100, draws // 4))`). `predict_T_from_proxyObs()`'s docstring
+  separately claimed the default is M=100 — neither number matched the code.
+  Fixed both docstrings to the real formula; confirmed against the executed
+  `SI_code03_paleo_showcases.ipynb` output that a typical 4000-draw posterior
+  auto-selects M=500, which is what the published paleo reconstructions ran
+  with. CLAUDE.md's posterior-caching section also described the pre-CESM
+  filename pattern as current; noted `save_posterior()` now defaults to the
+  case layout.
+- **`scripts/zenodo_upload.py` / `src/TEXAS/utils/download.py`**: a comment
+  calling `RECORD_ID=20032542` "latest" (it's the v0.2.0 record), and a
+  `TODO(v0.3.0 release)` in `download.py` that was already done (record is
+  `22131367`). Both cleaned up.
+- **`docs/_config.yml`**: added the existing `texas_logo.svg` as a favicon
+  (site had none configured).
+- Verified clean, no action taken: `notebooks/manuscripts/SI_code00`/`02`/`03`
+  (no deprecated API, no hardcoded paths, proplot import correctly guarded via
+  `ultraplot`), `docs/_toc.yml` (every file exists, no broken links, no
+  lingering `Q`-parameter or deleted-module references), CI (Tests/Lint/Deploy
+  docs all green on `main`, `gh-pages` in sync).
+
+### Found but NOT fixed — needs Ronnie's call
+
+- **Appendix C, C2.6 (screening) in `main.tex` is stale against the package,
+  and the fix direction is already decided — just not applied.** The
+  manuscript's C2.6 code block still calls
+  `MahalanobisOutlierDetector.from_calibration(confidence=0.90)` then
+  `detect_outliers_manual(df, columns=cols)` — `from_calibration()` has never
+  existed in `screening.py`. **This session's own 2026-08-27 entry above
+  (line ~25) already recorded that `fit_predict()` was added specifically so
+  Appendix C's `df["flagged"] = detector.fit_predict(df)` one-liner would
+  work** — i.e. the decision to make the *text* match a `fit_predict()`-based
+  workflow (fit on the user's own down-core data, not the calibration's fixed
+  reference ellipse) was already made when `fit_predict()` was built. The only
+  thing outstanding is that C2.6's prose and code in `main.tex` were never
+  actually updated to say this. Next action: rewrite C2.6 to use
+  `detector.fit_predict(df)` and adjust the surrounding sentence that currently
+  claims screening is "against the calibration training set" (it would now be
+  against the user's own record). I have not touched the manuscript repos.
+- **Stale branches on `PaleoLipidRR/TEXAS`**: `backup/pre-merge-20260809`,
+  `revision/boundedT-si-figures`, `claude/gridt-inversion-characterization-15i183`
+  (disconnected/very old history — verified the gridT one's content is already
+  byte-identical on `main`, nothing would be lost deleting it) and
+  `feat/revision1-validation-groupA` (fully merged into `main`). Awaiting go-ahead
+  to delete; Ronnie chose to leave `TEXAS-revision/` itself in place on `main`.
+- 2 GitHub Dependabot alerts (1 moderate, 1 low) flagged on push — not
+  investigated this session.
+- No `CHANGELOG.md` — optional, not created (didn't want to fabricate history).
+
+### Cross-session note (2026-09-05)
+
+A peer session (`bridge:session_01FtLeyFcLQzj7L2k8hyVSCc`, "Wrap up desktop
+sessions") reported two hygiene issues in its local **desktop** `working-repo`
+clone: (1) `.gitattributes` missing the glob star on the `.nc` LFS rule, and
+(2) a ~2.5 GB `.git` from a 13.7 MB `.nc` that was never routed through LFS.
+**Could not independently verify either from this session**: `origin/main`
+(`41ba78e`) already has the correctly-globbed `*.nc filter=lfs diff=lfs
+merge=lfs -text` line, and this session's clone is shallow (`--depth 1`), so
+full LFS history isn't checkable from here. Worth re-checking directly on the
+desktop clone before treating this as a shared repo defect rather than a
+local/stale-clone issue.
+
+---
+
 ## Latest session — 2026-08-27 (desktop): v0.3.0 resubmission prep — the Zenodo swap is staged
 
 The revised manuscript's Zenodo upload is prepared end to end. The data
