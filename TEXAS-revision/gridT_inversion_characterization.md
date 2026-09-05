@@ -6,9 +6,29 @@ Stan inverse run, and is it a safe substitute for `predict_T_from_proxyObs`?
 **Answer up front:** it is **(A) Bayesian quadrature** — it targets the *same*
 posterior as the Stan marginal inverse model. It is not (B) a
 mixture-of-normalized-posteriors and not (C) a frequentist ensemble root-solve.
-No math change is needed to make it correct. The only defect is an **incidental
-upper grid bound (45 °C) that truncates the warm/saturated tail**; everything
-else agrees with Stan to < 0.01 °C.
+No math change is needed to make the *estimator* correct.
+
+> **⚠️ Correction (2026-09-05) — this note over-claimed on the cold end.**
+> The original "everything else agrees with Stan to < 0.01 °C" was wrong, and
+> the cold-tail "pixel-identical" result below is an artifact of my validation
+> setup. An independent, real-Stan comparison (Ronnie + Claude Opus 5,
+> `notebooks/current/gridT_vs_stan_comparison.ipynb` @ `5d285ba` on
+> `claude/gridT-gui-exploratory`) shows the production `TEXAS.predict_grid`
+> **diverges from Stan by ~10 °C at p50 (and ~58 °C at p1) for RI ≈ 0.45**, near
+> the lower asymptote, when the Stan target is *unconstrained* and the prior is
+> diffuse. I reproduced the mechanism independently (11.8 °C gap). The A/B/C
+> classification and the mid-range/warm-tail results **stand**; the cross-range
+> "safe substitute" claim gets a **cold-end caveat** — see
+> **[Cold-end failure](#cold-end-failure-added-2026-09-05)** at the bottom.
+> This is a caveat, not a full retraction.
+
+There are now **two** things called "gridT": the **docs teaching reference**
+(what the bulk of this note characterizes) and a **production module**,
+`src/TEXAS/predict_grid.py::predict_T_grid` (added later, on the exploratory
+branch — not on `main` or this branch as of this writing). They share the
+Bayesian-quadrature *math*, but the production module's bound-handling and
+truncation flag are what the cold-end failure is about, and I did **not** audit
+those in the original pass.
 
 ---
 
@@ -188,12 +208,22 @@ MAX |Δ| = 0.010 °C     RMS = 0.006 °C     (across p5/p16/p50/p84/p95)
 | p84      | 1.67       | 0.54   |
 | p95      | **3.55**   | 1.19   |
 
-The entire error budget is upper-tail truncation, concentrated at RI ≥ 0.85
-(implied T ≳ 35 °C). For RI ≤ 0.80 the deviation is ≤ 0.015 °C at every
-quantile. See `notes/assets/gridT_validation.png`: the three warm-saturated
-panels (RI 0.90/0.94/0.97) show gridT (orange) tracking the true posterior
-(blue) until the 45 °C cap, then renormalizing upward and pulling p95 low; the
-three cold-tail panels (RI 0.45/0.47/0.50) are pixel-identical (Δ = 0.0 °C).
+The entire error budget *in this validation* is upper-tail truncation,
+concentrated at RI ≥ 0.85 (implied T ≳ 35 °C). For RI ≤ 0.80 the deviation is
+≤ 0.015 °C at every quantile. See `assets/gridT_validation.png`: the three
+warm-saturated panels (RI 0.90/0.94/0.97) show gridT (orange) tracking the true
+posterior (blue) until the 45 °C cap, then renormalizing upward and pulling p95
+low; the three cold-tail panels (RI 0.45/0.47/0.50) are pixel-identical (Δ = 0.0 °C).
+
+> **Why the cold tail looked identical here but isn't (see correction above).**
+> This validation compared gridT against a reference that **shared gridT's own
+> −1.8 °C lower floor** and used a **tighter prior (σ = 10)**. Both choices hide
+> the cold-end problem: the reference cannot diverge below a floor it also has,
+> and σ = 10 pulls the near-asymptote posterior up toward the prior mean. Against
+> the *unconstrained* Stan model with a *diffuse* prior (σ = 30) — what the
+> production path auto-selects — the RI ≈ 0.45 posterior has a long cold tail
+> (Stan p50 ≈ −6 °C, p5 ≈ −42 °C) that a −1.8 floor truncates. "Identical" was
+> true only inside my setup's assumptions, not in general.
 
 **Safe-substitute tolerance.** With the grid as written (`[-1.8, 45]`):
 
@@ -201,8 +231,16 @@ three cold-tail panels (RI 0.45/0.47/0.50) are pixel-identical (Δ = 0.0 °C).
 - **Upper quantiles (p84/p95):** safe to **≈ 0.1 °C only for RI ≲ 0.80
   (implied T ≲ 32 °C)**. For RI ≥ 0.85 the p95 error grows to 3.5 °C — do **not**
   trust gridT's warm-tail credible interval on saturated observations.
-- Rule of thumb: **trust gridT wherever P(T > T_max_grid) < ~1e-3**; flag the
-  observation otherwise.
+- **Lower end (added 2026-09-05): NOT safe near the lower asymptote.** For
+  RI ≲ 0.50 against an unconstrained Stan target with a diffuse prior, the
+  hardcoded −1.8 °C floor truncates the cold tail: p50 error up to ~10–12 °C, p1
+  up to ~58 °C, and the production `grid_truncated` flag does **not** fire (it
+  checks only the upper edge). Trust gridT here only if the Stan comparand also
+  floors at −1.8 (i.e. a `truncated_prior`/`hard_constraint` run with the same
+  `min_temp`).
+- Rule of thumb: **trust gridT wherever the posterior mass is well inside *both*
+  grid edges** — `P(T > T_max_grid) < ~1e-3` **and** `P(T < T_min_grid) < ~1e-3`.
+  The current flag only enforces the first half.
 
 ---
 
@@ -227,3 +265,61 @@ carry the `beta_gd·gd + beta_no3·logno3(gated by no3_cutoff)` terms exactly as
 `1−b`, not `1−lin`).
 
 These are bound/scope fixes, not a redefinition of the method.
+
+---
+
+## Cold-end failure (added 2026-09-05)
+
+**Evidence.** `notebooks/current/gridT_vs_stan_comparison.ipynb` @ `5d285ba`
+(branch `claude/gridT-gui-exploratory`; Ronnie + Claude Opus 5) runs the *real*
+Stan inverse (`predict_T_from_proxyObs`) against production
+`TEXAS.predict_grid.predict_T_grid` on `tx.GHEB.sst.sri03.G23-N1p0`, prior
+N(15, **30**), NO₃/G₂₃ corrections off. As executed:
+
+| RI range | diff_p50 | tails | flag | speed |
+|---|---|---|---|---|
+| 0.55–0.97 | ≤ 0.09 °C | p95 within ~1.7 °C (warm tail) | — | gridT 37× faster |
+| **0.45** | **+10.4 °C** (Stan −6.0, grid +4.4) | **p1 diff 58 °C** (Stan p5 −41.9) | `grid_truncated = False` ❌ | — |
+
+The mid/warm results **confirm** the original characterization. The RI = 0.45
+row is a new, cold-end failure that the note previously denied.
+
+**Root cause (read from `src/TEXAS/predict_grid.py` @ `5d285ba`, `_grid_quantiles`):**
+
+1. **Lower bound is hardcoded `min_temp = -1.8`.** Only the *upper* bound is
+   adaptive — `T_hi = max(60, mu_prior + 5*sigma_prior)` — which the author added
+   citing *this doc's* warm-tail budget. So the warm end I flagged was fixed; the
+   cold end I called "safe" was left with a fixed floor.
+2. **The `grid_truncated` flag is one-sided:** `post[-1] > 1e-3 * post.max()` —
+   it inspects only the top node, never `post[0]`. When the cold tail is
+   truncated, the flag cannot fire.
+3. **Constraint mismatch.** The comparand Stan model auto-selected here is
+   `..._marginal_unconstrained_...` (no floor). The grid always floors at −1.8,
+   so it imposes a bound Stan does not have. Near the lower asymptote (RI ≲ 0.5),
+   where an unconstrained + diffuse-prior posterior legitimately has a long cold
+   tail, the two disagree by ~10 °C at the median.
+
+**Independent reproduction (this session, univariate embedded posterior, N(15,30)):**
+
+| RI | grid floor −1.8 (p50) | wide support (p50) | gap | lower-edge density |
+|----|----:|----:|----:|----:|
+| 0.45 | +5.9 | −6.0 | **11.8** | 0.96 |
+| 0.47 | +7.0 | −2.6 | 9.6 | 0.85 |
+| 0.50 | +9.3 | +3.2 | 6.1 | 0.60 |
+| 0.55 | +14.2 | +12.6 | 1.6 | 0.20 |
+
+The −6.0 °C wide-support p50 matches the notebook's Stan −6.0 to a tenth of a
+degree, and the 0.96 lower-edge density proves a two-sided flag would have caught
+it. Mechanism is not multivariate-specific.
+
+**Minimal fixes (for whoever owns `predict_grid.py` — do not apply here without
+sign-off):**
+
+- Make the flag two-sided: also raise `grid_truncated` when
+  `post[0] > 1e-3 * post.max()`.
+- Make the lower bound adaptive and constraint-aware:
+  `T_lo = min(min_temp, mu_prior − 5*sigma_prior)` when the Stan target is
+  unconstrained; keep the `−1.8` floor only when reconstructing against a
+  `truncated_prior`/`hard_constraint` model with that same `min_temp`.
+- Or: refuse/flag rows where the implied temperature is within ~1–2 σ of the
+  lower asymptote, where the reconstruction is prior-dominated regardless.
