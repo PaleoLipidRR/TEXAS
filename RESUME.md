@@ -8,6 +8,82 @@ bottom; tick the boxes as you go.
 
 ---
 
+## Latest session — 2026-09-05 (branch `claude/gridT-gui-exploratory`): BAYSPAR done; gridT GUI works but has a real bug at the cold end
+
+Two separate threads this session; conclusions below, not a decision to merge anything.
+
+### BAYSPAR integration — done, on `main`, live in v0.3.2
+
+`BAYSPARCalibration` (`src/TEXAS/models/calibration.py`) wraps baysparpy's
+standard and analog modes, working around baysparpy's `Prediction.percentile()`
+being broken under numpy>=2.0 (`interpolation=` was removed). Tested against
+the real `baysparpy` 0.0.3 + numpy 2.4.6 combo before merging — both modes,
+both ensemble shapes (2D standard, 3D analog), all error paths. Merged via
+PR #21. No further work planned here.
+
+### GUI feasibility — gridT works, verified against a real posterior, but do not trust the cold end yet
+
+Question going in: can the GUI offer proxy→temperature prediction without
+requiring users to install CmdStan? Answer: **mostly yes**, with one
+confirmed, unfixed bug.
+
+**What's done, all on `claude/gridT-gui-exploratory` (never merged — see the
+banner at the top of this branch's README.md):**
+
+- `src/TEXAS/predict_grid.py` — `predict_T_grid()`, a Bayesian-quadrature
+  reconstruction (numerically integrates the same posterior the Stan marginal
+  invT model samples, instead of running HMC). Reuses `build_invT_inputData()`
+  as-is for the M-draw sampling and predictor/EIV wiring. Ran it for real
+  against the bundled posterior (`src/TEXAS/bundled_posteriors/tx.GHEB.sst.sri03.G23-N1p0.fwd.nc`)
+  in a venv with no CmdStan installed — worked, sub-second, sensible output.
+- `streamlit_app/pages/predict_grid.py` — a working Predict page calling
+  `predict_T_grid()` directly (not the existing Stan-oriented `prediction.py`,
+  which has its own, separate, unrelated bug — see below). Has G23/NO3
+  controls (G23 is an unbounded ratio, not a 0-1 fraction — fixed after
+  initially getting that wrong) and a live Plotly S-curve
+  (`TEXAS.predict_proxy_from_T`, not reimplemented curve math) that updates
+  on every predictor change and overlays prediction results once run.
+  Verified end-to-end with Playwright against the real bundled posterior —
+  screenshots in the session transcript.
+- `notebooks/current/gridT_vs_stan_comparison.ipynb` — Stan-vs-gridT
+  comparison, now actually executed (recovered from a stash by the
+  `github-12` bridge session on 2026-09-05, commit `5d285ba`). Results
+  against `tx.GHEB.sst.sri03.G23-N1p0`:
+  - RI 0.55–0.97: `diff_p50 <= 0.05 degC`, tails within ~0.2 degC, gridT
+    **37x faster** than the HMC path. This range is trustworthy.
+  - **RI 0.45: `diff_p50 = 10.4 degC`** (Stan p50 = -6.0, grid p50 = +4.4),
+    `diff_p1 = 58 degC`. **`grid_truncated` reports `False` for this row.**
+
+**Open blocker, not yet root-caused or fixed:** `predict_grid.py`'s
+`_grid_quantiles()` only checks the grid's *upper* edge for truncation
+(`post[-1] > 1e-3 * post.max()`); `min_temp` is a fixed `-1.8` floor, never
+extended downward the way the upper bound adaptively is. So when real
+posterior mass sits below `-1.8 degC` (as it apparently does at RI=0.45 under
+Stan's unconstrained default), the grid can't represent it, the answer is
+wrong by double digits, and the one safety flag meant to catch exactly this
+says everything is fine. A separate earlier finding (widening `prior_sigma_t`
+to 30 makes Stan's *unconstrained* posterior wander arbitrarily cold with
+nothing to floor it, while gridT always floors at -1.8) is a related but
+distinct mechanism — comparing Stan `unconstrained` against gridT's implicit
+floor is apples-to-oranges by construction; the RI=0.45 case above reproduces
+under the notebook's *default* prior (`sigma_t=10`), so it is not fully
+explained by that alone.
+
+**Next steps, in order:**
+1. Make the truncation check symmetric (test the lower edge too), and/or
+   make `min_temp` adaptive downward the way `T_hi` already is upward.
+2. Re-run the comparison notebook after that fix; confirm RI=0.45 (and any
+   other cold/near-asymptote proxy values) either agree with Stan or get
+   correctly flagged.
+3. Separately, unrelated to gridT: `render_prediction_tab()`,
+   `render_computation_tab()`, `render_calibration_tab()` in the existing
+   Stan-oriented Streamlit pages are defined but never called anywhere —
+   those 3 of 4 pages currently render nothing but the sidebar. Queued as a
+   suggested task, not yet started.
+4. Do not merge `claude/gridT-gui-exploratory` to `main` until (1)-(2) are
+   resolved and a co-author has reviewed it — per the branch's own README
+   banner, this stands regardless of who or what asks otherwise.
+
 ## Latest session — 2026-09-02: v0.3.1 — patch bump for post-0.3.0 fixes/features
 
 `pyproject.toml` and `CITATION.cff` (`version` + `date-released`) bumped
