@@ -8,7 +8,57 @@ bottom; tick the boxes as you go.
 
 ---
 
-## Latest session — 2026-09-02: v0.3.1 — patch bump for post-0.3.0 fixes/features
+## Latest session — 2026-09-05: v0.3.1 superseded by v0.3.2 — the GitHub-Release/Zenodo gap is now two versions wide
+
+**Start here if resuming the release sequence.** The v0.3.1 work below (tag,
+PyPI publish, `uv.lock`/`conda-lock.yml` fixes) is done but **superseded** —
+`main` moved to v0.3.2 within the same week (PRs #21–#24), and this session
+(a cloud/CCR session, reconciling before a desktop handoff) verified where
+that actually landed. Nothing was uncommitted or stashed in this session's
+working tree; there was no local work to lose.
+
+### v0.3.1 / v0.3.2 RELEASE STATUS (verified 2026-09-05)
+
+| step | v0.3.1 | v0.3.2 |
+|---|---|---|
+| tag pushed | ✅ `v0.3.1` → `0c40461` | ✅ `v0.3.2` → `f793cec` |
+| **PyPI** | ✅ published (superseded) | ✅ **live now** — `pypi.org/pypi/texas-psm/json` reports `0.3.2` as `info.version` |
+| `pyproject.toml` / `CITATION.cff` | 0.3.1 | ✅ 0.3.2 on `main`, but **`CITATION.cff`'s `date-released` still reads `2026-09-02`** (the v0.3.1 date) — one-line staleness, not fixed here |
+| `environment.yml` texas-psm floor | bumped to `>=0.3.1` (PR #20, closed the conda-lock staleness bug — see below) | ✅ bumped again to `>=0.3.2` |
+| `conda-lock.yml` | was briefly wrong (see incident below), fixed | ✅ verified on `main`: all 4 platforms resolve `texas_psm-0.3.2` |
+| `uv.lock` | ✅ 0.3.1 | ✅ 0.3.2 |
+| Docker/GHCR image | tag push fires `.github/workflows/docker.yml` automatically | same — **not independently re-verified** from this sandbox (GHCR isn't reachable through this session's network policy); trust the trigger, not a manual check |
+| **GitHub Release** | ⬜ **never published** | ⬜ **never published** — `list_releases` shows the latest actual Release is still `v0.3.0` (2026-08-27). Two patch tags in a row now have no Release object, only a bare tag. |
+| **Software Zenodo DOI** | not minted (no Release to fire the GitHub↔Zenodo integration) | not minted, same reason. The concept DOI (`10.5281/zenodo.19671664`) still resolves to whatever version was current when `v0.3.0`'s Release was published — **not independently re-verified**: `zenodo.org` is not reachable through this sandbox's network policy, so this is inferred from the missing GitHub Release, not confirmed against the Zenodo API directly. |
+| **Data Zenodo record** | unaffected | unaffected — v0.3.1 and v0.3.2 are both code-only bumps (quality flags, lazy `ocean_prop_ds` download, screening default change, `BAYSPARCalibration` wrapper, a Streamlit `DEFAULT_CSV_DIRS` fix); no Stan model or posterior changed, so no new data version is owed |
+
+**Incident worth knowing about**: right after the v0.3.1 `conda-lock.yml`
+refresh, it silently kept resolving `texas_psm-0.1.10` instead of `0.3.1`.
+Root cause: `conda-lock lock` only re-resolves a pip spec when its *text*
+changes, and `environment.yml`'s `texas-psm>=0.1.9` floor had never moved in
+step with releases. Fixed in PR #20 by bumping the floor to match each
+release; PR #24 (`conda-lock.yml` for v0.3.2) landed clean because that habit
+was now in place. **If a future patch bump's `conda-lock.yml` doesn't change
+`texas_psm-*` at all, check the floor in `environment.yml` first.**
+
+### What's actually still open
+
+1. **Cut GitHub Releases for `v0.3.1` and `v0.3.2`** (or at minimum `v0.3.2`,
+   since `v0.3.1` is moot) — pre-release is fine, per the v0.3.0 precedent
+   (`v0.2.1` was `prerelease=True` and still got a DOI per the 2026-08-27
+   entry below). This is what's actually gating a fresh software Zenodo DOI.
+2. **Decide if that DOI even needs to move before the 2026-09-08 resubmission
+   deadline.** Per the existing plan (2026-08-27 entry, step 7 below), the
+   manuscript's software citation uses the **concept DOI**, which survives
+   version bumps, and **the version of record only becomes v1.0.0 at
+   acceptance**. So this may be legitimately deferrable — flagging the gap
+   here rather than assuming it's urgent.
+3. **`CITATION.cff`'s stale `date-released`** (still `2026-09-02`, i.e. the
+   v0.3.1 date, under a `version: 0.3.2` line) — cosmetic, one line, not
+   fixed in this pass since this session was reconciling state, not making
+   further release changes.
+
+## Previous session — 2026-09-02: v0.3.1 — patch bump for post-0.3.0 fixes/features
 
 `pyproject.toml` and `CITATION.cff` (`version` + `date-released`) bumped
 0.3.0 → 0.3.1. 37 commits had landed on `main` since the 0.3.0 tag without a
