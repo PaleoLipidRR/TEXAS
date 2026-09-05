@@ -1,0 +1,1075 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TEXAS.predict &#8212; TEXAS</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/custom.css?v=e1f25cfb" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js?v=b8b12719"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/TEXAS/predict';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="canonical" href="https://paleolipidrr.github.io/TEXAS/_modules/TEXAS/predict.html" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../_static/searchtools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/texas_logo.svg" class="logo__image only-light" alt="TEXAS - Home"/>
+    <img src="../../_static/texas_logo.svg" class="logo__image only-dark pst-js-only" alt="TEXAS - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../callmap.html">Call map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../tutorial/intro.html">TEXAS Interactive Tutorial</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial/module1_prior.html">Module 1 — What is a Prior?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial/module2_bayesian_updating.html">Module 2 — Bayesian Updating</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial/module3_curve_explorer.html">Module 3 — The Calibration Curve Explorer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial/module4_mcmc.html">Module 4 — What MCMC Actually Does</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial/module5_results.html">Module 5 — Reading Your Results</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Explainers</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../PSM.html">TEXAS Proxy System Model — Bayesian Inference Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../model_validation.html">Model validation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../sampler_budget.html">Sampler budget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../stan_models_explanation_v2.html">TEXAS Stan Models: Ensemble vs Direct Sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../marginalization_explainer.html">Why Marginalization Improves Inverse TEXAS Sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../why_plugin_p50_differs.html">Why the plug-in P50 ≠ the Bayesian P50</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reduce_sum_for_geologists.html">Understanding <code class="docutils literal notranslate"><span class="pre">reduce_sum</span></code> and <code class="docutils literal notranslate"><span class="pre">ll_chunk</span></code> in TEXAS-PSM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Prior_Choice_Normal_vs_Cauchy.html">Why Normal Instead of Cauchy Priors? 🤔</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ckdtree_nearest_ocean_explainer.html">Finding the Nearest Ocean Pixel: How <code class="docutils literal notranslate"><span class="pre">cKDTree</span></code> Works</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Archive</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../preprint_additive_archive.html">Archive — the preprint’s additive (β) formulation</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS/issues/new?title=Issue%20on%20page%20%2F_modules/TEXAS/predict.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for TEXAS.predict</h1><div class="highlight"><pre>
+<span></span><span class="c1"># TEXAS/predict.py</span>
+<span class="sd">"""</span>
+<span class="sd">High-level prediction API for the TEXAS proxy system model.</span>
+
+<span class="sd">Two functions mirror the two directions of the calibration workflow</span>
+<span class="sd">described in the manuscript:</span>
+
+<span class="sd">  predict_proxy_from_T  — forward:  T → proxy (Scaled RI, TEX86, …)  (pure Python, no Stan)</span>
+<span class="sd">  predict_T_from_proxyObs — inverse:  proxy → T  (runs Stan)</span>
+
+<span class="sd">Both return percentile summaries (p5 / p50 / p95 by default) and</span>
+<span class="sd">optionally the full ensemble / posterior.</span>
+
+<span class="sd">Example</span>
+<span class="sd">-------</span>
+<span class="sd">&gt;&gt;&gt; from TEXAS.predict import predict_proxy_from_T, predict_T_from_proxyObs</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; # Forward: what Scaled RI does the calibration predict at 20–30 °C?</span>
+<span class="sd">&gt;&gt;&gt; result = predict_proxy_from_T(</span>
+<span class="sd">...     temperatures=np.linspace(20, 30, 50),</span>
+<span class="sd">...     posterior="gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3",</span>
+<span class="sd">... )</span>
+<span class="sd">&gt;&gt;&gt; result["p50"]   # median calibration curve</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; # Inverse: reconstruct temperature from downcore Scaled RI</span>
+<span class="sd">&gt;&gt;&gt; result = predict_T_from_proxyObs(</span>
+<span class="sd">...     proxyObs=my_ri_array,</span>
+<span class="sd">...     prior_mu_t=15.0,</span>
+<span class="sd">...     prior_sigma_t=10.0,</span>
+<span class="sd">...     fwd_posterior="tx.GHPU.thm.sri03.p0",</span>
+<span class="sd">...     temptype="thermoT",</span>
+<span class="sd">... )</span>
+<span class="sd">&gt;&gt;&gt; result["p50"]   # median temperature reconstruction</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.stan.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_posterior</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.ensemble.generator</span><span class="w"> </span><span class="kn">import</span> <span class="n">generate_ensemble_auto</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.stan.invT</span><span class="w"> </span><span class="kn">import</span> <span class="n">predict_temperature_from_proxyObs</span> <span class="k">as</span> <span class="n">_predict_temperature_from_proxyObs</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.data.builder</span><span class="w"> </span><span class="kn">import</span> <span class="n">InvTConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">DEFAULT_FWD_POSTERIOR</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.data.ocean_lookup</span><span class="w"> </span><span class="kn">import</span> <span class="n">lookup_no3_from_woa</span><span class="p">,</span> <span class="n">get_ocean_prop_ds</span>
+
+
+<div class="viewcode-block" id="predict_proxy_from_T">
+<a class="viewcode-back" href="../../api.html#TEXAS.predict.predict_proxy_from_T">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">predict_proxy_from_T</span><span class="p">(</span>
+    <span class="n">temperatures</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span>
+    <span class="n">posterior</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">n_draws</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
+    <span class="n">percentiles</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">95</span><span class="p">],</span>
+    <span class="n">return_full</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
+    <span class="n">gdgt23ratio</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">no3</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">no3_cutoff</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">suffix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">fwd_cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Forward prediction: temperature → proxy percentiles (Scaled RI, TEX86, or any fitted proxy).</span>
+
+<span class="sd">    Samples `n_draws` self-consistent parameter sets from the forward</span>
+<span class="sd">    calibration posterior (all parameters drawn from the same posterior</span>
+<span class="sd">    index, preserving correlations) and evaluates the calibration curve</span>
+<span class="sd">    at each requested temperature.  Corresponds to the forward model</span>
+<span class="sd">    described in Eq. 1 / Eq. 6–7 of the manuscript.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    temperatures : array-like</span>
+<span class="sd">        Temperatures (°C) at which to evaluate the calibration curve.</span>
+<span class="sd">    posterior : xr.Dataset or str</span>
+<span class="sd">        Forward calibration posterior — either a loaded xr.Dataset or</span>
+<span class="sd">        a saved-file name string (looked up in the posterior cache).</span>
+<span class="sd">    n_draws : int</span>
+<span class="sd">        Number of posterior draws to sample.  Default 500.</span>
+<span class="sd">    percentiles : list of float</span>
+<span class="sd">        Percentiles to return, e.g. [5, 50, 95].</span>
+<span class="sd">    return_full : bool</span>
+<span class="sd">        If True, also return the full (n_draws × len(temperatures))</span>
+<span class="sd">        ensemble array and run metadata under keys ``"ensemble"`` and</span>
+<span class="sd">        ``"metadata"``.</span>
+<span class="sd">    seed : int</span>
+<span class="sd">        Random seed for reproducible draw sampling.</span>
+<span class="sd">    gdgt23ratio : array-like, optional</span>
+<span class="sd">        GDGT-2/GDGT-3 ratio values (one per temperature point).</span>
+<span class="sd">        Required only when the posterior was fitted with the multivariate</span>
+<span class="sd">        model (β_{G₂/₃} correction).</span>
+<span class="sd">    no3 : array-like, optional</span>
+<span class="sd">        Nitrate concentration values (one per temperature point).</span>
+<span class="sd">        Required only when the posterior was fitted with NO₃ correction.</span>
+<span class="sd">    no3_cutoff : float, optional</span>
+<span class="sd">        Nitrate threshold (μmol/L) below which the NO₃ correction applies.</span>
+<span class="sd">        Defaults to the value stored in the posterior attributes.</span>
+<span class="sd">    suffix : str, optional</span>
+<span class="sd">        Force a specific parameter suffix (e.g. ``"crtp"``).  Auto-detected</span>
+<span class="sd">        by priority order when omitted.</span>
+<span class="sd">    fwd_cache_dir : Path or str, optional</span>
+<span class="sd">        Directory to resolve *posterior* in when it is given as a name string.</span>
+<span class="sd">        Defaults to the standard forward posterior cache.  Ignored when a</span>
+<span class="sd">        loaded Dataset is passed.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict with keys:</span>
+<span class="sd">        ``"x_vals"``  — temperature array (°C)</span>
+<span class="sd">        ``"pN"``      — one key per requested percentile, e.g. ``"p5"``, ``"p50"``, ``"p95"``</span>
+<span class="sd">        ``"ensemble"``  — full array, shape (n_draws, len(temperatures)), if return_full=True</span>
+<span class="sd">        ``"metadata"``  — run metadata dict, if return_full=True</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">posterior</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">posterior</span> <span class="o">=</span> <span class="n">load_posterior</span><span class="p">(</span><span class="n">posterior</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">fwd_cache_dir</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">generate_ensemble_auto</span><span class="p">(</span>
+        <span class="n">post_ds</span><span class="o">=</span><span class="n">posterior</span><span class="p">,</span>
+        <span class="n">x_vals</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">temperatures</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">),</span>
+        <span class="n">model_type</span><span class="o">=</span><span class="s2">"forward"</span><span class="p">,</span>
+        <span class="n">gdgt23ratio</span><span class="o">=</span><span class="n">gdgt23ratio</span><span class="p">,</span>
+        <span class="n">no3</span><span class="o">=</span><span class="n">no3</span><span class="p">,</span>
+        <span class="n">no3_cutoff</span><span class="o">=</span><span class="n">no3_cutoff</span><span class="p">,</span>
+        <span class="n">return_full_ensemble</span><span class="o">=</span><span class="n">return_full</span><span class="p">,</span>
+        <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">,</span>
+        <span class="c1"># passed through **kwargs to generate_ensemble:</span>
+        <span class="n">n_draws</span><span class="o">=</span><span class="n">n_draws</span><span class="p">,</span>
+        <span class="n">percentiles</span><span class="o">=</span><span class="n">percentiles</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="predict_T_from_proxyObs">
+<a class="viewcode-back" href="../../api.html#TEXAS.predict.predict_T_from_proxyObs">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">predict_T_from_proxyObs</span><span class="p">(</span>
+    <span class="n">proxyObs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]],</span>
+    <span class="n">prior_mu_t</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">],</span>
+    <span class="n">prior_sigma_t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">fwd_posterior</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">proxy_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">temptype</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">site_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">predictors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="c1"># ── Predictor shorthands (override anything in predictors dict) ───────</span>
+    <span class="n">no3</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">gdgt23ratio</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="c1"># ── Modern-ocean NO₃ lookup from WOA23-derived dataset ───────────────</span>
+    <span class="n">site_lat</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">site_lon</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">no3_dataset</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">no3_dataset_var</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"no3_sf2tc_avg"</span><span class="p">,</span>
+    <span class="c1"># ── Per-observation quality flags ────────────────────────────────────</span>
+    <span class="n">flags</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">tex86</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="c1"># ─────────────────────────────────────────────────────────────────────</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">InvTConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">chains</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+    <span class="n">iter_warmup</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">500</span><span class="p">,</span>
+    <span class="n">iter_sampling</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
+    <span class="n">constraint_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"unconstrained"</span><span class="p">,</span> <span class="s2">"truncated_prior"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"unconstrained"</span><span class="p">,</span>
+    <span class="n">min_temp</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">threads_per_chain</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">save_results</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">save_draws</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">filename_tag</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">fwd_cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Inverse reconstruction: scaled RI → temperature percentiles.</span>
+
+<span class="sd">    Runs the TEXAS-Bay inverse Stan model to infer paleotemperature from</span>
+<span class="sd">    observed scaled Ring Index values.  Marginalises over M draws from</span>
+<span class="sd">    the forward calibration posterior to propagate calibration uncertainty</span>
+<span class="sd">    into the temperature reconstruction.  Corresponds to Section 8</span>
+<span class="sd">    (Applications to Paleothermometry) of the manuscript.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    proxyObs : array-like, shape (N,)</span>
+<span class="sd">        Observed proxy values from downcore or coretop samples (e.g. scaledRI, TEX86).</span>
+<span class="sd">    prior_mu_t : float or array-like, shape (N,)</span>
+<span class="sd">        Prior mean temperature (°C).  Scalar applies the same prior to all</span>
+<span class="sd">        N observations; array sets a site-specific prior per sample.</span>
+<span class="sd">    prior_sigma_t : float</span>
+<span class="sd">        Prior temperature uncertainty (°C).  Use a diffuse value (e.g. 10)</span>
+<span class="sd">        when little prior information is available.</span>
+<span class="sd">    fwd_posterior : str or xr.Dataset, optional</span>
+<span class="sd">        The forward calibration posterior.  When omitted, the full multivariate</span>
+<span class="sd">        T0-shift calibration for *temptype* is used --- ``tx.GHEB.sst.sri03.G23-N1p0``</span>
+<span class="sd">        for SST, ``tx.GHEB.thm.sri03.G23-N1p0`` for thermoT --- which ships with</span>
+<span class="sd">        the package, so no download is required.  Accepts either:</span>
+
+<span class="sd">        - **str** — name of the saved posterior (without ``.nc`` extension)</span>
+<span class="sd">          in the posterior cache directory.  The file is loaded automatically.</span>
+<span class="sd">        - **xr.Dataset** — a pre-loaded posterior Dataset.  No file I/O or</span>
+<span class="sd">          Zenodo download is attempted; pass this when the cache is unavailable</span>
+<span class="sd">          (e.g. Google Colab with a Drive-mounted ``.nc``)::</span>
+
+<span class="sd">              ds = xr.open_dataset("my_drive/posterior.nc")</span>
+<span class="sd">              result = predict_T_from_proxyObs(..., fwd_posterior=ds)</span>
+
+<span class="sd">    temptype : str, optional</span>
+<span class="sd">        Temperature type: ``"SST"`` or ``"thermoT"``.  **Optional.**  It does</span>
+<span class="sd">        not change the reconstruction, which follows the calibration supplied:</span>
+<span class="sd">        when *fwd_posterior* is given, the target is read from that posterior's</span>
+<span class="sd">        own attributes and *temptype* only labels the metadata and output</span>
+<span class="sd">        filenames (a value conflicting with the calibration raises a warning).</span>
+<span class="sd">        It matters in exactly one case --- when *fwd_posterior* is omitted, it</span>
+<span class="sd">        chooses which default calibration is used, SST or thermoT.</span>
+<span class="sd">    site_name : str, optional</span>
+<span class="sd">        Label attached to result metadata and output filenames.</span>
+<span class="sd">    predictors : dict, optional</span>
+<span class="sd">        Non-thermal predictor arrays for the N observations, e.g.</span>
+<span class="sd">        ``{"gdgt23ratio": array, "no3": array}``.  Must be provided when</span>
+<span class="sd">        the forward posterior was fitted with the multivariate model.</span>
+<span class="sd">        Overridden by *no3* / *gdgt23ratio* shorthands when both are given.</span>
+<span class="sd">    no3 : float or array-like, optional</span>
+<span class="sd">        Nitrate concentration (µmol/L) for the N observations.</span>
+
+<span class="sd">        - **Array** (length N): per-observation values — use modern WOA23</span>
+<span class="sd">          values extracted at each sample's location (``ocean_prop_ds``</span>
+<span class="sd">          column ``"no3_sf2tc_avg"``).</span>
+<span class="sd">        - **Scalar**: broadcast to all N observations.  Pass a value above</span>
+<span class="sd">          ``no3_cutoff`` (e.g. ``no3=10.0`` when ``no3_cutoff=1.0``) to</span>
+<span class="sd">          effectively disable the NO₃ correction — all observations fall</span>
+<span class="sd">          outside the correction window.</span>
+
+<span class="sd">        Overrides any ``"no3"`` key in *predictors*.  Ignored when</span>
+<span class="sd">        *site_lat* / *site_lon* / *no3_dataset* are also provided (the</span>
+<span class="sd">        lookup result takes priority).</span>
+<span class="sd">    gdgt23ratio : float or array-like, optional</span>
+<span class="sd">        GDGT-2/GDGT-3 ratio for the N observations.  Scalar or array,</span>
+<span class="sd">        same broadcast rules as *no3*.  Overrides any ``"gdgt23ratio"``</span>
+<span class="sd">        key in *predictors*.</span>
+<span class="sd">    site_lat : float or array-like, optional</span>
+<span class="sd">        Decimal latitude(s) of the study site(s).  Scalar for a single</span>
+<span class="sd">        drill core; array of length N to assign a distinct location to</span>
+<span class="sd">        each observation.  Requires *site_lon* and *no3_dataset*.</span>
+<span class="sd">    site_lon : float or array-like, optional</span>
+<span class="sd">        Decimal longitude(s) of the study site(s).  Same shape rules as</span>
+<span class="sd">        *site_lat*.</span>
+<span class="sd">    no3_dataset : xr.Dataset, optional</span>
+<span class="sd">        WOA23-derived dataset with a ``(lat, lon)`` grid, typically the</span>
+<span class="sd">        ``ocean_prop_ds`` generated in the preprocessing notebook</span>
+<span class="sd">        (SI_code0).  Must contain *no3_dataset_var*.  When provided</span>
+<span class="sd">        together with *site_lat* / *site_lon*, the NO₃ value at those</span>
+<span class="sd">        coordinates is looked up via bilinear interpolation and used as</span>
+<span class="sd">        the predictor.  The result is a scalar (one drill site) or array</span>
+<span class="sd">        (per-obs sites), and is broadcast to all N observations when scalar.</span>
+<span class="sd">        **Optional** when *site_lat* / *site_lon* are given: if omitted, the</span>
+<span class="sd">        ~20 MB ``ocean_prop_ds`` field is downloaded from Zenodo and cached</span>
+<span class="sd">        automatically (see :func:`TEXAS.data.ocean_lookup.get_ocean_prop_ds`</span>
+<span class="sd">        / :func:`TEXAS.download_ocean_properties`) — pass it explicitly to</span>
+<span class="sd">        avoid the download (e.g. a pre-loaded copy, or a Colab session with</span>
+<span class="sd">        no persistent cache).</span>
+<span class="sd">    no3_dataset_var : str</span>
+<span class="sd">        Variable name to extract from *no3_dataset*.</span>
+<span class="sd">        Default ``"no3_sf2tc_avg"``.</span>
+<span class="sd">    flags : bool, default True</span>
+<span class="sd">        Attach ``result["flags"]``, a DataFrame with one row per observation</span>
+<span class="sd">        marking rows the reconstruction cannot support --- most importantly</span>
+<span class="sd">        proxy values outside the calibration curve's attainable range, which</span>
+<span class="sd">        return a converged, plausible-looking temperature that is really a</span>
+<span class="sd">        readout of the prior.  See :func:`TEXAS.quality.compute_quality_flags`.</span>
+<span class="sd">        Computing them costs no extra sampling.</span>
+<span class="sd">    tex86 : float or array-like, optional</span>
+<span class="sd">        TEX86 for the same samples, used only by the flags.  The published</span>
+<span class="sd">        calibration-domain ellipse is two-dimensional (TEX86 × Scaled RI), so</span>
+<span class="sd">        the ``outside_domain`` check needs both; without this it is reported</span>
+<span class="sd">        as ``pd.NA`` rather than as passing.</span>
+<span class="sd">    config : InvTConfig, optional</span>
+<span class="sd">        Controls number of forward-posterior draws (M), seed, etc.</span>
+<span class="sd">        Defaults to ``InvTConfig()`` (M=100).</span>
+<span class="sd">    chains : int</span>
+<span class="sd">        Number of MCMC chains.  Default 4.</span>
+<span class="sd">    iter_warmup : int</span>
+<span class="sd">        Warmup iterations per chain.  Default 500.</span>
+<span class="sd">    iter_sampling : int</span>
+<span class="sd">        Sampling iterations per chain.  Default 1000.</span>
+<span class="sd">    seed : int</span>
+<span class="sd">        Random seed.  Default 42.</span>
+<span class="sd">    constraint_type : str</span>
+<span class="sd">        Temperature constraint applied in the Stan model:</span>
+
+<span class="sd">        - ``"unconstrained"`` (default): no lower bound; P5 can be unrealistically cold</span>
+<span class="sd">          near the calibration curve's lower asymptote.</span>
+<span class="sd">        - ``"truncated_prior"`` (recommended when ``min_temp`` is set): proper</span>
+<span class="sd">          truncated Normal prior via inverse-CDF reparameterization — P50 is</span>
+<span class="sd">          data-driven and P5 is bounded at ``min_temp`` without warm bias.</span>
+
+<span class="sd">        ``"hard_constraint"`` (hard lower bound via ``&lt;lower=min_temp&gt;``) was</span>
+<span class="sd">        withdrawn in 2026-09: its Jacobian biases P50 warm for polar sites, which</span>
+<span class="sd">        is what ``"truncated_prior"`` was written to fix.  The model is kept in</span>
+<span class="sd">        ``archive/submission-2026-04/stan_models/`` and can be run by passing its</span>
+<span class="sd">        absolute path as ``stan_model_path``.  ``"reparameterized"`` and</span>
+<span class="sd">        ``"soft"`` were listed in earlier type hints but never existed as Stan</span>
+<span class="sd">        models; all three now raise :class:`ValueError` instead of failing later</span>
+<span class="sd">        with a missing-file error.</span>
+<span class="sd">    min_temp : float, optional</span>
+<span class="sd">        Lower temperature bound (°C). Required for ``"truncated_prior"``.</span>
+<span class="sd">        Typically −1.8 (seawater freezing point).</span>
+<span class="sd">        When provided without an explicit ``constraint_type``, automatically</span>
+<span class="sd">        selects ``"truncated_prior"``.</span>
+<span class="sd">    threads_per_chain : int, optional</span>
+<span class="sd">        Enable within-chain parallelism via Stan's ``reduce_sum``.</span>
+<span class="sd">    save_results : bool</span>
+<span class="sd">        If True, save the quantile posterior ``.nc`` and results ``.npz`` to the</span>
+<span class="sd">        invT cache directory.</span>
+<span class="sd">    save_draws : bool</span>
+<span class="sd">        If True, also save the raw posterior draws (pre-quantile) as a separate</span>
+<span class="sd">        ``{base}_draws.nc`` file in the invT cache directory.  The file contains</span>
+<span class="sd">        ``t_est`` with dims ``(chain, draw, obs_idx)`` and is suitable for</span>
+<span class="sd">        kernel-density plots or custom quantile calculation.  Default False.</span>
+<span class="sd">    filename_tag : str or list of str, optional</span>
+<span class="sd">        Extra tag(s) appended to the output filename.</span>
+<span class="sd">    cache_dir : Path or str, optional</span>
+<span class="sd">        Directory where ``.nc`` and ``.npz`` files are written when</span>
+<span class="sd">        *save_results* or *save_draws* is True.  Defaults to the standard</span>
+<span class="sd">        invT cache (``~/.texas/cache/TEXAS_invT_posterior_cache/`` for pip</span>
+<span class="sd">        installs, or ``data/cache/TEXAS_invT_posterior_cache/`` in the repo).</span>
+<span class="sd">    fwd_cache_dir : Path or str, optional</span>
+<span class="sd">        Directory to resolve *fwd_posterior* in when it is given as a name</span>
+<span class="sd">        string.  Defaults to the standard forward posterior cache.  This is a</span>
+<span class="sd">        separate directory from *cache_dir*, which controls only where results</span>
+<span class="sd">        are written.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict with keys:</span>
+<span class="sd">        ``"proxyObs"``   — input proxy array</span>
+<span class="sd">        ``"proxy_name"`` — proxy type label (e.g. ``"scaledRI"``, ``"TEX86"``)</span>
+<span class="sd">        ``"p5"``         — 5th percentile temperature (°C), shape (N,)</span>
+<span class="sd">        ``"p50"``        — median temperature (°C), shape (N,)</span>
+<span class="sd">        ``"p95"``        — 95th percentile temperature (°C), shape (N,)</span>
+<span class="sd">        ``"metadata"``   — run metadata dict (model name, attrs, etc.)</span>
+<span class="sd">        ``"flags"``      — DataFrame of per-observation quality flags, N rows,</span>
+<span class="sd">                           when *flags* is True</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Keep only the observations the calibration can actually support::</span>
+
+<span class="sd">        &gt;&gt;&gt; result = predict_T_from_proxyObs(ri, prior_mu_t=25, prior_sigma_t=10)</span>
+<span class="sd">        &gt;&gt;&gt; keep = ~result["flags"]["any_flag"].to_numpy(dtype=bool)</span>
+<span class="sd">        &gt;&gt;&gt; sst = result["p50"][keep]</span>
+<span class="sd">    """</span>
+    <span class="c1"># ── Default calibration ──────────────────────────────────────────────────</span>
+    <span class="c1"># Omitting fwd_posterior selects the full multivariate T0-shift calibration</span>
+    <span class="c1"># for the requested target, which ships inside the package. It is the</span>
+    <span class="c1"># default because the nonthermal effects are in the coretop data whether or</span>
+    <span class="c1"># not a user models them: a temperature-only calibration does not remove</span>
+    <span class="c1"># them, it absorbs them into the thermal parameters.</span>
+    <span class="k">if</span> <span class="n">fwd_posterior</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_target</span> <span class="o">=</span> <span class="n">temptype</span> <span class="k">if</span> <span class="n">temptype</span> <span class="ow">in</span> <span class="n">DEFAULT_FWD_POSTERIOR</span> <span class="k">else</span> <span class="s2">"SST"</span>
+        <span class="n">fwd_posterior</span> <span class="o">=</span> <span class="n">DEFAULT_FWD_POSTERIOR</span><span class="p">[</span><span class="n">_target</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"📚 No fwd_posterior given — using the default </span><span class="si">{</span><span class="n">_target</span><span class="si">}</span><span class="s2"> calibration "</span>
+            <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">fwd_posterior</span><span class="si">}</span><span class="s2">' (full multivariate, G23 + NO3)."</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ── Normalise fwd_posterior: split str vs pre-loaded Dataset ─────────────</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fwd_posterior</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+        <span class="n">_fwd_ds</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]</span> <span class="o">=</span> <span class="n">fwd_posterior</span>
+        <span class="n">_fwd_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_fwd_ds</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">_fwd_name</span> <span class="o">=</span> <span class="n">fwd_posterior</span>  <span class="c1"># str or None</span>
+
+    <span class="c1"># ── Resolve NO₃ predictor ─────────────────────────────────────────────────</span>
+    <span class="c1"># Priority: site_lat/lon lookup &gt; no3= explicit &gt; predictors["no3"] &gt; zeros</span>
+    <span class="n">predictors</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">predictors</span> <span class="ow">or</span> <span class="p">{})</span>
+
+    <span class="k">if</span> <span class="n">site_lat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">site_lon</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">site_lat</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">site_lon</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">"site_lat and site_lon must both be provided for a WOA23 lookup."</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">no3_dataset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">no3_dataset</span> <span class="o">=</span> <span class="n">get_ocean_prop_ds</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">"no3_dataset must be provided when using site_lat/site_lon, "</span>
+                    <span class="s2">"and the automatic download of the WOA23-derived "</span>
+                    <span class="sa">f</span><span class="s2">"ocean_prop_ds from Zenodo failed (</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">). Pass no3_dataset "</span>
+                    <span class="s2">"explicitly (e.g. from your preprocessing notebook), or "</span>
+                    <span class="s2">"retry with TEXAS.download_ocean_properties()."</span>
+                <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="s2">"🌊 no3_dataset not provided — downloaded/cached the WOA23 "</span>
+                <span class="s2">"ocean_prop_ds field from Zenodo."</span>
+            <span class="p">)</span>
+        <span class="n">no3</span> <span class="o">=</span> <span class="n">lookup_no3_from_woa</span><span class="p">(</span>
+            <span class="n">lat</span><span class="o">=</span><span class="n">site_lat</span><span class="p">,</span>
+            <span class="n">lon</span><span class="o">=</span><span class="n">site_lon</span><span class="p">,</span>
+            <span class="n">woa_dataset</span><span class="o">=</span><span class="n">no3_dataset</span><span class="p">,</span>
+            <span class="n">variable</span><span class="o">=</span><span class="n">no3_dataset_var</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">_lat_repr</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">site_lat</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">site_lat</span><span class="p">)</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"array[</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">site_lat</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2">]"</span>
+        <span class="n">_lon_repr</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">site_lon</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">site_lon</span><span class="p">)</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"array[</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">site_lon</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2">]"</span>
+        <span class="n">_no3_repr</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">no3</span><span class="p">)</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">no3</span><span class="p">)</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"array[</span><span class="si">{</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">no3</span><span class="p">)</span><span class="o">.</span><span class="n">size</span><span class="si">}</span><span class="s2">], mean=</span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">no3</span><span class="p">))</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">"</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"🌊 WOA23 NO₃ lookup: lat=</span><span class="si">{</span><span class="n">_lat_repr</span><span class="si">}</span><span class="s2">, lon=</span><span class="si">{</span><span class="n">_lon_repr</span><span class="si">}</span><span class="s2"> → </span><span class="si">{</span><span class="n">_no3_repr</span><span class="si">}</span><span class="s2"> µmol/L"</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">no3</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">predictors</span><span class="p">[</span><span class="s2">"no3"</span><span class="p">]</span> <span class="o">=</span> <span class="n">no3</span>
+    <span class="k">if</span> <span class="n">gdgt23ratio</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">predictors</span><span class="p">[</span><span class="s2">"gdgt23ratio"</span><span class="p">]</span> <span class="o">=</span> <span class="n">gdgt23ratio</span>
+
+    <span class="c1"># Warn if predictors are passed but the forward posterior doesn't use them</span>
+    <span class="n">_ds_for_check</span> <span class="o">=</span> <span class="n">_fwd_ds</span>
+    <span class="k">if</span> <span class="n">_ds_for_check</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_fwd_name</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">_ds_for_check</span> <span class="o">=</span> <span class="n">load_posterior</span><span class="p">(</span><span class="n">_fwd_name</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">fwd_cache_dir</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">if</span> <span class="n">_ds_for_check</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">_attrs</span> <span class="o">=</span> <span class="n">_ds_for_check</span><span class="o">.</span><span class="n">attrs</span>
+        <span class="k">if</span> <span class="n">predictors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"gdgt23ratio"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"use_gdgt23ratio"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">"gdgt23ratio was passed but the forward posterior has no GDGT-2/3 ratio "</span>
+                <span class="s2">"parameters (use_gdgt23ratio=False) — the predictor will be silently ignored. "</span>
+                <span class="s2">"To apply the GDGT-2/3 correction, use a multivariate posterior "</span>
+                <span class="s2">"(e.g. gen_logi_fixed_hier_crtp_multiv_priorApprox_*)."</span><span class="p">,</span>
+                <span class="ne">UserWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="n">_fwd_temptype</span> <span class="o">=</span> <span class="n">_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"temptype"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">temptype</span> <span class="ow">and</span> <span class="n">_fwd_temptype</span> <span class="ow">and</span> <span class="n">temptype</span> <span class="o">!=</span> <span class="n">_fwd_temptype</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"temptype=</span><span class="si">{</span><span class="n">temptype</span><span class="si">!r}</span><span class="s2"> was passed, but this calibration was "</span>
+                <span class="sa">f</span><span class="s2">"fitted against </span><span class="si">{</span><span class="n">_fwd_temptype</span><span class="si">!r}</span><span class="s2">. The reconstruction follows "</span>
+                <span class="sa">f</span><span class="s2">"the calibration, not the label, so the result is "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">_fwd_temptype</span><span class="si">}</span><span class="s2">; only the metadata and output filenames would "</span>
+                <span class="sa">f</span><span class="s2">"say otherwise. Drop temptype= to take it from the calibration."</span><span class="p">,</span>
+                <span class="ne">UserWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">predictors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"gdgt23ratio"</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"use_gdgt23ratio"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">"This calibration uses the GDGT-2/3 ratio, but none was supplied — "</span>
+                <span class="s2">"it will be treated as 0, which is not the same as switching the "</span>
+                <span class="s2">"correction off: it asserts a ratio of zero and biases the "</span>
+                <span class="s2">"reconstruction cold by roughly gamma_G23 x (true ratio) degC. "</span>
+                <span class="s2">"Pass gdgt23ratio=, or use a temperature-only calibration "</span>
+                <span class="s2">"(e.g. 'tx.GHPU.sst.sri03.p0')."</span><span class="p">,</span>
+                <span class="ne">UserWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">predictors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"no3"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"use_no3"</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">"no3 was passed but the forward posterior has no NO₃ parameters "</span>
+                <span class="s2">"(use_no3=False) — the predictor will be silently ignored. "</span>
+                <span class="s2">"To apply the NO₃ correction, use a multivariate posterior "</span>
+                <span class="s2">"(e.g. gen_logi_fixed_hier_crtp_multiv_priorApprox_*)."</span><span class="p">,</span>
+                <span class="ne">UserWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="n">_result</span> <span class="o">=</span> <span class="n">_predict_temperature_from_proxyObs</span><span class="p">(</span>
+        <span class="n">proxyObs</span><span class="o">=</span><span class="n">proxyObs</span><span class="p">,</span>
+        <span class="n">prior_mu_t</span><span class="o">=</span><span class="n">prior_mu_t</span><span class="p">,</span>
+        <span class="n">prior_sigma_t</span><span class="o">=</span><span class="n">prior_sigma_t</span><span class="p">,</span>
+        <span class="n">fwd_posterior_name</span><span class="o">=</span><span class="n">_fwd_name</span><span class="p">,</span>
+        <span class="n">fwd_posterior</span><span class="o">=</span><span class="n">_fwd_ds</span><span class="p">,</span>
+        <span class="n">site_name</span><span class="o">=</span><span class="n">site_name</span><span class="p">,</span>
+        <span class="n">temptype</span><span class="o">=</span><span class="n">temptype</span><span class="p">,</span>
+        <span class="n">predictors</span><span class="o">=</span><span class="n">predictors</span><span class="p">,</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+        <span class="n">chains</span><span class="o">=</span><span class="n">chains</span><span class="p">,</span>
+        <span class="n">iter_warmup</span><span class="o">=</span><span class="n">iter_warmup</span><span class="p">,</span>
+        <span class="n">iter_sampling</span><span class="o">=</span><span class="n">iter_sampling</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+        <span class="n">save_results</span><span class="o">=</span><span class="n">save_results</span><span class="p">,</span>
+        <span class="n">save_draws</span><span class="o">=</span><span class="n">save_draws</span><span class="p">,</span>
+        <span class="n">filename_tag</span><span class="o">=</span><span class="n">filename_tag</span><span class="p">,</span>
+        <span class="n">cache_dir</span><span class="o">=</span><span class="n">cache_dir</span><span class="p">,</span>
+        <span class="n">fwd_cache_dir</span><span class="o">=</span><span class="n">fwd_cache_dir</span><span class="p">,</span>
+        <span class="n">threads_per_chain</span><span class="o">=</span><span class="n">threads_per_chain</span><span class="p">,</span>
+        <span class="n">model_type</span><span class="o">=</span><span class="s2">"direct"</span><span class="p">,</span>
+        <span class="n">constraint_type</span><span class="o">=</span><span class="n">constraint_type</span><span class="p">,</span>
+        <span class="n">min_temp</span><span class="o">=</span><span class="n">min_temp</span><span class="p">,</span>
+        <span class="n">proxy_name</span><span class="o">=</span><span class="n">proxy_name</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Per-observation quality flags. The warnings above describe the call; these</span>
+    <span class="c1"># describe the rows, so a record can be filtered rather than accepted or</span>
+    <span class="c1"># rejected whole. Never fatal: a reconstruction that ran is still returned</span>
+    <span class="c1"># if the flags cannot be built.</span>
+    <span class="k">if</span> <span class="n">flags</span> <span class="ow">and</span> <span class="n">_ds_for_check</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">.quality</span><span class="w"> </span><span class="kn">import</span> <span class="n">compute_quality_flags</span>
+
+            <span class="n">_result</span><span class="p">[</span><span class="s2">"flags"</span><span class="p">]</span> <span class="o">=</span> <span class="n">compute_quality_flags</span><span class="p">(</span>
+                <span class="n">proxyObs</span><span class="p">,</span>
+                <span class="n">_ds_for_check</span><span class="p">,</span>
+                <span class="n">predictors</span><span class="o">=</span><span class="n">predictors</span><span class="p">,</span>
+                <span class="n">prior_sigma_t</span><span class="o">=</span><span class="n">prior_sigma_t</span><span class="p">,</span>
+                <span class="n">result</span><span class="o">=</span><span class="n">_result</span><span class="p">,</span>
+                <span class="n">tex86</span><span class="o">=</span><span class="n">tex86</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>  <span class="c1"># noqa: BLE001</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"Quality flags could not be computed (</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: "</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">); result['flags'] is absent. The reconstruction itself "</span>
+                <span class="s2">"is unaffected."</span><span class="p">,</span>
+                <span class="ne">UserWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_result</span></div>
+
+
+
+<div class="viewcode-block" id="compute_scaledRI">
+<a class="viewcode-back" href="../../api.html#TEXAS.predict.compute_scaledRI">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">compute_scaledRI</span><span class="p">(</span>
+    <span class="n">gdgt0</span><span class="p">,</span>
+    <span class="n">gdgt1</span><span class="p">,</span>
+    <span class="n">gdgt2</span><span class="p">,</span>
+    <span class="n">gdgt3</span><span class="p">,</span>
+    <span class="n">cren</span><span class="p">,</span>
+    <span class="n">cren_prime</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">cren_weight</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">cren_rings</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Compute Scaled Ring Index from six isoGDGT abundances.</span>
+
+<span class="sd">    Accepts raw LC/MS peak areas or fractional abundances — both give identical</span>
+<span class="sd">    results because the formula divides by the total sum of all six GDGTs, so</span>
+<span class="sd">    any common scale factor drops out.</span>
+<span class="sd">    Default ``cren_weight=3`` produces **scaledRI_cren3** (RI₀₋₃), the canonical</span>
+<span class="sd">    proxy used in TEXAS calibration posteriors.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    gdgt0, gdgt1, gdgt2, gdgt3, cren, cren_prime : float or array-like</span>
+<span class="sd">        isoGDGT abundances — GDGT-0, GDGT-1, GDGT-2, GDGT-3, crenarchaeol,</span>
+<span class="sd">        crenarchaeol regioisomer (cren').  Raw LC/MS peak areas and fractional</span>
+<span class="sd">        abundances give the same result (see above).</span>
+<span class="sd">    cren_weight : float</span>
+<span class="sd">        Weight carried by both crenarchaeol and its regioisomer, which also</span>
+<span class="sd">        sets the normalisation (see Notes).</span>
+<span class="sd">        ``3`` → scaledRI_cren3 / RI₀₋₃ (default, recommended).</span>
+<span class="sd">        ``4`` → scaledRI / RI₀₋₄ (Zhang et al. 2016 convention).</span>
+<span class="sd">    cren_rings : int, optional</span>
+<span class="sd">        Deprecated alias for ``cren_weight``. Emits a ``DeprecationWarning``.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    numpy.ndarray or float</span>
+<span class="sd">        Scaled Ring Index, dimensionless, nominally in [0, 1].</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The formula is::</span>
+
+<span class="sd">        RI      = (1·GDGT1 + 2·GDGT2 + 3·GDGT3 + cren_weight·cren + cren_weight·cren')</span>
+<span class="sd">                  / (GDGT0 + GDGT1 + GDGT2 + GDGT3 + cren + cren')</span>
+<span class="sd">        scaledRI = RI / cren_weight</span>
+
+<span class="sd">    The parameter does two jobs at once: it is the coefficient on cren and</span>
+<span class="sd">    cren' in the numerator *and* the constant the whole index is divided by, so</span>
+<span class="sd">    it fixes the scale on which every sample is expressed, not just the two</span>
+<span class="sd">    crenarchaeol terms. That second job is what makes a value chosen here part</span>
+<span class="sd">    of the proxy's definition rather than a detail — a posterior calibrated at</span>
+<span class="sd">    3 cannot read an index built at 4.</span>
+
+<span class="sd">    It was called ``cren_rings`` until 2026-08-21, which was misleading twice</span>
+<span class="sd">    over:</span>
+<span class="sd">    it named only the first job, and it implied a count of cyclic moieties.</span>
+<span class="sd">    Neither 3 nor 4 is that count. They are calibration conventions, which is</span>
+<span class="sd">    why both are offered and why neither is "correct".</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; compute_scaledRI(0.45, 0.10, 0.08, 0.05, 0.30, 0.02)</span>
+<span class="sd">    array(0.45666...)</span>
+
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; df = pd.read_csv("my_gdgt_data.csv")</span>
+<span class="sd">    &gt;&gt;&gt; df["scaledRI_cren3"] = compute_scaledRI(</span>
+<span class="sd">    ...     df["GDGT-0"], df["GDGT-1"], df["GDGT-2"], df["GDGT-3"],</span>
+<span class="sd">    ...     df["cren"],   df["cren_prime"],</span>
+<span class="sd">    ... )</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">cren_rings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">"compute_scaledRI(cren_rings=...) is deprecated; use "</span>
+            <span class="s2">"'cren_weight' instead. The value is a weight and a normalisation "</span>
+            <span class="s2">"constant, not a count of rings."</span><span class="p">,</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">cren_weight</span> <span class="o">=</span> <span class="n">cren_rings</span>
+
+    <span class="n">g0</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">gdgt0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">g1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">gdgt1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">g2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">gdgt2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">g3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">gdgt3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">cr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">cren</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+    <span class="n">cp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">cren_prime</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="n">numerator</span> <span class="o">=</span> <span class="n">g1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">g2</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">g3</span> <span class="o">+</span> <span class="n">cren_weight</span> <span class="o">*</span> <span class="n">cr</span> <span class="o">+</span> <span class="n">cren_weight</span> <span class="o">*</span> <span class="n">cp</span>
+    <span class="n">denominator</span> <span class="o">=</span> <span class="p">(</span><span class="n">g0</span> <span class="o">+</span> <span class="n">g1</span> <span class="o">+</span> <span class="n">g2</span> <span class="o">+</span> <span class="n">g3</span> <span class="o">+</span> <span class="n">cr</span> <span class="o">+</span> <span class="n">cp</span><span class="p">)</span> <span class="o">*</span> <span class="n">cren_weight</span>
+    <span class="k">return</span> <span class="n">numerator</span> <span class="o">/</span> <span class="n">denominator</span></div>
+
+
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Ronnakrit Rattanasriampaipong
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

@@ -1,0 +1,1419 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>TEXAS Stan Models: Ensemble vs Direct Sampling &#8212; TEXAS</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=e1f25cfb" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=b8b12719"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'stan_models_explanation_v2';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="canonical" href="https://paleolipidrr.github.io/TEXAS/stan_models_explanation_v2.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Why Marginalization Improves Inverse TEXAS Sampling" href="marginalization_explainer.html" />
+    <link rel="prev" title="Sampler budget" href="sampler_budget.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/texas_logo.svg" class="logo__image only-light" alt="TEXAS - Home"/>
+    <img src="_static/texas_logo.svg" class="logo__image only-dark pst-js-only" alt="TEXAS - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="callmap.html">Call map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="tutorial/intro.html">TEXAS Interactive Tutorial</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/module1_prior.html">Module 1 — What is a Prior?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/module2_bayesian_updating.html">Module 2 — Bayesian Updating</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/module3_curve_explorer.html">Module 3 — The Calibration Curve Explorer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/module4_mcmc.html">Module 4 — What MCMC Actually Does</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/module5_results.html">Module 5 — Reading Your Results</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Explainers</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="PSM.html">TEXAS Proxy System Model — Bayesian Inference Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_validation.html">Model validation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sampler_budget.html">Sampler budget</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">TEXAS Stan Models: Ensemble vs Direct Sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marginalization_explainer.html">Why Marginalization Improves Inverse TEXAS Sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="why_plugin_p50_differs.html">Why the plug-in P50 ≠ the Bayesian P50</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reduce_sum_for_geologists.html">Understanding <code class="docutils literal notranslate"><span class="pre">reduce_sum</span></code> and <code class="docutils literal notranslate"><span class="pre">ll_chunk</span></code> in TEXAS-PSM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Prior_Choice_Normal_vs_Cauchy.html">Why Normal Instead of Cauchy Priors? 🤔</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ckdtree_nearest_ocean_explainer.html">Finding the Nearest Ocean Pixel: How <code class="docutils literal notranslate"><span class="pre">cKDTree</span></code> Works</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Archive</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="preprint_additive_archive.html">Archive — the preprint’s additive (β) formulation</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS/issues/new?title=Issue%20on%20page%20%2Fstan_models_explanation_v2.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/stan_models_explanation_v2.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>TEXAS Stan Models: Ensemble vs Direct Sampling</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#overview">Overview</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-difference">Key Difference</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ensemble-models-regular-stan-files">Ensemble Models (Regular <code class="docutils literal notranslate"><span class="pre">*.stan</span></code> files)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#direct-marginal-models-marginal-stan-files">Direct/Marginal Models (<code class="docutils literal notranslate"><span class="pre">*_marginal.stan</span></code> files)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#uncertainty-propagation">Uncertainty Propagation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ensemble-approach">Ensemble Approach</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#marginal-approach">Marginal Approach</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mathematical-equivalence">Mathematical Equivalence</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#posterior-output-shapes">Posterior Output Shapes</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ensemble-models">Ensemble Models</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#marginal-models">Marginal Models</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-comparison">Performance Comparison</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Ensemble Models</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#direct-marginal-models">Direct/Marginal Models</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#available-model-files">Available Model Files</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ensemble-models-traditional-archived">Ensemble Models (Traditional) — archived</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#direct-marginal-models-recommended">Direct/Marginal Models (Recommended)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#usage-recommendations">Usage Recommendations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#use-direct-sampling-models-default-when">Use Direct Sampling Models (default) when:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#use-ensemble-models-when">Use Ensemble Models when:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#threading-performance-guidelines">Threading Performance Guidelines:</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#code-usage">Code Usage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output-filenames">Output Filenames</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#direct-sampling-models">Direct Sampling Models:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Ensemble Models:</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-examples">Performance Examples</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Performance Examples</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Performance Examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#visual-example-n-1300-observations-m-100-ensemble-members-4-chains">Visual Example: N=1300 observations, M=100 ensemble members, 4 chains</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#parameter-space-comparison">Parameter Space Comparison</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#understanding-stan-chains-for-non-technical-readers">Understanding Stan Chains (For Non-Technical Readers)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chain-analogy-restaurant-health-inspectors">Chain Analogy: Restaurant Health Inspectors</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#memory-usage-calculation-including-chains">Memory Usage Calculation (Including Chains)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#what-about-saved-file-sizes">What About Saved File Sizes?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#why-4-chains-the-reliability-check">Why 4 Chains? The Reliability Check</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#what-this-means-for-stan-sampling">What This Means for Stan Sampling</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#memory-usage-calculation">Memory Usage Calculation</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#simple-analogy-solving-a-jigsaw-puzzle">Simple Analogy: Solving a Jigsaw Puzzle</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#computational-efficiency">Computational Efficiency</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#real-world-performance-benchmark">Real-world Performance Benchmark</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scaling-with-dataset-size">Scaling with Dataset Size</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#small-dataset-n-50-m-100">Small Dataset (N=50, M=100)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#medium-dataset-n-500-m-100">Medium Dataset (N=500, M=100)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#large-dataset-n-2000-m-100">Large Dataset (N=2000+, M=100)</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#when-the-difference-matters-most">When the Difference Matters Most</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summary">Summary</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="texas-stan-models-ensemble-vs-direct-sampling">
+<h1>TEXAS Stan Models: Ensemble vs Direct Sampling<a class="headerlink" href="#texas-stan-models-ensemble-vs-direct-sampling" title="Link to this heading">#</a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">#</a></h2>
+<p>The TEXAS inverse temperature modeling framework includes two mathematically equivalent but computationally different approaches for incorporating forward model parameter uncertainty:</p>
+<ol class="arabic simple">
+<li><p><strong>Ensemble Models</strong> (<code class="docutils literal notranslate"><span class="pre">*.stan</span></code>) - Explicitly sample the ensemble dimension</p></li>
+<li><p><strong>Direct/Marginal Models</strong> (<code class="docutils literal notranslate"><span class="pre">*_marginal.stan</span></code>) - Directly sample the marginalized distribution</p></li>
+</ol>
+</section>
+<section id="key-difference">
+<h2>Key Difference<a class="headerlink" href="#key-difference" title="Link to this heading">#</a></h2>
+<section id="ensemble-models-regular-stan-files">
+<h3>Ensemble Models (Regular <code class="docutils literal notranslate"><span class="pre">*.stan</span></code> files)<a class="headerlink" href="#ensemble-models-regular-stan-files" title="Link to this heading">#</a></h3>
+<div class="highlight-stan notranslate"><div class="highlight"><pre><span></span><span class="kn">parameters</span> <span class="p">{</span>
+  <span class="kt">matrix</span><span class="o">&lt;</span><span class="k">lower</span><span class="p">=</span><span class="o">-</span><span class="mf">1.8</span><span class="o">&gt;</span><span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="n">M</span><span class="p">]</span> <span class="n">t_est</span><span class="p">;</span>  <span class="c1">// Sample N×M temperature matrix</span>
+<span class="p">}</span>
+<span class="kn">model</span> <span class="p">{</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">m</span> <span class="k">in</span> <span class="mf">1</span><span class="o">:</span><span class="n">M</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">t_est</span><span class="p">[</span><span class="o">:</span><span class="p">,</span><span class="n">m</span><span class="p">]</span> <span class="o">~</span><span class="w"> </span><span class="nb">normal</span><span class="p">(</span><span class="n">prior_mu_t</span><span class="p">,</span> <span class="n">prior_sigma_t</span><span class="p">);</span>  <span class="c1">// Each column gets prior</span>
+    <span class="c1">// Each ensemble member m gets its own temperature estimates</span>
+    <span class="n">scaledRI</span> <span class="o">~</span><span class="w"> </span><span class="nb">normal</span><span class="p">(</span><span class="n">forward_model</span><span class="p">(</span><span class="n">t_est</span><span class="p">[</span><span class="o">:</span><span class="p">,</span><span class="n">m</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="n">m</span><span class="p">]),</span> <span class="n">sigma</span><span class="p">[</span><span class="n">m</span><span class="p">]);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="direct-marginal-models-marginal-stan-files">
+<h3>Direct/Marginal Models (<code class="docutils literal notranslate"><span class="pre">*_marginal.stan</span></code> files)<a class="headerlink" href="#direct-marginal-models-marginal-stan-files" title="Link to this heading">#</a></h3>
+<div class="highlight-stan notranslate"><div class="highlight"><pre><span></span><span class="kn">parameters</span> <span class="p">{</span>
+  <span class="kt">vector</span><span class="o">&lt;</span><span class="k">lower</span><span class="p">=</span><span class="o">-</span><span class="mf">1.8</span><span class="o">&gt;</span><span class="p">[</span><span class="n">N</span><span class="p">]</span> <span class="n">t_est</span><span class="p">;</span>  <span class="c1">// Sample only N temperatures</span>
+<span class="p">}</span>
+<span class="kn">model</span> <span class="p">{</span>
+  <span class="n">t_est</span> <span class="o">~</span><span class="w"> </span><span class="nb">normal</span><span class="p">(</span><span class="n">prior_mu_t</span><span class="p">,</span> <span class="n">prior_sigma_t</span><span class="p">);</span>  <span class="c1">// Single prior</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">n</span> <span class="k">in</span> <span class="mf">1</span><span class="o">:</span><span class="n">N</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">vector</span><span class="p">[</span><span class="n">M</span><span class="p">]</span> <span class="n">lp</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">m</span> <span class="k">in</span> <span class="mf">1</span><span class="o">:</span><span class="n">M</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// Marginalize over ensemble members analytically</span>
+      <span class="n">lp</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="nb">normal_lpdf</span><span class="p">(</span><span class="n">scaledRI</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="p">|</span> <span class="n">forward_model</span><span class="p">(</span><span class="n">t_est</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="n">m</span><span class="p">]),</span> <span class="n">sigma</span><span class="p">[</span><span class="n">m</span><span class="p">]);</span>
+    <span class="p">}</span>
+    <span class="k">target +=</span> <span class="nb">log_sum_exp</span><span class="p">(</span><span class="n">lp</span><span class="p">)</span> <span class="o">-</span> <span class="nb">log</span><span class="p">(</span><span class="n">M</span><span class="p">);</span>  <span class="c1">// This is the marginalization!</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="uncertainty-propagation">
+<h2>Uncertainty Propagation<a class="headerlink" href="#uncertainty-propagation" title="Link to this heading">#</a></h2>
+<p><strong>Both methods properly propagate forward model parameter uncertainties.</strong></p>
+<section id="ensemble-approach">
+<h3>Ensemble Approach<a class="headerlink" href="#ensemble-approach" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Samples <code class="docutils literal notranslate"><span class="pre">N×M</span></code> temperatures (one per observation per ensemble member)</p></li>
+<li><p>Each temperature <code class="docutils literal notranslate"><span class="pre">t_est[n,m]</span></code> is paired with forward parameters <code class="docutils literal notranslate"><span class="pre">params[m]</span></code></p></li>
+<li><p>Forward parameter uncertainty comes through the different <code class="docutils literal notranslate"><span class="pre">params[m]</span></code> values</p></li>
+<li><p>You get <code class="docutils literal notranslate"><span class="pre">M</span></code> different temperature estimates per observation</p></li>
+</ul>
+</section>
+<section id="marginal-approach">
+<h3>Marginal Approach<a class="headerlink" href="#marginal-approach" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Samples <code class="docutils literal notranslate"><span class="pre">N</span></code> temperatures (one per observation)</p></li>
+<li><p><strong>But</strong> each temperature is evaluated against <strong>all M</strong> forward parameter sets</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">log_sum_exp(lp)</span> <span class="pre">-</span> <span class="pre">log(M)</span></code> mathematically averages over the ensemble</p></li>
+<li><p>Forward parameter uncertainty is captured by the variation across the <code class="docutils literal notranslate"><span class="pre">M</span></code> evaluations</p></li>
+</ul>
+</section>
+</section>
+<section id="mathematical-equivalence">
+<h2>Mathematical Equivalence<a class="headerlink" href="#mathematical-equivalence" title="Link to this heading">#</a></h2>
+<p>Both approaches compute the same integral:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>p(T|data) = ∫ p(T|data,θ) p(θ) dθ
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><strong>Ensemble</strong>: Samples both T and θ, then marginalizes θ in post-processing</p></li>
+<li><p><strong>Marginal</strong>: Marginalizes θ analytically during sampling</p></li>
+</ul>
+</section>
+<section id="posterior-output-shapes">
+<h2>Posterior Output Shapes<a class="headerlink" href="#posterior-output-shapes" title="Link to this heading">#</a></h2>
+<section id="ensemble-models">
+<h3>Ensemble Models<a class="headerlink" href="#ensemble-models" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">t_est</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(chain,</span> <span class="pre">draw,</span> <span class="pre">N,</span> <span class="pre">M)</span></code> - temperatures for each observation and ensemble member</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_invT_post_quantiles()</span></code> reduces over <code class="docutils literal notranslate"><span class="pre">chain</span></code>, <code class="docutils literal notranslate"><span class="pre">draw</span></code>, <strong>and</strong> <code class="docutils literal notranslate"><span class="pre">M</span></code></p></li>
+</ul>
+</section>
+<section id="marginal-models">
+<h3>Marginal Models<a class="headerlink" href="#marginal-models" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">t_est</span></code>: shape <code class="docutils literal notranslate"><span class="pre">(chain,</span> <span class="pre">draw,</span> <span class="pre">N)</span></code> - single temperature per observation</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">get_invT_post_quantiles()</span></code> reduces over <code class="docutils literal notranslate"><span class="pre">chain</span></code> and <code class="docutils literal notranslate"><span class="pre">draw</span></code></p></li>
+</ul>
+</section>
+</section>
+<section id="performance-comparison">
+<h2>Performance Comparison<a class="headerlink" href="#performance-comparison" title="Link to this heading">#</a></h2>
+<section id="id1">
+<h3>Ensemble Models<a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>Parameters</strong>: <code class="docutils literal notranslate"><span class="pre">N</span> <span class="pre">×</span> <span class="pre">M</span></code> temperatures (larger parameter space)</p></li>
+<li><p><strong>Memory</strong>: Higher memory usage due to larger posterior</p></li>
+<li><p><strong>Threading</strong>: Not supported</p></li>
+<li><p><strong>Use case</strong>: When you need explicit ensemble member information</p></li>
+</ul>
+</section>
+<section id="direct-marginal-models">
+<h3>Direct/Marginal Models<a class="headerlink" href="#direct-marginal-models" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p><strong>Parameters</strong>: <code class="docutils literal notranslate"><span class="pre">N</span></code> temperatures (smaller parameter space)</p></li>
+<li><p><strong>Memory</strong>: Lower memory usage</p></li>
+<li><p><strong>Threading</strong>: Supported via <code class="docutils literal notranslate"><span class="pre">reduce_sum</span></code> parallelization</p></li>
+<li><p><strong>Efficiency</strong>: Better sampling geometry, faster convergence</p></li>
+<li><p><strong>Use case</strong>: Most applications (recommended default)</p></li>
+</ul>
+</section>
+</section>
+<section id="available-model-files">
+<h2>Available Model Files<a class="headerlink" href="#available-model-files" title="Link to this heading">#</a></h2>
+<section id="ensemble-models-traditional-archived">
+<h3>Ensemble Models (Traditional) — archived<a class="headerlink" href="#ensemble-models-traditional-archived" title="Link to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">invT_gen_logi_fixed_univ_unconstrained.stan</span></code> and
+<code class="docutils literal notranslate"><span class="pre">invT_gen_logi_fixed_multiv_unconstrained.stan</span></code> were archived in 2026-09 to
+<code class="docutils literal notranslate"><span class="pre">archive/submission-2026-04/stan_models/</span></code>. The marginal models below supersede
+them and are much faster, so <code class="docutils literal notranslate"><span class="pre">model_type=&quot;ensemble&quot;</span></code> now raises <code class="docutils literal notranslate"><span class="pre">ValueError</span></code>
+rather than selecting a file that no longer ships. To run one anyway, pass its
+absolute path as <code class="docutils literal notranslate"><span class="pre">stan_model_path</span></code>.</p>
+</section>
+<section id="direct-marginal-models-recommended">
+<h3>Direct/Marginal Models (Recommended)<a class="headerlink" href="#direct-marginal-models-recommended" title="Link to this heading">#</a></h3>
+<p>Each ships in two prior-constraint variants — <code class="docutils literal notranslate"><span class="pre">unconstrained</span></code> (the default) and
+<code class="docutils literal notranslate"><span class="pre">truncated_prior</span></code>. <code class="docutils literal notranslate"><span class="pre">hard_constraint</span></code> was archived alongside the ensemble models:
+its <code class="docutils literal notranslate"><span class="pre">&lt;lower=min_temp&gt;</span></code> Jacobian biases P50 warm for polar sites, which is the
+bias <code class="docutils literal notranslate"><span class="pre">truncated_prior</span></code> was written to remove (see
+<a class="reference internal" href="why_plugin_p50_differs.html"><span class="std std-doc">why the plug-in P50 differs</span></a>). <code class="docutils literal notranslate"><span class="pre">reparameterized</span></code> and
+<code class="docutils literal notranslate"><span class="pre">soft</span></code> appeared in old type hints but were never implemented.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">invT_gen_logi_fixed_univ_marginal_unconstrained.stan</span></code> - No predictors</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">invT_gen_logi_fixed_multiv_marginal_unconstrained.stan</span></code> - With predictors (additive arm)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">invT_gen_logi_fixed_multiv_marginal_unconstrained_t0shift.stan</span></code> - With
+predictors entering inside the logistic (<strong>T₀-shift</strong>; pairs with the
+published <code class="docutils literal notranslate"><span class="pre">gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift</span></code>
+forward calibration)</p></li>
+</ul>
+<p>The <code class="docutils literal notranslate"><span class="pre">invT_logistic_*</span></code> (plain-logistic) variants listed in earlier versions of
+this page no longer ship.</p>
+</section>
+</section>
+<section id="usage-recommendations">
+<h2>Usage Recommendations<a class="headerlink" href="#usage-recommendations" title="Link to this heading">#</a></h2>
+<section id="use-direct-sampling-models-default-when">
+<h3>Use Direct Sampling Models (default) when:<a class="headerlink" href="#use-direct-sampling-models-default-when" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>You want the most efficient computation ✅</p></li>
+<li><p>You need threading support (<code class="docutils literal notranslate"><span class="pre">threads_per_chain</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>) ✅</p></li>
+<li><p>You only need temperature quantiles (most use cases) ✅</p></li>
+<li><p>Working with any dataset size ✅</p></li>
+</ul>
+</section>
+<section id="use-ensemble-models-when">
+<h3>Use Ensemble Models when:<a class="headerlink" href="#use-ensemble-models-when" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>You specifically need access to individual ensemble member predictions</p></li>
+<li><p>You’re debugging or comparing with legacy results</p></li>
+<li><p>You have very specific research questions about ensemble behavior</p></li>
+<li><p>Working with very small datasets (N &lt; 20) where efficiency doesn’t matter</p></li>
+</ul>
+</section>
+<section id="threading-performance-guidelines">
+<h3>Threading Performance Guidelines:<a class="headerlink" href="#threading-performance-guidelines" title="Link to this heading">#</a></h3>
+<p><strong>✅ Threading Recommended:</strong></p>
+<ul class="simple">
+<li><p>Simple logistic models: 2-4% speedup</p></li>
+<li><p>Moderate complexity models: 1-3% speedup</p></li>
+<li><p>Datasets with N &gt; 100: Greater benefits expected</p></li>
+</ul>
+<p><strong>🤔 Threading Optional:</strong></p>
+<ul class="simple">
+<li><p>Generalized logistic models: Minimal benefit (0.3-2.7%)</p></li>
+<li><p>Very complex multivariate models: Small gains</p></li>
+<li><p>Small datasets (N &lt; 50): Overhead may outweigh benefits</p></li>
+</ul>
+<p><strong>🎯 Optimal Settings:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># For most applications (recommended)</span>
+<span class="n">predict_T_from_proxyObs</span><span class="p">(</span>
+    <span class="n">model_type</span><span class="o">=</span><span class="s2">"direct"</span><span class="p">,</span>      <span class="c1"># 100× parameter reduction</span>
+    <span class="n">threads_per_chain</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>      <span class="c1"># 1-4% additional speedup</span>
+<span class="p">)</span>
+
+<span class="c1"># For maximum compatibility</span>
+<span class="n">predict_T_from_proxyObs</span><span class="p">(</span>
+    <span class="n">model_type</span><span class="o">=</span><span class="s2">"direct"</span><span class="p">,</span>      <span class="c1"># Still 100× more efficient</span>
+    <span class="c1"># no threading</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="code-usage">
+<h2>Code Usage<a class="headerlink" href="#code-usage" title="Link to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Direct sampling with threading (recommended for most cases)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">predict_T_from_proxyObs</span><span class="p">(</span>
+    <span class="n">scaledRI</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+    <span class="n">prior_mu_t</span><span class="o">=</span><span class="mf">30.0</span><span class="p">,</span>
+    <span class="n">prior_sigma_t</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span>
+    <span class="n">fwd_posterior_name</span><span class="o">=</span><span class="s2">"my_forward_model"</span><span class="p">,</span>
+    <span class="n">model_type</span><span class="o">=</span><span class="s2">"direct"</span><span class="p">,</span>       <span class="c1"># Default: efficient direct sampling</span>
+    <span class="n">threads_per_chain</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>       <span class="c1"># 1-4% additional speedup</span>
+    <span class="c1"># ... other parameters</span>
+<span class="p">)</span>
+
+<span class="c1"># Direct sampling without threading (maximum compatibility)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">predict_T_from_proxyObs</span><span class="p">(</span>
+    <span class="n">scaledRI</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+    <span class="n">prior_mu_t</span><span class="o">=</span><span class="mf">30.0</span><span class="p">,</span>
+    <span class="n">prior_sigma_t</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span>
+    <span class="n">fwd_posterior_name</span><span class="o">=</span><span class="s2">"my_forward_model"</span><span class="p">,</span>
+    <span class="n">model_type</span><span class="o">=</span><span class="s2">"direct"</span><span class="p">,</span>       <span class="c1"># Still 100× more efficient than ensemble</span>
+    <span class="c1"># ... other parameters</span>
+<span class="p">)</span>
+
+<span class="c1"># Ensemble models (legacy/research use)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">predict_T_from_proxyObs</span><span class="p">(</span>
+    <span class="n">scaledRI</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+    <span class="n">prior_mu_t</span><span class="o">=</span><span class="mf">30.0</span><span class="p">,</span>
+    <span class="n">prior_sigma_t</span><span class="o">=</span><span class="mf">6.0</span><span class="p">,</span>
+    <span class="n">fwd_posterior_name</span><span class="o">=</span><span class="s2">"my_forward_model"</span><span class="p">,</span>
+    <span class="n">model_type</span><span class="o">=</span><span class="s2">"ensemble"</span><span class="p">,</span>     <span class="c1"># Traditional approach</span>
+    <span class="c1"># threads_per_chain not supported with ensemble</span>
+    <span class="c1"># ... other parameters</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="output-filenames">
+<h2>Output Filenames<a class="headerlink" href="#output-filenames" title="Link to this heading">#</a></h2>
+<p>Results are automatically saved with clear model type identification:</p>
+<section id="direct-sampling-models">
+<h3>Direct Sampling Models:<a class="headerlink" href="#direct-sampling-models" title="Link to this heading">#</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">WilsonLake_invT_logistic_fixed_multiv_thermoT_gdgt23ratio_direct</span><span class="o">.</span><span class="n">nc</span>
+<span class="n">WilsonLake_invT_gen_logi_fixed_univ_sst_direct</span><span class="o">.</span><span class="n">nc</span>
+</pre></div>
+</div>
+</section>
+<section id="id2">
+<h3>Ensemble Models:<a class="headerlink" href="#id2" title="Link to this heading">#</a></h3>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">WilsonLake_invT_logistic_fixed_multiv_thermoT_gdgt23ratio_ensemble</span><span class="o">.</span><span class="n">nc</span>
+<span class="n">WilsonLake_invT_gen_logi_fixed_univ_sst_ensemble</span><span class="o">.</span><span class="n">nc</span>
+</pre></div>
+</div>
+<p>The model type is clearly indicated at the end of each filename for easy identification and organization.</p>
+</section>
+</section>
+<section id="performance-examples">
+<h2>Performance Examples<a class="headerlink" href="#performance-examples" title="Link to this heading">#</a></h2>
+</section>
+<section id="id3">
+<h2>Performance Examples<a class="headerlink" href="#id3" title="Link to this heading">#</a></h2>
+</section>
+<section id="id4">
+<h2>Performance Examples<a class="headerlink" href="#id4" title="Link to this heading">#</a></h2>
+<section id="visual-example-n-1300-observations-m-100-ensemble-members-4-chains">
+<h3>Visual Example: N=1300 observations, M=100 ensemble members, 4 chains<a class="headerlink" href="#visual-example-n-1300-observations-m-100-ensemble-members-4-chains" title="Link to this heading">#</a></h3>
+<section id="parameter-space-comparison">
+<h4>Parameter Space Comparison<a class="headerlink" href="#parameter-space-comparison" title="Link to this heading">#</a></h4>
+<p><strong>Ensemble Models:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Stan parameters to sample: matrix[1300, 100] t_est
+Total parameters per chain: N × M = 1,300 × 100 = 130,000 temperature parameters
+Parameter space dimensions: 130,000-dimensional
+Number of chains: 4 (default for reliable sampling)
+</pre></div>
+</div>
+<p><strong>Direct/Marginal Models:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Stan</span> <span class="n">parameters</span> <span class="n">to</span> <span class="n">sample</span><span class="p">:</span> <span class="n">vector</span><span class="p">[</span><span class="mi">1300</span><span class="p">]</span> <span class="n">t_est</span>
+<span class="n">Total</span> <span class="n">parameters</span> <span class="n">per</span> <span class="n">chain</span><span class="p">:</span> <span class="n">N</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="mi">300</span> <span class="n">temperature</span> <span class="n">parameters</span>
+<span class="n">Parameter</span> <span class="n">space</span> <span class="n">dimensions</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span><span class="mi">300</span><span class="o">-</span><span class="n">dimensional</span>  
+<span class="n">Number</span> <span class="n">of</span> <span class="n">chains</span><span class="p">:</span> <span class="mi">4</span> <span class="p">(</span><span class="n">default</span> <span class="k">for</span> <span class="n">reliable</span> <span class="n">sampling</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><strong>🎯 Key Insight: 130,000 parameters vs 1,300 parameters per chain (100× reduction!)</strong></p>
+</section>
+<section id="understanding-stan-chains-for-non-technical-readers">
+<h4>Understanding Stan Chains (For Non-Technical Readers)<a class="headerlink" href="#understanding-stan-chains-for-non-technical-readers" title="Link to this heading">#</a></h4>
+<p>Think of Stan chains like having multiple independent treasure hunters searching the same landscape:</p>
+<p><strong>What are “chains”?</strong></p>
+<ul class="simple">
+<li><p>Each chain is like an independent explorer with their own search path</p></li>
+<li><p>Stan runs multiple chains simultaneously to ensure reliable results</p></li>
+<li><p>Default: 4 chains (like having 4 different treasure hunters)</p></li>
+<li><p>Each chain starts from a different random location</p></li>
+<li><p>If all chains find similar treasures, we trust the results</p></li>
+</ul>
+<p><strong>Why multiple chains matter for memory:</strong></p>
+<p><strong>Ensemble Models: The Memory-Hungry Way</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>🗺️  4 treasure hunters, each tracking 130,000 treasure locations
+📊 Chain 1: 130,000 parameters × 1,000 samples = 130 million values
+📊 Chain 2: 130,000 parameters × 1,000 samples = 130 million values  
+📊 Chain 3: 130,000 parameters × 1,000 samples = 130 million values
+📊 Chain 4: 130,000 parameters × 1,000 samples = 130 million values
+💾 Total storage: 520 million values = ~4.0 GB
+</pre></div>
+</div>
+<p><strong>Direct Models: The Efficient Way</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>🗺️  4 treasure hunters, each tracking 1,300 treasure locations
+📊 Chain 1: 1,300 parameters × 1,000 samples = 1.3 million values
+📊 Chain 2: 1,300 parameters × 1,000 samples = 1.3 million values
+📊 Chain 3: 1,300 parameters × 1,000 samples = 1.3 million values  
+📊 Chain 4: 1,300 parameters × 1,000 samples = 1.3 million values
+💾 Total storage: 5.2 million values = ~40 MB
+</pre></div>
+</div>
+</section>
+<section id="chain-analogy-restaurant-health-inspectors">
+<h4>Chain Analogy: Restaurant Health Inspectors<a class="headerlink" href="#chain-analogy-restaurant-health-inspectors" title="Link to this heading">#</a></h4>
+<p><strong>Ensemble Approach (130,000 parameters per chain):</strong></p>
+<ul class="simple">
+<li><p>You hire 4 health inspectors to evaluate a restaurant</p></li>
+<li><p>Each inspector must check 130,000 different items (every ingredient, utensil, surface)</p></li>
+<li><p>Each inspector fills out a 130,000-item checklist</p></li>
+<li><p>You need 4 massive filing cabinets to store all the paperwork</p></li>
+<li><p>Takes a long time because there’s so much to inspect</p></li>
+</ul>
+<p><strong>Direct Approach (1,300 parameters per chain):</strong></p>
+<ul class="simple">
+<li><p>Same 4 health inspectors, same restaurant</p></li>
+<li><p>Each inspector checks only 1,300 critical items (the essentials)</p></li>
+<li><p>Each inspector fills out a 1,300-item checklist</p></li>
+<li><p>You need only 4 small folders to store the paperwork</p></li>
+<li><p>Much faster because there’s less to inspect</p></li>
+<li><p><strong>Same restaurant safety conclusion!</strong></p></li>
+</ul>
+</section>
+<section id="memory-usage-calculation-including-chains">
+<h4>Memory Usage Calculation (Including Chains)<a class="headerlink" href="#memory-usage-calculation-including-chains" title="Link to this heading">#</a></h4>
+<p><strong>Ensemble Models:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Parameters per chain: 130,000 temperature parameters
+Number of chains: 4
+Samples per chain: 1,000 draws
+Total values: 4 chains × 1,000 draws × 130,000 params = 520 million values
+Raw memory usage: ~4.0 GB for t_est alone (520M × 8 bytes/double)
+
+🔢 Think of it like: 
+   - 4 spreadsheets (chains)
+   - Each with 1,000 rows (draws)  
+   - Each row has 130,000 columns (parameters)
+   - Total: 520 million cells to store in RAM during sampling!
+</pre></div>
+</div>
+<p><strong>Direct/Marginal Models:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Parameters per chain: 1,300 temperature parameters  
+Number of chains: 4
+Samples per chain: 1,000 draws
+Total values: 4 chains × 1,000 draws × 1,300 params = 5.2 million values
+Raw memory usage: ~40 MB for t_est alone (5.2M × 8 bytes/double)
+
+🔢 Think of it like:
+   - 4 spreadsheets (chains)
+   - Each with 1,000 rows (draws)
+   - Each row has only 1,300 columns (parameters)  
+   - Total: Only 5.2 million cells to store in RAM during sampling!
+</pre></div>
+</div>
+<p><strong>Memory Reduction: 520M → 5.2M values = 100× smaller!</strong></p>
+</section>
+<section id="what-about-saved-file-sizes">
+<h4>What About Saved File Sizes?<a class="headerlink" href="#what-about-saved-file-sizes" title="Link to this heading">#</a></h4>
+<p><strong>Important</strong>: The 4 GB vs 40 MB comparison above refers to <strong>raw memory usage during Stan sampling</strong>, not final file sizes. TEXAS uses smart compression strategies to keep saved files manageable:</p>
+<p><strong>TEXAS File Size Optimization:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>🎯 TEXAS only saves selected quantiles, not raw MCMC draws!
+📊 Instead of 4,000 samples per parameter (4 chains × 1,000 draws)
+📊 TEXAS saves 13 quantiles per parameter (1%, 5%, 10%, 16%, 25%, 40%, 50%, 60%, 75%, 84%, 90%, 95%, 99%)
+</pre></div>
+</div>
+<p><strong>Actual File Sizes:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Ensemble Model Files:
+- Raw MCMC samples: ~4.0 GB (if we saved everything)
+- TEXAS quantile files: ~500-800 KB (13 quantiles × N × M compressed)
+
+Direct Model Files:  
+- Raw MCMC samples: ~40 MB (if we saved everything)
+- TEXAS quantile files: ~50-200 KB (13 quantiles × N compressed)
+</pre></div>
+</div>
+<p><strong>File Size Reduction Strategy:</strong></p>
+<ul class="simple">
+<li><p><strong>Raw draws</strong>: 4,000 values per parameter → <strong>Quantiles</strong>: 13 values per parameter</p></li>
+<li><p><strong>Compression ratio</strong>: ~300× smaller files (4,000 → 13)</p></li>
+<li><p><strong>NetCDF compression</strong>: Additional zlib compression reduces file size further</p></li>
+<li><p><strong>Result</strong>: Final .nc files are typically 50-800 KB - incredibly compact!</p></li>
+</ul>
+<p><strong>Why This Matters:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Memory During Sampling (what Stan needs):
+- Ensemble: 4.0 GB RAM required
+- Direct: 40 MB RAM required
+
+File Storage After Sampling (what gets saved):
+- Ensemble: ~15-30 MB .nc file  
+- Direct: ~2-5 MB .nc file
+- Both use quantile compression!
+</pre></div>
+</div>
+</section>
+<section id="why-4-chains-the-reliability-check">
+<h4>Why 4 Chains? The Reliability Check<a class="headerlink" href="#why-4-chains-the-reliability-check" title="Link to this heading">#</a></h4>
+<p><strong>Single Chain (Not Recommended):</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>🎯 Like having only 1 treasure hunter
+❌ If they get lost or stuck, you have no backup
+❌ Can't verify if the treasure location is correct
+❌ Might miss the real treasure due to bad luck
+</pre></div>
+</div>
+<p><strong>Multiple Chains (Recommended):</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>🎯 Like having 4 independent treasure hunters
+✅ If one gets stuck, others continue searching
+✅ All 4 finding similar treasures = high confidence
+✅ Can detect when someone found a false treasure
+✅ Much more reliable results
+</pre></div>
+</div>
+<p><strong>Chain Convergence Check:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Stan automatically checks if all 4 chains agree</span>
+<span class="k">if</span> <span class="n">all_chains_found_similar_treasures</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"✅ Reliable results - all chains converged"</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"⚠️ Unreliable - chains found different answers"</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="what-this-means-for-stan-sampling">
+<h4>What This Means for Stan Sampling<a class="headerlink" href="#what-this-means-for-stan-sampling" title="Link to this heading">#</a></h4>
+<p><strong>Ensemble Models (130,000 parameters):</strong></p>
+<ul class="simple">
+<li><p>Stan must explore a 130,000-dimensional parameter space</p>
+<ul>
+<li><p><em>Like navigating a maze with 130,000 different hallways</em></p></li>
+</ul>
+</li>
+<li><p>Each MCMC step updates 130,000 values</p>
+<ul>
+<li><p><em>Like moving 130,000 puzzle pieces at once</em></p></li>
+</ul>
+</li>
+<li><p>Gradient calculations involve 130,000 partial derivatives</p>
+<ul>
+<li><p><em>Like calculating the slope of 130,000 different hills simultaneously</em></p></li>
+</ul>
+</li>
+<li><p>Poor mixing due to high dimensionality</p>
+<ul>
+<li><p><em>Stan gets “lost” more easily in such a complex space</em></p></li>
+</ul>
+</li>
+<li><p>Memory: stores 130,000 × chains × samples values</p>
+<ul>
+<li><p><em>Like trying to remember 130,000 phone numbers for each attempt</em></p></li>
+</ul>
+</li>
+</ul>
+<p><strong>Direct/Marginal Models (1,300 parameters):</strong></p>
+<ul class="simple">
+<li><p>Stan explores a 1,300-dimensional parameter space</p>
+<ul>
+<li><p><em>Like navigating a maze with only 1,300 hallways</em></p></li>
+</ul>
+</li>
+<li><p>Each MCMC step updates 1,300 values</p>
+<ul>
+<li><p><em>Like moving only 1,300 puzzle pieces at once</em></p></li>
+</ul>
+</li>
+<li><p>Gradient calculations involve 1,300 partial derivatives</p>
+<ul>
+<li><p><em>Like calculating the slope of only 1,300 hills</em></p></li>
+</ul>
+</li>
+<li><p>Better mixing in lower-dimensional space</p>
+<ul>
+<li><p><em>Stan navigates more efficiently in simpler space</em></p></li>
+</ul>
+</li>
+<li><p>Memory: stores 1,300 × chains × samples values</p>
+<ul>
+<li><p><em>Like remembering only 1,300 phone numbers per attempt</em></p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="memory-usage-calculation">
+<h4>Memory Usage Calculation<a class="headerlink" href="#memory-usage-calculation" title="Link to this heading">#</a></h4>
+<p><strong>Ensemble Models:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Parameters sampled: 130,000 temperature parameters
+Posterior size: (4 chains × 1000 draws × 130,000 params) = 520 million values
+Memory usage: ~4.0 GB for t_est alone (520M × 8 bytes/double)
+
+📊 Think of it like: 
+   - 4 different treasure hunters (chains)
+   - Each makes 1,000 attempts (draws)  
+   - Each attempt records 130,000 treasure locations
+   - Total: 520 million location records to store!
+</pre></div>
+</div>
+<p><strong>Direct/Marginal Models:</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Parameters sampled: 1,300 temperature parameters  
+Posterior size: (4 chains × 1000 draws × 1,300 params) = 5.2 million values
+Memory usage: ~40 MB for t_est alone (5.2M × 8 bytes/double)
+
+📊 Think of it like:
+   - Same 4 treasure hunters (chains)
+   - Each makes 1,000 attempts (draws)
+   - Each attempt records only 1,300 treasure locations  
+   - Total: Only 5.2 million location records to store!
+</pre></div>
+</div>
+<p><strong>Memory Reduction: 130,000 → 1,300 parameters = 100× smaller!</strong></p>
+</section>
+<section id="simple-analogy-solving-a-jigsaw-puzzle">
+<h4>Simple Analogy: Solving a Jigsaw Puzzle<a class="headerlink" href="#simple-analogy-solving-a-jigsaw-puzzle" title="Link to this heading">#</a></h4>
+<p><strong>Ensemble Approach:</strong></p>
+<ul class="simple">
+<li><p>You have a 1,300-piece puzzle (your temperature data)</p></li>
+<li><p>But you decide to solve 100 copies of the puzzle simultaneously</p></li>
+<li><p>Total pieces: 1,300 × 100 = 130,000 pieces on your table</p></li>
+<li><p>You must keep track of where every piece goes in every puzzle</p></li>
+<li><p>Your table gets cluttered, you work slower, need more space</p></li>
+</ul>
+<p><strong>Direct Approach:</strong></p>
+<ul class="simple">
+<li><p>You solve the same 1,300-piece puzzle</p></li>
+<li><p>But you use a smart technique that gives you the same final result</p></li>
+<li><p>You only work with 1,300 pieces at a time</p></li>
+<li><p>Your table stays organized, you work faster, need less space</p></li>
+<li><p>The final completed puzzle looks identical to the ensemble approach!</p></li>
+</ul>
+</section>
+<section id="computational-efficiency">
+<h4>Computational Efficiency<a class="headerlink" href="#computational-efficiency" title="Link to this heading">#</a></h4>
+<p><strong>Ensemble Models (130k params):</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Sampling</span> <span class="n">efficiency</span><span class="p">:</span> <span class="n">Lower</span> <span class="p">(</span><span class="n">curse</span> <span class="n">of</span> <span class="n">dimensionality</span><span class="p">)</span>
+<span class="n">Each</span> <span class="n">MCMC</span> <span class="n">step</span><span class="p">:</span> <span class="n">Updates</span> <span class="mi">130</span><span class="p">,</span><span class="mi">000</span> <span class="n">parameters</span>
+<span class="n">Gradient</span> <span class="n">computation</span><span class="p">:</span> <span class="mi">130</span><span class="p">,</span><span class="mi">000</span> <span class="n">partial</span> <span class="n">derivatives</span>
+<span class="n">Effective</span> <span class="n">sample</span> <span class="n">size</span><span class="p">:</span> <span class="n">Often</span> <span class="n">poor</span> <span class="n">due</span> <span class="n">to</span> <span class="n">high</span><span class="o">-</span><span class="n">dimensional</span> <span class="n">space</span>
+<span class="n">Threading</span> <span class="n">support</span><span class="p">:</span> <span class="kc">None</span>
+<span class="n">Typical</span> <span class="n">runtime</span><span class="p">:</span> <span class="mi">45</span><span class="o">-</span><span class="mi">90</span> <span class="n">minutes</span>
+</pre></div>
+</div>
+<p><strong>Direct/Marginal Models (1.3k params):</strong></p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Sampling efficiency: Higher (better geometry)
+Each MCMC step: Updates 1,300 parameters
+Gradient computation: 1,300 partial derivatives  
+Effective sample size: Better convergence
+Threading support: Yes (reduce_sum parallelization)
+Typical runtime: 5-15 minutes (3-6× faster)
+</pre></div>
+</div>
+</section>
+<section id="real-world-performance-benchmark">
+<h4>Real-world Performance Benchmark<a class="headerlink" href="#real-world-performance-benchmark" title="Link to this heading">#</a></h4>
+<p><strong>Actual test results</strong> from Wilson Lake dataset (N=52 observations, M=100 ensemble members, <strong>4 chains</strong>, 1000 samples per chain):</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Model Type</p></th>
+<th class="head"><p>Base Model</p></th>
+<th class="head"><p>Runtime (Direct)</p></th>
+<th class="head"><p>Runtime (Direct+Threading)</p></th>
+<th class="head"><p>Threading Benefit</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Simple Logistic</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">logistic_fixed_univ_thermoT</span></code></p></td>
+<td><p>8.92s</p></td>
+<td><p>8.71s</p></td>
+<td><p><strong>2.4% faster</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>Simple Logistic</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">logistic_fixed_univ_sst</span></code></p></td>
+<td><p>8.30s</p></td>
+<td><p>8.00s</p></td>
+<td><p><strong>3.6% faster</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Multivariate</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">logistic_fixed_multiv_thermoT_gdgt23ratio</span></code></p></td>
+<td><p>11.46s</p></td>
+<td><p>11.04s</p></td>
+<td><p><strong>3.7% faster</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>Multivariate</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">logistic_fixed_multiv_sst_gdgt23ratio</span></code></p></td>
+<td><p>11.24s</p></td>
+<td><p>11.12s</p></td>
+<td><p><strong>1.1% faster</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Gen. Logistic</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gen_logi_fixed_univ_thermoT</span></code></p></td>
+<td><p>13.95s</p></td>
+<td><p>13.75s</p></td>
+<td><p><strong>1.4% faster</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>Gen. Logistic</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gen_logi_fixed_univ_sst</span></code></p></td>
+<td><p>11.64s</p></td>
+<td><p>11.33s</p></td>
+<td><p><strong>2.7% faster</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Complex Multiv</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gen_logi_fixed_multiv_thermoT_gdgt23ratio</span></code></p></td>
+<td><p>11.15s</p></td>
+<td><p>11.12s</p></td>
+<td><p><strong>0.3% faster</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>Complex Multiv</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">gen_logi_fixed_multiv_sst_gdgt23ratio</span></code></p></td>
+<td><p>23.18s</p></td>
+<td><p>22.55s</p></td>
+<td><p><strong>2.7% faster</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><strong>Memory Usage Comparison (N=52, M=100, 4 chains, 1000 samples):</strong></p>
+<ul class="simple">
+<li><p><strong>Direct sampling</strong>: ~2-5 MB peak memory during sampling, ~50-200 KB final .nc files</p></li>
+<li><p><strong>Ensemble models</strong>: Would require ~200-400 MB memory during sampling, ~500-800 KB final .nc files</p></li>
+<li><p><strong>Scaling</strong>: For N=1300, ensemble would need ~4 GB RAM during sampling, ~1-2 MB .nc files vs direct needing ~40 MB RAM, ~200-500 KB .nc files</p></li>
+</ul>
+<p><strong>TEXAS Storage Efficiency:</strong></p>
+<ul class="simple">
+<li><p><strong>Raw MCMC storage</strong>: Would be 300× larger (4,000 draws → 13 quantiles per parameter)</p></li>
+<li><p><strong>Quantile compression</strong>: Only stores 1%, 5%, 10%, 16%, 25%, 40%, 50%, 60%, 75%, 84%, 90%, 95%, 99% percentiles</p></li>
+<li><p><strong>NetCDF compression</strong>: Additional zlib compression for minimal file sizes</p></li>
+<li><p><strong>Result</strong>: Final files are incredibly compact at 50 KB - 2 MB regardless of sampling memory requirements</p></li>
+</ul>
+<p><strong>Key Findings:</strong></p>
+<ul class="simple">
+<li><p><strong>Direct sampling</strong>: Always efficient (8-23 seconds vs hours for ensemble)</p></li>
+<li><p><strong>Threading benefits</strong>: 0.3-3.7% additional speedup, best for simple logistic models</p></li>
+<li><p><strong>Memory efficiency</strong>: 100× reduction in memory usage</p></li>
+<li><p><strong>Chain reliability</strong>: All 4 chains converged successfully in &lt;25 seconds</p></li>
+<li><p><strong>Parameter reduction</strong>: 130,000 → 1,300 parameters per chain (100× reduction)</p></li>
+</ul>
+<p><strong>Expected scaling for larger datasets:</strong></p>
+<ul class="simple">
+<li><p>N=500: Direct ~1-5 minutes (4 chains), Ensemble ~30-90 minutes</p></li>
+<li><p>N=1300: Direct ~3-8 minutes (4 chains), Ensemble ~45-120 minutes</p></li>
+<li><p>N=2000+: Direct remains manageable, Ensemble may hit memory limits</p></li>
+</ul>
+<p><strong>Chain Performance Notes:</strong></p>
+<ul class="simple">
+<li><p>All tests used 4 chains for reliable convergence diagnostics</p></li>
+<li><p>Memory scales linearly with number of chains (more chains = more memory)</p></li>
+<li><p>Runtime scales approximately linearly with chains (4 chains ≈ 4× single chain time)</p></li>
+<li><p>Threading helps each chain individually, so benefits compound across all chains</p></li>
+</ul>
+</section>
+</section>
+<section id="scaling-with-dataset-size">
+<h3>Scaling with Dataset Size<a class="headerlink" href="#scaling-with-dataset-size" title="Link to this heading">#</a></h3>
+<section id="small-dataset-n-50-m-100">
+<h4>Small Dataset (N=50, M=100)<a class="headerlink" href="#small-dataset-n-50-m-100" title="Link to this heading">#</a></h4>
+<ul class="simple">
+<li><p>Ensemble: Manageable but slower</p></li>
+<li><p>Direct: Fast, minimal difference in user experience</p></li>
+</ul>
+</section>
+<section id="medium-dataset-n-500-m-100">
+<h4>Medium Dataset (N=500, M=100)<a class="headerlink" href="#medium-dataset-n-500-m-100" title="Link to this heading">#</a></h4>
+<ul class="simple">
+<li><p>Ensemble: Noticeably slower, higher memory</p></li>
+<li><p>Direct: Still fast, clear performance advantage</p></li>
+</ul>
+</section>
+<section id="large-dataset-n-2000-m-100">
+<h4>Large Dataset (N=2000+, M=100)<a class="headerlink" href="#large-dataset-n-2000-m-100" title="Link to this heading">#</a></h4>
+<ul class="simple">
+<li><p>Ensemble: May hit memory limits, very slow</p></li>
+<li><p>Direct: Remains manageable, threading becomes crucial</p></li>
+</ul>
+</section>
+</section>
+<section id="when-the-difference-matters-most">
+<h3>When the Difference Matters Most<a class="headerlink" href="#when-the-difference-matters-most" title="Link to this heading">#</a></h3>
+<p><strong>Direct sampling provides the biggest advantage when:</strong></p>
+<ul class="simple">
+<li><p>Large number of observations (N &gt; 500)</p></li>
+<li><p>Large ensemble size (M &gt; 50)</p></li>
+<li><p>Limited RAM (&lt; 16 GB)</p></li>
+<li><p>Multi-core systems (threading available)</p></li>
+<li><p>Production workflows (speed matters)</p></li>
+</ul>
+<p><strong>Ensemble models might still be preferred when:</strong></p>
+<ul class="simple">
+<li><p>Very small datasets (N &lt; 50)</p></li>
+<li><p>Debugging individual ensemble members</p></li>
+<li><p>Research requiring explicit ensemble analysis</p></li>
+<li><p>Comparing with legacy results</p></li>
+</ul>
+</section>
+</section>
+<section id="summary">
+<h2>Summary<a class="headerlink" href="#summary" title="Link to this heading">#</a></h2>
+<p>Both approaches are statistically equivalent and properly propagate uncertainties. The direct sampling models are simply a more efficient way to compute the same result, making them the recommended choice for most applications.</p>
+<p><strong>For typical paleoclimate datasets (N=50-2000, M=100), direct sampling provides:</strong></p>
+<ul class="simple">
+<li><p><strong>100× parameter reduction</strong> (130,000 → 1,300 parameters)</p></li>
+<li><p><strong>Dramatic memory savings</strong> (~40 MB vs ~4 GB)</p></li>
+<li><p><strong>Faster sampling</strong> (seconds to minutes vs minutes to hours)</p></li>
+<li><p><strong>Threading support</strong> for additional 1-4% speedup</p></li>
+<li><p><strong>Identical statistical results</strong> to ensemble methods</p></li>
+</ul>
+<p><strong>Real-world performance:</strong> Simple models run in 8-12 seconds, complex models in 11-23 seconds, with threading providing modest additional gains. The direct sampling approach transforms computationally expensive problems into highly manageable ones while maintaining full statistical rigor.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="sampler_budget.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Sampler budget</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="marginalization_explainer.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Why Marginalization Improves Inverse TEXAS Sampling</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#overview">Overview</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-difference">Key Difference</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ensemble-models-regular-stan-files">Ensemble Models (Regular <code class="docutils literal notranslate"><span class="pre">*.stan</span></code> files)</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#direct-marginal-models-marginal-stan-files">Direct/Marginal Models (<code class="docutils literal notranslate"><span class="pre">*_marginal.stan</span></code> files)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#uncertainty-propagation">Uncertainty Propagation</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ensemble-approach">Ensemble Approach</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#marginal-approach">Marginal Approach</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#mathematical-equivalence">Mathematical Equivalence</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#posterior-output-shapes">Posterior Output Shapes</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ensemble-models">Ensemble Models</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#marginal-models">Marginal Models</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-comparison">Performance Comparison</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Ensemble Models</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#direct-marginal-models">Direct/Marginal Models</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#available-model-files">Available Model Files</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ensemble-models-traditional-archived">Ensemble Models (Traditional) — archived</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#direct-marginal-models-recommended">Direct/Marginal Models (Recommended)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#usage-recommendations">Usage Recommendations</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#use-direct-sampling-models-default-when">Use Direct Sampling Models (default) when:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#use-ensemble-models-when">Use Ensemble Models when:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#threading-performance-guidelines">Threading Performance Guidelines:</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#code-usage">Code Usage</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#output-filenames">Output Filenames</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#direct-sampling-models">Direct Sampling Models:</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Ensemble Models:</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#performance-examples">Performance Examples</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">Performance Examples</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">Performance Examples</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#visual-example-n-1300-observations-m-100-ensemble-members-4-chains">Visual Example: N=1300 observations, M=100 ensemble members, 4 chains</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#parameter-space-comparison">Parameter Space Comparison</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#understanding-stan-chains-for-non-technical-readers">Understanding Stan Chains (For Non-Technical Readers)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#chain-analogy-restaurant-health-inspectors">Chain Analogy: Restaurant Health Inspectors</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#memory-usage-calculation-including-chains">Memory Usage Calculation (Including Chains)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#what-about-saved-file-sizes">What About Saved File Sizes?</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#why-4-chains-the-reliability-check">Why 4 Chains? The Reliability Check</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#what-this-means-for-stan-sampling">What This Means for Stan Sampling</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#memory-usage-calculation">Memory Usage Calculation</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#simple-analogy-solving-a-jigsaw-puzzle">Simple Analogy: Solving a Jigsaw Puzzle</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#computational-efficiency">Computational Efficiency</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#real-world-performance-benchmark">Real-world Performance Benchmark</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#scaling-with-dataset-size">Scaling with Dataset Size</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#small-dataset-n-50-m-100">Small Dataset (N=50, M=100)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#medium-dataset-n-500-m-100">Medium Dataset (N=500, M=100)</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#large-dataset-n-2000-m-100">Large Dataset (N=2000+, M=100)</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#when-the-difference-matters-most">When the Difference Matters Most</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#summary">Summary</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Ronnakrit Rattanasriampaipong
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

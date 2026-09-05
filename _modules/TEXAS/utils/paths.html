@@ -1,0 +1,755 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TEXAS.utils.paths &#8212; TEXAS</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=e1f25cfb" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js?v=b8b12719"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/TEXAS/utils/paths';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="canonical" href="https://paleolipidrr.github.io/TEXAS/_modules/TEXAS/utils/paths.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/texas_logo.svg" class="logo__image only-light" alt="TEXAS - Home"/>
+    <img src="../../../_static/texas_logo.svg" class="logo__image only-dark pst-js-only" alt="TEXAS - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../callmap.html">Call map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../tutorial/intro.html">TEXAS Interactive Tutorial</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module1_prior.html">Module 1 — What is a Prior?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module2_bayesian_updating.html">Module 2 — Bayesian Updating</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module3_curve_explorer.html">Module 3 — The Calibration Curve Explorer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module4_mcmc.html">Module 4 — What MCMC Actually Does</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module5_results.html">Module 5 — Reading Your Results</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Explainers</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../PSM.html">TEXAS Proxy System Model — Bayesian Inference Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_validation.html">Model validation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sampler_budget.html">Sampler budget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../stan_models_explanation_v2.html">TEXAS Stan Models: Ensemble vs Direct Sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../marginalization_explainer.html">Why Marginalization Improves Inverse TEXAS Sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../why_plugin_p50_differs.html">Why the plug-in P50 ≠ the Bayesian P50</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reduce_sum_for_geologists.html">Understanding <code class="docutils literal notranslate"><span class="pre">reduce_sum</span></code> and <code class="docutils literal notranslate"><span class="pre">ll_chunk</span></code> in TEXAS-PSM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Prior_Choice_Normal_vs_Cauchy.html">Why Normal Instead of Cauchy Priors? 🤔</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ckdtree_nearest_ocean_explainer.html">Finding the Nearest Ocean Pixel: How <code class="docutils literal notranslate"><span class="pre">cKDTree</span></code> Works</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Archive</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../preprint_additive_archive.html">Archive — the preprint’s additive (β) formulation</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS/issues/new?title=Issue%20on%20page%20%2F_modules/TEXAS/utils/paths.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for TEXAS.utils.paths</h1><div class="highlight"><pre>
+<span></span><span class="c1"># TEXAS/utils/paths.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">subprocess</span><span class="o">,</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cmdstanpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_cmdstan_path</span><span class="p">,</span> <span class="n">cmdstan_path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">RECOMMENDED_CMDSTAN_VERSION</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">find_cmdstan</span><span class="p">(</span><span class="n">min_version</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"2.23.0"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Locate a working CmdStan installation and configure cmdstanpy to use it.</span>
+
+<span class="sd">    Accepts any CmdStan version &gt;= min_version (default 2.23.0, when</span>
+<span class="sd">    reduce_sum was introduced).  For well-known directories the highest</span>
+<span class="sd">    installed version is preferred so users are not penalised for upgrading.</span>
+
+<span class="sd">    Search order:</span>
+<span class="sd">      1. ``CMDSTAN`` env var — set by conda on activation; also honoured when</span>
+<span class="sd">         set manually (``export CMDSTAN=/path/to/cmdstan-X.Y.Z``)</span>
+<span class="sd">      2. ``CONDA_PREFIX/bin/cmdstan`` — conda/mamba env activated interactively</span>
+<span class="sd">      3. ``sys.prefix/bin/cmdstan`` — active Python env (covers Docker/mamba</span>
+<span class="sd">         where activation scripts didn't run but PATH was set directly)</span>
+<span class="sd">      4. ``/opt/cmdstan/``, ``~/.cmdstan/``, ``/usr/local/cmdstan/`` —</span>
+<span class="sd">         highest cmdstan-* version found across all three directories</span>
+<span class="sd">      5. Whatever cmdstanpy is already configured to use</span>
+
+<span class="sd">    ``set_cmdstan_path()`` is always called so cmdstanpy's internal state stays</span>
+<span class="sd">    consistent with the returned path, regardless of which branch matched.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        RuntimeError: if no working CmdStan installation is found anywhere.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+    <span class="n">stanc</span> <span class="o">=</span> <span class="s2">"stanc.exe"</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span> <span class="k">else</span> <span class="s2">"stanc"</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">ok</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="n">stanc_path</span> <span class="o">=</span> <span class="n">p</span> <span class="o">/</span> <span class="s2">"bin"</span> <span class="o">/</span> <span class="n">stanc</span>
+        <span class="k">return</span> <span class="n">p</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="n">stanc_path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">stanc_path</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">X_OK</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_use</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+        <span class="n">set_cmdstan_path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">p</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_ver_tuple</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">"""Parse (major, minor, patch) from a cmdstan-X.Y.Z directory name."""</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"cmdstan-"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"."</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># 1. CMDSTAN env var — highest priority; conda sets this on `conda activate`</span>
+    <span class="n">env_cmdstan</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"CMDSTAN"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">env_cmdstan</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">env_cmdstan</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ok</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_use</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"CMDSTAN env var points to '</span><span class="si">{</span><span class="n">env_cmdstan</span><span class="si">}</span><span class="s2">' but no stanc binary was "</span>
+            <span class="s2">"found there. Ignoring and searching standard paths."</span><span class="p">,</span>
+            <span class="ne">UserWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># 2. Active conda/mamba environment (CONDA_PREFIX is set by both conda and mamba)</span>
+    <span class="n">prefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"CONDA_PREFIX"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">prefix</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"bin"</span> <span class="o">/</span> <span class="s2">"cmdstan"</span>
+        <span class="k">if</span> <span class="n">ok</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_use</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="c1"># 3. sys.prefix — covers Docker/mamba without activation scripts</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">prefix</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"bin"</span> <span class="o">/</span> <span class="s2">"cmdstan"</span>
+    <span class="k">if</span> <span class="n">ok</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_use</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="c1"># 4. Well-known installation directories — pick highest version found</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="n">Path</span><span class="p">(</span><span class="s2">"/opt/cmdstan"</span><span class="p">),</span>
+        <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".cmdstan"</span><span class="p">,</span>
+        <span class="n">Path</span><span class="p">(</span><span class="s2">"/usr/local/cmdstan"</span><span class="p">),</span>
+    <span class="p">]:</span>
+        <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="n">candidates</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"cmdstan-*"</span><span class="p">))</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">candidates</span> <span class="k">if</span> <span class="n">ok</span><span class="p">(</span><span class="n">c</span><span class="p">)),</span> <span class="n">key</span><span class="o">=</span><span class="n">_ver_tuple</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">candidates</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_use</span><span class="p">(</span><span class="n">candidates</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># 5. Whatever cmdstanpy is already configured to use</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cmdstan_path</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">ok</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_use</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="n">set_hint</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">'$env:CMDSTAN="C:</span><span class="se">\\</span><span class="s1">path</span><span class="se">\\</span><span class="s1">to</span><span class="se">\\</span><span class="s1">cmdstan"   (PowerShell)'</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"nt"</span>
+        <span class="k">else</span> <span class="s2">"export CMDSTAN=/path/to/your/cmdstan   (bash/zsh)"</span>
+    <span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+        <span class="s2">"No working CmdStan installation found.</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="s2">"  Searched : $CMDSTAN, $CONDA_PREFIX/bin/cmdstan, "</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">sys</span><span class="o">.</span><span class="n">prefix</span><span class="si">}</span><span class="s2">/bin/cmdstan, "</span>
+        <span class="s2">"/opt/cmdstan/cmdstan-*, ~/.cmdstan/cmdstan-*, "</span>
+        <span class="s2">"/usr/local/cmdstan/cmdstan-*, cmdstanpy configured path</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="s2">"  Install  : python -c </span><span class="se">\"</span><span class="s2">import cmdstanpy; "</span>
+        <span class="sa">f</span><span class="s2">"cmdstanpy.install_cmdstan(version='</span><span class="si">{</span><span class="n">RECOMMENDED_CMDSTAN_VERSION</span><span class="si">}</span><span class="s2">')</span><span class="se">\"\n</span><span class="s2">"</span>
+        <span class="sa">f</span><span class="s2">"  Or set   : </span><span class="si">{</span><span class="n">set_hint</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="s2">"  Diagnose : texas-doctor  (or TEXAS.doctor())"</span>
+    <span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_repo_root</span><span class="p">(</span><span class="n">target_dir_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"TEXAS"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">cwd</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">"git"</span><span class="p">,</span><span class="s2">"rev-parse"</span><span class="p">,</span><span class="s2">"--show-toplevel"</span><span class="p">],</span> <span class="n">cwd</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">top</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="p">[</span><span class="n">cwd</span><span class="p">,</span> <span class="o">*</span><span class="n">cwd</span><span class="o">.</span><span class="n">parents</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">target_dir_name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">parent</span>
+        <span class="n">cand</span> <span class="o">=</span> <span class="n">parent</span><span class="o">/</span><span class="n">target_dir_name</span>
+        <span class="k">if</span> <span class="n">cand</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">cand</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_project_root</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Top-level repo folder (contains .git or pyproject.toml).</span>
+
+<span class="sd">    Falls back to ~/.texas/ when the package is pip-installed outside a repo</span>
+<span class="sd">    (e.g. Google Colab, pip install texas-psm).</span>
+<span class="sd">    """</span>
+    <span class="n">cwd</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">"git"</span><span class="p">,</span> <span class="s2">"rev-parse"</span><span class="p">,</span> <span class="s2">"--show-toplevel"</span><span class="p">],</span> <span class="n">cwd</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">top</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="p">[</span><span class="n">cwd</span><span class="p">,</span> <span class="o">*</span><span class="n">cwd</span><span class="o">.</span><span class="n">parents</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">".git"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="p">(</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"pyproject.toml"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">parent</span>
+    <span class="c1"># Pip-installed (no repo): use ~/.texas/ as the project root for caches</span>
+    <span class="n">fallback</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".texas"</span>
+    <span class="n">fallback</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">fallback</span>
+
+<span class="c1"># PACKAGE_ROOT: always the installed TEXAS/ package directory, regardless of</span>
+<span class="c1"># whether the package was pip-installed or run from source.</span>
+<span class="n">PACKAGE_ROOT</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span>  <span class="c1"># utils/ -&gt; TEXAS/</span>
+<span class="n">PROJECT_ROOT</span> <span class="o">=</span> <span class="n">get_project_root</span><span class="p">()</span>
+<span class="n">REPO_ROOT</span> <span class="o">=</span> <span class="n">PROJECT_ROOT</span>                      <span class="c1"># back-compat alias</span>
+<span class="n">STAN_MODELS_DIR</span> <span class="o">=</span> <span class="p">(</span><span class="n">PACKAGE_ROOT</span> <span class="o">/</span> <span class="s2">"stan_models"</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+
+<span class="c1"># Superseded Stan models, kept in the repository for reproducibility but not</span>
+<span class="c1"># shipped in the wheel (`pyproject.toml` globs `stan_models/*.stan`, which is</span>
+<span class="c1"># non-recursive). Only exists in a source checkout; None for a pip install, in</span>
+<span class="c1"># which case the resolver's archive fallback is simply inert.</span>
+<span class="n">_archive</span> <span class="o">=</span> <span class="p">(</span><span class="n">PROJECT_ROOT</span> <span class="o">/</span> <span class="s2">"archive"</span> <span class="o">/</span> <span class="s2">"submission-2026-04"</span> <span class="o">/</span> <span class="s2">"stan_models"</span><span class="p">)</span>
+<span class="n">STAN_ARCHIVE_DIR</span> <span class="o">=</span> <span class="n">_archive</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="k">if</span> <span class="n">_archive</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+<span class="k">del</span> <span class="n">_archive</span>
+
+<span class="c1"># Calibration posteriors that ship inside the wheel, so that a reconstruction</span>
+<span class="c1"># works on a bare `pip install texas-psm` with no network access. These are the</span>
+<span class="c1"># full multivariate T0-shift calibrations with the per-site EIV latents dropped</span>
+<span class="c1"># (81 MB -&gt; 0.4 MB); rebuild with scripts/make_bundled_posteriors.py.</span>
+<span class="n">BUNDLED_POSTERIOR_DIR</span> <span class="o">=</span> <span class="p">(</span><span class="n">PACKAGE_ROOT</span> <span class="o">/</span> <span class="s2">"bundled_posteriors"</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+
+<span class="c1"># Stan build artifacts (.hpp, binaries) go here — outside the source/bind-mount</span>
+<span class="c1"># tree so container users (different UID) can always write compilation output.</span>
+<span class="c1"># Override with TEXAS_STAN_BUILD_DIR env var.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_resolve_stan_build_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"TEXAS_STAN_BUILD_DIR"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">env</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".texas"</span> <span class="o">/</span> <span class="s2">"stan_cache"</span>
+
+<span class="n">STAN_BUILD_DIR</span> <span class="o">=</span> <span class="n">_resolve_stan_build_dir</span><span class="p">()</span>
+
+<span class="n">HOME</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">CMDSTAN_DIR</span> <span class="o">=</span> <span class="n">find_cmdstan</span><span class="p">()</span>
+<span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">_e</span><span class="p">:</span>
+    <span class="n">CMDSTAN_DIR</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+        <span class="s2">"CmdStan not found — Stan sampling (forward calibration and inverse "</span>
+        <span class="s2">"reconstruction) will not be available until CmdStan is installed.</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="s2">"  Install : TEXAS.install_cmdstan()   (one call; also repairs a broken "</span>
+        <span class="s2">"install)</span><span class="se">\n</span><span class="s2">"</span>
+        <span class="s2">"  Diagnose: texas-doctor   (or TEXAS.doctor())"</span><span class="p">,</span>
+        <span class="ne">UserWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span>
+<span class="n">DOCUMENTS</span> <span class="o">=</span> <span class="n">HOME</span> <span class="o">/</span> <span class="s2">"Documents"</span>
+<span class="n">ONEDRIVE</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"/mnt/onedrive"</span><span class="p">)</span> <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"/mnt/onedrive"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="n">HOME</span> <span class="o">/</span> <span class="s2">"OneDrive"</span>
+
+<span class="c1"># ── Cache root resolution ────────────────────────────────────────────────────</span>
+<span class="c1"># Priority:</span>
+<span class="c1">#   1. TEXAS_CACHE_DIR environment variable</span>
+<span class="c1">#   2. data/cache/ inside the repo (when running from a git checkout)</span>
+<span class="c1">#   3. ~/.texas/cache/ (pip-installed / Colab / no repo)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_resolve_cache_root</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"TEXAS_CACHE_DIR"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">env</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+
+    <span class="c1"># In a git checkout — keep posteriors inside the repo</span>
+    <span class="n">cwd</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">"git"</span><span class="p">,</span> <span class="s2">"rev-parse"</span><span class="p">,</span> <span class="s2">"--show-toplevel"</span><span class="p">],</span> <span class="n">cwd</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">cwd</span><span class="p">),</span>
+            <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">top</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"data"</span> <span class="o">/</span> <span class="s2">"cache"</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="p">[</span><span class="n">cwd</span><span class="p">,</span> <span class="o">*</span><span class="n">cwd</span><span class="o">.</span><span class="n">parents</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">".git"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="p">(</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"pyproject.toml"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">parent</span> <span class="o">/</span> <span class="s2">"data"</span> <span class="o">/</span> <span class="s2">"cache"</span>
+
+    <span class="c1"># pip-installed / no repo</span>
+    <span class="n">user_cache</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".texas"</span> <span class="o">/</span> <span class="s2">"cache"</span>
+
+    <span class="c1"># Backward-compat: warn once if old pip-install layout exists</span>
+    <span class="n">old_cache</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".texas"</span> <span class="o">/</span> <span class="s2">"data"</span> <span class="o">/</span> <span class="s2">"cache"</span>
+    <span class="k">if</span> <span class="n">old_cache</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">old_cache</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()):</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"TEXAS cache found at old location </span><span class="si">{</span><span class="n">old_cache</span><span class="si">}</span><span class="s2">. "</span>
+            <span class="sa">f</span><span class="s2">"Move files to </span><span class="si">{</span><span class="n">user_cache</span><span class="si">}</span><span class="s2"> or set TEXAS_CACHE_DIR to suppress this warning."</span><span class="p">,</span>
+            <span class="ne">UserWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">user_cache</span>
+
+
+<span class="n">CACHE_ROOT</span> <span class="o">=</span> <span class="n">_resolve_cache_root</span><span class="p">()</span>
+<span class="n">CACHE_DIR</span> <span class="o">=</span> <span class="n">CACHE_ROOT</span>          <span class="c1"># backward-compat alias</span>
+<span class="n">POSTERIOR_CACHE_DIR</span> <span class="o">=</span> <span class="n">CACHE_ROOT</span> <span class="o">/</span> <span class="s2">"TEXAS_posterior_cache"</span>
+<span class="n">INVT_CACHE_DIR</span>      <span class="o">=</span> <span class="n">CACHE_ROOT</span> <span class="o">/</span> <span class="s2">"TEXAS_invT_posterior_cache"</span>
+
+<span class="c1"># Training data spreadsheets — inside the repo when running from a git checkout,</span>
+<span class="c1"># otherwise ~/.texas/data/spreadsheets/ (pip-installed / Colab).</span>
+<span class="c1"># SI notebooks use relative paths rooted at the repo, so git-checkout users get</span>
+<span class="c1"># the right location automatically.  Colab users should mount Google Drive and</span>
+<span class="c1"># call set_spreadsheets_dir() or set TEXAS_DATA_DIR.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_resolve_spreadsheets_dir</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"TEXAS_DATA_DIR"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">env</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">env</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"spreadsheets"</span>
+    <span class="c1"># Same logic as cache root: prefer the repo's data/spreadsheets/</span>
+    <span class="n">cwd</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">top</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">"git"</span><span class="p">,</span> <span class="s2">"rev-parse"</span><span class="p">,</span> <span class="s2">"--show-toplevel"</span><span class="p">],</span> <span class="n">cwd</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">cwd</span><span class="p">),</span>
+            <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">DEVNULL</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">top</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"data"</span> <span class="o">/</span> <span class="s2">"spreadsheets"</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">for</span> <span class="n">parent</span> <span class="ow">in</span> <span class="p">[</span><span class="n">cwd</span><span class="p">,</span> <span class="o">*</span><span class="n">cwd</span><span class="o">.</span><span class="n">parents</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">".git"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="p">(</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">"pyproject.toml"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">parent</span> <span class="o">/</span> <span class="s2">"data"</span> <span class="o">/</span> <span class="s2">"spreadsheets"</span>
+    <span class="k">return</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".texas"</span> <span class="o">/</span> <span class="s2">"data"</span> <span class="o">/</span> <span class="s2">"spreadsheets"</span>
+
+<span class="n">SPREADSHEETS_DIR</span> <span class="o">=</span> <span class="n">_resolve_spreadsheets_dir</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="set_cache_dir">
+<a class="viewcode-back" href="../../../api.html#TEXAS.utils.paths.set_cache_dir">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_cache_dir</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="s2">"str | Path"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Override TEXAS cache directories at runtime.</span>
+
+<span class="sd">    Call this before any posterior I/O.  For a persistent override, set the</span>
+<span class="sd">    ``TEXAS_CACHE_DIR`` environment variable instead.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        path: Root directory for all TEXAS caches.  Two subdirectories will be</span>
+<span class="sd">              used inside it: ``TEXAS_posterior_cache/`` and</span>
+<span class="sd">              ``TEXAS_invT_posterior_cache/``.</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">TEXAS.utils.paths</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_paths</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">_paths</span><span class="o">.</span><span class="n">CACHE_ROOT</span>           <span class="o">=</span> <span class="n">root</span>
+    <span class="n">_paths</span><span class="o">.</span><span class="n">CACHE_DIR</span>            <span class="o">=</span> <span class="n">root</span>
+    <span class="n">_paths</span><span class="o">.</span><span class="n">POSTERIOR_CACHE_DIR</span>  <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">"TEXAS_posterior_cache"</span>
+    <span class="n">_paths</span><span class="o">.</span><span class="n">INVT_CACHE_DIR</span>       <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">"TEXAS_invT_posterior_cache"</span>
+    <span class="c1"># Propagate into io.py module-level defaults (bound at import time)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">TEXAS.stan.io</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_io</span>
+        <span class="n">_io</span><span class="o">.</span><span class="n">DEFAULT_FORWARD_DIR</span> <span class="o">=</span> <span class="n">_paths</span><span class="o">.</span><span class="n">POSTERIOR_CACHE_DIR</span>
+        <span class="n">_io</span><span class="o">.</span><span class="n">DEFAULT_INVT_DIR</span>    <span class="o">=</span> <span class="n">_paths</span><span class="o">.</span><span class="n">INVT_CACHE_DIR</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">pass</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Ronnakrit Rattanasriampaipong
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

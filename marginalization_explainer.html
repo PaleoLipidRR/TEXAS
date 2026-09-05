@@ -1,0 +1,760 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Why Marginalization Improves Inverse TEXAS Sampling &#8212; TEXAS</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=e1f25cfb" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=b8b12719"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'marginalization_explainer';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="canonical" href="https://paleolipidrr.github.io/TEXAS/marginalization_explainer.html" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Why the plug-in P50 ≠ the Bayesian P50" href="why_plugin_p50_differs.html" />
+    <link rel="prev" title="TEXAS Stan Models: Ensemble vs Direct Sampling" href="stan_models_explanation_v2.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/texas_logo.svg" class="logo__image only-light" alt="TEXAS - Home"/>
+    <img src="_static/texas_logo.svg" class="logo__image only-dark pst-js-only" alt="TEXAS - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="callmap.html">Call map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="tutorial/intro.html">TEXAS Interactive Tutorial</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/module1_prior.html">Module 1 — What is a Prior?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/module2_bayesian_updating.html">Module 2 — Bayesian Updating</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/module3_curve_explorer.html">Module 3 — The Calibration Curve Explorer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/module4_mcmc.html">Module 4 — What MCMC Actually Does</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial/module5_results.html">Module 5 — Reading Your Results</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Explainers</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="PSM.html">TEXAS Proxy System Model — Bayesian Inference Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="model_validation.html">Model validation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sampler_budget.html">Sampler budget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stan_models_explanation_v2.html">TEXAS Stan Models: Ensemble vs Direct Sampling</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Why Marginalization Improves Inverse TEXAS Sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="why_plugin_p50_differs.html">Why the plug-in P50 ≠ the Bayesian P50</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reduce_sum_for_geologists.html">Understanding <code class="docutils literal notranslate"><span class="pre">reduce_sum</span></code> and <code class="docutils literal notranslate"><span class="pre">ll_chunk</span></code> in TEXAS-PSM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Prior_Choice_Normal_vs_Cauchy.html">Why Normal Instead of Cauchy Priors? 🤔</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ckdtree_nearest_ocean_explainer.html">Finding the Nearest Ocean Pixel: How <code class="docutils literal notranslate"><span class="pre">cKDTree</span></code> Works</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Archive</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="preprint_additive_archive.html">Archive — the preprint’s additive (β) formulation</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS/issues/new?title=Issue%20on%20page%20%2Fmarginalization_explainer.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/marginalization_explainer.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Why Marginalization Improves Inverse TEXAS Sampling</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-two-approaches">1. The Two Approaches</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-original-full-latent-approach">(A) Original “Full Latent” Approach</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#b-marginalized-approach">(B) Marginalized Approach</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#side-by-side-stan-sketch">2. Side-by-Side Stan Sketch</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#full-latent-version">Full Latent Version</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#marginalized-version">Marginalized Version</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-marginalization-is-better">3. Why Marginalization is Better</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fewer-parameters">3.1 Fewer Parameters</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#better-posterior-geometry">3.2 Better Posterior Geometry</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cleaner-effective-sample-size-ess">3.3 Cleaner Effective Sample Size (ESS)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#practical-impact">4. Practical Impact</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#analogy-for-non-statisticians">5. Analogy (for non-statisticians)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-takeaway">6. Key Takeaway</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="why-marginalization-improves-inverse-texas-sampling">
+<h1>Why Marginalization Improves Inverse TEXAS Sampling<a class="headerlink" href="#why-marginalization-improves-inverse-texas-sampling" title="Link to this heading">#</a></h1>
+<p>This note explains why the new <strong>marginal parameterization</strong> of the inverse TEXAS models runs <em>much faster</em> and produces <em>cleaner posteriors</em> compared to the original “full latent” formulation. The goal is to make this clear for a scientific audience, without assuming a background in Bayesian computation.</p>
+<hr class="docutils" />
+<section id="the-two-approaches">
+<h2>1. The Two Approaches<a class="headerlink" href="#the-two-approaches" title="Link to this heading">#</a></h2>
+<section id="a-original-full-latent-approach">
+<h3>(A) Original “Full Latent” Approach<a class="headerlink" href="#a-original-full-latent-approach" title="Link to this heading">#</a></h3>
+<ul>
+<li><p>For each data point <code class="docutils literal notranslate"><span class="pre">n</span></code> (e.g., a core-top sample), and each forward-model draw <code class="docutils literal notranslate"><span class="pre">m</span></code> (the ensemble), we introduced an <strong>explicit latent parameter</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">t_est</span><span class="p">[</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">]</span>
+</pre></div>
+</div>
+</li>
+<li><p>That means:</p>
+<ul class="simple">
+<li><p>Number of unknowns grows with both the <strong>number of samples (N)</strong> and <strong>the ensemble size (M)</strong>.</p></li>
+<li><p>For N ≈ 1,200 and M ≈ 100, that’s ~120,000 latent parameters.</p></li>
+</ul>
+</li>
+<li><p>The model then combines all of these latents into the likelihood.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="b-marginalized-approach">
+<h3>(B) Marginalized Approach<a class="headerlink" href="#b-marginalized-approach" title="Link to this heading">#</a></h3>
+<ul>
+<li><p>Instead of sampling <code class="docutils literal notranslate"><span class="pre">t_est[n,</span> <span class="pre">m]</span></code> for every ensemble draw, we only keep a <strong>single latent parameter per sample</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">t_est</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+</pre></div>
+</div>
+</li>
+<li><p>We then compute the likelihood by <strong>marginalizing over the ensemble</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">log</span> <span class="n">p</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">|</span> <span class="n">t_est</span><span class="p">[</span><span class="n">n</span><span class="p">])</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span> <span class="mi">1</span><span class="o">/</span><span class="n">M</span> <span class="o">*</span> <span class="n">Σ</span> <span class="n">p</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">|</span> <span class="n">t_est</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">params_m</span><span class="p">)</span> <span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>This uses the <code class="docutils literal notranslate"><span class="pre">log_sum_exp</span></code> trick in Stan, which is stable and efficient.</p></li>
+<li><p>Result:</p>
+<ul class="simple">
+<li><p>Only N ≈ 1,200 latent parameters (independent of M).</p></li>
+<li><p>The ensemble variability is still accounted for, but without exploding the parameter space.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="side-by-side-stan-sketch">
+<h2>2. Side-by-Side Stan Sketch<a class="headerlink" href="#side-by-side-stan-sketch" title="Link to this heading">#</a></h2>
+<p>Here’s the essential difference, shown in simplified pseudo-Stan code:</p>
+<section id="full-latent-version">
+<h3>Full Latent Version<a class="headerlink" href="#full-latent-version" title="Link to this heading">#</a></h3>
+<div class="highlight-stan notranslate"><div class="highlight"><pre><span></span><span class="kn">parameters</span> <span class="p">{</span>
+  <span class="kt">matrix</span><span class="p">[</span><span class="n">N</span><span class="p">,</span> <span class="n">M</span><span class="p">]</span> <span class="n">t_est</span><span class="p">;</span>   <span class="c1">// each sample × ensemble</span>
+<span class="p">}</span>
+
+<span class="kn">model</span> <span class="p">{</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">m</span> <span class="k">in</span> <span class="mf">1</span><span class="o">:</span><span class="n">M</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">vector</span><span class="p">[</span><span class="n">N</span><span class="p">]</span> <span class="n">mu_scaledRI</span> <span class="o">=</span> <span class="n">logistic_fn</span><span class="p">(</span><span class="n">t_est</span><span class="p">[,</span> <span class="n">m</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="n">m</span><span class="p">]);</span>
+    <span class="n">scaledRI</span> <span class="o">~</span><span class="w"> </span><span class="nb">normal</span><span class="p">(</span><span class="n">mu_scaledRI</span><span class="p">,</span> <span class="n">sigma</span><span class="p">[</span><span class="n">m</span><span class="p">]);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</section>
+<section id="marginalized-version">
+<h3>Marginalized Version<a class="headerlink" href="#marginalized-version" title="Link to this heading">#</a></h3>
+<div class="highlight-stan notranslate"><div class="highlight"><pre><span></span><span class="kn">parameters</span> <span class="p">{</span>
+  <span class="kt">vector</span><span class="p">[</span><span class="n">N</span><span class="p">]</span> <span class="n">t_est</span><span class="p">;</span>      <span class="c1">// only one per sample</span>
+<span class="p">}</span>
+
+<span class="kn">model</span> <span class="p">{</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">n</span> <span class="k">in</span> <span class="mf">1</span><span class="o">:</span><span class="n">N</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kt">vector</span><span class="p">[</span><span class="n">M</span><span class="p">]</span> <span class="n">log_lik_m</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">m</span> <span class="k">in</span> <span class="mf">1</span><span class="o">:</span><span class="n">M</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kt">real</span> <span class="n">mu_scaledRI</span> <span class="o">=</span> <span class="n">logistic_fn</span><span class="p">(</span><span class="n">t_est</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">params</span><span class="p">[</span><span class="n">m</span><span class="p">]);</span>
+      <span class="n">log_lik_m</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="nb">normal_lpdf</span><span class="p">(</span><span class="n">scaledRI</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="p">|</span> <span class="n">mu_scaledRI</span><span class="p">,</span> <span class="n">sigma</span><span class="p">[</span><span class="n">m</span><span class="p">]);</span>
+    <span class="p">}</span>
+    <span class="c1">// Marginalize using log-sum-exp</span>
+    <span class="k">target +=</span> <span class="nb">log_sum_exp</span><span class="p">(</span><span class="n">log_lik_m</span><span class="p">)</span> <span class="o">-</span> <span class="nb">log</span><span class="p">(</span><span class="n">M</span><span class="p">);</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Key change:</strong><br />
+Instead of sampling <code class="docutils literal notranslate"><span class="pre">t_est[n,</span> <span class="pre">m]</span></code> for all ensemble members, we sample only <code class="docutils literal notranslate"><span class="pre">t_est[n]</span></code> and analytically average over ensemble members.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="why-marginalization-is-better">
+<h2>3. Why Marginalization is Better<a class="headerlink" href="#why-marginalization-is-better" title="Link to this heading">#</a></h2>
+<section id="fewer-parameters">
+<h3>3.1 Fewer Parameters<a class="headerlink" href="#fewer-parameters" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Full latent model: ~120,000 parameters.</p></li>
+<li><p>Marginal model: ~1,200 parameters.</p></li>
+<li><p><strong>Sampling speed scales badly with dimensionality.</strong> By removing 100× more unknowns, the sampler spends far less time per iteration.</p></li>
+</ul>
+</section>
+<section id="better-posterior-geometry">
+<h3>3.2 Better Posterior Geometry<a class="headerlink" href="#better-posterior-geometry" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>In the full latent model, <code class="docutils literal notranslate"><span class="pre">t_est[n,</span> <span class="pre">m]</span></code> are strongly correlated across <code class="docutils literal notranslate"><span class="pre">m</span></code>.</p></li>
+<li><p>The sampler has to “wiggle” through a very tangled space.</p></li>
+<li><p>Marginalization <strong>collapses these correlations analytically</strong>, so the sampler only needs to explore the temperature dimension.</p></li>
+</ul>
+</section>
+<section id="cleaner-effective-sample-size-ess">
+<h3>3.3 Cleaner Effective Sample Size (ESS)<a class="headerlink" href="#cleaner-effective-sample-size-ess" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>ESS measures how many “independent” samples you get out of MCMC.</p></li>
+<li><p>With fewer parameters and smoother geometry, marginal models give <strong>higher ESS per unit time</strong>.</p></li>
+<li><p>This means your credible intervals stabilize faster.</p></li>
+</ul>
+</section>
+</section>
+<hr class="docutils" />
+<section id="practical-impact">
+<h2>4. Practical Impact<a class="headerlink" href="#practical-impact" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Speed</strong>:<br />
+With marginalization, warmup and sampling progress much faster. For example, reaching iteration 1/700 may take ~2 minutes, compared to much slower in the full latent case.</p></li>
+<li><p><strong>Stability</strong>:<br />
+Fewer divergences, better adaptation of step sizes, and cleaner R̂ diagnostics.</p></li>
+<li><p><strong>Scalability</strong>:<br />
+You can now afford larger ensembles (M=100, 200, …) without blowing up the parameter space.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="analogy-for-non-statisticians">
+<h2>5. Analogy (for non-statisticians)<a class="headerlink" href="#analogy-for-non-statisticians" title="Link to this heading">#</a></h2>
+<p>Think of this like averaging weather forecasts:</p>
+<ul class="simple">
+<li><p><strong>Full latent model</strong>: You ask 100 forecasters for 1,200 cities, and try to track <strong>every single opinion separately</strong>. That’s 120,000 numbers bouncing around.</p></li>
+<li><p><strong>Marginalized model</strong>: You only track the <strong>city-level temperature</strong> (1,200 numbers), and average the forecasts mathematically in the likelihood. You still capture uncertainty from forecasters, but you don’t waste time simulating each one.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="key-takeaway">
+<h2>6. Key Takeaway<a class="headerlink" href="#key-takeaway" title="Link to this heading">#</a></h2>
+<p>Marginalization trades a slightly more complex likelihood calculation for a <strong>massive reduction in sampling complexity</strong>.</p>
+<ul class="simple">
+<li><p>The science is the same (we still respect ensemble variability).</p></li>
+<li><p>But computationally, the marginalized model is leaner, faster, and more robust.</p></li>
+</ul>
+<p>This is why the new inverse TEXAS marginal models are now the recommended default.</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="stan_models_explanation_v2.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">TEXAS Stan Models: Ensemble vs Direct Sampling</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="why_plugin_p50_differs.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Why the plug-in P50 ≠ the Bayesian P50</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-two-approaches">1. The Two Approaches</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#a-original-full-latent-approach">(A) Original “Full Latent” Approach</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#b-marginalized-approach">(B) Marginalized Approach</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#side-by-side-stan-sketch">2. Side-by-Side Stan Sketch</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#full-latent-version">Full Latent Version</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#marginalized-version">Marginalized Version</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#why-marginalization-is-better">3. Why Marginalization is Better</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#fewer-parameters">3.1 Fewer Parameters</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#better-posterior-geometry">3.2 Better Posterior Geometry</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cleaner-effective-sample-size-ess">3.3 Cleaner Effective Sample Size (ESS)</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#practical-impact">4. Practical Impact</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#analogy-for-non-statisticians">5. Analogy (for non-statisticians)</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#key-takeaway">6. Key Takeaway</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Ronnakrit Rattanasriampaipong
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

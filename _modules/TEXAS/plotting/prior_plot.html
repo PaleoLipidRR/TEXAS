@@ -1,0 +1,1226 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TEXAS.plotting.prior_plot &#8212; TEXAS</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=e1f25cfb" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js?v=b8b12719"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/TEXAS/plotting/prior_plot';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="canonical" href="https://paleolipidrr.github.io/TEXAS/_modules/TEXAS/plotting/prior_plot.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/texas_logo.svg" class="logo__image only-light" alt="TEXAS - Home"/>
+    <img src="../../../_static/texas_logo.svg" class="logo__image only-dark pst-js-only" alt="TEXAS - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../callmap.html">Call map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../tutorial/intro.html">TEXAS Interactive Tutorial</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module1_prior.html">Module 1 — What is a Prior?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module2_bayesian_updating.html">Module 2 — Bayesian Updating</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module3_curve_explorer.html">Module 3 — The Calibration Curve Explorer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module4_mcmc.html">Module 4 — What MCMC Actually Does</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module5_results.html">Module 5 — Reading Your Results</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Explainers</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../PSM.html">TEXAS Proxy System Model — Bayesian Inference Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_validation.html">Model validation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sampler_budget.html">Sampler budget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../stan_models_explanation_v2.html">TEXAS Stan Models: Ensemble vs Direct Sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../marginalization_explainer.html">Why Marginalization Improves Inverse TEXAS Sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../why_plugin_p50_differs.html">Why the plug-in P50 ≠ the Bayesian P50</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reduce_sum_for_geologists.html">Understanding <code class="docutils literal notranslate"><span class="pre">reduce_sum</span></code> and <code class="docutils literal notranslate"><span class="pre">ll_chunk</span></code> in TEXAS-PSM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Prior_Choice_Normal_vs_Cauchy.html">Why Normal Instead of Cauchy Priors? 🤔</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ckdtree_nearest_ocean_explainer.html">Finding the Nearest Ocean Pixel: How <code class="docutils literal notranslate"><span class="pre">cKDTree</span></code> Works</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Archive</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../preprint_additive_archive.html">Archive — the preprint’s additive (β) formulation</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS/issues/new?title=Issue%20on%20page%20%2F_modules/TEXAS/plotting/prior_plot.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for TEXAS.plotting.prior_plot</h1><div class="highlight"><pre>
+<span></span><span class="c1"># TEXAS/plotting/prior_plot.py</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">stats</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>  <span class="c1"># only for the "xr.Dataset" type annotation below</span>
+
+
+<span class="c1"># ── Parameter-group registry ─────────────────────────────────────────────────</span>
+<span class="c1"># Groups are matched against posterior variable names by prefix: a group "gamma_G23"</span>
+<span class="c1"># collects every variable starting with "gamma_G23_" (e.g. gamma_G23_crtp).</span>
+<span class="c1">#</span>
+<span class="c1"># CORE_GROUPS are the thermal calibration-curve parameters, present in every model.</span>
+<span class="c1">#</span>
+<span class="c1"># PREDICTOR_GROUPS are the non-thermal correction coefficients.  The same physical</span>
+<span class="c1"># correction is named differently in each model variant because it enters the curve</span>
+<span class="c1"># in a different place, so each entry maps a group prefix to the posterior attr that</span>
+<span class="c1"># gates it and to the label used on the axis:</span>
+<span class="c1">#</span>
+<span class="c1">#   beta_*       parent model — additive shift of RI          (RI units per predictor unit)</span>
+<span class="c1">#   gamma_*      t0shift      — shift of the curve location T0 (°C per predictor unit)</span>
+<span class="c1">#   betaLogit_*  boundedCeil  — shift of the logit floor      (logit units per predictor unit)</span>
+<span class="c1">#</span>
+<span class="c1"># To support a new parameterization, add its prefixes here — nothing else in this</span>
+<span class="c1"># module hardcodes coefficient names.</span>
+<span class="n">CORE_GROUPS</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"t0"</span><span class="p">,</span> <span class="s2">"k"</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">,</span> <span class="s2">"a"</span><span class="p">)</span>
+
+<span class="c1"># The observation-noise scales. Kept OUT of CORE_GROUPS and appended last in</span>
+<span class="c1"># DEFAULT_INCLUDE_GROUPS on purpose: panels are filled row-major, so adding a</span>
+<span class="c1"># group anywhere but the end shifts every later panel and silently invalidates</span>
+<span class="c1"># the index-based axis limits the manuscript figures set.</span>
+<span class="c1">#</span>
+<span class="c1"># These were absent from the figures entirely until 2026-08-13, which is what a</span>
+<span class="c1"># reviewer noticed -- the noise terms are part of the probabilistic model</span>
+<span class="c1"># (sigma_proxyObs_cul / _meso for the culture+mesocosm layer, sigma_proxyObs_crtp</span>
+<span class="c1"># for the coretop layer), not ancillary diagnostics, and a parameter figure that</span>
+<span class="c1"># omits them is incomplete rather than merely terse.</span>
+<span class="n">NOISE_GROUPS</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"sigma_proxyObs"</span><span class="p">,)</span>
+
+<span class="n">PREDICTOR_GROUPS</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"beta_G23"</span><span class="p">:</span>      <span class="p">{</span><span class="s2">"use_flag"</span><span class="p">:</span> <span class="s2">"use_gdgt23ratio"</span><span class="p">,</span>
+                      <span class="s2">"label"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"$\beta_{G_{2/3}}$"</span><span class="p">,</span>
+                      <span class="s2">"label_culmeso"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"$\beta_{G_{2/3},culmeso}$"</span><span class="p">},</span>
+    <span class="s2">"beta_NO3"</span><span class="p">:</span>      <span class="p">{</span><span class="s2">"use_flag"</span><span class="p">:</span> <span class="s2">"use_no3"</span><span class="p">,</span>
+                      <span class="s2">"label"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"$\beta_</span><span class="si">{NO_3}</span><span class="s2">$"</span><span class="p">,</span>
+                      <span class="s2">"label_culmeso"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"$\beta_{NO_3,culmeso}$"</span><span class="p">},</span>
+    <span class="s2">"gamma_G23"</span><span class="p">:</span>     <span class="p">{</span><span class="s2">"use_flag"</span><span class="p">:</span> <span class="s2">"use_gdgt23ratio"</span><span class="p">,</span>
+                      <span class="s2">"label"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"$\gamma_{G_{2/3}}$"</span><span class="p">,</span>
+                      <span class="s2">"label_culmeso"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"$\gamma_{G_{2/3},culmeso}$"</span><span class="p">},</span>
+    <span class="s2">"gamma_NO3"</span><span class="p">:</span>     <span class="p">{</span><span class="s2">"use_flag"</span><span class="p">:</span> <span class="s2">"use_no3"</span><span class="p">,</span>
+                      <span class="s2">"label"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"$\gamma_</span><span class="si">{NO_3}</span><span class="s2">$"</span><span class="p">,</span>
+                      <span class="s2">"label_culmeso"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"$\gamma_{NO_3,culmeso}$"</span><span class="p">},</span>
+    <span class="s2">"betaLogit_G23"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"use_flag"</span><span class="p">:</span> <span class="s2">"use_gdgt23ratio"</span><span class="p">,</span>
+                      <span class="s2">"label"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"$\beta^{\,\mathrm</span><span class="si">{logit}</span><span class="s2">}_{G_{2/3}}$"</span><span class="p">,</span>
+                      <span class="s2">"label_culmeso"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"$\beta^{\,\mathrm</span><span class="si">{logit}</span><span class="s2">}_{G_{2/3},culmeso}$"</span><span class="p">},</span>
+    <span class="s2">"betaLogit_NO3"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"use_flag"</span><span class="p">:</span> <span class="s2">"use_no3"</span><span class="p">,</span>
+                      <span class="s2">"label"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"$\beta^{\,\mathrm</span><span class="si">{logit}</span><span class="s2">}_</span><span class="si">{NO_3}</span><span class="s2">$"</span><span class="p">,</span>
+                      <span class="s2">"label_culmeso"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"$\beta^{\,\mathrm</span><span class="si">{logit}</span><span class="s2">}_{NO_3,culmeso}$"</span><span class="p">},</span>
+<span class="p">}</span>
+
+<span class="n">DEFAULT_INCLUDE_GROUPS</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">*</span><span class="n">CORE_GROUPS</span><span class="p">,</span> <span class="o">*</span><span class="n">PREDICTOR_GROUPS</span><span class="p">,</span>
+                                         <span class="o">*</span><span class="n">NOISE_GROUPS</span><span class="p">)</span>
+
+<span class="c1"># Axis labels for the thermal parameters.  Predictor labels come from</span>
+<span class="c1"># PREDICTOR_GROUPS above.  Both tables carry the _culmeso form explicitly —</span>
+<span class="c1"># deriving it would mean splicing into an existing LaTeX subscript.</span>
+<span class="n">_CORE_LABELS</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"t0"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"label"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"T$_0$"</span><span class="p">,</span>  <span class="s2">"label_culmeso"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"T$_{0, culmeso}$"</span><span class="p">},</span>
+    <span class="s2">"k"</span><span class="p">:</span>  <span class="p">{</span><span class="s2">"label"</span><span class="p">:</span> <span class="s2">"k"</span><span class="p">,</span>       <span class="s2">"label_culmeso"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"k$_</span><span class="si">{culmeso}</span><span class="s2">$"</span><span class="p">},</span>
+    <span class="s2">"b"</span><span class="p">:</span>  <span class="p">{</span><span class="s2">"label"</span><span class="p">:</span> <span class="s2">"b"</span><span class="p">,</span>       <span class="s2">"label_culmeso"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"b$_</span><span class="si">{culmeso}</span><span class="s2">$"</span><span class="p">},</span>
+    <span class="s2">"v"</span><span class="p">:</span>  <span class="p">{</span><span class="s2">"label"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"$\nu$"</span><span class="p">,</span>  <span class="s2">"label_culmeso"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"$\nu_</span><span class="si">{culmeso}</span><span class="s2">$"</span><span class="p">},</span>
+    <span class="s2">"a"</span><span class="p">:</span>  <span class="p">{</span><span class="s2">"label"</span><span class="p">:</span> <span class="s2">"a"</span><span class="p">,</span>       <span class="s2">"label_culmeso"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"a$_</span><span class="si">{culmeso}</span><span class="s2">$"</span><span class="p">},</span>
+    <span class="c1"># One entry serves every layer; the per-suffix legend labels below</span>
+    <span class="c1"># distinguish cul / meso / crtp.</span>
+    <span class="s2">"sigma_proxyObs"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"label"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"$\sigma_</span><span class="si">{proxyObs}</span><span class="s2">$"</span><span class="p">,</span>
+                       <span class="s2">"label_culmeso"</span><span class="p">:</span> <span class="sa">r</span><span class="s2">"$\sigma_{proxyObs, culmeso}$"</span><span class="p">},</span>
+<span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_group_label</span><span class="p">(</span><span class="n">group</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"crtp"</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Axis / legend label for a group prefix, falling back to the raw prefix."""</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">_CORE_LABELS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="ow">or</span> <span class="n">PREDICTOR_GROUPS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">group</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">spec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">group</span>
+    <span class="n">key</span> <span class="o">=</span> <span class="s2">"label_culmeso"</span> <span class="k">if</span> <span class="n">suffix</span> <span class="o">==</span> <span class="s2">"culmeso"</span> <span class="k">else</span> <span class="s2">"label"</span>
+    <span class="k">return</span> <span class="n">spec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">spec</span><span class="p">[</span><span class="s2">"label"</span><span class="p">])</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_label_maps</span><span class="p">(</span><span class="n">groups</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Legend labels for ``{group}_{suffix}`` variables, e.g. gamma_G23_culmeso.</span>
+
+<span class="sd">    Longest key first so ``beta_G23_crtp`` is never matched by a shorter,</span>
+<span class="sd">    coincidentally-prefixed key.</span>
+<span class="sd">    """</span>
+    <span class="n">labels</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">_SUFFIX_LABEL</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"cul"</span><span class="p">:</span> <span class="s2">"cul"</span><span class="p">,</span> <span class="s2">"meso"</span><span class="p">:</span> <span class="s2">"meso"</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"crtp"</span><span class="p">,</span> <span class="s2">"culmeso"</span><span class="p">):</span>
+            <span class="n">labels</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_group_label</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span>
+        <span class="c1"># gen_logi_fixed_culmeso estimates a separate noise scale per data type,</span>
+        <span class="c1"># so the top layer has sigma_proxyObs_cul AND sigma_proxyObs_meso.</span>
+        <span class="k">for</span> <span class="n">suffix</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">_SUFFIX_LABEL</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">base</span> <span class="o">=</span> <span class="n">_group_label</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span>
+            <span class="n">labels</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">base</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"}$"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">", </span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="se">}}</span><span class="s2">$"</span><span class="p">)</span> <span class="k">if</span> <span class="n">base</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"}$"</span><span class="p">)</span>
+                <span class="k">else</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">labels</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">kv</span><span class="p">:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">kv</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_param_group</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">groups</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Return the group a posterior variable belongs to, or None.</span>
+
+<span class="sd">    Longest prefix wins, so ``betaLogit_G23_crtp`` cannot be captured by a</span>
+<span class="sd">    shorter group that happens to prefix it.</span>
+<span class="sd">    """</span>
+    <span class="n">matches</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">groups</span> <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">g</span> <span class="o">+</span> <span class="s2">"_"</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">matches</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">len</span><span class="p">)</span> <span class="k">if</span> <span class="n">matches</span> <span class="k">else</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_parse_trunc</span><span class="p">(</span><span class="n">trunc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Turn the inside of a ``T[lo, hi]`` into ``(lo, hi)``; either may be None."""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">trunc</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">trunc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">)]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">lo</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">hi</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">lo</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">hi</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">(</span><span class="n">lo</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_declaration_bounds</span><span class="p">(</span><span class="n">posterior_datasets</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="s2">"xr.Dataset"</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Recover implicit prior truncation from the packaged .stan files.</span>
+
+<span class="sd">    A posterior cached before the prior extractor understood declaration bounds</span>
+<span class="sd">    stores ``gamma_G23_crtp: normal(0, 1.0)`` for what is really a HALF-normal</span>
+<span class="sd">    (``real&lt;lower=0&gt;``).  Re-reading the model file restores the bound without a</span>
+<span class="sd">    refit.  Best-effort — a dataset whose model file is not packaged is skipped,</span>
+<span class="sd">    and an explicit ``T[…]`` already in the prior string always wins.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">..utils.paths</span><span class="w"> </span><span class="kn">import</span> <span class="n">STAN_MODELS_DIR</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">..stan.metadata</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_param_bounds_from_stan</span>
+
+    <span class="n">bounds</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">seen</span><span class="p">:</span> <span class="nb">set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">posterior_datasets</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"stan_model_name"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span> <span class="ow">or</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">STAN_MODELS_DIR</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s2">.stan"</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">continue</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">({</span><span class="s2">"no3_cutoff"</span><span class="p">:</span> <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"no3_cutoff"</span><span class="p">]}</span>
+                <span class="k">if</span> <span class="s2">"no3_cutoff"</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">bound</span> <span class="ow">in</span> <span class="n">extract_param_bounds_from_stan</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">bounds</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">bound</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+            <span class="k">continue</span>
+    <span class="k">return</span> <span class="n">bounds</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_format_stat</span><span class="p">(</span><span class="n">median</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">std</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return 'median ± std' formatted to appropriate significant figures.</span>
+
+<span class="sd">    The uncertainty drives the precision:</span>
+<span class="sd">    - Round std to 1 sig fig (2 sig figs if its leading digit is 1 or 2,</span>
+<span class="sd">      since one sig fig would be too coarse there).</span>
+<span class="sd">    - Round median to the same decimal place.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; _format_stat(35.812, 0.845)   # σ leading digit 8 → 1 sig fig</span>
+<span class="sd">    '35.8 ± 0.8'</span>
+<span class="sd">    &gt;&gt;&gt; _format_stat(0.02451, 0.00234)  # σ leading digit 2 → 2 sig figs</span>
+<span class="sd">    '0.0245 ± 0.0023'</span>
+<span class="sd">    &gt;&gt;&gt; _format_stat(35.0, 1.52)      # σ leading digit 1 → 2 sig figs</span>
+<span class="sd">    '35.0 ± 1.5'</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">std</span><span class="p">)</span> <span class="ow">or</span> <span class="n">std</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">median</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">"</span>
+    <span class="n">n_dec</span> <span class="o">=</span> <span class="n">_n_decimals</span><span class="p">(</span><span class="n">std</span><span class="p">)</span>
+    <span class="n">fmt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">".</span><span class="si">{</span><span class="n">n_dec</span><span class="si">}</span><span class="s2">f"</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">median</span><span class="p">,</span><span class="w"> </span><span class="n">n_dec</span><span class="p">)</span><span class="si">:{</span><span class="n">fmt</span><span class="si">}}</span><span class="s2"> ± </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">std</span><span class="p">,</span><span class="w"> </span><span class="n">n_dec</span><span class="p">)</span><span class="si">:{</span><span class="n">fmt</span><span class="si">}}</span><span class="s2">"</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_n_decimals</span><span class="p">(</span><span class="n">scale</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Decimal places needed to show `scale` to 1–2 sig figs (GUM §7.2.6 rule)."""</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span> <span class="ow">or</span> <span class="n">scale</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">3</span>
+    <span class="n">mag</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">scale</span><span class="p">)))</span>
+    <span class="n">first_digit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">scale</span><span class="p">)</span> <span class="o">/</span> <span class="mi">10</span> <span class="o">**</span> <span class="n">mag</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">mag</span><span class="p">)</span> <span class="k">if</span> <span class="n">first_digit</span> <span class="o">&lt;=</span> <span class="mi">3</span> <span class="k">else</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">mag</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_format_ci</span><span class="p">(</span><span class="n">median</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">p5</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">p95</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return 'median [p5, p95]' with sig figs driven by the interval half-width.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; _format_ci(31.2, 28.4, 34.1)</span>
+<span class="sd">    '31.2 [28.4, 34.1]'</span>
+<span class="sd">    &gt;&gt;&gt; _format_ci(0.245, 0.18, 0.31)</span>
+<span class="sd">    '0.245 [0.180, 0.310]'</span>
+<span class="sd">    """</span>
+    <span class="n">half_width</span> <span class="o">=</span> <span class="p">(</span><span class="n">p95</span> <span class="o">-</span> <span class="n">p5</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="n">n_dec</span> <span class="o">=</span> <span class="n">_n_decimals</span><span class="p">(</span><span class="n">half_width</span><span class="p">)</span>
+    <span class="n">fmt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">".</span><span class="si">{</span><span class="n">n_dec</span><span class="si">}</span><span class="s2">f"</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">median</span><span class="p">,</span><span class="w"> </span><span class="n">n_dec</span><span class="p">)</span><span class="si">:{</span><span class="n">fmt</span><span class="si">}}</span><span class="s2"> [</span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">p5</span><span class="p">,</span><span class="w"> </span><span class="n">n_dec</span><span class="p">)</span><span class="si">:{</span><span class="n">fmt</span><span class="si">}}</span><span class="s2">, </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">p95</span><span class="p">,</span><span class="w"> </span><span class="n">n_dec</span><span class="p">)</span><span class="si">:{</span><span class="n">fmt</span><span class="si">}}</span><span class="s2">]"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_format_prior_expr</span><span class="p">(</span><span class="n">dist</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">trunc</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Return a 'distributed as' string for a prior.</span>
+
+<span class="sd">    Notation follows McElreath (Statistical Rethinking) / Stan convention:</span>
+<span class="sd">    θ ~ Normal(μ, σ) where σ is the standard deviation.</span>
+<span class="sd">    The '~' is written as plain text outside math mode so it renders</span>
+<span class="sd">    as a tilde rather than the math-mode '∼' (similar-to) symbol.</span>
+<span class="sd">    """</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fmt</span><span class="p">(</span><span class="n">v</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2">.4g</span><span class="si">}</span><span class="s2">"</span>
+
+    <span class="n">args</span> <span class="o">=</span> <span class="sa">rf</span><span class="s2">"(</span><span class="si">{</span><span class="n">_fmt</span><span class="p">(</span><span class="n">a</span><span class="p">)</span><span class="si">}</span><span class="s2">,\;</span><span class="si">{</span><span class="n">_fmt</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span>
+
+    <span class="k">if</span> <span class="n">trunc</span><span class="p">:</span>
+        <span class="n">bounds</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">trunc</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">)]</span>
+        <span class="n">lo</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="sa">r</span><span class="s2">"-\infty"</span>
+        <span class="n">hi</span> <span class="o">=</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bounds</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">else</span> <span class="sa">r</span><span class="s2">"+\infty"</span>
+        <span class="n">args</span> <span class="o">+=</span> <span class="sa">rf</span><span class="s2">"\;\mathrm</span><span class="se">{{</span><span class="s2">T</span><span class="se">}}</span><span class="s2">[</span><span class="si">{</span><span class="n">lo</span><span class="si">}</span><span class="s2">,\;</span><span class="si">{</span><span class="n">hi</span><span class="si">}</span><span class="s2">]"</span>
+
+    <span class="k">if</span> <span class="n">dist</span> <span class="o">==</span> <span class="s2">"normal"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">rf</span><span class="s2">"$\mathcal</span><span class="se">{{</span><span class="s2">N</span><span class="se">}}</span><span class="s2">\,</span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">$"</span>
+    <span class="k">elif</span> <span class="n">dist</span> <span class="o">==</span> <span class="s2">"lognormal"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">rf</span><span class="s2">"$\mathrm</span><span class="se">{{</span><span class="s2">LogNormal</span><span class="se">}}</span><span class="s2">\,</span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">$"</span>
+    <span class="k">elif</span> <span class="n">dist</span> <span class="o">==</span> <span class="s2">"beta"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">rf</span><span class="s2">"$\mathcal</span><span class="se">{{</span><span class="s2">B</span><span class="se">}}</span><span class="s2">\,</span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">$"</span>
+    <span class="k">elif</span> <span class="n">dist</span> <span class="o">==</span> <span class="s2">"cauchy"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">rf</span><span class="s2">"$\mathrm</span><span class="se">{{</span><span class="s2">Cauchy</span><span class="se">}}</span><span class="s2">\,</span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">$"</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">rf</span><span class="s2">"$\mathrm</span><span class="se">{{</span><span class="si">{</span><span class="n">dist</span><span class="si">}</span><span class="se">}}</span><span class="s2">\,</span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">$"</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.range_utils</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">compute_sample_range</span><span class="p">,</span>
+    <span class="n">compute_suffix_specific_range</span><span class="p">,</span>
+    <span class="n">compute_dataset_specific_range</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="plot_prior_distributions">
+<a class="viewcode-back" href="../../../api.html#TEXAS.plotting.prior_plot.plot_prior_distributions">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_prior_distributions</span><span class="p">(</span>
+    <span class="n">priors_list</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">posterior_datasets</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="s2">"xr.Dataset"</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">posterior_labels_list</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">show_suptitle</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">kde_bw</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+    <span class="n">focus_on_posterior</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">include_groups</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFAULT_INCLUDE_GROUPS</span><span class="p">,</span>
+    <span class="n">suffix_include</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">zoomin_suffix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">zoomin_dataset_idx</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">use_linestyle_by_param</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">show_histogram</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_annotation</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">set_linewidth</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.5</span><span class="p">,</span>
+    <span class="n">set_fig_width_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">set_fig_height_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">3.5</span><span class="p">,</span>
+    <span class="n">set_leg_max_ncol</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="n">color_list</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">param_source_map</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">annotation_style</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"ci95"</span><span class="p">,</span> <span class="s2">"ci68"</span><span class="p">,</span> <span class="s2">"sigma"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"ci95"</span><span class="p">,</span>
+    <span class="n">show_subplot_legend</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_figure_legend</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_prior_expression</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Plot priors + any number of posterior distributions in a grid,</span>
+<span class="sd">    split by parameter group (t0, k, b, etc.).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        param_source_map: Optional dict mapping a param group name to the index of</span>
+<span class="sd">            the dataset in ``posterior_datasets`` that should be used as the sole</span>
+<span class="sd">            source for that group.  All other datasets are skipped for that group.</span>
+
+<span class="sd">            Use this when different parameters come from different posteriors — e.g.</span>
+<span class="sd">            logistic params (t0, k, b…) from a ``culmeso`` run and beta coefficients</span>
+<span class="sd">            from a multivariate ``crtp`` run::</span>
+
+<span class="sd">                plot_prior_distributions(</span>
+<span class="sd">                    posterior_datasets=[culmeso_ds, crtp_multiv_ds],</span>
+<span class="sd">                    param_source_map={"beta_G23": 1, "beta_NO3": 1},</span>
+<span class="sd">                )</span>
+
+<span class="sd">            When a group is not in ``param_source_map``, all datasets are searched</span>
+<span class="sd">            as usual.</span>
+<span class="sd">        include_groups: Parameter-group prefixes to draw, in panel order.  The</span>
+<span class="sd">            default covers the thermal parameters plus every coefficient naming</span>
+<span class="sd">            scheme in ``PREDICTOR_GROUPS`` (``beta_*`` for the parent model,</span>
+<span class="sd">            ``gamma_*`` for t0shift, ``betaLogit_*`` for boundedCeil), so the</span>
+<span class="sd">            same call works for any of them and for figures mixing several.</span>
+<span class="sd">            A group with no matching variable in any dataset is skipped, as is a</span>
+<span class="sd">            coefficient group whose predictor no dataset switched on.</span>
+<span class="sd">        cache_dir: Directory to resolve any name strings in</span>
+<span class="sd">            ``posterior_datasets``.  Defaults to the standard forward posterior</span>
+<span class="sd">            cache.  Loaded Datasets are passed through untouched.</span>
+<span class="sd">    """</span>
+    <span class="c1"># ── Resolve any string / Path entries in posterior_datasets ──────────────</span>
+    <span class="k">if</span> <span class="n">posterior_datasets</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span> <span class="k">as</span> <span class="n">_Path</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">..stan.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_posterior</span> <span class="k">as</span> <span class="n">_load_posterior</span>
+        <span class="n">resolved</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">posterior_datasets</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">_Path</span><span class="p">)):</span>
+                <span class="n">resolved</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_load_posterior</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">),</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">cache_dir</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">resolved</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="n">posterior_datasets</span> <span class="o">=</span> <span class="n">resolved</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="n">parsed_priors</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># If priors_list not supplied, pull prior strings from the posterior datasets'</span>
+    <span class="c1"># attrs["priors"] (set automatically during sampling).  Merge across all</span>
+    <span class="c1"># datasets and deduplicate so each prior name appears only once.</span>
+    <span class="k">if</span> <span class="n">priors_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">seen</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="p">(</span><span class="n">posterior_datasets</span> <span class="ow">or</span> <span class="p">[]):</span>
+            <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"priors"</span><span class="p">,</span> <span class="p">[]):</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">":"</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">seen</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">entry</span><span class="p">)</span>   <span class="c1"># first dataset wins on conflict</span>
+        <span class="n">priors_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">seen</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="c1"># Declaration bounds for priors whose stored string predates bounds-aware</span>
+    <span class="c1"># extraction.  Only consulted when the prior carries no explicit T[…].</span>
+    <span class="n">_decl_bounds</span> <span class="o">=</span> <span class="n">_declaration_bounds</span><span class="p">(</span><span class="n">posterior_datasets</span><span class="p">)</span> <span class="k">if</span> <span class="n">posterior_datasets</span> <span class="k">else</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">prior</span> <span class="ow">in</span> <span class="n">priors_list</span><span class="p">:</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">dist_expr</span> <span class="o">=</span> <span class="n">prior</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">":"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">dist_expr</span> <span class="o">=</span> <span class="n">dist_expr</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">sym</span> <span class="ow">in</span> <span class="n">dist_expr</span> <span class="k">for</span> <span class="n">sym</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"mu_"</span><span class="p">,</span> <span class="s2">"sigma_"</span><span class="p">,</span> <span class="s2">"logit"</span><span class="p">]):</span>
+            <span class="k">continue</span>
+
+        <span class="n">match</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(\w+)\(([^,]+),\s*([^)]+)\)(?:\s*T\[(.*)\])?"</span><span class="p">,</span> <span class="n">dist_expr</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">dist_name</span><span class="p">,</span> <span class="n">a_str</span><span class="p">,</span> <span class="n">b_str</span><span class="p">,</span> <span class="n">trunc</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">a_str</span><span class="p">)</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">b_str</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="n">parsed_priors</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">"dist"</span><span class="p">:</span> <span class="n">dist_name</span><span class="p">,</span>
+            <span class="s2">"a"</span><span class="p">:</span> <span class="n">a</span><span class="p">,</span>
+            <span class="s2">"b"</span><span class="p">:</span> <span class="n">b</span><span class="p">,</span>
+            <span class="s2">"trunc"</span><span class="p">:</span> <span class="n">trunc</span> <span class="k">if</span> <span class="n">trunc</span> <span class="k">else</span> <span class="n">_decl_bounds</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+        <span class="p">}</span>
+
+    <span class="n">all_param_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">parsed_priors</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="c1"># How many datasets actually switched each optional predictor on, keyed by the</span>
+    <span class="c1"># attr name.  Built from the registry so a new coefficient group is gated</span>
+    <span class="c1"># automatically, whatever it is called.</span>
+    <span class="n">_use_flag_counts</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">spec</span><span class="p">[</span><span class="s2">"use_flag"</span><span class="p">]:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">PREDICTOR_GROUPS</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="n">posterior_datasets</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">ds</span> <span class="ow">in</span> <span class="n">posterior_datasets</span><span class="p">:</span>
+            <span class="n">all_param_names</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">flag</span> <span class="ow">in</span> <span class="n">_use_flag_counts</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">flag</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">_use_flag_counts</span><span class="p">[</span><span class="n">flag</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">grouped</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">include_groups</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">all_param_names</span><span class="p">:</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="n">_param_group</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">include_groups</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">group</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">grouped</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">param_groups</span> <span class="o">=</span> <span class="p">[</span><span class="n">g</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">include_groups</span> <span class="k">if</span> <span class="n">grouped</span><span class="p">[</span><span class="n">g</span><span class="p">]]</span>
+
+    <span class="c1"># Drop a coefficient panel when no dataset used that predictor: the parameter</span>
+    <span class="c1"># is still declared and sampled in those runs, so its "posterior" would be</span>
+    <span class="c1"># nothing but the prior — a panel that invites a reading it cannot support.</span>
+    <span class="n">param_groups</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">g</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">param_groups</span>
+        <span class="k">if</span> <span class="n">g</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PREDICTOR_GROUPS</span>
+        <span class="ow">or</span> <span class="n">_use_flag_counts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">PREDICTOR_GROUPS</span><span class="p">[</span><span class="n">g</span><span class="p">][</span><span class="s2">"use_flag"</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="p">]</span>
+
+    <span class="c1"># ncols/nrows computed AFTER popping so the grid is sized correctly.</span>
+    <span class="n">ncols</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">param_groups</span><span class="p">))</span>
+    <span class="n">nrows</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">param_groups</span><span class="p">)</span> <span class="o">/</span> <span class="n">ncols</span><span class="p">))</span> <span class="k">if</span> <span class="n">ncols</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span>
+
+    <span class="c1"># squeeze=False guarantees axes is always 2-D (nrows × ncols) so indexing</span>
+    <span class="c1"># axes[row, col] is safe regardless of grid size.</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span><span class="o">=</span><span class="n">ncols</span><span class="p">,</span>
+                             <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">set_fig_width_factor</span> <span class="o">*</span> <span class="n">ncols</span><span class="p">,</span> <span class="n">set_fig_height_factor</span> <span class="o">*</span> <span class="n">nrows</span><span class="p">),</span>
+                             <span class="n">squeeze</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">clear</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                             <span class="n">sharex</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># Keyed by idx_ds → (line_handle, label); populated during plotting so the</span>
+    <span class="c1"># figure-level legend always has exactly one entry per dataset in list order.</span>
+    <span class="n">_fig_legend_entries</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">_prior_handle</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">base</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">param_groups</span><span class="p">):</span>
+        <span class="n">row_idx</span><span class="p">,</span> <span class="n">col_idx</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">ncols</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">axes</span><span class="p">[</span><span class="n">row_idx</span><span class="p">,</span> <span class="n">col_idx</span><span class="p">]</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            
+
+        <span class="n">param_names</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">grouped</span><span class="p">[</span><span class="n">base</span><span class="p">])</span>   <span class="c1"># sort for deterministic order</span>
+        <span class="k">if</span> <span class="n">suffix_include</span><span class="p">:</span>
+            <span class="n">param_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">param_names</span> <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">suf</span><span class="p">)</span> <span class="k">for</span> <span class="n">suf</span> <span class="ow">in</span> <span class="n">suffix_include</span><span class="p">)]</span>
+        <span class="n">all_samples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="c1"># Match on the group, not a bare prefix: "b" would otherwise capture</span>
+        <span class="c1"># beta_G23_crtp and draw the wrong prior on the b panel.</span>
+        <span class="n">prior_key</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">parsed_priors</span> <span class="k">if</span> <span class="n">_param_group</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">include_groups</span><span class="p">)</span> <span class="o">==</span> <span class="n">base</span><span class="p">),</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Initialize x variable</span>
+        <span class="n">trunc_bounds</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Store truncation bounds for later</span>
+
+        <span class="c1"># An unusable prior (unrecognised family, degenerate range) leaves</span>
+        <span class="c1"># frozen=None: the panel still draws its posteriors, it just has no</span>
+        <span class="c1"># prior curve.  Dropping the whole panel would hide the posterior too.</span>
+        <span class="n">frozen</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">prior_key</span><span class="p">:</span>
+            <span class="n">prior_info</span> <span class="o">=</span> <span class="n">parsed_priors</span><span class="p">[</span><span class="n">prior_key</span><span class="p">]</span>
+            <span class="n">dist</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">trunc</span> <span class="o">=</span> <span class="n">prior_info</span><span class="p">[</span><span class="s2">"dist"</span><span class="p">],</span> <span class="n">prior_info</span><span class="p">[</span><span class="s2">"a"</span><span class="p">],</span> <span class="n">prior_info</span><span class="p">[</span><span class="s2">"b"</span><span class="p">],</span> <span class="n">prior_info</span><span class="p">[</span><span class="s2">"trunc"</span><span class="p">]</span>
+            <span class="n">trunc_bounds</span> <span class="o">=</span> <span class="n">_parse_trunc</span><span class="p">(</span><span class="n">trunc</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">dist</span> <span class="o">==</span> <span class="s2">"normal"</span><span class="p">:</span>
+                <span class="n">frozen</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+                <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="n">a</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">b</span>
+
+            <span class="k">elif</span> <span class="n">dist</span> <span class="o">==</span> <span class="s2">"beta"</span><span class="p">:</span>
+                <span class="n">frozen</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">beta</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+                <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span>
+
+            <span class="k">elif</span> <span class="n">dist</span> <span class="o">==</span> <span class="s2">"cauchy"</span><span class="p">:</span>
+                <span class="n">frozen</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">cauchy</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+                <span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span> <span class="o">=</span> <span class="n">a</span> <span class="o">-</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">+</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">b</span>
+
+            <span class="k">elif</span> <span class="n">dist</span> <span class="o">==</span> <span class="s2">"lognormal"</span><span class="p">:</span>
+                <span class="n">frozen</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">lognorm</span><span class="p">(</span><span class="n">s</span><span class="o">=</span><span class="n">b</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">a</span><span class="p">))</span>
+                <span class="n">x_min</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mf">1e-6</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">b</span><span class="p">))</span>
+                <span class="n">x_max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">b</span><span class="p">)</span>
+
+            <span class="c1"># Draw the prior over its supported range only, and renormalise so a</span>
+            <span class="c1"># truncated prior integrates to 1 like the posterior KDE it is</span>
+            <span class="c1"># compared against.  Without this a half-normal — every coefficient</span>
+            <span class="c1"># bounded at zero — is drawn at half its true height.</span>
+            <span class="k">if</span> <span class="n">frozen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">trunc_bounds</span><span class="p">:</span>
+                <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="n">trunc_bounds</span>
+                <span class="k">if</span> <span class="n">lo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">x_min</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">lo</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">hi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">x_max</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">x_max</span><span class="p">,</span> <span class="n">hi</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">frozen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">x_min</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">x_max</span><span class="p">)</span> <span class="ow">and</span> <span class="n">x_max</span> <span class="o">&gt;</span> <span class="n">x_min</span>
+            <span class="p">):</span>
+                <span class="n">frozen</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">frozen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">frozen</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">trunc_bounds</span><span class="p">:</span>
+                <span class="n">lo</span><span class="p">,</span> <span class="n">hi</span> <span class="o">=</span> <span class="n">trunc_bounds</span>
+                <span class="n">mass</span> <span class="o">=</span> <span class="p">(</span><span class="n">frozen</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">hi</span><span class="p">)</span> <span class="k">if</span> <span class="n">hi</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">1.0</span><span class="p">)</span> <span class="o">-</span> \
+                       <span class="p">(</span><span class="n">frozen</span><span class="o">.</span><span class="n">cdf</span><span class="p">(</span><span class="n">lo</span><span class="p">)</span> <span class="k">if</span> <span class="n">lo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mf">0.0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">mass</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span> <span class="o">/</span> <span class="n">mass</span>
+
+            <span class="p">(</span><span class="n">prior_line</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">'black'</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="n">set_linewidth</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">"Prior"</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">_prior_handle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">_prior_handle</span> <span class="o">=</span> <span class="n">prior_line</span>
+            <span class="k">if</span> <span class="n">show_prior_expression</span><span class="p">:</span>
+                <span class="n">expr</span> <span class="o">=</span> <span class="n">_format_prior_expr</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">trunc</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.98</span><span class="p">,</span> <span class="mf">0.98</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span>
+                        <span class="n">fontsize</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">'top'</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">'right'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">'black'</span><span class="p">)</span>
+
+        <span class="c1"># Collect all samples first to determine x range if no prior available.</span>
+        <span class="c1"># If param_source_map specifies a source dataset for this group, only</span>
+        <span class="c1"># pull samples from that dataset; otherwise search all datasets.</span>
+        <span class="n">_source_idx</span> <span class="o">=</span> <span class="n">param_source_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">base</span><span class="p">)</span> <span class="k">if</span> <span class="n">param_source_map</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">_use_flag</span> <span class="o">=</span> <span class="n">PREDICTOR_GROUPS</span><span class="p">[</span><span class="n">base</span><span class="p">][</span><span class="s2">"use_flag"</span><span class="p">]</span> <span class="k">if</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">PREDICTOR_GROUPS</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">param_names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">posterior_datasets</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">idx_ds</span><span class="p">,</span> <span class="n">ds</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">posterior_datasets</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">_source_idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">idx_ds</span> <span class="o">!=</span> <span class="n">_source_idx</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">data_vars</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="c1"># Per-dataset gate: skip a coefficient from a run that did not</span>
+                    <span class="c1"># use that predictor, even when another dataset in the figure did.</span>
+                    <span class="k">if</span> <span class="n">_use_flag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_use_flag</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="n">samples</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">posterior_labels_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">stan_model_labels</span> <span class="o">=</span> <span class="n">posterior_labels_list</span><span class="p">[</span><span class="n">idx_ds</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># Fallback to dataset filename if labels not provided</span>
+                        <span class="n">stan_model_labels</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'filename'</span><span class="p">,</span> <span class="s1">'Unknown Model'</span><span class="p">)</span>
+                    <span class="n">all_samples</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">samples</span><span class="p">,</span> <span class="n">idx_ds</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">stan_model_labels</span><span class="p">))</span>
+        
+        <span class="c1"># Sort by (idx_ds, param_name) so all lines for dataset 0 are plotted</span>
+        <span class="c1"># before dataset 1, giving a consistent order in every subplot.</span>
+        <span class="n">all_samples</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">t</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        
+        <span class="c1"># ── NEW: expand x to cover posterior tails if they exceed prior bounds ──</span>
+        <span class="k">if</span> <span class="n">all_samples</span> <span class="ow">and</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">all_param_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="ow">in</span> <span class="n">all_samples</span><span class="p">])</span>
+            <span class="n">p_lo</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">all_param_samples</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">p_hi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">all_param_samples</span><span class="p">,</span> <span class="mi">99</span><span class="p">)</span>
+            <span class="c1"># Add 5% padding on each side to ensure KDE tails are visible</span>
+            <span class="n">data_range</span> <span class="o">=</span> <span class="n">p_hi</span> <span class="o">-</span> <span class="n">p_lo</span>
+            <span class="k">if</span> <span class="n">data_range</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">pad</span> <span class="o">=</span> <span class="mf">0.05</span> <span class="o">*</span> <span class="n">data_range</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">pad</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">p_lo</span><span class="p">),</span> <span class="nb">abs</span><span class="p">(</span><span class="n">p_hi</span><span class="p">))</span> <span class="o">*</span> <span class="mf">0.1</span> <span class="k">if</span> <span class="p">(</span><span class="n">p_lo</span> <span class="o">!=</span> <span class="n">p_hi</span><span class="p">)</span> <span class="k">else</span> <span class="mf">0.1</span>
+            <span class="n">p_lo_padded</span> <span class="o">=</span> <span class="n">p_lo</span> <span class="o">-</span> <span class="n">pad</span>
+            <span class="n">p_hi_padded</span> <span class="o">=</span> <span class="n">p_hi</span> <span class="o">+</span> <span class="n">pad</span>
+            
+            <span class="n">needs_expansion</span> <span class="o">=</span> <span class="p">(</span><span class="n">p_lo_padded</span> <span class="o">&lt;</span> <span class="n">x_min</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">p_hi_padded</span> <span class="o">&gt;</span> <span class="n">x_max</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">needs_expansion</span><span class="p">:</span>
+                <span class="n">x_min</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">p_lo_padded</span><span class="p">)</span>
+                <span class="n">x_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">x_max</span><span class="p">,</span> <span class="n">p_hi_padded</span><span class="p">)</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span>
+
+        <span class="c1"># If x was not defined by prior, create it from posterior data range</span>
+        <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">all_samples</span><span class="p">:</span>
+            <span class="c1"># Get the combined range of all samples for this parameter group</span>
+            <span class="n">all_param_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="ow">in</span> <span class="n">all_samples</span><span class="p">])</span>
+            <span class="n">data_min</span><span class="p">,</span> <span class="n">data_max</span> <span class="o">=</span> <span class="n">all_param_samples</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">all_param_samples</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+            
+            <span class="c1"># Robust padding calculation that works for any value range</span>
+            <span class="n">data_range</span> <span class="o">=</span> <span class="n">data_max</span> <span class="o">-</span> <span class="n">data_min</span>
+            <span class="k">if</span> <span class="n">data_range</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># Use 15% padding relative to data range</span>
+                <span class="n">padding</span> <span class="o">=</span> <span class="mf">0.15</span> <span class="o">*</span> <span class="n">data_range</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># If all values are identical, use absolute padding based on magnitude</span>
+                <span class="n">abs_magnitude</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">data_min</span><span class="p">)</span> <span class="k">if</span> <span class="n">data_min</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="mf">1.0</span>
+                <span class="n">padding</span> <span class="o">=</span> <span class="mf">0.1</span> <span class="o">*</span> <span class="n">abs_magnitude</span>
+            
+            <span class="n">x_min</span> <span class="o">=</span> <span class="n">data_min</span> <span class="o">-</span> <span class="n">padding</span>
+            <span class="n">x_max</span> <span class="o">=</span> <span class="n">data_max</span> <span class="o">+</span> <span class="n">padding</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">x</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Fallback: create a default range if no samples either</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5000</span><span class="p">)</span>
+        
+        <span class="c1"># Determine number of distinct models (used to color by model)</span>
+        <span class="k">if</span> <span class="n">posterior_datasets</span><span class="p">:</span>
+            <span class="n">num_models</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">posterior_datasets</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">num_models</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># Validate and assign plotting colors</span>
+        <span class="k">if</span> <span class="n">color_list</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">color_list</span><span class="p">)</span> <span class="o">!=</span> <span class="n">num_models</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"color_list must have exactly </span><span class="si">{</span><span class="n">num_models</span><span class="si">}</span><span class="s2"> colors to match the number of posterior datasets."</span><span class="p">)</span>
+            <span class="n">default_colors</span> <span class="o">=</span> <span class="n">color_list</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Use default tab10 colors; repeat if not enough</span>
+            <span class="n">default_colors</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">tab10</span><span class="o">.</span><span class="n">colors</span>
+            <span class="k">if</span> <span class="n">num_models</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">default_colors</span><span class="p">):</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">cycle</span><span class="p">,</span> <span class="n">islice</span>
+                <span class="n">default_colors</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">islice</span><span class="p">(</span><span class="n">cycle</span><span class="p">(</span><span class="n">default_colors</span><span class="p">),</span> <span class="n">num_models</span><span class="p">))</span>
+        
+        <span class="n">linestyles</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'-'</span><span class="p">,</span> <span class="s1">'--'</span><span class="p">,</span> <span class="s1">'-.'</span><span class="p">,</span> <span class="s1">':'</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))]</span>
+
+        <span class="n">unique_param_names</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">pname</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">pname</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">all_samples</span><span class="p">))</span>
+        <span class="n">_n_annotated</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># counts lines actually drawn; drives annotation y-position</span>
+
+        <span class="k">for</span> <span class="n">iiii</span><span class="p">,</span> <span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">idx_ds</span><span class="p">,</span> <span class="n">param_label</span><span class="p">,</span> <span class="n">stan_model_label</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">all_samples</span><span class="p">):</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">default_colors</span><span class="p">[</span><span class="n">idx_ds</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">default_colors</span><span class="p">)]</span>
+
+            <span class="k">if</span> <span class="n">use_linestyle_by_param</span><span class="p">:</span>
+                <span class="n">ls_idx</span> <span class="o">=</span> <span class="n">unique_param_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">param_label</span><span class="p">)</span>
+                <span class="n">linestyle</span> <span class="o">=</span> <span class="n">linestyles</span><span class="p">[</span><span class="n">ls_idx</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">linestyles</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">linestyle</span> <span class="o">=</span> <span class="s1">'-'</span>
+
+            <span class="n">kde</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">gaussian_kde</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">bw_method</span><span class="o">=</span><span class="n">kde_bw</span><span class="p">)</span>
+            <span class="n">kde_y</span> <span class="o">=</span> <span class="n">kde</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">_plot_line</span><span class="p">(</span><span class="n">param_label</span><span class="o">=</span><span class="n">param_label</span><span class="p">,</span> <span class="n">idx_ds</span><span class="o">=</span><span class="n">idx_ds</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                           <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">,</span> <span class="n">kde_y</span><span class="o">=</span><span class="n">kde_y</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">,</span>
+                           <span class="n">stan_model_label</span><span class="o">=</span><span class="n">stan_model_label</span><span class="p">):</span>
+                <span class="p">(</span><span class="n">line</span><span class="p">,)</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">kde_y</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">,</span> <span class="n">lw</span><span class="o">=</span><span class="n">set_linewidth</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="n">linestyle</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">param_label</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">idx_ds</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fig_legend_entries</span><span class="p">:</span>
+                    <span class="n">_fig_legend_entries</span><span class="p">[</span><span class="n">idx_ds</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">stan_model_label</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">show_histogram</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">density</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">show_annotation</span><span class="p">:</span>
+                    <span class="n">med</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">annotation_style</span> <span class="o">==</span> <span class="s2">"ci95"</span><span class="p">:</span>
+                        <span class="n">text</span> <span class="o">=</span> <span class="n">_format_ci</span><span class="p">(</span><span class="n">med</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+                                               <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="mi">95</span><span class="p">))</span>
+                    <span class="k">elif</span> <span class="n">annotation_style</span> <span class="o">==</span> <span class="s2">"ci68"</span><span class="p">:</span>
+                        <span class="n">text</span> <span class="o">=</span> <span class="n">_format_ci</span><span class="p">(</span><span class="n">med</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="mi">16</span><span class="p">),</span>
+                                               <span class="n">np</span><span class="o">.</span><span class="n">percentile</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="mi">84</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">text</span> <span class="o">=</span> <span class="n">_format_stat</span><span class="p">(</span><span class="n">med</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+                    <span class="n">ypos</span> <span class="o">=</span> <span class="mf">0.98</span> <span class="o">-</span> <span class="n">_n_annotated</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="mf">0.065</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mf">0.02</span><span class="p">,</span> <span class="n">ypos</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="n">ax</span><span class="o">.</span><span class="n">transAxes</span><span class="p">,</span>
+                            <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">'top'</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">'left'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">)</span>
+                    <span class="n">_n_annotated</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c1"># Predictor coefficients are gated when their samples are collected</span>
+            <span class="c1"># above, so anything that reached this point is drawable.</span>
+            <span class="n">_plot_line</span><span class="p">()</span>
+
+
+        <span class="k">if</span> <span class="n">all_samples</span><span class="p">:</span>
+            <span class="n">combined</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="ow">in</span> <span class="n">all_samples</span><span class="p">])</span>
+            
+            <span class="c1"># Handle dataset-specific zooming (priority over suffix-based zooming)</span>
+            <span class="k">if</span> <span class="n">focus_on_posterior</span> <span class="ow">and</span> <span class="n">zoomin_dataset_idx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">zoom_min</span><span class="p">,</span> <span class="n">zoom_max</span> <span class="o">=</span> <span class="n">compute_dataset_specific_range</span><span class="p">(</span><span class="n">all_samples</span><span class="p">,</span> <span class="n">zoomin_dataset_idx</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">zoom_min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">zoom_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="n">zoom_min</span><span class="p">,</span> <span class="n">zoom_max</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Fallback to standard range if dataset-specific fails</span>
+                    <span class="n">zoom_min</span><span class="p">,</span> <span class="n">zoom_max</span> <span class="o">=</span> <span class="n">compute_sample_range</span><span class="p">(</span><span class="n">combined</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">zoom_min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="n">zoom_min</span><span class="p">,</span> <span class="n">zoom_max</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Handle zoomin_suffix as either string or list (legacy behavior)</span>
+                <span class="n">should_zoom</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">focus_on_posterior</span> <span class="ow">and</span> <span class="n">zoomin_suffix</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">zoomin_suffix</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                        <span class="n">should_zoom</span> <span class="o">=</span> <span class="n">zoomin_suffix</span> <span class="ow">in</span> <span class="n">base</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">should_zoom</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">suffix</span> <span class="ow">in</span> <span class="n">base</span> <span class="k">for</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="n">zoomin_suffix</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">should_zoom</span><span class="p">:</span>
+                    <span class="c1"># For zoomin_suffix matches, use suffix-specific P5-P95 range for aggressive zooming</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">zoomin_suffix</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                        <span class="n">zoom_min</span><span class="p">,</span> <span class="n">zoom_max</span> <span class="o">=</span> <span class="n">compute_suffix_specific_range</span><span class="p">(</span><span class="n">all_samples</span><span class="p">,</span> <span class="n">zoomin_suffix</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># For list of suffixes, try each one</span>
+                        <span class="n">zoom_min</span><span class="p">,</span> <span class="n">zoom_max</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+                        <span class="k">for</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="n">zoomin_suffix</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">suffix</span> <span class="ow">in</span> <span class="n">base</span><span class="p">:</span>
+                                <span class="n">zoom_min</span><span class="p">,</span> <span class="n">zoom_max</span> <span class="o">=</span> <span class="n">compute_suffix_specific_range</span><span class="p">(</span><span class="n">all_samples</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span>
+                                <span class="k">break</span>
+                    
+                    <span class="k">if</span> <span class="n">zoom_min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">zoom_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="n">zoom_min</span><span class="p">,</span> <span class="n">zoom_max</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># Fallback to standard range if suffix-specific fails</span>
+                        <span class="n">zoom_min</span><span class="p">,</span> <span class="n">zoom_max</span> <span class="o">=</span> <span class="n">compute_sample_range</span><span class="p">(</span><span class="n">combined</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">zoom_min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="n">zoom_min</span><span class="p">,</span> <span class="n">zoom_max</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">focus_on_posterior</span><span class="p">:</span>
+                    <span class="c1"># For other cases, use the standard percentile-based range</span>
+                    <span class="n">zoom_min</span><span class="p">,</span> <span class="n">zoom_max</span> <span class="o">=</span> <span class="n">compute_sample_range</span><span class="p">(</span><span class="n">combined</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">zoom_min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">x_min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">x_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="nb">max</span><span class="p">(</span><span class="n">x_min</span><span class="p">,</span> <span class="n">zoom_min</span><span class="p">),</span> <span class="nb">min</span><span class="p">(</span><span class="n">x_max</span><span class="p">,</span> <span class="n">zoom_max</span><span class="p">)])</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="n">zoom_min</span><span class="p">,</span> <span class="n">zoom_max</span><span class="p">])</span>
+                <span class="k">elif</span> <span class="n">x_min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">x_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">x_min</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">x_max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="n">x_min</span><span class="p">,</span> <span class="n">x_max</span><span class="p">])</span>
+
+        
+        <span class="c1">### Modified labels in ax</span>
+        <span class="n">ax_legends_labels_dict</span> <span class="o">=</span> <span class="n">_build_label_maps</span><span class="p">(</span><span class="n">include_groups</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">all_samples</span><span class="p">:</span>
+            <span class="n">handles</span><span class="p">,</span> <span class="n">labels_in_ax</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_legend_handles_labels</span><span class="p">()</span>
+            <span class="n">revised_labels_in_ax</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">lbl</span> <span class="ow">in</span> <span class="n">labels_in_ax</span><span class="p">:</span>
+                <span class="n">revised_lbl</span> <span class="o">=</span> <span class="n">lbl</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">ax_legends_labels_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">lbl</span><span class="p">:</span>
+                        <span class="c1">### strip with "_" before replacing both prefix and suffix</span>
+                        <span class="n">revised_lbl</span> <span class="o">=</span> <span class="n">val</span> <span class="o">+</span> <span class="n">revised_lbl</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+                        <span class="k">break</span>
+                <span class="n">revised_labels_in_ax</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">revised_lbl</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">handles</span> <span class="ow">and</span> <span class="n">show_subplot_legend</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">handles</span><span class="p">,</span> <span class="n">revised_labels_in_ax</span><span class="p">,</span> <span class="n">loc</span><span class="o">=</span><span class="s1">'upper right'</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">ncol</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">_group_label</span><span class="p">(</span><span class="n">base</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">posterior_datasets</span><span class="p">:</span>
+        <span class="c1"># Build figure legend: Prior first, then one entry per dataset in</span>
+        <span class="c1"># posterior_datasets order (guaranteed by idx_ds key).</span>
+        <span class="n">fig_handles</span><span class="p">,</span> <span class="n">fig_labels</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">_prior_handle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig_handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_prior_handle</span><span class="p">)</span>
+            <span class="n">fig_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"Prior"</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">posterior_datasets</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">_fig_legend_entries</span><span class="p">:</span>
+                <span class="n">h_ds</span><span class="p">,</span> <span class="n">lbl_ds</span> <span class="o">=</span> <span class="n">_fig_legend_entries</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                <span class="n">fig_handles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">h_ds</span><span class="p">)</span>
+                <span class="n">fig_labels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lbl_ds</span><span class="p">)</span>
+
+        <span class="n">legend_ncol</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fig_labels</span><span class="p">),</span> <span class="n">set_leg_max_ncol</span><span class="p">)</span>
+        <span class="n">legend_nrow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fig_labels</span><span class="p">)</span> <span class="o">/</span> <span class="n">legend_ncol</span><span class="p">))</span>
+
+        <span class="n">top_margin</span> <span class="o">=</span> <span class="mf">0.95</span> <span class="k">if</span> <span class="n">show_suptitle</span> <span class="k">else</span> <span class="mf">1.0</span>
+
+        <span class="c1"># 1. Let tight_layout organize the subplots in the original figure size</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="n">rect</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">top_margin</span><span class="p">])</span>
+
+        <span class="c1"># 2. Add extra physical height to the figure specifically for the legend</span>
+        <span class="c1">#    (~0.35 inches per row + 0.25 inches of buffer)</span>
+        <span class="n">legend_extra_inches</span> <span class="o">=</span> <span class="mf">0.25</span> <span class="o">+</span> <span class="mf">0.25</span> <span class="o">*</span> <span class="n">legend_nrow</span>
+        <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">get_size_inches</span><span class="p">()</span>
+        <span class="n">new_h</span> <span class="o">=</span> <span class="n">h</span> <span class="o">+</span> <span class="n">legend_extra_inches</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">new_h</span><span class="p">)</span>
+
+        <span class="c1"># 3. Calculate what fraction of the NEW height belongs to the legend space</span>
+        <span class="n">bottom_frac</span> <span class="o">=</span> <span class="n">legend_extra_inches</span> <span class="o">/</span> <span class="n">new_h</span>
+        
+        <span class="c1"># Push subplots up so they sit exactly above the new legend space</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">bottom</span><span class="o">=</span><span class="n">bottom_frac</span> <span class="o">+</span> <span class="mf">0.1</span><span class="p">)</span>
+
+        <span class="c1"># 4. Anchor the legend to the top of the reserved space, drawing downward</span>
+        <span class="k">if</span> <span class="n">show_figure_legend</span><span class="p">:</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span>
+                <span class="n">handles</span><span class="o">=</span><span class="n">fig_handles</span><span class="p">,</span>
+                <span class="n">labels</span><span class="o">=</span><span class="n">fig_labels</span><span class="p">,</span>
+                <span class="n">loc</span><span class="o">=</span><span class="s1">'upper center'</span><span class="p">,</span>         
+                <span class="c1"># Anchor right below the subplots (inside the figure boundaries)</span>
+                <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">bottom_frac</span><span class="p">),</span>  
+                <span class="n">ncol</span><span class="o">=</span><span class="n">legend_ncol</span><span class="p">,</span>
+                <span class="n">fontsize</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                <span class="n">frameon</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">borderaxespad</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+                <span class="n">handletextpad</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span>
+                <span class="n">labelspacing</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">show_suptitle</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">suptitle</span><span class="p">(</span><span class="s2">"Prior and Posterior Distributions"</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+
+    <span class="c1"># Hide any unused subplots in the grid (e.g. last cell when param count is odd).</span>
+    <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="o">.</span><span class="n">flat</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ax</span><span class="o">.</span><span class="n">has_data</span><span class="p">():</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Ronnakrit Rattanasriampaipong
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

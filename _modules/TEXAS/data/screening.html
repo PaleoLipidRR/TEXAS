@@ -1,0 +1,1727 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TEXAS.data.screening &#8212; TEXAS</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=e1f25cfb" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js?v=b8b12719"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/TEXAS/data/screening';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="canonical" href="https://paleolipidrr.github.io/TEXAS/_modules/TEXAS/data/screening.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/texas_logo.svg" class="logo__image only-light" alt="TEXAS - Home"/>
+    <img src="../../../_static/texas_logo.svg" class="logo__image only-dark pst-js-only" alt="TEXAS - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../callmap.html">Call map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../tutorial/intro.html">TEXAS Interactive Tutorial</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module1_prior.html">Module 1 — What is a Prior?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module2_bayesian_updating.html">Module 2 — Bayesian Updating</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module3_curve_explorer.html">Module 3 — The Calibration Curve Explorer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module4_mcmc.html">Module 4 — What MCMC Actually Does</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module5_results.html">Module 5 — Reading Your Results</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Explainers</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../PSM.html">TEXAS Proxy System Model — Bayesian Inference Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_validation.html">Model validation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sampler_budget.html">Sampler budget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../stan_models_explanation_v2.html">TEXAS Stan Models: Ensemble vs Direct Sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../marginalization_explainer.html">Why Marginalization Improves Inverse TEXAS Sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../why_plugin_p50_differs.html">Why the plug-in P50 ≠ the Bayesian P50</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reduce_sum_for_geologists.html">Understanding <code class="docutils literal notranslate"><span class="pre">reduce_sum</span></code> and <code class="docutils literal notranslate"><span class="pre">ll_chunk</span></code> in TEXAS-PSM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Prior_Choice_Normal_vs_Cauchy.html">Why Normal Instead of Cauchy Priors? 🤔</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ckdtree_nearest_ocean_explainer.html">Finding the Nearest Ocean Pixel: How <code class="docutils literal notranslate"><span class="pre">cKDTree</span></code> Works</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Archive</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../preprint_additive_archive.html">Archive — the preprint’s additive (β) formulation</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS/issues/new?title=Issue%20on%20page%20%2F_modules/TEXAS/data/screening.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for TEXAS.data.screening</h1><div class="highlight"><pre>
+<span></span><span class="sd">"""</span>
+<span class="sd">Data quality control and outlier screening tools.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">itertools</span><span class="w"> </span><span class="kn">import</span> <span class="n">combinations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.spatial.distance</span><span class="w"> </span><span class="kn">import</span> <span class="n">mahalanobis</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.linalg</span><span class="w"> </span><span class="kn">import</span> <span class="n">inv</span><span class="p">,</span> <span class="n">pinv</span><span class="p">,</span> <span class="n">LinAlgError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">chi2</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Literal</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib.patches</span><span class="w"> </span><span class="kn">import</span> <span class="n">Ellipse</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<div class="viewcode-block" id="MahalanobisOutlierDetector">
+<a class="viewcode-back" href="../../../api.html#TEXAS.data.screening.MahalanobisOutlierDetector">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">MahalanobisOutlierDetector</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Fit Mahalanobis distance parameters on training data, apply to any dataset.</span>
+<span class="sd">    </span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; # Fit on coretop data</span>
+<span class="sd">    &gt;&gt;&gt; detector = MahalanobisOutlierDetector(['TEX86', 'ringIndex'])  # default confidence=0.90</span>
+<span class="sd">    &gt;&gt;&gt; detector.fit(coretop_df)</span>
+<span class="sd">    &gt;&gt;&gt; coretop_df['mahal_dist'] = detector.transform(coretop_df)</span>
+<span class="sd">    &gt;&gt;&gt; coretop_df['outliers'] = detector.detect_outliers(coretop_df)</span>
+<span class="sd">    &gt;&gt;&gt; </span>
+<span class="sd">    &gt;&gt;&gt; # Apply to downcore data</span>
+<span class="sd">    &gt;&gt;&gt; downcore_df['mahal_dist'] = detector.transform(downcore_df)</span>
+<span class="sd">    &gt;&gt;&gt; downcore_df['outliers'] = detector.detect_outliers(downcore_df)</span>
+<span class="sd">    """</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">features</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">confidence</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.90</span><span class="p">,</span>
+        <span class="n">method</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'chi2'</span><span class="p">,</span> <span class="s1">'chi2_rounddown'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'chi2'</span><span class="p">,</span>
+        <span class="n">use_pinv_if_singular</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        features : list[str]</span>
+<span class="sd">            Feature column names to use for distance calculation</span>
+<span class="sd">        confidence : float, default=0.90</span>
+<span class="sd">            Confidence level for outlier threshold (0-1)</span>
+<span class="sd">        method : {'chi2', 'chi2_rounddown'}, default='chi2'</span>
+<span class="sd">            Method for threshold calculation</span>
+<span class="sd">        use_pinv_if_singular : bool, default=True</span>
+<span class="sd">            Use pseudo-inverse if covariance matrix is singular</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="o">=</span> <span class="n">features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">confidence</span> <span class="o">=</span> <span class="n">confidence</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_pinv_if_singular</span> <span class="o">=</span> <span class="n">use_pinv_if_singular</span>
+        
+        <span class="c1"># Fitted parameters (set during fit())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean_vec</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inv_cov</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span> <span class="o">=</span> <span class="kc">False</span>
+        
+    <span class="c1"># Path to the frozen reference ellipse of manuscript Section 5.1, built by</span>
+    <span class="c1"># scripts/build_calibration_domain.py from the core-top reference cluster.</span>
+    <span class="n">_DOMAIN_FILE</span> <span class="o">=</span> <span class="s2">"calibration_domain.json"</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_calibration_domain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Adopt the published calibration ellipse. False if it does not apply."""</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_DOMAIN_FILE</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">f</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"features"</span><span class="p">]):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"mean"</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inv_cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"inv_cov"</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">confidence</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">[</span><span class="s2">"features"</span><span class="p">]))))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fitted_on</span> <span class="o">=</span> <span class="s2">"TEXAS published calibration domain"</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_reference</span> <span class="o">=</span> <span class="n">spec</span><span class="p">[</span><span class="s2">"n_reference"</span><span class="p">]</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+<div class="viewcode-block" id="MahalanobisOutlierDetector.from_calibration">
+<a class="viewcode-back" href="../../../api.html#TEXAS.data.screening.MahalanobisOutlierDetector.from_calibration">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_calibration</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">confidence</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.90</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">"MahalanobisOutlierDetector"</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return a detector fixed to TEXAS's published calibration domain.</span>
+
+<span class="sd">        Explicit form of the default behaviour: a detector on the standard</span>
+<span class="sd">        features screens against this domain without being fitted at all.</span>
+
+<span class="sd">        The ellipse is a property of the *calibration* -- Section 5.1 fits it to</span>
+<span class="sd">        core-top samples with GDGT-2/GDGT-3 &lt;= 5 -- not of the data being</span>
+<span class="sd">        screened. Fitting on your own record instead re-centres the ellipse onto</span>
+<span class="sd">        that record, so the more unusual the record the less it flags: an</span>
+<span class="sd">        all-warm Paleogene section would report nothing.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; detector = MahalanobisOutlierDetector.from_calibration()</span>
+<span class="sd">        &gt;&gt;&gt; df["flagged"] = detector.detect_outliers(df)</span>
+<span class="sd">        """</span>
+        <span class="n">det</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">([</span><span class="s2">"TEX86"</span><span class="p">,</span> <span class="s2">"scaledRI_cren3"</span><span class="p">],</span> <span class="n">confidence</span><span class="o">=</span><span class="n">confidence</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">det</span><span class="o">.</span><span class="n">_load_calibration_domain</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+                <span class="s2">"The bundled calibration domain is missing or does not match "</span>
+                <span class="s2">"the default features; rebuild it with "</span>
+                <span class="s2">"scripts/build_calibration_domain.py."</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">det</span></div>
+
+
+<div class="viewcode-block" id="MahalanobisOutlierDetector.fit">
+<a class="viewcode-back" href="../../../api.html#TEXAS.data.screening.MahalanobisOutlierDetector.fit">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">on_unscorable</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'warn'</span><span class="p">,</span> <span class="s1">'raise'</span><span class="p">,</span> <span class="s1">'ignore'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'warn'</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'MahalanobisOutlierDetector'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Fit mean, covariance, and threshold on training data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : pd.DataFrame</span>
+<span class="sd">            Training data</span>
+<span class="sd">        columns : dict, optional</span>
+<span class="sd">            Mapping {logical_name: physical_column} for callers whose</span>
+<span class="sd">            DataFrame uses different column names than ``self.features``.</span>
+<span class="sd">        on_unscorable : {'warn', 'raise', 'ignore'}, default 'warn'</span>
+<span class="sd">            Policy for rows that map to a present column but are NaN/Inf.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        self : MahalanobisOutlierDetector</span>
+<span class="sd">            Fitted detector instance</span>
+<span class="sd">        """</span>
+        <span class="c1"># Resolve logical-&gt;physical, then clean &amp; get valid rows</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_features</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">on_unscorable</span><span class="o">=</span><span class="n">on_unscorable</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">replace</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="n">X_valid</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">X_valid</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"No valid data rows after removing NaN/Inf values"</span><span class="p">)</span>
+        
+        <span class="c1"># Compute mean and inverse covariance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">X_valid</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">cov</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cov</span><span class="p">(</span><span class="n">X_valid</span><span class="p">,</span> <span class="n">rowvar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inv_cov</span> <span class="o">=</span> <span class="n">inv</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">LinAlgError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_pinv_if_singular</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">inv_cov</span> <span class="o">=</span> <span class="n">pinv</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span>
+        
+        <span class="c1"># Compute threshold from chi-square distribution</span>
+        <span class="n">dof</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">'chi2'</span><span class="p">:</span>
+            <span class="n">thr_squared</span> <span class="o">=</span> <span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">confidence</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="n">dof</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">'chi2_rounddown'</span><span class="p">:</span>
+            <span class="n">thr_squared</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_round_down_to_nearest_5</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">chi2</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">confidence</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="n">dof</span><span class="p">),</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unknown method: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">thr_squared</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span> <span class="o">=</span> <span class="kc">True</span>
+        
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_round_down_to_nearest_5</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Round down to nearest 0.05."""</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="mi">20</span><span class="p">)</span> <span class="o">/</span> <span class="mi">20</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_features</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">logical</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">on_unscorable</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'warn'</span><span class="p">,</span> <span class="s1">'raise'</span><span class="p">,</span> <span class="s1">'ignore'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'warn'</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Select feature columns from `df` via a logical-&gt;physical map and return</span>
+<span class="sd">        a COPY relabeled to the logical names (same index as `df`).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : pd.DataFrame</span>
+<span class="sd">            Caller data (physical column names).</span>
+<span class="sd">        columns : dict, optional</span>
+<span class="sd">            Mapping {logical_name: physical_column}. Missing keys default to</span>
+<span class="sd">            identity (logical == physical). None means full identity.</span>
+<span class="sd">        logical : list, optional</span>
+<span class="sd">            Logical names to resolve. Defaults to ``self.features``.</span>
+<span class="sd">        on_unscorable : {'warn', 'raise', 'ignore'}, default 'warn'</span>
+<span class="sd">            Policy for rows that map to a present column but are NaN/Inf and</span>
+<span class="sd">            therefore cannot be scored.</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        KeyError</span>
+<span class="sd">            If any mapped physical column is absent from `df`, naming each</span>
+<span class="sd">            unresolved ``logical -&gt; physical`` pair.</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If `on_unscorable='raise'` and any unscorable rows exist, or if</span>
+<span class="sd">            `on_unscorable` is not one of the allowed values.</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">on_unscorable</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'warn'</span><span class="p">,</span> <span class="s1">'raise'</span><span class="p">,</span> <span class="s1">'ignore'</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"on_unscorable must be 'warn', 'raise', or 'ignore', "</span>
+                <span class="sa">f</span><span class="s2">"got </span><span class="si">{</span><span class="n">on_unscorable</span><span class="si">!r}</span><span class="s2">"</span>
+            <span class="p">)</span>
+        <span class="n">logical</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">)</span> <span class="k">if</span> <span class="n">logical</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">logical</span><span class="p">)</span>
+        <span class="n">cmap</span> <span class="o">=</span> <span class="n">columns</span> <span class="ow">or</span> <span class="p">{}</span>
+        <span class="n">physical</span> <span class="o">=</span> <span class="p">[</span><span class="n">cmap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">logical</span><span class="p">]</span>
+
+        <span class="n">missing</span> <span class="o">=</span> <span class="p">[(</span><span class="n">f</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">logical</span><span class="p">,</span> <span class="n">physical</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="n">pairs</span> <span class="o">=</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">f</span><span class="si">!r}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">p</span><span class="si">!r}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">f</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">missing</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"MahalanobisOutlierDetector: mapped column(s) not found in "</span>
+                <span class="sa">f</span><span class="s2">"DataFrame: </span><span class="si">{</span><span class="n">pairs</span><span class="si">}</span><span class="s2">. Available columns: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+            <span class="p">)</span>
+
+        <span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">physical</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">X</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">logical</span>
+
+        <span class="k">if</span> <span class="n">on_unscorable</span> <span class="o">!=</span> <span class="s1">'ignore'</span><span class="p">:</span>
+            <span class="n">clean</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">replace</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+            <span class="n">n_unscorable</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">clean</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">n_unscorable</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"MahalanobisOutlierDetector: </span><span class="si">{</span><span class="n">n_unscorable</span><span class="si">}</span><span class="s2"> row(s) map to "</span>
+                    <span class="sa">f</span><span class="s2">"present column(s) but contain NaN/Inf and cannot be scored "</span>
+                    <span class="sa">f</span><span class="s2">"(they receive NaN distance/flag). Features: </span><span class="si">{</span><span class="n">logical</span><span class="si">}</span><span class="s2">."</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">on_unscorable</span> <span class="o">==</span> <span class="s1">'raise'</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="ne">UserWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">X</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_distances</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">on_unscorable</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'warn'</span><span class="p">,</span> <span class="s1">'raise'</span><span class="p">,</span> <span class="s1">'ignore'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'warn'</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Internal method to compute Mahalanobis distances.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : pd.DataFrame</span>
+<span class="sd">            Data to compute distances for</span>
+<span class="sd">        columns : dict, optional</span>
+<span class="sd">            Mapping {logical_name: physical_column}.</span>
+<span class="sd">        on_unscorable : {'warn', 'raise', 'ignore'}, default 'warn'</span>
+<span class="sd">            Policy for rows that map to a present column but are NaN/Inf.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        distances : pd.Series</span>
+<span class="sd">            Mahalanobis distances (NaN for invalid rows)</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_calibration_domain</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">"This detector is not fitted, and no bundled calibration domain "</span>
+                <span class="sa">f</span><span class="s2">"exists for features </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">)</span><span class="si">}</span><span class="s2">. Either call fit() on "</span>
+                <span class="s2">"your reference set, or use the standard "</span>
+                <span class="s2">"['TEX86', 'scaledRI_cren3'] features to screen against TEXAS's "</span>
+                <span class="s2">"published calibration domain."</span>
+            <span class="p">)</span>
+
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_features</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">on_unscorable</span><span class="o">=</span><span class="n">on_unscorable</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">replace</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="n">valid_idx</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">X_valid</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid_idx</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        
+        <span class="c1"># Compute distances</span>
+        <span class="n">dists</span> <span class="o">=</span> <span class="p">[</span><span class="n">mahalanobis</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_vec</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inv_cov</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">X_valid</span><span class="p">]</span>
+        
+        <span class="c1"># Aligned output</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'mahalanobis_distance'</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid_idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">dists</span>
+        
+        <span class="k">return</span> <span class="n">out</span>
+    
+<div class="viewcode-block" id="MahalanobisOutlierDetector.transform">
+<a class="viewcode-back" href="../../../api.html#TEXAS.data.screening.MahalanobisOutlierDetector.transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">transform</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">col_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">on_unscorable</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'warn'</span><span class="p">,</span> <span class="s1">'raise'</span><span class="p">,</span> <span class="s1">'ignore'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'warn'</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Compute Mahalanobis distances using fitted parameters.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : pd.DataFrame</span>
+<span class="sd">            Data to transform</span>
+<span class="sd">        col_name : str, optional</span>
+<span class="sd">            If provided, add distances to df as this column</span>
+<span class="sd">        columns : dict, optional</span>
+<span class="sd">            Mapping {logical_name: physical_column}.</span>
+<span class="sd">        on_unscorable : {'warn', 'raise', 'ignore'}, default 'warn'</span>
+<span class="sd">            Policy for rows that map to a present column but are NaN/Inf.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        distances : pd.Series</span>
+<span class="sd">            Mahalanobis distances</span>
+<span class="sd">        """</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_distances</span><span class="p">(</span>
+            <span class="n">df</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">on_unscorable</span><span class="o">=</span><span class="n">on_unscorable</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">col_name</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">distances</span>
+
+        <span class="k">return</span> <span class="n">distances</span></div>
+
+
+<div class="viewcode-block" id="MahalanobisOutlierDetector.detect_outliers">
+<a class="viewcode-back" href="../../../api.html#TEXAS.data.screening.MahalanobisOutlierDetector.detect_outliers">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">detect_outliers</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">col_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">on_unscorable</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'warn'</span><span class="p">,</span> <span class="s1">'raise'</span><span class="p">,</span> <span class="s1">'ignore'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'warn'</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Detect outliers using fitted threshold.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : pd.DataFrame</span>
+<span class="sd">            Data to screen</span>
+<span class="sd">        col_name : str, optional</span>
+<span class="sd">            If provided, add outlier flags to df as this column</span>
+<span class="sd">        columns : dict, optional</span>
+<span class="sd">            Mapping {logical_name: physical_column}.</span>
+<span class="sd">        on_unscorable : {'warn', 'raise', 'ignore'}, default 'warn'</span>
+<span class="sd">            Policy for rows that map to a present column but are NaN/Inf.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        outliers : pd.Series</span>
+<span class="sd">            Boolean series (True=outlier, False=inlier, NaN=invalid)</span>
+<span class="sd">        """</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_distances</span><span class="p">(</span>
+            <span class="n">df</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">on_unscorable</span><span class="o">=</span><span class="n">on_unscorable</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Flag outliers. Build the Series as nullable boolean from the start:</span>
+        <span class="c1"># assigning a bool array into a float64 Series is deprecated in pandas</span>
+        <span class="c1"># 2.x and raises in pandas 3.0. Unscorable rows stay &lt;NA&gt;.</span>
+        <span class="n">flags</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">NA</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s2">"boolean"</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'outlier_flag'</span><span class="p">)</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="n">distances</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span>
+        <span class="n">flags</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">distances</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">col_name</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">flags</span>
+        
+        <span class="k">return</span> <span class="n">flags</span></div>
+
+    
+<div class="viewcode-block" id="MahalanobisOutlierDetector.detect_outliers_manual">
+<a class="viewcode-back" href="../../../api.html#TEXAS.data.screening.MahalanobisOutlierDetector.detect_outliers_manual">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">detect_outliers_manual</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">col_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">exclude_condition</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">on_unscorable</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'warn'</span><span class="p">,</span> <span class="s1">'raise'</span><span class="p">,</span> <span class="s1">'ignore'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'warn'</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Detect outliers using the manuscript's screening criterion.</span>
+
+<span class="sd">        **This is the recommended call for screening a record.** It applies the</span>
+<span class="sd">        calibration-domain ellipse and then restores the warm-end exception:</span>
+<span class="sd">        samples with TEX86 &gt; 0.75 *and* Scaled RI(0-3) &gt; 0.75 are retained, not</span>
+<span class="sd">        flagged, because the calibration itself retains them (Section 5.1,</span>
+<span class="sd">        Fig. 4 -- "data with TEX86 and Scaled RI above 0.75 are retained in the</span>
+<span class="sd">        calibration dataset"). Screening with the bare ellipse instead</span>
+<span class="sd">        (:meth:`detect_outliers`) would flag warm samples the calibration</span>
+<span class="sd">        actually covers.</span>
+
+<span class="sd">        Needs no ``fit()``: on the standard features the published calibration</span>
+<span class="sd">        domain is adopted automatically.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : pd.DataFrame</span>
+<span class="sd">            Data to screen</span>
+<span class="sd">        col_name : str, optional</span>
+<span class="sd">            If provided, add manual outlier flags to df as this column</span>
+<span class="sd">        exclude_condition : pd.Series, optional</span>
+<span class="sd">            Boolean series indicating samples to exclude from outlier detection.</span>
+<span class="sd">            If None, applies default: (ringIndex &gt; 3) &amp; (TEX86 &gt; 0.7)</span>
+<span class="sd">        columns : dict, optional</span>
+<span class="sd">            Mapping {logical_name: physical_column} for callers whose</span>
+<span class="sd">            DataFrame uses different column names than ``self.features``.</span>
+<span class="sd">        on_unscorable : {'warn', 'raise', 'ignore'}, default 'warn'</span>
+<span class="sd">            Policy for rows that map to a present column but are NaN/Inf.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        manual_outliers : pd.Series</span>
+<span class="sd">            Boolean series with manual exceptions applied</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; # Use default exception</span>
+<span class="sd">        &gt;&gt;&gt; outliers = detector.detect_outliers_manual(df)</span>
+<span class="sd">        &gt;&gt;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; # Custom exception</span>
+<span class="sd">        &gt;&gt;&gt; custom_exclude = (df['SST'] &gt; 30) &amp; (df['TEX86'] &gt; 0.8)</span>
+<span class="sd">        &gt;&gt;&gt; outliers = detector.detect_outliers_manual(df, exclude_condition=custom_exclude)</span>
+<span class="sd">        """</span>
+        <span class="n">outliers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_outliers</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">on_unscorable</span><span class="o">=</span><span class="n">on_unscorable</span><span class="p">)</span>
+
+        <span class="c1"># Apply manual exception</span>
+        <span class="k">if</span> <span class="n">exclude_condition</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cmap</span> <span class="o">=</span> <span class="n">columns</span> <span class="ow">or</span> <span class="p">{}</span>
+
+            <span class="k">def</span><span class="w"> </span><span class="nf">_col</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">cmap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+            <span class="c1"># Default: exclude high RI + high TEX86 samples</span>
+            <span class="k">if</span> <span class="s1">'ringIndex'</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="ow">and</span> <span class="s1">'TEX86'</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">:</span>
+                <span class="n">exclude_condition</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">_col</span><span class="p">(</span><span class="s1">'ringIndex'</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mf">0.75</span><span class="o">*</span><span class="mi">4</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">_col</span><span class="p">(</span><span class="s1">'TEX86'</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="mf">0.75</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s1">'ringIndex_cren3'</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="ow">and</span> <span class="s1">'TEX86'</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">:</span>
+                <span class="n">exclude_condition</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">_col</span><span class="p">(</span><span class="s1">'ringIndex_cren3'</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="p">(</span><span class="mf">0.75</span><span class="o">*</span><span class="mi">3</span><span class="p">))</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">_col</span><span class="p">(</span><span class="s1">'TEX86'</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="mf">0.75</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s1">'proxyObs'</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="ow">and</span> <span class="s1">'TEX86'</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">:</span>
+                <span class="n">exclude_condition</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">_col</span><span class="p">(</span><span class="s1">'proxyObs'</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="mf">0.75</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">_col</span><span class="p">(</span><span class="s1">'TEX86'</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="mf">0.75</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s1">'scaledRI'</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="ow">and</span> <span class="s1">'TEX86'</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">:</span>  <span class="c1"># backward compat</span>
+                <span class="n">exclude_condition</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">_col</span><span class="p">(</span><span class="s1">'scaledRI'</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="mf">0.75</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">_col</span><span class="p">(</span><span class="s1">'TEX86'</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="mf">0.75</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="s1">'scaledRI_cren3'</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span> <span class="ow">and</span> <span class="s1">'TEX86'</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">:</span>  <span class="c1"># backward compat</span>
+                <span class="n">exclude_condition</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">_col</span><span class="p">(</span><span class="s1">'scaledRI_cren3'</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="mf">0.75</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">_col</span><span class="p">(</span><span class="s1">'TEX86'</span><span class="p">)]</span> <span class="o">&gt;</span> <span class="mf">0.75</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">exclude_condition</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="n">manual_outliers</span> <span class="o">=</span> <span class="n">outliers</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">exclude_condition</span>
+
+        <span class="k">if</span> <span class="n">col_name</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">manual_outliers</span>
+
+        <span class="k">return</span> <span class="n">manual_outliers</span></div>
+
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_exception_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Return {feature_name: threshold} for the default manual exception, or None.</span>
+<span class="sd">        Mirrors the branching logic in detect_outliers_manual().</span>
+<span class="sd">        """</span>
+        <span class="n">feats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span>
+        <span class="k">if</span> <span class="s1">'ringIndex'</span> <span class="ow">in</span> <span class="n">feats</span> <span class="ow">and</span> <span class="s1">'TEX86'</span> <span class="ow">in</span> <span class="n">feats</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">'ringIndex'</span><span class="p">:</span> <span class="mf">0.75</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">'TEX86'</span><span class="p">:</span> <span class="mf">0.75</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="s1">'ringIndex_cren3'</span> <span class="ow">in</span> <span class="n">feats</span> <span class="ow">and</span> <span class="s1">'TEX86'</span> <span class="ow">in</span> <span class="n">feats</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">'ringIndex_cren3'</span><span class="p">:</span> <span class="mf">0.75</span> <span class="o">*</span> <span class="mi">3</span><span class="p">,</span> <span class="s1">'TEX86'</span><span class="p">:</span> <span class="mf">0.75</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="s1">'proxyObs'</span> <span class="ow">in</span> <span class="n">feats</span> <span class="ow">and</span> <span class="s1">'TEX86'</span> <span class="ow">in</span> <span class="n">feats</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">'proxyObs'</span><span class="p">:</span> <span class="mf">0.75</span><span class="p">,</span> <span class="s1">'TEX86'</span><span class="p">:</span> <span class="mf">0.75</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="s1">'scaledRI'</span> <span class="ow">in</span> <span class="n">feats</span> <span class="ow">and</span> <span class="s1">'TEX86'</span> <span class="ow">in</span> <span class="n">feats</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">'scaledRI'</span><span class="p">:</span> <span class="mf">0.75</span><span class="p">,</span> <span class="s1">'TEX86'</span><span class="p">:</span> <span class="mf">0.75</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="s1">'scaledRI_cren3'</span> <span class="ow">in</span> <span class="n">feats</span> <span class="ow">and</span> <span class="s1">'TEX86'</span> <span class="ow">in</span> <span class="n">feats</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">{</span><span class="s1">'scaledRI_cren3'</span><span class="p">:</span> <span class="mf">0.75</span><span class="p">,</span> <span class="s1">'TEX86'</span><span class="p">:</span> <span class="mf">0.75</span><span class="p">}</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="MahalanobisOutlierDetector.fit_predict">
+<a class="viewcode-back" href="../../../api.html#TEXAS.data.screening.MahalanobisOutlierDetector.fit_predict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit_predict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">col_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">on_unscorable</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'warn'</span><span class="p">,</span> <span class="s1">'raise'</span><span class="p">,</span> <span class="s1">'ignore'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'warn'</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Fit on *df* and flag its rows in one call (sklearn-style).</span>
+
+<span class="sd">        Equivalent to ``fit(df)`` followed by ``detect_outliers(df)``.</span>
+
+<span class="sd">        .. warning::</span>
+<span class="sd">           This fits the ellipse on *df itself*, which is right when *df* is a</span>
+<span class="sd">           reference/training set and **wrong for screening a record against the</span>
+<span class="sd">           calibration** -- the domain would move with the data, so an unusual</span>
+<span class="sd">           record flags less rather than more. To screen your own data, just</span>
+<span class="sd">           call :meth:`detect_outliers`: an unfitted detector on the standard</span>
+<span class="sd">           features uses TEXAS's published calibration domain automatically.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : pd.DataFrame</span>
+<span class="sd">            Data to fit on and screen</span>
+<span class="sd">        col_name : str, optional</span>
+<span class="sd">            If provided, add outlier flags to df as this column</span>
+<span class="sd">        columns : dict, optional</span>
+<span class="sd">            Mapping {logical_name: physical_column}.</span>
+<span class="sd">        on_unscorable : {'warn', 'raise', 'ignore'}, default 'warn'</span>
+<span class="sd">            Policy for rows that map to a present column but are NaN/Inf.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        outliers : pd.Series</span>
+<span class="sd">            Boolean series (True=outlier, False=inlier, NaN=invalid)</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">on_unscorable</span><span class="o">=</span><span class="n">on_unscorable</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_outliers</span><span class="p">(</span>
+            <span class="n">df</span><span class="p">,</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">on_unscorable</span><span class="o">=</span><span class="n">on_unscorable</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MahalanobisOutlierDetector.fit_transform">
+<a class="viewcode-back" href="../../../api.html#TEXAS.data.screening.MahalanobisOutlierDetector.fit_transform">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">fit_transform</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">dist_col</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">outlier_col</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">manual_outlier_col</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">on_unscorable</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">'warn'</span><span class="p">,</span> <span class="s1">'raise'</span><span class="p">,</span> <span class="s1">'ignore'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'warn'</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Fit and transform in one step.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : pd.DataFrame</span>
+<span class="sd">            Training data</span>
+<span class="sd">        dist_col : str, optional</span>
+<span class="sd">            Column name for distances</span>
+<span class="sd">        outlier_col : str, optional</span>
+<span class="sd">            Column name for outlier flags</span>
+<span class="sd">        manual_outlier_col : str, optional</span>
+<span class="sd">            Column name for manual outlier flags</span>
+<span class="sd">        columns : dict, optional</span>
+<span class="sd">            Mapping {logical_name: physical_column}.</span>
+<span class="sd">        on_unscorable : {'warn', 'raise', 'ignore'}, default 'warn'</span>
+<span class="sd">            Policy for rows that map to a present column but are NaN/Inf.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        results : dict</span>
+<span class="sd">            Dictionary containing:</span>
+<span class="sd">            - 'distances': Mahalanobis distances</span>
+<span class="sd">            - 'outliers': Outlier flags</span>
+<span class="sd">            - 'manual_outliers': Manual outlier flags</span>
+<span class="sd">            - 'threshold': Computed threshold</span>
+<span class="sd">        """</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">on_unscorable</span><span class="o">=</span><span class="n">on_unscorable</span><span class="p">)</span>
+
+        <span class="n">distances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">dist_col</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">on_unscorable</span><span class="o">=</span><span class="n">on_unscorable</span><span class="p">)</span>
+        <span class="n">outliers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_outliers</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">outlier_col</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">on_unscorable</span><span class="o">=</span><span class="n">on_unscorable</span><span class="p">)</span>
+        <span class="n">manual_outliers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_outliers_manual</span><span class="p">(</span>
+            <span class="n">df</span><span class="p">,</span> <span class="n">manual_outlier_col</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">on_unscorable</span><span class="o">=</span><span class="n">on_unscorable</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">'distances'</span><span class="p">:</span> <span class="n">distances</span><span class="p">,</span>
+            <span class="s1">'outliers'</span><span class="p">:</span> <span class="n">outliers</span><span class="p">,</span>
+            <span class="s1">'manual_outliers'</span><span class="p">:</span> <span class="n">manual_outliers</span><span class="p">,</span>
+            <span class="s1">'threshold'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">,</span>
+        <span class="p">}</span></div>
+
+    
+<div class="viewcode-block" id="MahalanobisOutlierDetector.get_params">
+<a class="viewcode-back" href="../../../api.html#TEXAS.data.screening.MahalanobisOutlierDetector.get_params">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_params</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Get fitted parameters.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        params : dict</span>
+<span class="sd">            Dictionary of fitted parameters</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Detector has not been fitted yet"</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">'mean_vec'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_vec</span><span class="p">,</span>
+            <span class="s1">'inv_cov'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">inv_cov</span><span class="p">,</span>
+            <span class="s1">'threshold'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">,</span>
+            <span class="s1">'features'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">,</span>
+            <span class="s1">'confidence'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">confidence</span><span class="p">,</span>
+            <span class="s1">'method'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">method</span>
+        <span class="p">}</span></div>
+
+    
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">fitted_str</span> <span class="o">=</span> <span class="s2">"fitted"</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span> <span class="k">else</span> <span class="s2">"not fitted"</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s2">"MahalanobisOutlierDetector(features=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="si">}</span><span class="s2">, "</span>
+                <span class="sa">f</span><span class="s2">"confidence=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">confidence</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">fitted_str</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_confidence_ellipse_params</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_std</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Get parameters for drawing confidence ellipse (2D only).</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n_std : float, optional</span>
+<span class="sd">            Number of standard deviations for ellipse.</span>
+<span class="sd">            If None, uses fitted threshold.</span>
+<span class="sd">            </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        params : dict</span>
+<span class="sd">            Dictionary with 'center', 'width', 'height', 'angle'</span>
+<span class="sd">            </span>
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If detector is not fitted or has != 2 features</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Must call fit() before getting ellipse parameters"</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Ellipse visualization only works for 2D data, got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">)</span><span class="si">}</span><span class="s2"> features"</span><span class="p">)</span>
+        
+        <span class="c1"># Use threshold if n_std not provided</span>
+        <span class="k">if</span> <span class="n">n_std</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">n_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span>
+        
+        <span class="c1"># Get covariance matrix (inverse of inv_cov)</span>
+        <span class="n">cov</span> <span class="o">=</span> <span class="n">inv</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inv_cov</span><span class="p">)</span>
+        
+        <span class="c1"># Eigendecomposition to get ellipse parameters</span>
+        <span class="n">eigenvalues</span><span class="p">,</span> <span class="n">eigenvectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eigh</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate ellipse parameters</span>
+        <span class="n">angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">degrees</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">eigenvectors</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">eigenvectors</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]))</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n_std</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">eigenvalues</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">n_std</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">eigenvalues</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">'center'</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_vec</span><span class="p">,</span>
+            <span class="s1">'width'</span><span class="p">:</span> <span class="n">width</span><span class="p">,</span>
+            <span class="s1">'height'</span><span class="p">:</span> <span class="n">height</span><span class="p">,</span>
+            <span class="s1">'angle'</span><span class="p">:</span> <span class="n">angle</span><span class="p">,</span>
+            <span class="s1">'eigenvalues'</span><span class="p">:</span> <span class="n">eigenvalues</span><span class="p">,</span>
+            <span class="s1">'eigenvectors'</span><span class="p">:</span> <span class="n">eigenvectors</span>
+        <span class="p">}</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_ellipse</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ax</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_std</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Ellipse</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Plot confidence ellipse on matplotlib axes (2D only).</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ax : matplotlib.axes.Axes, optional</span>
+<span class="sd">            Axes to plot on. If None, uses current axes.</span>
+<span class="sd">        n_std : float, optional</span>
+<span class="sd">            Number of standard deviations. If None, uses fitted threshold.</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Additional arguments passed to matplotlib.patches.Ellipse</span>
+<span class="sd">            </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ellipse : matplotlib.patches.Ellipse</span>
+<span class="sd">            The ellipse patch object</span>
+<span class="sd">            </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; fig, ax = plt.subplots()</span>
+<span class="sd">        &gt;&gt;&gt; ax.scatter(df['TEX86'], df['ringIndex'])</span>
+<span class="sd">        &gt;&gt;&gt; detector.plot_ellipse(ax, facecolor='none', edgecolor='red', linewidth=2)</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span>
+        
+        <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_confidence_ellipse_params</span><span class="p">(</span><span class="n">n_std</span><span class="p">)</span>
+        
+        <span class="c1"># Default styling</span>
+        <span class="n">ellipse_kwargs</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">'facecolor'</span><span class="p">:</span> <span class="s1">'none'</span><span class="p">,</span>
+            <span class="s1">'edgecolor'</span><span class="p">:</span> <span class="s1">'red'</span><span class="p">,</span>
+            <span class="s1">'linewidth'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s1">'linestyle'</span><span class="p">:</span> <span class="s1">'--'</span><span class="p">,</span>
+            <span class="s1">'alpha'</span><span class="p">:</span> <span class="mf">0.8</span>
+        <span class="p">}</span>
+        <span class="n">ellipse_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        
+        <span class="n">ellipse</span> <span class="o">=</span> <span class="n">Ellipse</span><span class="p">(</span>
+            <span class="n">xy</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">'center'</span><span class="p">],</span>
+            <span class="n">width</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">'width'</span><span class="p">],</span>
+            <span class="n">height</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">'height'</span><span class="p">],</span>
+            <span class="n">angle</span><span class="o">=</span><span class="n">params</span><span class="p">[</span><span class="s1">'angle'</span><span class="p">],</span>
+            <span class="o">**</span><span class="n">ellipse_kwargs</span>
+        <span class="p">)</span>
+        
+        <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">ellipse</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">ellipse</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_decision_boundary</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">ax</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">plot_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">show_outliers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">use_manual</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">show_exception_region</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">ellipse_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">scatter_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">outlier_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Complete visualization with data points and decision boundary.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : pd.DataFrame</span>
+<span class="sd">            Data to visualize</span>
+<span class="sd">        ax : matplotlib.axes.Axes, optional</span>
+<span class="sd">            Axes to plot on</span>
+<span class="sd">        plot_data : bool, default=True</span>
+<span class="sd">            Whether to plot data points</span>
+<span class="sd">        show_outliers : bool, default=True</span>
+<span class="sd">            Whether to highlight outliers differently</span>
+<span class="sd">        use_manual : bool, default=True</span>
+<span class="sd">            If True, use detect_outliers_manual() so that points kept by the</span>
+<span class="sd">            manual exception (e.g. high TEX86 + high scaledRI) are shown as</span>
+<span class="sd">            inliers, matching the actual filtered dataset. If False, use</span>
+<span class="sd">            detect_outliers() (pure distance threshold, ignores the exception).</span>
+<span class="sd">        show_exception_region : bool, default=True</span>
+<span class="sd">            If True and use_manual is True, draw a shaded rectangle marking</span>
+<span class="sd">            the high-RI / high-TEX86 corner that is retained regardless of</span>
+<span class="sd">            Mahalanobis distance. Has no effect when use_manual=False or when</span>
+<span class="sd">            the feature combination has no default exception.</span>
+<span class="sd">        ellipse_kwargs : dict, optional</span>
+<span class="sd">            Keyword arguments for ellipse</span>
+<span class="sd">        scatter_kwargs : dict, optional</span>
+<span class="sd">            Keyword arguments for inlier scatter plot</span>
+<span class="sd">        outlier_kwargs : dict, optional</span>
+<span class="sd">            Keyword arguments for outlier scatter plot</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ax : matplotlib.axes.Axes</span>
+<span class="sd">            The axes object</span>
+<span class="sd">        ellipse : matplotlib.patches.Ellipse</span>
+<span class="sd">            The ellipse patch</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; detector = MahalanobisOutlierDetector(['TEX86', 'ringIndex'])</span>
+<span class="sd">        &gt;&gt;&gt; detector.fit(df)</span>
+<span class="sd">        &gt;&gt;&gt; fig, ax = plt.subplots()</span>
+<span class="sd">        &gt;&gt;&gt; detector.plot_decision_boundary(df, ax=ax)</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Decision boundary plot only works for 2D data, got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">)</span><span class="si">}</span><span class="s2"> features"</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+
+        <span class="c1"># Default kwargs</span>
+        <span class="k">if</span> <span class="n">ellipse_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ellipse_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">scatter_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">scatter_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'c'</span><span class="p">:</span> <span class="s1">'#888888'</span><span class="p">,</span> <span class="s1">'s'</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span> <span class="s1">'alpha'</span><span class="p">:</span> <span class="mf">0.6</span><span class="p">,</span> <span class="s1">'label'</span><span class="p">:</span> <span class="s1">'Inliers'</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">outlier_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">outlier_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'c'</span><span class="p">:</span> <span class="s1">'red'</span><span class="p">,</span> <span class="s1">'s'</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span> <span class="s1">'alpha'</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">,</span> <span class="s1">'marker'</span><span class="p">:</span> <span class="s1">'x'</span><span class="p">,</span> <span class="s1">'label'</span><span class="p">:</span> <span class="s1">'Outliers (screened out)'</span><span class="p">}</span>
+
+        <span class="c1"># Plot data points</span>
+        <span class="k">if</span> <span class="n">plot_data</span><span class="p">:</span>
+            <span class="n">x_data</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">y_data</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+
+            <span class="k">if</span> <span class="n">show_outliers</span><span class="p">:</span>
+                <span class="n">outliers</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">detect_outliers_manual</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="k">if</span> <span class="n">use_manual</span>
+                            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_outliers</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
+
+                <span class="c1"># Plot inliers</span>
+                <span class="n">inlier_mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">outliers</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x_data</span><span class="p">[</span><span class="n">inlier_mask</span><span class="p">],</span> <span class="n">y_data</span><span class="p">[</span><span class="n">inlier_mask</span><span class="p">],</span> <span class="o">**</span><span class="n">scatter_kwargs</span><span class="p">)</span>
+
+                <span class="c1"># Plot outliers</span>
+                <span class="n">outlier_mask</span> <span class="o">=</span> <span class="n">outliers</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">outlier_mask</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x_data</span><span class="p">[</span><span class="n">outlier_mask</span><span class="p">],</span> <span class="n">y_data</span><span class="p">[</span><span class="n">outlier_mask</span><span class="p">],</span> <span class="o">**</span><span class="n">outlier_kwargs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="o">**</span><span class="n">scatter_kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Plot ellipse</span>
+        <span class="n">ellipse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">ellipse_kwargs</span><span class="p">)</span>
+
+        <span class="c1"># Draw manual-exception rectangle (high-RI / high-TEX86 retained corner)</span>
+        <span class="k">if</span> <span class="n">use_manual</span> <span class="ow">and</span> <span class="n">show_exception_region</span><span class="p">:</span>
+            <span class="n">bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_exception_bounds</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">bounds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">x_thresh</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">y_thresh</span> <span class="o">=</span> <span class="n">bounds</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">x_thresh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">y_thresh</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># Freeze axis limits set by the data before adding the patch,</span>
+                    <span class="c1"># so the large rectangle does not expand the axes to 1000.</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">autoscale</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="n">xlim</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()</span>
+                    <span class="n">ylim</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">get_ylim</span><span class="p">()</span>
+                    <span class="n">w</span> <span class="o">=</span> <span class="p">(</span><span class="n">xlim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x_thresh</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span>
+                    <span class="n">h</span> <span class="o">=</span> <span class="p">(</span><span class="n">ylim</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">y_thresh</span><span class="p">)</span> <span class="o">*</span> <span class="mi">10</span>
+                    <span class="n">rect</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">Rectangle</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">x_thresh</span><span class="p">,</span> <span class="n">y_thresh</span><span class="p">),</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span>
+                        <span class="n">facecolor</span><span class="o">=</span><span class="s1">'steelblue'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.12</span><span class="p">,</span>
+                        <span class="n">edgecolor</span><span class="o">=</span><span class="s1">'steelblue'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.2</span><span class="p">,</span>
+                        <span class="n">linestyle</span><span class="o">=</span><span class="s1">'--'</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'Manual exception (retained)'</span><span class="p">,</span>
+                        <span class="n">zorder</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">rect</span><span class="p">)</span>
+
+        <span class="c1"># Labels</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">ellipse</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_multiple_ellipses</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">ax</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_std_levels</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">colors</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Plot multiple confidence ellipses at different threshold levels.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : pd.DataFrame</span>
+<span class="sd">            Data to visualize</span>
+<span class="sd">        ax : matplotlib.axes.Axes, optional</span>
+<span class="sd">            Axes to plot on</span>
+<span class="sd">        n_std_levels : list, optional</span>
+<span class="sd">            List of standard deviation levels. Default: [1, 2, 3, threshold]</span>
+<span class="sd">        colors : list, optional</span>
+<span class="sd">            Colors for each ellipse level</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Additional arguments passed to scatter plot</span>
+<span class="sd">            </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; detector.plot_multiple_ellipses(df, n_std_levels=[1, 2, 2.5, 3])</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Ellipse plot only works for 2D data, got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">)</span><span class="si">}</span><span class="s2"> features"</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        
+        <span class="k">if</span> <span class="n">n_std_levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">n_std_levels</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">colors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">colors</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">cm</span><span class="o">.</span><span class="n">Reds</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">n_std_levels</span><span class="p">)))</span>
+        
+        <span class="c1"># Plot data</span>
+        <span class="n">x_data</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="n">y_data</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        <span class="n">scatter_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'c'</span><span class="p">:</span> <span class="s1">'#888888'</span><span class="p">,</span> <span class="s1">'s'</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s1">'alpha'</span><span class="p">:</span> <span class="mf">0.4</span><span class="p">,</span> <span class="s1">'zorder'</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span>
+        <span class="n">scatter_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x_data</span><span class="p">,</span> <span class="n">y_data</span><span class="p">,</span> <span class="o">**</span><span class="n">scatter_kwargs</span><span class="p">)</span>
+        
+        <span class="c1"># Plot ellipses</span>
+        <span class="k">for</span> <span class="n">n_std</span><span class="p">,</span> <span class="n">color</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">n_std_levels</span><span class="p">,</span> <span class="n">colors</span><span class="p">):</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">n_std</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">σ'</span> <span class="k">if</span> <span class="n">n_std</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">'Threshold (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">threshold</span><span class="si">:</span><span class="s1">.2f</span><span class="si">}</span><span class="s1">)'</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">(</span>
+                <span class="n">ax</span><span class="p">,</span>
+                <span class="n">n_std</span><span class="o">=</span><span class="n">n_std</span><span class="p">,</span>
+                <span class="n">edgecolor</span><span class="o">=</span><span class="n">color</span><span class="p">,</span>
+                <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span> <span class="k">if</span> <span class="n">n_std</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">threshold</span> <span class="k">else</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="n">linestyle</span><span class="o">=</span><span class="s1">'--'</span><span class="p">,</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+                <span class="n">zorder</span><span class="o">=</span><span class="mi">2</span>
+            <span class="p">)</span>
+        
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        
+        <span class="k">return</span> <span class="n">ax</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_pairwise_ellipses</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">show_outliers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">ellipse_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">scatter_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">outlier_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Plot pairwise 2D projections with confidence ellipses for high-dimensional data.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : pd.DataFrame</span>
+<span class="sd">            Data to visualize</span>
+<span class="sd">        figsize : tuple, optional</span>
+<span class="sd">            Figure size. Auto-calculated if None.</span>
+<span class="sd">        show_outliers : bool, default=True</span>
+<span class="sd">            Whether to highlight outliers</span>
+<span class="sd">        ellipse_kwargs : dict, optional</span>
+<span class="sd">            Keyword arguments for ellipses</span>
+<span class="sd">        scatter_kwargs : dict, optional</span>
+<span class="sd">            Keyword arguments for inlier scatter</span>
+<span class="sd">        outlier_kwargs : dict, optional</span>
+<span class="sd">            Keyword arguments for outlier scatter</span>
+<span class="sd">            </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fig : matplotlib.figure.Figure</span>
+<span class="sd">            Figure object</span>
+<span class="sd">        axs : array of matplotlib.axes.Axes</span>
+<span class="sd">            Array of axes objects</span>
+<span class="sd">            </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; detector = MahalanobisOutlierDetector(['TEX86', 'ringIndex', 'fGDGT_0', 'fGDGT_cren'])</span>
+<span class="sd">        &gt;&gt;&gt; detector.fit(coretop_df)</span>
+<span class="sd">        &gt;&gt;&gt; fig, axs = detector.plot_pairwise_ellipses(coretop_df)</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Must call fit() before plotting"</span><span class="p">)</span>
+        
+        <span class="n">n_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">)</span>
+        <span class="n">feature_pairs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">combinations</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_features</span><span class="p">),</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="n">n_pairs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">feature_pairs</span><span class="p">)</span>
+        
+        <span class="c1"># Calculate grid dimensions</span>
+        <span class="n">n_cols</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">n_pairs</span><span class="p">)))</span>
+        <span class="n">n_rows</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n_pairs</span> <span class="o">/</span> <span class="n">n_cols</span><span class="p">))</span>
+        
+        <span class="k">if</span> <span class="n">figsize</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">n_cols</span><span class="p">,</span> <span class="mf">3.5</span> <span class="o">*</span> <span class="n">n_rows</span><span class="p">)</span>
+        
+        <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">n_rows</span><span class="p">,</span> <span class="n">n_cols</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+        <span class="n">axs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">axs</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+        
+        <span class="c1"># Default styling</span>
+        <span class="k">if</span> <span class="n">ellipse_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ellipse_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'facecolor'</span><span class="p">:</span> <span class="s1">'red'</span><span class="p">,</span> <span class="s1">'alpha'</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span> <span class="s1">'edgecolor'</span><span class="p">:</span> <span class="s1">'red'</span><span class="p">,</span> <span class="s1">'linewidth'</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">scatter_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">scatter_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'c'</span><span class="p">:</span> <span class="s1">'#888888'</span><span class="p">,</span> <span class="s1">'s'</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s1">'alpha'</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">outlier_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">outlier_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'c'</span><span class="p">:</span> <span class="s1">'red'</span><span class="p">,</span> <span class="s1">'s'</span><span class="p">:</span> <span class="mi">40</span><span class="p">,</span> <span class="s1">'marker'</span><span class="p">:</span> <span class="s1">'x'</span><span class="p">,</span> <span class="s1">'alpha'</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">}</span>
+        
+        <span class="c1"># Get outlier flags once</span>
+        <span class="k">if</span> <span class="n">show_outliers</span><span class="p">:</span>
+            <span class="n">outliers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_outliers</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">inliers</span> <span class="o">=</span> <span class="o">~</span><span class="n">outliers</span>
+        
+        <span class="c1"># Plot each pair</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">feature_pairs</span><span class="p">):</span>
+            <span class="n">ax</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+            
+            <span class="n">feat_i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">feat_j</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            
+            <span class="c1"># Create marginal 2D detector for this pair</span>
+            <span class="n">pair_detector</span> <span class="o">=</span> <span class="n">MahalanobisOutlierDetector</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">feat_i</span><span class="p">,</span> <span class="n">feat_j</span><span class="p">],</span>
+                <span class="n">confidence</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">confidence</span><span class="p">,</span>
+                <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span>
+            <span class="p">)</span>
+            
+            <span class="c1"># Fit on the same data (marginal distribution)</span>
+            <span class="n">pair_detector</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+            
+            <span class="c1"># Plot data</span>
+            <span class="k">if</span> <span class="n">show_outliers</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">inliers</span><span class="p">,</span> <span class="n">feat_i</span><span class="p">],</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">inliers</span><span class="p">,</span> <span class="n">feat_j</span><span class="p">],</span> 
+                          <span class="o">**</span><span class="n">scatter_kwargs</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'Inliers'</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">outliers</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">outliers</span><span class="p">,</span> <span class="n">feat_i</span><span class="p">],</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">outliers</span><span class="p">,</span> <span class="n">feat_j</span><span class="p">],</span> 
+                              <span class="o">**</span><span class="n">outlier_kwargs</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'Outliers'</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">feat_i</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="n">feat_j</span><span class="p">],</span> <span class="o">**</span><span class="n">scatter_kwargs</span><span class="p">)</span>
+            
+            <span class="c1"># Plot ellipse for this marginal distribution</span>
+            <span class="n">pair_detector</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">ellipse_kwargs</span><span class="p">)</span>
+            
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">feat_i</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">feat_j</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+        
+        <span class="c1"># Hide unused subplots</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_pairs</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">axs</span><span class="p">)):</span>
+            <span class="n">axs</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        
+        <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_pca_projection</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">n_components</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">ax</span><span class="p">:</span> <span class="n">plt</span><span class="o">.</span><span class="n">Axes</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">show_outliers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">show_variance</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">ellipse_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">scatter_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">outlier_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Project high-dimensional data to 2D/3D using PCA and plot with ellipse.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : pd.DataFrame</span>
+<span class="sd">            Data to visualize</span>
+<span class="sd">        n_components : int, default=2</span>
+<span class="sd">            Number of PCA components (2 or 3)</span>
+<span class="sd">        ax : matplotlib.axes.Axes, optional</span>
+<span class="sd">            Axes to plot on</span>
+<span class="sd">        show_outliers : bool, default=True</span>
+<span class="sd">            Whether to highlight outliers</span>
+<span class="sd">        show_variance : bool, default=True</span>
+<span class="sd">            Whether to show explained variance in labels</span>
+<span class="sd">        ellipse_kwargs : dict, optional</span>
+<span class="sd">            Keyword arguments for ellipse</span>
+<span class="sd">        scatter_kwargs : dict, optional</span>
+<span class="sd">            Keyword arguments for inlier scatter</span>
+<span class="sd">        outlier_kwargs : dict, optional</span>
+<span class="sd">            Keyword arguments for outlier scatter</span>
+<span class="sd">            </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ax : matplotlib.axes.Axes</span>
+<span class="sd">            Axes object</span>
+<span class="sd">        pca : sklearn.decomposition.PCA</span>
+<span class="sd">            Fitted PCA object</span>
+<span class="sd">            </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; detector = MahalanobisOutlierDetector(['TEX86', 'ringIndex', 'fGDGT_0', 'fGDGT_cren'])</span>
+<span class="sd">        &gt;&gt;&gt; detector.fit(coretop_df)</span>
+<span class="sd">        &gt;&gt;&gt; ax, pca = detector.plot_pca_projection(coretop_df)</span>
+<span class="sd">        &gt;&gt;&gt; print(f"Variance explained: {pca.explained_variance_ratio_}")</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Must call fit() before plotting"</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">n_components</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"n_components must be 2 or 3"</span><span class="p">)</span>
+        
+        <span class="c1"># Get valid data</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="n">valid_idx</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">X_valid</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid_idx</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        
+        <span class="c1"># Fit PCA</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.decomposition</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCA</span>
+        <span class="n">pca</span> <span class="o">=</span> <span class="n">PCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="n">n_components</span><span class="p">)</span>
+        <span class="n">X_pca</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_valid</span><span class="p">)</span>
+        
+        <span class="c1"># Create axes</span>
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">n_components</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="s1">'3d'</span><span class="p">)</span>
+        
+        <span class="c1"># Default styling</span>
+        <span class="k">if</span> <span class="n">ellipse_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ellipse_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'facecolor'</span><span class="p">:</span> <span class="s1">'red'</span><span class="p">,</span> <span class="s1">'alpha'</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span> <span class="s1">'edgecolor'</span><span class="p">:</span> <span class="s1">'red'</span><span class="p">,</span> <span class="s1">'linewidth'</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">scatter_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">scatter_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'c'</span><span class="p">:</span> <span class="s1">'#888888'</span><span class="p">,</span> <span class="s1">'s'</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span> <span class="s1">'alpha'</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">outlier_kwargs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">outlier_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'c'</span><span class="p">:</span> <span class="s1">'red'</span><span class="p">,</span> <span class="s1">'s'</span><span class="p">:</span> <span class="mi">40</span><span class="p">,</span> <span class="s1">'marker'</span><span class="p">:</span> <span class="s1">'x'</span><span class="p">,</span> <span class="s1">'alpha'</span><span class="p">:</span> <span class="mf">0.8</span><span class="p">}</span>
+        
+        <span class="c1"># Get outliers</span>
+        <span class="n">outliers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_outliers</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">outliers_valid</span> <span class="o">=</span> <span class="n">outliers</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">valid_idx</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">inliers_valid</span> <span class="o">=</span> <span class="o">~</span><span class="n">outliers_valid</span>
+        
+        <span class="c1"># Plot data</span>
+        <span class="k">if</span> <span class="n">n_components</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">show_outliers</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_pca</span><span class="p">[</span><span class="n">inliers_valid</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_pca</span><span class="p">[</span><span class="n">inliers_valid</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> 
+                          <span class="o">**</span><span class="n">scatter_kwargs</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'Inliers'</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">outliers_valid</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_pca</span><span class="p">[</span><span class="n">outliers_valid</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_pca</span><span class="p">[</span><span class="n">outliers_valid</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> 
+                              <span class="o">**</span><span class="n">outlier_kwargs</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'Outliers'</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_pca</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_pca</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="o">**</span><span class="n">scatter_kwargs</span><span class="p">)</span>
+            
+            <span class="c1"># Create temporary dataframe for PCA space</span>
+            <span class="n">pca_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">X_pca</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">'PC1'</span><span class="p">,</span> <span class="s1">'PC2'</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">valid_idx</span><span class="p">)</span>
+            
+            <span class="c1"># Fit detector in PCA space</span>
+            <span class="n">pca_detector</span> <span class="o">=</span> <span class="n">MahalanobisOutlierDetector</span><span class="p">([</span><span class="s1">'PC1'</span><span class="p">,</span> <span class="s1">'PC2'</span><span class="p">],</span> 
+                                                      <span class="n">confidence</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">confidence</span><span class="p">,</span>
+                                                      <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">)</span>
+            <span class="n">pca_detector</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">pca_df</span><span class="p">)</span>
+            <span class="n">pca_detector</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">ellipse_kwargs</span><span class="p">)</span>
+            
+            <span class="c1"># Labels</span>
+            <span class="n">var1</span><span class="p">,</span> <span class="n">var2</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">explained_variance_ratio_</span>
+            <span class="k">if</span> <span class="n">show_variance</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PC1 (</span><span class="si">{</span><span class="n">var1</span><span class="si">:</span><span class="s1">.1%</span><span class="si">}</span><span class="s1"> variance)'</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PC2 (</span><span class="si">{</span><span class="n">var2</span><span class="si">:</span><span class="s1">.1%</span><span class="si">}</span><span class="s1"> variance)'</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">'PC1'</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">'PC2'</span><span class="p">)</span>
+            
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># 3D</span>
+            <span class="k">if</span> <span class="n">show_outliers</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_pca</span><span class="p">[</span><span class="n">inliers_valid</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_pca</span><span class="p">[</span><span class="n">inliers_valid</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> 
+                          <span class="n">X_pca</span><span class="p">[</span><span class="n">inliers_valid</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="o">**</span><span class="n">scatter_kwargs</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'Inliers'</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">outliers_valid</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_pca</span><span class="p">[</span><span class="n">outliers_valid</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_pca</span><span class="p">[</span><span class="n">outliers_valid</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> 
+                              <span class="n">X_pca</span><span class="p">[</span><span class="n">outliers_valid</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="o">**</span><span class="n">outlier_kwargs</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'Outliers'</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X_pca</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X_pca</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">X_pca</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="o">**</span><span class="n">scatter_kwargs</span><span class="p">)</span>
+            
+            <span class="c1"># Labels</span>
+            <span class="n">var1</span><span class="p">,</span> <span class="n">var2</span><span class="p">,</span> <span class="n">var3</span> <span class="o">=</span> <span class="n">pca</span><span class="o">.</span><span class="n">explained_variance_ratio_</span>
+            <span class="k">if</span> <span class="n">show_variance</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PC1 (</span><span class="si">{</span><span class="n">var1</span><span class="si">:</span><span class="s1">.1%</span><span class="si">}</span><span class="s1"> variance)'</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PC2 (</span><span class="si">{</span><span class="n">var2</span><span class="si">:</span><span class="s1">.1%</span><span class="si">}</span><span class="s1"> variance)'</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PC3 (</span><span class="si">{</span><span class="n">var3</span><span class="si">:</span><span class="s1">.1%</span><span class="si">}</span><span class="s1"> variance)'</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">'PC1'</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">'PC2'</span><span class="p">)</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_zlabel</span><span class="p">(</span><span class="s1">'PC3'</span><span class="p">)</span>
+        
+        <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">ax</span><span class="p">,</span> <span class="n">pca</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">plot_corner</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">figsize</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">show_outliers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">"""</span>
+<span class="sd">        Create corner plot (lower triangle pairwise plots with marginals).</span>
+<span class="sd">        Similar to corner.py but integrated with Mahalanobis detection.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        df : pd.DataFrame</span>
+<span class="sd">            Data to visualize</span>
+<span class="sd">        figsize : tuple, optional</span>
+<span class="sd">            Figure size</span>
+<span class="sd">        show_outliers : bool, default=True</span>
+<span class="sd">            Whether to highlight outliers</span>
+<span class="sd">        **kwargs</span>
+<span class="sd">            Additional styling arguments</span>
+<span class="sd">            </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fig : matplotlib.figure.Figure</span>
+<span class="sd">            Figure object</span>
+<span class="sd">        axs : array of matplotlib.axes.Axes</span>
+<span class="sd">            Grid of axes</span>
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_fitted</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Must call fit() before plotting"</span><span class="p">)</span>
+        
+        <span class="n">n_features</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">figsize</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.5</span> <span class="o">*</span> <span class="n">n_features</span><span class="p">,</span> <span class="mf">2.5</span> <span class="o">*</span> <span class="n">n_features</span><span class="p">)</span>
+        
+        <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">n_features</span><span class="p">,</span> <span class="n">n_features</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+        
+        <span class="c1"># Get outliers</span>
+        <span class="k">if</span> <span class="n">show_outliers</span><span class="p">:</span>
+            <span class="n">outliers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detect_outliers</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">inliers</span> <span class="o">=</span> <span class="o">~</span><span class="n">outliers</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_features</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_features</span><span class="p">):</span>
+                <span class="n">ax</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+                
+                <span class="k">if</span> <span class="n">j</span> <span class="o">&gt;</span> <span class="n">i</span><span class="p">:</span>
+                    <span class="c1"># Upper triangle - hide</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                    
+                <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="n">j</span><span class="p">:</span>
+                    <span class="c1"># Diagonal - histogram</span>
+                    <span class="n">feat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">show_outliers</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">inliers</span><span class="p">,</span> <span class="n">feat</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> 
+                               <span class="n">color</span><span class="o">=</span><span class="s1">'gray'</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'Inliers'</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">outliers</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                            <span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">outliers</span><span class="p">,</span> <span class="n">feat</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span> 
+                                   <span class="n">color</span><span class="o">=</span><span class="s1">'red'</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'Outliers'</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">feat</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">'gray'</span><span class="p">)</span>
+                    
+                    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">'Count'</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">n_features</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">feat</span><span class="p">)</span>
+                    
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Lower triangle - scatter + ellipse</span>
+                    <span class="n">feat_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                    <span class="n">feat_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">features</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                    
+                    <span class="c1"># Create marginal detector</span>
+                    <span class="n">pair_detector</span> <span class="o">=</span> <span class="n">MahalanobisOutlierDetector</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">feat_x</span><span class="p">,</span> <span class="n">feat_y</span><span class="p">],</span>
+                        <span class="n">confidence</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">confidence</span><span class="p">,</span>
+                        <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span>
+                    <span class="p">)</span>
+                    <span class="n">pair_detector</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+                    
+                    <span class="c1"># Plot</span>
+                    <span class="k">if</span> <span class="n">show_outliers</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">inliers</span><span class="p">,</span> <span class="n">feat_x</span><span class="p">],</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">inliers</span><span class="p">,</span> <span class="n">feat_y</span><span class="p">],</span> 
+                                  <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">'gray'</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">outliers</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+                            <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">outliers</span><span class="p">,</span> <span class="n">feat_x</span><span class="p">],</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">outliers</span><span class="p">,</span> <span class="n">feat_y</span><span class="p">],</span> 
+                                      <span class="n">s</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">'x'</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">'red'</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">feat_x</span><span class="p">],</span> <span class="n">df</span><span class="p">[</span><span class="n">feat_y</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">'gray'</span><span class="p">)</span>
+                    
+                    <span class="n">pair_detector</span><span class="o">.</span><span class="n">plot_ellipse</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">'red'</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> 
+                                              <span class="n">edgecolor</span><span class="o">=</span><span class="s1">'red'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">1.5</span><span class="p">)</span>
+                    
+                    <span class="k">if</span> <span class="n">j</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">feat_y</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">n_features</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">feat_x</span><span class="p">)</span>
+        
+        <span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">fig</span><span class="p">,</span> <span class="n">axs</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Ronnakrit Rattanasriampaipong
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

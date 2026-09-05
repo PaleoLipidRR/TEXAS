@@ -1,0 +1,1323 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TEXAS.data.builder &#8212; TEXAS</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=e1f25cfb" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js?v=b8b12719"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/TEXAS/data/builder';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="canonical" href="https://paleolipidrr.github.io/TEXAS/_modules/TEXAS/data/builder.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/texas_logo.svg" class="logo__image only-light" alt="TEXAS - Home"/>
+    <img src="../../../_static/texas_logo.svg" class="logo__image only-dark pst-js-only" alt="TEXAS - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../callmap.html">Call map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../tutorial/intro.html">TEXAS Interactive Tutorial</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module1_prior.html">Module 1 — What is a Prior?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module2_bayesian_updating.html">Module 2 — Bayesian Updating</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module3_curve_explorer.html">Module 3 — The Calibration Curve Explorer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module4_mcmc.html">Module 4 — What MCMC Actually Does</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module5_results.html">Module 5 — Reading Your Results</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Explainers</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../PSM.html">TEXAS Proxy System Model — Bayesian Inference Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_validation.html">Model validation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sampler_budget.html">Sampler budget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../stan_models_explanation_v2.html">TEXAS Stan Models: Ensemble vs Direct Sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../marginalization_explainer.html">Why Marginalization Improves Inverse TEXAS Sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../why_plugin_p50_differs.html">Why the plug-in P50 ≠ the Bayesian P50</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reduce_sum_for_geologists.html">Understanding <code class="docutils literal notranslate"><span class="pre">reduce_sum</span></code> and <code class="docutils literal notranslate"><span class="pre">ll_chunk</span></code> in TEXAS-PSM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Prior_Choice_Normal_vs_Cauchy.html">Why Normal Instead of Cauchy Priors? 🤔</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ckdtree_nearest_ocean_explainer.html">Finding the Nearest Ocean Pixel: How <code class="docutils literal notranslate"><span class="pre">cKDTree</span></code> Works</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Archive</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../preprint_additive_archive.html">Archive — the preprint’s additive (β) formulation</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS/issues/new?title=Issue%20on%20page%20%2F_modules/TEXAS/data/builder.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for TEXAS.data.builder</h1><div class="highlight"><pre>
+<span></span><span class="c1"># TEXAS/data/builder.py</span>
+<span class="sd">"""</span>
+<span class="sd">Data builder for inverse temperature (invT) models.</span>
+
+<span class="sd">This module bridges the FORWARD and INVERSE calibration models:</span>
+<span class="sd">  1. Loads posterior samples from a completed forward calibration</span>
+<span class="sd">  2. Randomly samples M parameter sets from that posterior</span>
+<span class="sd">  3. Packages them as FIXED DATA for the inverse Stan model</span>
+
+<span class="sd">The inverse model then marginalizes over these M samples to predict</span>
+<span class="sd">temperature from observed Ring Index values.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_fwd_case_id</span><span class="p">(</span><span class="n">attrs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Case id of the forward posterior, or "" if it cannot be derived.</span>
+
+<span class="sd">    Never fatal: naming is a convenience layer, and a calibration that predates</span>
+<span class="sd">    it (or carries incomplete attrs) must still be usable for reconstruction.</span>
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">..utils.naming</span><span class="w"> </span><span class="kn">import</span> <span class="n">case_from_attrs</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">case_from_attrs</span><span class="p">(</span><span class="n">attrs</span><span class="p">))</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">TEXAS.constants</span><span class="w"> </span><span class="kn">import</span> <span class="n">OPTIONAL_PREDICTORS</span><span class="p">,</span> <span class="n">PREDICTOR_BETA_NAMES</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">TEXAS.data.filter</span><span class="w"> </span><span class="kn">import</span> <span class="n">ensure_numpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">TEXAS.stan.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_posterior</span>
+
+<div class="viewcode-block" id="InvTConfig">
+<a class="viewcode-back" href="../../../api.html#TEXAS.data.builder.InvTConfig">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InvTConfig</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Configuration for the inverse-T Stan data builder."""</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"ensemble"</span>        <span class="c1"># Only 'ensemble' is supported (historical artifact)</span>
+    <span class="n">n_draws</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># Number of forward posterior samples (M).</span>
+                                  <span class="c1"># None → auto: min(available_draws, 300).</span>
+                                  <span class="c1"># Larger M → better marginal likelihood approximation</span>
+                                  <span class="c1"># (error ∝ 1/√M) but proportionally slower inference.</span>
+                                  <span class="c1"># Recommended: 100 (quick), 300 (default), 500 (publication).</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span>                <span class="c1"># For reproducible sampling of M draws</span>
+    <span class="n">no3_cutoff</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="n">suffix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>   <span class="c1"># Force a specific fwd parameter suffix (e.g., 'crtp')</span></div>
+
+
+<span class="c1"># ═══════════════════════════════════════════════════════════════════════════════</span>
+<span class="c1"># PARAMETER NAMING CONVENTIONS</span>
+<span class="c1"># ═══════════════════════════════════════════════════════════════════════════════</span>
+<span class="c1"># Core forward parameters always required from the forward posterior</span>
+<span class="n">_FORWARD_PARAMS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"t0"</span><span class="p">,</span> <span class="s2">"k"</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">]</span>  <span class="c1"># Generalized logistic core parameters</span>
+
+<span class="c1"># Extra params for generalized logistic models (optional, depending on model)</span>
+<span class="n">_EXTRA_PARAMS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"v"</span><span class="p">]</span>  <span class="c1"># Shape parameter (Q is fixed to 1 in all active models)</span>
+
+
+<div class="viewcode-block" id="build_invT_inputData">
+<a class="viewcode-back" href="../../../api.html#TEXAS.data.builder.build_invT_inputData">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_invT_inputData</span><span class="p">(</span>
+    <span class="n">proxyObs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prior_mu_t</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prior_sigma_t</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">scaledRI</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># deprecated alias</span>
+    <span class="n">fwd_posterior_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">predictors</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">InvTConfig</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">fwd_posterior</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">fwd_cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Build the `data` dictionary for Stan's inverse model and sampler configuration.</span>
+
+<span class="sd">    WORKFLOW:</span>
+<span class="sd">    ─────────</span>
+<span class="sd">    1. Load forward calibration posterior from .nc file (or accept a pre-loaded Dataset)</span>
+<span class="sd">    2. Randomly sample M parameter sets from that posterior</span>
+<span class="sd">    3. Extract calibration curve parameters (t0, k, b, v, sigma)</span>
+<span class="sd">    4. Package optional environmental predictors (GDGT-2/3, NO3) if used</span>
+<span class="sd">    5. Return data dict (for Stan) + sampler_kwargs (for CmdStanPy)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        proxyObs: Observed proxy values to predict temperature from (length N).</span>
+<span class="sd">            Any proxy is accepted: scaledRI, TEX86, ringIndex, etc.</span>
+<span class="sd">        prior_mu_t: Prior mean temperature (scalar or array of length N)</span>
+<span class="sd">        prior_sigma_t: Prior temperature uncertainty (e.g., 10°C)</span>
+<span class="sd">        fwd_posterior_name: Name of saved forward calibration (without .nc extension).</span>
+<span class="sd">            Not required when fwd_posterior is supplied directly.</span>
+<span class="sd">        predictors: Optional environmental covariates {'gdgt23ratio': array, 'no3': array}</span>
+<span class="sd">        config: Configuration object controlling M, seed, etc.</span>
+<span class="sd">        fwd_posterior: Pre-loaded forward posterior xr.Dataset. When provided,</span>
+<span class="sd">            fwd_posterior_name is ignored and no file I/O is performed. Useful</span>
+<span class="sd">            when running from Google Colab or any pip-install context where the</span>
+<span class="sd">            posterior cache is not available.</span>
+<span class="sd">        fwd_cache_dir: Directory to resolve fwd_posterior_name in. Defaults to</span>
+<span class="sd">            the standard forward posterior cache. Use this to read posteriors</span>
+<span class="sd">            from a project-local bundle without copying them into the cache.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        data: Dictionary for Stan's data block</span>
+<span class="sd">        sampler_kwargs: Dictionary for CmdStanPy sampling configuration</span>
+<span class="sd">    """</span>
+    <span class="c1"># Backward-compat: accept deprecated scaledRI kwarg</span>
+    <span class="k">if</span> <span class="n">scaledRI</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">proxyObs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">"The 'scaledRI' parameter is deprecated; use 'proxyObs' instead."</span><span class="p">,</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">proxyObs</span> <span class="o">=</span> <span class="n">scaledRI</span>
+    <span class="k">if</span> <span class="n">proxyObs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"build_invT_inputData() missing required argument: 'proxyObs'"</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">fwd_posterior</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">fwd_posterior_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"Provide either fwd_posterior_name (cache lookup) "</span>
+            <span class="s2">"or fwd_posterior (pre-loaded xr.Dataset)."</span>
+        <span class="p">)</span>
+
+    <span class="n">config</span> <span class="o">=</span> <span class="n">config</span> <span class="ow">or</span> <span class="n">InvTConfig</span><span class="p">()</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>  <span class="c1"># Ensure reproducible M-sample selection</span>
+    <span class="n">predictors</span> <span class="o">=</span> <span class="n">predictors</span> <span class="ow">or</span> <span class="p">{}</span>
+
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># STEP 1: LOAD FORWARD CALIBRATION POSTERIOR</span>
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># Accept a pre-loaded Dataset (fwd_posterior) or load from the cache by name.</span>
+    <span class="c1"># Expected structure: xr.Dataset with dims (chain, draw) and data_vars like:</span>
+    <span class="c1">#   - t0_crtp, k_crtp, b_crtp, v_crtp, sigma_proxyObs_crtp</span>
+    <span class="c1">#   - beta_G23_crtp, beta_NO3_crtp (if multivariate)</span>
+    <span class="c1"># ───────────────────────────────────────────────────────────────────────────</span>
+    <span class="k">if</span> <span class="n">fwd_posterior</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">post</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">=</span> <span class="n">fwd_posterior</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">post</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span> <span class="o">=</span> <span class="n">load_posterior</span><span class="p">(</span><span class="n">fwd_posterior_name</span><span class="p">,</span> <span class="n">cache_dir</span><span class="o">=</span><span class="n">fwd_cache_dir</span><span class="p">)</span>
+    <span class="n">vars_</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">data_vars</span><span class="p">)</span>
+
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># STEP 2: FLATTEN MCMC DIMENSIONS (chain, draw) → (sample)</span>
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># Stan posteriors have shape (chain, draw, ...). We flatten to a single</span>
+    <span class="c1"># dimension 'sample' so we can randomly select M draws across all chains.</span>
+    <span class="c1"># ───────────────────────────────────────────────────────────────────────────</span>
+    <span class="k">if</span> <span class="s2">"chain"</span> <span class="ow">in</span> <span class="n">post</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+        <span class="c1"># Standard case: (chain, draw) → (sample)</span>
+        <span class="n">post</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">sample</span><span class="o">=</span><span class="p">(</span><span class="s2">"chain"</span><span class="p">,</span> <span class="s2">"draw"</span><span class="p">))</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="s2">"sample"</span><span class="p">)</span>
+        <span class="n">draw_dim_name</span> <span class="o">=</span> <span class="s2">"sample"</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Edge case: already flattened or single-chain posterior</span>
+        <span class="k">if</span> <span class="s2">"sample"</span> <span class="ow">in</span> <span class="n">post</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="n">draw_dim_name</span> <span class="o">=</span> <span class="s2">"sample"</span>
+        <span class="k">elif</span> <span class="s2">"draw"</span> <span class="ow">in</span> <span class="n">post</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+            <span class="n">draw_dim_name</span> <span class="o">=</span> <span class="s2">"draw"</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Could not find a 'draw' or 'sample' dimension in the posterior file."</span><span class="p">)</span>
+    
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># STEP 3: PREPARE OBSERVATION DATA</span>
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">proxyObs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>  <span class="c1"># Observed proxy values</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">size</span>  <span class="c1"># Number of observations (e.g., coretop samples or PETM section)</span>
+
+    <span class="c1"># Prior on temperature: Can be scalar (same prior for all N) or array (site-specific)</span>
+    <span class="n">mu_t</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">prior_mu_t</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">prior_mu_t</span><span class="p">)</span>
+            <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">prior_mu_t</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">mu_t</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">N</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"prior_mu_t length (</span><span class="si">{</span><span class="n">mu_t</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">) must match proxyObs length (</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">mode</span> <span class="o">!=</span> <span class="s2">"ensemble"</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Only 'ensemble' mode is supported, not '</span><span class="si">{</span><span class="n">config</span><span class="o">.</span><span class="n">mode</span><span class="si">}</span><span class="s2">'"</span><span class="p">)</span>
+
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># STEP 4: IDENTIFY PARAMETER SUFFIX</span>
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># Forward models may produce parameters like:</span>
+    <span class="c1">#   - t0_crtp, k_crtp (coretop-only calibration)</span>
+    <span class="c1">#   - t0_culmesocore, k_culmesocore (culture+mesocosm+coretop)</span>
+    <span class="c1"># We prioritize higher-data combinations (crtp &gt; culmesocore &gt; culmes &gt; ...)</span>
+    <span class="c1"># ───────────────────────────────────────────────────────────────────────────</span>
+    <span class="n">PRIORITY_SUFFIXES</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"crtp"</span><span class="p">,</span> <span class="s2">"culmesocore"</span><span class="p">,</span> <span class="s2">"culmes"</span><span class="p">,</span> <span class="s2">"meso"</span><span class="p">,</span> <span class="s2">"cul"</span><span class="p">]</span>
+    <span class="n">used_suffix</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">suffix</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">used_suffix</span><span class="p">:</span>
+        <span class="c1"># Auto-detect the highest-priority suffix present in the posterior</span>
+        <span class="k">for</span> <span class="n">sfx</span> <span class="ow">in</span> <span class="n">PRIORITY_SUFFIXES</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">sfx</span><span class="si">}</span><span class="s2">"</span> <span class="ow">in</span> <span class="n">vars_</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">_FORWARD_PARAMS</span><span class="p">):</span>
+                <span class="n">used_suffix</span> <span class="o">=</span> <span class="n">sfx</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">used_suffix</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Could not find a valid parameter suffix in the forward posterior."</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># User specified a suffix - verify it exists</span>
+        <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">used_suffix</span><span class="si">}</span><span class="s2">"</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">_FORWARD_PARAMS</span><span class="p">]</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">vars_</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"User suffix '</span><span class="si">{</span><span class="n">used_suffix</span><span class="si">}</span><span class="s2">' is missing required parameters: </span><span class="si">{</span><span class="n">missing</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># STEP 5: RANDOMLY SAMPLE M PARAMETER SETS FROM THE FORWARD POSTERIOR</span>
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># This is the KEY STEP for Bayesian uncertainty propagation!</span>
+    <span class="c1"># </span>
+    <span class="c1"># Instead of using a single "best-fit" calibration, we randomly draw M</span>
+    <span class="c1"># plausible calibration curves from the forward posterior. Each draw m</span>
+    <span class="c1"># represents one self-consistent set of parameters {t0, k, b, v, sigma}.</span>
+    <span class="c1"># </span>
+    <span class="c1"># The inverse model averages predictions across all M draws, naturally</span>
+    <span class="c1"># accounting for calibration uncertainty.</span>
+    <span class="c1"># ───────────────────────────────────────────────────────────────────────────</span>
+    <span class="n">total_available</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="n">draw_dim_name</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">n_draws</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Auto-select M: use up to 25% of available draws, bounded [100, 500].</span>
+        <span class="c1"># For typical runs (4 chains × 1000 = 4000 draws): 4000//4=1000, capped</span>
+        <span class="c1"># at 500 → M=500 (~4.5% Monte Carlo error). Use InvTConfig(n_draws=300)</span>
+        <span class="c1"># to match the publication default (M=300, ~5.8% error).</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">500</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">total_available</span> <span class="o">//</span> <span class="mi">4</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"⚙️  Auto M=</span><span class="si">{</span><span class="n">M</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">total_available</span><span class="si">}</span><span class="s2"> posterior draws available; "</span>
+            <span class="sa">f</span><span class="s2">"approx. error ≈ </span><span class="si">{</span><span class="mi">100</span><span class="o">/</span><span class="n">M</span><span class="o">**</span><span class="mf">0.5</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%). "</span>
+            <span class="sa">f</span><span class="s2">"Override with InvTConfig(n_draws=...)."</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">M</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">n_draws</span>
+        <span class="k">if</span> <span class="n">M</span> <span class="o">&gt;</span> <span class="n">total_available</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"⚠️  n_draws=</span><span class="si">{</span><span class="n">M</span><span class="si">}</span><span class="s2"> exceeds available draws (</span><span class="si">{</span><span class="n">total_available</span><span class="si">}</span><span class="s2">); "</span>
+                <span class="sa">f</span><span class="s2">"sampling with replacement (draws will repeat)."</span>
+            <span class="p">)</span>
+
+    <span class="n">draw_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">total_available</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">P</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">isel</span><span class="p">({</span><span class="n">draw_dim_name</span><span class="p">:</span> <span class="n">draw_indices</span><span class="p">})</span>  <span class="c1"># Subset to M samples</span>
+    <span class="c1"># Now P has shape (sample=M, ...) instead of (sample=total_available, ...)</span>
+
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># STEP 6: INITIALIZE DATA DICTIONARY FOR STAN</span>
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"N"</span><span class="p">:</span> <span class="n">N</span><span class="p">,</span>                     <span class="c1"># Number of observations</span>
+        <span class="s2">"proxyObs"</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span>              <span class="c1"># Observed proxy values</span>
+        <span class="s2">"prior_mu_t"</span><span class="p">:</span> <span class="n">mu_t</span><span class="p">,</span>         <span class="c1"># Prior temperature mean</span>
+        <span class="s2">"prior_sigma_t"</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">prior_sigma_t</span><span class="p">),</span>  <span class="c1"># Prior temperature uncertainty</span>
+        <span class="s2">"M"</span><span class="p">:</span> <span class="n">M</span><span class="p">,</span>                     <span class="c1"># Number of forward posterior samples</span>
+    <span class="p">}</span>
+
+    <span class="n">used_posts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Track which parameters were extracted</span>
+    
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># STEP 7: EXTRACT CORE CALIBRATION PARAMETERS</span>
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># Extract the M samples of each core parameter:</span>
+    <span class="c1">#   t0[m] = curve location temperature for draw m (NOT the inflection point:</span>
+    <span class="c1">#           the steepest response is at t0 - ln(v)/k)</span>
+    <span class="c1">#   k[m]  = growth rate for draw m</span>
+    <span class="c1">#   b[m]  = lower asymptote for draw m</span>
+    <span class="c1"># These will be passed to Stan as FIXED data (not sampled again).</span>
+    <span class="c1"># ───────────────────────────────────────────────────────────────────────────</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">_FORWARD_PARAMS</span><span class="p">:</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">used_suffix</span><span class="si">}</span><span class="s2">"</span>  <span class="c1"># e.g., "t0_crtp"</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>  <span class="c1"># Shape: (M,)</span>
+        <span class="n">used_posts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># STEP 8: EXTRACT EXTRA PARAMETERS (v) IF PRESENT</span>
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># Generalized logistic models include v (shape) parameter. Q is fixed to 1</span>
+    <span class="c1"># in all active models and is no longer sampled or passed to invT Stan models.</span>
+    <span class="c1"># Standard logistic models also fix v=1 and don't include it in the posterior.</span>
+    <span class="c1"># ───────────────────────────────────────────────────────────────────────────</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">_EXTRA_PARAMS</span><span class="p">:</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">used_suffix</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">P</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>  <span class="c1"># Shape: (M,)</span>
+            <span class="n">used_posts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># STEP 9: EXTRACT RESIDUAL ERROR PARAMETER</span>
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># sigma_proxyObs[m] = measurement/model error for calibration sample m</span>
+    <span class="c1"># If not available in posterior, use a default value.</span>
+    <span class="c1"># ───────────────────────────────────────────────────────────────────────────</span>
+    <span class="n">sigma_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"sigma_proxyObs_</span><span class="si">{</span><span class="n">used_suffix</span><span class="si">}</span><span class="s2">"</span>
+    <span class="k">if</span> <span class="n">sigma_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">P</span><span class="p">:</span>
+        <span class="n">sigma_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"sigma_scaledRI_</span><span class="si">{</span><span class="n">used_suffix</span><span class="si">}</span><span class="s2">"</span>  <span class="c1"># backward compat with old posteriors</span>
+    <span class="k">if</span> <span class="n">sigma_key</span> <span class="ow">in</span> <span class="n">P</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">"sigma_proxyObs"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="n">sigma_key</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>  <span class="c1"># Shape: (M,)</span>
+        <span class="n">used_posts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sigma_key</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Fallback to constant error if not estimated in forward model</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">"sigma_proxyObs"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># STEP 10: PROCESS OPTIONAL ENVIRONMENTAL PREDICTORS</span>
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># If the forward model included environmental covariates (GDGT-2/3, NO3),</span>
+    <span class="c1"># we need to:</span>
+    <span class="c1">#   1. Extract their coefficients (beta0) from the forward posterior</span>
+    <span class="c1">#   2. Pass the observed predictor values for our N observations</span>
+    <span class="c1">#   3. Set use_* flags so Stan knows to apply nonthermal corrections</span>
+    <span class="c1"># ───────────────────────────────────────────────────────────────────────────</span>
+    <span class="n">predictor_usage</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># BoundedT forward models move the covariates inside the logistic (a shift of</span>
+    <span class="c1"># the curve location T0) and name the slopes gamma_* instead of beta_*. Detect</span>
+    <span class="c1"># by coefficient presence so it holds regardless of the model-name string.</span>
+    <span class="n">is_bounded</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="sa">f</span><span class="s2">"gamma_</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">used_suffix</span><span class="si">}</span><span class="s2">"</span> <span class="ow">in</span> <span class="n">P</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"G23"</span><span class="p">,</span> <span class="s2">"NO3"</span><span class="p">))</span>
+    <span class="n">coef_names</span> <span class="o">=</span> <span class="p">({</span><span class="s2">"gdgt23ratio"</span><span class="p">:</span> <span class="s2">"gamma_G23"</span><span class="p">,</span> <span class="s2">"no3"</span><span class="p">:</span> <span class="s2">"gamma_NO3"</span><span class="p">}</span>
+                  <span class="k">if</span> <span class="n">is_bounded</span> <span class="k">else</span> <span class="n">PREDICTOR_BETA_NAMES</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">pred</span> <span class="ow">in</span> <span class="n">OPTIONAL_PREDICTORS</span><span class="p">:</span>  <span class="c1"># ['gdgt23ratio', 'no3']</span>
+        <span class="c1"># Check if this predictor was used in the forward calibration</span>
+        <span class="n">use_flag</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="sa">f</span><span class="s2">"use_</span><span class="si">{</span><span class="n">pred</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+        <span class="n">predictor_usage</span><span class="p">[</span><span class="n">pred</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_flag</span>
+        
+        <span class="c1"># Get observed predictor values for our N observations (or zeros if not provided).</span>
+        <span class="c1"># Scalars (e.g. no3=10.0) are broadcast to all N observations.</span>
+        <span class="n">arr</span> <span class="o">=</span> <span class="n">ensure_numpy</span><span class="p">(</span><span class="n">predictors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pred</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># scalar → broadcast</span>
+            <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">arr</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">N</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Predictor '</span><span class="si">{</span><span class="n">pred</span><span class="si">}</span><span class="s2">' length (</span><span class="si">{</span><span class="n">arr</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">) must equal N (</span><span class="si">{</span><span class="n">N</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+        
+        <span class="c1"># Add to Stan data</span>
+        <span class="n">data</span><span class="p">[</span><span class="n">pred</span><span class="p">]</span> <span class="o">=</span> <span class="n">arr</span>  <span class="c1"># Observed predictor values: shape (N,)</span>
+        <span class="n">data</span><span class="p">[</span><span class="sa">f</span><span class="s2">"use_</span><span class="si">{</span><span class="n">pred</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">use_flag</span> <span class="k">else</span> <span class="mi">0</span>  <span class="c1"># Flag for Stan conditional logic</span>
+        
+        <span class="c1"># Stan always expects beta_G23 and beta_NO3 as vector[M], even when the</span>
+        <span class="c1"># predictor is disabled (use_* = 0). Provide zeros when not used so the</span>
+        <span class="c1"># data block dimensions match regardless of which predictors are active.</span>
+        <span class="n">beta_name</span> <span class="o">=</span> <span class="n">coef_names</span><span class="p">[</span><span class="n">pred</span><span class="p">]</span>                    <span class="c1"># "beta_G23" or (bounded) "gamma_G23"</span>
+        <span class="k">if</span> <span class="n">use_flag</span><span class="p">:</span>
+            <span class="c1"># Extract the coefficient from forward posterior</span>
+            <span class="n">beta_key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">beta_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">used_suffix</span><span class="si">}</span><span class="s2">"</span>          <span class="c1"># e.g., "beta_G23_crtp"</span>
+            <span class="k">if</span> <span class="n">beta_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">P</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Expected '</span><span class="si">{</span><span class="n">beta_key</span><span class="si">}</span><span class="s2">' in forward posterior but not found."</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">beta_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">P</span><span class="p">[</span><span class="n">beta_key</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>  <span class="c1"># Shape: (M,)</span>
+            <span class="n">used_posts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">beta_key</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Predictor unused → pass zeros so Stan's vector[M] declaration is satisfied</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">beta_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">M</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>  <span class="c1"># Shape: (M,)</span>
+
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># STEP 11: HANDLE NITRATE CUTOFF (Special case for NO3 predictor)</span>
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># NO3 uses a threshold model: correction only applies when NO3 &gt; cutoff.</span>
+    <span class="c1"># Priority: (1) forward posterior attrs, (2) InvTConfig, (3) default 0.0</span>
+    <span class="c1"># ───────────────────────────────────────────────────────────────────────────</span>
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"use_no3"</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s2">"no3"</span><span class="p">],</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="c1"># All NO3 values are zero → no correction needed</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">"no3_cutoff"</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># 1. Try to get cutoff from forward posterior attributes</span>
+            <span class="n">cutoff_from_attrs</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"no3_cutoff"</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">cutoff_from_attrs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">final_cutoff</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cutoff_from_attrs</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"💡 Using no3_cutoff from forward posterior attributes: </span><span class="si">{</span><span class="n">final_cutoff</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="c1"># 2. Fallback to InvTConfig if not in attributes</span>
+            <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">no3_cutoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">final_cutoff</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">no3_cutoff</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"💡 Using no3_cutoff from InvTConfig: </span><span class="si">{</span><span class="n">final_cutoff</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="c1"># 3. Default to 0.0 if neither source available</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">final_cutoff</span> <span class="o">=</span> <span class="mf">0.0</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"⚠️ no3_cutoff not specified. Using default value: </span><span class="si">{</span><span class="n">final_cutoff</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            
+            <span class="n">data</span><span class="p">[</span><span class="s2">"no3_cutoff"</span><span class="p">]</span> <span class="o">=</span> <span class="n">final_cutoff</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># NO3 not used → cutoff irrelevant</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">"no3_cutoff"</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># STEP 12: PACKAGE SAMPLER CONFIGURATION AND METADATA</span>
+    <span class="c1"># ═══════════════════════════════════════════════════════════════════════════</span>
+    <span class="c1"># Return both the Stan data and configuration for CmdStanPy.</span>
+    <span class="c1"># Metadata helps with provenance tracking and debugging.</span>
+    <span class="c1"># ───────────────────────────────────────────────────────────────────────────</span>
+    <span class="n">fwd_model_name</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"stan_model_name"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="n">sampler_kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"chains"</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>           <span class="c1"># Number of MCMC chains</span>
+        <span class="s2">"iter_warmup"</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>    <span class="c1"># Warmup iterations per chain</span>
+        <span class="s2">"iter_sampling"</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span> <span class="c1"># Sampling iterations per chain</span>
+        <span class="s2">"seed"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">seed</span><span class="p">),</span>
+        <span class="s2">"_metadata"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"posteriors_used"</span><span class="p">:</span> <span class="n">used_posts</span><span class="p">,</span>  <span class="c1"># Which parameters were extracted</span>
+            <span class="s2">"calibration_model_name"</span><span class="p">:</span> <span class="n">fwd_model_name</span><span class="p">,</span>
+            <span class="s2">"used_suffix"</span><span class="p">:</span> <span class="n">used_suffix</span><span class="p">,</span>  <span class="c1"># e.g., "crtp"</span>
+            <span class="s2">"predictor_usage"</span><span class="p">:</span> <span class="n">predictor_usage</span><span class="p">,</span>  <span class="c1"># Which covariates are active</span>
+            <span class="s2">"no3ratio"</span><span class="p">:</span> <span class="s2">"_no3ratio"</span> <span class="ow">in</span> <span class="n">fwd_model_name</span><span class="p">,</span>  <span class="c1"># Forward model used centred NO₃ form</span>
+            <span class="s2">"is_bounded"</span><span class="p">:</span> <span class="n">is_bounded</span><span class="p">,</span>  <span class="c1"># T0-shift forward model → select t0shift invT model</span>
+            <span class="c1"># Forward-calibration provenance. An invT model name records the</span>
+            <span class="c1"># curve and the constraint but not the training set or the</span>
+            <span class="c1"># estimator, so without these two the saved .nc cannot be traced</span>
+            <span class="c1"># back to the calibration it marginalised over.</span>
+            <span class="s2">"fwd_posterior_name"</span><span class="p">:</span> <span class="n">fwd_posterior_name</span> <span class="ow">or</span> <span class="n">fwd_model_name</span><span class="p">,</span>
+            <span class="s2">"fwd_case"</span><span class="p">:</span> <span class="n">_fwd_case_id</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">attrs</span><span class="p">),</span>
+            <span class="c1"># What the calibration was fitted against. The authoritative answer</span>
+            <span class="c1"># lives here, in the forward posterior's own attrs -- inferring it</span>
+            <span class="c1"># from a name works for legacy names carrying "SST"/"thermoT" but</span>
+            <span class="c1"># not for case ids, whose target token is "sst"/"thm".</span>
+            <span class="s2">"fwd_temptype"</span><span class="p">:</span> <span class="n">post</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"temptype"</span><span class="p">),</span>
+        <span class="p">},</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">data</span><span class="p">,</span> <span class="n">sampler_kwargs</span></div>
+
+
+
+<span class="c1"># ═══════════════════════════════════════════════════════════════════════════════</span>
+<span class="c1"># FORWARD CALIBRATION DATA BUILDER</span>
+<span class="c1"># ═══════════════════════════════════════════════════════════════════════════════</span>
+
+<span class="n">_FWD_HYPERPARAMS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"t0"</span><span class="p">,</span> <span class="s2">"k"</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">,</span> <span class="s2">"v"</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_fit_gen_logi_to_get_residuals</span><span class="p">(</span><span class="n">t</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">proxy</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Fit generalized logistic (fixed upper asymptote = 1) to (t, proxy) and</span>
+<span class="sd">    return residuals (proxy − predicted). Used internally to compute the</span>
+<span class="sd">    temperature-only baseline before finding the optimal NO3 threshold.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.optimize</span><span class="w"> </span><span class="kn">import</span> <span class="n">curve_fit</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">TEXAS.models.logistics</span><span class="w"> </span><span class="kn">import</span> <span class="n">generalized_logistic_fixed_upper</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_model</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">generalized_logistic_fixed_upper</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t0</span><span class="o">=</span><span class="n">t0</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">b</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">=</span><span class="n">v</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">popt</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">curve_fit</span><span class="p">(</span>
+            <span class="n">_model</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">proxy</span><span class="p">,</span>
+            <span class="n">p0</span><span class="o">=</span><span class="p">[</span><span class="mf">25.0</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+            <span class="n">bounds</span><span class="o">=</span><span class="p">([</span><span class="o">-</span><span class="mi">5</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">,</span> <span class="mf">1e-4</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">],</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">50.0</span><span class="p">]),</span>
+            <span class="n">maxfev</span><span class="o">=</span><span class="mi">20000</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">proxy</span> <span class="o">-</span> <span class="n">_model</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="o">*</span><span class="n">popt</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">RuntimeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"Generalized logistic fit failed while computing residuals for NO3 "</span>
+            <span class="sa">f</span><span class="s2">"threshold calculation: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="s2">"Pass proxy_residuals_crtp= to provide pre-computed residuals."</span>
+        <span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_auto_no3_cutoff</span><span class="p">(</span>
+    <span class="n">no3</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">t_crtp</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">proxy_crtp</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+    <span class="n">proxy_residuals</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Auto-calculate no3_cutoff via find_optimal_no3_threshold (Spearman method).</span>
+<span class="sd">    NaN rows are dropped across all arrays before scoring.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">TEXAS.models.multivariate</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_optimal_no3_threshold</span>
+
+    <span class="k">if</span> <span class="n">proxy_residuals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">no3</span><span class="p">,</span> <span class="n">proxy_residuals</span><span class="p">])</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">stack</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">no3_clean</span> <span class="o">=</span> <span class="n">no3</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span>
+        <span class="n">res_clean</span> <span class="o">=</span> <span class="n">proxy_residuals</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span>
+        <span class="n">n_excluded</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="o">~</span><span class="n">valid</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">n_excluded</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"      (</span><span class="si">{</span><span class="n">n_excluded</span><span class="si">}</span><span class="s2"> samples excluded due to NaN values)"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">no3</span><span class="p">,</span> <span class="n">t_crtp</span><span class="p">,</span> <span class="n">proxy_crtp</span><span class="p">])</span>
+        <span class="n">valid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">stack</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">no3_clean</span> <span class="o">=</span> <span class="n">no3</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span>
+        <span class="n">t_clean</span> <span class="o">=</span> <span class="n">t_crtp</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span>
+        <span class="n">proxy_clean</span> <span class="o">=</span> <span class="n">proxy_crtp</span><span class="p">[</span><span class="n">valid</span><span class="p">]</span>
+        <span class="n">n_excluded</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="o">~</span><span class="n">valid</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"      Computing proxy residuals from generalized logistic fit "</span>
+            <span class="sa">f</span><span class="s2">"(N=</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">valid</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">no3</span><span class="p">)</span><span class="si">}</span><span class="s2"> samples"</span>
+            <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">", </span><span class="si">{</span><span class="n">n_excluded</span><span class="si">}</span><span class="s2"> excluded with NaN NO3)"</span> <span class="k">if</span> <span class="n">n_excluded</span> <span class="k">else</span> <span class="s2">")"</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">res_clean</span> <span class="o">=</span> <span class="n">_fit_gen_logi_to_get_residuals</span><span class="p">(</span><span class="n">t_clean</span><span class="p">,</span> <span class="n">proxy_clean</span><span class="p">)</span>
+
+    <span class="n">optimal_cutoff</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">find_optimal_no3_threshold</span><span class="p">(</span>
+        <span class="n">no3_values</span><span class="o">=</span><span class="n">no3_clean</span><span class="p">,</span>
+        <span class="n">residuals</span><span class="o">=</span><span class="n">res_clean</span><span class="p">,</span>
+        <span class="n">score_method</span><span class="o">=</span><span class="s2">"spearmanr"</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">optimal_cutoff</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_extract_culmeso_hyperpriors</span><span class="p">(</span><span class="n">posterior</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Extract prior_mean_* / prior_sd_* hyperpriors from a culmeso forward posterior.</span>
+<span class="sd">    Returns a dict with those keys plus '_suffix' and '_n_draws' for logging.</span>
+<span class="sd">    """</span>
+    <span class="n">vars_</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">posterior</span><span class="o">.</span><span class="n">data_vars</span><span class="p">)</span>
+    <span class="n">used_suffix</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">sfx</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">"culmeso"</span><span class="p">,</span> <span class="s2">"culmesocore"</span><span class="p">,</span> <span class="s2">"crtp"</span><span class="p">,</span> <span class="s2">"meso"</span><span class="p">,</span> <span class="s2">"cul"</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="sa">f</span><span class="s2">"t0_</span><span class="si">{</span><span class="n">sfx</span><span class="si">}</span><span class="s2">"</span> <span class="ow">in</span> <span class="n">vars_</span><span class="p">:</span>
+            <span class="n">used_suffix</span> <span class="o">=</span> <span class="n">sfx</span>
+            <span class="k">break</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">used_suffix</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"Cannot find a parameter suffix in culmeso_posterior "</span>
+            <span class="s2">"(expected e.g. t0_culmeso). Check that you passed the correct dataset."</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">"chain"</span> <span class="ow">in</span> <span class="n">posterior</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+        <span class="n">flat</span> <span class="o">=</span> <span class="n">posterior</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">sample</span><span class="o">=</span><span class="p">(</span><span class="s2">"chain"</span><span class="p">,</span> <span class="s2">"draw"</span><span class="p">))</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="s2">"sample"</span><span class="p">)</span>
+        <span class="n">n_draws</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">flat</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="s2">"sample"</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="s2">"sample"</span> <span class="ow">in</span> <span class="n">posterior</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+        <span class="n">flat</span><span class="p">,</span> <span class="n">n_draws</span> <span class="o">=</span> <span class="n">posterior</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">posterior</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="s2">"sample"</span><span class="p">])</span>
+    <span class="k">elif</span> <span class="s2">"draw"</span> <span class="ow">in</span> <span class="n">posterior</span><span class="o">.</span><span class="n">dims</span><span class="p">:</span>
+        <span class="n">flat</span><span class="p">,</span> <span class="n">n_draws</span> <span class="o">=</span> <span class="n">posterior</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">posterior</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="s2">"draw"</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"Cannot find a draw dimension in culmeso_posterior."</span><span class="p">)</span>
+
+    <span class="n">result</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"_suffix"</span><span class="p">:</span> <span class="n">used_suffix</span><span class="p">,</span> <span class="s2">"_n_draws"</span><span class="p">:</span> <span class="n">n_draws</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">_FWD_HYPERPARAMS</span><span class="p">:</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">used_suffix</span><span class="si">}</span><span class="s2">"</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">flat</span><span class="p">:</span>
+            <span class="n">vals</span> <span class="o">=</span> <span class="n">flat</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+            <span class="n">result</span><span class="p">[</span><span class="sa">f</span><span class="s2">"prior_mean_</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">vals</span><span class="p">))</span>
+            <span class="n">result</span><span class="p">[</span><span class="sa">f</span><span class="s2">"prior_sd_</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>  <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">vals</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<div class="viewcode-block" id="build_fwd_data">
+<a class="viewcode-back" href="../../../api.html#TEXAS.data.builder.build_fwd_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">build_fwd_data</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="c1"># Culture observations</span>
+    <span class="n">t_cul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">proxy_cul</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="c1"># Mesocosm observations</span>
+    <span class="n">t_meso</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">proxy_meso</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="c1"># Coretop observations</span>
+    <span class="n">t_crtp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">proxy_crtp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="c1"># Optional coretop predictors</span>
+    <span class="n">gdgt23ratio_crtp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">sd_gdgt23ratio_crtp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>   <span class="c1"># per-site SE of G₂/₃ — required for _eiv model; defaults to zeros</span>
+    <span class="n">no3_crtp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">sd_no3_crtp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>            <span class="c1"># per-site SE of NO₃ (μmol/L, linear) — required for _eiv model; defaults to zeros</span>
+    <span class="n">no3_cutoff</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">proxy_residuals_crtp</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="c1"># Analytical measurement SE of RI — required for _eiv model</span>
+    <span class="n">sd_proxyObs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>            <span class="c1"># per-site SE of scaled RI; defaults to 0.03 (Schouten et al. 2013)</span>
+    <span class="c1"># Thermal-only R² — required for _eiv sigma prior scaling</span>
+    <span class="n">R2_thermal</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>   <span class="c1"># compute from a thermal-only coretop run first</span>
+    <span class="c1"># Stage-1 culmeso posterior — auto-extracts hyperpriors and no3_cutoff</span>
+    <span class="n">culmeso_posterior</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="c1"># Manual hyperprior overrides (alternative or supplement to culmeso_posterior)</span>
+    <span class="n">prior_mean_t0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">prior_sd_t0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">prior_mean_k</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="n">prior_sd_k</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">prior_mean_b</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="n">prior_sd_b</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">prior_mean_v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="n">prior_sd_v</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Build the Stan data dictionary for forward calibration models.</span>
+
+<span class="sd">    Handles all forward model variants:</span>
+<span class="sd">      - culmeso / Q1_culmeso / v1_culmeso  : pass t_cul, proxy_cul, t_meso, proxy_meso</span>
+<span class="sd">      - culmesocore                         : add t_crtp, proxy_crtp</span>
+<span class="sd">      - hier_crtp_multiv                    : add gdgt23ratio_crtp, no3_crtp</span>
+<span class="sd">      - hier_crtp_multiv_priorApprox        : add culmeso_posterior (extracts hyperpriors)</span>
+<span class="sd">      - hier_crtp_univ_priorApprox          : add culmeso_posterior (no predictors needed)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        t_cul, proxy_cul:           Culture temperature and proxy arrays.</span>
+<span class="sd">        t_meso, proxy_meso:         Mesocosm temperature and proxy arrays.</span>
+<span class="sd">        t_crtp, proxy_crtp:         Coretop temperature and proxy arrays.</span>
+<span class="sd">        gdgt23ratio_crtp:           GDGT-2/GDGT-3 ratio for coretop samples.</span>
+<span class="sd">                                    Sets use_gdgt23ratio=1 if non-zero/non-NaN.</span>
+<span class="sd">        sd_gdgt23ratio_crtp:        Per-site measurement SE of gdgt23ratio (same units,</span>
+<span class="sd">                                    linear). Required for the _eiv model; always included</span>
+<span class="sd">                                    in the data dict (defaults to zeros when not provided,</span>
+<span class="sd">                                    which disables the G₂/₃ EIV measurement model).</span>
+<span class="sd">        no3_crtp:                   Nitrate concentration for coretop samples.</span>
+<span class="sd">                                    Sets use_no3=1 if non-zero/non-NaN.</span>
+<span class="sd">        sd_no3_crtp:                Per-site measurement SE of NO₃ (μmol/L, linear space).</span>
+<span class="sd">                                    Required for the _eiv model. Always included (defaults</span>
+<span class="sd">                                    to zeros; sites with sd=0 receive only the lognormal</span>
+<span class="sd">                                    prior and skip the normal measurement model).</span>
+<span class="sd">        no3_cutoff:                 NO3 threshold for the nonthermal correction.</span>
+<span class="sd">                                    Priority: (1) this arg, (2) culmeso_posterior attrs,</span>
+<span class="sd">                                    (3) auto-calculated via Spearman method.</span>
+<span class="sd">        proxy_residuals_crtp:       Pre-computed proxy residuals for NO3 threshold</span>
+<span class="sd">                                    calculation. If omitted, residuals are computed</span>
+<span class="sd">                                    internally by fitting a generalized logistic curve.</span>
+<span class="sd">                                    Warning: Stan models use generalized logistic — residuals</span>
+<span class="sd">                                    from other functional forms may shift the threshold.</span>
+<span class="sd">        culmeso_posterior:          xr.Dataset from a completed culmeso forward run.</span>
+<span class="sd">                                    Auto-extracts prior_mean_*/prior_sd_* hyperpriors and</span>
+<span class="sd">                                    no3_cutoff (if saved in attrs).</span>
+<span class="sd">        prior_mean_*/prior_sd_*:    Manual hyperprior values. Override auto-extracted</span>
+<span class="sd">                                    values from culmeso_posterior for individual params.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Stan-ready data dict with proxyObs_* keys, N_* counts, use_* flags,</span>
+<span class="sd">              and hyperpriors — ready for get_posterior().</span>
+<span class="sd">    """</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+
+    <span class="c1"># ── Validate dataset pairs and sizes ──────────────────────────────────────</span>
+    <span class="n">_pairs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="s2">"culture"</span><span class="p">,</span>  <span class="s2">"cul"</span><span class="p">,</span>  <span class="n">t_cul</span><span class="p">,</span>  <span class="n">proxy_cul</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"mesocosm"</span><span class="p">,</span> <span class="s2">"meso"</span><span class="p">,</span> <span class="n">t_meso</span><span class="p">,</span> <span class="n">proxy_meso</span><span class="p">),</span>
+        <span class="p">(</span><span class="s2">"coretop"</span><span class="p">,</span>  <span class="s2">"crtp"</span><span class="p">,</span> <span class="n">t_crtp</span><span class="p">,</span> <span class="n">proxy_crtp</span><span class="p">),</span>
+    <span class="p">]</span>
+    <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">sfx</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">_pairs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">t</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="o">!=</span> <span class="p">(</span><span class="n">p</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">: t_</span><span class="si">{</span><span class="n">sfx</span><span class="si">}</span><span class="s2"> and proxy_</span><span class="si">{</span><span class="n">sfx</span><span class="si">}</span><span class="s2"> must be provided together."</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2">: t_</span><span class="si">{</span><span class="n">sfx</span><span class="si">}</span><span class="s2"> (len=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">t</span><span class="p">))</span><span class="si">}</span><span class="s2">) and "</span>
+                <span class="sa">f</span><span class="s2">"proxy_</span><span class="si">{</span><span class="n">sfx</span><span class="si">}</span><span class="s2"> (len=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">p</span><span class="p">))</span><span class="si">}</span><span class="s2">) must have the same length."</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">t</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">_pairs</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"build_fwd_data() requires at least one dataset "</span>
+            <span class="s2">"(culture, mesocosm, or coretop)."</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">gdgt23ratio_crtp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">no3_crtp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="n">t_crtp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"gdgt23ratio_crtp / no3_crtp require coretop data (t_crtp, proxy_crtp)."</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">sd_gdgt23ratio_crtp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">gdgt23ratio_crtp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"sd_gdgt23ratio_crtp requires gdgt23ratio_crtp to be provided."</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">sd_no3_crtp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">no3_crtp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">"sd_no3_crtp requires no3_crtp to be provided."</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ── Build data dict ────────────────────────────────────────────────────────</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">summary_lines</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_range_str</span><span class="p">(</span><span class="n">t_arr</span><span class="p">,</span> <span class="n">p_arr</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"N=</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">t_arr</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"  (t: </span><span class="si">{</span><span class="n">t_arr</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">–</span><span class="si">{</span><span class="n">t_arr</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">°C,"</span>
+            <span class="sa">f</span><span class="s2">" proxy: </span><span class="si">{</span><span class="n">p_arr</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">–</span><span class="si">{</span><span class="n">p_arr</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">)"</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Culture</span>
+    <span class="k">if</span> <span class="n">t_cul</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">t_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">t_cul</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">p_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">proxy_cul</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">"N_cul"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">t_arr</span><span class="p">),</span> <span class="s2">"t_cul"</span><span class="p">:</span> <span class="n">t_arr</span><span class="p">,</span> <span class="s2">"proxyObs_cul"</span><span class="p">:</span> <span class="n">p_arr</span><span class="p">})</span>
+        <span class="n">summary_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"   culture:   </span><span class="si">{</span><span class="n">_range_str</span><span class="p">(</span><span class="n">t_arr</span><span class="p">,</span><span class="w"> </span><span class="n">p_arr</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">summary_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"   culture:   —"</span><span class="p">)</span>
+
+    <span class="c1"># Mesocosm</span>
+    <span class="k">if</span> <span class="n">t_meso</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">t_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">t_meso</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">p_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">proxy_meso</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">"N_meso"</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">t_arr</span><span class="p">),</span> <span class="s2">"t_meso"</span><span class="p">:</span> <span class="n">t_arr</span><span class="p">,</span> <span class="s2">"proxyObs_meso"</span><span class="p">:</span> <span class="n">p_arr</span><span class="p">})</span>
+        <span class="n">summary_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"   mesocosm:  </span><span class="si">{</span><span class="n">_range_str</span><span class="p">(</span><span class="n">t_arr</span><span class="p">,</span><span class="w"> </span><span class="n">p_arr</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">summary_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"   mesocosm:  —"</span><span class="p">)</span>
+
+    <span class="c1"># Coretop + predictors</span>
+    <span class="n">N_crtp</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">t_crtp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">t_arr</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">t_crtp</span><span class="p">,</span>    <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">p_arr</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">proxy_crtp</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="n">N_crtp</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">t_arr</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">"N_crtp"</span><span class="p">:</span> <span class="n">N_crtp</span><span class="p">,</span> <span class="s2">"t_crtp"</span><span class="p">:</span> <span class="n">t_arr</span><span class="p">,</span> <span class="s2">"proxyObs_crtp"</span><span class="p">:</span> <span class="n">p_arr</span><span class="p">})</span>
+        <span class="n">summary_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"   coretop:   </span><span class="si">{</span><span class="n">_range_str</span><span class="p">(</span><span class="n">t_arr</span><span class="p">,</span><span class="w"> </span><span class="n">p_arr</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+        <span class="n">pred_parts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># GDGT-2/3 ratio</span>
+        <span class="k">if</span> <span class="n">gdgt23ratio_crtp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">g_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">gdgt23ratio_crtp</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">g_arr</span><span class="p">)</span> <span class="o">!=</span> <span class="n">N_crtp</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"gdgt23ratio_crtp length (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">g_arr</span><span class="p">)</span><span class="si">}</span><span class="s2">) != N_crtp (</span><span class="si">{</span><span class="n">N_crtp</span><span class="si">}</span><span class="s2">)."</span>
+                <span class="p">)</span>
+            <span class="n">use_g</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="ow">not</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">g_arr</span><span class="p">))</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">g_arr</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)))</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">"gdgt23ratio_crtp"</span><span class="p">:</span> <span class="n">g_arr</span><span class="p">,</span> <span class="s2">"use_gdgt23ratio"</span><span class="p">:</span> <span class="n">use_g</span><span class="p">})</span>
+            <span class="n">pred_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"gdgt23ratio </span><span class="si">{</span><span class="s1">'✓'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">use_g</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'✗'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">sd_gdgt23ratio_crtp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">sd_g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">sd_gdgt23ratio_crtp</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sd_g</span><span class="p">)</span> <span class="o">!=</span> <span class="n">N_crtp</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">"sd_gdgt23ratio_crtp length (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sd_g</span><span class="p">)</span><span class="si">}</span><span class="s2">) != N_crtp (</span><span class="si">{</span><span class="n">N_crtp</span><span class="si">}</span><span class="s2">)."</span>
+                    <span class="p">)</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">sd_g</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"sd_gdgt23ratio_crtp must be non-negative."</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">"sd_gdgt23ratio_crtp"</span><span class="p">]</span> <span class="o">=</span> <span class="n">sd_g</span>
+                <span class="n">pred_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"sd_gdgt23ratio: </span><span class="si">{</span><span class="n">sd_g</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">–</span><span class="si">{</span><span class="n">sd_g</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2"> (EIV)"</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Always include sd_gdgt23ratio_crtp so _eiv model always has its required</span>
+                <span class="c1"># data variable. Zeros disable the EIV measurement model for G₂/₃.</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">"sd_gdgt23ratio_crtp"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N_crtp</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">"gdgt23ratio_crtp"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N_crtp</span><span class="p">),</span> <span class="s2">"use_gdgt23ratio"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                         <span class="s2">"sd_gdgt23ratio_crtp"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N_crtp</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)})</span>
+
+        <span class="c1"># NO3</span>
+        <span class="k">if</span> <span class="n">no3_crtp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">n_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">no3_crtp</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">n_arr</span><span class="p">)</span> <span class="o">!=</span> <span class="n">N_crtp</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"no3_crtp length (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">n_arr</span><span class="p">)</span><span class="si">}</span><span class="s2">) != N_crtp (</span><span class="si">{</span><span class="n">N_crtp</span><span class="si">}</span><span class="s2">)."</span>
+                <span class="p">)</span>
+            <span class="n">use_n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="ow">not</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">n_arr</span><span class="p">))</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">n_arr</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)))</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">"no3_crtp"</span><span class="p">:</span> <span class="n">n_arr</span><span class="p">,</span> <span class="s2">"use_no3"</span><span class="p">:</span> <span class="n">use_n</span><span class="p">})</span>
+
+            <span class="k">if</span> <span class="n">sd_no3_crtp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">sd_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">sd_no3_crtp</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sd_n</span><span class="p">)</span> <span class="o">!=</span> <span class="n">N_crtp</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">"sd_no3_crtp length (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sd_n</span><span class="p">)</span><span class="si">}</span><span class="s2">) != N_crtp (</span><span class="si">{</span><span class="n">N_crtp</span><span class="si">}</span><span class="s2">)."</span>
+                    <span class="p">)</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">sd_n</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"sd_no3_crtp must be non-negative."</span><span class="p">)</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">"sd_no3_crtp"</span><span class="p">]</span> <span class="o">=</span> <span class="n">sd_n</span>
+                <span class="n">n_with_se</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">sd_n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+                <span class="n">pred_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"sd_no3: </span><span class="si">{</span><span class="n">sd_n</span><span class="p">[</span><span class="n">sd_n</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">–</span><span class="si">{</span><span class="n">sd_n</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2"> µmol/L "</span>
+                    <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">n_with_se</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">N_crtp</span><span class="si">}</span><span class="s2"> sites have SE; EIV)"</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># sd_no3_crtp not provided: treat all NO₃ sites as exact (no latent variable).</span>
+                <span class="c1"># The Stan data block always requires sd_no3_crtp; default to zeros so</span>
+                <span class="c1"># build_fwd_data() produces a complete data dict for EIV models.</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">"sd_no3_crtp"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N_crtp</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+                <span class="n">pred_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"sd_no3: not provided (all sites treated as exact)"</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">use_n</span><span class="p">:</span>
+                <span class="c1"># Determine no3_cutoff — priority: explicit &gt; posterior attrs &gt; auto-calc</span>
+                <span class="k">if</span> <span class="n">no3_cutoff</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">final_cutoff</span>  <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">no3_cutoff</span><span class="p">)</span>
+                    <span class="n">cutoff_source</span> <span class="o">=</span> <span class="s2">"user-provided"</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="n">culmeso_posterior</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                      <span class="ow">and</span> <span class="n">culmeso_posterior</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"no3_cutoff"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+                    <span class="n">final_cutoff</span>  <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">culmeso_posterior</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"no3_cutoff"</span><span class="p">])</span>
+                    <span class="n">cutoff_source</span> <span class="o">=</span> <span class="s2">"from culmeso_posterior attrs"</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">"   🔍 Auto-calculating no3_cutoff (Spearman method)..."</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">proxy_residuals_crtp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                            <span class="s2">"Pre-computed proxy_residuals_crtp provided. "</span>
+                            <span class="s2">"Note: Stan models use generalized logistic functional form — "</span>
+                            <span class="s2">"residuals from other models may produce a suboptimal threshold."</span><span class="p">,</span>
+                            <span class="ne">UserWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="n">final_cutoff</span> <span class="o">=</span> <span class="n">_auto_no3_cutoff</span><span class="p">(</span>
+                        <span class="n">n_arr</span><span class="p">,</span> <span class="n">t_arr</span><span class="p">,</span> <span class="n">p_arr</span><span class="p">,</span>
+                        <span class="n">proxy_residuals</span><span class="o">=</span><span class="n">proxy_residuals_crtp</span><span class="p">,</span>
+                    <span class="p">)</span>
+                    <span class="n">cutoff_source</span> <span class="o">=</span> <span class="s2">"auto-calculated (Spearman)"</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"      → no3_cutoff = </span><span class="si">{</span><span class="n">final_cutoff</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2"> µmol/L"</span><span class="p">)</span>
+
+                <span class="c1"># Validate cutoff</span>
+                <span class="k">if</span> <span class="n">final_cutoff</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">"no3_cutoff=</span><span class="si">{</span><span class="n">final_cutoff</span><span class="si">}</span><span class="s2"> ≤ 0. _no3ratio Stan models require "</span>
+                        <span class="s2">"cutoff &gt; 0 (used as log10(no3/cutoff) denominator). "</span>
+                        <span class="s2">"Specify a positive no3_cutoff= explicitly."</span><span class="p">,</span>
+                        <span class="ne">UserWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="n">no3_min</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmin</span><span class="p">(</span><span class="n">n_arr</span><span class="p">))</span>
+                <span class="n">no3_max</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">n_arr</span><span class="p">))</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">no3_min</span> <span class="o">&lt;=</span> <span class="n">final_cutoff</span> <span class="o">&lt;=</span> <span class="n">no3_max</span><span class="p">):</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">"no3_cutoff=</span><span class="si">{</span><span class="n">final_cutoff</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2"> is outside the range of no3_crtp "</span>
+                        <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">no3_min</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">–</span><span class="si">{</span><span class="n">no3_max</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2"> µmol/L). The NO3 correction may "</span>
+                        <span class="s2">"not apply to any samples. Check your data or threshold value."</span><span class="p">,</span>
+                        <span class="ne">UserWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                <span class="n">data</span><span class="p">[</span><span class="s2">"no3_cutoff"</span><span class="p">]</span> <span class="o">=</span> <span class="n">final_cutoff</span>
+                <span class="n">pred_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"no3 ✓  (no3_cutoff=</span><span class="si">{</span><span class="n">final_cutoff</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">cutoff_source</span><span class="si">}</span><span class="s2">)"</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="s2">"no3_cutoff"</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span>
+                <span class="n">pred_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"no3 ✗  (all zeros/NaN — correction disabled)"</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">"no3_crtp"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N_crtp</span><span class="p">),</span> <span class="s2">"use_no3"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"no3_cutoff"</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+                         <span class="s2">"sd_no3_crtp"</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N_crtp</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)})</span>
+
+        <span class="n">summary_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"   predictors: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pred_parts</span><span class="p">)</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">pred_parts</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'none'</span><span class="si">}</span><span class="s2">"</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">summary_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"   coretop:   —"</span><span class="p">)</span>
+        <span class="n">summary_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"   predictors: none"</span><span class="p">)</span>
+
+    <span class="c1"># ── sd_proxyObs — per-site RI analytical SE (_eiv model) ─────────────────</span>
+    <span class="k">if</span> <span class="n">sd_proxyObs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">sd_p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">sd_proxyObs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">N_crtp</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">sd_p</span><span class="p">)</span> <span class="o">!=</span> <span class="n">N_crtp</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"sd_proxyObs length (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sd_p</span><span class="p">)</span><span class="si">}</span><span class="s2">) != N_crtp (</span><span class="si">{</span><span class="n">N_crtp</span><span class="si">}</span><span class="s2">)."</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">sd_p</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"sd_proxyObs must be non-negative."</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">"sd_proxyObs"</span><span class="p">]</span> <span class="o">=</span> <span class="n">sd_p</span>
+    <span class="k">elif</span> <span class="n">N_crtp</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">"sd_proxyObs"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">N_crtp</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>  <span class="c1"># default Rs (Schouten et al. 2013)</span>
+
+    <span class="c1"># ── R2_thermal — thermal-only R² for sigma prior scaling (_eiv model) ──────</span>
+    <span class="k">if</span> <span class="n">R2_thermal</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">r2</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">R2_thermal</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="mf">0.0</span> <span class="o">&lt;=</span> <span class="n">r2</span> <span class="o">&lt;=</span> <span class="mf">1.0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"R2_thermal must be in [0, 1], got </span><span class="si">{</span><span class="n">r2</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">"R2_thermal"</span><span class="p">]</span> <span class="o">=</span> <span class="n">r2</span>
+
+    <span class="c1"># ── Hyperpriors ────────────────────────────────────────────────────────────</span>
+    <span class="n">manual_hp</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">"prior_mean_t0"</span><span class="p">:</span> <span class="n">prior_mean_t0</span><span class="p">,</span> <span class="s2">"prior_sd_t0"</span><span class="p">:</span> <span class="n">prior_sd_t0</span><span class="p">,</span>
+        <span class="s2">"prior_mean_k"</span><span class="p">:</span>  <span class="n">prior_mean_k</span><span class="p">,</span>  <span class="s2">"prior_sd_k"</span><span class="p">:</span>  <span class="n">prior_sd_k</span><span class="p">,</span>
+        <span class="s2">"prior_mean_b"</span><span class="p">:</span>  <span class="n">prior_mean_b</span><span class="p">,</span>  <span class="s2">"prior_sd_b"</span><span class="p">:</span>  <span class="n">prior_sd_b</span><span class="p">,</span>
+        <span class="s2">"prior_mean_v"</span><span class="p">:</span>  <span class="n">prior_mean_v</span><span class="p">,</span>  <span class="s2">"prior_sd_v"</span><span class="p">:</span>  <span class="n">prior_sd_v</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">culmeso_posterior</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">hp</span>      <span class="o">=</span> <span class="n">_extract_culmeso_hyperpriors</span><span class="p">(</span><span class="n">culmeso_posterior</span><span class="p">)</span>
+        <span class="n">suffix</span>  <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"_suffix"</span><span class="p">)</span>
+        <span class="n">n_draws</span> <span class="o">=</span> <span class="n">hp</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">"_n_draws"</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">hp</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">manual_hp</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>   <span class="c1"># manual overrides win</span>
+            <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="n">param_lines</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">"      </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">: mean=</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="sa">f</span><span class="s1">'prior_mean_</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s1">'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">  sd=</span><span class="si">{</span><span class="n">data</span><span class="p">[</span><span class="sa">f</span><span class="s1">'prior_sd_</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s1">'</span><span class="p">]</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">"</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">_FWD_HYPERPARAMS</span> <span class="k">if</span> <span class="sa">f</span><span class="s2">"prior_mean_</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">"</span> <span class="ow">in</span> <span class="n">data</span>
+        <span class="p">]</span>
+        <span class="n">summary_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"   hyperpriors from culmeso posterior  (suffix=</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">n_draws</span><span class="si">}</span><span class="s2"> draws):"</span>
+        <span class="p">)</span>
+        <span class="n">summary_lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">param_lines</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">provided</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">manual_hp</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">provided</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">provided</span><span class="p">:</span>
+            <span class="n">summary_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"   hyperpriors: manual"</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">provided</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">summary_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"      </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">v</span><span class="si">:</span><span class="s2">.3g</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">summary_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"   hyperpriors: none"</span><span class="p">)</span>
+
+    <span class="c1"># ── Print summary ──────────────────────────────────────────────────────────</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"📦 build_fwd_data summary:"</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">summary_lines</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Ronnakrit Rattanasriampaipong
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

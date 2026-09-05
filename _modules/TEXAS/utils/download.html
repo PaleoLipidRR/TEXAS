@@ -1,0 +1,930 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TEXAS.utils.download &#8212; TEXAS</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=e1f25cfb" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js?v=b8b12719"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/TEXAS/utils/download';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="canonical" href="https://paleolipidrr.github.io/TEXAS/_modules/TEXAS/utils/download.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/texas_logo.svg" class="logo__image only-light" alt="TEXAS - Home"/>
+    <img src="../../../_static/texas_logo.svg" class="logo__image only-dark pst-js-only" alt="TEXAS - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../callmap.html">Call map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../tutorial/intro.html">TEXAS Interactive Tutorial</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module1_prior.html">Module 1 — What is a Prior?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module2_bayesian_updating.html">Module 2 — Bayesian Updating</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module3_curve_explorer.html">Module 3 — The Calibration Curve Explorer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module4_mcmc.html">Module 4 — What MCMC Actually Does</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module5_results.html">Module 5 — Reading Your Results</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Explainers</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../PSM.html">TEXAS Proxy System Model — Bayesian Inference Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_validation.html">Model validation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sampler_budget.html">Sampler budget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../stan_models_explanation_v2.html">TEXAS Stan Models: Ensemble vs Direct Sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../marginalization_explainer.html">Why Marginalization Improves Inverse TEXAS Sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../why_plugin_p50_differs.html">Why the plug-in P50 ≠ the Bayesian P50</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reduce_sum_for_geologists.html">Understanding <code class="docutils literal notranslate"><span class="pre">reduce_sum</span></code> and <code class="docutils literal notranslate"><span class="pre">ll_chunk</span></code> in TEXAS-PSM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Prior_Choice_Normal_vs_Cauchy.html">Why Normal Instead of Cauchy Priors? 🤔</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ckdtree_nearest_ocean_explainer.html">Finding the Nearest Ocean Pixel: How <code class="docutils literal notranslate"><span class="pre">cKDTree</span></code> Works</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Archive</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../preprint_additive_archive.html">Archive — the preprint’s additive (β) formulation</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS/issues/new?title=Issue%20on%20page%20%2F_modules/TEXAS/utils/download.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for TEXAS.utils.download</h1><div class="highlight"><pre>
+<span></span><span class="c1"># TEXAS/utils/download.py</span>
+<span class="sd">"""</span>
+<span class="sd">Utilities for downloading data from the TEXAS Zenodo data record.</span>
+
+<span class="sd">Files are downloaded individually from Zenodo so you only fetch what you need.</span>
+<span class="sd">The full multivariate (EIV) posteriors are ~78–81 MB each — they carry the</span>
+<span class="sd">per-site latent variables; the wheel already bundles a latent-stripped copy of</span>
+<span class="sd">the default pair, so most reconstructions need no download at all. All other</span>
+<span class="sd">files are &lt; 2 MB.  A size notice is printed before any download ≥ 5 MB.</span>
+
+<span class="sd">Usage</span>
+<span class="sd">-----</span>
+<span class="sd">&gt;&gt;&gt; import TEXAS</span>
+<span class="sd">&gt;&gt;&gt; TEXAS.download_all()               # everything: posteriors + training data</span>
+<span class="sd">&gt;&gt;&gt; TEXAS.download_posteriors()        # forward calibration posteriors only</span>
+<span class="sd">&gt;&gt;&gt; TEXAS.download_training_data()     # training CSVs + NO₃ fields</span>
+<span class="sd">&gt;&gt;&gt; TEXAS.download_ocean_properties()  # just the WOA23 ocean_prop_ds field</span>
+
+<span class="sd">Download a specific posterior:</span>
+<span class="sd">&gt;&gt;&gt; TEXAS.download_posteriors(["tx.GHPU.sst.sri03.p0"])</span>
+
+<span class="sd">Docker/devcontainer users: run on the host machine — the container</span>
+<span class="sd">bind-mounts ``data/`` automatically.</span>
+<span class="sd">"""</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">urllib.error</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">urllib.request</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.paths</span><span class="w"> </span><span class="kn">import</span> <span class="n">POSTERIOR_CACHE_DIR</span><span class="p">,</span> <span class="n">SPREADSHEETS_DIR</span>
+
+<span class="c1"># ─── Zenodo config ────────────────────────────────────────────────────────────</span>
+<span class="c1"># The current version of the data record (concept DOI 10.5281/zenodo.19666744).</span>
+<span class="c1"># TODO(v0.3.0 release): replace with the record id of the v0.3.0 deposit as soon</span>
+<span class="c1"># as `scripts/zenodo_upload.py` creates the draft — the draft's id is final even</span>
+<span class="c1"># before it is published — then tag the release.</span>
+<span class="n">ZENODO_RECORD_ID</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"22131367"</span>
+
+<span class="c1"># Registry entries may pin a different record ("record": "&lt;id&gt;"); files</span>
+<span class="c1"># without a pin are fetched from ZENODO_RECORD_ID.</span>
+<span class="n">_V020_RECORD_ID</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"20032542"</span>   <span class="c1"># v0.2.0: initial-submission (additive) files</span>
+
+<span class="c1"># ocean_prop_ds isn't a TEXAS-record file at all -- it's produced and hosted</span>
+<span class="c1"># on the Zenodo record for the companion GRL paper, which is the canonical</span>
+<span class="c1"># source SI_code00_PreProcessing itself downloads it from.</span>
+<span class="n">_GRL_PAPER_RECORD_ID</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"14806962"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_file_url</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">rec</span> <span class="o">=</span> <span class="n">record</span> <span class="ow">or</span> <span class="n">ZENODO_RECORD_ID</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"https://zenodo.org/records/</span><span class="si">{</span><span class="n">rec</span><span class="si">}</span><span class="s2">/files/</span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2">?download=1"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_fmt_size</span><span class="p">(</span><span class="n">size_mb</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">size_mb</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"~</span><span class="si">{</span><span class="n">size_mb</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> MB"</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"~</span><span class="si">{</span><span class="n">size_mb</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">1024</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> KB"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_download_file</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">dest</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">size_mb</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Download a single file from *url* to *dest*."""</span>
+    <span class="k">if</span> <span class="n">dest</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Already cached: </span><span class="si">{</span><span class="n">dest</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dest</span>
+    <span class="n">dest</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">size_mb</span> <span class="o">&gt;=</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Downloading </span><span class="si">{</span><span class="n">dest</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">_fmt_size</span><span class="p">(</span><span class="n">size_mb</span><span class="p">)</span><span class="si">}</span><span class="s2">) …"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Downloading </span><span class="si">{</span><span class="n">dest</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> …"</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">url</span><span class="p">)</span> <span class="k">as</span> <span class="n">resp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">urllib</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">URLError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">"Zenodo returned HTTP </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="n">url</span><span class="si">!r}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">"</span>
+                    <span class="s2">"  The data record may not be published yet — "</span>
+                    <span class="s2">"contact the authors or check "</span>
+                    <span class="sa">f</span><span class="s2">"https://doi.org/10.5281/zenodo.</span><span class="si">{</span><span class="n">ZENODO_RECORD_ID</span><span class="si">}</span><span class="s2">"</span>
+                <span class="p">)</span>
+            <span class="n">dest</span><span class="o">.</span><span class="n">write_bytes</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+    <span class="k">except</span> <span class="n">urllib</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">URLError</span><span class="p">:</span>
+        <span class="k">raise</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">urllib</span><span class="o">.</span><span class="n">error</span><span class="o">.</span><span class="n">URLError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Download failed: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  → saved to </span><span class="si">{</span><span class="n">dest</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dest</span>
+
+
+<span class="c1"># ─── Registry of forward calibration posteriors ───────────────────────────────</span>
+<span class="c1"># Each entry: name (no .nc) → {"filename": str, "size_mb": float}</span>
+<span class="c1"># filename is the flat name on the Zenodo record (no subdirectory); an optional</span>
+<span class="c1"># "record" pins the entry to an older version of the record.</span>
+<span class="c1">#</span>
+<span class="c1"># From v0.3.0 the record carries the revised manuscript's refits under their</span>
+<span class="c1"># case ids (T₀-shift multivariate `GHEB`, thermal-only `GHPU`, culture+mesocosm</span>
+<span class="c1"># `GCDU`). The multivariate files are the COMPLETE archival copies, EIV per-site</span>
+<span class="c1"># latents included (~78–81 MB); the wheel bundles a 0.4 MB latent-stripped copy</span>
+<span class="c1"># of the default pair, so most users never need these downloads.</span>
+<span class="n">POSTERIOR_REGISTRY</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># ── Default calibration: full multivariate T₀-shift (G₂/₃ + NO₃) ─────────</span>
+    <span class="s2">"tx.GHEB.sst.sri03.G23-N1p0"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"tx.GHEB.sst.sri03.G23-N1p0.fwd.nc"</span><span class="p">,</span> <span class="s2">"size_mb"</span><span class="p">:</span> <span class="mi">78</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">"tx.GHEB.thm.sri03.G23-N1p0"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"tx.GHEB.thm.sri03.G23-N1p0.fwd.nc"</span><span class="p">,</span> <span class="s2">"size_mb"</span><span class="p">:</span> <span class="mi">78</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="c1"># ── Single-predictor T₀-shift variants ───────────────────────────────────</span>
+    <span class="s2">"tx.GHEB.sst.sri03.G23"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"tx.GHEB.sst.sri03.G23.fwd.nc"</span><span class="p">,</span> <span class="s2">"size_mb"</span><span class="p">:</span> <span class="mi">78</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">"tx.GHEB.thm.sri03.G23"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"tx.GHEB.thm.sri03.G23.fwd.nc"</span><span class="p">,</span> <span class="s2">"size_mb"</span><span class="p">:</span> <span class="mi">78</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">"tx.GHEB.sst.sri03.N1p0"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"tx.GHEB.sst.sri03.N1p0.fwd.nc"</span><span class="p">,</span> <span class="s2">"size_mb"</span><span class="p">:</span> <span class="mi">81</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">"tx.GHEB.thm.sri03.N1p0"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"tx.GHEB.thm.sri03.N1p0.fwd.nc"</span><span class="p">,</span> <span class="s2">"size_mb"</span><span class="p">:</span> <span class="mi">81</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="c1"># ── Temperature-only calibrations ────────────────────────────────────────</span>
+    <span class="s2">"tx.GHPU.sst.sri03.p0"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"tx.GHPU.sst.sri03.p0.fwd.nc"</span><span class="p">,</span> <span class="s2">"size_mb"</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">"tx.GHPU.thm.sri03.p0"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"tx.GHPU.thm.sri03.p0.fwd.nc"</span><span class="p">,</span> <span class="s2">"size_mb"</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="c1"># ── Stage-1 culture+mesocosm fit ─────────────────────────────────────────</span>
+    <span class="s2">"tx.GCDU.cul.sri03.p0"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"tx.GCDU.cul.sri03.p0.fwd.nc"</span><span class="p">,</span> <span class="s2">"size_mb"</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="c1"># ── Initial-submission (additive) posteriors, v0.2.0 record ──────────────</span>
+    <span class="c1"># Superseded by the T₀-shift refits above; kept resolvable so preprint-era</span>
+    <span class="c1"># notebooks still run. Pinned to the old version of the record, which</span>
+    <span class="c1"># Zenodo preserves permanently.</span>
+    <span class="s2">"gen_logi_fixed_culmeso_cultureT_scaledRI_cren3"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"gen_logi_fixed_culmeso_cultureT_scaledRI_cren3.nc"</span><span class="p">,</span>
+        <span class="s2">"size_mb"</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span> <span class="s2">"record"</span><span class="p">:</span> <span class="n">_V020_RECORD_ID</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">"gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc"</span><span class="p">,</span>
+        <span class="s2">"size_mb"</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s2">"record"</span><span class="p">:</span> <span class="n">_V020_RECORD_ID</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">"gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3.nc"</span><span class="p">,</span>
+        <span class="s2">"size_mb"</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span> <span class="s2">"record"</span><span class="p">:</span> <span class="n">_V020_RECORD_ID</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">"gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_SST_gdgt23ratio_no3_1.0_scaledRI_cren3.nc"</span><span class="p">,</span>
+        <span class="s2">"size_mb"</span><span class="p">:</span> <span class="mi">78</span><span class="p">,</span> <span class="s2">"record"</span><span class="p">:</span> <span class="n">_V020_RECORD_ID</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">"gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_thermoT_gdgt23ratio_no3_1.0_scaledRI_cren3.nc"</span><span class="p">,</span>
+        <span class="s2">"size_mb"</span><span class="p">:</span> <span class="mi">78</span><span class="p">,</span> <span class="s2">"record"</span><span class="p">:</span> <span class="n">_V020_RECORD_ID</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># ─── Training data registry ───────────────────────────────────────────────────</span>
+<span class="c1"># Each entry: name → {"filename": str, "size_mb": float}</span>
+<span class="n">TRAINING_DATA_REGISTRY</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">"combined_coretop_culture_mesocosm"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"combined_coretop_culture_mesocosm_rev20260210.csv"</span><span class="p">,</span>
+        <span class="s2">"size_mb"</span><span class="p">:</span> <span class="mf">1.8</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">"ds_gridded_screened_global"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"ds_gridded_screened_global_compilation_finalized.csv"</span><span class="p">,</span>
+        <span class="s2">"size_mb"</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s2">"cmems_no3_uncertainty_field"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"cmems_no3_uncertainty_field.nc"</span><span class="p">,</span>
+        <span class="s2">"size_mb"</span><span class="p">:</span> <span class="mi">14</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="c1"># WOA23-derived gridded ocean properties ("ocean_prop_ds" in the SI</span>
+    <span class="c1"># preprocessing notebooks). Unlike the other three entries this one is</span>
+    <span class="c1"># also used at inference time — by predict_T_from_proxyObs(site_lat=,</span>
+    <span class="c1"># site_lon=) — not only to re-run the SI notebooks from scratch, so it</span>
+    <span class="c1"># has its own download_ocean_properties() convenience wrapper below.</span>
+    <span class="c1">#</span>
+    <span class="c1"># Pinned to the Zenodo record for the companion GRL paper, which is</span>
+    <span class="c1"># where this file is actually produced and hosted — not the TEXAS</span>
+    <span class="c1"># record, so no re-upload/re-hosting here.</span>
+    <span class="s2">"ocean_prop_ds"</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">"filename"</span><span class="p">:</span> <span class="s2">"ds06_calculated_ocean_properties.nc"</span><span class="p">,</span>
+        <span class="s2">"size_mb"</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="s2">"record"</span><span class="p">:</span> <span class="n">_GRL_PAPER_RECORD_ID</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+
+
+<span class="c1"># ─── Public API ───────────────────────────────────────────────────────────────</span>
+
+<div class="viewcode-block" id="download_all">
+<a class="viewcode-back" href="../../../api.html#TEXAS.utils.download.download_all">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">download_all</span><span class="p">(</span>
+    <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">data_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Download everything from Zenodo: forward posteriors + training data.</span>
+
+<span class="sd">    Files are downloaded individually; already-cached files are skipped unless</span>
+<span class="sd">    *force=True*.  Total download is ~490 MB (dominated by the six full EIV</span>
+<span class="sd">    multivariate posteriors at ~78–81 MB each).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cache_dir : Path or str, optional</span>
+<span class="sd">        Destination for ``.nc`` posteriors.  Defaults to the standard</span>
+<span class="sd">        posterior cache directory.</span>
+<span class="sd">    data_dir : Path or str, optional</span>
+<span class="sd">        Destination for training data files.  Defaults to ``data/spreadsheets/``.</span>
+<span class="sd">    force : bool</span>
+<span class="sd">        Re-download files that already exist locally.</span>
+<span class="sd">    """</span>
+    <span class="n">download_posteriors</span><span class="p">(</span><span class="n">cache_dir</span><span class="o">=</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
+    <span class="n">download_training_data</span><span class="p">(</span><span class="n">dest_dir</span><span class="o">=</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="download_posteriors">
+<a class="viewcode-back" href="../../../api.html#TEXAS.utils.download.download_posteriors">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">download_posteriors</span><span class="p">(</span>
+    <span class="n">names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Download forward calibration posteriors from Zenodo.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    names : list of str, optional</span>
+<span class="sd">        Subset of ``POSTERIOR_REGISTRY`` keys to download.  When omitted,</span>
+<span class="sd">        downloads every posterior of the current record version (~475 MB —</span>
+<span class="sd">        dominated by the six full multivariate EIV posteriors at ~78–81 MB</span>
+<span class="sd">        each; pass ``names=`` to fetch only what you need).  Superseded</span>
+<span class="sd">        initial-submission posteriors are pinned to the v0.2.0 record and</span>
+<span class="sd">        must be requested by name.</span>
+<span class="sd">    cache_dir : Path or str, optional</span>
+<span class="sd">        Destination directory.  Defaults to the standard posterior cache.</span>
+<span class="sd">    force : bool</span>
+<span class="sd">        Re-download files that already exist locally.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list of Path</span>
+<span class="sd">        Local paths of the downloaded ``.nc`` files.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Download only the univariate SST posterior (~0.3 MB):</span>
+
+<span class="sd">    &gt;&gt;&gt; download_posteriors(["gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3"])</span>
+<span class="sd">    """</span>
+    <span class="c1"># By default download only the current-record posteriors; superseded</span>
+    <span class="c1"># entries pinned to an older record version must be asked for by name.</span>
+    <span class="n">targets</span> <span class="o">=</span> <span class="n">names</span> <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span>
+        <span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">POSTERIOR_REGISTRY</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="s2">"record"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">v</span>
+    <span class="p">]</span>
+    <span class="n">dest_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">cache_dir</span> <span class="k">else</span> <span class="n">POSTERIOR_CACHE_DIR</span>
+    <span class="n">dest_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">aliases</span> <span class="o">=</span> <span class="n">_case_aliases</span><span class="p">()</span>
+    <span class="n">POSTERIOR_REGISTRY</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">aliases</span><span class="p">)</span>      <span class="c1"># case ids resolve to the same files</span>
+
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">POSTERIOR_REGISTRY</span><span class="p">:</span>
+            <span class="n">available</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">  "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">POSTERIOR_REGISTRY</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">' is not in POSTERIOR_REGISTRY.</span><span class="se">\n</span><span class="s2">"</span>
+                <span class="sa">f</span><span class="s2">"Available posteriors:</span><span class="se">\n</span><span class="s2">  </span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s2">"</span>
+            <span class="p">)</span>
+
+    <span class="n">local_paths</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">_local_dest</span><span class="p">(</span><span class="n">dest_dir</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">}</span>
+
+    <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">targets</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">local_paths</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="n">force</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">missing</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"All requested posteriors already cached."</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">local_paths</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">]</span>
+
+    <span class="n">total_mb</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">POSTERIOR_REGISTRY</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="s2">"size_mb"</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">missing</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">total_mb</span> <span class="o">&gt;=</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Downloading </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span><span class="si">}</span><span class="s2"> posterior(s) — total ~</span><span class="si">{</span><span class="n">total_mb</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> MB"</span><span class="p">)</span>
+
+    <span class="n">paths</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">targets</span><span class="p">:</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="n">POSTERIOR_REGISTRY</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="n">dest</span> <span class="o">=</span> <span class="n">local_paths</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="n">dest</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">_download_file</span><span class="p">(</span>
+            <span class="n">_file_url</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s2">"filename"</span><span class="p">],</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"record"</span><span class="p">)),</span>
+            <span class="n">dest</span><span class="p">,</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"size_mb"</span><span class="p">],</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dest</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">paths</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_case_aliases</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Case-id aliases onto the registry's legacy keys.</span>
+
+<span class="sd">    Two names refer to one file and both must work. The **key** is what a user</span>
+<span class="sd">    asks for, and case ids are canonical from the resubmission on. The</span>
+<span class="sd">    **filename** is what exists on the published Zenodo record, which is a</span>
+<span class="sd">    frozen DOI carrying the legacy long names -- so it cannot change until a</span>
+<span class="sd">    new deposit is made, and inventing a case-named URL now would 404.</span>
+
+<span class="sd">    Built rather than hand-listed so it cannot fall out of step with the</span>
+<span class="sd">    registry, and failures are silent because an alias is a convenience: a</span>
+<span class="sd">    posterior this naming scheme cannot classify simply keeps its legacy key.</span>
+<span class="sd">    """</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.naming</span><span class="w"> </span><span class="kn">import</span> <span class="n">case_from_attrs</span><span class="p">,</span> <span class="n">legacy_fwd_name</span>  <span class="c1"># noqa: F401</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">POSTERIOR_REGISTRY</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="n">_case_id_for</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span> <span class="o">=</span> <span class="n">entry</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">continue</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">and</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">POSTERIOR_REGISTRY</span><span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_case_id_for</span><span class="p">(</span><span class="n">legacy_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Derive a case id from a legacy registry key, by re-reading its parts."""</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">.naming</span><span class="w"> </span><span class="kn">import</span> <span class="n">case_from_attrs</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">"^(?P&lt;model&gt;.+?)_(?P&lt;temptype&gt;SST|thermoT|cultureT)"</span>
+                 <span class="sa">r</span><span class="s2">"(?P&lt;g23&gt;_gdgt23ratio)?(?:_no3_(?P&lt;cut&gt;[0-9.]+))?"</span>
+                 <span class="sa">r</span><span class="s2">"_(?P&lt;proxy&gt;.+)$"</span><span class="p">,</span> <span class="n">legacy_key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">m</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">""</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">groupdict</span><span class="p">()</span>
+    <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"stan_model_name"</span><span class="p">:</span> <span class="n">g</span><span class="p">[</span><span class="s2">"model"</span><span class="p">],</span> <span class="s2">"temptype"</span><span class="p">:</span> <span class="n">g</span><span class="p">[</span><span class="s2">"temptype"</span><span class="p">],</span>
+             <span class="s2">"proxy_name"</span><span class="p">:</span> <span class="n">g</span><span class="p">[</span><span class="s2">"proxy"</span><span class="p">],</span> <span class="s2">"use_gdgt23ratio"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="s2">"g23"</span><span class="p">])),</span>
+             <span class="s2">"use_no3"</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="s2">"cut"</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)}</span>
+    <span class="k">if</span> <span class="n">g</span><span class="p">[</span><span class="s2">"cut"</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">attrs</span><span class="p">[</span><span class="s2">"no3_cutoff"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">g</span><span class="p">[</span><span class="s2">"cut"</span><span class="p">])</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">case_from_attrs</span><span class="p">(</span><span class="n">attrs</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_local_dest</span><span class="p">(</span><span class="n">dest_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Where a Zenodo posterior lands locally.</span>
+
+<span class="sd">    The Zenodo record is a **flat** namespace -- it has to be, a DOI deposit has</span>
+<span class="sd">    no subdirectories -- but the local cache is organised by case directory. So</span>
+<span class="sd">    a registry key that is a case id is unpacked into ``&lt;case&gt;/&lt;case&gt;.fwd.nc``,</span>
+<span class="sd">    giving one uniform local layout no matter whether a posterior was sampled</span>
+<span class="sd">    here or downloaded. Legacy long-name keys (the v0.2.0 record's files) stay</span>
+<span class="sd">    flat.</span>
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">.naming</span><span class="w"> </span><span class="kn">import</span> <span class="n">fwd_relpath</span><span class="p">,</span> <span class="n">is_case_id</span>
+        <span class="k">if</span> <span class="n">is_case_id</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+            <span class="c1"># Flat both sides now, so this is a rename rather than an unpack.</span>
+            <span class="k">return</span> <span class="n">dest_dir</span> <span class="o">/</span> <span class="n">fwd_relpath</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>  <span class="c1"># naming is a convenience; never block a download on it</span>
+    <span class="k">return</span> <span class="n">dest_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.nc"</span>
+
+
+<div class="viewcode-block" id="download_training_data">
+<a class="viewcode-back" href="../../../api.html#TEXAS.utils.download.download_training_data">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">download_training_data</span><span class="p">(</span>
+    <span class="n">dest_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""Download GDGT training data files from Zenodo.</span>
+
+<span class="sd">    Downloads the coretop/culture/mesocosm training CSVs, the CMEMS NO₃</span>
+<span class="sd">    uncertainty field used in the EIV calibration, and the WOA23-derived</span>
+<span class="sd">    ``ocean_prop_ds`` gridded ocean properties.  The CSVs and the CMEMS field</span>
+<span class="sd">    are needed only to re-run the SI preprocessing and calibration notebooks</span>
+<span class="sd">    from scratch and are NOT required for inverse temperature</span>
+<span class="sd">    reconstructions — use :func:`download_posteriors` for that.</span>
+<span class="sd">    ``ocean_prop_ds`` is the exception: it is also used at inference time by</span>
+<span class="sd">    :func:`~TEXAS.predict.predict_T_from_proxyObs` for the optional</span>
+<span class="sd">    ``site_lat``/``site_lon`` NO₃ lookup — see :func:`download_ocean_properties`</span>
+<span class="sd">    to fetch just that one file. It also isn't hosted on the TEXAS record at</span>
+<span class="sd">    all; it comes from the companion GRL paper's Zenodo record (see</span>
+<span class="sd">    ``TRAINING_DATA_REGISTRY["ocean_prop_ds"]["record"]``).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dest_dir : Path or str, optional</span>
+<span class="sd">        Destination directory.  Defaults to ``data/spreadsheets/`` in the</span>
+<span class="sd">        repo (or ``~/.texas/data/spreadsheets/`` when pip-installed).</span>
+<span class="sd">    force : bool</span>
+<span class="sd">        Re-download files that already exist locally.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list of Path</span>
+<span class="sd">        Local paths of the downloaded files.</span>
+<span class="sd">    """</span>
+    <span class="n">dest</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dest_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">dest_dir</span> <span class="k">else</span> <span class="n">SPREADSHEETS_DIR</span>
+    <span class="n">dest</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">TRAINING_DATA_REGISTRY</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">dest</span> <span class="o">/</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"filename"</span><span class="p">])</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="n">force</span>
+    <span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">missing</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">"All training data files already present."</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">dest</span> <span class="o">/</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"filename"</span><span class="p">]</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">TRAINING_DATA_REGISTRY</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+
+    <span class="n">total_mb</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">TRAINING_DATA_REGISTRY</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="s2">"size_mb"</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">missing</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">total_mb</span> <span class="o">&gt;=</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Downloading </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span><span class="si">}</span><span class="s2"> training data file(s) — total ~</span><span class="si">{</span><span class="n">total_mb</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2"> MB"</span><span class="p">)</span>
+
+    <span class="n">paths</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">TRAINING_DATA_REGISTRY</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">dest</span> <span class="o">/</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"filename"</span><span class="p">]</span>
+        <span class="n">_download_file</span><span class="p">(</span>
+            <span class="n">_file_url</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s2">"filename"</span><span class="p">],</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"record"</span><span class="p">)),</span>
+            <span class="n">out</span><span class="p">,</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"size_mb"</span><span class="p">],</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">paths</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">download_ocean_properties</span><span class="p">(</span>
+    <span class="n">dest_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">force</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Download the WOA23-derived ``ocean_prop_ds`` field from Zenodo.</span>
+
+<span class="sd">    This is the single file most users need for the ``site_lat``/``site_lon``</span>
+<span class="sd">    NO₃ lookup in :func:`~TEXAS.predict.predict_T_from_proxyObs` — a ~20 MB</span>
+<span class="sd">    gridded ``(lat, lon)`` dataset of thermocline-depth-integrated WOA23</span>
+<span class="sd">    nitrate, previously only obtainable by running ``SI_code00_PreProcessing``</span>
+<span class="sd">    locally. Downloading just this entry (rather than the full</span>
+<span class="sd">    :func:`download_training_data`, which also fetches the ~17 MB of</span>
+<span class="sd">    training CSVs and the CMEMS field) is why this has its own function.</span>
+
+<span class="sd">    Fetched from the Zenodo record for the companion GRL paper (not the</span>
+<span class="sd">    TEXAS project's own record) — the same source ``SI_code00_PreProcessing``</span>
+<span class="sd">    itself downloads it from.</span>
+
+<span class="sd">    Idempotent: skips the download if the file is already cached, unless</span>
+<span class="sd">    *force=True*.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dest_dir : Path or str, optional</span>
+<span class="sd">        Destination directory.  Defaults to ``data/spreadsheets/`` in the</span>
+<span class="sd">        repo (or ``~/.texas/data/spreadsheets/`` when pip-installed) — the</span>
+<span class="sd">        same directory :func:`download_training_data` uses.</span>
+<span class="sd">    force : bool</span>
+<span class="sd">        Re-download even if the file already exists locally.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Path</span>
+<span class="sd">        Local path of the downloaded ``.nc`` file.  Open it with</span>
+<span class="sd">        ``xr.open_dataset(path)``, or use</span>
+<span class="sd">        :func:`TEXAS.data.ocean_lookup.get_ocean_prop_ds` to download and</span>
+<span class="sd">        open it in one call.</span>
+<span class="sd">    """</span>
+    <span class="n">dest</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dest_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">dest_dir</span> <span class="k">else</span> <span class="n">SPREADSHEETS_DIR</span>
+    <span class="n">dest</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">entry</span> <span class="o">=</span> <span class="n">TRAINING_DATA_REGISTRY</span><span class="p">[</span><span class="s2">"ocean_prop_ds"</span><span class="p">]</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">dest</span> <span class="o">/</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"filename"</span><span class="p">]</span>
+    <span class="n">_download_file</span><span class="p">(</span>
+        <span class="n">_file_url</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s2">"filename"</span><span class="p">],</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"record"</span><span class="p">)),</span>
+        <span class="n">out</span><span class="p">,</span> <span class="n">entry</span><span class="p">[</span><span class="s2">"size_mb"</span><span class="p">],</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span>
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Ronnakrit Rattanasriampaipong
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

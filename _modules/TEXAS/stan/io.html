@@ -1,0 +1,1025 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TEXAS.stan.io &#8212; TEXAS</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=e1f25cfb" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="../../../_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="../../../_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../../_static/togglebutton.js?v=b8b12719"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="../../../_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/TEXAS/stan/io';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="canonical" href="https://paleolipidrr.github.io/TEXAS/_modules/TEXAS/stan/io.html" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="../../../_static/searchtools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="../../../searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/texas_logo.svg" class="logo__image only-light" alt="TEXAS - Home"/>
+    <img src="../../../_static/texas_logo.svg" class="logo__image only-dark pst-js-only" alt="TEXAS - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../callmap.html">Call map</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Tutorial</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../tutorial/intro.html">TEXAS Interactive Tutorial</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module1_prior.html">Module 1 — What is a Prior?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module2_bayesian_updating.html">Module 2 — Bayesian Updating</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module3_curve_explorer.html">Module 3 — The Calibration Curve Explorer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module4_mcmc.html">Module 4 — What MCMC Actually Does</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../tutorial/module5_results.html">Module 5 — Reading Your Results</a></li>
+</ul>
+</details></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Explainers</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../PSM.html">TEXAS Proxy System Model — Bayesian Inference Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../model_validation.html">Model validation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../sampler_budget.html">Sampler budget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../stan_models_explanation_v2.html">TEXAS Stan Models: Ensemble vs Direct Sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../marginalization_explainer.html">Why Marginalization Improves Inverse TEXAS Sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../why_plugin_p50_differs.html">Why the plug-in P50 ≠ the Bayesian P50</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reduce_sum_for_geologists.html">Understanding <code class="docutils literal notranslate"><span class="pre">reduce_sum</span></code> and <code class="docutils literal notranslate"><span class="pre">ll_chunk</span></code> in TEXAS-PSM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../Prior_Choice_Normal_vs_Cauchy.html">Why Normal Instead of Cauchy Priors? 🤔</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../ckdtree_nearest_ocean_explainer.html">Finding the Nearest Ocean Pixel: How <code class="docutils literal notranslate"><span class="pre">cKDTree</span></code> Works</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Archive</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../preprint_additive_archive.html">Archive — the preprint’s additive (β) formulation</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS/issues/new?title=Issue%20on%20page%20%2F_modules/TEXAS/stan/io.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1></h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for TEXAS.stan.io</h1><div class="highlight"><pre>
+<span></span><span class="c1"># TEXAS/stan/io.py</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..utils.paths</span><span class="w"> </span><span class="kn">import</span> <span class="n">POSTERIOR_CACHE_DIR</span><span class="p">,</span> <span class="n">INVT_CACHE_DIR</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">xarray</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">xr</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"save_posterior"</span><span class="p">,</span>
+    <span class="s2">"load_posterior"</span><span class="p">,</span>
+    <span class="s2">"list_posteriors"</span><span class="p">,</span>
+    <span class="s2">"save_invT_posterior"</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1"># By default, write into your repo under TEXAS/posterior_cache</span>
+<span class="n">DEFAULT_FORWARD_DIR</span> <span class="o">=</span> <span class="n">POSTERIOR_CACHE_DIR</span>
+<span class="n">DEFAULT_INVT_DIR</span> <span class="o">=</span> <span class="n">INVT_CACHE_DIR</span>
+<span class="n">DEFAULT_FORWARD_DIR</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">DEFAULT_INVT_DIR</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="save_posterior">
+<a class="viewcode-back" href="../../../api.html#TEXAS.stan.io.save_posterior">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_posterior</span><span class="p">(</span>
+    <span class="n">posterior</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+    <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">filename_suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+    <span class="n">layout</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"auto"</span><span class="p">,</span> <span class="s2">"case"</span><span class="p">,</span> <span class="s2">"legacy"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"auto"</span><span class="p">,</span>
+    <span class="n">run</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"auto"</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Save a forward-model posterior to disk as compressed NetCDF.</span>
+
+<span class="sd">    The filename is auto-generated from the posterior's metadata attrs:</span>
+<span class="sd">    ``{model}_{temptype}[_gdgt23ratio][_no3_{cutoff}][_{proxy_name}]{suffix}.nc``</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    posterior : xr.Dataset</span>
+<span class="sd">        Forward calibration posterior returned by ``get_posterior()``.</span>
+<span class="sd">        Must have ``stan_model_name``, ``temptype``, and ``proxy_name``</span>
+<span class="sd">        attrs set (``proxy_name`` is required — a warning is raised if</span>
+<span class="sd">        missing).</span>
+<span class="sd">    cache_dir : str or Path, optional</span>
+<span class="sd">        Directory to write the file.  Defaults to the standard forward</span>
+<span class="sd">        posterior cache (``data/cache/TEXAS_posterior_cache/`` for</span>
+<span class="sd">        source installs, ``~/.texas/cache/TEXAS_posterior_cache/`` for</span>
+<span class="sd">        pip installs).</span>
+<span class="sd">    overwrite : bool</span>
+<span class="sd">        If ``False``, raise ``FileExistsError`` when the output path</span>
+<span class="sd">        already exists.  Default ``True``.</span>
+<span class="sd">    filename_suffix : str, optional</span>
+<span class="sd">        Extra tag appended before ``.nc`` under the *legacy* layout, and the</span>
+<span class="sd">        run/member token under the case layout.  Leading/trailing underscores</span>
+<span class="sd">        are stripped.  **Do not pass a date here.**  Filenames no longer carry</span>
+<span class="sd">        date stamps; the run date is recorded in the ``run_timestamp`` attr,</span>
+<span class="sd">        where it survives a rename and does not have to be parsed back out of</span>
+<span class="sd">        a path.  Prefer ``run=`` for an explicit member.</span>
+<span class="sd">    run : str or int, optional</span>
+<span class="sd">        Optional run/member token under the case layout.  ``"auto"`` (default)</span>
+<span class="sd">        writes **no** member, so a configuration has one canonical path and a</span>
+<span class="sd">        re-run replaces it; pass a value only to keep a run deliberately apart.</span>
+<span class="sd">        An explicit *run* wins over *filename_suffix* for the case path.  With</span>
+<span class="sd">        ``overwrite=False`` an existing file raises ``FileExistsError``.</span>
+<span class="sd">    layout : {"auto", "case", "legacy"}</span>
+<span class="sd">        Where to write.  ``"case"`` uses the CESM-style case directory</span>
+<span class="sd">        (``tx.v026.GHEB.sst.ri3.G23-N1p0/fwd.nc``); ``"legacy"`` uses the</span>
+<span class="sd">        historical long flat filename; ``"auto"`` (default) prefers the case</span>
+<span class="sd">        layout and falls back to legacy with a warning if no case id can be</span>
+<span class="sd">        derived.  See :mod:`TEXAS.utils.naming`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Path</span>
+<span class="sd">        Absolute path of the saved ``.nc`` file.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">posterior</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"posterior must be an xarray.Dataset"</span><span class="p">)</span>
+
+    <span class="n">outdir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">cache_dir</span> <span class="k">else</span> <span class="n">DEFAULT_FORWARD_DIR</span>
+    <span class="n">outdir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">name</span>  <span class="o">=</span> <span class="n">posterior</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"stan_model_name"</span><span class="p">,</span> <span class="s2">"unknown_model"</span><span class="p">)</span>
+    <span class="n">ttype</span> <span class="o">=</span> <span class="n">posterior</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"temptype"</span><span class="p">,</span> <span class="s2">"unknown"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">posterior</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"use_gdgt23ratio"</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">ttype</span> <span class="o">+=</span> <span class="s2">"_gdgt23ratio"</span>
+    <span class="k">if</span> <span class="n">posterior</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"use_no3"</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">cutoff</span> <span class="o">=</span> <span class="n">posterior</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"no3_cutoff"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cutoff</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"no3_cutoff must be set when use_no3=1"</span><span class="p">)</span>
+        <span class="n">ttype</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">"_no3_</span><span class="si">{</span><span class="n">cutoff</span><span class="si">}</span><span class="s2">"</span>
+
+    <span class="n">proxy_name</span> <span class="o">=</span> <span class="n">posterior</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"proxy_name"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span>
+    <span class="n">proxy_tag</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"_</span><span class="si">{</span><span class="n">proxy_name</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">proxy_name</span> <span class="ow">and</span> <span class="n">proxy_name</span> <span class="o">!=</span> <span class="s2">"unknown"</span> <span class="k">else</span> <span class="s2">""</span>
+
+    <span class="c1"># sanitize suffix</span>
+    <span class="k">if</span> <span class="n">filename_suffix</span><span class="p">:</span>
+        <span class="n">filename_suffix</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"_</span><span class="si">{</span><span class="n">filename_suffix</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">'_'</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+
+    <span class="n">legacy_path</span> <span class="o">=</span> <span class="n">outdir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">ttype</span><span class="si">}{</span><span class="n">proxy_tag</span><span class="si">}{</span><span class="n">filename_suffix</span><span class="si">}</span><span class="s2">.nc"</span>
+
+    <span class="c1"># Preferred layout: one directory per calibration case, CESM-style, so the</span>
+    <span class="c1"># forward posterior and every reconstruction derived from it sit together</span>
+    <span class="c1"># and individual filenames stay short. Falls back to the historical flat</span>
+    <span class="c1"># name whenever a case id cannot be derived (e.g. a model this naming</span>
+    <span class="c1"># scheme does not know), so saving can never fail on naming alone.</span>
+    <span class="n">outpath</span> <span class="o">=</span> <span class="n">legacy_path</span>
+    <span class="k">if</span> <span class="n">layout</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"case"</span><span class="p">,</span> <span class="s2">"auto"</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">..utils.naming</span><span class="w"> </span><span class="kn">import</span> <span class="n">case_from_attrs</span><span class="p">,</span> <span class="n">fwd_relpath</span>
+            <span class="c1"># One canonical path per configuration. There is no member counter:</span>
+            <span class="c1"># a re-run overwrites, and callers that do not want to re-run check</span>
+            <span class="c1"># the cache first (load_posterior, or a resume manifest). The</span>
+            <span class="c1"># auto-incrementing member this replaced put ".001" next to "N10",</span>
+            <span class="c1"># where only one of the two is a number, and made overwrite=False</span>
+            <span class="c1"># vacuous because a fresh member never collides.</span>
+            <span class="n">explicit</span> <span class="o">=</span> <span class="n">filename_suffix</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)</span>
+            <span class="n">case</span> <span class="o">=</span> <span class="n">case_from_attrs</span><span class="p">(</span>
+                <span class="n">posterior</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span>
+                <span class="n">run</span><span class="o">=</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">run</span><span class="p">)</span> <span class="k">if</span> <span class="n">run</span> <span class="o">!=</span> <span class="s2">"auto"</span> <span class="k">else</span> <span class="n">explicit</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">outpath</span> <span class="o">=</span> <span class="n">outdir</span> <span class="o">/</span> <span class="n">fwd_relpath</span><span class="p">(</span><span class="n">case</span><span class="p">)</span>
+            <span class="n">outpath</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">posterior</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"case_id"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">case</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">layout</span> <span class="o">==</span> <span class="s2">"case"</span><span class="p">:</span>
+                <span class="k">raise</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">"Could not derive a case id for this posterior (</span><span class="si">{</span><span class="n">exc</span><span class="si">}</span><span class="s2">); "</span>
+                <span class="sa">f</span><span class="s2">"falling back to the legacy flat filename. Pass "</span>
+                <span class="sa">f</span><span class="s2">"layout='legacy' to silence this."</span><span class="p">,</span>
+                <span class="ne">UserWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">outpath</span> <span class="o">=</span> <span class="n">legacy_path</span>
+
+    <span class="k">if</span> <span class="n">outpath</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">outpath</span><span class="si">}</span><span class="s2"> exists and overwrite=False"</span><span class="p">)</span>
+
+    <span class="n">posterior</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"filename"</span><span class="p">]</span> <span class="o">=</span> <span class="n">outpath</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">posterior</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"proxy_name"</span><span class="p">):</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">"proxy_name is not set on this posterior. "</span>
+            <span class="s2">"Pass proxy_name= to get_posterior() (e.g. proxy_name='scaledRI'). "</span>
+            <span class="s2">"It is stored in the .nc file and used downstream to validate that "</span>
+            <span class="s2">"the correct proxy type is passed to predict_T_from_proxyObs()."</span><span class="p">,</span>
+            <span class="ne">UserWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">posterior</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"proxy_name"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"unknown"</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="p">:</span> <span class="p">{</span><span class="s2">"zlib"</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">posterior</span><span class="o">.</span><span class="n">data_vars</span><span class="p">}</span>
+    <span class="n">sanitized</span> <span class="o">=</span> <span class="n">_sanitize_attrs_for_netcdf</span><span class="p">(</span><span class="n">posterior</span><span class="p">)</span>
+    <span class="n">sanitized</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="n">outpath</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Saved forward posterior to </span><span class="si">{</span><span class="n">outpath</span><span class="si">}</span><span class="s2">  [proxy_name='</span><span class="si">{</span><span class="n">posterior</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">'proxy_name'</span><span class="p">]</span><span class="si">}</span><span class="s2">']"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">outpath</span></div>
+
+
+
+<div class="viewcode-block" id="load_posterior">
+<a class="viewcode-back" href="../../../api.html#TEXAS.stan.io.load_posterior">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">load_posterior</span><span class="p">(</span>
+    <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">model_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"forward"</span><span class="p">,</span> <span class="s2">"invT"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"forward"</span><span class="p">,</span>
+    <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Load a posterior from disk: `{model_name}.nc` in the appropriate cache directory.</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        model_name: Name of the model file (without .nc extension)</span>
+<span class="sd">        model_type: Type of posterior ("forward" or "invT")</span>
+<span class="sd">        cache_dir: Custom cache directory (overrides default locations)</span>
+<span class="sd">    </span>
+<span class="sd">    Returns:</span>
+<span class="sd">        xarray.Dataset containing the posterior</span>
+<span class="sd">        </span>
+<span class="sd">    Raises:</span>
+<span class="sd">        FileNotFoundError: If the posterior file doesn't exist</span>
+<span class="sd">    """</span>
+    <span class="c1"># Determine cache directory</span>
+    <span class="k">if</span> <span class="n">cache_dir</span><span class="p">:</span>
+        <span class="n">indir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">model_type</span> <span class="o">==</span> <span class="s2">"forward"</span><span class="p">:</span>
+        <span class="n">indir</span> <span class="o">=</span> <span class="n">DEFAULT_FORWARD_DIR</span>
+    <span class="k">elif</span> <span class="n">model_type</span> <span class="o">==</span> <span class="s2">"invT"</span><span class="p">:</span>
+        <span class="n">indir</span> <span class="o">=</span> <span class="n">DEFAULT_INVT_DIR</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># This shouldn't happen due to type hints, but just in case</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Invalid model_type: </span><span class="si">{</span><span class="n">model_type</span><span class="si">}</span><span class="s2">. Must be 'forward' or 'invT'"</span><span class="p">)</span>
+    
+    <span class="c1"># Ensure directory exists</span>
+    <span class="n">indir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Dual-read: accept either a case id (tx.v026.GHEB.sst.ri3.G23-N1p0) or a</span>
+    <span class="c1"># historical long name, and find the file under either layout. Exact-path</span>
+    <span class="c1"># lookups come first; the attr-matching scan only runs if those miss.</span>
+    <span class="n">fpath</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">model_type</span> <span class="o">==</span> <span class="s2">"forward"</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">..utils.naming</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_posterior_path</span>
+            <span class="n">fpath</span> <span class="o">=</span> <span class="n">resolve_posterior_path</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">indir</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">fpath</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">fpath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">candidate</span> <span class="o">=</span> <span class="n">indir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">.nc"</span>
+        <span class="n">fpath</span> <span class="o">=</span> <span class="n">candidate</span> <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">fpath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># The nitrate token was respelled (N10 -&gt; N1p0) on 2026-08-23, and a</span>
+        <span class="c1"># name and the file it points at can sit on either side of that. This</span>
+        <span class="c1"># covers the inverse cache and any leaf too specific to parse as a case</span>
+        <span class="c1"># id -- an invT leaf carries a site and scenario after the case, so the</span>
+        <span class="c1"># case-id machinery above never sees it.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">..utils.naming</span><span class="w"> </span><span class="kn">import</span> <span class="n">swap_no3_token</span>
+            <span class="n">alt</span> <span class="o">=</span> <span class="n">swap_no3_token</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">alt</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">alt</span><span class="p">:</span>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="n">indir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">alt</span><span class="si">}</span><span class="s2">.nc"</span>
+            <span class="n">fpath</span> <span class="o">=</span> <span class="n">candidate</span> <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">fpath</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">model_type</span> <span class="o">==</span> <span class="s2">"forward"</span><span class="p">:</span>
+        <span class="c1"># Last resort before failing: the posteriors that ship inside the wheel.</span>
+        <span class="c1"># This is what lets a bare `pip install texas-psm` reconstruct without a</span>
+        <span class="c1"># download; the cache still wins, so a user's own refit of the same case</span>
+        <span class="c1"># is never shadowed by the bundled copy.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">..utils.paths</span><span class="w"> </span><span class="kn">import</span> <span class="n">BUNDLED_POSTERIOR_DIR</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">..utils.naming</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_posterior_path</span> <span class="k">as</span> <span class="n">_resolve</span>
+            <span class="k">if</span> <span class="n">BUNDLED_POSTERIOR_DIR</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                <span class="n">fpath</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">model_name</span><span class="p">,</span> <span class="n">BUNDLED_POSTERIOR_DIR</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">fpath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">candidate</span> <span class="o">=</span> <span class="n">BUNDLED_POSTERIOR_DIR</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">.nc"</span>
+                    <span class="n">fpath</span> <span class="o">=</span> <span class="n">candidate</span> <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">fpath</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">fpath</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Case dirs hold "&lt;case&gt;.fwd.nc"; dirs written before 2026-08-11 hold a</span>
+        <span class="c1"># bare "fwd.nc". Either way the case id is the directory name.</span>
+        <span class="n">cased</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*/*.fwd.nc"</span><span class="p">))</span> <span class="o">+</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*/fwd.nc"</span><span class="p">))</span>
+        <span class="n">available</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">indir</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.nc"</span><span class="p">))</span> <span class="o">+</span> <span class="n">cased</span>
+        <span class="n">available_str</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">    "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"fwd.nc"</span><span class="p">)</span> <span class="k">else</span> <span class="n">f</span><span class="o">.</span><span class="n">stem</span>
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">available</span>
+            <span class="p">)</span>
+        <span class="p">)</span> <span class="k">if</span> <span class="n">available</span> <span class="k">else</span> <span class="s2">"(none)"</span>
+        <span class="n">model_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">"Posterior file not found: '</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">.nc'</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"Searched in: </span><span class="si">{</span><span class="n">indir</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"Files present in that directory:</span><span class="se">\n</span><span class="s2">    </span><span class="si">{</span><span class="n">available_str</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"Options:</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"  1. The file is in a different directory — load it yourself and pass the Dataset:</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"       import xarray as xr</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"       ds = xr.open_dataset('/your/path/</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">.nc')</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"       predict_T_from_proxyObs(..., fwd_posterior=ds)</span><span class="se">\n\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"  2. Search a different cache directory:</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"       load_posterior('</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">', cache_dir='/your/path/here')</span><span class="se">\n\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"  3. Download from Zenodo:</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"       from TEXAS.utils.download import download_posteriors</span><span class="se">\n</span><span class="s2">"</span>
+            <span class="sa">f</span><span class="s2">"       download_posteriors(['</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">'])"</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">xr</span><span class="o">.</span><span class="n">load_dataset</span><span class="p">(</span><span class="n">fpath</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="list_posteriors">
+<a class="viewcode-back" href="../../../api.html#TEXAS.stan.io.list_posteriors">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_posteriors</span><span class="p">(</span>
+    <span class="n">model_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">"forward"</span><span class="p">,</span> <span class="s2">"invT"</span><span class="p">,</span> <span class="s2">"both"</span><span class="p">]</span> <span class="o">=</span> <span class="s2">"both"</span><span class="p">,</span>
+    <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    List available posterior files in the cache directory.</span>
+
+<span class="sd">    Prints a summary and returns a dict of stem names that can be passed</span>
+<span class="sd">    directly to ``predict_T_from_proxyObs(fwd_posterior=...)``.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model_type : "forward", "invT", or "both"</span>
+<span class="sd">        Which cache to inspect.  Default ``"both"``.</span>
+<span class="sd">    cache_dir : Path or str, optional</span>
+<span class="sd">        Override the default cache root.  When given, both forward and invT</span>
+<span class="sd">        subdirectories are looked for under this path.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dict</span>
+<span class="sd">        ``{"forward": [...], "invT": [...]}`` — lists of stem names (no ``.nc``).</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">cache_dir</span><span class="p">:</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">)</span>
+        <span class="n">fwd_dir</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">"TEXAS_posterior_cache"</span>
+        <span class="n">invt_dir</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">"TEXAS_invT_posterior_cache"</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fwd_dir</span> <span class="o">=</span> <span class="n">DEFAULT_FORWARD_DIR</span>
+        <span class="n">invt_dir</span> <span class="o">=</span> <span class="n">DEFAULT_INVT_DIR</span>
+
+    <span class="n">result</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"forward"</span><span class="p">:</span> <span class="p">[],</span> <span class="s2">"invT"</span><span class="p">:</span> <span class="p">[]}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_list</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">directory</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.nc"</span><span class="p">))</span> <span class="k">if</span> <span class="n">directory</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="n">stems</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">stem</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s2"> posteriors  [</span><span class="si">{</span><span class="n">directory</span><span class="si">}</span><span class="s2">]"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">stems</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">stems</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">"  (none)"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">stems</span>
+
+    <span class="k">if</span> <span class="n">model_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"forward"</span><span class="p">,</span> <span class="s2">"both"</span><span class="p">):</span>
+        <span class="n">result</span><span class="p">[</span><span class="s2">"forward"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_list</span><span class="p">(</span><span class="n">fwd_dir</span><span class="p">,</span> <span class="s2">"Forward calibration"</span><span class="p">)</span>
+        <span class="c1"># Also report what ships with the package, so a user who has downloaded</span>
+        <span class="c1"># nothing still sees the calibrations they can use right now.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">..utils.paths</span><span class="w"> </span><span class="kn">import</span> <span class="n">BUNDLED_POSTERIOR_DIR</span>
+            <span class="n">bundled</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s2">".fwd.nc"</span><span class="p">)]</span>
+                <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">BUNDLED_POSTERIOR_DIR</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s2">"*.fwd.nc"</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="n">bundled</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">bundled</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Bundled with the package  [</span><span class="si">{</span><span class="n">BUNDLED_POSTERIOR_DIR</span><span class="si">}</span><span class="s2">]"</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">bundled</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            <span class="n">result</span><span class="p">[</span><span class="s2">"bundled"</span><span class="p">]</span> <span class="o">=</span> <span class="n">bundled</span>
+    <span class="k">if</span> <span class="n">model_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"invT"</span><span class="p">,</span> <span class="s2">"both"</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">model_type</span> <span class="o">==</span> <span class="s2">"both"</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">()</span>
+        <span class="n">result</span><span class="p">[</span><span class="s2">"invT"</span><span class="p">]</span> <span class="o">=</span> <span class="n">_list</span><span class="p">(</span><span class="n">invt_dir</span><span class="p">,</span> <span class="s2">"Inverse temperature (invT)"</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">save_invT_posterior</span><span class="p">(</span>
+    <span class="n">posterior</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+    <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">filename_tag</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Save an inverse-T posterior to disk as compressed NetCDF.</span>
+
+<span class="sd">    Default location: repo/.../TEXAS/invT_posterior_cache/</span>
+
+<span class="sd">    The filename comes from :func:`_generate_filename_base`, the same builder</span>
+<span class="sd">    the internal save path uses, so a reconstruction lands in one place however</span>
+<span class="sd">    it was produced.</span>
+
+<span class="sd">    This function used to build ``{site}_{model}_{temptype}.nc`` itself, which</span>
+<span class="sd">    omitted ``proxy_name``: a ``scaledRI`` and a ``TEX86`` reconstruction of one</span>
+<span class="sd">    site collided on a single path, and with the default ``overwrite=True`` the</span>
+<span class="sd">    second silently replaced the first. It was also case-unaware, so it could</span>
+<span class="sd">    not place a reconstruction inside its calibration's case directory. Nothing</span>
+<span class="sd">    on disk used that spelling -- every cached invT posterior came from the</span>
+<span class="sd">    internal path -- so unifying them changes no existing file.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">posterior</span><span class="p">,</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">"posterior must be an xarray.Dataset"</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">_save_invT_posterior</span><span class="p">(</span>
+        <span class="n">posterior</span><span class="o">=</span><span class="n">posterior</span><span class="p">,</span>
+        <span class="n">cache_dir</span><span class="o">=</span><span class="n">cache_dir</span><span class="p">,</span>
+        <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span><span class="p">,</span>
+        <span class="n">filename_tag</span><span class="o">=</span><span class="n">filename_tag</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="c1"># ─── Private helpers for invT I/O ──────────────────────────────────────────</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_slug</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="s2">"-"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[^a-zA-Z0-9._-]+"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_generate_filename_base</span><span class="p">(</span>
+    <span class="n">meta</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">filename_tag</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Generate the base filename for saving invT results.</span>
+
+<span class="sd">    Format: {site}_{model}_{temptype}_{tags}_{model_type}</span>
+<span class="sd">    Model type (direct/ensemble) goes at the end for easy identification.</span>
+<span class="sd">    """</span>
+    <span class="n">site_name</span> <span class="o">=</span> <span class="n">_slug</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"SiteName"</span><span class="p">,</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"site_name"</span><span class="p">,</span> <span class="s2">"unknown_site"</span><span class="p">)))</span>
+    <span class="n">stan_model</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"stan_model_name"</span><span class="p">,</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"stan_model"</span><span class="p">,</span> <span class="s2">"unknown_model"</span><span class="p">))</span>
+    <span class="n">temptype</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"temptype"</span><span class="p">,</span> <span class="s2">"unknown_temptype"</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s2">"marginal"</span> <span class="ow">in</span> <span class="n">stan_model</span><span class="p">:</span>
+        <span class="n">model_type</span> <span class="o">=</span> <span class="s2">"direct"</span>
+        <span class="n">clean_stan_model</span> <span class="o">=</span> <span class="n">stan_model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"_marginal"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">model_type</span> <span class="o">=</span> <span class="s2">"ensemble"</span>
+        <span class="n">clean_stan_model</span> <span class="o">=</span> <span class="n">stan_model</span>
+
+    <span class="c1"># Case layout: a reconstruction belongs to the calibration it marginalised</span>
+    <span class="c1"># over, so it is named for that calibration's case. Requires the fwd_case</span>
+    <span class="c1"># attr that build_invT_inputData attaches; posteriors produced before that</span>
+    <span class="c1"># fall through to the legacy name below.</span>
+    <span class="c1">#</span>
+    <span class="c1"># The leaf comes from naming.inv_relpath() rather than being spelled out</span>
+    <span class="c1"># again here. This function used to reimplement it, which is how the two</span>
+    <span class="c1"># drifted: inv_relpath still described the pre-flattening &lt;case&gt;/&lt;leaf&gt;</span>
+    <span class="c1"># layout in its docstring while this branch had already gone flat, and only</span>
+    <span class="c1"># one of them was reachable from production. There is now one builder, so a</span>
+    <span class="c1"># change to the inverse naming scheme cannot land in half of it.</span>
+    <span class="n">fwd_case</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"fwd_case"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fwd_case</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">..utils.naming</span><span class="w"> </span><span class="kn">import</span> <span class="n">CONSTRAINT_CODES</span><span class="p">,</span> <span class="n">inv_relpath</span><span class="p">,</span> <span class="n">is_case_id</span>
+            <span class="k">if</span> <span class="n">is_case_id</span><span class="p">(</span><span class="n">fwd_case</span><span class="p">):</span>
+                <span class="n">constraint</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">CONSTRAINT_CODES</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">stan_model</span><span class="p">),</span> <span class="s2">"unconstrained"</span>
+                <span class="p">)</span>
+                <span class="n">leaf</span> <span class="o">=</span> <span class="n">inv_relpath</span><span class="p">(</span>
+                    <span class="n">fwd_case</span><span class="p">,</span>
+                    <span class="n">site_name</span><span class="p">,</span>
+                    <span class="n">constraint</span><span class="o">=</span><span class="n">constraint</span><span class="p">,</span>
+                    <span class="n">kind</span><span class="o">=</span><span class="n">model_type</span><span class="p">,</span>
+                    <span class="n">scenario</span><span class="o">=</span><span class="n">filename_tag</span><span class="p">,</span>
+                    <span class="c1"># No run number: a reconstruction is identified by its</span>
+                    <span class="c1"># (case, site, scenario), and the case already carries the</span>
+                    <span class="c1"># member of the calibration it marginalised over.</span>
+                    <span class="n">run</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="c1"># Callers append the suffix themselves; .stem drops only ".nc".</span>
+                <span class="k">return</span> <span class="n">leaf</span><span class="o">.</span><span class="n">stem</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>  <span class="c1"># naming is a convenience; never block a save on it</span>
+
+    <span class="n">temp_parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">temptype</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"use_gdgt23ratio"</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">temp_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"gdgt23ratio"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"use_no3"</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">no3_cutoff</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"no3_cutoff"</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">no3_cutoff</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"no3_cutoff missing but use_no3=1."</span><span class="p">)</span>
+        <span class="n">temp_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no3_</span><span class="si">{</span><span class="n">no3_cutoff</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="n">temptype_str</span> <span class="o">=</span> <span class="s2">"_"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">temp_parts</span><span class="p">)</span>
+
+    <span class="n">proxy_name</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"proxy_name"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">""</span>
+    <span class="n">proxy_segment</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"_</span><span class="si">{</span><span class="n">_slug</span><span class="p">(</span><span class="n">proxy_name</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">proxy_name</span> <span class="ow">and</span> <span class="n">proxy_name</span> <span class="o">!=</span> <span class="s2">"unknown"</span> <span class="k">else</span> <span class="s2">""</span>
+
+    <span class="n">tag_segment</span> <span class="o">=</span> <span class="s2">""</span>
+    <span class="k">if</span> <span class="n">filename_tag</span><span class="p">:</span>
+        <span class="n">tags</span> <span class="o">=</span> <span class="p">[</span><span class="n">filename_tag</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename_tag</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">filename_tag</span>
+        <span class="n">tag_segment</span> <span class="o">=</span> <span class="s2">"_"</span> <span class="o">+</span> <span class="s2">"+"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_slug</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tags</span> <span class="k">if</span> <span class="n">t</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">site_name</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">clean_stan_model</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">temptype_str</span><span class="si">}{</span><span class="n">proxy_segment</span><span class="si">}{</span><span class="n">tag_segment</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">model_type</span><span class="si">}</span><span class="s2">"</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_sanitize_attrs_for_netcdf</span><span class="p">(</span><span class="n">ds</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Convert posterior attrs to NetCDF-compatible types."""</span>
+    <span class="n">clean_attrs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="n">clean_attrs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">number</span><span class="p">)):</span>
+            <span class="n">clean_attrs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)):</span>
+            <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">arr</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">bool</span><span class="p">:</span>
+                <span class="n">clean_attrs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">clean_attrs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">arr</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">clean_attrs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                <span class="n">clean_attrs</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+    <span class="n">ds_copy</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">ds_copy</span><span class="o">.</span><span class="n">attrs</span> <span class="o">=</span> <span class="n">clean_attrs</span>
+    <span class="k">return</span> <span class="n">ds_copy</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_save_invT_posterior</span><span class="p">(</span>
+    <span class="n">posterior</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+    <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">filename_tag</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Save an invT posterior with detailed auto-generated filename."""</span>
+    <span class="n">output_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">cache_dir</span> <span class="k">else</span> <span class="n">DEFAULT_INVT_DIR</span>
+    <span class="n">output_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">_generate_filename_base</span><span class="p">(</span><span class="n">posterior</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">filename_tag</span><span class="p">)</span>
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2">.nc"</span>
+    <span class="n">filepath</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">filepath</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2"> already exists and overwrite=False."</span><span class="p">)</span>
+    <span class="n">posterior</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s2">"proxy_name"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span>
+    <span class="c1"># Record the name we wrote, as save_posterior does for forward posteriors.</span>
+    <span class="c1"># It is what lets a file renamed later still be resolved by its original</span>
+    <span class="c1"># name, and what run_from_attrs() reads to recover a run token.</span>
+    <span class="n">posterior</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">"filename"</span><span class="p">]</span> <span class="o">=</span> <span class="n">filepath</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="p">:</span> <span class="p">{</span><span class="s2">"zlib"</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">posterior</span><span class="o">.</span><span class="n">data_vars</span><span class="p">}</span>
+    <span class="n">sanitized</span> <span class="o">=</span> <span class="n">_sanitize_attrs_for_netcdf</span><span class="p">(</span><span class="n">posterior</span><span class="p">)</span>
+    <span class="n">sanitized</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"✅ Posterior saved to </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">filepath</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_save_invT_draws</span><span class="p">(</span>
+    <span class="n">draws</span><span class="p">:</span> <span class="n">xr</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span>
+    <span class="n">cache_dir</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">filename_tag</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Save raw invT posterior draws (pre-quantile) as a compressed .nc file.</span>
+
+<span class="sd">    The filename mirrors the quantile posterior but with a ``_draws`` suffix,</span>
+<span class="sd">    e.g. ``ODP1259_..._040226_direct_draws.nc``.</span>
+<span class="sd">    </span>
+<span class="sd">    Draws are automatically organized into a ``draws/`` subdirectory.</span>
+<span class="sd">    """</span>
+    <span class="n">base_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">cache_dir</span><span class="p">)</span> <span class="k">if</span> <span class="n">cache_dir</span> <span class="k">else</span> <span class="n">DEFAULT_INVT_DIR</span>
+    <span class="n">output_dir</span> <span class="o">=</span> <span class="n">base_dir</span> <span class="o">/</span> <span class="s2">"draws"</span>  <span class="c1"># Auto-organize into draws subfolder</span>
+    <span class="n">output_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">_generate_filename_base</span><span class="p">(</span><span class="n">draws</span><span class="o">.</span><span class="n">attrs</span><span class="p">,</span> <span class="n">filename_tag</span><span class="p">)</span>
+    <span class="n">filepath</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2">_draws.nc"</span>
+    <span class="n">filepath</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">filepath</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2"> already exists and overwrite=False."</span><span class="p">)</span>
+    <span class="n">encoding</span> <span class="o">=</span> <span class="p">{</span><span class="n">var</span><span class="p">:</span> <span class="p">{</span><span class="s2">"zlib"</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">draws</span><span class="o">.</span><span class="n">data_vars</span><span class="p">}</span>
+    <span class="n">sanitized</span> <span class="o">=</span> <span class="n">_sanitize_attrs_for_netcdf</span><span class="p">(</span><span class="n">draws</span><span class="p">)</span>
+    <span class="n">sanitized</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"✅ Raw draws saved to </span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">filepath</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_save_invT_results</span><span class="p">(</span>
+    <span class="n">results</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Save invT quantile results dict as a compressed .npz file."""</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="n">results</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"metadata"</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">DEFAULT_INVT_DIR</span>
+        <span class="n">output_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">filename_tag</span> <span class="o">=</span> <span class="n">meta</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"filename_tag"</span><span class="p">)</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">_generate_filename_base</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">filename_tag</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s2">.npz"</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2"> already exists and overwrite=False."</span><span class="p">)</span>
+    <span class="n">savez_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="o">!=</span> <span class="s2">"metadata"</span><span class="p">}</span>
+    <span class="n">savez_dict</span><span class="p">[</span><span class="s2">"__metadata__"</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">meta</span><span class="p">)])</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">savez</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">savez_dict</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"✅ invT results saved: </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path</span>
+</pre></div>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Ronnakrit Rattanasriampaipong
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="../../../_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
