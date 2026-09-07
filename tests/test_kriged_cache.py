@@ -51,3 +51,22 @@ def test_set_cache_dir_is_reversible(cache_root):
     assert paths.KRIGED_CACHE_DIR == inner / "TEXAS_kriged_grids_cache"
     set_cache_dir(cache_root)
     assert paths.KRIGED_CACHE_DIR == cache_root / "TEXAS_kriged_grids_cache"
+
+
+def test_the_halo_only_cache_api_is_gone():
+    """Superseded by load_or_build_grids_cache, which caches halo AND true grids.
+
+    ``load_or_build_halo_cache`` had zero callers and wrote a file format
+    (``data_{i}``/``mask_{i}``, no true grids) that nothing reads any more.
+    ``krige_halo_all`` is a different thing and must survive: the grids cache
+    calls it.
+    """
+    import TEXAS.plotting as plotting
+
+    assert not hasattr(rm, "load_or_build_halo_cache")
+    assert not hasattr(plotting, "load_or_build_halo_cache")
+    assert "load_or_build_halo_cache" not in plotting.__all__
+
+    assert callable(rm.krige_halo_all)
+    assert "krige_halo_all" in plotting.__all__
+    assert callable(rm.load_or_build_grids_cache)
