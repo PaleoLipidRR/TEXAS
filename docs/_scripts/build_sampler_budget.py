@@ -427,7 +427,7 @@ def adopted_budgets() -> dict:
     time, which the docs job should not need.
     """
     import ast
-    runner = REPO / "scripts" / "run_manuscript_refits.py"
+    runner = REPO / "scripts" / "paper" / "run_manuscript_refits.py"
     if not runner.exists():
         return {}
     out = {}
