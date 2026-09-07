@@ -7,6 +7,9 @@
 .venv/
 
 notebooks/
+!notebooks/quickstart_demo.ipynb
+!notebooks/quickstart_extended.ipynb
+!notebooks/manuscripts/
 figures/
 outputs/
 logs/

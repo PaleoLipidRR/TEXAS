@@ -139,8 +139,10 @@ once uploaded at the v1.0.0 release (tracked in `RESUME.md`, Phase C).
 
 These arrive with a clone via LFS — no download step needed. "What reads it" was
 found by grepping each basename across `notebooks/`, `src/`, `tests/`, `scripts/`,
-and `streamlit_app/`; five files matched no live reader despite carrying reference
-counts in the design spec's Appendix A.1 (see Task 9 report, Concerns).
+and `streamlit_app/`; five files matched no live reader despite carrying nonzero
+reference counts in an earlier internal accounting made before this pass's
+archive moves — a discrepancy noted at the time and left as informational only,
+since these five stay tracked regardless.
 
 | filename | what reads it | where to get it |
 |---|---|---|
@@ -149,7 +151,7 @@ counts in the design spec's Appendix A.1 (see Task 9 report, Concerns).
 | `data/spreadsheets/culture_mesocosm_combined_rev_092325.xlsx` | `SI_code00_PreProcessing.ipynb` | in this repository (LFS) |
 | `data/spreadsheets/ds01_updated_global_coretop_tex_revised_011226.csv` | `SI_code00_PreProcessing.ipynb` | in this repository (LFS) |
 | `data/spreadsheets/ds03_processed_coretop_tex.csv` | not read by any current notebook or script found | in this repository (LFS) |
-| `data/spreadsheets/ds_gridded_screened_global_compilation_finalized.csv` | `SI_code01_t0shift_variance_partitioning.ipynb`, `SI_code02_t0shift_TEXAS_analysis.ipynb`, `SI_code02a_model_param_sensitivity_test.ipynb`, `SI_code03_paleo_showcases.ipynb`; `scripts/paper/run_param_sensitivity.py`, `run_manuscript_refits.py`, `add_retained_flag.py`, `prepare_resubmission_archive.py`; `streamlit_app/pages/calibration_data.py`; `TEXAS.utils.download` registry | in this repository (LFS) |
+| `data/spreadsheets/ds_gridded_screened_global_compilation_finalized.csv` | `SI_code01_t0shift_variance_partitioning.ipynb`, `SI_code02_t0shift_TEXAS_analysis.ipynb`, `SI_code02a_model_param_sensitivity_test.ipynb`, `SI_code03_paleo_showcases.ipynb`; `scripts/paper/run_param_sensitivity.py`, `run_manuscript_refits.py`, `add_retained_flag.py`; `scripts/prepare_resubmission_archive.py`; `streamlit_app/pages/calibration_data.py`; `TEXAS.utils.download` registry | in this repository (LFS) |
 | `data/spreadsheets/global_hydrothermal_vents.csv` | not read by any current notebook or script found | in this repository (LFS) |
 | `data/spreadsheets/ols_tex_thermoT_thisStudy.pkl` | `SI_code03_paleo_showcases.ipynb` | in this repository (LFS) |
 | `data/spreadsheets/revised_cultures_GDGT_github_March2025_RR.xlsx` | not read by any current notebook or script found | in this repository (LFS) |
@@ -231,10 +233,10 @@ properties, and CESM simulation output regridded to a common grid) that
 clone can run `SI_code00_PreProcessing.ipynb` and `SI_code03_paleo_showcases.ipynb`
 end to end (see `RESUME.md`, Phase C). `ds04_gridded_coretop_tex_scaledRI.nc`
 (table 2) and `calculated_ocean_properties_seasonal.nc` (table 2) are
-deliberately dropped without an upload: per the repo-finalization design spec's
-Appendix A.2, their only reader is the ignored, locally-gitignored
-`notebooks/exploration/` directory, which does not exist in this working tree
-and so is not part of any shipped notebook's dependency chain.
+deliberately dropped without an upload: their only reader is the ignored,
+locally-gitignored `notebooks/exploration/` directory, which does not exist
+in this working tree and so is not part of any shipped notebook's dependency
+chain.
 
 ### 4. Superseded spreadsheets, not tracked (56 files)
 

@@ -4,7 +4,7 @@
 > the package as of 2026-04-16 and are no longer accurate: the `_werr`/`_odr`
 > variants named here were consolidated into a single `_eiv` model in v0.1.5, and
 > the package now ships 9 Stan models, not 23. The current split is documented in
-> [`archive/submission-2026-04/stan_models/README.md`](../../../../archive/submission-2026-04/stan_models/README.md),
+> [`archive/submission-2026-04/stan_models/README.md`](../../submission-2026-04/stan_models/README.md),
 > which is also where the models archived in 2026-09 went. This directory holds
 > older, pre-submission material and is kept for history. Neither directory ships
 > in the wheel (`pyproject.toml` globs `stan_models/*.stan`, non-recursively).

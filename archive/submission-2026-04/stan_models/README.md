@@ -91,7 +91,9 @@ results rather than the fit.
 
 ## Earlier archives
 
-`src/TEXAS/stan_models/archive/` (16 files) and
-`src/TEXAS/stan_models/archive_pre_annotated/` (4 files) hold older material
-from before the initial submission. Neither ships in the wheel either. They were
-left in place in this pass; folding all three into one location is still open.
+`archive/pre-submission/stan_models/` (15 `.stan` files) and its
+`pre_annotated/` subdirectory (4 `.stan` files) hold older material from
+before the initial submission — moved out of `src/TEXAS/stan_models/` in a
+later pass. Neither ships in the wheel either. See `archive/README.md` for
+what distinguishes all four sub-archives and how to run a model out of any
+of them.

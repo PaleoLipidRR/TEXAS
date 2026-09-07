@@ -1412,10 +1412,12 @@ archive/
 > added. `tests/test_streamlit_params.py` scans the new archive so the additive
 > `beta_*` labels stay valid. 351 passed, 11 skipped.
 >
-> **Still open:** B1's last bullet — folding
-> `src/TEXAS/stan_models/archive/` (16) and `archive_pre_annotated/` (4) into
-> the one repo-root archive. Three archive locations remain. A banner on the old
-> README points at the new one meanwhile.
+> **Done 2026-09-07** (`e0c729b5`): B1's last bullet — folding
+> `src/TEXAS/stan_models/archive/` (15 `.stan` + README) and
+> `archive_pre_annotated/` (4) — moved to `archive/pre-submission/stan_models/`
+> (with the latter as its `pre_annotated/` subdirectory), not into
+> `archive/submission-2026-04/`. Four archive locations now exist under
+> `archive/`, indexed by `archive/README.md`.
 
 
 **Stays in `src/TEXAS/stan_models/` (8):**
@@ -1457,9 +1459,10 @@ archive/
   they are testing the *name grammar*, not the models, so they stay.
 - `scripts/prepare_review_archive.sh` is written entirely against the legacy flat
   names of the initial submission. It belongs in `archive/`, not `scripts/`.
-- `src/TEXAS/stan_models/archive/` (16 files) and `archive_pre_annotated/` (4)
-  already exist and are tracked. Fold both into `archive/submission-2026-04/`
-  rather than leaving three archive locations. Neither ships in the wheel today.
+- `src/TEXAS/stan_models/archive/` (15 `.stan` + README) and
+  `archive_pre_annotated/` (4) — **done 2026-09-07** (`e0c729b5`): folded into
+  `archive/pre-submission/stan_models/` (the latter as its `pre_annotated/`
+  subdirectory), not `archive/submission-2026-04/`. Neither ships in the wheel.
 
 #### B2 — Notebooks
 

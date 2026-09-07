@@ -16,7 +16,7 @@ FROM ghcr.io/paleolipidRR/texas-base:latest
 WORKDIR /home/micromamba/app
 
 # Demo notebooks
-COPY --chown=micromamba:micromamba notebooks/current/ ./notebooks/current/
+COPY --chown=micromamba:micromamba notebooks/quickstart_demo.ipynb notebooks/quickstart_extended.ipynb ./notebooks/
 
 # Forward calibration posteriors (pre-built, ~4 MB)
 COPY --chown=micromamba:micromamba data/cache/TEXAS_posterior_cache/ ./data/cache/TEXAS_posterior_cache/

@@ -31,6 +31,9 @@ post, diag = get_posterior(data, "gen_logi_fixed_hier_crtp_multiv_priorApprox_ei
 There is no `model_dir=` route through `get_posterior()`; it builds a
 `StanCompiler()` with no arguments.
 
-Archived models also still resolve by plain stem through
-`resolve_stan_path()`'s archive fallback, which is inert in a wheel install
-because `archive/` is not packaged.
+The `submission-2026-04/` models also still resolve by plain stem through
+`resolve_stan_path()`'s archive fallback (`STAN_ARCHIVE_DIR` points only at
+`archive/submission-2026-04/stan_models`), which is inert in a wheel install
+because `archive/` is not packaged. The 15 `pre-submission/stan_models/`
+models (and their 4 `pre_annotated/` variants) are **not** covered by that
+fallback and are reachable only by absolute path, as shown above.
