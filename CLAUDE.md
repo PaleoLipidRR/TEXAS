@@ -125,6 +125,13 @@ Model names follow a naming convention: `{transform}_{curve}_{params}_{datasourc
 > `beta_G23_crtp` / `beta_NO3_crtp`; the two older archive dirs stay excluded,
 > since they declare the `Q_crtp` and `sigma_scaledRI_crtp` that test exists to
 > catch.
+>
+> Two more sub-archives were added later (2026-09-07): `archive/pre-submission/stan_models/`
+> (the 15 never-submitted development models plus 4 pre-annotated variants) and
+> `archive/exploratory/gridT-inversion/` (revision-cycle work excluded from the
+> resubmission), alongside an `archive/presentations/` sibling for conference
+> material — see `archive/README.md` for what distinguishes all four archive
+> directories.
 
 ### Parameter suffix convention
 
