@@ -127,7 +127,10 @@ override-dependencies = ["pyproj>=3.6.1"]
 
 [tool.ruff]
 line-length = 100
-extend-exclude = ["notebooks", "streamlit_app", "docs", "docker", "build", "dist"]
+# `archive` is frozen historical material: superseded models, notebooks and
+# figures kept verbatim for the reproducibility record. Linting it would
+# demand edits to artifacts whose whole value is being unmodified.
+extend-exclude = ["notebooks", "streamlit_app", "docs", "docker", "build", "dist", "archive"]
 
 [tool.ruff.lint]
 # Start conservative: pyflakes (F) catches the real issues — undefined names,
