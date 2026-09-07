@@ -96,8 +96,8 @@ Pre-computed posteriors and training data are hosted on Zenodo:
 import TEXAS
 
 TEXAS.download_all()               # posteriors + training CSVs
-TEXAS.download_posteriors()        # forward posteriors only (~158 MB total;
-                                   # EIV multiv posteriors are ~78 MB each)
+TEXAS.download_posteriors()        # forward posteriors only (~475 MB total;
+                                   # multivariate EIV posteriors are ~78-81 MB each)
 TEXAS.download_training_data()     # training CSVs + CMEMS NO₃ field
 ```
 

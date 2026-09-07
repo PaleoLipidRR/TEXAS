@@ -8,4 +8,4 @@ replaces with the T₀-shift parameterization (`GHEB`); see
 | Superseded | Replaced by |
 |---|---|
 | `SI_code2_TEXAS_analysis.ipynb` | `manuscripts/SI_code02_t0shift_TEXAS_analysis.ipynb` |
-| `SI_code3_paleo_showcases.ipynb` | `manuscripts/SI03_paleo_showcases_modelswitch.ipynb` (run with `MODEL_VARIANT = "t0shift"`) |
+| `SI_code3_paleo_showcases.ipynb` | `manuscripts/SI_code03_paleo_showcases.ipynb` (run with `MODEL_VARIANT = "t0shift"`) |

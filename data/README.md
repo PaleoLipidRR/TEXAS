@@ -5,7 +5,7 @@ Everything downloads into it; notebooks and the package API read from it;
 the Docker container bind-mounts it from your host machine.
 
 ```
-Zenodo data record (DOI: https://doi.org/10.5281/zenodo.20032542)
+Zenodo data record (DOI: https://doi.org/10.5281/zenodo.19666744)
   ├── posteriors (.nc)   ──→  download_posteriors()    ──→  data/cache/TEXAS_posterior_cache/
   └── training CSVs      ──→  download_training_data() ──→  data/spreadsheets/
                                        ↑
@@ -31,7 +31,7 @@ Zenodo data record (DOI: https://doi.org/10.5281/zenodo.20032542)
 ```python
 import TEXAS
 
-# Download forward calibration posteriors (~280 MB total)
+# Download forward calibration posteriors (~475 MB total)
 TEXAS.download_posteriors()
 
 # Download GDGT training CSVs (needed only to re-run SI notebooks)
@@ -113,7 +113,15 @@ These are not hosted on the TEXAS Zenodo record — download them separately:
 
 ## Zenodo record
 
-**Data DOI**: https://doi.org/10.5281/zenodo.20032542
+**Data DOI**: https://doi.org/10.5281/zenodo.19666744
+
+This is the *concept DOI* — it always resolves to the newest deposited
+version, and every Zenodo reference to "the data record" in this file uses
+it. A dated, version-specific DOI (e.g. `zenodo.20032542`, the superseded
+v0.2.0 deposit — see `src/TEXAS/utils/download.py`) is used only for a
+particular frozen deposit, such as when pinning a download to files that
+were never migrated to the current record; none of the links below need
+that distinction.
 
 You can also download files manually from the Zenodo record page
 and place them in the directories above.
@@ -132,7 +140,7 @@ public source are marked "author-only, not needed by any notebook" rather than
 left blank — that phrase means exactly what it says: nobody has to go find it.
 
 The derived NetCDFs in table 3 that still need hosting will live on the TEXAS
-Zenodo data record, DOI [10.5281/zenodo.22131367](https://doi.org/10.5281/zenodo.22131367),
+Zenodo data record, DOI [10.5281/zenodo.19666744](https://doi.org/10.5281/zenodo.19666744),
 once uploaded at the v1.0.0 release (tracked in `RESUME.md`, Phase C).
 
 ### 1. Tracked training data (22 files)
@@ -230,7 +238,7 @@ properties, and CESM simulation output regridded to a common grid) that
 | `data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM06x.nc` | `SI_code03_paleo_showcases.ipynb` | **upload to the Zenodo data record at v1.0.0** |
 | `data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM09x.nc` | `SI_code03_paleo_showcases.ipynb` | **upload to the Zenodo data record at v1.0.0** |
 
-**Five of these files, totalling 16 MB, need the v1.0.0 upload** before a fresh
+**Five of these files, totalling ~13 MB, need the v1.0.0 upload** before a fresh
 clone can run `SI_code00_PreProcessing.ipynb` and `SI_code03_paleo_showcases.ipynb`
 end to end (see `RESUME.md`, Phase C). `ds04_gridded_coretop_tex_scaledRI.nc`
 (table 2) and `calculated_ocean_properties_seasonal.nc` (table 2) are
