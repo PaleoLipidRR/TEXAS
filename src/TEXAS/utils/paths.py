@@ -1,4 +1,16 @@
 # TEXAS/utils/paths.py
+"""Filesystem locations TEXAS reads and writes.
+
+The cache root — ``TEXAS_CACHE_DIR`` if set, else ``<repo>/data/cache`` in a git
+checkout, else ``~/.texas/cache`` — holds three subdirectories:
+
+* ``TEXAS_posterior_cache/``      forward calibration posteriors (``.nc``)
+* ``TEXAS_invT_posterior_cache/`` inverse temperature reconstructions (``.nc``)
+* ``TEXAS_kriged_grids_cache/``   kriged residual-map grids (``.npz``)
+
+``set_cache_dir()`` repoints all three at once.
+"""
+
 from __future__ import annotations
 import os, subprocess, warnings
 from pathlib import Path
@@ -200,6 +212,9 @@ ONEDRIVE = Path("/mnt/onedrive") if Path("/mnt/onedrive").exists() else HOME / "
 #   1. TEXAS_CACHE_DIR environment variable
 #   2. data/cache/ inside the repo (when running from a git checkout)
 #   3. ~/.texas/cache/ (pip-installed / Colab / no repo)
+#
+# Three subdirectories live under the root: TEXAS_posterior_cache/,
+# TEXAS_invT_posterior_cache/ and TEXAS_kriged_grids_cache/.
 
 def _resolve_cache_root() -> Path:
     env = os.environ.get("TEXAS_CACHE_DIR")
@@ -239,6 +254,10 @@ CACHE_ROOT = _resolve_cache_root()
 CACHE_DIR = CACHE_ROOT          # backward-compat alias
 POSTERIOR_CACHE_DIR = CACHE_ROOT / "TEXAS_posterior_cache"
 INVT_CACHE_DIR      = CACHE_ROOT / "TEXAS_invT_posterior_cache"
+# Kriged residual-map grids (.npz). Until 2026-09-07 these were written loose
+# into CACHE_ROOT, alongside the two posterior directories; residual_maps.py
+# still reads them from there as a fallback.
+KRIGED_CACHE_DIR    = CACHE_ROOT / "TEXAS_kriged_grids_cache"
 
 # Training data spreadsheets — inside the repo when running from a git checkout,
 # otherwise ~/.texas/data/spreadsheets/ (pip-installed / Colab).
@@ -274,9 +293,10 @@ def set_cache_dir(path: "str | Path") -> None:
     ``TEXAS_CACHE_DIR`` environment variable instead.
 
     Args:
-        path: Root directory for all TEXAS caches.  Two subdirectories will be
-              used inside it: ``TEXAS_posterior_cache/`` and
-              ``TEXAS_invT_posterior_cache/``.
+        path: Root directory for all TEXAS caches.  Three subdirectories will
+              be used inside it: ``TEXAS_posterior_cache/``,
+              ``TEXAS_invT_posterior_cache/`` and
+              ``TEXAS_kriged_grids_cache/``.
     """
     import TEXAS.utils.paths as _paths
     root = Path(path)
@@ -284,6 +304,7 @@ def set_cache_dir(path: "str | Path") -> None:
     _paths.CACHE_DIR            = root
     _paths.POSTERIOR_CACHE_DIR  = root / "TEXAS_posterior_cache"
     _paths.INVT_CACHE_DIR       = root / "TEXAS_invT_posterior_cache"
+    _paths.KRIGED_CACHE_DIR     = root / "TEXAS_kriged_grids_cache"
     # Propagate into io.py module-level defaults (bound at import time)
     try:
         import TEXAS.stan.io as _io

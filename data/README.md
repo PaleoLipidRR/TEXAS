@@ -90,7 +90,8 @@ TEXAS.download_posteriors()
 data/
 ├── cache/
 │   ├── TEXAS_posterior_cache/     ← forward calibration posteriors (.nc)
-│   └── TEXAS_invT_posterior_cache/ ← inverse temperature posteriors (.nc)
+│   ├── TEXAS_invT_posterior_cache/ ← inverse temperature posteriors (.nc)
+│   └── TEXAS_kriged_grids_cache/  ← kriged residual-map grids (.npz)
 ├── spreadsheets/                  ← GDGT training CSVs (download from Zenodo)
 └── external/                      ← third-party reference datasets (see below)
 ```
