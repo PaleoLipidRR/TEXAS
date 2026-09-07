@@ -20,6 +20,7 @@ Set env var KRIGE_N_JOBS to override parallelism (1 = serial).
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import List, Optional, Sequence, Tuple, Union
 
 import numpy as np
@@ -291,6 +292,43 @@ def make_true_grid(
     return np.ma.array(z, mask=~has_data)
 
 
+def _auto_cache_path(
+    temp_param: str,
+    y_param: str,
+    residual_tag: str,
+    krige_res: float = 1.0,
+    max_dist_deg: float = 10.0,
+) -> Path:
+    """Default location of the kriged-grids cache for one figure.
+
+    The resolution is formatted with ``:g``, so ``krige_res=1`` and
+    ``krige_res=1.0`` produce the same ``1deg`` token and ``2.5`` keeps its
+    decimal. The unformatted f-string this replaces wrote ``1deg`` and
+    ``1.0deg`` as two names for one 57 MB grid.
+
+    ``KRIGED_CACHE_DIR`` is read from the module rather than from-imported so
+    that :func:`TEXAS.set_cache_dir` takes effect without a reimport.
+
+    Args:
+        temp_param: Temperature column name, e.g. ``"SST"``.
+        y_param: Proxy column name, e.g. ``"scaledRI_cren3"``.
+        residual_tag: What kind of field is gridded, e.g. ``"temp_residual"``.
+        krige_res: Halo grid resolution in degrees.
+        max_dist_deg: Kriging search radius in degrees.
+
+    Returns:
+        Path to the ``.npz`` under ``TEXAS_kriged_grids_cache/``. The file need
+        not exist.
+    """
+    from TEXAS.utils import paths as _paths
+
+    leaf = (
+        f"kriged_grids_{krige_res:g}deg_{int(max_dist_deg)}dmax_woa23_"
+        f"{temp_param}_{y_param}_{residual_tag}.npz"
+    )
+    return _paths.KRIGED_CACHE_DIR / leaf
+
+
 def load_or_build_grids_cache(
     cache_path: str,
     data: list,
@@ -354,6 +392,7 @@ def load_or_build_grids_cache(
         )
     
     # Save both to cache
+    Path(cache_path).parent.mkdir(parents=True, exist_ok=True)
     np.savez(
         cache_path,
         **{f"halo_data_{i}": halo_grids[i].data for i in range(len(data))},
@@ -669,9 +708,12 @@ def plot_residual_maps(
         ``temp_param``/``y_param`` but different residual content.
     cache_path : str, optional
         Explicit path to the .npz grids cache.  When omitted and both
-        ``temp_param`` and ``y_param`` are set, auto-generated as
-        ``data/cache/kriged_grids_{res}deg_{dist}dmax_woa23_{temp_param}_{y_param}_{residual_tag}.npz``
-        inside the project root. Now caches both halo and true grids for faster plotting.
+        ``temp_param`` and ``y_param`` are set, auto-generated under
+        ``data/cache/TEXAS_kriged_grids_cache/`` as
+        ``kriged_grids_{res}deg_{dist}dmax_woa23_{temp_param}_{y_param}_{residual_tag}.npz``.
+        The resolution token is formatted with ``:g``, so ``krige_res=1`` and
+        ``krige_res=1.0`` name one file.  Caches both halo and true grids for
+        faster plotting.
     recompute : bool or ``'auto'``
         - ``False``  : load grids from cache; raise ``FileNotFoundError`` if not found.
         - ``True``   : always re-krige and recompute grids, then overwrite the cache.
@@ -717,11 +759,10 @@ def plot_residual_maps(
 
     # ── Halo + True grids (cached) ──────────────────────────────────────────
     if cache_path is None and temp_param is not None and y_param is not None:
-        from TEXAS.utils.paths import CACHE_DIR
-        _tag = f"{temp_param}_{y_param}_{residual_tag}"
-        cache_path = str(
-            CACHE_DIR / f"kriged_grids_{krige_res}deg_{int(max_dist_deg)}dmax_woa23_{_tag}.npz"
-        )
+        cache_path = str(_auto_cache_path(
+            temp_param, y_param, residual_tag,
+            krige_res=krige_res, max_dist_deg=max_dist_deg,
+        ))
         print(f"Auto cache path: {cache_path}")
 
     if cache_path is not None:
