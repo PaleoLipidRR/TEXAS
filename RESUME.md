@@ -1506,6 +1506,13 @@ tagging.
       archive lives outside `src/`. Confirm the wheel drops from 17 to 8 models.
 - [ ] `CITATION.cff` / `.zenodo.json` → 1.0.0; drop the "in prep" / "prepared to
       submit" language once accepted.
+- [ ] Upload the 5 TEXAS-derived NetCDFs (16 MB) to the Zenodo data record
+      10.5281/zenodo.22131367 and add them to `TRAINING_DATA_REGISTRY`:
+      `Tierney22_PNAS_PETMDA/PETMDA_OCN_annual_regridded.nc` and the four
+      `Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/*.nc`. They were
+      untracked on 2026-09-07 (repo-hygiene plan, Task 7) and SI_code00 and
+      SI_code03 read them, so until this lands a fresh clone cannot run those
+      two notebooks end to end.
 
 ---
 
