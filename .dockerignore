@@ -16,6 +16,8 @@ docs/_build/
 data/raw/*
 data/external/*
 data/cache/*
+!data/cache/TEXAS_posterior_cache/
+!data/cache/TEXAS_invT_posterior_cache/
 *.nc
 
 review_archive_v*/
