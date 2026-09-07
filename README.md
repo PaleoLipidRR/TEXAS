@@ -195,7 +195,6 @@ notebooks/
   quickstart_extended.ipynb Longer walkthrough: a published record, model comparison
   manuscripts/      Finalized SI notebooks behind the paper (SI_code00 .. SI_code03)
   reviewer_response/ Analyses answering review comments, not cited in the paper
-  superseded/       Pre-revision (additive-formulation) versions, kept for provenance
 streamlit_app/      Drag-and-drop web interface (Streamlit)
 docker/             Dockerfile and compose configuration
 docs/               Jupyter Book documentation source (guides, API, tutorial)
