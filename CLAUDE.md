@@ -390,8 +390,8 @@ Entry point: `streamlit_app/main.py`. Config (cache dir resolution, plot default
 
 ### Notebooks
 
-- `notebooks/current/` — active analysis notebooks
 - `notebooks/manuscripts/` — finalized figure-generation notebooks for papers
+- `notebooks/reviewer_response/` — revision-cycle analysis notebooks
 
 ### Documentation (`docs/`)
 
