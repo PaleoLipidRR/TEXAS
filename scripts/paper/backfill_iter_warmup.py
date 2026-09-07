@@ -7,7 +7,7 @@ dimensions, or the diagnostics distinguishes 300 warm-up iterations from 1,000.
 
 So this script does not recover the value — it *asserts* one, and it will only do
 so where there is external evidence for the specific file. The evidence is the
-manifests that ``scripts/run_manuscript_refits.py`` writes, which record
+manifests that ``scripts/paper/run_manuscript_refits.py`` writes, which record
 ``iter_warmup`` alongside the exact output ``path`` of every run it completed.
 
 **Why a blanket stamp would be wrong.** The cache holds posteriors from more than
@@ -22,8 +22,8 @@ not.
 Every written attr is paired with ``iter_warmup_source`` naming the manifest it
 came from, so a later reader can tell an asserted value from a measured one.
 
-    python scripts/backfill_iter_warmup.py            # dry run: print the plan
-    python scripts/backfill_iter_warmup.py --apply    # write, verifying each file
+    python scripts/paper/backfill_iter_warmup.py            # dry run: print the plan
+    python scripts/paper/backfill_iter_warmup.py --apply    # write, verifying each file
 """
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ from pathlib import Path
 import pandas as pd
 import xarray as xr
 
-REPO = Path(__file__).resolve().parents[1]
+REPO = Path(__file__).resolve().parents[2]
 REFIT_DIR = REPO / "data/revision1/groupA/manuscript_refit"
 
 # Manifests carrying BOTH iter_warmup and the output path. The coretop_maps_*

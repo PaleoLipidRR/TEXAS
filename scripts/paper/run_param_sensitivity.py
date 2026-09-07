@@ -9,14 +9,14 @@ write and read the same files, so whichever runs first, the other picks up the
 results and skips the work.
 
     # everything, in the background, surviving logout
-    nohup python scripts/run_param_sensitivity.py all > sensitivity.log 2>&1 &
+    nohup python scripts/paper/run_param_sensitivity.py all > sensitivity.log 2>&1 &
     tail -f sensitivity.log
 
     # just one part, or one model
-    python scripts/run_param_sensitivity.py part1
-    python scripts/run_param_sensitivity.py part1 --models bnd
-    python scripts/run_param_sensitivity.py part2 --proxies SRI04 SRI05
-    python scripts/run_param_sensitivity.py part3 --invt-m 300 500
+    python scripts/paper/run_param_sensitivity.py part1
+    python scripts/paper/run_param_sensitivity.py part1 --models bnd
+    python scripts/paper/run_param_sensitivity.py part2 --proxies SRI04 SRI05
+    python scripts/paper/run_param_sensitivity.py part3 --invt-m 300 500
 
 Three parts. Part 1 sweeps the forward calibration's warmup/sampling budget,
 Part 2 refits it under three crenarchaeol ring conventions, and Part 3 sweeps
@@ -26,10 +26,10 @@ have unrelated geometry -- see the INVT_BUDGETS comment -- and because only the
 inverse side can be scored against a known temperature.
 
     # a 12-minute smoke run that exercises every path
-    python scripts/run_param_sensitivity.py all --quick
+    python scripts/paper/run_param_sensitivity.py all --quick
 
     # what would run, without running it
-    python scripts/run_param_sensitivity.py all --dry-run
+    python scripts/paper/run_param_sensitivity.py all --dry-run
 
 Resumable: every completed fit is appended to
 ``data/revision1/groupA/param_sensitivity/mcmc_budget_grid.csv`` immediately, and
@@ -1094,7 +1094,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(
         description="Headless runner for the SI_code02a sensitivity tests.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="nohup python scripts/run_param_sensitivity.py all "
+        epilog="nohup python scripts/paper/run_param_sensitivity.py all "
                "> sensitivity.log 2>&1 &")
     ap.add_argument("stage",
                     choices=["part1", "part2", "part3", "all", "recommend"],

@@ -2,13 +2,13 @@
 """
 Refit every manuscript case at one sampler budget, both model variants.
 
-    nohup python scripts/run_manuscript_refits.py all > refits.log 2>&1 &
+    nohup python scripts/paper/run_manuscript_refits.py all > refits.log 2>&1 &
     tail -f refits.log
 
-    python scripts/run_manuscript_refits.py forward     # the 7 calibrations
-    python scripts/run_manuscript_refits.py inverse     # the 64 reconstructions
-    python scripts/run_manuscript_refits.py audit       # comparability report only
-    python scripts/run_manuscript_refits.py all --dry-run
+    python scripts/paper/run_manuscript_refits.py forward     # the 7 calibrations
+    python scripts/paper/run_manuscript_refits.py inverse     # the 64 reconstructions
+    python scripts/paper/run_manuscript_refits.py audit       # comparability report only
+    python scripts/paper/run_manuscript_refits.py all --dry-run
 
 The point of this script is **comparability**. The manuscript compares the
 parent additive-EIV calibration against the bounded-T one, and that comparison
@@ -788,7 +788,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(
         description=__doc__.splitlines()[0],
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog="nohup python scripts/run_manuscript_refits.py all "
+        epilog="nohup python scripts/paper/run_manuscript_refits.py all "
                "> refits.log 2>&1 &")
     ap.add_argument("stage", choices=["forward", "inverse", "all", "audit"])
     ap.add_argument("--temptypes", nargs="+", choices=list(TEMPTYPES),

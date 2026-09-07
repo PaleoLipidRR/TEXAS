@@ -16,7 +16,7 @@ bite, and it is a regime the core-top set cannot reach by construction. So the
 core-top ladder alone does not settle the question for paleo use.
 
 Writes  data/revision1/groupA/param_sensitivity/invt_M_paleo.csv
-    python scripts/invt_M_paleo_check.py
+    python scripts/paper/invt_M_paleo_check.py
 """
 from __future__ import annotations
 import sys, time

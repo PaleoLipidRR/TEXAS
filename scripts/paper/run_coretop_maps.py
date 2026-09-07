@@ -45,9 +45,9 @@ Batched at 250 sites so a kill loses at most one batch; each batch is recorded
 in a manifest and skipped on restart. Batches concatenate along t_est_dim_0,
 which is what the notebook loader expects.
 
-    python scripts/run_coretop_maps.py --dry-run
-    python scripts/run_coretop_maps.py --arm bnd
-    python scripts/run_coretop_maps.py --arm eiv --temptypes SST
+    python scripts/paper/run_coretop_maps.py --dry-run
+    python scripts/paper/run_coretop_maps.py --arm bnd
+    python scripts/paper/run_coretop_maps.py --arm eiv --temptypes SST
 """
 from __future__ import annotations
 

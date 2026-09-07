@@ -24,7 +24,7 @@ the model does not believe is wide.
 Input: data/revision1/groupA/param_sensitivity/invt_budget_sites.csv, written by
 SI_code02a Part 3. Until now nothing plotted it.
 
-    python scripts/plot_uncertainty_calibration.py
+    python scripts/paper/plot_uncertainty_calibration.py
 """
 from __future__ import annotations
 

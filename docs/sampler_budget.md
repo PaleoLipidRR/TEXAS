@@ -26,12 +26,12 @@ the way a hand-written summary does.
 
 ## Reproducing it
 
-The sweep itself is `scripts/run_param_sensitivity.py`, which does the sampling
+The sweep itself is `scripts/paper/run_param_sensitivity.py`, which does the sampling
 unattended and is resumable per fit:
 
 ```bash
-python scripts/run_param_sensitivity.py all      # forward grid + proxy refits
-python scripts/run_param_sensitivity.py part3    # inverse budget and M
+python scripts/paper/run_param_sensitivity.py all      # forward grid + proxy refits
+python scripts/paper/run_param_sensitivity.py part3    # inverse budget and M
 python docs/_scripts/build_sampler_budget.py     # rebuild this page
 ```
 

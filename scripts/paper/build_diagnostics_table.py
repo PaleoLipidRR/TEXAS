@@ -18,8 +18,8 @@ Gates applied, and why these:
     treedepth    == 0 hits saturating treedepth means the sampler ran out of
                            steps, not that it converged
 
-    python scripts/build_diagnostics_table.py
-    python scripts/build_diagnostics_table.py --csv out.csv --all
+    python scripts/paper/build_diagnostics_table.py
+    python scripts/paper/build_diagnostics_table.py --csv out.csv --all
 """
 from __future__ import annotations
 

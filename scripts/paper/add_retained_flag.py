@@ -28,7 +28,7 @@ from pathlib import Path
 
 import pandas as pd
 
-REPO = Path(__file__).resolve().parent.parent
+REPO = Path(__file__).resolve().parent.parent.parent
 CSV = REPO / "data/spreadsheets/ds_gridded_screened_global_compilation_finalized.csv"
 # The ellipse is fitted on the RAW sample-level database — the same domain the
 # preprocessing notebook used — not on the gridded (already screened) set,

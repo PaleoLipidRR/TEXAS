@@ -1,7 +1,7 @@
 """
 Guard the refit runner against drifting from SI03.
 
-``scripts/run_manuscript_refits.py`` rebuilds SI03's paleo inputs -- site lists,
+``scripts/paper/run_manuscript_refits.py`` rebuilds SI03's paleo inputs -- site lists,
 depth windows, PETM priors, NO3 scenarios -- because the notebook builds them
 inline and there is nothing importable. Duplication is the price; this test is
 what stops it becoming divergence.
@@ -19,7 +19,7 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[1]
 NOTEBOOK = REPO / "notebooks" / "manuscripts" / "SI_code03_paleo_showcases.ipynb"
-SCRIPT = REPO / "scripts" / "run_manuscript_refits.py"
+SCRIPT = REPO / "scripts" / "paper" / "run_manuscript_refits.py"
 
 pytestmark = pytest.mark.skipif(
     not (NOTEBOOK.exists() and SCRIPT.exists()),

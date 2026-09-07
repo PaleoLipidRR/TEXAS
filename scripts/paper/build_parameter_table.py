@@ -18,8 +18,8 @@ Two things it is careful about:
   Both are emitted, labelled, so the manuscript can quote one and name it
   rather than leaving a reader to guess which definition produced the number.
 
-    python scripts/build_parameter_table.py                # markdown to stdout
-    python scripts/build_parameter_table.py --csv out.csv
+    python scripts/paper/build_parameter_table.py                # markdown to stdout
+    python scripts/paper/build_parameter_table.py --csv out.csv
 """
 from __future__ import annotations
 

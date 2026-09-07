@@ -38,9 +38,9 @@ and its forward keys are ``fwd|<variant>|<temptype>|<proxy>`` -- appending
 these would collide with the full-predictor rows under the same key and make
 the audit describe something that never happened.
 
-    python scripts/fit_t0shift_single_predictors.py --dry-run
-    python scripts/fit_t0shift_single_predictors.py
-    python scripts/fit_t0shift_single_predictors.py --force      # refit existing
+    python scripts/paper/fit_t0shift_single_predictors.py --dry-run
+    python scripts/paper/fit_t0shift_single_predictors.py
+    python scripts/paper/fit_t0shift_single_predictors.py --force      # refit existing
 """
 from __future__ import annotations
 
