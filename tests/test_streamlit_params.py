@@ -25,11 +25,12 @@ STAN_DIR = REPO / "src" / "TEXAS" / "stan_models"
 # still downloadable via `TEXAS.download_posteriors()`, so the app still has to
 # label `beta_G23_crtp` / `beta_NO3_crtp`. Scan that archive too.
 #
-# Only that one. `stan_models/archive/` and `archive_pre_annotated/` predate the
-# initial submission and still declare `Q_crtp` and `sigma_scaledRI_crtp` -- the
-# exact two regressions this file exists to catch. Including them would let a
-# genuinely dead label pass.
+# Only that one. `archive/pre-submission/stan_models/` (and its `pre_annotated/`
+# subdirectory) predate the initial submission and still declare `Q_crtp` and
+# `sigma_scaledRI_crtp` -- the exact two regressions this file exists to catch.
+# Including them would let a genuinely dead label pass.
 ARCHIVE_DIR = REPO / "archive" / "submission-2026-04" / "stan_models"
+PRE_SUBMISSION_DIR = REPO / "archive" / "pre-submission" / "stan_models"
 
 pytestmark = pytest.mark.skipif(not PAGE.exists(),
                                 reason="streamlit app not present")
@@ -96,3 +97,14 @@ def test_the_page_uses_the_package_curve_not_a_copy():
     assert "def _gen_logi_fixed_upper" not in src, (
         "the page re-implements the curve again; import it from "
         "TEXAS.models.logistics so it cannot diverge from the model")
+
+
+def test_pre_submission_archive_is_excluded_from_the_param_scan():
+    """The pre-2026-04 models declare Q_crtp and sigma_scaledRI_crtp.
+
+    Those are exactly the stale parameter names this module exists to catch, so
+    the scan must never walk them. Pinning the path here means a future move
+    breaks this test instead of silently widening the scan.
+    """
+    assert PRE_SUBMISSION_DIR.is_dir()
+    assert PRE_SUBMISSION_DIR not in ARCHIVE_DIR.parents
