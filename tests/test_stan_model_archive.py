@@ -15,7 +15,6 @@ after a move like that, and none of them fails loudly on its own:
    variants, or every case id already written to disk and to Zenodo stops
    resolving.
 """
-from pathlib import Path
 
 import pytest
 
