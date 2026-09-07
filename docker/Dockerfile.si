@@ -6,13 +6,13 @@
 # so reviewers can run every figure without re-running MCMC.
 #
 # Prerequisites: push the base image first:
-#   docker build -f docker/Dockerfile -t ghcr.io/paleolipidRR/texas-base:latest .
-#   docker push ghcr.io/paleolipidRR/texas-base:latest
+#   docker build -f docker/Dockerfile -t ghcr.io/paleolipidrr/texas-base:latest .
+#   docker push ghcr.io/paleolipidrr/texas-base:latest
 #
 # Build & run:
 #   docker compose --profile si up
 # ─────────────────────────────────────────────────────────────────────────────
-FROM ghcr.io/paleolipidRR/texas-base:latest
+FROM ghcr.io/paleolipidrr/texas-base:latest
 
 WORKDIR /home/micromamba/app
 

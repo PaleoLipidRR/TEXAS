@@ -16,7 +16,7 @@ temperature. The distribution name and the import already carry that split
 
 <p align="center">
   <kbd><a href="docs/installation.md">📦 Installation</a></kbd> &nbsp;
-  <kbd><a href="https://paleolipidRR.github.io/TEXAS">📖 Documentation</a></kbd> &nbsp;
+  <kbd><a href="https://paleolipidrr.github.io/TEXAS">📖 Documentation</a></kbd> &nbsp;
   <kbd><a href="CONTRIBUTING.md">🤝 Contributing</a></kbd> &nbsp;
   <kbd><a href="LICENSE">📄 License</a></kbd>
 </p>
@@ -220,7 +220,7 @@ tests/              Unit tests
 | `set_cache_dir(path)` | Override cache root at runtime |
 | `summarize_sampler_diagnostics(fit)` | Divergences, R-hat, ESS, E-BFMI |
 
-Full API reference: [https://paleolipidRR.github.io/TEXAS](https://paleolipidRR.github.io/TEXAS)
+Full API reference: [https://paleolipidrr.github.io/TEXAS](https://paleolipidrr.github.io/TEXAS)
 
 ---
 
