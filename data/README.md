@@ -139,10 +139,11 @@ once uploaded at the v1.0.0 release (tracked in `RESUME.md`, Phase C).
 
 These arrive with a clone via LFS — no download step needed. "What reads it" was
 found by grepping each basename across `notebooks/`, `src/`, `tests/`, `scripts/`,
-and `streamlit_app/`; five files matched no live reader despite carrying nonzero
-reference counts in an earlier internal accounting made before this pass's
-archive moves — a discrepancy noted at the time and left as informational only,
-since these five stay tracked regardless.
+and `streamlit_app/`. Five of the twenty-two matched no live reader anywhere in
+the current tree, although an earlier audit credited them with references. The
+discrepancy is unexplained and is recorded here rather than resolved; all five
+stay tracked, since keeping a file nothing reads costs little and dropping one
+something reads would break a clone.
 
 | filename | what reads it | where to get it |
 |---|---|---|
