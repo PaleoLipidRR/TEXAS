@@ -363,6 +363,32 @@ byte-identical (md5 over every data var), +87 bytes of header on an 81 MB file.
 
 ---
 
+## Session — 2026-09-07: repo finalization, and six branches archived as tags
+
+Six unmerged remote branches and one local backup were tagged, the tags pushed
+and verified on the remote, and only then were the branches deleted. Nothing is
+lost; every commit is reachable from its tag.
+
+| deleted branch | tag | tip | what it held |
+|---|---|---|---|
+| `claude/gridT-gui-exploratory` | `archived-branch/claude-gridT-gui-exploratory` | `8f29f091` | 12 commits, ~1476 lines: `predict_grid.py`, a Streamlit page, 121 lines of tests. Its own commits mark it exploratory, "no merge without co-author sign-off", and its tip says the GUI has an unfixed cold-end bug. Its BAYSPAR work is already on `main` via PR #21. |
+| `revision/boundedT-si-figures` | `archived-branch/revision-boundedT-si-figures` | `088ca463` | 4 commits from July: SI figures and `.stan` files under the old `boundedT` name, superseded by the `t0shift` rename. |
+| `claude/repo-audit-docs-update-od2dsj` | `archived-branch/claude-repo-audit-docs-update` | `c51bbb6d` | 3 commits. **Its genuine fixes were recovered onto `main` first** — see the recovery commit. Left behind deliberately: its edits to `docs/stan_models_explanation_v2.md` (that page is being replaced), its 91 lines of session narration, and its `data/README.md` lines (superseded by the README sweep). |
+| `claude/gridt-inversion-characterization-15i183` | `archived-branch/claude-gridt-inversion-characterization` | `82554fa3` | 2 commits improving the gridT explainer at the old `TEXAS-revision/` path, which this session moved to `archive/exploratory/gridT-inversion/`. |
+| `claude/bounded-t-model-revisions-idrogu` | `archived-branch/claude-bounded-t-model-revisions` | `883dec99` | `manuscript_revision/` Section 6-7 draft plus a handoff note, 226 lines. Archived rather than merged because manuscript text lives in its own repositories. |
+| `claude/version-bump-v0-3-1-pxkvas` | `archived-branch/claude-version-bump-v0-3-1` | `e0050f46` | RESUME.md handoff notes only. |
+| `backup/revision1-groupA-prerebase` (local) | `archived-branch/backup-revision1-groupA-prerebase` | `0ac01441` | The pre-rebase backup kept during the PR #15 work. |
+
+To recover any of it: `git checkout -b <name> archived-branch/<tag>`.
+
+**The local-only `v0.2.6` tag was deleted, not pushed.** Its commit is on `main`.
+`.github/workflows/docker.yml` fires on every `v*` tag, so pushing it would have
+published a GHCR image for a version that was never released. Confirmed absent
+from the remote before and after.
+
+**Never run `git push --tags` in this repository** for that same reason.
+
+
 ## Latest session — 2026-08-22 (desktop): the gridded CV finally reached Part 1
 
 **Start here.** figS17 was not the only thing left behind by the ungridded →
@@ -1412,10 +1438,12 @@ archive/
 > added. `tests/test_streamlit_params.py` scans the new archive so the additive
 > `beta_*` labels stay valid. 351 passed, 11 skipped.
 >
-> **Still open:** B1's last bullet — folding
-> `src/TEXAS/stan_models/archive/` (16) and `archive_pre_annotated/` (4) into
-> the one repo-root archive. Three archive locations remain. A banner on the old
-> README points at the new one meanwhile.
+> **Done 2026-09-07** (`e0c729b5`): B1's last bullet — folding
+> `src/TEXAS/stan_models/archive/` (15 `.stan` + README) and
+> `archive_pre_annotated/` (4) — moved to `archive/pre-submission/stan_models/`
+> (with the latter as its `pre_annotated/` subdirectory), not into
+> `archive/submission-2026-04/`. Four archive locations now exist under
+> `archive/`, indexed by `archive/README.md`.
 
 
 **Stays in `src/TEXAS/stan_models/` (8):**
@@ -1457,9 +1485,10 @@ archive/
   they are testing the *name grammar*, not the models, so they stay.
 - `scripts/prepare_review_archive.sh` is written entirely against the legacy flat
   names of the initial submission. It belongs in `archive/`, not `scripts/`.
-- `src/TEXAS/stan_models/archive/` (16 files) and `archive_pre_annotated/` (4)
-  already exist and are tracked. Fold both into `archive/submission-2026-04/`
-  rather than leaving three archive locations. Neither ships in the wheel today.
+- `src/TEXAS/stan_models/archive/` (15 `.stan` + README) and
+  `archive_pre_annotated/` (4) — **done 2026-09-07** (`e0c729b5`): folded into
+  `archive/pre-submission/stan_models/` (the latter as its `pre_annotated/`
+  subdirectory), not `archive/submission-2026-04/`. Neither ships in the wheel.
 
 #### B2 — Notebooks
 
@@ -1506,6 +1535,13 @@ tagging.
       archive lives outside `src/`. Confirm the wheel drops from 17 to 8 models.
 - [ ] `CITATION.cff` / `.zenodo.json` → 1.0.0; drop the "in prep" / "prepared to
       submit" language once accepted.
+- [ ] Upload the 5 TEXAS-derived NetCDFs (16 MB) to the Zenodo data record
+      10.5281/zenodo.22131367 and add them to `TRAINING_DATA_REGISTRY`:
+      `Tierney22_PNAS_PETMDA/PETMDA_OCN_annual_regridded.nc` and the four
+      `Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/*.nc`. They were
+      untracked on 2026-09-07 (repo-hygiene plan, Task 7) and SI_code00 and
+      SI_code03 read them, so until this lands a fresh clone cannot run those
+      two notebooks end to end.
 
 ---
 

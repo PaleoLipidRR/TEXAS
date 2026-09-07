@@ -3,7 +3,7 @@
 # TEXAS — A proxy system model for TetraEther indeX of Ammonia oxidizerS
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Python 3.8+](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
 [![PyPI](https://img.shields.io/pypi/v/texas-psm.svg)](https://pypi.org/project/texas-psm/)
 [![Zenodo](https://img.shields.io/badge/data-10.5281%2Fzenodo.19666744-blue.svg)](https://doi.org/10.5281/zenodo.19666744)
 
@@ -16,7 +16,7 @@ temperature. The distribution name and the import already carry that split
 
 <p align="center">
   <kbd><a href="docs/installation.md">📦 Installation</a></kbd> &nbsp;
-  <kbd><a href="https://paleolipidRR.github.io/TEXAS">📖 Documentation</a></kbd> &nbsp;
+  <kbd><a href="https://paleolipidrr.github.io/TEXAS">📖 Documentation</a></kbd> &nbsp;
   <kbd><a href="CONTRIBUTING.md">🤝 Contributing</a></kbd> &nbsp;
   <kbd><a href="LICENSE">📄 License</a></kbd>
 </p>
@@ -96,8 +96,8 @@ Pre-computed posteriors and training data are hosted on Zenodo:
 import TEXAS
 
 TEXAS.download_all()               # posteriors + training CSVs
-TEXAS.download_posteriors()        # forward posteriors only (~158 MB total;
-                                   # EIV multiv posteriors are ~78 MB each)
+TEXAS.download_posteriors()        # forward posteriors only (~475 MB total;
+                                   # multivariate EIV posteriors are ~78-81 MB each)
 TEXAS.download_training_data()     # training CSVs + CMEMS NO₃ field
 ```
 
@@ -195,7 +195,6 @@ notebooks/
   quickstart_extended.ipynb Longer walkthrough: a published record, model comparison
   manuscripts/      Finalized SI notebooks behind the paper (SI_code00 .. SI_code03)
   reviewer_response/ Analyses answering review comments, not cited in the paper
-  superseded/       Pre-revision (additive-formulation) versions, kept for provenance
 streamlit_app/      Drag-and-drop web interface (Streamlit)
 docker/             Dockerfile and compose configuration
 docs/               Jupyter Book documentation source (guides, API, tutorial)
@@ -221,7 +220,7 @@ tests/              Unit tests
 | `set_cache_dir(path)` | Override cache root at runtime |
 | `summarize_sampler_diagnostics(fit)` | Divergences, R-hat, ESS, E-BFMI |
 
-Full API reference: [https://paleolipidRR.github.io/TEXAS](https://paleolipidRR.github.io/TEXAS)
+Full API reference: [https://paleolipidrr.github.io/TEXAS](https://paleolipidrr.github.io/TEXAS)
 
 ---
 

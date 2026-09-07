@@ -8,7 +8,10 @@ currently archived on Zenodo. The **revised manuscript supersedes it** with
 the [T₀-shift parameterization](index.md) (γ on the curve location T₀), which
 keeps predicted Scaled RI inside its physical bounds by construction. This
 page exists so readers arriving from the preprint, or working with the
-archived `GHEA` posteriors, can map what they see onto the current model.
+archived `GHEA` posteriors, can map what they see onto the current model. The
+Stan model itself now lives at
+`archive/submission-2026-04/stan_models/gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv.stan`;
+see `archive/README.md` for what else is archived and why.
 ```
 
 ## The additive model

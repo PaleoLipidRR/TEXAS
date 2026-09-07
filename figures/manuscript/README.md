@@ -5,7 +5,6 @@
 | `finalized/main-text/`, `finalized/supplementary/` | the figures of the **current** manuscript and SI, one file per figure number |
 | `revision1/` | working outputs of the revision notebooks (`SI_code02a`, and the reviewer-response `SI_code04`) |
 | `sources/` | editable vector sources (`.svg`) for hand-composed figures such as the PSM framework diagram |
-| `superseded/` | earlier versions — old numbering, pre-`t0shift` fits, unused `figXX_` drafts. Referenced by nothing; kept for provenance |
 
 ## Two trees, deliberately different
 
@@ -33,5 +32,7 @@ while the file the SI actually includes went untouched. That bug was live until
 2026-08-27.
 
 **When you renumber a figure: rename the file, update the notebook that writes
-it, and move the old one here to `superseded/` — never leave a copy under the
-old number.**
+it, and delete the copy under the old number — never leave both around.** (The
+initial submission's own figure set, `superseded/` as it stood then, was
+archived wholesale to `archive/submission-2026-04/figures/` rather than kept
+here; this folder no longer carries a per-figure superseded/ scratch area.)

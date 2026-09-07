@@ -276,7 +276,10 @@ def predict_T_from_proxyObs(
         as ``pd.NA`` rather than as passing.
     config : InvTConfig, optional
         Controls number of forward-posterior draws (M), seed, etc.
-        Defaults to ``InvTConfig()`` (M=100).
+        Defaults to ``InvTConfig()``, which auto-selects
+        M = min(500, max(100, available_draws // 4)) — M=500 for a typical
+        4-chain/1000-sample forward posterior (4000 draws), the value the
+        published paleo reconstructions use.
     chains : int
         Number of MCMC chains.  Default 4.
     iter_warmup : int

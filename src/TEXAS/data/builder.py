@@ -40,10 +40,15 @@ class InvTConfig:
     """Configuration for the inverse-T Stan data builder."""
     mode: str = "ensemble"        # Only 'ensemble' is supported (historical artifact)
     n_draws: Optional[int] = None # Number of forward posterior samples (M).
-                                  # None → auto: min(available_draws, 300).
+                                  # None → auto: min(500, max(100, available_draws // 4)).
+                                  # For a typical 4-chain/1000-sample forward fit (4000
+                                  # draws) this resolves to M=500, which is what the
+                                  # published paleo reconstructions use.
                                   # Larger M → better marginal likelihood approximation
                                   # (error ∝ 1/√M) but proportionally slower inference.
-                                  # Recommended: 100 (quick), 300 (default), 500 (publication).
+                                  # The sampler-budget sweep (docs/sampler_budget.md)
+                                  # only tested M=300 and M=500 and recommends M=500;
+                                  # pass n_draws=... explicitly to try a smaller budget.
     seed: int = 42                # For reproducible sampling of M draws
     no3_cutoff: Optional[float] = 0.0
     suffix: Optional[str] = None   # Force a specific fwd parameter suffix (e.g., 'crtp')

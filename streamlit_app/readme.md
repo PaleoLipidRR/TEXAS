@@ -8,33 +8,35 @@ A modular, component-based Streamlit application for exploring TEXAS temperature
 streamlit_app/
 ├── main.py                 # Entry point - run with `streamlit run main.py`
 ├── config.py              # Configuration constants and settings
-├── README.md              # This file
+├── readme.md              # This file
 ├── utils/                 # Core utilities
-│   ├── __init__.py
+│   ├── pages_init.py      # Package marker (misnamed; not __init__.py)
 │   ├── data_processing.py # Data transformation functions
 │   ├── file_handling.py   # File I/O operations
 │   └── plotting.py        # Matplotlib plotting utilities
 ├── components/            # Reusable UI components
-│   ├── __init__.py
+│   ├── components_init.py # Package marker (misnamed; not __init__.py)
 │   ├── file_selector.py   # File upload/selection widgets
 │   ├── plot_controls.py   # Plot configuration controls
 │   └── data_info.py       # Dataset information displays
 └── pages/                 # Tab content modules
     ├── __init__.py
-    ├── prediction.py      # Temperature prediction tab
-    ├── exploration.py     # Posterior exploration tab
-    └── computation.py     # Advanced computation tab
+    ├── prediction.py      # Temperature prediction tab (not wired into main.py — see below)
+    ├── exploration.py     # Posterior exploration tab (the only tab main.py currently renders)
+    ├── computation.py     # Advanced computation tab (not wired into main.py — see below)
+    └── calibration_data.py # Calibration dataset browser (not wired into main.py — see below)
 ```
+
+> **Only the exploration page is currently live.** `main.py` imports and
+> renders `pages/exploration.py` alone; `prediction.py`, `computation.py`,
+> and `calibration_data.py` still exist and still work as standalone modules,
+> but nothing in `main.py` calls them, so running the app shows a single
+> "Explore Posterior Distributions" page, not the multi-tab layout described
+> below.
 
 ## Features
 
-### 🎯 **Temperature Prediction Tab**
-- CSV upload or repository file selection
-- Flexible column mapping for RI data
-- Integration with TEXAS prediction functions
-- Results visualization and download
-
-### 📊 **Posterior Exploration Tab**
+### 📊 **Posterior Exploration** (the page `main.py` actually runs)
 - **Multi-file NetCDF support** (from cache or upload)
 - **Multi-parameter plotting** with subplot grids
 - **Flexible data processing**: flatten, mean, median, std, min, max over any axis
@@ -43,10 +45,17 @@ streamlit_app/
 - **Comprehensive dataset information**: dimensions, coordinates, attributes
 - **Smart MCMC handling**: automatic detection of (chains, draws) structures
 
-### ⚙️ **Advanced Computation Tab**
-- Direct interface to TEXAS sampling functions
-- JSON parameter input with examples
-- NetCDF result download
+### Other pages present but not wired into `main.py`
+
+These modules are complete and importable, but `main.py` does not currently
+render them as tabs — see the note under Directory Structure above.
+
+- **`pages/prediction.py`** — Temperature Prediction: CSV upload or repository
+  file selection, flexible column mapping for RI data, integration with TEXAS
+  prediction functions, results visualization and download.
+- **`pages/computation.py`** — Advanced Computation: direct interface to TEXAS
+  sampling functions, JSON parameter input with examples, NetCDF result download.
+- **`pages/calibration_data.py`** — Calibration dataset browser.
 
 ## Key Improvements Over Monolithic Version
 
@@ -70,7 +79,7 @@ streamlit_app/
 1. Ensure TEXAS is installed and importable
 2. Install required dependencies:
    ```bash
-   pip install streamlit pandas numpy xarray matplotlib scipy
+   pip install -r requirements.streamlit.txt
    ```
 3. Run the application:
    ```bash

@@ -43,7 +43,7 @@ TEMPLATE = HERE / "sampler_budget_template.html"
 OUT = DOCS / "_static" / "sampler-budget.html"
 SNAPSHOT = DOCS / "_static" / "sampler-budget.data.json"
 
-# Kept in step with scripts/run_param_sensitivity.py. Duplicated rather than
+# Kept in step with scripts/paper/run_param_sensitivity.py. Duplicated rather than
 # imported because this script must run in the docs CI job, which installs the
 # package but not the analysis scripts' assumptions about a data directory.
 CRITERIA = dict(max_rhat=1.01, min_ess_bulk=400.0, pct_divergent=0.0,
@@ -427,7 +427,7 @@ def adopted_budgets() -> dict:
     time, which the docs job should not need.
     """
     import ast
-    runner = REPO / "scripts" / "run_manuscript_refits.py"
+    runner = REPO / "scripts" / "paper" / "run_manuscript_refits.py"
     if not runner.exists():
         return {}
     out = {}
@@ -456,7 +456,7 @@ def render_part3(s: dict) -> str:
     if not cells:
         return ('<div class="prose" style="margin-top:1.4rem"><p>The inverse sweep has '
                 'not produced results on this machine yet. Run '
-                '<code>python scripts/run_param_sensitivity.py part3</code>.</p></div>')
+                '<code>python scripts/paper/run_param_sensitivity.py part3</code>.</p></div>')
 
     rows = []
     for c in sorted(cells, key=lambda c: c.get("wall_sec") or 0):
@@ -576,7 +576,7 @@ def render_part3(s: dict) -> str:
             f'{adopted.get("FWD_SAMPLING")}</strong>, inverse '
             f'<strong>{adopted["INV_WARMUP"]}/{adopted["INV_SAMPLING"]}</strong> with '
             f'<strong>M&nbsp;=&nbsp;{adopted["INV_M"]}</strong> '
-            f'(<code>scripts/run_manuscript_refits.py</code>).</p>'
+            f'(<code>scripts/paper/run_manuscript_refits.py</code>).</p>'
             f'<p>The inverse budget is a deliberate choice over the recommender’s '
             f'output, on three grounds: it clears R&#770;&nbsp;&lt;&nbsp;1.01 and '
             f'ESS&nbsp;&ge;&nbsp;400 with room; its accuracy is indistinguishable from '

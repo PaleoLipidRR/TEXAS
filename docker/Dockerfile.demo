@@ -5,18 +5,18 @@
 # Includes demo notebooks and the forward calibration posterior cache.
 #
 # Prerequisites: push the base image first:
-#   docker build -f docker/Dockerfile -t ghcr.io/paleolipidRR/texas-base:latest .
-#   docker push ghcr.io/paleolipidRR/texas-base:latest
+#   docker build -f docker/Dockerfile -t ghcr.io/paleolipidrr/texas-base:latest .
+#   docker push ghcr.io/paleolipidrr/texas-base:latest
 #
 # Build & run:
 #   docker compose --profile demo up
 # ─────────────────────────────────────────────────────────────────────────────
-FROM ghcr.io/paleolipidRR/texas-base:latest
+FROM ghcr.io/paleolipidrr/texas-base:latest
 
 WORKDIR /home/micromamba/app
 
 # Demo notebooks
-COPY --chown=micromamba:micromamba notebooks/current/ ./notebooks/current/
+COPY --chown=micromamba:micromamba notebooks/quickstart_demo.ipynb notebooks/quickstart_extended.ipynb ./notebooks/
 
 # Forward calibration posteriors (pre-built, ~4 MB)
 COPY --chown=micromamba:micromamba data/cache/TEXAS_posterior_cache/ ./data/cache/TEXAS_posterior_cache/
