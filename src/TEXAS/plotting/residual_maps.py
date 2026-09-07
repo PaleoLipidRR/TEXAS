@@ -329,6 +329,36 @@ def _auto_cache_path(
     return _paths.KRIGED_CACHE_DIR / leaf
 
 
+def _legacy_grids_cache(cache_path: Union[str, Path]) -> Optional[Path]:
+    """The same cache leaf in the legacy cache root, if it is sitting there.
+
+    Kriged grids were written straight into ``CACHE_ROOT`` until 2026-09-07,
+    next to the two posterior directories. Reading them from there keeps a
+    machine whose files have not been moved yet working — the same never-fatal
+    dual-read policy ``load_posterior`` uses for legacy posterior filenames.
+    ``data/cache/**`` is gitignored, so this is genuinely per-machine:
+    ``scripts/migrate_kriged_cache.py`` is what moves them.
+
+    Only auto-generated paths get the fallback. An explicitly passed
+    ``cache_path`` is taken at its word.
+
+    Args:
+        cache_path: The path that was asked for.
+
+    Returns:
+        The legacy path if it exists and ``cache_path`` is an auto path under
+        ``KRIGED_CACHE_DIR``, otherwise ``None``. Nothing is ever written back
+        to the old location.
+    """
+    from TEXAS.utils import paths as _paths
+
+    p = Path(cache_path)
+    if p.parent != _paths.KRIGED_CACHE_DIR:
+        return None
+    legacy = _paths.CACHE_ROOT / p.name
+    return legacy if legacy.exists() else None
+
+
 def load_or_build_grids_cache(
     cache_path: str,
     data: list,
@@ -357,9 +387,19 @@ def load_or_build_grids_cache(
     if grid_lat_true is None:
         grid_lat_true = _GRID_LAT_025DEG
 
+    # Dual-read: prefer the new location, accept a grid still sitting loose in
+    # the legacy cache root. Writes below always go to `cache_path`.
+    read_path = Path(cache_path)
+    if not read_path.exists():
+        legacy = _legacy_grids_cache(cache_path)
+        if legacy is not None:
+            print(f"Loaded grids cache ← {legacy}  (legacy cache root; run "
+                  f"scripts/migrate_kriged_cache.py to move it)")
+            read_path = legacy
+
     if recompute != True:  # False or 'auto'
-        if os.path.exists(cache_path):
-            cache = np.load(cache_path)
+        if read_path.exists():
+            cache = np.load(read_path)
             halo_grids = [
                 np.ma.array(cache[f"halo_data_{i}"], mask=cache[f"halo_mask_{i}"])
                 for i in range(len(data))
@@ -368,7 +408,7 @@ def load_or_build_grids_cache(
                 np.ma.array(cache[f"true_data_{i}"], mask=cache[f"true_mask_{i}"])
                 for i in range(len(data))
             ]
-            print(f"Loaded grids cache ← {cache_path}")
+            print(f"Loaded grids cache ← {read_path}")
             return halo_grids, true_grids
         if recompute == False:
             raise FileNotFoundError(

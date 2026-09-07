@@ -135,7 +135,7 @@ def test_a_missing_cache_is_written_to_the_new_folder(cache_root, no_kriging):
 
 # ── Call-time resolution of KRIGED_CACHE_DIR ────────────────────────────────
 
-def test_auto_cache_path_honours_a_cache_dir_change_after_import(cache_root, tmp_path):
+def test_auto_cache_path_honors_a_cache_dir_change_after_import(cache_root, tmp_path):
     """Regression guard for the io.py-style hoisting bug.
 
     ``stan/io.py`` does ``from TEXAS.utils.paths import POSTERIOR_CACHE_DIR``
@@ -154,3 +154,79 @@ def test_auto_cache_path_honours_a_cache_dir_change_after_import(cache_root, tmp
         assert p.parent != cache_root / "TEXAS_kriged_grids_cache"
     finally:
         set_cache_dir(cache_root)
+
+
+# ── The legacy-root fallback ────────────────────────────────────────────────
+
+def _write_grids_npz(path, halo_value, true_value):
+    """Write one panel's worth of the grids-cache format."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    np.savez(
+        path,
+        halo_data_0=np.full((3, 4), float(halo_value)),
+        halo_mask_0=np.zeros((3, 4), bool),
+        true_data_0=np.full((3, 4), float(true_value)),
+        true_mask_0=np.zeros((3, 4), bool),
+    )
+
+
+def test_a_grid_left_in_the_legacy_cache_root_is_still_read(
+    cache_root, no_kriging, capsys
+):
+    """Pre-2026-09-07 caches sit loose in the root; a Windows box may not be migrated."""
+    path = rm._auto_cache_path("SST", "scaledRI_cren3", "temp_residual", krige_res=1)
+    _write_grids_npz(cache_root / path.name, halo_value=7, true_value=8)
+
+    # recompute=False raises if nothing is found, so a returned grid proves the
+    # fallback fired rather than the compute branch.
+    halo, true = rm.load_or_build_grids_cache(
+        str(path), DATA, LONS, LATS, recompute=False,
+    )
+
+    assert halo[0].data[0, 0] == 7.0
+    assert true[0].data[0, 0] == 8.0
+    assert "legacy cache root" in capsys.readouterr().out
+    assert not path.exists()          # a fallback read never copies or writes
+
+
+def test_the_new_location_wins_over_the_legacy_one(cache_root, no_kriging):
+    path = rm._auto_cache_path("SST", "scaledRI_cren3", "temp_residual", krige_res=1)
+    _write_grids_npz(cache_root / path.name, halo_value=7, true_value=8)
+    _write_grids_npz(path, halo_value=70, true_value=80)
+
+    halo, true = rm.load_or_build_grids_cache(
+        str(path), DATA, LONS, LATS, recompute=False,
+    )
+
+    assert halo[0].data[0, 0] == 70.0
+    assert true[0].data[0, 0] == 80.0
+
+
+def test_an_explicit_cache_path_gets_no_fallback(cache_root, no_kriging):
+    """An explicit path is explicit — never silently redirected to the root."""
+    explicit = cache_root / "elsewhere" / "my_grids.npz"
+    _write_grids_npz(cache_root / "my_grids.npz", halo_value=7, true_value=8)
+
+    with pytest.raises(FileNotFoundError):
+        rm.load_or_build_grids_cache(
+            str(explicit), DATA, LONS, LATS, recompute=False,
+        )
+
+
+def test_a_genuinely_missing_cache_still_raises(cache_root, no_kriging):
+    path = rm._auto_cache_path("SST", "scaledRI_cren3", "temp_residual", krige_res=1)
+    with pytest.raises(FileNotFoundError, match="TEXAS_kriged_grids_cache"):
+        rm.load_or_build_grids_cache(str(path), DATA, LONS, LATS, recompute=False)
+
+
+def test_recompute_true_ignores_the_legacy_file(cache_root, no_kriging):
+    """recompute=True means re-krige and overwrite — at the NEW path."""
+    path = rm._auto_cache_path("SST", "scaledRI_cren3", "temp_residual", krige_res=1)
+    _write_grids_npz(cache_root / path.name, halo_value=7, true_value=8)
+
+    halo, _ = rm.load_or_build_grids_cache(
+        str(path), DATA, LONS, LATS, recompute=True,
+    )
+
+    assert halo[0].data[0, 0] == 10.0   # the patched builder, not the cached 7
+    assert path.exists()
