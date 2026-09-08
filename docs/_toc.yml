@@ -22,7 +22,6 @@ parts:
       - file: sampler_budget
       - file: stan_models
       - file: marginalization_explainer
-      - file: why_plugin_p50_differs
       - file: reduce_sum_for_geologists
       - file: ckdtree_nearest_ocean_explainer
   - caption: Developer
