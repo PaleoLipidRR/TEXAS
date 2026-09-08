@@ -30,7 +30,7 @@ import urllib.request
 from pathlib import Path
 from typing import List, Optional
 
-from .paths import POSTERIOR_CACHE_DIR, SPREADSHEETS_DIR
+from . import paths as _paths
 
 # ─── Zenodo config ────────────────────────────────────────────────────────────
 # The current version of the data record (concept DOI 10.5281/zenodo.19666744),
@@ -250,7 +250,7 @@ def download_posteriors(
     targets = names if names is not None else [
         k for k, v in POSTERIOR_REGISTRY.items() if "record" not in v
     ]
-    dest_dir = Path(cache_dir) if cache_dir else POSTERIOR_CACHE_DIR
+    dest_dir = Path(cache_dir) if cache_dir else _paths.POSTERIOR_CACHE_DIR
     dest_dir.mkdir(parents=True, exist_ok=True)
 
     aliases = _case_aliases()
@@ -384,7 +384,7 @@ def download_training_data(
     list of Path
         Local paths of the downloaded files.
     """
-    dest = Path(dest_dir) if dest_dir else SPREADSHEETS_DIR
+    dest = Path(dest_dir) if dest_dir else _paths.SPREADSHEETS_DIR
     dest.mkdir(parents=True, exist_ok=True)
 
     missing = [
@@ -449,7 +449,7 @@ def download_ocean_properties(
         :func:`TEXAS.data.ocean_lookup.get_ocean_prop_ds` to download and
         open it in one call.
     """
-    dest = Path(dest_dir) if dest_dir else SPREADSHEETS_DIR
+    dest = Path(dest_dir) if dest_dir else _paths.SPREADSHEETS_DIR
     dest.mkdir(parents=True, exist_ok=True)
     entry = TRAINING_DATA_REGISTRY["ocean_prop_ds"]
     out = dest / entry["filename"]

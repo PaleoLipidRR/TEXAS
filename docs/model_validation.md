@@ -70,7 +70,10 @@ residuals two ways:
   `TEXAS.plotting.plot_residual_maps`. Regional residual patterns (e.g. the
   Mediterranean and Red Sea) shrink once the GDGT-2/3 and NO₃ corrections are
   applied, indicating the non-thermal terms capture a real ecological signal
-  rather than overfitting noise.
+  rather than overfitting noise. Kriging six panels takes minutes, so the grids
+  are cached as `.npz` under `data/cache/TEXAS_kriged_grids_cache/` and the
+  figure re-renders in seconds. Pass `recompute='auto'` to build a grid that is
+  not there yet, or `recompute=True` to force a re-krige.
 
 ---
 

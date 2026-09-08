@@ -29,7 +29,17 @@ PREDICTOR_BETA_NAMES = {
 }
 
 # Stan direct keys (if used across multiple places)
+# R2_thermal is included here (rather than given its own block in
+# extract_and_update_metadata, the way no3_cutoff is) because the direct-keys
+# loop already does exactly what provenance requires: it is only in the Stan
+# data dict when build_fwd_data(..., R2_thermal=...) was actually called (see
+# data/builder.py), so a univariate or non-EIV fit -- which never receives the
+# argument -- gets no R2_thermal attr at all rather than an invented 0.0. It
+# scales the sigma_proxyObs_crtp prior in the _eiv models (see
+# gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift.stan); without it on
+# the posterior, nothing shipped with a fitted file records what set that
+# prior's scale.
 DIRECT_KEYS = ["proxyObs", "prior_mu_t", "prior_sigma_t",
     "calibration_model_name", "N_cul", "N_meso", "N_crtp", "N",
-    "prior_mu_t", "prior_sigma_t", "M"
+    "prior_mu_t", "prior_sigma_t", "M", "R2_thermal"
 ]

@@ -20,6 +20,7 @@ Set env var KRIGE_N_JOBS to override parallelism (1 = serial).
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from typing import List, Optional, Sequence, Tuple, Union
 
 import numpy as np
@@ -291,69 +292,76 @@ def make_true_grid(
     return np.ma.array(z, mask=~has_data)
 
 
-def load_or_build_halo_cache(
-    cache_path: str,
-    data: list,
-    lons: np.ndarray,
-    lats: np.ndarray,
-    grid_lon: Optional[np.ndarray] = None,
-    grid_lat: Optional[np.ndarray] = None,
-    n_closest: int = 5,
+def _auto_cache_path(
+    temp_param: str,
+    y_param: str,
+    residual_tag: str,
+    krige_res: float = 1.0,
     max_dist_deg: float = 10.0,
-    grid_res: float = 1.0,
-    recompute=False,
-) -> List[np.ma.MaskedArray]:
+) -> Path:
+    """Default location of the kriged-grids cache for one figure.
+
+    Both ``krige_res`` and ``max_dist_deg`` are formatted with ``:g``, so
+    ``krige_res=1`` and ``krige_res=1.0`` produce the same ``1deg`` token and
+    ``2.5`` keeps its decimal, and likewise ``10.0`` and ``10`` both give
+    ``10dmax`` while ``10.5`` and ``10.9`` no longer collide onto that same
+    ``10dmax`` the way ``int()`` used to collapse them — two genuinely
+    different search radii now get two different cache files instead of
+    silently sharing (and returning) the wrong grid. The unformatted f-string
+    this replaces wrote ``1deg`` and ``1.0deg`` as two names for one 57 MB
+    grid.
+
+    ``KRIGED_CACHE_DIR`` is read from the module rather than from-imported so
+    that :func:`TEXAS.set_cache_dir` takes effect without a reimport.
+
+    Args:
+        temp_param: Temperature column name, e.g. ``"SST"``.
+        y_param: Proxy column name, e.g. ``"scaledRI_cren3"``.
+        residual_tag: What kind of field is gridded, e.g. ``"temp_residual"``.
+        krige_res: Halo grid resolution in degrees.
+        max_dist_deg: Kriging search radius in degrees.
+
+    Returns:
+        Path to the ``.npz`` under ``TEXAS_kriged_grids_cache/``. The file need
+        not exist.
     """
-    Load halo grids from ``cache_path`` (.npz), or recompute and save if needed.
+    from TEXAS.utils import paths as _paths
 
-    Parameters
-    ----------
-    recompute : bool or ``'auto'``
-        - ``False``  : load from cache; raise ``FileNotFoundError`` if not found.
-        - ``True``   : always recompute and overwrite the cache.
-        - ``'auto'`` : load from cache if it exists, otherwise compute and save.
+    leaf = (
+        f"kriged_grids_{krige_res:g}deg_{max_dist_deg:g}dmax_woa23_"
+        f"{temp_param}_{y_param}_{residual_tag}.npz"
+    )
+    return _paths.KRIGED_CACHE_DIR / leaf
+
+
+def _legacy_grids_cache(cache_path: Union[str, Path]) -> Optional[Path]:
+    """The same cache leaf in the legacy cache root, if it is sitting there.
+
+    Kriged grids were written straight into ``CACHE_ROOT`` until 2026-09-07,
+    next to the two posterior directories. Reading them from there keeps a
+    machine whose files have not been moved yet working — the same never-fatal
+    dual-read policy ``load_posterior`` uses for legacy posterior filenames.
+    ``data/cache/**`` is gitignored, so this is genuinely per-machine:
+    ``scripts/migrate_kriged_cache.py`` is what moves them.
+
+    Only auto-generated paths get the fallback. An explicitly passed
+    ``cache_path`` is taken at its word.
+
+    Args:
+        cache_path: The path that was asked for.
+
+    Returns:
+        The legacy path if it exists and ``cache_path`` is an auto path under
+        ``KRIGED_CACHE_DIR``, otherwise ``None``. Nothing is ever written back
+        to the old location.
     """
-    if grid_lon is None:
-        grid_lon = _GRID_LON_1DEG
-    if grid_lat is None:
-        grid_lat = _GRID_LAT_1DEG
+    from TEXAS.utils import paths as _paths
 
-    if recompute != True:  # False or 'auto'
-        if os.path.exists(cache_path):
-            cache = np.load(cache_path)
-            # Try new format first (halo_data_), fall back to old format (data_)
-            try:
-                halo_grids = [
-                    np.ma.array(cache[f"halo_data_{i}"], mask=cache[f"halo_mask_{i}"])
-                    for i in range(len(data))
-                ]
-            except KeyError:
-                # Fall back to old format
-                halo_grids = [
-                    np.ma.array(cache[f"data_{i}"], mask=cache[f"mask_{i}"])
-                    for i in range(len(data))
-                ]
-            print(f"Loaded halo cache ← {cache_path}")
-            return halo_grids
-        if recompute == False:
-            raise FileNotFoundError(
-                f"Cache not found at:\n  {cache_path}\n"
-                "Pass recompute=True to generate it, or recompute='auto' to "
-                "compute-and-cache automatically."
-            )
-        # recompute='auto' and cache missing — fall through to compute
-
-    halo_grids = krige_halo_all(
-        data, lons, lats, grid_lon, grid_lat,
-        n_closest=n_closest, max_dist_deg=max_dist_deg, grid_res=grid_res,
-    )
-    np.savez(
-        cache_path,
-        **{f"data_{i}": halo_grids[i].data for i in range(len(data))},
-        **{f"mask_{i}": halo_grids[i].mask for i in range(len(data))},
-    )
-    print(f"Saved halo cache → {cache_path}")
-    return halo_grids
+    p = Path(cache_path)
+    if p.parent != _paths.KRIGED_CACHE_DIR:
+        return None
+    legacy = _paths.CACHE_ROOT / p.name
+    return legacy if legacy.exists() else None
 
 
 def load_or_build_grids_cache(
@@ -385,8 +393,23 @@ def load_or_build_grids_cache(
         grid_lat_true = _GRID_LAT_025DEG
 
     if recompute != True:  # False or 'auto'
-        if os.path.exists(cache_path):
-            cache = np.load(cache_path)
+        # Dual-read: prefer the new location, accept a grid still sitting
+        # loose in the legacy cache root. Only consulted when a cached read
+        # is actually going to be attempted — recompute=True must neither
+        # read the legacy file nor tell the user to run the migration
+        # script, since that script would overwrite the fresh recompute
+        # with the stale legacy grid.  Writes below always go to `cache_path`.
+        read_path = Path(cache_path)
+        legacy_note = ""
+        if not read_path.exists():
+            legacy = _legacy_grids_cache(cache_path)
+            if legacy is not None:
+                read_path = legacy
+                legacy_note = ("  (legacy cache root; run "
+                                "scripts/migrate_kriged_cache.py to move it)")
+
+        if read_path.exists():
+            cache = np.load(read_path)
             halo_grids = [
                 np.ma.array(cache[f"halo_data_{i}"], mask=cache[f"halo_mask_{i}"])
                 for i in range(len(data))
@@ -395,7 +418,7 @@ def load_or_build_grids_cache(
                 np.ma.array(cache[f"true_data_{i}"], mask=cache[f"true_mask_{i}"])
                 for i in range(len(data))
             ]
-            print(f"Loaded grids cache ← {cache_path}")
+            print(f"Loaded grids cache ← {read_path}{legacy_note}")
             return halo_grids, true_grids
         if recompute == False:
             raise FileNotFoundError(
@@ -419,6 +442,7 @@ def load_or_build_grids_cache(
         )
     
     # Save both to cache
+    Path(cache_path).parent.mkdir(parents=True, exist_ok=True)
     np.savez(
         cache_path,
         **{f"halo_data_{i}": halo_grids[i].data for i in range(len(data))},
@@ -734,9 +758,13 @@ def plot_residual_maps(
         ``temp_param``/``y_param`` but different residual content.
     cache_path : str, optional
         Explicit path to the .npz grids cache.  When omitted and both
-        ``temp_param`` and ``y_param`` are set, auto-generated as
-        ``data/cache/kriged_grids_{res}deg_{dist}dmax_woa23_{temp_param}_{y_param}_{residual_tag}.npz``
-        inside the project root. Now caches both halo and true grids for faster plotting.
+        ``temp_param`` and ``y_param`` are set, auto-generated under
+        ``data/cache/TEXAS_kriged_grids_cache/`` as
+        ``kriged_grids_{res}deg_{dist}dmax_woa23_{temp_param}_{y_param}_{residual_tag}.npz``.
+        The resolution token is formatted with ``:g``, so ``krige_res=1`` and
+        ``krige_res=1.0`` name one file.  Caches both halo and true grids for
+        faster plotting.  A cache left in the old location (the cache root,
+        pre-2026-09-07) is still read, with a printed note.
     recompute : bool or ``'auto'``
         - ``False``  : load grids from cache; raise ``FileNotFoundError`` if not found.
         - ``True``   : always re-krige and recompute grids, then overwrite the cache.
@@ -782,11 +810,10 @@ def plot_residual_maps(
 
     # ── Halo + True grids (cached) ──────────────────────────────────────────
     if cache_path is None and temp_param is not None and y_param is not None:
-        from TEXAS.utils.paths import CACHE_DIR
-        _tag = f"{temp_param}_{y_param}_{residual_tag}"
-        cache_path = str(
-            CACHE_DIR / f"kriged_grids_{krige_res}deg_{int(max_dist_deg)}dmax_woa23_{_tag}.npz"
-        )
+        cache_path = str(_auto_cache_path(
+            temp_param, y_param, residual_tag,
+            krige_res=krige_res, max_dist_deg=max_dist_deg,
+        ))
         print(f"Auto cache path: {cache_path}")
 
     if cache_path is not None:

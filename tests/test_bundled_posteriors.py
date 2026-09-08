@@ -86,6 +86,18 @@ def test_default_target_map_covers_both_temptypes():
     assert set(DEFAULT_FWD_POSTERIOR) == {"SST", "thermoT"}
 
 
+@pytest.mark.parametrize("case", sorted(DEFAULT_FWD_POSTERIOR.values()))
+def test_bundled_posterior_carries_r2_thermal(case, tmp_path):
+    # Both bundled files are EIV (_eiv_t0shift) fits, so both must carry the
+    # R² their sigma_proxyObs_crtp prior was scaled from -- backfilled from
+    # data/revision1/groupA/manuscript_refit/manifest.csv by
+    # scripts/backfill_r2_thermal.py, since they predate DIRECT_KEYS stamping
+    # it automatically.
+    ds = load_posterior(case, cache_dir=tmp_path)
+    assert "R2_thermal" in ds.attrs
+    assert 0.0 < float(ds.attrs["R2_thermal"]) < 1.0
+
+
 # --- one fact, one attr ----------------------------------------------------
 # Duplicated metadata is how a rename leaves one name current and another
 # stale: `stan_model_name` said `_t0shift` while arviz's echoed `model` still

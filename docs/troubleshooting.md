@@ -174,3 +174,39 @@ Then re-run `texas-doctor` — it should print `Stan sampling: READY`.
 - **Windows:** `python -m cmdstanpy.install_cxx_toolchain` (installs the RTools
   MinGW toolchain), or use the conda-forge `cmdstan` package, which ships a pre-built
   compiler.
+
+---
+
+## Where TEXAS caches things, and what is safe to delete
+
+**Symptom:** a figure or reconstruction spends minutes rebuilding something you
+are sure you already computed, or `data/cache/` has grown to gigabytes and you
+want to know what can go.
+
+**Cause:** TEXAS keeps three caches under one root — `TEXAS_CACHE_DIR` if it is
+set, otherwise `data/cache/` inside a git checkout, otherwise `~/.texas/cache/`:
+
+| Directory | Holds | Rebuilt by |
+|---|---|---|
+| `TEXAS_posterior_cache/` | forward calibration posteriors (`.nc`) | `get_posterior()`, or `TEXAS.download_posteriors()` |
+| `TEXAS_invT_posterior_cache/` | inverse temperature reconstructions (`.nc`) | `predict_T_from_proxyObs()` |
+| `TEXAS_kriged_grids_cache/` | kriged residual-map grids (`.npz`) | `plot_residual_maps(..., recompute='auto')` |
+
+**Fix:** all three are caches — deleting any file costs only the time to
+recompute it. To move all three at once:
+
+```python
+import TEXAS
+TEXAS.set_cache_dir("/big/disk/texas-cache")   # or export TEXAS_CACHE_DIR
+```
+
+**Kriged grids written before 2026-09-07** sit loose in the cache root instead
+of in `TEXAS_kriged_grids_cache/`. They are still read from there, with a
+printed note naming the old path. To tidy them up:
+
+```bash
+python scripts/migrate_kriged_cache.py                        # dry run
+python scripts/migrate_kriged_cache.py --apply --delete-superseded
+```
+
+`data/cache/**` is gitignored, so this is per-machine — run it on each clone.
