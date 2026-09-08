@@ -76,7 +76,7 @@ resolves their legacy names — pinned to that old version.
   paired bootstrap -- appears in **neither** main.tex, si_template_2019.tex,
   nor R2R_main.tex (verified by concept words AND signature numbers: 24.3,
   0.750, 0.343, "elpd", 1298 all absent), and its two figures are in no SI.
-  R2C4 was answered a different way -- everything labelled *in-sample* plus
+  R2C4 was answered a different way -- everything labeled *in-sample* plus
   the 21-basin breakdown (Fig. S16, from `SI_code02`) -- and the letter says
   outright "not an out-of-sample validation ... we do not make any
   out-of-sample claims anywhere in the revised manuscript", which publishing
@@ -181,7 +181,7 @@ the log before theorising.**
 
 Fixed by `lfs: true` on the docs checkout. Only `docs.yml` needs it; tests,
 lint and the Docker build pass without LFS content. If another workflow ever
-reads a `*.csv`, `*.nc`, `*.npz`, `*.pkl`, `*.h5` or `*.xlsx`, it needs the
+reads a `*.csv`, `*.nc`, `*.npz`, `*.pkl`, `*.h5`, or `*.xlsx`, it needs the
 same flag.
 
 ### v0.3.0 RELEASE STATUS (2026-08-27)
@@ -285,13 +285,13 @@ point); `N10` still parses and is never written.
   refuses on clash, `--revert`, `.npz` siblings move together). Per-machine —
   **run it on the Windows box too**.
 - Every read path is spelling-tolerant in both directions first:
-  `resolve_posterior_path` normalises the token on both sides and tries both
+  `resolve_posterior_path` normalizes the token on both sides and tries both
   spellings on exact-path lookups, and `naming.swap_no3_token()` covers invT
   leaves, which carry a site and scenario after the case and so never parse as a
   case id. Verified: old id → renamed file, and renamed id → old cache.
 - `temptype` was inferred by string-matching the posterior *name* for
   `"thermoT"`, which case ids spell `thm` — so every thermocline reconstruction
-  was silently labelled `unknown_temptype`. It now comes from the calibration's
+  was silently labeled `unknown_temptype`. It now comes from the calibration's
   own attrs, and a contradicting `temptype=` warns.
 
 ### 3. One fact, one attr
@@ -463,7 +463,7 @@ point of use. Implementers refusing a bad instruction is the system working.
 2. **Bayesian R² / RMSE ranges for reviewer 3.** Feasible from saved draws, no
    Stan change. But the median of per-draw R² is systematically **lower** than
    the point R², so swapping it into a comparison table against other groups'
-   plug-in values would penalise TEXAS for a definitional change. Recommendation:
+   plug-in values would penalize TEXAS for a definitional change. Recommendation:
    keep point estimates in the comparison, add the interval alongside, ship the
    distributions in the `.nc`. Note the paired-RMSE table already reports lo/hi/p.
 
@@ -550,7 +550,7 @@ leftovers and are fixed too. `PROVENANCE.md` was already correct.
   intact but under **permuted fold indices** (old 1↔3, 2↔4); the boxes
   themselves needed no change. Labels re-derived from the new centroids, not
   loosened.
-- **Colour is now keyed to the region name, not the fold index** (`COLOR` dict,
+- **Color is now keyed to the region name, not the fold index** (`COLOR` dict,
   cell 16), so the palette and legend order are byte-for-byte what they were.
   Without this the permutation would have silently recoloured the map — the
   Part 3 prose about "the red block" and "the green one" would have gone wrong
@@ -653,7 +653,7 @@ Written as a handoff across a PC restart. (Superseded as the entry point by the
 
 
 `figS17_spatial_cv_folds` still renders **n = 2043**, the *ungridded* CV, while
-`cv_sites.csv`, `cv_folds_map.csv` and `cv_waic_meta.json` are the **gridded
+`cv_sites.csv`, `cv_folds_map.csv`, and `cv_waic_meta.json` are the **gridded
 n = 1513** run that `121c294` staged. The commit message predicted the figure
 would need refreshing and it never was — the 2026-08-21 re-run only reached the
 table cells.
@@ -874,7 +874,7 @@ Code lives in `working-repo/TEXAS-revision/`, under **its own uv env (pandas 3)*
 Do not re-run it under `texas-env`; `uv.lock` is the provenance record.
 `results.pkl` will **not** unpickle under TEXAS's pandas 2 (`StringDtype`), so it
 cannot be the record — added `scripts/export_cv_results.py` → CSV/JSON, plus
-`.gitignore` negations so `run.log`, `manifest.json` and the four exports are
+`.gitignore` negations so `run.log`, `manifest.json`, and the four exports are
 tracked. Copied to `TEXAS/data/revision1/groupA/model_comparison_cv/` with a
 `PROVENANCE.md`.
 
@@ -966,7 +966,7 @@ intentionally keep the old spelling. The Python curve function is
 
 - [ ] **Re-run the two bottom-layer calibration cells** in
       `SI_code02_t0shift_TEXAS_analysis.ipynb` (SST + thermoT): panel (b) now
-      lists `sigma_proxyObs_crtp` (σ_crtp, coretop colour, stack starts at
+      lists `sigma_proxyObs_crtp` (σ_crtp, coretop color, stack starts at
       y=0.31) but the committed figures predate the edit.
 - [ ] **Re-run the fig10/fig11 cells in `SI_code03_paleo_showcases.ipynb`**
       and eyeball the new code-drawn annotations (`site_annot_dict`, elbow
@@ -1218,7 +1218,7 @@ not matter. Do **not** copy `src/TEXAS/stan_models/` binaries — let them recom
   `*.csv` ignores SI evidence (`mcmc_budget_grid.csv`, the Text S2 sweep;
   `proxy_definition_summary.csv`) while off-scope material is tracked:
   `TEXAS-revision/` (9 files — gridT poster/explainer, **zero references** from
-  main text, SI, docs or package) and `notebooks/current/IMOG_presentation.ipynb`.
+  main text, SI, docs, or package) and `notebooks/current/IMOG_presentation.ipynb`.
   Also note `proxy_parameter_comparison_by_arm.csv` is tracked but its sibling
   `proxy_parameter_comparison.csv` is not — almost certainly accidental.
   > ⚠️ **`.gitignore:89` reads `figures/   # ← uncomment if you want...`** — it is
@@ -1269,7 +1269,7 @@ derivation of the bounded-T model from the production posterior, written for the
 §6–7 rewrite.
 
 **The sampler budget is now recorded and reported.** `sampler.py` stamps
-`iter_warmup`, `iter_sampling`, `chains` and `thin` on every new posterior, read
+`iter_warmup`, `iter_sampling`, `chains`, and `thin` on every new posterior, read
 from the CmdStan fit so defaults are captured too. `scripts/backfill_iter_warmup.py`
 retrofits existing files **only where a refit manifest names the specific file** —
 a blanket stamp would be wrong, because the cache mixes 400 (refit script), 300
@@ -1313,7 +1313,7 @@ Two were factual inconsistencies, now fixed:
   and the Conclusions had moved to the production posterior. The temperature-only pair
   (0.75, 0.058) already matched; only the multivariate one did not. Now **0.81 (0.050)**.
 - The **inverse figures (R² = 0.82, RMSE 4.4 °C) were unlabelled** as in-sample, which
-  R2C4 and R3 both asked for explicitly. Now labelled, with the spatially blocked
+  R2C4 and R3 both asked for explicitly. Now labeled, with the spatially blocked
   counterpart given.
 
 Six were overstatements against the paper's own evidence or its own hedged wording
@@ -1544,7 +1544,7 @@ archive/
 >
 > Also done in the same pass, beyond the plan: `_select_invT_stan_file()`
 > narrowed to the two constraints that ship (`hard_constraint`,
-> `reparameterized`, `soft` and `model_type="ensemble"` now raise `ValueError`
+> `reparameterized`, `soft`, and `model_type="ensemble"` now raise `ValueError`
 > naming the archive), `utils/naming.py::CONSTRAINT_CODES` left intact with a
 > comment saying why, docs updated, and `tests/test_stan_model_archive.py`
 > added. `tests/test_streamlit_params.py` scans the new archive so the additive
@@ -1642,7 +1642,7 @@ tagging.
       problem, not tidiness.
 - [ ] Same repointing in `README.md:153`, `docs/index.md:119,136,137,186,203,265`.
 - [ ] Upload the bounded-T posteriors to Zenodo; keep the `GHEA` ones in the record
-      as the submission archive, clearly labelled.
+      as the submission archive, clearly labeled.
 - [ ] `pyproject.toml` package-data stays `stan_models/*.stan` — correct, since the
       archive lives outside `src/`. Confirm the wheel drops from 17 to 8 models.
 - [ ] `CITATION.cff` / `.zenodo.json` → 1.0.0; drop the "in prep" / "prepared to
@@ -2145,7 +2145,7 @@ than silently different ones.
 
 ---
 
-## STATUS: Phases 0, 1 and 2 are DONE — resume at Phase 3 (2026-08-10)
+## STATUS: Phases 0, 1, and 2 are DONE — resume at Phase 3 (2026-08-10)
 
 > ### Handoff — Linux box → Windows, 2026-08-11
 >
@@ -2645,7 +2645,7 @@ skips inverse posteriors entirely (see 5D).
       one undifferentiated tag list. Two spellings of one format is how a naming
       scheme rots. Fix: delete the inline branch and call `inv_relpath()`.
       Verify: `tests/test_naming.py:301-323` currently asserts the *inline*
-      behaviour, so those two tests must be updated in the same commit.
+      behavior, so those two tests must be updated in the same commit.
 
 - [ ] **5B `save_invT_posterior()` is entirely case-unaware.** The public,
       `__all__`-exported entry point (`stan/io.py:269`) builds
