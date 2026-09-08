@@ -37,6 +37,12 @@ from TEXAS.stan.io import load_posterior
 BUNDLED_CASES = [
     "tx.GHEB.sst.sri03.G23-N1p0",
     "tx.GHEB.thm.sri03.G23-N1p0",
+    # Thermal-only (univariate) counterparts. predict_T_from_proxyObs falls back
+    # to these when it is given a proxy and no predictors, so they have to be
+    # present on a bare `pip install texas-psm` too. They carry no EIV latents,
+    # so they are already ~0.28 MB and _slim() is a no-op on them.
+    "tx.GHPU.sst.sri03.p0",
+    "tx.GHPU.thm.sri03.p0",
 ]
 
 # Latent variables of the EIV model. One value per coretop site per draw, used

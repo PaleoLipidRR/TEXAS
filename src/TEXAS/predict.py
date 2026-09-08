@@ -47,7 +47,9 @@ from .ensemble.generator import generate_ensemble_auto
 from .stan.invT import get_invT_posterior as _get_invT_posterior
 from .stan.invT import _percentiles_from_posterior
 from .data.builder import InvTConfig
-from .constants import DEFAULT_FWD_POSTERIOR, GDGT23RATIO_KEY, NO3_KEY
+from .constants import (DEFAULT_FWD_POSTERIOR,
+                        DEFAULT_FWD_POSTERIOR_UNIVARIATE,
+                        GDGT23RATIO_KEY, NO3_KEY)
 from .data.ocean_lookup import lookup_no3_from_woa, get_ocean_prop_ds
 
 
@@ -224,11 +226,37 @@ def predict_T_from_proxyObs(
     # them, it absorbs them into the thermal parameters.
     if fwd_posterior is None:
         _target = temptype if temptype in DEFAULT_FWD_POSTERIOR else "SST"
-        fwd_posterior = DEFAULT_FWD_POSTERIOR[_target]
-        print(
-            f"📚 No fwd_posterior given — using the default {_target} calibration "
-            f"'{fwd_posterior}' (full multivariate, G23 + NO3)."
+        # Did the caller supply ANY non-thermal information? Checked against the
+        # raw arguments, before site_lat/site_lon are resolved into an NO3 array.
+        _supplied = [k for k, v in (predictors or {}).items() if v is not None]
+        _any_predictor = bool(_supplied) or any(
+            x is not None for x in (no3, gdgt23ratio, site_lat, site_lon)
         )
+        if _any_predictor:
+            fwd_posterior = DEFAULT_FWD_POSTERIOR[_target]
+            print(
+                f"📚 No fwd_posterior given — using the default {_target} calibration "
+                f"'{fwd_posterior}' (full multivariate, G23 + NO3)."
+            )
+        else:
+            fwd_posterior = DEFAULT_FWD_POSTERIOR_UNIVARIATE[_target]
+            warnings.warn(
+                f"No predictors were supplied, so the thermal-only {_target} "
+                f"calibration '{fwd_posterior}' is being used instead of the "
+                f"multivariate default. This is a DIFFERENT calibration, not the "
+                f"multivariate one with its corrections switched off: the "
+                f"non-thermal effects are present in the core-top data either "
+                f"way, and a thermal-only fit absorbs them into the thermal "
+                f"parameters rather than removing them. Reconstructions will "
+                f"differ from the manuscript's, which uses the multivariate "
+                f"calibration throughout. To use it, pass gdgt23ratio= and no3= "
+                f"(or site_lat=/site_lon= for a WOA23 nitrate lookup).",
+                UserWarning, stacklevel=2,
+            )
+            print(
+                f"📚 No fwd_posterior and no predictors given — using the "
+                f"thermal-only {_target} calibration '{fwd_posterior}'."
+            )
 
     # ── Normalize fwd_posterior: split str vs pre-loaded Dataset ─────────────
     if isinstance(fwd_posterior, xr.Dataset):

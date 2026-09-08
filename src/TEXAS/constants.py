@@ -16,6 +16,16 @@ DEFAULT_FWD_POSTERIOR = {
     "thermoT": "tx.GHEB.thm.sri03.G23-N1p0",
 }
 
+# Thermal-only counterparts, used when predict_T_from_proxyObs is called with a
+# proxy and no predictors at all. These are a DIFFERENT calibration, not the
+# multivariate one with its corrections switched off: the nonthermal effects are
+# present in the coretop data either way, and a univariate fit absorbs them into
+# the thermal parameters rather than removing them. They ship in the wheel too.
+DEFAULT_FWD_POSTERIOR_UNIVARIATE = {
+    "SST": "tx.GHPU.sst.sri03.p0",
+    "thermoT": "tx.GHPU.thm.sri03.p0",
+}
+
 # Optional (non-thermal) predictors. The two named constants are the single
 # source of truth for the key spelling; OPTIONAL_PREDICTORS is the canonical
 # order in which they are iterated (data/builder.py, stan/metadata.py). Code
