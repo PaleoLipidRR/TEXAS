@@ -1,6 +1,6 @@
 # Module 1 — What is a Prior?
 
-> **Coming soon.** This module will cover how prior distributions encode existing knowledge about temperature and proxy behaviour before any calibration data is introduced.
+> **Coming soon.** This module will cover how prior distributions encode existing knowledge about temperature and proxy behavior before any calibration data is introduced.
 
 ## Preview
 
