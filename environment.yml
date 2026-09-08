@@ -11,25 +11,20 @@ dependencies:
   - ipywidgets
   - tqdm
   - ipykernel
+  - psutil          # utils/system_info.py imports this unguarded at module level
 
   # --- Core Scientific Stack ---
   - numpy
   - pandas
-  - openpyxl
+  - openpyxl        # backs pd.read_excel (culture/mesocosm .xlsx, SI_code00)
   - scipy
-  - scikit-learn
-  - statsmodels
+  - scikit-learn    # SI_code00/SI_code02: LinearRegression
   - seaborn
-  - gsw
-  
+
   # --- Core Data Handling ---
   - xarray
-  - dask
-  - distributed
-  - zarr
   - netcdf4
   - h5netcdf
-  - cftime
 
   # --- Plotting ---
   # NOTE: Multiple pins here increase solver complexity.
@@ -39,26 +34,20 @@ dependencies:
   # (matplotlib.cm.ColormapRegistry arrived in 3.5). Unpinned 2026-08-27.
   - matplotlib>=3.9,<3.11
   - matplotlib-inline
+  # setuptools<81: the reason for this cap was never recorded anywhere in the
+  # repo or its history. Left in place deliberately (2026-09-07) -- lifting an
+  # unexplained pin is its own change, with its own test.
   - setuptools<81
   - cmocean
-  - plotly
 
   # --- Geo Stack (Complex Dependencies) ---
-  # NOTE: shapely<2 is a major constraint.
-  - geopandas
   - shapely
-  - pyproj
   - cartopy
-  - pyogrio
-  - mapclassify
-  - rtree
-  - geopy
-  - pyshp=2.3.*
   - pygplates
 
   # --- xESMF Stack (Complex Dependencies) ---
   - xesmf
-  - esmpy
+  - esmpy           # NOT on PyPI; this is why it lives here and in no pip extra
   - esmf
   - hdf5
   - libnetcdf
@@ -68,16 +57,20 @@ dependencies:
   - cmdstanpy>=1.0
   - stanio
   - typing-extensions
-  - pyarrow
-  - importlib-metadata<5.0
+  - pyarrow         # backs pd.read_parquet (PhanTEX_GIG_df.parquet, SI_code02)
 
   # --- Pip-only packages (conda-lock skips these if listed under conda) ---
   - pip:
     - ultraplot>=2.4.0      # keep in step with pyproject; <2.4 cannot import
     - pykrige
     - regionmask>=0.9
-    - odrpack
     - baysparpy>=0.0.2      # SI_code2/3: BAYSPAR TEX86 comparison
     - baysplinepy>=0.0.1    # SI_code2/3: BAYSPLINE UK'37 comparison
     - bayfox                # SI_code2/3: BAYFOX foram δ18O comparison
-    - texas-psm>=0.3.2
+    # NOTE: TEXAS itself is deliberately NOT installed here. A `texas-psm>=0.3.2`
+    # entry resolved from PyPI, so conda-lock pinned the *published* wheel and
+    # baked its dependency metadata into conda-lock.yml -- reintroducing plotly,
+    # which the 2026-09 audit had just removed, under a version number identical
+    # to the local tree's. Every core dependency above is declared explicitly, so
+    # nothing is lost. Install the package itself with `pip install -e .`, which
+    # both CLAUDE.md and docs/installation.md already instruct.

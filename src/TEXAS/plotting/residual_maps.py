@@ -76,6 +76,33 @@ try:
 except ImportError:
     _HAS_JOBLIB = False
 
+
+def _r2_score(y_true, y_pred) -> float:
+    """Coefficient of determination, ``R² = 1 - SS_res / SS_tot``.
+
+    A numpy stand-in for ``sklearn.metrics.r2_score``, so the map figures do not
+    make scikit-learn a hidden core dependency (it is declared only in the
+    ``dev`` extra).
+
+    Args:
+        y_true: Observed values. Any array-like of floats.
+        y_pred: Predicted values, same length as ``y_true``.
+
+    Returns:
+        The R² statistic. Matches ``sklearn.metrics.r2_score`` exactly for any
+        input whose ``y_true`` has non-zero variance. When ``y_true`` is constant
+        this returns NaN, because R² is undefined with no variance to explain;
+        sklearn instead returns 0.0 there for an imperfect prediction and 1.0 for
+        an exact one. Callers here pass measured temperatures across many sites,
+        which are never constant.
+    """
+    y_true = np.asarray(y_true, dtype=float)
+    y_pred = np.asarray(y_pred, dtype=float)
+    ss_res = float(np.sum((y_true - y_pred) ** 2))
+    ss_tot = float(np.sum((y_true - np.mean(y_true)) ** 2))
+    return 1.0 - ss_res / ss_tot if ss_tot > 0 else float("nan")
+
+
 # ── Grid parameters ──────────────────────────────────────────────────────────
 # WOA_OFFSET aligns output grids with WOA23 0.25° cell centres.
 
@@ -770,7 +797,7 @@ def plot_residual_maps(
         - ``True``   : always re-krige and recompute grids, then overwrite the cache.
         - ``'auto'`` : load from cache if it exists, otherwise compute and save.
     metrics : list of (r2, rmse), optional
-        Pre-computed metrics.  If None, auto-calculated via r2_score.
+        Pre-computed metrics.  If None, auto-calculated via _r2_score.
         Ignored when ``row_annotations`` is provided.
     row_annotations : list of str, optional
         One annotation string per row, placed where R²/RMSE would normally
@@ -800,7 +827,6 @@ def plot_residual_maps(
     fig, axs
     """
     _require_cartopy()
-    from sklearn.metrics import r2_score
 
     nrows = len(data)
 
@@ -850,7 +876,7 @@ def plot_residual_maps(
             meas_vals = measured.values  if hasattr(measured,  "values") else np.array(measured)
             pred_vals = predicted.values if hasattr(predicted, "values") else np.array(predicted)
             idx  = ~np.isnan(res_vals) & ~np.isnan(meas_vals)
-            r2   = r2_score(meas_vals[idx], pred_vals[idx])
+            r2   = _r2_score(meas_vals[idx], pred_vals[idx])
             rmse = np.sqrt(np.mean(res_vals[idx] ** 2))
             metrics.append((r2, rmse))
 
@@ -870,7 +896,7 @@ def plot_residual_maps(
             return None, None
         meas = meas_raw[valid]
         pred = pred_raw[valid]
-        return r2_score(meas, pred), np.sqrt(np.mean((meas - pred) ** 2))
+        return _r2_score(meas, pred), np.sqrt(np.mean((meas - pred) ** 2))
 
     def _region_median(ext, vals, region_name=None):
         mask = None
