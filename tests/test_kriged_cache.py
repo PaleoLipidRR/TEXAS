@@ -183,9 +183,11 @@ def test_a_grid_left_in_the_legacy_cache_root_is_still_read(
         str(path), DATA, LONS, LATS, recompute=False,
     )
 
+    out = capsys.readouterr().out
     assert halo[0].data[0, 0] == 7.0
     assert true[0].data[0, 0] == 8.0
-    assert "legacy cache root" in capsys.readouterr().out
+    assert "legacy cache root" in out
+    assert out.count("Loaded grids cache ←") == 1   # one statement, not two
     assert not path.exists()          # a fallback read never copies or writes
 
 
@@ -219,8 +221,13 @@ def test_a_genuinely_missing_cache_still_raises(cache_root, no_kriging):
         rm.load_or_build_grids_cache(str(path), DATA, LONS, LATS, recompute=False)
 
 
-def test_recompute_true_ignores_the_legacy_file(cache_root, no_kriging):
-    """recompute=True means re-krige and overwrite — at the NEW path."""
+def test_recompute_true_ignores_the_legacy_file(cache_root, no_kriging, capsys):
+    """recompute=True means re-krige and overwrite — at the NEW path.
+
+    It must also say nothing about the legacy root: no load happened, and
+    telling the user to run the migration script here would have them
+    overwrite the fresh recompute with the stale legacy grid.
+    """
     path = rm._auto_cache_path("SST", "scaledRI_cren3", "temp_residual", krige_res=1)
     _write_grids_npz(cache_root / path.name, halo_value=7, true_value=8)
 
@@ -228,5 +235,9 @@ def test_recompute_true_ignores_the_legacy_file(cache_root, no_kriging):
         str(path), DATA, LONS, LATS, recompute=True,
     )
 
+    out = capsys.readouterr().out
     assert halo[0].data[0, 0] == 10.0   # the patched builder, not the cached 7
     assert path.exists()
+    assert "legacy cache root" not in out
+    assert "migrate_kriged_cache" not in out
+    assert "Loaded grids cache" not in out

@@ -387,17 +387,22 @@ def load_or_build_grids_cache(
     if grid_lat_true is None:
         grid_lat_true = _GRID_LAT_025DEG
 
-    # Dual-read: prefer the new location, accept a grid still sitting loose in
-    # the legacy cache root. Writes below always go to `cache_path`.
-    read_path = Path(cache_path)
-    if not read_path.exists():
-        legacy = _legacy_grids_cache(cache_path)
-        if legacy is not None:
-            print(f"Loaded grids cache ← {legacy}  (legacy cache root; run "
-                  f"scripts/migrate_kriged_cache.py to move it)")
-            read_path = legacy
-
     if recompute != True:  # False or 'auto'
+        # Dual-read: prefer the new location, accept a grid still sitting
+        # loose in the legacy cache root. Only consulted when a cached read
+        # is actually going to be attempted — recompute=True must neither
+        # read the legacy file nor tell the user to run the migration
+        # script, since that script would overwrite the fresh recompute
+        # with the stale legacy grid.  Writes below always go to `cache_path`.
+        read_path = Path(cache_path)
+        legacy_note = ""
+        if not read_path.exists():
+            legacy = _legacy_grids_cache(cache_path)
+            if legacy is not None:
+                read_path = legacy
+                legacy_note = ("  (legacy cache root; run "
+                                "scripts/migrate_kriged_cache.py to move it)")
+
         if read_path.exists():
             cache = np.load(read_path)
             halo_grids = [
@@ -408,7 +413,7 @@ def load_or_build_grids_cache(
                 np.ma.array(cache[f"true_data_{i}"], mask=cache[f"true_mask_{i}"])
                 for i in range(len(data))
             ]
-            print(f"Loaded grids cache ← {read_path}")
+            print(f"Loaded grids cache ← {read_path}{legacy_note}")
             return halo_grids, true_grids
         if recompute == False:
             raise FileNotFoundError(
