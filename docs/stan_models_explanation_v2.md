@@ -98,17 +98,20 @@ p(T|data) = ∫ p(T|data,θ) p(θ) dθ
 `invT_gen_logi_fixed_univ_unconstrained.stan` and
 `invT_gen_logi_fixed_multiv_unconstrained.stan` were archived in 2026-09 to
 `archive/submission-2026-04/stan_models/`. The marginal models below supersede
-them and are much faster, so `model_type="ensemble"` now raises `ValueError`
-rather than selecting a file that no longer ships. To run one anyway, pass its
-absolute path as `stan_model_path`.
+them and are much faster; `model_type` is no longer a public parameter, so
+passing `model_type="ensemble"` now raises `TypeError` (unexpected keyword
+argument) rather than selecting a file that no longer ships. To run one
+anyway, pass its absolute path as `stan_model_path`.
 
 ### Direct/Marginal Models (Recommended)
-Each ships in two prior-constraint variants — `unconstrained` (the default) and
-`truncated_prior`. `hard_constraint` was archived alongside the ensemble models:
-its `<lower=min_temp>` Jacobian biases P50 warm for polar sites, which is the
-bias `truncated_prior` was written to remove (see
-[why the plug-in P50 differs](why_plugin_p50_differs.md)). `reparameterized` and
-`soft` appeared in old type hints but were never implemented.
+Only the `unconstrained` prior-constraint variant ships now. `truncated_prior`
+and `hard_constraint` were both archived: `hard_constraint`'s `<lower=min_temp>`
+Jacobian biases P50 warm for polar sites, which is the bias `truncated_prior`
+was written to remove (see
+[why the plug-in P50 differs](why_plugin_p50_differs.md)), but `truncated_prior`
+itself was archived too and `constraint_type` is no longer a public parameter.
+`reparameterized` and `soft` appeared in old type hints but were never
+implemented.
 - `invT_gen_logi_fixed_univ_marginal_unconstrained.stan` - No predictors
 - `invT_gen_logi_fixed_multiv_marginal_unconstrained.stan` - With predictors (additive arm)
 - `invT_gen_logi_fixed_multiv_marginal_unconstrained_t0shift.stan` - With
@@ -184,16 +187,10 @@ results = predict_T_from_proxyObs(
     # ... other parameters
 )
 
-# Ensemble models (legacy/research use)
-results = predict_T_from_proxyObs(
-    scaledRI=data,
-    prior_mu_t=30.0,
-    prior_sigma_t=6.0,
-    fwd_posterior_name="my_forward_model",
-    model_type="ensemble",     # Traditional approach
-    # threads_per_chain not supported with ensemble
-    # ... other parameters
-)
+# Ensemble models (legacy/research use) — archived; model_type is no longer
+# a public parameter at all, so this raises TypeError, not ValueError. To
+# run one of the archived ensemble models, pass its absolute path as
+# stan_model_path instead.
 ```
 
 ## Output Filenames

@@ -238,7 +238,21 @@ class BAYSPARCalibration:
 
 
 class CalibrationRegistry:
-    """Registry of available TEX86-SST calibrations."""
+    """Named library of the published classical TEX86-SST calibrations.
+
+    Holds the non-Bayesian regressions -- the linear, inverse, log10 and ln
+    forms from Schouten, Kim, Liu, O'Brien and Low -- as
+    :class:`TEX86Calibration` objects, so a comparison figure can name a
+    calibration instead of repeating its slope and intercept.
+
+    TEXAS's own calibration is not in here: it is a posterior, not a pair of
+    coefficients. Use :func:`TEXAS.predict.predict_T_from_proxyObs` for that.
+
+    Class methods:
+        ``get(name)`` returns one calibration; ``list_calibrations()`` lists
+        the registered names; ``add_calibration(name, slope, intercept,
+        transform)`` registers another for the current session.
+    """
     
     # Define all available calibrations
     _CALIBRATIONS = {

@@ -156,3 +156,101 @@ $$
 ---
 
 *This workflow ensures that your TEXAS-PSM reconstructions combine the best available culture, modern, and paleo data in a statistically rigorous way, providing more reliable temperature estimates for past climates.*
+
+## 8. Reconstructing temperature from proxy observations
+
+`TEXAS.predict_T_from_proxyObs` is the inverse half of the API. Three things
+about how it is called are worth stating once here rather than in its
+docstring.
+
+**The default calibration.** Omitting `fwd_posterior` selects the full
+multivariate T₀-shift calibration for the requested target — `tx.GHEB.sst.sri03.G23-N1p0`
+for SST, `tx.GHEB.thm.sri03.G23-N1p0` for thermoT — both of which ship inside
+the wheel, so a reconstruction needs no download. That is the default because
+the non-thermal effects are present in the core-top data whether or not a user
+models them: a temperature-only calibration does not remove them, it absorbs
+them into the thermal parameters.
+
+**Which NO₃ value reaches Stan.** The resolution order is
+`site_lat`/`site_lon` lookup → an explicit `no3=` → `predictors["no3"]` →
+zeros. Passing `site_lat` and `site_lon` interpolates the WOA23-derived
+`ocean_prop_ds` field at those coordinates (downloaded and cached from Zenodo
+on first use if `no3_dataset` is not supplied). A scalar `no3` broadcasts to
+every observation; a value above `no3_cutoff` — e.g. `no3=10.0` when the
+cutoff is 1.0 — puts every observation outside the correction window, which is
+how the correction is switched off.
+
+Supplying *nothing* is not the same as switching it off. An absent predictor
+sent to Stan is treated as zero, which asserts a ratio or concentration of
+zero and biases the reconstruction; the `predictor_missing` quality flag
+(below) catches this for both predictors, and a missing GDGT-2/3 ratio or
+missing NO₃ also raises a `UserWarning` at call time. Use a temperature-only calibration
+(`tx.GHPU.sst.sri03.p0`) if that is what you want.
+
+**`temptype` is a label, not a modelling choice.** The reconstruction follows
+whatever calibration it was given: the target is read from the posterior's own
+attrs, and `temptype` only names the metadata and the output files. It matters
+in exactly one case — when `fwd_posterior` is omitted, it chooses which default
+calibration is used. A `temptype` that contradicts the calibration raises a
+warning and is otherwise ignored.
+
+**Per-observation flags.** `result["flags"]` is a DataFrame with one row per
+observation, marking rows the reconstruction cannot support — above all, proxy
+values outside the calibration curve's attainable range, which return a
+converged, plausible-looking temperature that is really a readout of the prior.
+The published calibration-domain ellipse is two-dimensional (TEX₈₆ × Scaled RI),
+so the `outside_domain` check needs `tex86=` as well; without it that column is
+`pd.NA` rather than passing. Computing the flags costs no extra sampling. Filter
+with:
+
+```python
+result = predict_T_from_proxyObs(ri, prior_mu_t=25, prior_sigma_t=10)
+keep = ~result["flags"]["any_flag"].to_numpy(dtype=bool)
+sst = result["p50"][keep]
+```
+
+## 9. Choosing the NO₃ cutoff
+
+The NO₃ correction applies only below a cutoff concentration: above it, sites
+are nutrient-replete and the term is switched off. `find_optimal_no3_threshold`
+and `find_optimal_no3_threshold_nointercept` search that cutoff against the
+residuals of a temperature-only fit. They differ in the criterion, and the
+choice is a modelling decision, not a tuning detail.
+
+**`find_optimal_no3_threshold`** takes the cutoff that maximises the *negative*
+correlation between log(NO₃) and the residuals.
+
+- `score_method="spearmanr"` (default) uses the most negative Spearman ρ. It is
+  rank-based, robust to outliers, and is what the prior publication used.
+- `score_method="R_squared"` uses the highest no-intercept R² of
+  `RI_res = β·log(NO₃)` with β < 0. It penalises poor fit rather than rank order
+  alone, and corresponds to a model whose correction is zero at NO₃ = 1.
+
+**`find_optimal_no3_threshold_nointercept`** instead maximises the no-intercept
+R² of `RI_res = β·x`, matching the `_no3ratio` Stan formulation where the
+correction is exactly zero *at the threshold*.
+
+- `no3_mode="log10ratio"` (default) sets `x = log10(NO₃ / threshold)` — zero at
+  the boundary.
+- `no3_mode="log10"` sets `x = log10(NO₃)` — zero at NO₃ = 1 regardless of the
+  threshold, which is the original Stan form. Use it to compare the
+  no-intercept criterion against the Spearman one while holding the predictor
+  fixed.
+
+**Asymmetric weighting** (`weight_method`, R²-based criteria only; Spearman
+takes no sample weights) exists because the two corrections have opposite
+expected signs.
+
+- `"uniform"` — ordinary least squares.
+- `"positive_residuals"` — `wᵢ = max(resᵢ, ε)`. For the **NO₃** correction:
+  nutrient-limited sites are expected to have positive RI residuals (observed
+  RI above what temperature alone predicts).
+- `"negative_residuals"` — `wᵢ = max(−resᵢ, ε)`. For the **G₂/₃** correction:
+  deep-water, high-G₂/₃ sites are expected to have negative RI residuals.
+
+In both weighted cases `ε = 0.001 · std(residuals)`, so off-direction points are
+suppressed but never fully excluded — which keeps the fit stable when nearly all
+residuals fall on one side.
+
+`log_method` (`"log10"` or `"ln"`) sets the log base. `"log10"` matches the Stan
+models; `"ln"` is there to test sensitivity to that choice.

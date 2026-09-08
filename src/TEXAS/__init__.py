@@ -19,10 +19,7 @@ from .stan.io import (
     save_invT_posterior,
     list_posteriors,
 )
-from .stan.invT import (
-    get_invT_posterior,
-    predict_temperature_from_proxyObs,
-)
+from .stan.invT import get_invT_posterior
 from .predict import predict_proxy_from_T, predict_T_from_proxyObs, compute_scaledRI
 from .quality import compute_quality_flags
 
@@ -37,7 +34,6 @@ from .models.logistics import (
     logistic,
     logistic_fixed_upper,
     inverse_logistic_fixed_upper,
-    generalized_logistic,
     generalized_logistic_fixed_upper,
 )
 from .models.multivariate import (
@@ -78,7 +74,6 @@ from .utils.regrid import regrid_curvilinear_to_latlon
 # ─── Plotting / dataviz ─────────────────────────────────────────────────
 from .plotting import (
     compute_sample_range,
-    compute_density_based_range,
     compute_suffix_specific_range,
     compute_dataset_specific_range,
     plot_prior_distributions,
@@ -97,7 +92,6 @@ __all__ = [
     "save_invT_posterior",
     # stan — inverse temperature
     "get_invT_posterior",
-    "predict_temperature_from_proxyObs",
     # high-level prediction API
     "predict_proxy_from_T",
     "predict_T_from_proxyObs",
@@ -110,7 +104,6 @@ __all__ = [
     "logistic",
     "logistic_fixed_upper",
     "inverse_logistic_fixed_upper",
-    "generalized_logistic",
     "generalized_logistic_fixed_upper",
     "generalized_logistic_fixed_upper_multivariate",
     "inverse_generalized_logistic_fixed_upper_multivariate",
@@ -147,7 +140,6 @@ __all__ = [
     "regrid_curvilinear_to_latlon",
     # plotting
     "compute_sample_range",
-    "compute_density_based_range",
     "compute_suffix_specific_range",
     "compute_dataset_specific_range",
     "plot_prior_distributions",

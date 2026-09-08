@@ -4,9 +4,25 @@ import numpy as np
 import pandas as pd
 
 def summarize_sampler_diagnostics(fit) -> dict:
-    """
-    Extract ``divergent__``, ``treedepth__``, E-BFMI, R_hat, and ESS_bulk
-    from a CmdStanPy fit and return them as stan_diag_* attrs.
+    """Summarise a CmdStanPy fit's convergence diagnostics as ``stan_diag_*`` attrs.
+
+    Reads divergent transitions, max-treedepth saturation, E-BFMI, R-hat and
+    bulk ESS, and grades each against a fixed threshold, so a run can be
+    accepted or rejected without re-opening the raw fit. Attached to every
+    posterior by ``StanSampler.sample`` and ``get_invT_posterior``.
+
+    Args:
+        fit: A ``CmdStanMCMC`` object, as returned by ``CmdStanModel.sample``.
+
+    Returns:
+        A flat dict of ``stan_diag_*`` entries: the counts and percentages
+        (``n_divergent``, ``pct_divergent``, ``n_max_treedepth``,
+        ``pct_max_treedepth``, ``min_ebfmi``, ``max_rhat``, ``n_high_rhat``,
+        ``min_ess_bulk``), a ``*_status`` of ``"PASS"``, ``"FAIL"`` or
+        ``"UNKNOWN"`` beside each, and ``stan_diag_overall_status``. The
+        thresholds are: divergences < 1%, max-treedepth < 5%, R-hat < 1.01,
+        bulk ESS > 100. All values are plain Python scalars, so the dict can be
+        written straight into NetCDF attrs.
     """
     diag = {}
     # 1) method variables
@@ -70,8 +86,17 @@ def summarize_sampler_diagnostics(fit) -> dict:
 
 
 def create_summary_table(datasets: list) -> pd.DataFrame:
-    """
-    Build a DataFrame summarizing the stan_diag_* attrs from each xarray.Dataset.
+    """Tabulate the ``stan_diag_*`` attrs of several posteriors, one row each.
+
+    Args:
+        datasets: Posteriors carrying ``stan_diag_*`` attrs, as written by
+            :func:`summarize_sampler_diagnostics`.
+
+    Returns:
+        A DataFrame with a ``model`` column (each dataset's ``filename`` attr,
+        or ``"unknown"``) plus one column per diagnostic, with the
+        ``stan_diag_`` prefix stripped. A dataset missing a diagnostic gets
+        ``NaN`` in that column rather than being dropped.
     """
     rows = []
     for ds in datasets:

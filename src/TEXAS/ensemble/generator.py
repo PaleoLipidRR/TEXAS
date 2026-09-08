@@ -5,6 +5,7 @@ import xarray as xr
 from typing import Callable, List, Optional, Dict, Any, Literal
 
 from .detection import detect_model_and_params
+from ..constants import GDGT23RATIO_KEY, NO3_KEY
 
 def generate_ensemble(
     post_ds: xr.Dataset,
@@ -25,9 +26,42 @@ def generate_ensemble(
     use_gdgt23ratio_flag: Optional[bool] = None,
     use_no3_flag: Optional[bool] = None,
 ) -> Dict[str, np.ndarray]:
-    """
-    Generate an ensemble of curves from a posterior dataset using any model function.
-    (Exact port of your old stan_utils.py version.)
+    """Evaluate a calibration curve at *x_vals* for *n_draws* posterior samples.
+
+    Each draw takes every parameter from one posterior index, so parameter
+    correlations are preserved rather than being averaged away. Prefer
+    :func:`generate_ensemble_auto`, which infers *model_function*,
+    *param_names* and *suffix* from the posterior instead of asking for them.
+
+    Args:
+        post_ds: Forward calibration posterior.
+        model_function: Curve to evaluate, called as
+            ``model_function(x, **params)``.
+        x_vals: Temperatures (degC) at which to evaluate the curve.
+        param_names: Unsuffixed parameter names, e.g. ``["t0", "b", "k", "v"]``.
+        suffix: Parameter suffix, e.g. ``"crtp"``. Required -- nothing is
+            inferred here.
+        n_draws: Draws to sample; clipped to what the posterior holds.
+        seed: Seed for draw selection, for a reproducible ensemble.
+        percentiles: Percentiles to return, on a 0-100 scale.
+        return_full_ensemble: Also return the draw matrix and run metadata.
+        gdgt23ratio: GDGT-2/3 values, applied when the posterior uses them.
+        no3: Nitrate values (umol/L), applied when the posterior uses them.
+        no3_cutoff: Override the cutoff carried in the posterior attrs.
+        is_multivariate: Override the multivariate decision from the detector.
+        use_gdgt23ratio_flag: Override the posterior's ``use_gdgt23ratio`` attr.
+        use_no3_flag: Override the posterior's ``use_no3`` attr.
+
+    Returns:
+        A dict with ``"x_vals"`` and one ``f"p{q:g}"`` key per requested
+        percentile (5 -> ``"p5"``, 2.5 -> ``"p2.5"``), plus ``"ensemble"``
+        (shape ``(n_draws, len(x_vals))``) and ``"metadata"`` when
+        *return_full_ensemble* is True.
+
+    Raises:
+        ValueError: if *suffix* is None, if a required parameter is missing from
+            the posterior, or if two percentiles collapse onto one key.
+        RuntimeError: if *model_function* raises on any draw.
     """
     if seed is not None:
         np.random.seed(seed)
@@ -59,13 +93,13 @@ def generate_ensemble(
     # STRICT attr-based flags only (no data_vars scanning)
     if use_gdgt23ratio_flag is None:
         # apply only if the attr exists and is truthy
-        use_gdgt = bool(post_ds.attrs.get("use_gdgt23ratio", False))
+        use_gdgt = bool(post_ds.attrs.get(f"use_{GDGT23RATIO_KEY}", False))
     else:
         use_gdgt = bool(use_gdgt23ratio_flag)
 
     if use_no3_flag is None:
         # apply only if the attr exists and is truthy
-        use_no3 = bool(post_ds.attrs.get("use_no3", False))
+        use_no3 = bool(post_ds.attrs.get(f"use_{NO3_KEY}", False))
     else:
         use_no3 = bool(use_no3_flag)
 
@@ -94,9 +128,9 @@ def generate_ensemble(
         params = {p: getattr(row, f"{p}_{suffix}") for p in param_names}
         if is_multi:
             if use_gdgt and gdgt23ratio is not None:
-                params["gdgt23ratio"] = gdgt23ratio
+                params[GDGT23RATIO_KEY] = gdgt23ratio
             if use_no3 and no3 is not None:
-                params["no3"] = no3
+                params[NO3_KEY] = no3
                 params["no3_cutoff"] = eff_no3_cutoff
         try:
             ensemble[i] = model_function(x, **params)

@@ -3,10 +3,11 @@ The two invT save paths must produce the same filename.
 
 ``save_invT_posterior`` is the public, __all__-exported entry point;
 ``_save_invT_posterior`` is what the production path
-(``predict_temperature_from_proxyObs``) calls. They used to build filenames by
-different rules, and the public one omitted ``proxy_name`` entirely -- so a
-scaledRI and a TEX86 reconstruction of one site resolved to a single path and,
-with the default overwrite=True, the second silently destroyed the first.
+(``predict_T_from_proxyObs`` -> ``get_invT_posterior``) calls. They used to
+build filenames by different rules, and the public one omitted ``proxy_name``
+entirely -- so a scaledRI and a TEX86 reconstruction of one site resolved to a
+single path and, with the default overwrite=True, the second silently
+destroyed the first.
 
 Tracked as Phase 5B in RESUME.md.
 """
@@ -108,3 +109,36 @@ def test_missing_no3_cutoff_is_an_error():
     del ds.attrs["no3_cutoff"]
     with pytest.raises(ValueError):
         _generate_filename_base(ds.attrs, None)
+
+
+def test_predict_T_from_proxyObs_writes_the_npz_itself(tmp_path, monkeypatch):
+    """The .npz save moved out of the deleted wrapper and into predict.py."""
+    import numpy as np
+    import TEXAS.predict as predict_mod
+
+    reduced = xr.Dataset(
+        {"t_est": (("quantile", "obs_idx"),
+                   np.tile(np.array([[5.0], [20.0], [35.0]]), (1, 3)))},
+        coords={"quantile": [0.05, 0.5, 0.95], "obs_idx": np.arange(3)},
+    )
+    reduced.attrs.update({
+        "SiteName": "TestSite", "temptype": "SST", "proxy_name": "scaledRI_cren3",
+        "stan_model_name": "invT_gen_logi_fixed_univ_marginal_unconstrained",
+        "use_gdgt23ratio": 0, "use_no3": 0, "no3_cutoff": 0.0,
+        "model_type": "direct",
+    })
+    monkeypatch.setattr(predict_mod, "_get_invT_posterior",
+                        lambda *a, **k: reduced)
+
+    fwd = xr.Dataset(attrs={"use_gdgt23ratio": 0, "use_no3": 0,
+                            "proxy_name": "scaledRI_cren3", "temptype": "SST"})
+    result = predict_mod.predict_T_from_proxyObs(
+        np.array([0.3, 0.4, 0.5]), prior_mu_t=20.0, prior_sigma_t=10.0,
+        fwd_posterior=fwd, flags=False, save_results=True, cache_dir=tmp_path,
+    )
+
+    assert set(["p5", "p50", "p95"]).issubset(result)
+    np.testing.assert_allclose(result["p50"], 20.0)
+    written = list(tmp_path.glob("*.npz"))
+    assert len(written) == 1, f"expected one .npz, got {written}"
+    assert "TestSite" in written[0].name

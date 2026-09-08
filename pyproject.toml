@@ -133,9 +133,26 @@ line-length = 100
 extend-exclude = ["notebooks", "streamlit_app", "docs", "docker", "build", "dist", "archive"]
 
 [tool.ruff.lint]
-# Start conservative: pyflakes (F) catches the real issues — undefined names,
-# unused imports/variables — without a noisy whole-repo style reformat.
-select = ["F"]
+# pyflakes (F) catches the real issues — undefined names, unused
+# imports/variables — without a noisy whole-repo style reformat.
+#
+# D1 (pydocstyle: missing docstring) is scoped to src/TEXAS by the per-file
+# ignores below. The package is the published API and is held to one
+# documentation standard; tests and scripts are not, and turning D1 on there
+# would add 216 violations that say nothing about the API.
+select = ["F", "D1"]
+
+# D100/D104 (module and package headers) would be a separate 23-file sweep and
+# are deliberately deferred — see spec §9.6, which scopes the pass to public
+# functions, classes and methods. D105/D107 (magic methods, __init__) are
+# excluded by that spec directly: an __init__ is documented in its class
+# docstring's Args block.
+ignore = ["D100", "D104", "D105", "D107"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]   # re-exports (TEXAS.build_fwd_data etc.) are intentional
+"tests/**" = ["D1"]        # D1 is for the published API, not the test suite
+"scripts/**" = ["D1"]      # nor for the one-off analysis runners

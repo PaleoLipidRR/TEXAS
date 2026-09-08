@@ -15,7 +15,6 @@ import gc
 import tracemalloc
 import multiprocessing
 from datetime import datetime
-import json
 
 def get_cpu_info():
     """Get detailed CPU information"""
@@ -73,7 +72,18 @@ def get_python_env():
     }
 
 def get_container_info():
-    """Check if running in container"""
+    """Detect whether this process is running inside a container.
+
+    Reads ``/proc/1/cgroup`` for Docker and LXC markers, then checks the
+    ``CODESPACES`` and ``REMOTE_CONTAINERS`` environment variables. Never
+    raises: an unreadable or absent cgroup file is reported as "not a
+    container", because this only annotates a benchmark, it never gates one.
+
+    Returns:
+        ``{"in_container": bool, "container_type": str | None}``, where the
+        type is one of ``"Docker"``, ``"LXC"``, ``"GitHub Codespaces"``,
+        ``"VS Code Dev Container"`` or ``None``.
+    """
     container_info = {
         "in_container": False,
         "container_type": None
@@ -158,7 +168,19 @@ def generate_system_summary():
     return summary
 
 def print_summary(summary):
-    """Print formatted summary"""
+    """Print a system-configuration summary to stdout.
+
+    The rendering half of :func:`get_system_summary`; call
+    :func:`print_system_summary` to collect and print in one step.
+
+    Args:
+        summary: A dict as returned by ``generate_system_summary()``. It must
+            carry the ``timestamp``, ``system``, ``cpu``, ``memory``, ``disk``,
+            ``python``, ``container``, ``stan`` and ``packages`` keys.
+
+    Returns:
+        None. The report goes to stdout.
+    """
     print("=" * 60)
     print("SYSTEM CONFIGURATION SUMMARY")
     print("=" * 60)
@@ -243,22 +265,6 @@ def print_system_summary():
     print_summary(summary)
     return summary
 
-def save_system_summary(filepath=None):
-    """Save system summary to JSON file"""
-    from datetime import datetime
-
-    summary = generate_system_summary()
-
-    if filepath is None:
-        filepath = f"system_config_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-
-    with open(filepath, 'w', encoding="utf-8") as f:
-        json.dump(summary, f, indent=2)
-
-    print(f"✅ System configuration saved to: {filepath}")
-    return filepath
-
-
 def suggest_stan_sampling_kwargs() -> dict:
     """
     Return optimized Stan sampling kwargs for the current machine.
@@ -312,7 +318,20 @@ def simple_memory_check():
 
 
 def get_system_info():
-    """Collect system information dict for embedding in posterior metadata."""
+    """Collect the machine facts stamped onto every posterior's attrs.
+
+    Deliberately cheap and non-raising: a psutil call that fails on a given
+    platform yields ``None`` for that field rather than aborting a sampling
+    run that may already be hours in.
+
+    Returns:
+        A dict of plain scalars -- ``system``, ``platform``, ``architecture``,
+        ``processor``, ``hostname``, ``cpu_count_logical``,
+        ``cpu_count_physical``, ``cpu_freq_current_mhz``, ``cpu_freq_max_mhz``,
+        ``total_memory_gb``, ``available_memory_gb``, ``python_version``,
+        ``python_implementation`` and ``run_timestamp`` (ISO 8601). Any field
+        that could not be read is ``None``.
+    """
     try:
         cpu_freq = psutil.cpu_freq()
         cpu_freq_current = cpu_freq.current if cpu_freq else None

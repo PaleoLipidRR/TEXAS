@@ -120,23 +120,6 @@ def find_cmdstan(min_version: str = "2.23.0") -> Path:
         "  Diagnose : texas-doctor  (or TEXAS.doctor())"
     )
 
-def get_repo_root(target_dir_name: str = "TEXAS") -> Path | None:
-    cwd = Path.cwd()
-    try:
-        top = subprocess.check_output(
-            ["git","rev-parse","--show-toplevel"], cwd=str(cwd)
-        ).decode().strip()
-        return Path(top)
-    except Exception:
-        pass
-    for parent in [cwd, *cwd.parents]:
-        if parent.name == target_dir_name:
-            return parent
-        cand = parent/target_dir_name
-        if cand.is_dir():
-            return cand
-    return None
-
 def get_project_root() -> Path:
     """Top-level repo folder (contains .git or pyproject.toml).
 

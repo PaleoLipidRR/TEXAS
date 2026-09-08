@@ -86,7 +86,6 @@ __all__ = [
     "PROJECT",
     "encode_compset",
     "decode_compset",
-    "describe_compset",
     "case_from_attrs",
     "run_from_attrs",
     "parse_case",
@@ -94,7 +93,6 @@ __all__ = [
     "inv_relpath",
     "legacy_fwd_name",
     "legacy_invT_name",
-    "default_version",
     "resolve_posterior_path",
     "is_case_id",
     "encode_predictors",
@@ -221,16 +219,6 @@ _CASE_RE = re.compile(
 )
 
 
-def default_version() -> str:
-    """``v`` + the package version with separators dropped: 0.2.6 -> ``v026``."""
-    try:
-        from .. import __version__ as v
-    except Exception:  # pragma: no cover - package metadata unavailable
-        return "v000"
-    parts = re.findall(r"\d+", str(v))[:3]
-    return "v" + "".join(parts) if parts else "v000"
-
-
 # ---------------------------------------------------------------------------
 # Compset encoding
 # ---------------------------------------------------------------------------
@@ -303,13 +291,6 @@ def decode_compset(code: str) -> Dict[str, str]:
             raise ValueError(f"Unknown {axis} code {char!r} in compset {code!r}")
     return {"curve": _CURVE_LABEL[c], "training_set": _TRAIN_LABEL[t],
             "estimator": _EST_LABEL[e], "structure": _STRUCT_LABEL[s]}
-
-
-def describe_compset(code: str) -> str:
-    """One-line human-readable expansion, for logs and figure captions."""
-    d = decode_compset(code)
-    return (f"{code}: {d['curve']}, {d['training_set']}, "
-            f"{d['estimator']}, {d['structure']}")
 
 
 # ---------------------------------------------------------------------------
@@ -481,13 +462,35 @@ class CaseName:
     # -- convenience ------------------------------------------------------
     @property
     def temptype_full(self) -> str:
+        """The temperature target spelled out: ``sst`` -> ``SST``, ``thm`` -> ``thermoT``."""
         return TEMPTYPE_DECODE.get(self.temptype, self.temptype)
 
     @property
     def proxy_full(self) -> str:
+        """The proxy spelled out: ``sri03`` -> ``scaledRI_cren3``."""
         return PROXY_DECODE.get(self.proxy, self.proxy)
 
     def describe(self) -> str:
+        """Expand this case id into a human-readable block.
+
+        Decodes each of the four compset characters and both predictor tokens
+        into words, so a case id in a log line, a figure caption or a Zenodo
+        file listing can be read without the codebook.
+
+        Returns:
+            A multi-line string: the canonical id on the first line, then one
+            indented ``key : value`` line per axis (curve, training set,
+            estimator, structure, target, proxy, predictors).
+
+        Raises:
+            ValueError: if the compset or predictor token cannot be decoded.
+
+        Example:
+            ``CaseName("GHEB", "sst", "sri03", "G23-N1p0").describe()`` starts
+            ``tx.GHEB.sst.sri03.G23-N1p0`` and then lists ``curve``,
+            ``training set``, ``estimator``, ``structure``, ``target``,
+            ``proxy`` and ``predictors``.
+        """
         d = decode_compset(self.compset)
         p = decode_predictors(self.predictors)
         preds = []
@@ -863,7 +866,33 @@ def legacy_invT_name(
     no3_cutoff: Optional[float] = None,
     tags: Optional[Union[str, Sequence[str]]] = None,
 ) -> str:
-    """The historical invT name, matching ``io._generate_filename_base``."""
+    """Rebuild the pre-case-id inverse filename, byte-for-byte.
+
+    Matches what ``io._generate_filename_base`` writes, so ``load_posterior``
+    can still find reconstructions saved before the CESM-style case layout
+    arrived (2026-08-09). Nothing new is named this way.
+
+    Args:
+        site: Site label; slugified into the name.
+        stan_model_name: Inverse model name. ``_marginal`` is stripped out of
+            the name, and its presence chooses the trailing ``direct`` vs
+            ``ensemble`` token.
+        temptype: Temperature target, e.g. ``"SST"`` or ``"thermoT"``.
+        proxy_name: Proxy label. Omitted from the name when empty or
+            ``"unknown"``, which is what the oldest files did.
+        use_gdgt23ratio: Whether the calibration carried the G23 correction.
+        use_no3: Whether it carried the NO3 correction.
+        no3_cutoff: The cutoff in umol/L. Required when *use_no3* is True.
+        tags: Extra tag(s), joined with ``+`` and inserted before the kind
+            token.
+
+    Returns:
+        The legacy stem, without the ``.nc`` extension.
+
+    Raises:
+        ValueError: if *use_no3* is True and *no3_cutoff* is None -- writing a
+            name with no cutoff would misrecord which run it was.
+    """
     clean = stan_model_name.replace("_marginal", "")
     kind = "direct" if "marginal" in stan_model_name else "ensemble"
 

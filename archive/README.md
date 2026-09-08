@@ -6,7 +6,7 @@ answers a different question about the project's history.
 | directory | what it holds | why it is not in the live tree |
 |---|---|---|
 | `submission-2026-04/` | The initial submission: 8 Stan models, 2 SI notebooks, 32 figures | Superseded by the revision. The additive (beta-on-mu) model here is still the revision's comparison arm, and its posteriors remain downloadable, so the code that reads them is live even though the model is not. |
-| `pre-submission/stan_models/` | 15 development models, plus 4 pre-annotated variants under `pre_annotated/` | Never submitted. They declare parameters the project has since dropped (`Q_crtp`, `sigma_scaledRI_crtp`), which is why `tests/test_streamlit_params.py` deliberately does not scan this tree. |
+| `pre-submission/stan_models/` | 15 development models, plus 4 pre-annotated variants under `pre_annotated/` | Never submitted. They declare parameters the project has since dropped (`Q_crtp`, `sigma_scaledRI_crtp`), which is why `tests/test_streamlit_params.py` deliberately does not scan this tree. Also holds `invT_gen_logi_fixed_{univ,multiv}_marginal_truncated_prior.stan`, archived 2026-09-07 when `constraint_type` and `min_temp` left the public API. `STAN_ARCHIVE_DIR` does not cover this directory, so these resolve by absolute path only — which is all that is needed, since nothing can select them by stem any more. |
 | `exploratory/gridT-inversion/` | The gridded-inversion explainer, its two write-ups and six figures | Explored during the revision and left out of the resubmission. Provenance, not reviewer evidence. |
 | `presentations/` | `IMOG_presentation.ipynb` | A conference talk, not part of the analysis. |
 

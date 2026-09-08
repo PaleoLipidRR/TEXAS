@@ -308,3 +308,72 @@ class TestRecommendedScreeningCriterion:
         """Why the manual variant is the recommended one, not detect_outliers."""
         det = MahalanobisOutlierDetector(["TEX86", "scaledRI_cren3"], confidence=0.90)
         assert det.detect_outliers(self.PROBE)["warm corner"]
+
+
+class TestPlotColumnsMapping:
+    """The columns= parameter on the five plot methods.
+
+    Each plot method relabels the caller's DataFrame to the detector's
+    logical feature names via _resolve_features(df, columns=columns, ...)
+    before doing anything else. If columns= were dropped from a method's
+    signature, calling it against a physically-named DataFrame would raise
+    either TypeError (unexpected keyword) or KeyError (logical columns
+    missing) instead of succeeding.
+    """
+
+    MAPPING = {"TEX86": "TEX86_best", "scaledRI_cren3": "ScaledRI03_best"}
+
+    def teardown_method(self, _method):
+        import matplotlib.pyplot as plt
+        plt.close("all")
+
+    def _fitted_detector(self):
+        train = _training_df()
+        return MahalanobisOutlierDetector(
+            ["TEX86", "scaledRI_cren3"], confidence=0.9
+        ).fit(train)
+
+    def _physical_df(self):
+        train = _training_df()
+        return train.rename(columns=self.MAPPING)
+
+    def test_plot_decision_boundary_columns_mapping(self):
+        det = self._fitted_detector()
+        phys = self._physical_df()
+        with pytest.raises(KeyError):
+            det.plot_decision_boundary(phys)
+        ax, ellipse = det.plot_decision_boundary(phys, columns=self.MAPPING)
+        assert ax is not None and ellipse is not None
+
+    def test_plot_multiple_ellipses_columns_mapping(self):
+        det = self._fitted_detector()
+        phys = self._physical_df()
+        with pytest.raises(KeyError):
+            det.plot_multiple_ellipses(phys)
+        ax = det.plot_multiple_ellipses(phys, columns=self.MAPPING)
+        assert ax is not None
+
+    def test_plot_pairwise_ellipses_columns_mapping(self):
+        det = self._fitted_detector()
+        phys = self._physical_df()
+        with pytest.raises(KeyError):
+            det.plot_pairwise_ellipses(phys)
+        fig, axs = det.plot_pairwise_ellipses(phys, columns=self.MAPPING)
+        assert fig is not None and len(axs) >= 1
+
+    def test_plot_pca_projection_columns_mapping(self):
+        pytest.importorskip("sklearn")
+        det = self._fitted_detector()
+        phys = self._physical_df()
+        with pytest.raises(KeyError):
+            det.plot_pca_projection(phys)
+        ax, pca = det.plot_pca_projection(phys, columns=self.MAPPING)
+        assert ax is not None and pca is not None
+
+    def test_plot_corner_columns_mapping(self):
+        det = self._fitted_detector()
+        phys = self._physical_df()
+        with pytest.raises(KeyError):
+            det.plot_corner(phys)
+        fig, axs = det.plot_corner(phys, columns=self.MAPPING)
+        assert fig is not None and axs is not None

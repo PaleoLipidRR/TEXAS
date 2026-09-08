@@ -133,3 +133,40 @@ Marginalization trades a slightly more complex likelihood calculation for a **ma
 - But computationally, the marginalized model is leaner, faster, and more robust.
 
 This is why the new inverse TEXAS marginal models are now the recommended default.
+
+## 7. The deterministic point inverse, and when not to use it
+
+`TEXAS.inverse_generalized_logistic_fixed_upper_multivariate` inverts the
+forward curve for a **single** parameter set. It is not a reconstruction.
+
+The two non-thermal corrections are additive and independent of temperature, so
+the inversion subtracts them off and then inverts the thermal curve
+analytically:
+
+```
+y_thermal = y − β_G23·gdgt23ratio − β_NO3·log10(no3)   [only where 0 < no3 < no3_cutoff]
+x         = t0 − ln(((1 − b) / (y_thermal − b))**v − 1) / k
+```
+
+`gdgt23ratio` and `no3` may each be a scalar (applied to every sample) or an
+array broadcastable to `y`. They are additive predictors that must be supplied,
+not quantities solved for: pass the same covariate values that applied to those
+observations.
+
+The thermal inverse is defined only for `b < y_thermal < 1`. Values outside that
+range are physically unreachable for the given parameters and come back as
+`np.nan`, with a single `RuntimeWarning` if any occur. That NaN is the honest
+answer, and it is the first reason this function is not a reconstruction: the
+Bayesian path returns a posterior in exactly that region, driven by the prior,
+which is informative in a way a NaN is not.
+
+The second reason is uncertainty. Feeding this function the posterior means of
+`t0`, `k`, `b` and `v` gives one number per sample and no interval — and the
+plug-in estimate is not the median of the marginal posterior, because the
+inverse is non-linear. For an uncertainty-aware reconstruction that marginalises
+over the full forward posterior, use `TEXAS.predict_T_from_proxyObs`, which is
+the Stan path this page describes.
+
+Use the point inverse for what it is good at: drawing a single calibration curve
+on a figure, checking an algebraic identity against the forward function, or
+sanity-checking one parameter set by hand.

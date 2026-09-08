@@ -7,7 +7,7 @@ import warnings
 from pathlib import Path
 import numpy as np
 import xarray as xr
-from typing import Tuple, Optional, Dict, Any, Literal
+from typing import Tuple, Optional, Dict, Any
 from cmdstanpy import CmdStanModel, CmdStanMCMC
 import cmdstanpy as _cmdstanpy
 
@@ -69,7 +69,18 @@ def _attach_sampler_config(ds: xr.Dataset, fit: CmdStanMCMC) -> xr.Dataset:
 
 
 class StanSampler:
-    """A simple wrapper for running the Stan sampler."""
+    """Run a compiled Stan model and return its draws as an ``xr.Dataset``.
+
+    Wraps ``CmdStanModel.sample`` with the parts every TEXAS run needs: run
+    metadata and prior strings attached to the result, convergence diagnostics
+    summarised into ``stan_diag_*`` attrs, and one automatic
+    recompile-and-retry when a cached binary turns out to be from another
+    environment (CmdStan exit code 127, typically a TBB mismatch).
+
+    Args:
+        compiler: The :class:`~TEXAS.stan.compiler.StanCompiler` used to
+            resolve model names to files and to build them.
+    """
     def __init__(self, compiler: StanCompiler):
         self.compiler = compiler
         
@@ -209,74 +220,46 @@ def get_posterior(
     max_treedepth: Optional[int] = None,
     **kwargs
 ) -> Tuple[xr.Dataset, str]:
-    """
-    Run forward calibration Stan sampling and return the posterior.
+    """Run a forward calibration in Stan and return the posterior.
 
-    Wraps ``StanSampler`` with automatic predictor detection, CPU
-    configuration, and metadata attachment.  The returned dataset can be
-    passed directly to ``predict_proxy_from_T`` or saved with
-    ``save_posterior``.
+    Wraps :class:`StanSampler` with automatic predictor detection, CPU
+    configuration and metadata attachment. The returned dataset can be passed
+    straight to ``predict_proxy_from_T`` or saved with ``save_posterior``.
 
-    Parameters
-    ----------
-    data : dict
-        Stan data dict built by ``build_fwd_data()``.  Predictor flags
-        (``use_gdgt23ratio``, ``use_no3``) are auto-detected from the
-        arrays present; you do not need to set them manually.
-    stan_file : str
-        Stan model name (without ``.stan``), e.g.
-        ``"gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv"``.
-    temptype : str
-        Temperature variable type, e.g. ``"SST"`` or ``"thermoT"``.
-        Stored in the posterior metadata.
-    proxy_name : str
-        Proxy type, e.g. ``"scaledRI_cren3"``.  Required — stored in
-        the ``.nc`` attrs and validated downstream when the posterior is
-        used for inverse reconstruction.
-    iter_warmup : int, optional
-        HMC warmup iterations per chain (default: CmdStan default, 1000).
-    iter_sampling : int, optional
-        Post-warmup sampling iterations per chain (default: 1000).
-    chains : int, optional
-        Number of independent chains (default: 4).
-    parallel_chains : int, optional
-        Chains to run simultaneously (auto-detected from CPU count).
-    threads_per_chain : int, optional
-        Threads per chain for ``reduce_sum`` models (auto-enabled for
-        models whose filename contains ``reduce_sum``).
-    adapt_delta : float, optional
-        Target acceptance rate (default: 0.8).  Increase toward 0.99 to
-        reduce divergences at the cost of more leapfrog steps.
-    max_treedepth : int, optional
-        Maximum tree depth for HMC (default: 10).
-    **kwargs
-        Additional keyword arguments forwarded to ``CmdStanModel.sample``.
+    Args:
+        data: Stan data dict from ``build_fwd_data()``. The ``use_*`` predictor
+            flags are auto-detected from the arrays present.
+        stan_file: Model name without ``.stan``, e.g.
+            ``"gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv"``.
+        temptype: Temperature target, e.g. ``"SST"`` or ``"thermoT"``.
+        proxy_name: Proxy label, e.g. ``"scaledRI_cren3"``. Required: it is
+            written to the attrs and validated when the posterior is later used
+            for a reconstruction.
+        iter_warmup: Warmup iterations per chain. Default 1000 (CmdStan's).
+        iter_sampling: Sampling iterations per chain. Default 1000.
+        threads_per_chain: Threads per chain for ``reduce_sum`` models;
+            auto-enabled for models whose filename contains ``reduce_sum``.
+        chains: Independent chains. Default 4.
+        parallel_chains: Chains run at once. Auto-detected from the CPU count.
+        adapt_delta: Target acceptance rate. Default 0.8; raise toward 0.99 to
+            trade leapfrog steps for fewer divergences.
+        max_treedepth: HMC maximum tree depth. Default 10.
+        **kwargs: Forwarded to ``CmdStanModel.sample``.
 
-    Returns
-    -------
-    posterior : xr.Dataset
-        Forward calibration posterior with parameter draws and metadata
-        attrs (model name, temptype, proxy_name, priors, diagnostics).
-    diagnostics : str
-        Human-readable sampler diagnostic summary (divergences, R-hat,
-        ESS, E-BFMI).
+    Returns:
+        ``(posterior, diagnostics)``: an ``xr.Dataset`` of draws with metadata
+        attrs (model name, temptype, proxy_name, priors, ``stan_diag_*``), and
+        the human-readable sampler diagnostic summary.
 
-    Raises
-    ------
-    ValueError
-        If active predictors are present but a univariate model is
-        requested, or if an EIV model is requested without ``R2_thermal``.
+    Raises:
+        ValueError: if active predictors are present but a univariate model was
+            requested, or if an EIV model is requested without ``R2_thermal``.
 
-    Examples
-    --------
-    >>> data = build_fwd_data(t_crtp=..., proxy_crtp=..., ...)
-    >>> posterior, diag = get_posterior(
-    ...     data,
-    ...     stan_file="gen_logi_fixed_hier_crtp_univ_priorApprox",
-    ...     temptype="SST",
-    ...     proxy_name="scaledRI_cren3",
-    ... )
-    >>> save_posterior(posterior)
+    Example:
+        >>> posterior, diag = get_posterior(
+        ...     data, stan_file="gen_logi_fixed_hier_crtp_univ_priorApprox",
+        ...     temptype="SST", proxy_name="scaledRI_cren3")
+        >>> save_posterior(posterior)
     """
     rng_seed = kwargs.setdefault("seed", 42)
     np.random.seed(rng_seed)
@@ -400,31 +383,25 @@ def _ensure_lenN_vector(enh: dict, key: str, N: int, fill: float = 0.0):
 
 
 def auto_detect_predictors(data: dict) -> dict:
-    """Smart predictor detection with data validation (suffix-prioritized)."""
-    enhanced = data.copy()
+    """Fill in the ``use_*`` flags and predictor arrays a Stan model expects.
 
-    # 0) Translate legacy scaledRI_* keys → proxyObs_* for backward compatibility
-    _key_map = {
-        "scaledRI_":    "proxyObs_",
-        "mu_scaledRI_": "mu_proxyObs_",
-        "sigma_scaledRI_": "sigma_proxyObs_",
-    }
-    _renames = {}
-    for key in list(enhanced.keys()):
-        for old_prefix, new_prefix in _key_map.items():
-            if key.startswith(old_prefix):
-                _renames[key] = new_prefix + key[len(old_prefix):]
-                break
-    if _renames:
-        import warnings
-        warnings.warn(
-            f"Data dict contains legacy key(s) {list(_renames)}. "
-            "Rename scaledRI_* → proxyObs_* (e.g. scaledRI_cul → proxyObs_cul). "
-            "Auto-translating for now.",
-            DeprecationWarning, stacklevel=3,
-        )
-        for old, new in _renames.items():
-            enhanced[new] = enhanced.pop(old)
+    Picks the observation-count key by the suffix priority order crtp >
+    culmesocore > meso > cul, then sets ``use_gdgt23ratio`` and ``use_no3``
+    from whether a non-empty, not-all-NaN, not-all-zero array is present for
+    each. Flags the caller set by hand are respected; the arrays are still
+    coerced to the chosen group's length either way, so a model that declares
+    a predictor vector always receives one.
+
+    Args:
+        data: A Stan data dict, normally from ``build_fwd_data()``.
+
+    Returns:
+        A copy of *data* with ``use_gdgt23ratio`` and ``use_no3`` set as
+        integers, any missing ``gdgt23ratio_<suffix>`` / ``no3_<suffix>``
+        vector filled with zeros of the right length, and ``no3_cutoff``
+        defaulted to 1.0 if absent. The input dict is not mutated.
+    """
+    enhanced = data.copy()
 
     # 1) pick the N_* key using priority order
     N_keys = [k for k in enhanced.keys() if k.startswith("N_")]
@@ -509,28 +486,36 @@ def sampler_invT_posterior(
     stan_file: str,
     site_name: Optional[str] = None,
     temptype: Optional[str] = None,
-    model_type: Literal["direct", "ensemble"] = "direct",  # ADD: if this function uses model selection
     **kwargs
 ) -> Tuple[xr.Dataset, str]:
-    """
-    Sample from invT posterior with updated model_type parameter.
-    
+    """Compile and run an inverse-T Stan model on a prepared data dict.
+
+    The raw sampling layer: it does no data assembly and no model selection.
+    Use :func:`TEXAS.stan.invT.get_invT_posterior` for those, or
+    :func:`TEXAS.predict.predict_T_from_proxyObs` for the full inverse.
+
     Args:
-        model_type: 
-            - "direct": Use direct sampling models (more efficient, supports threading)
-            - "ensemble": Use traditional ensemble models
+        data: Stan data dict, e.g. from ``build_invT_inputData()``.
+        stan_file: Inverse model name, with or without ``.stan``.
+        site_name: Label written into the posterior metadata.
+        temptype: Temperature target label, e.g. ``"SST"``.
+        **kwargs: Forwarded to ``CmdStanModel.sample``. ``seed`` defaults to 42
+            and also seeds numpy, so a run is reproducible end to end.
+
+    Returns:
+        ``(posterior, diagnostics)``: the draws as an ``xr.Dataset`` with
+        metadata attrs, and the human-readable diagnostic summary.
     """
     rng_seed = kwargs.setdefault("seed", 42)
     np.random.seed(rng_seed)
-    
+
     compiler = StanCompiler()
     sampler = StanSampler(compiler)
-    
+
     return sampler.sample(
         data=data,
         stan_file=stan_file,
         site_name=site_name,
         temptype=temptype,
-        model_type=model_type,  # PASS: if needed
         **kwargs
     )

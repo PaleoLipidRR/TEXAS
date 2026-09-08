@@ -36,17 +36,18 @@ Example
 from __future__ import annotations
 
 import warnings
-from typing import Dict, List, Literal, Optional, Sequence, Union, Any
+from typing import Dict, List, Optional, Sequence, Union, Any
 from pathlib import Path
 
 import numpy as np
 import xarray as xr
 
-from .stan.io import load_posterior
+from .stan.io import load_posterior, _generate_filename_base, _save_invT_results
 from .ensemble.generator import generate_ensemble_auto
-from .stan.invT import predict_temperature_from_proxyObs as _predict_temperature_from_proxyObs
+from .stan.invT import get_invT_posterior as _get_invT_posterior
+from .stan.invT import _percentiles_from_posterior
 from .data.builder import InvTConfig
-from .constants import DEFAULT_FWD_POSTERIOR
+from .constants import DEFAULT_FWD_POSTERIOR, GDGT23RATIO_KEY, NO3_KEY
 from .data.ocean_lookup import lookup_no3_from_woa, get_ocean_prop_ds
 
 
@@ -162,8 +163,6 @@ def predict_T_from_proxyObs(
     iter_warmup: int = 500,
     iter_sampling: int = 1000,
     seed: int = 42,
-    constraint_type: Literal["unconstrained", "truncated_prior"] = "unconstrained",
-    min_temp: Optional[float] = None,
     threads_per_chain: Optional[int] = None,
     save_results: bool = False,
     save_draws: bool = False,
@@ -171,187 +170,51 @@ def predict_T_from_proxyObs(
     cache_dir: Optional[Union[str, Path]] = None,
     fwd_cache_dir: Optional[Union[str, Path]] = None,
 ) -> Dict[str, Any]:
-    """
-    Inverse reconstruction: scaled RI → temperature percentiles.
+    """Reconstruct temperature from proxy observations, with full uncertainty.
 
-    Runs the TEXAS-Bay inverse Stan model to infer paleotemperature from
-    observed scaled Ring Index values.  Marginalises over M draws from
-    the forward calibration posterior to propagate calibration uncertainty
-    into the temperature reconstruction.  Corresponds to Section 8
-    (Applications to Paleothermometry) of the manuscript.
+    Marginalises over M draws from the forward calibration posterior so
+    calibration uncertainty propagates into the reconstruction. See
+    :doc:`PSM` Section 8 for the default calibration, the NO3 resolution
+    order, and what the quality flags mean.
 
-    Parameters
-    ----------
-    proxyObs : array-like, shape (N,)
-        Observed proxy values from downcore or coretop samples (e.g. scaledRI, TEX86).
-    prior_mu_t : float or array-like, shape (N,)
-        Prior mean temperature (°C).  Scalar applies the same prior to all
-        N observations; array sets a site-specific prior per sample.
-    prior_sigma_t : float
-        Prior temperature uncertainty (°C).  Use a diffuse value (e.g. 10)
-        when little prior information is available.
-    fwd_posterior : str or xr.Dataset, optional
-        The forward calibration posterior.  When omitted, the full multivariate
-        T0-shift calibration for *temptype* is used --- ``tx.GHEB.sst.sri03.G23-N1p0``
-        for SST, ``tx.GHEB.thm.sri03.G23-N1p0`` for thermoT --- which ships with
-        the package, so no download is required.  Accepts either:
+    Args:
+        proxyObs: Observed proxy values, shape (N,) -- scaledRI, TEX86, ...
+        prior_mu_t: Prior mean temperature (degC), scalar or shape (N,).
+        prior_sigma_t: Prior temperature SD (degC); use ~10 when little is known.
+        fwd_posterior: Forward calibration: a case id/legacy name (str,
+            loaded from the cache) or a pre-loaded ``xr.Dataset``. Omit for
+            the bundled default calibration for *temptype*.
+        proxy_name: Proxy label. Inherited from the calibration when omitted.
+        temptype: ``"SST"`` or ``"thermoT"``; a label, except it picks the
+            default calibration when *fwd_posterior* is omitted.
+        site_name: Label for the metadata and output filenames.
+        predictors: Non-thermal predictor arrays, e.g. ``{"gdgt23ratio": ..., "no3": ...}``.
+        no3: Nitrate (umol/L), scalar or shape (N,). Overrides *predictors*.
+        gdgt23ratio: GDGT-2/3 ratio, scalar or shape (N,). Overrides *predictors*.
+        site_lat: Latitude(s) for a WOA23 NO3 lookup. Needs *site_lon*.
+        site_lon: Longitude(s) for the same lookup.
+        no3_dataset: WOA23-derived ``(lat, lon)`` field; downloaded from
+            Zenodo and cached if omitted.
+        no3_dataset_var: Variable to read from it. Default ``"no3_sf2tc_avg"``.
+        flags: Attach ``result["flags"]``, one row per observation. Default True.
+        tex86: TEX86 for the same samples; only ``outside_domain`` uses it.
+        config: :class:`InvTConfig` controlling M, the seed and the suffix.
+        chains: MCMC chains. Default 4.
+        iter_warmup: Warmup iterations per chain. Default 500.
+        iter_sampling: Sampling iterations per chain. Default 1000.
+        seed: Random seed. Default 42.
+        threads_per_chain: Within-chain parallelism for ``reduce_sum`` models.
+        save_results: Write the quantile ``.nc`` and results ``.npz``.
+        save_draws: Also write the raw draws as ``{base}_draws.nc``.
+        filename_tag: Extra tag(s) for the output filenames.
+        cache_dir: Where outputs are written. Defaults to the invT cache.
+        fwd_cache_dir: Where a named *fwd_posterior* is read from; a
+            different directory from *cache_dir*.
 
-        - **str** — name of the saved posterior (without ``.nc`` extension)
-          in the posterior cache directory.  The file is loaded automatically.
-        - **xr.Dataset** — a pre-loaded posterior Dataset.  No file I/O or
-          Zenodo download is attempted; pass this when the cache is unavailable
-          (e.g. Google Colab with a Drive-mounted ``.nc``)::
-
-              ds = xr.open_dataset("my_drive/posterior.nc")
-              result = predict_T_from_proxyObs(..., fwd_posterior=ds)
-
-    temptype : str, optional
-        Temperature type: ``"SST"`` or ``"thermoT"``.  **Optional.**  It does
-        not change the reconstruction, which follows the calibration supplied:
-        when *fwd_posterior* is given, the target is read from that posterior's
-        own attributes and *temptype* only labels the metadata and output
-        filenames (a value conflicting with the calibration raises a warning).
-        It matters in exactly one case --- when *fwd_posterior* is omitted, it
-        chooses which default calibration is used, SST or thermoT.
-    site_name : str, optional
-        Label attached to result metadata and output filenames.
-    predictors : dict, optional
-        Non-thermal predictor arrays for the N observations, e.g.
-        ``{"gdgt23ratio": array, "no3": array}``.  Must be provided when
-        the forward posterior was fitted with the multivariate model.
-        Overridden by *no3* / *gdgt23ratio* shorthands when both are given.
-    no3 : float or array-like, optional
-        Nitrate concentration (µmol/L) for the N observations.
-
-        - **Array** (length N): per-observation values — use modern WOA23
-          values extracted at each sample's location (``ocean_prop_ds``
-          column ``"no3_sf2tc_avg"``).
-        - **Scalar**: broadcast to all N observations.  Pass a value above
-          ``no3_cutoff`` (e.g. ``no3=10.0`` when ``no3_cutoff=1.0``) to
-          effectively disable the NO₃ correction — all observations fall
-          outside the correction window.
-
-        Overrides any ``"no3"`` key in *predictors*.  Ignored when
-        *site_lat* / *site_lon* / *no3_dataset* are also provided (the
-        lookup result takes priority).
-    gdgt23ratio : float or array-like, optional
-        GDGT-2/GDGT-3 ratio for the N observations.  Scalar or array,
-        same broadcast rules as *no3*.  Overrides any ``"gdgt23ratio"``
-        key in *predictors*.
-    site_lat : float or array-like, optional
-        Decimal latitude(s) of the study site(s).  Scalar for a single
-        drill core; array of length N to assign a distinct location to
-        each observation.  Requires *site_lon* and *no3_dataset*.
-    site_lon : float or array-like, optional
-        Decimal longitude(s) of the study site(s).  Same shape rules as
-        *site_lat*.
-    no3_dataset : xr.Dataset, optional
-        WOA23-derived dataset with a ``(lat, lon)`` grid, typically the
-        ``ocean_prop_ds`` generated in the preprocessing notebook
-        (SI_code0).  Must contain *no3_dataset_var*.  When provided
-        together with *site_lat* / *site_lon*, the NO₃ value at those
-        coordinates is looked up via bilinear interpolation and used as
-        the predictor.  The result is a scalar (one drill site) or array
-        (per-obs sites), and is broadcast to all N observations when scalar.
-        **Optional** when *site_lat* / *site_lon* are given: if omitted, the
-        ~20 MB ``ocean_prop_ds`` field is downloaded from Zenodo and cached
-        automatically (see :func:`TEXAS.data.ocean_lookup.get_ocean_prop_ds`
-        / :func:`TEXAS.download_ocean_properties`) — pass it explicitly to
-        avoid the download (e.g. a pre-loaded copy, or a Colab session with
-        no persistent cache).
-    no3_dataset_var : str
-        Variable name to extract from *no3_dataset*.
-        Default ``"no3_sf2tc_avg"``.
-    flags : bool, default True
-        Attach ``result["flags"]``, a DataFrame with one row per observation
-        marking rows the reconstruction cannot support --- most importantly
-        proxy values outside the calibration curve's attainable range, which
-        return a converged, plausible-looking temperature that is really a
-        readout of the prior.  See :func:`TEXAS.quality.compute_quality_flags`.
-        Computing them costs no extra sampling.
-    tex86 : float or array-like, optional
-        TEX86 for the same samples, used only by the flags.  The published
-        calibration-domain ellipse is two-dimensional (TEX86 × Scaled RI), so
-        the ``outside_domain`` check needs both; without this it is reported
-        as ``pd.NA`` rather than as passing.
-    config : InvTConfig, optional
-        Controls number of forward-posterior draws (M), seed, etc.
-        Defaults to ``InvTConfig()``, which auto-selects
-        M = min(500, max(100, available_draws // 4)) — M=500 for a typical
-        4-chain/1000-sample forward posterior (4000 draws), the value the
-        published paleo reconstructions use.
-    chains : int
-        Number of MCMC chains.  Default 4.
-    iter_warmup : int
-        Warmup iterations per chain.  Default 500.
-    iter_sampling : int
-        Sampling iterations per chain.  Default 1000.
-    seed : int
-        Random seed.  Default 42.
-    constraint_type : str
-        Temperature constraint applied in the Stan model:
-
-        - ``"unconstrained"`` (default): no lower bound; P5 can be unrealistically cold
-          near the calibration curve's lower asymptote.
-        - ``"truncated_prior"`` (recommended when ``min_temp`` is set): proper
-          truncated Normal prior via inverse-CDF reparameterization — P50 is
-          data-driven and P5 is bounded at ``min_temp`` without warm bias.
-
-        ``"hard_constraint"`` (hard lower bound via ``<lower=min_temp>``) was
-        withdrawn in 2026-09: its Jacobian biases P50 warm for polar sites, which
-        is what ``"truncated_prior"`` was written to fix.  The model is kept in
-        ``archive/submission-2026-04/stan_models/`` and can be run by passing its
-        absolute path as ``stan_model_path``.  ``"reparameterized"`` and
-        ``"soft"`` were listed in earlier type hints but never existed as Stan
-        models; all three now raise :class:`ValueError` instead of failing later
-        with a missing-file error.
-    min_temp : float, optional
-        Lower temperature bound (°C). Required for ``"truncated_prior"``.
-        Typically −1.8 (seawater freezing point).
-        When provided without an explicit ``constraint_type``, automatically
-        selects ``"truncated_prior"``.
-    threads_per_chain : int, optional
-        Enable within-chain parallelism via Stan's ``reduce_sum``.
-    save_results : bool
-        If True, save the quantile posterior ``.nc`` and results ``.npz`` to the
-        invT cache directory.
-    save_draws : bool
-        If True, also save the raw posterior draws (pre-quantile) as a separate
-        ``{base}_draws.nc`` file in the invT cache directory.  The file contains
-        ``t_est`` with dims ``(chain, draw, obs_idx)`` and is suitable for
-        kernel-density plots or custom quantile calculation.  Default False.
-    filename_tag : str or list of str, optional
-        Extra tag(s) appended to the output filename.
-    cache_dir : Path or str, optional
-        Directory where ``.nc`` and ``.npz`` files are written when
-        *save_results* or *save_draws* is True.  Defaults to the standard
-        invT cache (``~/.texas/cache/TEXAS_invT_posterior_cache/`` for pip
-        installs, or ``data/cache/TEXAS_invT_posterior_cache/`` in the repo).
-    fwd_cache_dir : Path or str, optional
-        Directory to resolve *fwd_posterior* in when it is given as a name
-        string.  Defaults to the standard forward posterior cache.  This is a
-        separate directory from *cache_dir*, which controls only where results
-        are written.
-
-    Returns
-    -------
-    dict with keys:
-        ``"proxyObs"``   — input proxy array
-        ``"proxy_name"`` — proxy type label (e.g. ``"scaledRI"``, ``"TEX86"``)
-        ``"p5"``         — 5th percentile temperature (°C), shape (N,)
-        ``"p50"``        — median temperature (°C), shape (N,)
-        ``"p95"``        — 95th percentile temperature (°C), shape (N,)
-        ``"metadata"``   — run metadata dict (model name, attrs, etc.)
-        ``"flags"``      — DataFrame of per-observation quality flags, N rows,
-                           when *flags* is True
-
-    Examples
-    --------
-    Keep only the observations the calibration can actually support::
-
-        >>> result = predict_T_from_proxyObs(ri, prior_mu_t=25, prior_sigma_t=10)
-        >>> keep = ~result["flags"]["any_flag"].to_numpy(dtype=bool)
-        >>> sst = result["p50"][keep]
+    Returns:
+        A dict with ``"proxyObs"``, ``"proxy_name"``, ``"metadata"``, one
+        ``"pN"`` array per posterior quantile (``"p5"``, ``"p50"``, ...),
+        and ``"flags"`` when *flags* is True.
     """
     # ── Default calibration ──────────────────────────────────────────────────
     # Omitting fwd_posterior selects the full multivariate T0-shift calibration
@@ -411,9 +274,9 @@ def predict_T_from_proxyObs(
         print(f"🌊 WOA23 NO₃ lookup: lat={_lat_repr}, lon={_lon_repr} → {_no3_repr} µmol/L")
 
     if no3 is not None:
-        predictors["no3"] = no3
+        predictors[NO3_KEY] = no3
     if gdgt23ratio is not None:
-        predictors["gdgt23ratio"] = gdgt23ratio
+        predictors[GDGT23RATIO_KEY] = gdgt23ratio
 
     # Warn if predictors are passed but the forward posterior doesn't use them
     _ds_for_check = _fwd_ds
@@ -424,7 +287,8 @@ def predict_T_from_proxyObs(
             pass
     if _ds_for_check is not None:
         _attrs = _ds_for_check.attrs
-        if predictors.get("gdgt23ratio") is not None and not _attrs.get("use_gdgt23ratio", False):
+        if (predictors.get(GDGT23RATIO_KEY) is not None
+                and not _attrs.get(f"use_{GDGT23RATIO_KEY}", False)):
             warnings.warn(
                 "gdgt23ratio was passed but the forward posterior has no GDGT-2/3 ratio "
                 "parameters (use_gdgt23ratio=False) — the predictor will be silently ignored. "
@@ -442,7 +306,8 @@ def predict_T_from_proxyObs(
                 f"say otherwise. Drop temptype= to take it from the calibration.",
                 UserWarning, stacklevel=2,
             )
-        if predictors.get("gdgt23ratio") is None and _attrs.get("use_gdgt23ratio", False):
+        if (predictors.get(GDGT23RATIO_KEY) is None
+                and _attrs.get(f"use_{GDGT23RATIO_KEY}", False)):
             warnings.warn(
                 "This calibration uses the GDGT-2/3 ratio, but none was supplied — "
                 "it will be treated as 0, which is not the same as switching the "
@@ -452,7 +317,8 @@ def predict_T_from_proxyObs(
                 "(e.g. 'tx.GHPU.sst.sri03.p0').",
                 UserWarning, stacklevel=2,
             )
-        if predictors.get("no3") is not None and not _attrs.get("use_no3", False):
+        if (predictors.get(NO3_KEY) is not None
+                and not _attrs.get(f"use_{NO3_KEY}", False)):
             warnings.warn(
                 "no3 was passed but the forward posterior has no NO₃ parameters "
                 "(use_no3=False) — the predictor will be silently ignored. "
@@ -460,32 +326,66 @@ def predict_T_from_proxyObs(
                 "(e.g. gen_logi_fixed_hier_crtp_multiv_priorApprox_*).",
                 UserWarning, stacklevel=2,
             )
+        if (predictors.get(NO3_KEY) is None
+                and _attrs.get(f"use_{NO3_KEY}", False)):
+            warnings.warn(
+                "This calibration uses the NO₃ correction, but none was supplied — "
+                "it will be treated as 0, which is not the same as switching the "
+                "correction off: it asserts a nitrate of zero and biases the "
+                "reconstruction by roughly beta_NO3 x (true no3) degC. "
+                "Pass no3= (or site_lat=/site_lon= for a WOA23 lookup), or use a "
+                "temperature-only calibration (e.g. 'tx.GHPU.sst.sri03.p0').",
+                UserWarning, stacklevel=2,
+            )
 
-    _result = _predict_temperature_from_proxyObs(
-        proxyObs=proxyObs,
-        prior_mu_t=prior_mu_t,
-        prior_sigma_t=prior_sigma_t,
+    post_ds = _get_invT_posterior(
+        proxyObs,
+        prior_mu_t,
+        prior_sigma_t,
+        proxy_name=proxy_name,
         fwd_posterior_name=_fwd_name,
         fwd_posterior=_fwd_ds,
         site_name=site_name,
         temptype=temptype,
         predictors=predictors,
         config=config,
-        chains=chains,
-        iter_warmup=iter_warmup,
-        iter_sampling=iter_sampling,
-        seed=seed,
         save_results=save_results,
         save_draws=save_draws,
         filename_tag=filename_tag,
         cache_dir=cache_dir,
-        fwd_cache_dir=fwd_cache_dir,
+        chains=chains,
+        iter_warmup=iter_warmup,
+        iter_sampling=iter_sampling,
+        seed=seed,
         threads_per_chain=threads_per_chain,
-        model_type="direct",
-        constraint_type=constraint_type,
-        min_temp=min_temp,
-        proxy_name=proxy_name,
+        fwd_cache_dir=fwd_cache_dir,
     )
+
+    # The metadata dict layer 2 used to build. The explicit keys come first so
+    # the posterior's own attrs win where they overlap -- the calibration is a
+    # better witness to its own name than the argument that requested it.
+    _metadata = {
+        "fwd_posterior_name": _fwd_name,
+        "filename_tag": filename_tag,
+        **post_ds.attrs,
+    }
+    _result: Dict[str, Any] = {
+        "proxyObs": np.asarray(proxyObs),
+        "proxy_name": post_ds.attrs.get("proxy_name"),
+        "metadata": _metadata,
+        **_percentiles_from_posterior(post_ds),
+    }
+
+    # The .npz is written before the flags are attached, exactly as it was when
+    # this lived in stan/invT.py: _save_invT_results np.asarray()s every value,
+    # and a DataFrame is not that.
+    if save_results:
+        _results_path = None
+        if cache_dir is not None:
+            _out = Path(cache_dir)
+            _out.mkdir(parents=True, exist_ok=True)
+            _results_path = _out / f"{_generate_filename_base(_metadata, filename_tag)}.npz"
+        _save_invT_results(_result, _results_path)
 
     # Per-observation quality flags. The warnings above describe the call; these
     # describe the rows, so a record can be filtered rather than accepted or

@@ -46,7 +46,7 @@ OUT = R.REPO / "data" / "revision1" / "groupA" / "param_sensitivity" / "invt_M_p
 
 
 def main() -> int:
-    from TEXAS.stan.invT import predict_temperature_from_proxyObs
+    from TEXAS.predict import predict_T_from_proxyObs
     from TEXAS.data.builder import InvTConfig
     from TEXAS.stan.io import load_posterior
 
@@ -67,15 +67,15 @@ def main() -> int:
             preds["no3"] = np.full(len(sub), NO3_OFF)
         for M in M_VALUES:
             t0 = time.time()
-            res = predict_temperature_from_proxyObs(
-                proxyObs=sub[col].to_numpy(float),
-                prior_mu_t=np.full(len(sub), mu), prior_sigma_t=PRIOR_SIGMA_T,
-                fwd_posterior_name=fwd, site_name=f"Mcheck_{rec.replace(' ','')}_M{M}",
+            res = predict_T_from_proxyObs(
+                sub[col].to_numpy(float),
+                np.full(len(sub), mu), PRIOR_SIGMA_T,
+                fwd_posterior=fwd, site_name=f"Mcheck_{rec.replace(' ','')}_M{M}",
                 temptype=R.TEMPTYPE, proxy_name=col, predictors=preds or None,
                 config=InvTConfig(n_draws=M), chains=CHAINS,
                 iter_warmup=ITER_WARMUP, iter_sampling=ITER_SAMPLING, seed=SEED,
-                constraint_type=R.INVT_CONSTRAINT,
                 save_results=False,          # a tuning run is not a reconstruction
+                flags=False,                 # and it does not read them
             )
             p16, p50, p84 = (np.asarray(res[k], float) for k in ("p16", "p50", "p84"))
             for i in range(len(sub)):

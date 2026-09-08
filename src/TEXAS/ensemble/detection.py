@@ -48,9 +48,30 @@ def choose_suffix(posterior_ds: xr.Dataset, param_basenames, preferred: str | No
     raise ValueError(f"No compatible suffix found. Available: {sorted(have)}")
 
 def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
-    """
-    Auto-detect which logistic model and parameters to use.
-    Uses a shared suffix priority via choose_suffix().
+    """Infer the curve, parameter names and predictor flags from a forward posterior.
+
+    Structure is read from the posterior's ``data_vars`` and attrs, never from
+    ``stan_model_name``, so a posterior that was renamed or downloaded from
+    Zenodo still dispatches correctly. The presence of a ``v`` parameter selects
+    the generalized curve over the plain logistic; ``gamma_G23*`` /
+    ``gamma_NO3*`` select the T0-shift parameterization over the additive one.
+
+    Args:
+        posterior_ds: A forward calibration posterior.
+        suffix: Force a parameter suffix (e.g. ``"crtp"``). ``None`` selects by
+            the priority order crtp > culmesocore > culmeso > meso > cul.
+
+    Returns:
+        A dict with ``model_function`` (the callable to evaluate),
+        ``param_names`` (unsuffixed names, in the order the callable wants
+        them), ``suffix``, ``is_multivariate``, ``use_gdgt23ratio``,
+        ``use_no3`` and ``no3_cutoff``.
+
+    Raises:
+        ValueError: if gamma coefficients are present without a ``v``
+            parameter. No shipped model produces that combination, and fitting
+            the additive form to gamma coefficients would be wrong by a whole
+            parameterization while still looking plausible.
     """
     vars_ = set(posterior_ds.data_vars)
     attrs_ = set(posterior_ds.attrs)

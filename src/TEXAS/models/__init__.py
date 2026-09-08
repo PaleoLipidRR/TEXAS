@@ -4,7 +4,6 @@ from .logistics import (
     logistic,
     logistic_fixed_upper,
     inverse_logistic_fixed_upper,
-    generalized_logistic,
     generalized_logistic_fixed_upper,
     inverse_generalized_logistic_fixed_upper
 )
@@ -25,7 +24,6 @@ __all__ = [
     "logistic",
     "logistic_fixed_upper",
     "inverse_logistic_fixed_upper",
-    "generalized_logistic",
     "generalized_logistic_fixed_upper",
     "inverse_generalized_logistic_fixed_upper",
     "generalized_logistic_fixed_upper_multivariate",

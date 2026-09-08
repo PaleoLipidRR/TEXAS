@@ -1,6 +1,6 @@
 # TEXAS/stan/invT.py
 
-from typing import Union, Optional, Dict, Sequence, List, Any, Literal
+from typing import Union, Optional, Dict, Sequence, List, Literal
 import numpy as np
 import xarray as xr
 from pathlib import Path
@@ -17,16 +17,18 @@ from TEXAS.stan.io import (
     load_posterior,
     _save_invT_posterior,
     _save_invT_draws,
-    _save_invT_results,
 )
 from TEXAS.utils.system_info import simple_memory_check, get_system_info, suggest_stan_sampling_kwargs
 from TEXAS.utils.paths import STAN_MODELS_DIR
 
 #: Constraint formulations that have a Stan model in ``src/TEXAS/stan_models/``.
-#: ``hard_constraint`` was archived (2026-09) to
-#: ``archive/submission-2026-04/stan_models/``; ``reparameterized`` and ``soft``
-#: appeared in the old type hints but were never implemented as Stan models.
-_SHIPPED_CONSTRAINTS = frozenset({"unconstrained", "truncated_prior"})
+#: Only the unconstrained inverse ships. ``truncated_prior`` was archived on
+#: 2026-09-07 to ``archive/pre-submission/stan_models/``, with the explainer
+#: page that was its only documentation; ``hard_constraint`` was archived in
+#: 2026-09 to ``archive/submission-2026-04/stan_models/``.
+#: ``reparameterized`` and ``soft`` appeared in old type hints but were never
+#: implemented as Stan models.
+_SHIPPED_CONSTRAINTS = frozenset({"unconstrained"})
 
 
 # Instantiate once
@@ -38,9 +40,8 @@ def _attach_invT_metadata(
     data: dict,
     stan_file: str,
     site_name: Optional[str] = None,
-    model_type: Optional[str] = None
 ) -> xr.Dataset:
-    """Attaches essential metadata to the posterior dataset."""
+    """Attach the metadata every saved reconstruction is identified by."""
     stan_model_name = stan_file.replace('.stan', '') if stan_file.endswith('.stan') else stan_file
     ds.attrs["stan_model_name"] = stan_model_name
     ds.attrs.setdefault("temptype", "unknown")
@@ -52,29 +53,24 @@ def _attach_invT_metadata(
         ds.attrs["no3_cutoff"] = 0.0
     ds.attrs["SiteName"] = site_name or "unknown_site"
 
-    if model_type:
-        ds.attrs["model_type"] = model_type
-    else:
-        ds.attrs["model_type"] = "direct" if "marginal" in stan_file else "ensemble"
-
+    ds.attrs["model_type"] = "direct" if "marginal" in stan_file else "ensemble"
     ds.attrs["use_marginal"] = 1 if ds.attrs["model_type"] == "direct" else 0
 
     return ds
 
 # -------------------------------------------------------------------------
 def get_invT_posterior(
-    proxyObs: Union[np.ndarray, List[float]] = None,
-    prior_mu_t: Union[np.ndarray, float] = None,
-    prior_sigma_t: float = None,
+    proxyObs: Union[np.ndarray, List[float]],
+    prior_mu_t: Union[np.ndarray, float],
+    prior_sigma_t: float,
     *,
     proxy_name: Optional[str] = None,
-    scaledRI: Union[np.ndarray, List[float]] = None,  # deprecated alias
     fwd_posterior_name: Optional[str] = None,
     site_name: Optional[str] = None,
     temptype: Optional[str] = None,
     predictors: Optional[Dict[str, np.ndarray]] = None,
     config: Optional[InvTConfig] = None,
-    save: bool = True,
+    save_results: bool = False,
     save_draws: bool = False,
     filename_tag: Optional[Union[str, Sequence[str]]] = None,
     cache_dir: Optional[Union[str, Path]] = None,
@@ -82,39 +78,63 @@ def get_invT_posterior(
     iter_warmup: Optional[int] = None,
     iter_sampling: Optional[int] = None,
     seed: Optional[int] = None,
-    use_opencl: bool = False,
     threads_per_chain: Optional[int] = None,
     stan_model_path: Optional[Union[str, Path]] = None,
-    model_type: Literal["direct"] = "direct",
-    constraint_type: Literal["unconstrained", "truncated_prior"] = "unconstrained",
-    min_temp: Optional[float] = None,
     fwd_posterior: Optional[xr.Dataset] = None,
     fwd_cache_dir: Optional[Union[str, Path]] = None,
 ) -> xr.Dataset:
-    """
-    Run the inverse-T model and return the posterior Dataset with metadata.
+    """Run the inverse-T model and return the quantile-reduced posterior.
+
+    Builds the Stan data from a forward calibration posterior, samples,
+    reduces the draws to quantiles, attaches run and provenance metadata, and
+    optionally writes the result. Most callers want
+    :func:`TEXAS.predict.predict_T_from_proxyObs`, which wraps this with the
+    default calibration, the NO3 lookup and the quality flags.
 
     Args:
-        model_type:
-            - "direct": Use direct sampling models (more efficient, supports threading)
-            - "ensemble": Use traditional ensemble models
-        cache_dir: Where invT RESULTS are written.
-        fwd_cache_dir: Where fwd_posterior_name is READ from. Defaults to the
-            standard forward posterior cache. The two are separate directories —
-            passing cache_dir does not change where the forward posterior is
-            looked up.
-    """
-    # Backward-compat: accept deprecated scaledRI kwarg
-    if scaledRI is not None and proxyObs is None:
-        import warnings
-        warnings.warn(
-            "The 'scaledRI' parameter is deprecated; use 'proxyObs' instead.",
-            DeprecationWarning, stacklevel=2,
-        )
-        proxyObs = scaledRI
-    if proxyObs is None:
-        raise TypeError("get_invT_posterior() missing required argument: 'proxyObs'")
+        proxyObs: Observed proxy values, shape (N,).
+        prior_mu_t: Prior mean temperature (degC), scalar or shape (N,).
+        prior_sigma_t: Prior temperature standard deviation (degC).
+        proxy_name: Proxy label. Inherited from the forward posterior when
+            omitted, and validated against it when given.
+        fwd_posterior_name: Case id or legacy name of the forward calibration,
+            read from *fwd_cache_dir*. Not needed when *fwd_posterior* is given.
+        site_name: Label for the metadata and the output filenames.
+        temptype: Temperature target label. Taken from the calibration when
+            omitted.
+        predictors: Non-thermal predictor arrays, e.g. ``{"no3": ...}``.
+        config: :class:`InvTConfig`, or a dict of its fields. Sampler-level
+            keys in that dict (``show_console``, ``show_progress``, ``refresh``,
+            ``sig_figs``, ``timeout``) are routed to cmdstanpy instead.
+        save_results: Write the quantile posterior as ``.nc``. Default False.
+        save_draws: Also write the raw pre-quantile draws as
+            ``{base}_draws.nc``.
+        filename_tag: Extra tag(s) for the output filenames.
+        cache_dir: Where results are **written**. Defaults to the invT cache.
+        chains: MCMC chains. Default 4.
+        iter_warmup: Warmup iterations per chain. Default 500.
+        iter_sampling: Sampling iterations per chain. Default 1000.
+        seed: Random seed.
+        threads_per_chain: Within-chain parallelism. Only applied to models
+            containing ``reduce_sum``; auto-sized from the CPU count if None.
+        stan_model_path: Run a specific ``.stan`` file, including an absolute
+            path into ``archive/submission-2026-04/stan_models/`` or
+            ``archive/pre-submission/stan_models/``.
+        fwd_posterior: A pre-loaded forward posterior. Skips all file I/O and
+            any Zenodo download.
+        fwd_cache_dir: Where *fwd_posterior_name* is **read** from. A different
+            directory from *cache_dir*: passing *cache_dir* does not change
+            where the calibration is looked up.
 
+    Returns:
+        The quantile-reduced posterior, with ``t_est`` over
+        ``(quantile, obs_idx)`` and the run metadata in ``.attrs``.
+
+    Raises:
+        ValueError: if the calibration uses a NO3 correction but no NO3 values
+            were supplied, or if *proxy_name* contradicts the calibration.
+        FileNotFoundError: if the selected inverse model does not ship.
+    """
     tracemalloc.start()
     start_time = time.perf_counter()
     system_info = get_system_info()
@@ -191,23 +211,6 @@ def get_invT_posterior(
 
     meta = sampler_kwargs.pop("_metadata", {})
 
-    # Auto-select truncated_prior when min_temp is given and the user hasn't
-    # explicitly chosen a different constraint type.
-    if min_temp is not None and constraint_type == "unconstrained":
-        constraint_type = "truncated_prior"
-        print(f"🔧 Auto-selected constraint_type='truncated_prior' (min_temp={min_temp})")
-
-    if constraint_type == "truncated_prior":
-        if min_temp is None:
-            raise ValueError(
-                f"min_temp must be provided when constraint_type='{constraint_type}'. "
-                "Example: min_temp=-1.8 for seawater freezing point."
-            )
-        data["min_temp"] = float(min_temp)
-    elif min_temp is not None:
-        print(f"⚠️  min_temp={min_temp} provided but constraint_type='{constraint_type}' — "
-              f"min_temp will be ignored.")
-
     # Select the Stan file first — threading is only useful for multiv models
     # that contain reduce_sum. Applying STAN_THREADS to univ models wastes cores.
     if stan_model_path:
@@ -220,16 +223,14 @@ def get_invT_posterior(
         stan_file = _select_invT_stan_file(
             data, predictor_usage,
             threads_per_chain=threads_per_chain,
-            model_type=model_type,
-            constraint_type=constraint_type,
             no3ratio=no3ratio,
             bounded=meta.get("is_bounded", False))
         if not (STAN_MODELS_DIR / stan_file).exists():
             available = sorted(q.name for q in STAN_MODELS_DIR.glob("invT_*.stan"))
             hint = ""
             if "t0shift" in stan_file:
-                hint = ("\nThe T0-shift arm ships only the multiv/unconstrained "
-                        "variant (use predictors + constraint_type='unconstrained').")
+                hint = ("\nThe T0-shift arm ships only the multiv variant "
+                        "(pass predictors).")
             raise FileNotFoundError(
                 f"Selected invT model '{stan_file}' is not available in "
                 f"{STAN_MODELS_DIR}.{hint}\n"
@@ -257,21 +258,15 @@ def get_invT_posterior(
         )
 
     cpp_options = {}
-    if use_opencl and threads_per_chain:
-        raise ValueError("Cannot use both OpenCL and threading simultaneously.")
-    if use_opencl:
-        cpp_options["STAN_OPENCL"] = True
-        sampler_kwargs["opencl_ids"] = [0, 0]
     if threads_per_chain and _uses_reduce_sum:
         cpp_options["STAN_THREADS"] = True
         sampler_kwargs["threads_per_chain"] = threads_per_chain
 
-    if model_type == "direct":
-        N = data["N"]
-        if threads_per_chain and _uses_reduce_sum:
-            data["grainsize"] = 1
-        else:
-            data["grainsize"] = max(1, min(10, N // 4))
+    N = data["N"]
+    if threads_per_chain and _uses_reduce_sum:
+        data["grainsize"] = 1
+    else:
+        data["grainsize"] = max(1, min(10, N // 4))
 
     print(f"| M={data.get('M')} N={data.get('N')}")
 
@@ -291,8 +286,6 @@ def get_invT_posterior(
 
     ds.attrs["threads_per_chain"] = threads_per_chain if threads_per_chain else 0
     ds.attrs["threading_enabled"] = bool(threads_per_chain)
-    ds.attrs["opencl_enabled"] = use_opencl
-    ds.attrs["model_type"] = model_type
 
     ds.attrs["memory_peak_mb"] = round(memory_info['peak_mb'], 2)
     ds.attrs["memory_final_mb"] = round(memory_info['current_mb'], 2)
@@ -310,7 +303,7 @@ def get_invT_posterior(
                      'total_memory_gb', 'python_version', 'run_timestamp']
     })
 
-    if model_type == "direct" and threads_per_chain:
+    if threads_per_chain:
         ds.attrs["grainsize"] = data.get("grainsize", 0)
 
     # Forward-calibration provenance, carried through from build_invT_inputData.
@@ -348,7 +341,7 @@ def get_invT_posterior(
     post_ds.attrs["runtime_seconds"] = runtime
     post_ds.attrs["runtime_minutes"] = runtime / 60.0
 
-    if save:
+    if save_results:
         _save_invT_posterior(
             posterior=post_ds,
             cache_dir=cache_dir,
@@ -363,7 +356,7 @@ def _select_invT_stan_file(
     predictor_usage: Dict[str, bool],
     threads_per_chain: Optional[int] = None,
     model_type: Literal["direct"] = "direct",
-    constraint_type: Literal["unconstrained", "truncated_prior"] = "unconstrained",
+    constraint_type: Literal["unconstrained"] = "unconstrained",
     no3ratio: bool = False,
     bounded: bool = False,
 ) -> str:
@@ -375,9 +368,12 @@ def _select_invT_stan_file(
             - "direct": marginal (direct-sampling) models.  The only mode that
               ships; the non-marginal "ensemble" models were archived to
               ``archive/submission-2026-04/stan_models/``.
-        constraint_type:
-            - "unconstrained": no temperature constraint (default)
-            - "truncated_prior": truncated Normal prior via inverse-CDF; P50 unbiased
+        constraint_type: Only ``"unconstrained"`` ships. No public entry
+            point exposes this parameter any more; it survives only as a
+            defensive check on this internal function, so an internal caller
+            that still passes a withdrawn value gets a ``ValueError`` naming
+            the archive here, rather than a missing-file error later at
+            compile time.
 
     Raises:
         ValueError: if ``model_type`` or ``constraint_type`` names a variant that
@@ -397,11 +393,11 @@ def _select_invT_stan_file(
     if constraint_type not in _SHIPPED_CONSTRAINTS:
         raise ValueError(
             f"constraint_type={constraint_type!r} is not supported. "
-            f"Valid values: {sorted(_SHIPPED_CONSTRAINTS)}. "
-            f"'hard_constraint' was archived to archive/submission-2026-04/stan_models/ "
-            f"(the truncated_prior formulation replaced it -- see "
-            f"docs/why_plugin_p50_differs.md); 'reparameterized' and 'soft' were "
-            f"never implemented as Stan models."
+            f"The only shipped inverse formulation is 'unconstrained'. "
+            f"'truncated_prior' was archived to archive/pre-submission/stan_models/ "
+            f"and 'hard_constraint' to archive/submission-2026-04/stan_models/; "
+            f"either can be run by passing its absolute path as stan_model_path. "
+            f"'reparameterized' and 'soft' were never implemented as Stan models."
         )
     multiv = any(predictor_usage.values())
 
@@ -453,112 +449,43 @@ def get_invT_post_quantiles(
     return xr.Dataset(processed_vars, attrs=posterior.attrs)
 
 # -------------------------------------------------------------------------
-def predict_temperature_from_proxyObs(
-    proxyObs: Union[np.ndarray, List[float]] = None,
-    prior_mu_t: Union[np.ndarray, float] = None,
-    prior_sigma_t: float = None,
-    fwd_posterior_name: Optional[str] = None,
-    site_name: Optional[str] = None,
-    temptype: Optional[str] = None,
-    predictors: Optional[Dict[str, np.ndarray]] = None,
-    config: Optional[InvTConfig] = None,
-    chains: int = 4,
-    iter_warmup: int = 500,
-    iter_sampling: int = 1000,
-    seed: Optional[int] = 42,
-    save_results: bool = False,
-    save_draws: bool = False,
-    filename_tag: Optional[Union[str, Sequence[str]]] = None,
-    results_path: Optional[Union[str, Path]] = None,
-    cache_dir: Optional[Union[str, Path]] = None,
-    use_opencl: bool = False,
-    threads_per_chain: Optional[int] = None,
-    stan_model_path: Optional[Union[str, Path]] = None,
-    model_type: Literal["direct"] = "direct",
-    constraint_type: Literal["unconstrained", "truncated_prior"] = "unconstrained",
-    min_temp: Optional[float] = None,
-    fwd_posterior: Optional[xr.Dataset] = None,
-    proxy_name: Optional[str] = None,
-    fwd_cache_dir: Optional[Union[str, Path]] = None,
-    *,
-    scaledRI: Union[np.ndarray, List[float]] = None,  # deprecated alias
-) -> Dict[str, Any]:
-    """
-    High-level wrapper to run the inverse model and get temperature percentiles.
+def _percentiles_from_posterior(posterior: xr.Dataset) -> Dict[str, np.ndarray]:
+    """Reduce a quantile-summarised invT posterior to a ``{"pN": array}`` dict.
+
+    The keys follow the quantiles the dataset actually carries. The eleven that
+    used to be hard-coded here silently dropped ``p40`` and ``p60`` -- both of
+    which :func:`get_invT_post_quantiles` computes by default -- and raised
+    ``KeyError`` on any run that asked for a different quantile set.
 
     Args:
-        model_type:
-            - "direct": Use direct sampling models (more efficient, supports threading)
-            - "ensemble": Use traditional ensemble models
+        posterior: Output of :func:`get_invT_post_quantiles`. Must carry
+            ``t_est`` with a ``quantile`` coordinate on the [0, 1] scale.
+
+    Returns:
+        One entry per quantile, keyed ``f"p{q * 100:g}"`` (0.05 -> ``"p5"``,
+        matching the key convention used by
+        :func:`TEXAS.ensemble.generator.generate_ensemble`), each a float
+        array of length N.
+
+    Raises:
+        KeyError: if *posterior* has no ``t_est`` variable.
+        ValueError: if two quantiles map to the same key, which would make
+            one silently overwrite the other.
     """
-    # Backward-compat: accept deprecated scaledRI kwarg
-    if scaledRI is not None and proxyObs is None:
-        import warnings
-        warnings.warn(
-            "The 'scaledRI' parameter is deprecated; use 'proxyObs' instead.",
-            DeprecationWarning, stacklevel=2,
+    if "t_est" not in posterior:
+        raise KeyError(
+            "invT posterior has no 't_est' variable; found "
+            f"{sorted(posterior.data_vars)}"
         )
-        proxyObs = scaledRI
-
-    post_ds = get_invT_posterior(
-        proxyObs=proxyObs,
-        prior_mu_t=prior_mu_t,
-        prior_sigma_t=prior_sigma_t,
-        fwd_posterior_name=fwd_posterior_name,
-        predictors=predictors,
-        config=config,
-        site_name=site_name,
-        temptype=temptype,
-        filename_tag=filename_tag,
-        chains=chains,
-        iter_warmup=iter_warmup,
-        iter_sampling=iter_sampling,
-        seed=seed,
-        save=save_results,
-        save_draws=save_draws,
-        cache_dir=cache_dir,
-        use_opencl=use_opencl,
-        threads_per_chain=threads_per_chain,
-        stan_model_path=stan_model_path,
-        model_type=model_type,
-        constraint_type=constraint_type,
-        min_temp=min_temp,
-        fwd_posterior=fwd_posterior,
-        proxy_name=proxy_name,
-        fwd_cache_dir=fwd_cache_dir,
-    )
-
-    metadata = {
-        "fwd_posterior_name": fwd_posterior_name,
-        "filename_tag": filename_tag,
-        **post_ds.attrs,
+    t_est = posterior["t_est"]
+    quantiles = [float(q) for q in np.atleast_1d(t_est["quantile"].values)]
+    keys = [f"p{q * 100:g}" for q in quantiles]
+    if len(set(keys)) != len(quantiles):
+        raise ValueError(
+            f"quantiles {quantiles} do not map to distinct keys {keys}; "
+            "two entries would overwrite each other"
+        )
+    return {
+        key: t_est.sel(quantile=q, drop=True).values
+        for key, q in zip(keys, quantiles)
     }
-
-    results = {
-        "proxyObs": np.asarray(proxyObs),
-        "proxy_name": post_ds.attrs.get("proxy_name"),
-        "metadata": metadata,
-        'p1': post_ds['t_est'].sel(quantile=0.01, drop=True).values,
-        'p5': post_ds['t_est'].sel(quantile=0.05, drop=True).values,
-        'p10': post_ds['t_est'].sel(quantile=0.1, drop=True).values,
-        'p16': post_ds['t_est'].sel(quantile=0.16, drop=True).values,
-        'p25': post_ds['t_est'].sel(quantile=0.25, drop=True).values,
-        'p50': post_ds['t_est'].sel(quantile=0.50, drop=True).values,
-        'p75': post_ds['t_est'].sel(quantile=0.75, drop=True).values,
-        'p84': post_ds['t_est'].sel(quantile=0.84, drop=True).values,
-        'p90': post_ds['t_est'].sel(quantile=0.90, drop=True).values,
-        'p95': post_ds['t_est'].sel(quantile=0.95, drop=True).values,
-        'p99': post_ds['t_est'].sel(quantile=0.99, drop=True).values,
-    }
-
-    if save_results:
-        if results_path is None and cache_dir is not None:
-            from pathlib import Path as _Path
-            from ..stan.io import _generate_filename_base
-            _out = _Path(cache_dir)
-            _out.mkdir(parents=True, exist_ok=True)
-            _base = _generate_filename_base(metadata, filename_tag)
-            results_path = _out / f"{_base}.npz"
-        _save_invT_results(results, results_path)
-
-    return results
