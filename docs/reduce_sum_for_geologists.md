@@ -276,4 +276,4 @@ the overhead of parallelism may outweigh the benefit.
 ---
 
 *See also: [Why marginalization improves inverse sampling](marginalization_explainer.md)
-and the [Stan models overview](stan_models_explanation_v2.md).*
+and the [Stan models overview](stan_models.md).*

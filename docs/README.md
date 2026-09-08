@@ -33,7 +33,7 @@ Then open `docs/_build/html/index.html` in your browser.
 | `callmap.md` | Interactive call map — embeds the generated `_static/callmap.html` |
 | `_scripts/` | Call-map generator (excluded from the build; see below) |
 | `tutorial/` | Interactive Jupyter Book tutorial (Modules 1–5) |
-| `PSM.md`, `stan_models_explanation_v2.md` | Explainers |
+| `PSM.md`, `model_validation.md`, `stan_models.md`, `sampler_budget.md` | Explainers |
 | `marginalization_explainer.md`, `reduce_sum_for_geologists.md` | Stan internals, plain-language |
 | `Prior_Choice_Normal_vs_Cauchy.md`, `ckdtree_nearest_ocean_explainer.md` | Method notes |
 
