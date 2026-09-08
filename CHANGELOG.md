@@ -33,3 +33,12 @@ acceptance.
 - `TEXAS.utils.system_info.save_system_summary()` — wrote the system summary to
   a timestamped JSON file. `get_system_summary()` and `print_system_summary()`
   are kept; both are used.
+
+### Changed
+
+- The public API is now guarded. `tests/test_public_api_docs.py` asserts that
+  every name in `TEXAS.__all__` resolves, is referenced by at least one test or
+  notebook code cell, and (for functions and classes) carries a docstring of at
+  least three lines. `ruff`'s `D1` missing-docstring rules are enabled for
+  `src/TEXAS`, with `D100`/`D104` (module and package headers) deferred and
+  `D105`/`D107` (magic methods, `__init__`) excluded.
