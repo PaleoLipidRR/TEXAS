@@ -167,13 +167,6 @@ INVERSE = {
             ],
         },
         {
-            "name": "Wrapper",
-            "note": "Thin layer that runs the model and turns draws into percentile summaries.",
-            "nodes": [
-                "stan.invT.predict_temperature_from_proxyObs",
-            ],
-        },
-        {
             "name": "Bridge forward -> inverse",
             "note": "This is where calibration uncertainty enters: M parameter sets are sampled "
                     "from the forward posterior and handed to Stan as data.",
@@ -247,8 +240,8 @@ EXPLAIN = {
         "The inverse half of the public API, and the function most paleo users actually call. It "
         "accepts proxy observations plus a temperature prior (mu, sigma), optionally resolves modern "
         "NO3 from site coordinates against a WOA23-derived dataset, and delegates to "
-        "predict_temperature_from_proxyObs. prior_sigma_t should be diffuse (~10 degC) when you have "
-        "little prior information.",
+        "get_invT_posterior, reducing its quantiles to a p5/p50/p95 dict. prior_sigma_t should be "
+        "diffuse (~10 degC) when you have little prior information.",
     "predict.compute_scaledRI":
         "Converts raw GDGT fractional abundances into the scaled Ring Index used as the proxy "
         "throughout. Kept variable-name-agnostic so it is not tied to one spreadsheet's column names.",
@@ -326,9 +319,6 @@ EXPLAIN = {
         "Reduces draws to percentiles, with shape handling that differs by model family: ensemble "
         "models give t_est as (chain, draw, N, M) and must also reduce over M, marginal models give "
         "(chain, draw, N).",
-    "stan.invT.predict_temperature_from_proxyObs":
-        "High-level wrapper around get_invT_posterior that returns temperature percentiles and, "
-        "optionally, writes a tidy results table.",
     "stan.utils.patch_optional_predictors":
         "Defensive normalisation before Stan sees the data: makes sure gdgt23ratio and no3 arrays, "
         "use_* flags and beta terms all exist with the right shapes, converts NaN to 0.0, and handles "

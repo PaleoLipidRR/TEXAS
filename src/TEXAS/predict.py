@@ -42,9 +42,10 @@ from pathlib import Path
 import numpy as np
 import xarray as xr
 
-from .stan.io import load_posterior
+from .stan.io import load_posterior, _generate_filename_base, _save_invT_results
 from .ensemble.generator import generate_ensemble_auto
-from .stan.invT import predict_temperature_from_proxyObs as _predict_temperature_from_proxyObs
+from .stan.invT import get_invT_posterior as _get_invT_posterior
+from .stan.invT import _percentiles_from_posterior
 from .data.builder import InvTConfig
 from .constants import DEFAULT_FWD_POSTERIOR
 from .data.ocean_lookup import lookup_no3_from_woa, get_ocean_prop_ds
@@ -312,30 +313,65 @@ def predict_T_from_proxyObs(
                 "(e.g. gen_logi_fixed_hier_crtp_multiv_priorApprox_*).",
                 UserWarning, stacklevel=2,
             )
+        if predictors.get("no3") is None and _attrs.get("use_no3", False):
+            warnings.warn(
+                "This calibration uses the NO₃ correction, but none was supplied — "
+                "it will be treated as 0, which is not the same as switching the "
+                "correction off: it asserts a nitrate of zero and biases the "
+                "reconstruction by roughly beta_NO3 x (true no3) degC. "
+                "Pass no3= (or site_lat=/site_lon= for a WOA23 lookup), or use a "
+                "temperature-only calibration (e.g. 'tx.GHPU.sst.sri03.p0').",
+                UserWarning, stacklevel=2,
+            )
 
-    _result = _predict_temperature_from_proxyObs(
-        proxyObs=proxyObs,
-        prior_mu_t=prior_mu_t,
-        prior_sigma_t=prior_sigma_t,
+    post_ds = _get_invT_posterior(
+        proxyObs,
+        prior_mu_t,
+        prior_sigma_t,
+        proxy_name=proxy_name,
         fwd_posterior_name=_fwd_name,
         fwd_posterior=_fwd_ds,
         site_name=site_name,
         temptype=temptype,
         predictors=predictors,
         config=config,
-        chains=chains,
-        iter_warmup=iter_warmup,
-        iter_sampling=iter_sampling,
-        seed=seed,
         save_results=save_results,
         save_draws=save_draws,
         filename_tag=filename_tag,
         cache_dir=cache_dir,
-        fwd_cache_dir=fwd_cache_dir,
+        chains=chains,
+        iter_warmup=iter_warmup,
+        iter_sampling=iter_sampling,
+        seed=seed,
         threads_per_chain=threads_per_chain,
-        model_type="direct",
-        proxy_name=proxy_name,
+        fwd_cache_dir=fwd_cache_dir,
     )
+
+    # The metadata dict layer 2 used to build. The explicit keys come first so
+    # the posterior's own attrs win where they overlap -- the calibration is a
+    # better witness to its own name than the argument that requested it.
+    _metadata = {
+        "fwd_posterior_name": _fwd_name,
+        "filename_tag": filename_tag,
+        **post_ds.attrs,
+    }
+    _result: Dict[str, Any] = {
+        "proxyObs": np.asarray(proxyObs),
+        "proxy_name": post_ds.attrs.get("proxy_name"),
+        "metadata": _metadata,
+        **_percentiles_from_posterior(post_ds),
+    }
+
+    # The .npz is written before the flags are attached, exactly as it was when
+    # this lived in stan/invT.py: _save_invT_results np.asarray()s every value,
+    # and a DataFrame is not that.
+    if save_results:
+        _results_path = None
+        if cache_dir is not None:
+            _out = Path(cache_dir)
+            _out.mkdir(parents=True, exist_ok=True)
+            _results_path = _out / f"{_generate_filename_base(_metadata, filename_tag)}.npz"
+        _save_invT_results(_result, _results_path)
 
     # Per-observation quality flags. The warnings above describe the call; these
     # describe the rows, so a record can be filtered rather than accepted or

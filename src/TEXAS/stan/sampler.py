@@ -7,7 +7,7 @@ import warnings
 from pathlib import Path
 import numpy as np
 import xarray as xr
-from typing import Tuple, Optional, Dict, Any, Literal
+from typing import Tuple, Optional, Dict, Any
 from cmdstanpy import CmdStanModel, CmdStanMCMC
 import cmdstanpy as _cmdstanpy
 
@@ -403,29 +403,6 @@ def auto_detect_predictors(data: dict) -> dict:
     """
     enhanced = data.copy()
 
-    # 0) Translate legacy scaledRI_* keys → proxyObs_* for backward compatibility
-    _key_map = {
-        "scaledRI_":    "proxyObs_",
-        "mu_scaledRI_": "mu_proxyObs_",
-        "sigma_scaledRI_": "sigma_proxyObs_",
-    }
-    _renames = {}
-    for key in list(enhanced.keys()):
-        for old_prefix, new_prefix in _key_map.items():
-            if key.startswith(old_prefix):
-                _renames[key] = new_prefix + key[len(old_prefix):]
-                break
-    if _renames:
-        import warnings
-        warnings.warn(
-            f"Data dict contains legacy key(s) {list(_renames)}. "
-            "Rename scaledRI_* → proxyObs_* (e.g. scaledRI_cul → proxyObs_cul). "
-            "Auto-translating for now.",
-            DeprecationWarning, stacklevel=3,
-        )
-        for old, new in _renames.items():
-            enhanced[new] = enhanced.pop(old)
-
     # 1) pick the N_* key using priority order
     N_keys = [k for k in enhanced.keys() if k.startswith("N_")]
     if not N_keys:
@@ -509,28 +486,36 @@ def sampler_invT_posterior(
     stan_file: str,
     site_name: Optional[str] = None,
     temptype: Optional[str] = None,
-    model_type: Literal["direct", "ensemble"] = "direct",  # ADD: if this function uses model selection
     **kwargs
 ) -> Tuple[xr.Dataset, str]:
-    """
-    Sample from invT posterior with updated model_type parameter.
-    
+    """Compile and run an inverse-T Stan model on a prepared data dict.
+
+    The raw sampling layer: it does no data assembly and no model selection.
+    Use :func:`TEXAS.stan.invT.get_invT_posterior` for those, or
+    :func:`TEXAS.predict.predict_T_from_proxyObs` for the full inverse.
+
     Args:
-        model_type: 
-            - "direct": Use direct sampling models (more efficient, supports threading)
-            - "ensemble": Use traditional ensemble models
+        data: Stan data dict, e.g. from ``build_invT_inputData()``.
+        stan_file: Inverse model name, with or without ``.stan``.
+        site_name: Label written into the posterior metadata.
+        temptype: Temperature target label, e.g. ``"SST"``.
+        **kwargs: Forwarded to ``CmdStanModel.sample``. ``seed`` defaults to 42
+            and also seeds numpy, so a run is reproducible end to end.
+
+    Returns:
+        ``(posterior, diagnostics)``: the draws as an ``xr.Dataset`` with
+        metadata attrs, and the human-readable diagnostic summary.
     """
     rng_seed = kwargs.setdefault("seed", 42)
     np.random.seed(rng_seed)
-    
+
     compiler = StanCompiler()
     sampler = StanSampler(compiler)
-    
+
     return sampler.sample(
         data=data,
         stan_file=stan_file,
         site_name=site_name,
         temptype=temptype,
-        model_type=model_type,  # PASS: if needed
         **kwargs
     )

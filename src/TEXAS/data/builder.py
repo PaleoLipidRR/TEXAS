@@ -85,11 +85,10 @@ _EXTRA_PARAMS = ["v"]  # Shape parameter (Q is fixed to 1 in all active models)
 
 
 def build_invT_inputData(
-    proxyObs: Union[np.ndarray, List[float]] = None,
-    prior_mu_t: Union[np.ndarray, float] = None,
-    prior_sigma_t: float = None,
+    proxyObs: Union[np.ndarray, List[float]],
+    prior_mu_t: Union[np.ndarray, float],
+    prior_sigma_t: float,
     *,
-    scaledRI: Union[np.ndarray, List[float]] = None,  # deprecated alias
     fwd_posterior_name: Optional[str] = None,
     predictors: Optional[Dict[str, np.ndarray]] = None,
     config: Optional[InvTConfig] = None,
@@ -128,17 +127,6 @@ def build_invT_inputData(
         data: Dictionary for Stan's data block
         sampler_kwargs: Dictionary for CmdStanPy sampling configuration
     """
-    # Backward-compat: accept deprecated scaledRI kwarg
-    if scaledRI is not None and proxyObs is None:
-        import warnings
-        warnings.warn(
-            "The 'scaledRI' parameter is deprecated; use 'proxyObs' instead.",
-            DeprecationWarning, stacklevel=2,
-        )
-        proxyObs = scaledRI
-    if proxyObs is None:
-        raise TypeError("build_invT_inputData() missing required argument: 'proxyObs'")
-
     if fwd_posterior is None and fwd_posterior_name is None:
         raise ValueError(
             "Provide either fwd_posterior_name (cache lookup) "

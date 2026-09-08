@@ -4,7 +4,7 @@ from .compiler import StanCompiler
 from .sampler  import StanSampler, get_posterior, sampler_invT_posterior
 from .metadata import extract_and_update_metadata, extract_priors_from_stan
 from .io      import load_posterior, save_posterior, save_invT_posterior
-from .invT import get_invT_posterior, get_invT_post_quantiles, predict_temperature_from_proxyObs
+from .invT import get_invT_posterior, get_invT_post_quantiles
 
 __all__ = [
     "StanCompiler",
@@ -16,7 +16,6 @@ __all__ = [
     "save_invT_posterior",
     "get_posterior",
     "sampler_invT_posterior",
-    "predict_temperature_from_proxyObs",
     "get_invT_posterior",
     "get_invT_post_quantiles"
 ]

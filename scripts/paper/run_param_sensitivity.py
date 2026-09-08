@@ -759,7 +759,7 @@ def run_invt_case(fwd_name, subset, proxy_col, iter_warmup, iter_sampling, M,
                   seed=SEED, chains=CHAINS):
     """One invT fit over the subset; returns (metrics row, per-site frame)."""
     from TEXAS.data.builder import InvTConfig
-    from TEXAS.stan.invT import predict_temperature_from_proxyObs
+    from TEXAS.predict import predict_T_from_proxyObs
 
     truth = subset["SST"].to_numpy(dtype=float)
 
@@ -786,11 +786,11 @@ def run_invt_case(fwd_name, subset, proxy_col, iter_warmup, iter_sampling, M,
         predictors["no3"] = subset["no3_sf2tc_avg"].to_numpy(dtype=float)
 
     t_start = time.time()
-    res = predict_temperature_from_proxyObs(
-        proxyObs           = subset[proxy_col].to_numpy(dtype=float),
-        prior_mu_t         = np.full(len(subset), prior_mu),
-        prior_sigma_t      = INVT_PRIOR_SIGMA_T,
-        fwd_posterior_name = fwd_name,
+    res = predict_T_from_proxyObs(
+        subset[proxy_col].to_numpy(dtype=float),
+        np.full(len(subset), prior_mu),
+        INVT_PRIOR_SIGMA_T,
+        fwd_posterior      = fwd_name,
         site_name          = f"budgettest_n{len(subset)}",
         temptype           = TEMPTYPE,
         proxy_name         = proxy_col,
@@ -801,6 +801,7 @@ def run_invt_case(fwd_name, subset, proxy_col, iter_warmup, iter_sampling, M,
         iter_sampling      = iter_sampling,
         seed               = seed,
         save_results       = False,   # a tuning run is not a reconstruction
+        flags              = False,   # and it does not read them
     )
     wall = time.time() - t_start
 

@@ -43,6 +43,27 @@ acceptance.
   instead of 9. `utils.naming.CONSTRAINT_CODES` is deliberately unchanged: it
   is a name grammar, and case ids already on disk and on Zenodo carry the `t`
   code.
+- `TEXAS.predict_temperature_from_proxyObs` / `TEXAS.stan.invT.predict_temperature_from_proxyObs`.
+  It was the pre-`predict.py` public entry point and had become a pass-through
+  with 27 hand-copied parameters: its only work was reshaping the posterior into
+  a percentile dict and optionally writing a `.npz`. Both moved into
+  `predict_T_from_proxyObs`, which is the drop-in replacement — pass the
+  calibration as `fwd_posterior=` (it takes a name or a Dataset) instead of
+  `fwd_posterior_name=`, and `flags=False` if you do not want the quality flags.
+- `use_opencl=` on `get_invT_posterior`. OpenCL support was deleted in 2026-05
+  and nothing read the `opencl_enabled` attr it set.
+- `scaledRI=` on `build_invT_inputData` and `get_invT_posterior`, and the
+  `scaledRI_*` → `proxyObs_*` key translation in `auto_detect_predictors`.
+  Deprecated since 0.1.x. (The `sigma_scaledRI_*` lookup in `build_invT_inputData`
+  stays: it reads variable names inside older posteriors, not a keyword.)
+- `model_type=` on `predict_T_from_proxyObs`, `get_invT_posterior`,
+  `_select_invT_stan_file` and `sampler_invT_posterior`. Only `"direct"` has
+  existed since the ensemble models were archived. On `sampler_invT_posterior`
+  it was also a live bug: the value was forwarded into `CmdStanModel.sample`,
+  which has no such parameter, so any call that passed it raised `TypeError`.
+- `results_path=`, which went with `predict_temperature_from_proxyObs`. The
+  `.npz` destination is now `cache_dir` + `filename_tag`, as it already was for
+  the `.nc`.
 
 ### Changed
 
@@ -52,3 +73,18 @@ acceptance.
   least three lines. `ruff`'s `D1` missing-docstring rules are enabled for
   `src/TEXAS`, with `D100`/`D104` (module and package headers) deferred and
   `D105`/`D107` (magic methods, `__init__`) excluded.
+- `get_invT_posterior`'s `save=True` is now `save_results=False`, matching
+  `predict_T_from_proxyObs`. One name and one default across both layers. The
+  function has no caller outside the package, so nothing silently stops saving.
+- `proxyObs`, `prior_mu_t` and `prior_sigma_t` are positional-required on
+  `get_invT_posterior` and `build_invT_inputData`. They were keyword arguments
+  defaulting to `None` that raised `TypeError` at runtime instead.
+- `predict_T_from_proxyObs` now returns a percentile key for every quantile the
+  posterior carries, derived rather than hard-coded — so `p40` and `p60`, which
+  were computed and discarded, are included.
+- `predict_T_from_proxyObs` now warns when a calibration uses the NO3
+  correction but no `no3=` was supplied, mirroring the existing GDGT-2/3
+  warning. NO3 was previously the one predictor/calibration combination of the
+  four that stayed silent; omitting a predictor the calibration actually
+  applies treats it as 0, which is not the same as switching the correction
+  off.

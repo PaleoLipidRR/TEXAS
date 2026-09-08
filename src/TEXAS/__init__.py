@@ -19,10 +19,7 @@ from .stan.io import (
     save_invT_posterior,
     list_posteriors,
 )
-from .stan.invT import (
-    get_invT_posterior,
-    predict_temperature_from_proxyObs,
-)
+from .stan.invT import get_invT_posterior
 from .predict import predict_proxy_from_T, predict_T_from_proxyObs, compute_scaledRI
 from .quality import compute_quality_flags
 
@@ -95,7 +92,6 @@ __all__ = [
     "save_invT_posterior",
     # stan — inverse temperature
     "get_invT_posterior",
-    "predict_temperature_from_proxyObs",
     # high-level prediction API
     "predict_proxy_from_T",
     "predict_T_from_proxyObs",
