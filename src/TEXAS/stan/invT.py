@@ -194,6 +194,27 @@ def get_invT_posterior(
                 f"(any value above the cutoff of {no3_cutoff} \u00b5mol/L sets the correction to zero)"
             )
 
+    # Guard: same for the GDGT-2/3 ratio. Without this, a caller who supplies
+    # no3= but omits gdgt23ratio= clears the NO3 gate above and then has G23
+    # silently treated as 0 -- which asserts a ratio of zero rather than
+    # switching the correction off, biasing the reconstruction cold by roughly
+    # gamma_G23 x (true ratio) degC. A warning alone is easy to miss in a
+    # notebook, and the result looks converged and plausible.
+    if fwd_posterior is not None and fwd_posterior.attrs.get("use_gdgt23ratio", 0) == 1:
+        if "gdgt23ratio" not in predictors:
+            raise ValueError(
+                "The forward posterior uses a GDGT-2/3 ratio correction "
+                "(use_gdgt23ratio=1) but no ratio was supplied.\n\n"
+                "  Option 1 \u2014 your own per-observation values:\n"
+                "    pass  gdgt23ratio=<array of length N>\n\n"
+                "  Option 2 \u2014 a thermal-only calibration, which needs no predictors:\n"
+                "    pass  fwd_posterior='tx.GHPU.sst.sri03.p0'  (ships with the package)\n"
+                "    or omit both fwd_posterior= and every predictor, and TEXAS\n"
+                "    will select it for you.\n\n"
+                "  Passing gdgt23ratio=0 is NOT equivalent to switching the correction\n"
+                "  off: it asserts a true ratio of zero."
+            )
+
     data, sampler_kwargs = build_invT_inputData(
         proxyObs=proxyObs, prior_mu_t=prior_mu_t, prior_sigma_t=prior_sigma_t,
         fwd_posterior_name=fwd_posterior_name, predictors=predictors, config=cfg,

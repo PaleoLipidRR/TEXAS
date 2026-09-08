@@ -11,7 +11,8 @@ import numpy as np
 import pytest
 import xarray as xr
 
-from TEXAS.constants import DEFAULT_FWD_POSTERIOR
+from TEXAS.constants import (DEFAULT_FWD_POSTERIOR,
+                             DEFAULT_FWD_POSTERIOR_UNIVARIATE)
 from TEXAS.data.builder import InvTConfig, build_invT_inputData
 from TEXAS.stan.io import load_posterior
 from TEXAS.utils.paths import BUNDLED_POSTERIOR_DIR
@@ -126,3 +127,65 @@ def test_metadata_writer_records_one_model_name_and_no_version():
     assert out.attrs["generated_by"] == "texas-psm"
     assert "version" not in out.attrs
     assert "texas_version" in out.attrs
+
+
+# ── the thermal-only pair, and the fallback that selects it ──────────────────
+# predict_T_from_proxyObs switches to these when it is handed a proxy and no
+# predictors, so they must ship too -- otherwise the fallback would need a
+# network round-trip on a bare `pip install texas-psm`.
+
+@pytest.mark.parametrize("case", sorted(DEFAULT_FWD_POSTERIOR_UNIVARIATE.values()))
+def test_univariate_bundled_file_exists(case):
+    assert (BUNDLED_POSTERIOR_DIR / f"{case}.fwd.nc").is_file()
+
+
+@pytest.mark.parametrize("case", sorted(DEFAULT_FWD_POSTERIOR_UNIVARIATE.values()))
+def test_univariate_bundled_file_is_small_enough_to_ship(case):
+    mb = (BUNDLED_POSTERIOR_DIR / f"{case}.fwd.nc").stat().st_size / 1e6
+    assert mb < 2.0, f"{case} is {mb:.2f} MB"
+
+
+@pytest.mark.parametrize("case", sorted(DEFAULT_FWD_POSTERIOR_UNIVARIATE.values()))
+def test_univariate_bundled_posterior_is_thermal_only(case, tmp_path):
+    """It must NOT declare the corrections, or the fallback would demand them."""
+    ds = load_posterior(case, cache_dir=tmp_path)
+    assert not ds.attrs.get("use_gdgt23ratio", 0)
+    assert not ds.attrs.get("use_no3", 0)
+    for p in ("t0_crtp", "k_crtp", "b_crtp", "v_crtp", "sigma_proxyObs_crtp"):
+        assert p in ds.data_vars, f"{case} is missing {p}"
+
+
+def test_univariate_targets_match_the_multivariate_ones():
+    """Every target with a multivariate default needs a thermal-only counterpart."""
+    assert set(DEFAULT_FWD_POSTERIOR_UNIVARIATE) == set(DEFAULT_FWD_POSTERIOR)
+
+
+def test_no_predictors_selects_the_thermal_only_calibration(monkeypatch):
+    """The fallback picks the univariate case and says so, loudly.
+
+    A silent switch would be worse than the error it replaces: the thermal-only
+    fit is a different calibration, not the multivariate one with its
+    corrections off, so a user who does not notice would get numbers that do not
+    match the manuscript.
+    """
+    import warnings as _w
+    from TEXAS import predict as _predict
+
+    seen = {}
+
+    def _capture(**kwargs):
+        seen.update(kwargs)
+        raise RuntimeError("stop before sampling")
+
+    monkeypatch.setattr(_predict, "predict_T_from_proxyObs_core", _capture,
+                        raising=False)
+    with _w.catch_warnings(record=True) as rec:
+        _w.simplefilter("always")
+        try:
+            _predict.predict_T_from_proxyObs(np.array([0.55, 0.62]),
+                                             prior_mu_t=20.0, prior_sigma_t=10.0)
+        except Exception:
+            pass
+        msgs = " ".join(str(x.message) for x in rec)
+    assert "thermal-only" in msgs, msgs
+    assert "DIFFERENT calibration" in msgs or "different calibration" in msgs.lower()
