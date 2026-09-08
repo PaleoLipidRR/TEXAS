@@ -208,72 +208,39 @@ def inverse_generalized_logistic_fixed_upper_multivariate(
     no3: np.ndarray = None,
     no3_cutoff: float = 50.0,
 ) -> np.ndarray:
-    """Invert :func:`generalized_logistic_fixed_upper_multivariate`.
+    """Invert :func:`generalized_logistic_fixed_upper_multivariate` for one parameter set.
 
-    Given proxy observations ``y`` (e.g. Scaled Ring Index), return the
-    temperature ``x`` (e.g. SST) that the forward model maps to ``y`` for a
-    *single* parameter set.  The two non-thermal corrections are additive and
-    independent of temperature, so inversion subtracts them off and then
-    inverts the pure thermal curve analytically::
+    Subtracts the two additive non-thermal corrections, then inverts the thermal
+    curve analytically. This is a deterministic **point** inverse, not a
+    reconstruction: see :doc:`marginalization_explainer` §7 for the algebra, the
+    NaN convention and why :func:`TEXAS.predict.predict_T_from_proxyObs` is what
+    you want for paleotemperature.
 
-        y_thermal = y - beta_G23 * gdgt23ratio
-                      - beta_NO3 * log10(no3)   [only where 0 < no3 < no3_cutoff]
-        x = t0 - ln(((1 - b) / (y_thermal - b))**v - 1) / k
+    Args:
+        y: Proxy observations to invert. Scalar or array.
+        t0: Curve location parameter. ``x0`` is accepted as a legacy alias.
+        x0: Legacy alias for *t0*.
+        b: Lower asymptote.
+        k: Slope.
+        v: Generalized-logistic shape parameter. Defaults to 1.0, matching the
+            forward function.
+        beta_G23: GDGT-2/3 coefficient. The correction applies only when both
+            this and *gdgt23ratio* are given.
+        gdgt23ratio: GDGT-2/3 ratio: scalar, or one value per sample.
+        beta_NO3: Nitrate coefficient. The correction applies only when both
+            this and *no3* are given, and only where ``0 < no3 < no3_cutoff``.
+        no3: Nitrate concentration (umol/L): scalar, or one value per sample.
+        no3_cutoff: Upper NO3 bound for the correction. Must match the value
+            used in the forward call.
 
-    ``gdgt23ratio`` and ``no3`` may each be a single scalar (applied to every
-    sample) or an array of per-sample values broadcastable to ``y``.  Supply
-    the *same* covariate values that applied to those observations — they are
-    additive predictors, not solved for.
-
-    The thermal inverse is defined only for ``b < y_thermal < 1``.  Proxy
-    values outside that range are physically unreachable for the given
-    parameters and are returned as ``np.nan`` (a single ``RuntimeWarning`` is
-    emitted if any occur).
-
-    .. note::
-       This is a deterministic **point** inverse for one parameter set (e.g.
-       posterior means).  For uncertainty-aware paleotemperature
-       reconstruction that marginalises over the full forward posterior, use
-       :func:`TEXAS.predict.predict_T_from_proxyObs` (the Bayesian Stan path).
-
-    Parameters
-    ----------
-    y : array-like
-        Proxy observations (Scaled Ring Index) to invert.  Scalar or array.
-    t0, x0 : float
-        Inflection point (prefer ``t0``; ``x0`` accepted for legacy callers).
-    b : float
-        Lower asymptote.
-    k : float
-        Slope.
-    v : float, optional
-        Generalized-logistic shape parameter; defaults to 1.0 (standard
-        logistic), matching the forward function.
-    beta_G23 : float, optional
-        GDGT-2/3 ratio coefficient.  Correction applied only if both
-        ``beta_G23`` and ``gdgt23ratio`` are given.
-    gdgt23ratio : array-like, optional
-        GDGT-2/3 ratio: scalar or one value per sample.
-    beta_NO3 : float, optional
-        Nitrate coefficient.  Correction applied only if both ``beta_NO3`` and
-        ``no3`` are given, and only where ``0 < no3 < no3_cutoff``.
-    no3 : array-like, optional
-        Nitrate concentration (µmol/L): scalar or one value per sample.
-    no3_cutoff : float
-        Upper NO3 bound for the correction; must match the forward call.
-
-    Returns
-    -------
-    x : np.ndarray
-        Reconstructed temperature, ``np.nan`` where ``y`` is unreachable.
-        A 0-d array is returned for scalar input, matching the forward
+    Returns:
+        Reconstructed temperature, ``np.nan`` wherever *y* is unreachable for
+        these parameters. A 0-d array for scalar input, matching the forward
         function's convention.
 
-    Raises
-    ------
-    ValueError
-        If required parameters (``t0``/``x0``, ``b``, ``k``) are missing, or a
-        predictor array cannot be broadcast to the shape of ``y``.
+    Raises:
+        ValueError: if ``t0``/``x0``, ``b`` or ``k`` is missing, or a predictor
+            array cannot be broadcast to the shape of *y*.
     """
     inf = t0 if t0 is not None else x0
     if inf is None:
@@ -334,80 +301,37 @@ def find_optimal_no3_threshold(
     score_method: str = "spearmanr",
     weight_method: str = "uniform",
 ):
-    """Find the NO3 threshold that maximises the negative correlation between
-    log(NO3) and model residuals.
+    """Find the NO3 cutoff that maximises the negative log(NO3)-residual correlation.
 
-    Used to select the ``no3_cutoff`` parameter for the multivariate logistic
-    models: points below the threshold carry an NO3 correction; points above
-    are treated as nutrient-replete and excluded from the NO3 term.
+    Selects the ``no3_cutoff`` used by the multivariate models: points below it
+    carry the NO3 correction, points above are nutrient-replete and excluded.
+    The two scoring criteria and the three weighting schemes are different
+    modelling choices, not tuning knobs -- see :doc:`PSM` §9.
 
-    Parameters
-    ----------
-    no3_values : array-like
-        Nitrate concentrations (µmol/L).
-    residuals : array-like
-        Residuals from a temperature-only model fit on the same observations.
-    threshold_range : array-like, optional
-        NO3 thresholds to test.  Defaults to ``np.arange(0.5, 5, 0.01)``.
-    min_points : int
-        Minimum number of valid data points required to compute a score.
-    log_method : {'log10', 'ln'}
-        Log transform applied to NO3 values before scoring.
+    Args:
+        no3_values: Nitrate concentrations (umol/L).
+        residuals: Residuals of a temperature-only fit on the same observations.
+        threshold_range: Cutoffs to test. Defaults to ``np.arange(0.5, 5, 0.01)``.
+        min_points: Minimum valid points required to score a cutoff.
+        log_method: ``"log10"`` (default, matches the Stan models) or ``"ln"``.
+        score_method: ``"spearmanr"`` (default; most negative Spearman rho,
+            rank-based) or ``"R_squared"`` (highest no-intercept R2 with
+            beta < 0).
+        weight_method: ``"uniform"`` (default), ``"positive_residuals"`` (for
+            the NO3 correction) or ``"negative_residuals"`` (for the G23
+            correction). Applies to ``"R_squared"`` only.
 
-        ``'log10'`` (default)
-            Base-10 logarithm — consistent with prior publication and the
-            original Stan model formulation.
-        ``'ln'``
-            Natural logarithm — use to test sensitivity to the log base.
+    Returns:
+        ``(optimal_threshold, results)``: the best cutoff in umol/L, and a
+        DataFrame with one row per tested cutoff. Its columns are ``threshold``,
+        ``spearman_rho``, ``spearman_pval``, ``n_points`` for ``"spearmanr"``,
+        or ``threshold``, ``beta``, ``r2_nointercept``, ``n_points`` for
+        ``"R_squared"``.
 
-    score_method : {'spearmanr', 'R_squared'}
-        Criterion used to select the optimal threshold.
-
-        ``'spearmanr'`` (default)
-            Most negative Spearman ρ between log(NO3) and residuals.
-            Rank-based; robust to outliers.  Used in prior publication.
-        ``'R_squared'``
-            Highest no-intercept R² of ``RI_res = β · log(NO3)`` with β < 0.
-            Penalises poor fit, not just rank order.  Consistent with a
-            model where the correction is zero at no3 = 1 (log10) or
-            no3 = 1 (ln).  For a zero-at-threshold formulation use
-            ``find_optimal_no3_threshold_nointercept`` instead.
-
-    weight_method : {'uniform', 'positive_residuals', 'negative_residuals'}
-        Asymmetric weighting applied when ``score_method='R_squared'``
-        (ignored for ``'spearmanr'``, which does not support sample weights).
-
-        ``'uniform'`` (default)
-            All points weighted equally — standard OLS.
-        ``'positive_residuals'``
-            ``w_i = max(res_i, ε)`` — up-weights observations with positive
-            residuals.  Use for the NO₃ correction: nutrient-limited sites
-            are expected to have positive RI residuals (observed RI > predicted
-            from temperature alone).
-        ``'negative_residuals'``
-            ``w_i = max(-res_i, ε)`` — up-weights observations with negative
-            residuals.  Use for the G23 correction: deep-water / high-G23
-            sites are expected to have negative RI residuals.
-
-    Returns
-    -------
-    optimal_threshold : float
-        Threshold (µmol/L) giving the best score.
-    results : pd.DataFrame
-        One row per tested threshold.  Columns depend on ``score_method``:
-
-        - ``'spearmanr'``:  ``threshold``, ``spearman_rho``,
-          ``spearman_pval``, ``n_points``
-        - ``'R_squared'``:  ``threshold``, ``beta``,
-          ``r2_nointercept``, ``n_points``
-
-    Raises
-    ------
-    ImportError
-        If pandas or scipy are not available.
-    ValueError
-        If ``log_method`` or ``score_method`` are unrecognised, or no valid
-        threshold is found.
+    Raises:
+        ImportError: if pandas or scipy is unavailable.
+        ValueError: if *log_method* or *score_method* is unrecognised, or no
+            valid threshold is found.
     """
     if not _HAS_SCIPY_PANDAS:
         raise ImportError(
@@ -503,75 +427,35 @@ def find_optimal_no3_threshold_nointercept(
     log_method: str = "log10",
     weight_method: str = "uniform",
 ):
-    """Find the NO3 threshold that maximises the no-intercept R² of
-    ``RI_res = β · x``, consistent with the no3ratio Stan model formulation
-    where the correction is exactly zero at the threshold boundary.
+    """Find the NO3 cutoff that maximises the no-intercept R2 of ``RI_res = beta * x``.
 
-    Unlike ``find_optimal_no3_threshold`` (Spearman-based, used in prior
-    publication), this function optimises for the threshold that best explains
-    residual variance under the zero-intercept constraint.
+    Matches the ``_no3ratio`` Stan formulation, where the correction is exactly
+    zero at the threshold boundary -- unlike :func:`find_optimal_no3_threshold`,
+    which is Spearman-based and was used in the prior publication. The predictor
+    forms and the weighting schemes are explained in :doc:`PSM` §9.
 
-    Parameters
-    ----------
-    no3_values : array-like
-        Nitrate concentrations (µmol/L).
-    residuals : array-like
-        Residuals from a temperature-only model fit on the same observations.
-    threshold_range : array-like, optional
-        NO3 thresholds to test.  Defaults to ``np.arange(0.5, 5, 0.01)``.
-    min_points : int
-        Minimum number of valid data points required to fit the regression.
-    no3_mode : {'log10ratio', 'log10'}
-        Predictor used in the no-intercept regression:
+    Args:
+        no3_values: Nitrate concentrations (umol/L).
+        residuals: Residuals of a temperature-only fit on the same observations.
+        threshold_range: Cutoffs to test. Defaults to ``np.arange(0.5, 5, 0.01)``.
+        min_points: Minimum valid points required to fit the regression.
+        no3_mode: ``"log10ratio"`` (default; ``x = log10(no3 / threshold)``,
+            zero at the boundary) or ``"log10"`` (``x = log10(no3)``, zero at
+            no3 = 1, the original Stan form).
+        log_method: ``"log10"`` (default) or ``"ln"``.
+        weight_method: ``"uniform"`` (default), ``"positive_residuals"`` or
+            ``"negative_residuals"``.
 
-        ``'log10ratio'`` (default)
-            ``x = log10(no3 / threshold)`` — zero at the boundary; consistent
-            with the ``_no3ratio`` Stan models.  The optimal threshold is where
-            the no-intercept model best fits the data with correction = 0 at T.
+    Returns:
+        ``(optimal_threshold, results)``: the cutoff in umol/L giving the
+        highest no-intercept R2 with beta < 0, and a DataFrame with one row per
+        tested cutoff and columns ``threshold``, ``beta``, ``r2_nointercept``,
+        ``n_points``.
 
-        ``'log10'``
-            ``x = log10(no3)`` — zero at no3 = 1 µmol/L regardless of T;
-            consistent with the original Stan models.  Use this to compare the
-            no-intercept R² criterion against the Spearman criterion while
-            keeping the original predictor form.
-
-    log_method : {'log10', 'ln'}
-        Log transform applied to NO3 values.  ``'log10'`` (default) matches
-        the Stan model formulations; ``'ln'`` tests sensitivity to log base.
-
-    weight_method : {'uniform', 'positive_residuals', 'negative_residuals'}
-        Asymmetric weighting for the no-intercept regression.
-
-        ``'uniform'`` (default)
-            All points weighted equally — standard no-intercept OLS.
-        ``'positive_residuals'``
-            ``w_i = max(res_i, ε)`` — up-weights observations with positive
-            residuals.  Use for the NO₃ correction: nutrient-limited sites
-            are expected to have positive RI residuals (observed RI > predicted
-            from temperature alone).
-        ``'negative_residuals'``
-            ``w_i = max(-res_i, ε)`` — up-weights observations with negative
-            residuals.  Use for the G23 correction: deep-water / high-G23
-            sites are expected to have negative RI residuals.
-
-        In all cases, ``ε = 0.001 · std(residuals)`` so that off-direction
-        points are suppressed but never fully excluded (avoids numerical
-        instability when nearly all residuals are on one side).
-
-    Returns
-    -------
-    optimal_threshold : float
-        Threshold (µmol/L) giving the highest no-intercept R² with β < 0.
-    results : pd.DataFrame
-        One row per tested threshold; columns: ``threshold``, ``beta``,
-        ``r2_nointercept``, ``n_points``.
-
-    Raises
-    ------
-    ImportError
-        If pandas or scipy are not available.
-    ValueError
-        If no valid threshold is found or parameters are unrecognised.
+    Raises:
+        ImportError: if pandas or scipy is unavailable.
+        ValueError: if a parameter is unrecognised or no valid threshold is
+            found.
     """
     if not _HAS_SCIPY_PANDAS:
         raise ImportError(

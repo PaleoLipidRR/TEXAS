@@ -220,74 +220,46 @@ def get_posterior(
     max_treedepth: Optional[int] = None,
     **kwargs
 ) -> Tuple[xr.Dataset, str]:
-    """
-    Run forward calibration Stan sampling and return the posterior.
+    """Run a forward calibration in Stan and return the posterior.
 
-    Wraps ``StanSampler`` with automatic predictor detection, CPU
-    configuration, and metadata attachment.  The returned dataset can be
-    passed directly to ``predict_proxy_from_T`` or saved with
-    ``save_posterior``.
+    Wraps :class:`StanSampler` with automatic predictor detection, CPU
+    configuration and metadata attachment. The returned dataset can be passed
+    straight to ``predict_proxy_from_T`` or saved with ``save_posterior``.
 
-    Parameters
-    ----------
-    data : dict
-        Stan data dict built by ``build_fwd_data()``.  Predictor flags
-        (``use_gdgt23ratio``, ``use_no3``) are auto-detected from the
-        arrays present; you do not need to set them manually.
-    stan_file : str
-        Stan model name (without ``.stan``), e.g.
-        ``"gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv"``.
-    temptype : str
-        Temperature variable type, e.g. ``"SST"`` or ``"thermoT"``.
-        Stored in the posterior metadata.
-    proxy_name : str
-        Proxy type, e.g. ``"scaledRI_cren3"``.  Required — stored in
-        the ``.nc`` attrs and validated downstream when the posterior is
-        used for inverse reconstruction.
-    iter_warmup : int, optional
-        HMC warmup iterations per chain (default: CmdStan default, 1000).
-    iter_sampling : int, optional
-        Post-warmup sampling iterations per chain (default: 1000).
-    chains : int, optional
-        Number of independent chains (default: 4).
-    parallel_chains : int, optional
-        Chains to run simultaneously (auto-detected from CPU count).
-    threads_per_chain : int, optional
-        Threads per chain for ``reduce_sum`` models (auto-enabled for
-        models whose filename contains ``reduce_sum``).
-    adapt_delta : float, optional
-        Target acceptance rate (default: 0.8).  Increase toward 0.99 to
-        reduce divergences at the cost of more leapfrog steps.
-    max_treedepth : int, optional
-        Maximum tree depth for HMC (default: 10).
-    **kwargs
-        Additional keyword arguments forwarded to ``CmdStanModel.sample``.
+    Args:
+        data: Stan data dict from ``build_fwd_data()``. The ``use_*`` predictor
+            flags are auto-detected from the arrays present.
+        stan_file: Model name without ``.stan``, e.g.
+            ``"gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv"``.
+        temptype: Temperature target, e.g. ``"SST"`` or ``"thermoT"``.
+        proxy_name: Proxy label, e.g. ``"scaledRI_cren3"``. Required: it is
+            written to the attrs and validated when the posterior is later used
+            for a reconstruction.
+        iter_warmup: Warmup iterations per chain. Default 1000 (CmdStan's).
+        iter_sampling: Sampling iterations per chain. Default 1000.
+        threads_per_chain: Threads per chain for ``reduce_sum`` models;
+            auto-enabled for models whose filename contains ``reduce_sum``.
+        chains: Independent chains. Default 4.
+        parallel_chains: Chains run at once. Auto-detected from the CPU count.
+        adapt_delta: Target acceptance rate. Default 0.8; raise toward 0.99 to
+            trade leapfrog steps for fewer divergences.
+        max_treedepth: HMC maximum tree depth. Default 10.
+        **kwargs: Forwarded to ``CmdStanModel.sample``.
 
-    Returns
-    -------
-    posterior : xr.Dataset
-        Forward calibration posterior with parameter draws and metadata
-        attrs (model name, temptype, proxy_name, priors, diagnostics).
-    diagnostics : str
-        Human-readable sampler diagnostic summary (divergences, R-hat,
-        ESS, E-BFMI).
+    Returns:
+        ``(posterior, diagnostics)``: an ``xr.Dataset`` of draws with metadata
+        attrs (model name, temptype, proxy_name, priors, ``stan_diag_*``), and
+        the human-readable sampler diagnostic summary.
 
-    Raises
-    ------
-    ValueError
-        If active predictors are present but a univariate model is
-        requested, or if an EIV model is requested without ``R2_thermal``.
+    Raises:
+        ValueError: if active predictors are present but a univariate model was
+            requested, or if an EIV model is requested without ``R2_thermal``.
 
-    Examples
-    --------
-    >>> data = build_fwd_data(t_crtp=..., proxy_crtp=..., ...)
-    >>> posterior, diag = get_posterior(
-    ...     data,
-    ...     stan_file="gen_logi_fixed_hier_crtp_univ_priorApprox",
-    ...     temptype="SST",
-    ...     proxy_name="scaledRI_cren3",
-    ... )
-    >>> save_posterior(posterior)
+    Example:
+        >>> posterior, diag = get_posterior(
+        ...     data, stan_file="gen_logi_fixed_hier_crtp_univ_priorApprox",
+        ...     temptype="SST", proxy_name="scaledRI_cren3")
+        >>> save_posterior(posterior)
     """
     rng_seed = kwargs.setdefault("seed", 42)
     np.random.seed(rng_seed)
