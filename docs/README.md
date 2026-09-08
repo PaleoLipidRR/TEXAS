@@ -35,7 +35,7 @@ Then open `docs/_build/html/index.html` in your browser.
 | `tutorial/` | Interactive Jupyter Book tutorial (Modules 1–5) |
 | `PSM.md`, `model_validation.md`, `stan_models.md`, `sampler_budget.md` | Explainers |
 | `marginalization_explainer.md`, `reduce_sum_for_geologists.md` | Stan internals, plain-language |
-| `Prior_Choice_Normal_vs_Cauchy.md`, `ckdtree_nearest_ocean_explainer.md` | Method notes |
+| `ckdtree_nearest_ocean_explainer.md` | Method notes |
 
 ## Call map
 
