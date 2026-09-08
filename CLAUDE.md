@@ -172,6 +172,25 @@ Posteriors are saved as compressed NetCDF (`.nc`) in:
 - `data/cache/TEXAS_posterior_cache/` — forward calibration posteriors
 - `data/cache/TEXAS_invT_posterior_cache/` — inverse temperature posteriors
 
+A third sibling holds derived grids rather than posteriors:
+- `data/cache/TEXAS_kriged_grids_cache/` — kriged residual-map grids (`.npz`),
+  written by `plot_residual_maps`
+
+> **Kriged grids got their own folder (2026-09-07)**: they used to be written
+> loose into the cache **root**. `utils/paths.py` now declares
+> `KRIGED_CACHE_DIR` beside the two posterior dirs and `set_cache_dir()`
+> repoints all three. The resolution token is formatted with `f"{krige_res:g}"`,
+> so `krige_res=1` and `krige_res=1.0` name one file — they used to write two
+> 57 MB copies of one grid. A grid still sitting in the old location is loaded
+> with a printed note (`_legacy_grids_cache`), so an un-migrated machine keeps
+> working; writes always go to the new folder.
+> **The migration is per-machine** — `data/cache/**` is gitignored:
+> `python scripts/migrate_kriged_cache.py` (dry run), then
+> `--apply --delete-superseded`.
+> `load_or_build_halo_cache` and its halo-only `.npz` format were deleted in the
+> same pass (zero callers); `krige_halo_all` stays — `load_or_build_grids_cache`
+> and `plot_residual_maps` both call it.
+
 Legacy forward posterior filenames follow: `{model}_{temptype}_{proxy_name}{suffix}.nc`
 e.g. `gen_logi_fixed_hier_crtp_multiv_SST_scaledRI.nc`
 Optional predictor flags (`_gdgt23ratio`, `_no3_1.5`) are appended to `temptype` before `proxy_name`.
