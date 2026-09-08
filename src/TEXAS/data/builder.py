@@ -37,7 +37,28 @@ from TEXAS.stan.io import load_posterior
 
 @dataclass
 class InvTConfig:
-    """Configuration for the inverse-T Stan data builder."""
+    """Knobs for the forward-to-inverse bridge in ``build_invT_inputData``.
+
+    Controls how many parameter sets M are drawn from the forward posterior and
+    marginalised over. The marginal-likelihood error falls as 1/sqrt(M) while
+    cost rises linearly with it, so M is the main accuracy-versus-runtime dial
+    of a reconstruction.
+
+    Attributes:
+        mode: Historical artifact; only ``"ensemble"`` is supported.
+        n_draws: M, the number of forward draws. ``None`` auto-selects
+            ``min(500, max(100, available_draws // 4))`` -- for a typical
+            4-chain x 1000-draw forward fit (4000 draws) this resolves to 500.
+            Pass ``n_draws=300`` explicitly to match the original publication's
+            budget (~5.8% Monte Carlo error) at lower cost.
+        seed: Seed for selecting those M draws, so a reconstruction is
+            reproducible.
+        no3_cutoff: Fallback NO3 cutoff (umol/L), used only when the forward
+            posterior carries no ``no3_cutoff`` attr of its own -- the
+            posterior always wins.
+        suffix: Force a forward parameter suffix (e.g. ``"crtp"``) instead of
+            taking the highest-priority one present.
+    """
     mode: str = "ensemble"        # Only 'ensemble' is supported (historical artifact)
     n_draws: Optional[int] = None # Number of forward posterior samples (M).
                                   # None → auto: min(500, max(100, available_draws // 4)).

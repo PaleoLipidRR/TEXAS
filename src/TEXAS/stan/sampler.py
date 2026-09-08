@@ -69,7 +69,18 @@ def _attach_sampler_config(ds: xr.Dataset, fit: CmdStanMCMC) -> xr.Dataset:
 
 
 class StanSampler:
-    """A simple wrapper for running the Stan sampler."""
+    """Run a compiled Stan model and return its draws as an ``xr.Dataset``.
+
+    Wraps ``CmdStanModel.sample`` with the parts every TEXAS run needs: run
+    metadata and prior strings attached to the result, convergence diagnostics
+    summarised into ``stan_diag_*`` attrs, and one automatic
+    recompile-and-retry when a cached binary turns out to be from another
+    environment (CmdStan exit code 127, typically a TBB mismatch).
+
+    Args:
+        compiler: The :class:`~TEXAS.stan.compiler.StanCompiler` used to
+            resolve model names to files and to build them.
+    """
     def __init__(self, compiler: StanCompiler):
         self.compiler = compiler
         
@@ -400,7 +411,24 @@ def _ensure_lenN_vector(enh: dict, key: str, N: int, fill: float = 0.0):
 
 
 def auto_detect_predictors(data: dict) -> dict:
-    """Smart predictor detection with data validation (suffix-prioritized)."""
+    """Fill in the ``use_*`` flags and predictor arrays a Stan model expects.
+
+    Picks the observation-count key by the suffix priority order crtp >
+    culmesocore > meso > cul, then sets ``use_gdgt23ratio`` and ``use_no3``
+    from whether a non-empty, not-all-NaN, not-all-zero array is present for
+    each. Flags the caller set by hand are respected; the arrays are still
+    coerced to the chosen group's length either way, so a model that declares
+    a predictor vector always receives one.
+
+    Args:
+        data: A Stan data dict, normally from ``build_fwd_data()``.
+
+    Returns:
+        A copy of *data* with ``use_gdgt23ratio`` and ``use_no3`` set as
+        integers, any missing ``gdgt23ratio_<suffix>`` / ``no3_<suffix>``
+        vector filled with zeros of the right length, and ``no3_cutoff``
+        defaulted to 1.0 if absent. The input dict is not mutated.
+    """
     enhanced = data.copy()
 
     # 0) Translate legacy scaledRI_* keys → proxyObs_* for backward compatibility

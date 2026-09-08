@@ -866,7 +866,33 @@ def legacy_invT_name(
     no3_cutoff: Optional[float] = None,
     tags: Optional[Union[str, Sequence[str]]] = None,
 ) -> str:
-    """The historical invT name, matching ``io._generate_filename_base``."""
+    """Rebuild the pre-case-id inverse filename, byte-for-byte.
+
+    Matches what ``io._generate_filename_base`` writes, so ``load_posterior``
+    can still find reconstructions saved before the CESM-style case layout
+    arrived (2026-08-09). Nothing new is named this way.
+
+    Args:
+        site: Site label; slugified into the name.
+        stan_model_name: Inverse model name. ``_marginal`` is stripped out of
+            the name, and its presence chooses the trailing ``direct`` vs
+            ``ensemble`` token.
+        temptype: Temperature target, e.g. ``"SST"`` or ``"thermoT"``.
+        proxy_name: Proxy label. Omitted from the name when empty or
+            ``"unknown"``, which is what the oldest files did.
+        use_gdgt23ratio: Whether the calibration carried the G23 correction.
+        use_no3: Whether it carried the NO3 correction.
+        no3_cutoff: The cutoff in umol/L. Required when *use_no3* is True.
+        tags: Extra tag(s), joined with ``+`` and inserted before the kind
+            token.
+
+    Returns:
+        The legacy stem, without the ``.nc`` extension.
+
+    Raises:
+        ValueError: if *use_no3* is True and *no3_cutoff* is None -- writing a
+            name with no cutoff would misrecord which run it was.
+    """
     clean = stan_model_name.replace("_marginal", "")
     kind = "direct" if "marginal" in stan_model_name else "ensemble"
 
