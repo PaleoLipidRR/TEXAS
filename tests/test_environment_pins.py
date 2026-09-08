@@ -25,6 +25,7 @@ import pytest
 REPO = Path(__file__).resolve().parent.parent
 ENV_YML = REPO / "environment.yml"
 PYPROJECT = REPO / "pyproject.toml"
+DOCKERFILE = REPO / "docker" / "Dockerfile"
 
 pytestmark = pytest.mark.skipif(
     not ENV_YML.exists(), reason="environment.yml not present (installed package)"
@@ -176,3 +177,89 @@ def test_no_extra_lists_esmpy():
     extras = _pyproject()["project"]["optional-dependencies"]
     for name, deps in extras.items():
         assert not any(d.startswith("esmpy") for d in deps), f"esmpy in [{name}]"
+
+
+# ── environment.yml dependency-audit guards (spec §9.3) ───────────────────────
+
+_REMOVED_FROM_ENV = (
+    "dask", "distributed", "zarr", "cftime", "gsw", "geopandas", "geopy",
+    "pyogrio", "mapclassify", "rtree", "pyshp", "pyproj", "statsmodels",
+    "odrpack", "importlib-metadata", "plotly",
+)
+
+
+def _dep_names() -> set[str]:
+    """Bare package names from environment.yml -- comments and pins stripped.
+
+    ``_dep_lines()`` keeps trailing ``# ...`` comments and version pins, which is
+    what the matplotlib pin tests want. These tests want identity instead.
+    """
+    names = set()
+    for dep in _dep_lines():
+        name = dep.split("#", 1)[0].strip()
+        name = re.split(r"[<>=!~]", name, maxsplit=1)[0].strip()
+        if name:
+            # PEP 503 style: underscores and hyphens are equivalent, so a
+            # package cannot return under an alias spelling the guard misses.
+            names.add(name.replace("_", "-"))
+    return names
+
+
+def test_removed_conda_packages_stay_removed():
+    """Nothing in src/, scripts/, streamlit_app/ or any notebook imports these."""
+    names = _dep_names()
+    for gone in _REMOVED_FROM_ENV:
+        assert gone not in names, f"{gone} is back in environment.yml"
+
+
+def _dockerfile_pip_packages() -> set[str]:
+    """Packages named on ``docker/Dockerfile``'s hardcoded ``pip install`` lines.
+
+    The image is built from ``conda-lock.yml``, then this line layers extra PyPI
+    packages on top -- a second declaration surface that ``environment.yml`` does
+    not cover. Without this, a banned package could return here with the suite
+    still green.
+    """
+    if not DOCKERFILE.exists():                # pragma: no cover - repo always has it
+        return set()
+    names = set()
+    for line in DOCKERFILE.read_text(encoding="utf-8").splitlines():
+        if "pip install" not in line:
+            continue
+        for tok in line.split("pip install", 1)[1].split():
+            if tok.startswith("-") or "/" in tok:   # flags, and local path installs
+                continue
+            names.add(re.split(r"[<>=!~]", tok, maxsplit=1)[0].strip().replace("_", "-"))
+    return names
+
+
+def test_removed_packages_stay_out_of_the_dockerfile_pip_line():
+    """The Dockerfile layers PyPI packages onto the locked env -- guard it too.
+
+    ``environment.yml`` is not the only place a dropped dependency can come
+    back: ``docker/Dockerfile`` pip-installs a hardcoded list after creating the
+    environment, and ``odrpack`` lived there until the 2026-09 audit.
+    """
+    named = _dockerfile_pip_packages()
+    for gone in _REMOVED_FROM_ENV:
+        assert gone not in named, f"{gone} is back in docker/Dockerfile's pip line"
+
+
+def test_psutil_is_declared_explicitly():
+    """utils/system_info.py imports psutil unguarded at module level."""
+    assert "psutil" in _dep_names(), (
+        "psutil must be explicit, not left to arrive via the pip texas-psm entry"
+    )
+
+
+def test_native_libs_behind_xesmf_and_netcdf_are_kept():
+    names = _dep_names()
+    for keep in ("esmf", "hdf5", "libnetcdf", "esmpy", "xesmf"):
+        assert keep in names, f"{keep} was removed; xesmf/netCDF4 need it"
+
+
+def test_esmpy_is_conda_only():
+    """esmpy must be a conda dep and must never move into the pip: block."""
+    text = ENV_YML.read_text(encoding="utf-8")
+    conda_part, _, pip_part = text.partition("- pip:")
+    assert "esmpy" in conda_part and "esmpy" not in pip_part
