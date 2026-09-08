@@ -1583,6 +1583,7 @@ pytest -q                   # expect 175 passed
 | `backup/pre-merge-20260809` | No rollback point elsewhere | Pushed to origin; `git fetch` brings it down |
 | Compiled Stan binaries | First sample recompiles (slow, once) | Nothing — expected, and platform-specific anyway |
 | `data/cache/**` posteriors | Reconstructions cannot be loaded | `git lfs pull`, `TEXAS.download_posteriors()`, or re-run |
+| Kriged grids loose in the `data/cache/` **root** (pre-2026-09-07 layout) | Read with a printed fallback note; ~189 MB of superseded `1.0deg`/`2.5deg`/`kriged_halo_*` files never get cleaned up | `python scripts/migrate_kriged_cache.py` (dry run), then `--apply --delete-superseded`. Repeat on the Windows box — `data/cache/**` is gitignored |
 | CmdStan install | Nothing samples | `texas-install-cmdstan` |
 
 > ### CHECK THIS FIRST ON EVERY MACHINE: the LFS smudge filter
