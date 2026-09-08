@@ -150,7 +150,7 @@ Posterior variables carry a suffix indicating which dataset they were estimated 
 
 Example: `t0_crtp`, `k_crtp`, `b_crtp`, `v_crtp`, `sigma_proxyObs_crtp`.
 
-> **Q parameter removed (2026-03-24, Python cleanup 2026-03-24)**: The asymmetry parameter Q has been dropped from all Stan models (both forward and invT). The generalized logistic curve now uses Q=1, so T₀ is the curve's location parameter. **T₀ is not the inflection point** unless ν=1: the steepest response sits at `T₀ − ln(ν)/k`, which for the fitted ν of 2.1–4.0 is 4.2–5.2 °C *below* T₀ (verified 2026-08-13 across the bounded-T, additive-EIV, univariate and culmeso posteriors). Do not quote a single thermal sensitivity for this curve — f′ varies ~6× over the sampled range. All existing `.stan` files were edited in-place — the `gen_logi_fixed_Q1_culmeso.stan` placeholder has been deleted. `ensemble/detection.py` no longer detects Q; `plotting/prior_plot.py` no longer lists Q in `include_groups` or label dicts. Cached `.nc` posteriors generated before this change contain `Q_crtp`/`Q_culmeso` variables that are no longer produced; regenerate them.
+> **Q parameter removed (2026-03-24, Python cleanup 2026-03-24)**: The asymmetry parameter Q has been dropped from all Stan models (both forward and invT). The generalized logistic curve now uses Q=1, so T₀ is the curve's location parameter. **T₀ is not the inflection point** unless ν=1: the steepest response sits at `T₀ − ln(ν)/k`, which for the fitted ν of 2.1–4.0 is 4.2–5.2 °C *below* T₀ (verified 2026-08-13 across the bounded-T, additive-EIV, univariate, and culmeso posteriors). Do not quote a single thermal sensitivity for this curve — f′ varies ~6× over the sampled range. All existing `.stan` files were edited in-place — the `gen_logi_fixed_Q1_culmeso.stan` placeholder has been deleted. `ensemble/detection.py` no longer detects Q; `plotting/prior_plot.py` no longer lists Q in `include_groups` or label dicts. Cached `.nc` posteriors generated before this change contain `Q_crtp`/`Q_culmeso` variables that are no longer produced; regenerate them.
 
 > **Stan model bound fixes (2026-03-24)**:
 > - `k_crtp upper=0.5 → removed` in all priorApprox models (`gen_logi_fixed_hier_crtp_*_priorApprox*.stan`): the standalone culmeso model has no upper cap on k, and its posterior mean (~0.57) exceeded the old bound, pinning k against the constraint.
@@ -232,7 +232,7 @@ for old caches and Zenodo downloads pinned to the v0.2.0 record.
 > > correction off**. A token could therefore be read as the opposite of what it
 > > means. `encode_predictors` now writes `N1p0` (`_fmt_cutoff`, `p` for the
 > > decimal point since `.` delimits the fields); `N10` still *parses*, so every
-> > case id in the cache, in notebooks and in `case_ids.json` keeps resolving.
+> > case id in the cache, in notebooks, and in `case_ids.json` keeps resolving.
 > > Nothing on disk was renamed except the two bundled posteriors.
 > >
 > > Files on disk were renamed on 2026-08-23 by
@@ -241,14 +241,14 @@ for old caches and Zenodo downloads pinned to the v0.2.0 record.
 > > `.npz` siblings moved with their `.nc`. This is per-machine — `data/cache/**`
 > > is gitignored, so run it on the Windows box too.
 > >
-> > `resolve_posterior_path` now normalises the predictor token on **both**
+> > `resolve_posterior_path` now normalizes the predictor token on **both**
 > > sides before comparing, and tries both spellings on the exact-path lookups,
 > > because an id and the file it names can sit on opposite sides of the rename
 > > in either direction — a notebook holding `N10` must find a posterior written
 > > today, and `N1p0` must find one in an old cache. Pinned by
 > > `tests/test_naming.py`.
 >
-> > **Posterior attrs normalised (2026-08-23).** `scripts/normalize_posterior_attrs.py`
+> > **Posterior attrs normalized (2026-08-23).** `scripts/normalize_posterior_attrs.py`
 > > edits cached posteriors' attrs in place through netCDF4 (append mode, so the
 > > draws are never rewritten — verified byte-identical, +87 bytes of header):
 > > `stan_model_name` `..._eiv_boundedT` → `..._eiv_t0shift` on the 8 `GHEB`
@@ -411,7 +411,7 @@ is reconstructed from attrs by `legacy_fwd_name()` rather than remembered.
 This matters because `SI_code3_paleo_showcases.ipynb` and
 `SI_code03_paleo_showcases.ipynb` both request a stamped name
 (`..._scaledRI_cren3_050126_eiv`). **If you re-run those calibrations rather
-than migrating, update the notebooks to the case id.** Both behaviours are
+than migrating, update the notebooks to the case id.** Both behaviors are
 pinned by tests in `tests/test_naming.py`.
 
 ### Streamlit app (`streamlit_app/`)
