@@ -396,15 +396,15 @@ Then select `.venv/bin/python` as your notebook kernel (VS Code auto-detects it;
 
 !!! tip "Which sync command?"
     - `uv sync` — core runtime only (no Jupyter). Cannot serve a notebook kernel.
-    - `uv sync --extra dev` — adds Jupyter/ipykernel + the notebook analysis deps (scikit-learn, statsmodels, seaborn, openpyxl, odrpack).
-    - `uv sync --all-extras` — the above **plus** plotting (ultraplot), maps (cartopy, regionmask), and regrid (geopandas, xesmf). Recommended for the SI notebooks.
+    - `uv sync --extra dev` — adds Jupyter/ipykernel + the notebook analysis deps (scikit-learn, seaborn, openpyxl, pyarrow).
+    - `uv sync --all-extras` — the above **plus** plotting (ultraplot, cmocean), maps (cartopy, regionmask, pykrige, joblib), and regrid (xesmf). Recommended for the SI notebooks.
 
 !!! note "Python 3.12"
-    uv on Python 3.12 is supported: the project pins a `[tool.uv]` override so `pyproj` resolves to a version with a 3.12 wheel (the `regrid` extra's `pyproj<3.6` cap has no 3.12 wheel and would otherwise force a source build). No action needed on your part.
+    uv on Python 3.12 is supported with no special handling. Until 2026-09 the `regrid` extra pinned `pyproj<3.6`, which ships no cp312 wheel, and a `[tool.uv] override-dependencies` entry existed purely to undo that pin. `regrid` is now just `xesmf`, so both are gone.
 
 !!! note "Optional extras under uv"
-    - `texas-psm[plotting]` (ultraplot) and `texas-psm[maps]` (cartopy, regionmask) install cleanly from PyPI.
-    - The `regrid` extra installs `xesmf` and the rest of the geo stack from PyPI, but **`esmpy` (the ESMF bindings xesmf needs at runtime) is not on PyPI** — install it from conda-forge: `conda install -c conda-forge esmpy`. (esmpy is deliberately kept out of the extra: a non-PyPI package in *any* extra makes `uv lock` fail for the whole project.) For heavy regridding, prefer the conda environment (Option D).
+    - `texas-psm[plotting]` (ultraplot, cmocean) and `texas-psm[maps]` (cartopy, regionmask, pykrige, joblib) install cleanly from PyPI.
+    - The `regrid` extra installs `xesmf` from PyPI, but **`esmpy` (the ESMF bindings xesmf needs at runtime) is not on PyPI** — install it from conda-forge: `conda install -c conda-forge esmpy`. (esmpy is deliberately kept out of the extra: a non-PyPI package in *any* extra makes `uv lock` fail for the whole project.) For heavy regridding, prefer the conda environment (Option D). Without esmpy, `regrid_curvilinear_to_latlon` falls back to its pure-scipy backend.
     - CmdStan is **not** a Python package — install it once via `cmdstanpy.install_cmdstan()` or conda-forge `cmdstan`, exactly as for the pip route above.
 
 ### CmdStan: install, discovery, and verification

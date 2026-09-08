@@ -64,4 +64,3 @@ sphinx:
       - pykrige
       - proplot
       - pygwalker
-      - odrpack

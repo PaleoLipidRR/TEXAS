@@ -80,3 +80,99 @@ def test_proplot_is_gone():
         "proplot is back in environment.yml; it was superseded by ultraplot "
         "in 6eca051 and its matplotlib<3.5 requirement breaks the stack."
     )
+
+
+# ── pyproject dependency-audit guards (spec §9.2) ─────────────────────────────
+# Each of these encodes a finding from the 2026-09-07 dependency audit. They are
+# tests rather than comments because a dependency list drifts silently.
+
+try:
+    import tomllib                      # Python 3.11+
+except ModuleNotFoundError:             # pragma: no cover - environment.yml pins python=3.10
+    tomllib = None
+
+# CI runs 3.11/3.12 so these always execute there; the conda env is 3.10.
+needs_tomllib = pytest.mark.skipif(tomllib is None,
+                                   reason="tomllib requires Python 3.11+")
+
+
+def _pyproject() -> dict:
+    return tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))
+
+
+@needs_tomllib
+def test_core_deps_do_not_include_packages_the_package_never_imports():
+    """cmocean and plotly are notebook/Streamlit deps, not core runtime deps."""
+    core = " ".join(_pyproject()["project"]["dependencies"])
+    assert "cmocean" not in core, "cmocean belongs in the `plotting` extra"
+    assert "plotly" not in core, (
+        "plotly is used only by streamlit_app/, which has its own "
+        "requirements.streamlit.txt"
+    )
+
+
+@needs_tomllib
+def test_plotting_extra_carries_cmocean():
+    extras = _pyproject()["project"]["optional-dependencies"]
+    assert any(d.startswith("cmocean") for d in extras["plotting"])
+
+
+@needs_tomllib
+def test_maps_extra_declares_joblib():
+    """residual_maps.py imports joblib; it used to arrive via scikit-learn."""
+    extras = _pyproject()["project"]["optional-dependencies"]
+    assert any(d.startswith("joblib") for d in extras["maps"])
+
+
+def _req_name(dep: str) -> str:
+    """Bare distribution name from a PEP 508 requirement string.
+
+    Splits on every character that can legally follow the name -- version
+    operators, an extras bracket, an environment marker, whitespace -- so a
+    banned package cannot slip back in under a spelling the guard fails to
+    recognise (``statsmodels~=0.14``, ``pydantic[email]``,
+    ``odrpack ; python_version<'3.13'``).
+    """
+    return re.split(r"[<>=!~;\[\s]", dep, maxsplit=1)[0].strip()
+
+
+@needs_tomllib
+def test_dev_extra_has_no_unreferenced_packages():
+    """anywidget/ipylab/duckdb/sqlalchemy/pydantic/statsmodels/odrpack are unused."""
+    dev = _pyproject()["project"]["optional-dependencies"]["dev"]
+    names = {_req_name(d) for d in dev}
+    for gone in ("anywidget", "ipylab", "duckdb", "sqlalchemy",
+                 "pydantic", "statsmodels", "odrpack"):
+        assert gone not in names, f"{gone} is back in the dev extra; nothing imports it"
+
+
+@needs_tomllib
+def test_dev_extra_keeps_the_implicit_pandas_backends():
+    """pyarrow backs pd.read_parquet, openpyxl backs pd.read_excel."""
+    dev = _pyproject()["project"]["optional-dependencies"]["dev"]
+    names = {_req_name(d) for d in dev}
+    assert "pyarrow" in names and "openpyxl" in names
+
+
+@needs_tomllib
+def test_regrid_extra_is_just_xesmf():
+    """utils/regrid.py imports only xesmf (+ esmpy at runtime, conda-only)."""
+    extras = _pyproject()["project"]["optional-dependencies"]
+    assert extras["regrid"] == ["xesmf"], extras["regrid"]
+
+
+def test_no_pyproj_pin_and_no_uv_override_to_undo_it():
+    """The `pyproj<3.6` cap and the [tool.uv] override that undid it both go."""
+    text = PYPROJECT.read_text(encoding="utf-8")
+    assert "pyproj<3.6" not in text
+    assert "override-dependencies" not in text, (
+        "the only override-dependencies entry existed to undo pyproj<3.6"
+    )
+
+
+@needs_tomllib
+def test_no_extra_lists_esmpy():
+    """esmpy is not on PyPI; one non-PyPI package in any extra breaks `uv lock`."""
+    extras = _pyproject()["project"]["optional-dependencies"]
+    for name, deps in extras.items():
+        assert not any(d.startswith("esmpy") for d in deps), f"esmpy in [{name}]"
