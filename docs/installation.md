@@ -552,7 +552,8 @@ cd TEXAS
 
 - **conda (recommended for the notebooks — the tested stack):** `conda env create -f
   environment.yml && conda activate texas-env && pip install -e .`. This pins
-  `matplotlib<3.5` and `python=3.10`, the versions the notebooks were authored against.
+  `matplotlib>=3.9,<3.11` and `python=3.10`, the versions the notebooks were authored
+  against. (The old `matplotlib<3.5` cap was a proplot constraint; ultraplot needs 3.9+.)
 - **uv (lightweight):** `uv sync --all-extras`. Newer stack (matplotlib 3.10, numpy 2,
   ultraplot 2.x) — a few notebook plotting idioms need the updated syntax the notebooks
   now use.

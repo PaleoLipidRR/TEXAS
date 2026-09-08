@@ -252,6 +252,39 @@ def test_psutil_is_declared_explicitly():
     )
 
 
+def test_environment_does_not_self_install_texas_from_pypi():
+    """environment.yml must not pip-install texas-psm from PyPI.
+
+    ``conda-lock`` resolves a ``texas-psm`` entry against PyPI, so it pins the
+    *published* wheel and bakes that wheel's dependency metadata into
+    ``conda-lock.yml``. In 2026-09 that silently reintroduced ``plotly`` --
+    removed from the core dependencies in the same audit -- under a version
+    number identical to the working tree's, so nothing about the version
+    signalled that the lock described a different package than the source.
+    The package is installed with ``pip install -e .`` instead.
+    """
+    assert "texas-psm" not in _dep_names(), (
+        "environment.yml pip-installs texas-psm again; conda-lock will pin the "
+        "published wheel's dependencies instead of this tree's"
+    )
+
+
+def test_texas_core_dependencies_are_declared_explicitly():
+    """Dropping the self-install is only safe while every core dep is explicit."""
+    core = set()
+    in_block = False
+    for line in PYPROJECT.read_text(encoding="utf-8").splitlines():
+        if line.startswith("dependencies = ["):
+            in_block = True
+            continue
+        if in_block:
+            if line.strip() == "]":
+                break
+            core |= {_req_name(m) for m in re.findall(r'"([^"]+)"', line)}
+    missing = sorted(core - _dep_names())
+    assert not missing, f"environment.yml no longer supplies core deps: {missing}"
+
+
 def test_native_libs_behind_xesmf_and_netcdf_are_kept():
     names = _dep_names()
     for keep in ("esmf", "hdf5", "libnetcdf", "esmpy", "xesmf"):
