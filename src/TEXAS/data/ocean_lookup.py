@@ -23,6 +23,8 @@ from typing import Literal, Optional, Union
 import numpy as np
 import xarray as xr
 
+from ..utils.regrid import resolve_latlon_names
+
 
 def get_ocean_prop_ds(
     cache_dir: Optional[Union[str, Path]] = None,
@@ -65,6 +67,9 @@ def lookup_no3_from_woa(
     woa_dataset: xr.Dataset,
     variable: str = "no3_sf2tc_avg",
     method: Literal["linear", "nearest"] = "linear",
+    *,
+    lat_name: Optional[str] = None,
+    lon_name: Optional[str] = None,
 ) -> np.ndarray:
     """
     Look up modern NO₃ at one or more lat/lon coordinates from a WOA23-derived
@@ -86,8 +91,10 @@ def lookup_no3_from_woa(
         are accepted — the function normalises to match the dataset's convention
         automatically.
     woa_dataset : xr.Dataset
-        WOA23-derived dataset with a ``(lat, lon)`` grid containing *variable*.
-        Dimensions must be named ``"lat"`` and ``"lon"``.
+        WOA23-derived dataset on a regular latitude/longitude grid containing
+        *variable*. The axis names are detected (``lat``/``lon``,
+        ``latitude``/``longitude``, ``LAT``/``LON``, ...); pass *lat_name* /
+        *lon_name* to override.
     variable : str
         Name of the NO₃ variable to extract.  Default ``"no3_sf2tc_avg"``
         (thermocline depth-integrated annual average from SI_code1).
@@ -96,6 +103,10 @@ def lookup_no3_from_woa(
         interpolation and is preferred for smooth fields.  ``"nearest"`` snaps
         to the closest grid cell and is useful when the dataset is sparse or
         has NaN-masked shelves.
+    lat_name : str, optional
+        Latitude coordinate name.  Auto-detected when omitted.
+    lon_name : str, optional
+        Longitude coordinate name.  Auto-detected when omitted.
 
     Returns
     -------
@@ -110,7 +121,8 @@ def lookup_no3_from_woa(
     KeyError
         If *variable* is not found in *woa_dataset*.
     ValueError
-        If *woa_dataset* does not have ``"lat"`` and ``"lon"`` dimensions.
+        If the latitude/longitude axes cannot be resolved, or the resolved
+        names are coordinates but not dimensions.
 
     Examples
     --------
@@ -127,11 +139,15 @@ def lookup_no3_from_woa(
     ...                                ocean_prop_ds)
     >>> result = predict_T_from_proxyObs(..., no3=no3_arr)
     """
-    # ── Validate dataset ──────────────────────────────────────────────────────
-    if "lat" not in woa_dataset.dims or "lon" not in woa_dataset.dims:
+    # ── Resolve the grid axes ─────────────────────────────────────────────────
+    # utils/regrid.py already knows the spellings these grids arrive under; the
+    # lookup used to hard-code "lat"/"lon" and fail on anything else.
+    lat_name, lon_name = resolve_latlon_names(woa_dataset, lat_name, lon_name)
+    if lat_name not in woa_dataset.dims or lon_name not in woa_dataset.dims:
         raise ValueError(
-            "woa_dataset must have 'lat' and 'lon' dimensions. "
-            f"Found: {list(woa_dataset.dims)}"
+            f"woa_dataset must be on a regular grid: {lat_name!r} and "
+            f"{lon_name!r} are coordinates but not dimensions. "
+            f"Found dims: {list(woa_dataset.dims)}"
         )
     if variable not in woa_dataset:
         raise KeyError(
@@ -144,7 +160,7 @@ def lookup_no3_from_woa(
     # ── Normalise longitude convention ────────────────────────────────────────
     # Dataset may use 0–360; input may use −180–180 (or vice-versa).
     # Detect the dataset's convention from its lon coordinate range.
-    ds_lon = da["lon"].values
+    ds_lon = da[lon_name].values
     ds_uses_0_360 = float(ds_lon.max()) > 180.0
 
     lon_arr = np.asarray(lon, dtype=float)
@@ -161,8 +177,7 @@ def lookup_no3_from_woa(
     # ── Interpolate ───────────────────────────────────────────────────────────
     if scalar_input:
         result = da.interp(
-            lat=float(lat_arr),
-            lon=float(lon_arr),
+            {lat_name: float(lat_arr), lon_name: float(lon_arr)},
             method=method,
         )
         out = np.asarray(result.values, dtype=float)
@@ -171,7 +186,7 @@ def lookup_no3_from_woa(
         # performs point-wise (not grid) interpolation.
         lat_da = xr.DataArray(lat_arr, dims="obs")
         lon_da = xr.DataArray(lon_arr, dims="obs")
-        result = da.interp(lat=lat_da, lon=lon_da, method=method)
+        result = da.interp({lat_name: lat_da, lon_name: lon_da}, method=method)
         out = np.asarray(result.values, dtype=float)
 
     # ── Warn on NaN (masked shelf / land) ────────────────────────────────────

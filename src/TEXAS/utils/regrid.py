@@ -17,16 +17,44 @@ _LAT_CANDIDATES = ["TLAT", "lat", "latitude", "LAT", "Lat"]
 _LON_CANDIDATES = ["TLONG", "lon", "longitude", "LON", "Lon", "LONG"]
 
 
-def _prepare_grids(ds, lat_name, lon_name, target_res, lat_range, lon_range):
+def resolve_latlon_names(ds, lat_name=None, lon_name=None):
+    """Resolve a dataset's latitude and longitude coordinate names.
+
+    Grids in this project arrive under several spellings -- POP curvilinear
+    output as ``TLAT``/``TLONG``, the WOA23-derived fields as ``lat``/``lon``,
+    CMIP-style files as ``latitude``/``longitude`` -- so the names are detected
+    rather than assumed. An explicit name always wins over detection.
+
+    Args:
+        ds: An ``xr.Dataset`` or ``xr.DataArray`` to inspect.
+        lat_name: Latitude coordinate name. ``None`` auto-detects, trying
+            ``TLAT``, ``lat``, ``latitude``, ``LAT``, ``Lat`` in that order.
+        lon_name: Longitude coordinate name. ``None`` auto-detects, trying
+            ``TLONG``, ``lon``, ``longitude``, ``LON``, ``Lon``, ``LONG``.
+
+    Returns:
+        ``(lat_name, lon_name)`` as they appear in *ds*.
+
+    Raises:
+        ValueError: if either name is absent and no candidate matches. The
+            message lists what *ds* does contain, so the caller can pass the
+            right names rather than guess again.
+    """
     if lat_name is None:
         lat_name = next((c for c in _LAT_CANDIDATES if c in ds), None)
     if lon_name is None:
         lon_name = next((c for c in _LON_CANDIDATES if c in ds), None)
     if lat_name is None or lon_name is None:
+        available = list(ds.variables) if hasattr(ds, "variables") else list(ds.coords)
         raise ValueError(
-            f"Could not auto-detect lat/lon coordinates. Available: {list(ds.variables)}. "
+            f"Could not auto-detect lat/lon coordinates. Available: {available}. "
             "Pass lat_name and lon_name explicitly."
         )
+    return lat_name, lon_name
+
+
+def _prepare_grids(ds, lat_name, lon_name, target_res, lat_range, lon_range):
+    lat_name, lon_name = resolve_latlon_names(ds, lat_name, lon_name)
     lat_dims, lon_dims = ds[lat_name].dims, ds[lon_name].dims
     if lat_dims != lon_dims:
         raise ValueError(f"lat/lon have different dims: {lat_dims} vs {lon_dims}")

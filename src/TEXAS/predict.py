@@ -47,7 +47,7 @@ from .ensemble.generator import generate_ensemble_auto
 from .stan.invT import get_invT_posterior as _get_invT_posterior
 from .stan.invT import _percentiles_from_posterior
 from .data.builder import InvTConfig
-from .constants import DEFAULT_FWD_POSTERIOR
+from .constants import DEFAULT_FWD_POSTERIOR, GDGT23RATIO_KEY, NO3_KEY
 from .data.ocean_lookup import lookup_no3_from_woa, get_ocean_prop_ds
 
 
@@ -264,9 +264,9 @@ def predict_T_from_proxyObs(
         print(f"🌊 WOA23 NO₃ lookup: lat={_lat_repr}, lon={_lon_repr} → {_no3_repr} µmol/L")
 
     if no3 is not None:
-        predictors["no3"] = no3
+        predictors[NO3_KEY] = no3
     if gdgt23ratio is not None:
-        predictors["gdgt23ratio"] = gdgt23ratio
+        predictors[GDGT23RATIO_KEY] = gdgt23ratio
 
     # Warn if predictors are passed but the forward posterior doesn't use them
     _ds_for_check = _fwd_ds
@@ -277,7 +277,8 @@ def predict_T_from_proxyObs(
             pass
     if _ds_for_check is not None:
         _attrs = _ds_for_check.attrs
-        if predictors.get("gdgt23ratio") is not None and not _attrs.get("use_gdgt23ratio", False):
+        if (predictors.get(GDGT23RATIO_KEY) is not None
+                and not _attrs.get(f"use_{GDGT23RATIO_KEY}", False)):
             warnings.warn(
                 "gdgt23ratio was passed but the forward posterior has no GDGT-2/3 ratio "
                 "parameters (use_gdgt23ratio=False) — the predictor will be silently ignored. "
@@ -295,7 +296,8 @@ def predict_T_from_proxyObs(
                 f"say otherwise. Drop temptype= to take it from the calibration.",
                 UserWarning, stacklevel=2,
             )
-        if predictors.get("gdgt23ratio") is None and _attrs.get("use_gdgt23ratio", False):
+        if (predictors.get(GDGT23RATIO_KEY) is None
+                and _attrs.get(f"use_{GDGT23RATIO_KEY}", False)):
             warnings.warn(
                 "This calibration uses the GDGT-2/3 ratio, but none was supplied — "
                 "it will be treated as 0, which is not the same as switching the "
@@ -305,7 +307,8 @@ def predict_T_from_proxyObs(
                 "(e.g. 'tx.GHPU.sst.sri03.p0').",
                 UserWarning, stacklevel=2,
             )
-        if predictors.get("no3") is not None and not _attrs.get("use_no3", False):
+        if (predictors.get(NO3_KEY) is not None
+                and not _attrs.get(f"use_{NO3_KEY}", False)):
             warnings.warn(
                 "no3 was passed but the forward posterior has no NO₃ parameters "
                 "(use_no3=False) — the predictor will be silently ignored. "
@@ -313,7 +316,8 @@ def predict_T_from_proxyObs(
                 "(e.g. gen_logi_fixed_hier_crtp_multiv_priorApprox_*).",
                 UserWarning, stacklevel=2,
             )
-        if predictors.get("no3") is None and _attrs.get("use_no3", False):
+        if (predictors.get(NO3_KEY) is None
+                and _attrs.get(f"use_{NO3_KEY}", False)):
             warnings.warn(
                 "This calibration uses the NO₃ correction, but none was supplied — "
                 "it will be treated as 0, which is not the same as switching the "

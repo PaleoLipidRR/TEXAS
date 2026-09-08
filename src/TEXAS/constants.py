@@ -16,8 +16,14 @@ DEFAULT_FWD_POSTERIOR = {
     "thermoT": "tx.GHEB.thm.sri03.G23-N1p0",
 }
 
-# Optional predictors
-OPTIONAL_PREDICTORS = ["gdgt23ratio", "no3"]
+# Optional (non-thermal) predictors. The two named constants are the single
+# source of truth for the key spelling; OPTIONAL_PREDICTORS is the canonical
+# order in which they are iterated (data/builder.py, stan/metadata.py). Code
+# that looks *up* one predictor uses the name; code that loops over both uses
+# the list. Neither spells the string again.
+GDGT23RATIO_KEY = "gdgt23ratio"
+NO3_KEY = "no3"
+OPTIONAL_PREDICTORS = [GDGT23RATIO_KEY, NO3_KEY]
 
 # Suffixes for logistic model parameter variants
 DEFAULT_SUFFIXES = ["crtp", "culmesocore", "culmeso", "meso", "cul", "downcore"]

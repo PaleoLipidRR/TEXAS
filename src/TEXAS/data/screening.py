@@ -708,7 +708,9 @@ class MahalanobisOutlierDetector:
         show_exception_region: bool = True,
         ellipse_kwargs: dict = None,
         scatter_kwargs: dict = None,
-        outlier_kwargs: dict = None
+        outlier_kwargs: dict = None,
+        *,
+        columns: Optional[dict] = None,
     ) -> tuple:
         """
         Complete visualization with data points and decision boundary.
@@ -739,6 +741,10 @@ class MahalanobisOutlierDetector:
             Keyword arguments for inlier scatter plot
         outlier_kwargs : dict, optional
             Keyword arguments for outlier scatter plot
+        columns : dict, optional
+            Mapping ``{logical_name: physical_column}`` for callers whose
+            DataFrame uses different column names than ``self.features`` --
+            the same map ``fit``, ``transform`` and ``fit_predict`` accept.
 
         Returns
         -------
@@ -756,6 +762,11 @@ class MahalanobisOutlierDetector:
         """
         if len(self.features) != 2:
             raise ValueError(f"Decision boundary plot only works for 2D data, got {len(self.features)} features")
+
+        # Work on a copy relabelled to the logical names, so every df[...] below
+        # and every nested detector call sees self.features regardless of what
+        # the caller's columns are called.
+        df = self._resolve_features(df, columns=columns, on_unscorable='ignore')
 
         if ax is None:
             fig, ax = plt.subplots(figsize=(8, 6))
@@ -827,11 +838,12 @@ class MahalanobisOutlierDetector:
         ax: plt.Axes = None,
         n_std_levels: list = None,
         colors: list = None,
+        columns: Optional[dict] = None,
         **kwargs
     ):
         """
         Plot multiple confidence ellipses at different threshold levels.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
@@ -842,16 +854,25 @@ class MahalanobisOutlierDetector:
             List of standard deviation levels. Default: [1, 2, 3, threshold]
         colors : list, optional
             Colors for each ellipse level
+        columns : dict, optional
+            Mapping ``{logical_name: physical_column}`` for callers whose
+            DataFrame uses different column names than ``self.features`` --
+            the same map ``fit``, ``transform`` and ``fit_predict`` accept.
         **kwargs
             Additional arguments passed to scatter plot
-            
+
         Examples
         --------
         >>> detector.plot_multiple_ellipses(df, n_std_levels=[1, 2, 2.5, 3])
         """
         if len(self.features) != 2:
             raise ValueError(f"Ellipse plot only works for 2D data, got {len(self.features)} features")
-        
+
+        # Work on a copy relabelled to the logical names, so every df[...] below
+        # and every nested detector call sees self.features regardless of what
+        # the caller's columns are called.
+        df = self._resolve_features(df, columns=columns, on_unscorable='ignore')
+
         if ax is None:
             fig, ax = plt.subplots(figsize=(8, 6))
         
@@ -894,11 +915,13 @@ class MahalanobisOutlierDetector:
         show_outliers: bool = True,
         ellipse_kwargs: dict = None,
         scatter_kwargs: dict = None,
-        outlier_kwargs: dict = None
+        outlier_kwargs: dict = None,
+        *,
+        columns: Optional[dict] = None,
     ):
         """
         Plot pairwise 2D projections with confidence ellipses for high-dimensional data.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
@@ -913,7 +936,11 @@ class MahalanobisOutlierDetector:
             Keyword arguments for inlier scatter
         outlier_kwargs : dict, optional
             Keyword arguments for outlier scatter
-            
+        columns : dict, optional
+            Mapping ``{logical_name: physical_column}`` for callers whose
+            DataFrame uses different column names than ``self.features`` --
+            the same map ``fit``, ``transform`` and ``fit_predict`` accept.
+
         Returns
         -------
         fig : matplotlib.figure.Figure
@@ -929,7 +956,12 @@ class MahalanobisOutlierDetector:
         """
         if not self.is_fitted:
             raise ValueError("Must call fit() before plotting")
-        
+
+        # Work on a copy relabelled to the logical names, so every df[...] below
+        # and every nested detector call sees self.features regardless of what
+        # the caller's columns are called.
+        df = self._resolve_features(df, columns=columns, on_unscorable='ignore')
+
         n_features = len(self.features)
         feature_pairs = list(combinations(range(n_features), 2))
         n_pairs = len(feature_pairs)
@@ -1009,11 +1041,13 @@ class MahalanobisOutlierDetector:
         show_variance: bool = True,
         ellipse_kwargs: dict = None,
         scatter_kwargs: dict = None,
-        outlier_kwargs: dict = None
+        outlier_kwargs: dict = None,
+        *,
+        columns: Optional[dict] = None,
     ):
         """
         Project high-dimensional data to 2D/3D using PCA and plot with ellipse.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
@@ -1032,14 +1066,18 @@ class MahalanobisOutlierDetector:
             Keyword arguments for inlier scatter
         outlier_kwargs : dict, optional
             Keyword arguments for outlier scatter
-            
+        columns : dict, optional
+            Mapping ``{logical_name: physical_column}`` for callers whose
+            DataFrame uses different column names than ``self.features`` --
+            the same map ``fit``, ``transform`` and ``fit_predict`` accept.
+
         Returns
         -------
         ax : matplotlib.axes.Axes
             Axes object
         pca : sklearn.decomposition.PCA
             Fitted PCA object
-            
+
         Examples
         --------
         >>> detector = MahalanobisOutlierDetector(['TEX86', 'ringIndex', 'fGDGT_0', 'fGDGT_cren'])
@@ -1049,10 +1087,15 @@ class MahalanobisOutlierDetector:
         """
         if not self.is_fitted:
             raise ValueError("Must call fit() before plotting")
-        
+
         if n_components not in [2, 3]:
             raise ValueError("n_components must be 2 or 3")
-        
+
+        # Work on a copy relabelled to the logical names, so every df[...] below
+        # and every nested detector call sees self.features regardless of what
+        # the caller's columns are called.
+        df = self._resolve_features(df, columns=columns, on_unscorable='ignore')
+
         # Get valid data
         X = df[self.features].replace([np.inf, -np.inf], np.nan)
         valid_idx = X.dropna().index
@@ -1143,12 +1186,13 @@ class MahalanobisOutlierDetector:
         df: pd.DataFrame,
         figsize: tuple = None,
         show_outliers: bool = True,
+        columns: Optional[dict] = None,
         **kwargs
     ):
         """
         Create corner plot (lower triangle pairwise plots with marginals).
         Similar to corner.py but integrated with Mahalanobis detection.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
@@ -1157,9 +1201,13 @@ class MahalanobisOutlierDetector:
             Figure size
         show_outliers : bool, default=True
             Whether to highlight outliers
+        columns : dict, optional
+            Mapping ``{logical_name: physical_column}`` for callers whose
+            DataFrame uses different column names than ``self.features`` --
+            the same map ``fit``, ``transform`` and ``fit_predict`` accept.
         **kwargs
             Additional styling arguments
-            
+
         Returns
         -------
         fig : matplotlib.figure.Figure
@@ -1169,7 +1217,12 @@ class MahalanobisOutlierDetector:
         """
         if not self.is_fitted:
             raise ValueError("Must call fit() before plotting")
-        
+
+        # Work on a copy relabelled to the logical names, so every df[...] below
+        # and every nested detector call sees self.features regardless of what
+        # the caller's columns are called.
+        df = self._resolve_features(df, columns=columns, on_unscorable='ignore')
+
         n_features = len(self.features)
         
         if figsize is None:

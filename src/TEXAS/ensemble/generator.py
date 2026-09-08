@@ -5,6 +5,7 @@ import xarray as xr
 from typing import Callable, List, Optional, Dict, Any, Literal
 
 from .detection import detect_model_and_params
+from ..constants import GDGT23RATIO_KEY, NO3_KEY
 
 def generate_ensemble(
     post_ds: xr.Dataset,
@@ -92,13 +93,13 @@ def generate_ensemble(
     # STRICT attr-based flags only (no data_vars scanning)
     if use_gdgt23ratio_flag is None:
         # apply only if the attr exists and is truthy
-        use_gdgt = bool(post_ds.attrs.get("use_gdgt23ratio", False))
+        use_gdgt = bool(post_ds.attrs.get(f"use_{GDGT23RATIO_KEY}", False))
     else:
         use_gdgt = bool(use_gdgt23ratio_flag)
 
     if use_no3_flag is None:
         # apply only if the attr exists and is truthy
-        use_no3 = bool(post_ds.attrs.get("use_no3", False))
+        use_no3 = bool(post_ds.attrs.get(f"use_{NO3_KEY}", False))
     else:
         use_no3 = bool(use_no3_flag)
 
@@ -127,9 +128,9 @@ def generate_ensemble(
         params = {p: getattr(row, f"{p}_{suffix}") for p in param_names}
         if is_multi:
             if use_gdgt and gdgt23ratio is not None:
-                params["gdgt23ratio"] = gdgt23ratio
+                params[GDGT23RATIO_KEY] = gdgt23ratio
             if use_no3 and no3 is not None:
-                params["no3"] = no3
+                params[NO3_KEY] = no3
                 params["no3_cutoff"] = eff_no3_cutoff
         try:
             ensemble[i] = model_function(x, **params)
