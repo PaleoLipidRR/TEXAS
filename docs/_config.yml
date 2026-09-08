@@ -47,7 +47,11 @@ sphinx:
       - custom.css
     html_favicon: _static/texas_logo.svg
     # Generate #slug anchors for H1–H3 so in-page table links resolve
-    myst_heading_anchors: 3
+    # 4, not 3: installation.md links to two of its own #### headings
+    # (verify-the-whole-toolchain, setting-cmdstan-manually) and MyST
+    # generates no anchor for a level it is not told to cover, so those
+    # links had been dead since they were written.
+    myst_heading_anchors: 4
     # The codebase mixes Google-style (Args:/Returns:) and NumPy-style
     # (Parameters\n----------) docstrings — enable both napoleon parsers.
     napoleon_numpy_docstring: true
