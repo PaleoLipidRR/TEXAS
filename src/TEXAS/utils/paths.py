@@ -22,7 +22,7 @@ def find_cmdstan(min_version: str = "2.23.0") -> Path:
 
     Accepts any CmdStan version >= min_version (default 2.23.0, when
     reduce_sum was introduced).  For well-known directories the highest
-    installed version is preferred so users are not penalised for upgrading.
+    installed version is preferred so users are not penalized for upgrading.
 
     Search order:
       1. ``CMDSTAN`` env var — set by conda on activation; also honoured when

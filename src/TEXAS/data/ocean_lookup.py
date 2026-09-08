@@ -88,7 +88,7 @@ def lookup_no3_from_woa(
         single drill site; pass an array of length N to match N observations.
     lon : float or array-like
         Longitude(s) in decimal degrees.  Both −180–180 and 0–360 conventions
-        are accepted — the function normalises to match the dataset's convention
+        are accepted — the function normalizes to match the dataset's convention
         automatically.
     woa_dataset : xr.Dataset
         WOA23-derived dataset on a regular latitude/longitude grid containing
@@ -157,7 +157,7 @@ def lookup_no3_from_woa(
 
     da: xr.DataArray = woa_dataset[variable]
 
-    # ── Normalise longitude convention ────────────────────────────────────────
+    # ── Normalize longitude convention ────────────────────────────────────────
     # Dataset may use 0–360; input may use −180–180 (or vice-versa).
     # Detect the dataset's convention from its lon coordinate range.
     ds_lon = da[lon_name].values
@@ -165,10 +165,10 @@ def lookup_no3_from_woa(
 
     lon_arr = np.asarray(lon, dtype=float)
     if ds_uses_0_360:
-        # Normalise input to 0–360
+        # Normalize input to 0–360
         lon_arr = lon_arr % 360.0
     else:
-        # Normalise input to −180–180
+        # Normalize input to −180–180
         lon_arr = ((lon_arr + 180.0) % 360.0) - 180.0
 
     lat_arr = np.asarray(lat, dtype=float)

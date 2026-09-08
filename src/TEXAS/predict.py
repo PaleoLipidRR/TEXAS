@@ -230,7 +230,7 @@ def predict_T_from_proxyObs(
             f"'{fwd_posterior}' (full multivariate, G23 + NO3)."
         )
 
-    # ── Normalise fwd_posterior: split str vs pre-loaded Dataset ─────────────
+    # ── Normalize fwd_posterior: split str vs pre-loaded Dataset ─────────────
     if isinstance(fwd_posterior, xr.Dataset):
         _fwd_ds: Optional[xr.Dataset] = fwd_posterior
         _fwd_name: Optional[str] = None
@@ -442,7 +442,7 @@ def compute_scaledRI(
         abundances give the same result (see above).
     cren_weight : float
         Weight carried by both crenarchaeol and its regioisomer, which also
-        sets the normalisation (see Notes).
+        sets the normalization (see Notes).
         ``3`` → scaledRI_cren3 / RI₀₋₃ (default, recommended).
         ``4`` → scaledRI / RI₀₋₄ (Zhang et al. 2016 convention).
     cren_rings : int, optional
@@ -490,7 +490,7 @@ def compute_scaledRI(
         import warnings
         warnings.warn(
             "compute_scaledRI(cren_rings=...) is deprecated; use "
-            "'cren_weight' instead. The value is a weight and a normalisation "
+            "'cren_weight' instead. The value is a weight and a normalization "
             "constant, not a count of rings.",
             DeprecationWarning, stacklevel=2,
         )

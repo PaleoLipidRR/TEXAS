@@ -306,7 +306,7 @@ def find_optimal_no3_threshold(
     Selects the ``no3_cutoff`` used by the multivariate models: points below it
     carry the NO3 correction, points above are nutrient-replete and excluded.
     The two scoring criteria and the three weighting schemes are different
-    modelling choices, not tuning knobs -- see :doc:`PSM` §9.
+    modeling choices, not tuning knobs -- see :doc:`PSM` §9.
 
     Args:
         no3_values: Nitrate concentrations (umol/L).

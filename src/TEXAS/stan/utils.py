@@ -16,7 +16,7 @@ import numpy as np
 #                                   flags plus validation and legacy-key
 #                                   translation.
 #   infer_use_flags_from_attrs      existed HERE and in stan/metadata.py under
-#                                   one name with different behaviour: this
+#                                   one name with different behavior: this
 #                                   copy returned False for an absent use_*
 #                                   key, the other omitted the key entirely.
 #                                   Both were dead, so the divergence was a

@@ -947,7 +947,7 @@ def plot_residual_maps(
     fig = plt.figure(figsize=(fig_width, fig_height))
     fig.subplots_adjust(bottom=_bot_frac, top=_top_frac, left=0.005, right=0.995)
 
-    # ── Normalise hspace → list of (nrows-1) gap sizes ─────────────────────
+    # ── Normalize hspace → list of (nrows-1) gap sizes ─────────────────────
     # GridSpec only accepts a scalar for hspace, so variable gaps are encoded
     # via interleaved invisible spacer rows in height_ratios instead.
     if nrows > 1:

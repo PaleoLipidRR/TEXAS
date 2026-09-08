@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 def summarize_sampler_diagnostics(fit) -> dict:
-    """Summarise a CmdStanPy fit's convergence diagnostics as ``stan_diag_*`` attrs.
+    """Summarize a CmdStanPy fit's convergence diagnostics as ``stan_diag_*`` attrs.
 
     Reads divergent transitions, max-treedepth saturation, E-BFMI, R-hat and
     bulk ESS, and grades each against a fixed threshold, so a run can be

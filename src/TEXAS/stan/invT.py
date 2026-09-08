@@ -320,7 +320,7 @@ def get_invT_posterior(
         ds.attrs["temptype"] = temptype
     elif meta.get("fwd_temptype"):
         # The calibration itself says what it was fitted against, which is why
-        # `temptype=` is optional: it is metadata, not a modelling choice.
+        # `temptype=` is optional: it is metadata, not a modeling choice.
         ds.attrs["temptype"] = meta["fwd_temptype"]
     elif 'thermoT' in _name_hint:
         ds.attrs["temptype"] = "thermoT"
@@ -450,7 +450,7 @@ def get_invT_post_quantiles(
 
 # -------------------------------------------------------------------------
 def _percentiles_from_posterior(posterior: xr.Dataset) -> Dict[str, np.ndarray]:
-    """Reduce a quantile-summarised invT posterior to a ``{"pN": array}`` dict.
+    """Reduce a quantile-summarized invT posterior to a ``{"pN": array}`` dict.
 
     The keys follow the quantiles the dataset actually carries. The eleven that
     used to be hard-coded here silently dropped ``p40`` and ``p60`` -- both of
