@@ -462,13 +462,35 @@ class CaseName:
     # -- convenience ------------------------------------------------------
     @property
     def temptype_full(self) -> str:
+        """The temperature target spelled out: ``sst`` -> ``SST``, ``thm`` -> ``thermoT``."""
         return TEMPTYPE_DECODE.get(self.temptype, self.temptype)
 
     @property
     def proxy_full(self) -> str:
+        """The proxy spelled out: ``sri03`` -> ``scaledRI_cren3``."""
         return PROXY_DECODE.get(self.proxy, self.proxy)
 
     def describe(self) -> str:
+        """Expand this case id into a human-readable block.
+
+        Decodes each of the four compset characters and both predictor tokens
+        into words, so a case id in a log line, a figure caption or a Zenodo
+        file listing can be read without the codebook.
+
+        Returns:
+            A multi-line string: the canonical id on the first line, then one
+            indented ``key : value`` line per axis (curve, training set,
+            estimator, structure, target, proxy, predictors).
+
+        Raises:
+            ValueError: if the compset or predictor token cannot be decoded.
+
+        Example:
+            ``CaseName("GHEB", "sst", "sri03", "G23-N1p0").describe()`` starts
+            ``tx.GHEB.sst.sri03.G23-N1p0`` and then lists ``curve``,
+            ``training set``, ``estimator``, ``structure``, ``target``,
+            ``proxy`` and ``predictors``.
+        """
         d = decode_compset(self.compset)
         p = decode_predictors(self.predictors)
         preds = []
