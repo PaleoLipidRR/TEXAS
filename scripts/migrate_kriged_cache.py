@@ -3,10 +3,16 @@
 
 Until 2026-09-07 ``plot_residual_maps`` wrote its ``.npz`` grids straight into
 the cache root, next to the two posterior directories. This moves the live
-grids into their own folder and deletes four superseded sets:
+grids into their own folder and deletes three superseded sets:
 
-* ``kriged_grids_1.0deg_*`` -- the same grid as ``1deg`` under the old
-  unformatted resolution token (the f-string had no ``:g``).
+* ``kriged_grids_1.0deg_*`` -- normally the same grid as ``1deg`` under the
+  old unformatted resolution token (the f-string had no ``:g``), so it is
+  deleted as a duplicate *only when a ``1deg`` counterpart actually exists*
+  (in the cache root or already in the destination). A machine whose grids
+  were written through the default ``krige_res=1.0`` rather than an explicit
+  ``1`` has no such counterpart -- there deleting it would destroy the only
+  copy, so instead it is **renamed into the new folder under the canonical
+  ``1deg`` name**, and the plan says so.
 * ``kriged_grids_2.5deg_*`` -- the 2.5 degree cells in SI_code02 are
   commented out.
 * ``kriged_halo_*.npz`` -- the halo-only cache format, written by
@@ -44,8 +50,11 @@ import sys
 from pathlib import Path
 
 LIVE_PREFIX = "kriged_grids_1deg_"
+# ``1.0deg`` files are handled separately below (deleted only if a ``1deg``
+# counterpart exists; otherwise renamed in as the only copy) -- not a flat
+# "always superseded" prefix.
+ORPHAN_PREFIX = "kriged_grids_1.0deg_"
 SUPERSEDED_PREFIXES = (
-    "kriged_grids_1.0deg_",
     "kriged_grids_2.5deg_",
     "kriged_halo_",
 )
@@ -63,6 +72,58 @@ def _verify_moved(dest: Path) -> None:
     with np.load(dest) as z:
         if not z.files:
             raise ValueError(f"{dest} opened but contains no arrays")
+
+
+def build_plan(root: Path, dest_dir: Path) -> dict:
+    """Classify every ``.npz``/stray under *root* into what the migration does.
+
+    Returns a dict with:
+      - ``moves``          : [(src, dest)] -- live ``1deg`` grids to relocate
+      - ``orphan_renames``  : [(src, dest)] -- ``1.0deg`` grids with no ``1deg``
+        counterpart anywhere (root or destination); the only copy of that
+        grid, so they are renamed into *dest_dir* under the canonical
+        ``1deg`` name instead of being deleted.
+      - ``doomed_files``   : [Path] -- files to delete (superseded duplicates
+        + strays), including any ``1.0deg`` file that DOES have a ``1deg``
+        counterpart.
+      - ``doomed_dirs``    : [Path] -- stray directories to delete.
+
+    Pure classification -- nothing on disk is touched.
+    """
+    moves = [(f, dest_dir / f.name)
+             for f in sorted(root.glob(f"{LIVE_PREFIX}*.npz")) if f.is_file()]
+
+    # 1.0deg files: delete only when a 1deg counterpart genuinely exists
+    # (about to be moved from root, or already sitting in dest_dir); a
+    # machine whose grids were written through the default krige_res=1.0
+    # rather than an explicit 1 has no such counterpart, so that file is the
+    # *only* copy of the grid and must be preserved, not deleted.
+    orphan_renames: list[tuple[Path, Path]] = []
+    doomed_1p0_files: list[Path] = []
+    for f in sorted(root.glob(f"{ORPHAN_PREFIX}*.npz")):
+        if not f.is_file():
+            continue
+        sibling_name = LIVE_PREFIX + f.name[len(ORPHAN_PREFIX):]
+        has_counterpart = (root / sibling_name).exists() or (dest_dir / sibling_name).exists()
+        if has_counterpart:
+            doomed_1p0_files.append(f)
+        else:
+            orphan_renames.append((f, dest_dir / sibling_name))
+
+    doomed_files = doomed_1p0_files + [
+        f
+        for prefix in SUPERSEDED_PREFIXES
+        for f in sorted(root.glob(f"{prefix}*.npz")) if f.is_file()
+    ]
+    doomed_files += [root / n for n in STRAY_FILES if (root / n).is_file()]
+    doomed_dirs = [root / n for n in STRAY_DIRS if (root / n).is_dir()]
+
+    return {
+        "moves": moves,
+        "orphan_renames": orphan_renames,
+        "doomed_files": doomed_files,
+        "doomed_dirs": doomed_dirs,
+    }
 
 
 def main() -> int:
@@ -89,16 +150,13 @@ def main() -> int:
         print(f"No cache root at {root} -- nothing to do.")
         return 0
 
-    moves = [(f, dest_dir / f.name)
-             for f in sorted(root.glob(f"{LIVE_PREFIX}*.npz")) if f.is_file()]
+    plan = build_plan(root, dest_dir)
+    moves = plan["moves"]
+    orphan_renames = plan["orphan_renames"]
+    doomed_files = plan["doomed_files"]
+    doomed_dirs = plan["doomed_dirs"]
 
-    doomed_files = [f
-                    for prefix in SUPERSEDED_PREFIXES
-                    for f in sorted(root.glob(f"{prefix}*.npz")) if f.is_file()]
-    doomed_files += [root / n for n in STRAY_FILES if (root / n).is_file()]
-    doomed_dirs = [root / n for n in STRAY_DIRS if (root / n).is_dir()]
-
-    clashes = [(a, b) for a, b in moves if b.exists()]
+    clashes = [(a, b) for a, b in moves + orphan_renames if b.exists()]
     if clashes:
         print("REFUSING: destination already exists for")
         for a, b in clashes:
@@ -112,6 +170,13 @@ def main() -> int:
     print(f"MOVE  ({len(moves)} file(s), {_mb(move_bytes)}):")
     for a, _ in moves:
         print(f"   {a.name}")
+
+    if orphan_renames:
+        rename_bytes = sum(a.stat().st_size for a, _ in orphan_renames)
+        print(f"\nRENAME -- no 1deg counterpart, this is the only copy "
+              f"({len(orphan_renames)} file(s), {_mb(rename_bytes)}):")
+        for a, b in orphan_renames:
+            print(f"   {a.name}  ->  {b.name}")
 
     del_bytes = sum(f.stat().st_size for f in doomed_files)
     print(f"\nDELETE ({len(doomed_files)} file(s) + {len(doomed_dirs)} dir(s), "
@@ -129,7 +194,7 @@ def main() -> int:
     # --- Move -----------------------------------------------------------
     dest_dir.mkdir(parents=True, exist_ok=True)
     moved: list[Path] = []
-    for a, b in moves:
+    for a, b in moves + orphan_renames:
         shutil.move(str(a), str(b))
         moved.append(b)
         print(f"moved   {a.name}")

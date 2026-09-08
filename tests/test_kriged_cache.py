@@ -120,6 +120,34 @@ def test_a_fractional_resolution_keeps_its_decimal(cache_root):
     assert p.name.startswith("kriged_grids_2.5deg_")
 
 
+def test_max_dist_deg_default_leaf_is_byte_identical_to_the_old_int_naming(cache_root):
+    """``max_dist_deg=10.0`` is the default and every current call site's value.
+
+    ``int(10.0)`` and ``f"{10.0:g}"`` both give ``"10"``, so switching from
+    ``int()`` to ``:g`` formatting must not orphan any existing cache file.
+    """
+    p = rm._auto_cache_path(
+        "SST", "scaledRI_cren3", "temp_residual", krige_res=1, max_dist_deg=10.0
+    )
+    assert p.name == (
+        "kriged_grids_1deg_10dmax_woa23_SST_scaledRI_cren3_temp_residual.npz"
+    )
+
+
+def test_distinct_fractional_max_dist_deg_produce_distinct_filenames(cache_root):
+    """``int(10.5)`` and ``int(10.9)`` used to both collapse to ``10dmax``,
+    silently sharing one cache file for two different search radii."""
+    p1 = rm._auto_cache_path(
+        "SST", "scaledRI_cren3", "temp_residual", krige_res=1, max_dist_deg=10.5
+    )
+    p2 = rm._auto_cache_path(
+        "SST", "scaledRI_cren3", "temp_residual", krige_res=1, max_dist_deg=10.9
+    )
+    assert p1.name != p2.name
+    assert "10.5dmax" in p1.name
+    assert "10.9dmax" in p2.name
+
+
 def test_a_missing_cache_is_written_to_the_new_folder(cache_root, no_kriging):
     path = rm._auto_cache_path("SST", "scaledRI_cren3", "temp_residual", krige_res=1)
     assert not path.parent.exists()          # the folder does not exist yet
