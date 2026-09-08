@@ -1,7 +1,12 @@
 name: texas-env
 channels:
   - conda-forge
-channel_priority: strict
+# NOTE: no `channel_priority:` key here. It is not a valid environment.yml
+# section -- conda prints EnvironmentSectionNotValid and ignores it -- so it
+# only ever looked like it was enforcing something. It is also unnecessary:
+# channel priority matters when a package exists on more than one channel, and
+# this file declares exactly one. Verified 2026-09-08: all 441 conda packages in
+# conda-lock.yml resolve to conda-forge.
 
 dependencies:
   # --- Core & Environment ---

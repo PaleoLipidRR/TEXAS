@@ -4870,6 +4870,7 @@ all = [
     { name = "scikit-learn", version = "1.7.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "scikit-learn", version = "1.9.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "seaborn" },
+    { name = "shapely" },
     { name = "tqdm" },
     { name = "ultraplot" },
     { name = "xesmf", version = "0.8.10", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
@@ -4890,6 +4891,7 @@ dev = [
     { name = "scikit-learn", version = "1.7.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "scikit-learn", version = "1.9.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "seaborn" },
+    { name = "shapely" },
     { name = "tqdm" },
 ]
 maps = [
@@ -4897,6 +4899,7 @@ maps = [
     { name = "joblib" },
     { name = "pykrige" },
     { name = "regionmask" },
+    { name = "shapely" },
 ]
 plotting = [
     { name = "cmocean" },
@@ -4935,6 +4938,8 @@ requires-dist = [
     { name = "scikit-learn", marker = "extra == 'dev'" },
     { name = "scipy", specifier = ">=1.7" },
     { name = "seaborn", marker = "extra == 'dev'" },
+    { name = "shapely", marker = "extra == 'dev'" },
+    { name = "shapely", marker = "extra == 'maps'" },
     { name = "stanio", specifier = ">=0.4" },
     { name = "texas-psm", extras = ["dev"], marker = "extra == 'all'" },
     { name = "texas-psm", extras = ["maps"], marker = "extra == 'all'" },
