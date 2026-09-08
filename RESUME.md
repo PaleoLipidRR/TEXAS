@@ -363,9 +363,139 @@ byte-identical (md5 over every data var), +87 bytes of header on an 81 MB file.
 
 ---
 
-## HANDOFF — 2026-09-08: three of five finalization plans merged
+## HANDOFF — 2026-09-08 (laptop): all five plans merged; repo is release-ready
 
-Written on the Linux desktop for a laptop pickup. Read this first.
+Picked up the desktop handoff below and finished it. Read this first.
+
+### Where things stand
+
+`main` is green: **602 passed, 24 skipped**, `ruff check .` clean,
+`jupyter-book build docs/` succeeds **with no warnings**, and the published site
+at <https://paleolipidrr.github.io/TEXAS/> is current (gh-pages deploys `main`'s
+tip; verified against the deployed HTML, not just the build log).
+
+| plan | state | PR |
+|---|---|---|
+| 01 repo hygiene | merged | #25 |
+| 02 kriged cache folder | merged | #27 |
+| 03 dependency audit | **merged** | **#29** |
+| 04 package API cleanup | merged | #28 |
+| 05 docs alignment | **merged** | **#30** |
+
+Follow-on work merged the same day: **#31** (CLAUDE.md/RESUME.md American
+English), **#32** (`src/` docstrings), **#33** (`myst_heading_anchors` 3→4),
+**#34** (declare `shapely`, drop the invalid `channel_priority` key),
+**#35** (thermal-only fallback), **#36** (docs for #35).
+
+### The baseline is environment-dependent — 602/24 here, and that is correct
+
+This laptop has **esmpy 8.9.1**, so two `tests/test_regrid.py` cases exercise the
+absent-esmpy fallback and **skip** instead of passing. The desktop, without
+esmpy, reports two more passes and two fewer skips. Same total. Both are right.
+CI's `pytest (pip, pandas 3.x)` job runs Python 3.12 and reports a *third*
+figure again, because seven `tomllib`-gated dependency guards execute there and
+skip on 3.10. None of these three numbers is the "true" one.
+
+### What changed beyond the plans
+
+- **`environment.yml` no longer pip-installs `texas-psm` from PyPI.** That entry
+  made `conda-lock` pin the *published* wheel and bake its dependency metadata
+  into `conda-lock.yml`, reintroducing `plotly` — which the audit had just
+  removed — under a version number identical to the working tree's. Nothing about
+  the version signaled that the lock described a different package than the
+  source. Two guards now prevent its return.
+- **`predict_T_from_proxyObs` no longer fails on a bare proxy.** It selects the
+  thermal-only calibration, which now ships in the wheel alongside the
+  multivariate one (four bundled posteriors, was two), and warns that it is a
+  *different* calibration rather than the multivariate one with its corrections
+  off. A missing GDGT-2/3 ratio now raises like a missing NO₃ already did.
+- **`R2_thermal` is a prior scale, and the posterior is insensitive to it.**
+  Measured, not argued: seven GHEB refits over the full 0–0.99 grid. Over the
+  plausible 0.4–0.9 range `t0` moves 1.1% of its own CI width and `gamma_NO3`
+  0.4%. Written up as **Text S4** in the manuscript placeholder repo. See
+  `memory/project_r2_thermal_sensitivity.md`.
+
+### Eleven defects were found in the plan text, not in execution
+
+The desktop found ten; this session found eleven more of the same kind. The
+pattern is consistent and worth carrying forward: **the plans' anchors and
+reasoning were sound, but essentially every count, cell index and line number in
+them had drifted.** Verify each at the point of use.
+
+The two that would have caused real damage:
+
+1. **Plan 03 Task 7 told us to delete `import os` from `SI_code02a`.** It is not
+   unused — `os.path.join` builds the export paths in three `fig.savefig` cells.
+   Deleting it breaks manuscript figure generation. The tell was arithmetic:
+   ruff reports 7 F401 findings, not the plan's 8, and `os` is absent from them.
+2. **Plan 03 Task 8 omitted `import plotly.express as px` from SI_code03.** Not
+   a lint problem — ruff does not flag it, because cell 69 rebinds `px` to a
+   numpy array. But `plotly` had just been removed from both declaration files,
+   so leaving the import would `ModuleNotFoundError` on a fresh env, and **no
+   gate in the plan would have caught it.** Hence the installability cross-check
+   added below.
+
+### A gate the plans did not have, and should have
+
+The notebook verification was F401 (unused) and F821 (undefined) only. Neither
+sees an import of a package that is no longer *installable*. After the audit
+stripped plotly/geopy/requests/statsmodels/odrpack from both declaration files,
+any surviving import of them was a latent crash. The check is cheap — parse every
+top-level import in every notebook against the declared dependency set — and it
+is what caught defect 2 above. All seven notebooks pass it now.
+
+### Two decisions, resolved
+
+1. **A temperature-only default calibration — declined.** The circularity
+   objection was answered empirically first (see `R2_thermal` above), so the
+   objection is not what killed it; the revision deadline and the judgment that
+   it does not change the paper's main message did. Consequence: the wheel still
+   ships **seven** Stan models, `constraint_type` stays out of the public API,
+   and `docs/stan_models.md` is correct as written. The *thermal-only posterior*
+   now ships and is auto-selected (#35) — that is a packaging convenience, not
+   the GHEU model, which was never written.
+2. **Bayesian R²/RMSE for reviewer 3 — already done, better than proposed.**
+   `8ed4316` in the manuscript repo reports R² 0.803 [0.800, 0.806] and RMSE
+   0.0508, recomputed per draw **at the observed predictors**. The two cached
+   quantities (`R2_full` 0.813, `bayesR2_full` 0.874) are both *latent*-predictor
+   values and the manuscript correctly rejects them. Do not "fix" this by
+   swapping in the cached numbers.
+
+### Still open
+
+- [ ] **`.github/workflows/docs.yml` has no `pull_request` trigger.** `tests.yml`
+      is path-filtered to `src/`/`tests/`/`pyproject.toml`/`environment.yml`, so
+      **a docs-only PR runs no checks at all.** #30, #33 and #36 each merged with
+      zero CI. #36 exists only because the staleness was noticed by hand. Fix is
+      a `pull_request:` block mirroring the existing `paths:` filter, deploy left
+      push-only. *(An agent sandbox blocks edits to `.github/workflows/`; this
+      needs a human.)*
+- [ ] **`dist/` holds a stale wheel** — built 2026-08-27, 17 Stan models
+      including archived ones, no univariate bundle. `rm -rf dist/ && python -m
+      build` before any release.
+- [ ] **Phase C / v1.0.0 — deliberately deferred to acceptance** (decided
+      2026-09-08). Version stays **0.3.2** through review; do not bump, tag, or
+      publish before the paper is accepted. The Phase C checklist further down
+      this file is also **stale** and should not be worked from: `download.py`
+      already defaults to `GHEB`, `ZENODO_RECORD_ID` is already `22131367`, the
+      README/docs already label the `GHEA` rows as the preprint archive, and the
+      model count is 7, not 8. At acceptance what remains is the bump, the tag,
+      the GitHub release, and the Zenodo/PyPI publish. **Never `git push --tags`
+      here** — `docker.yml` fires on every `v*` tag and would ship a GHCR image
+      for an unreleased version.
+
+### Two deploys can race
+
+#32 and #33 merged minutes apart; both docs deploys ran at 19:07 and both
+force-pushed `gh-pages`. One lost the ref lock and the run shows as failed. The
+build was fine and the later run published correctly. If you merge several docs
+PRs at once, expect this and check the *last* run rather than the failed one.
+
+## HANDOFF — 2026-09-08 (desktop): three of five finalization plans merged
+
+Written on the Linux desktop for a laptop pickup. **(Superseded as the entry
+point by the 2026-09-08 laptop section above — all five plans are now merged.
+The search traps and the plan-staleness warning below still apply.)**
 
 ### Where things stand
 
