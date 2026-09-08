@@ -75,38 +75,6 @@ def inverse_logistic_fixed_upper(y, t0=None, x0=None, k=None, b=None):
     return inflection + np.log((1 - b)/y - 1) / -k
 
 
-def generalized_logistic(
-    x: np.ndarray, 
-    t0: float = None, 
-    x0: float = None, 
-    a: float = None, 
-    b: float = None, 
-    k: float = None, 
-    v: float = None, 
-    Q: float = None
-):
-    """
-    Generalized logistic function.
-
-    Parameters
-    ----------
-    x : array-like
-    t0, x0 : float
-    a, b : float
-        Upper/lower asymptotes.
-    k, v, Q : float
-
-    Returns
-    -------
-    y : np.ndarray
-    """
-    inflection = t0 if t0 is not None else x0
-    if inflection is None or a is None or b is None or k is None or v is None or Q is None:
-        raise ValueError("Missing required parameters: t0 (or x0), a, b, k, v, Q")
-    x = np.asarray(x).squeeze()
-    return b + ((a - b) / np.power(1 + Q * np.exp(-k * (x - inflection)), 1/v))
-
-
 def generalized_logistic_fixed_upper(
     x: np.ndarray,
     t0: float = None,

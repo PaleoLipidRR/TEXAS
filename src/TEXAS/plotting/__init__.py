@@ -2,7 +2,6 @@
 
 from .range_utils import (
     compute_sample_range,
-    compute_density_based_range,
     compute_suffix_specific_range,
     compute_dataset_specific_range,
 )
@@ -19,7 +18,6 @@ plot_proxy_residual_maps = plot_residual_maps
 
 __all__ = [
     "compute_sample_range",
-    "compute_density_based_range",
     "compute_suffix_specific_range",
     "compute_dataset_specific_range",
     "plot_prior_distributions",

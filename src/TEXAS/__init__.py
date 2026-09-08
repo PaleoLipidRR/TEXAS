@@ -37,7 +37,6 @@ from .models.logistics import (
     logistic,
     logistic_fixed_upper,
     inverse_logistic_fixed_upper,
-    generalized_logistic,
     generalized_logistic_fixed_upper,
 )
 from .models.multivariate import (
@@ -78,7 +77,6 @@ from .utils.regrid import regrid_curvilinear_to_latlon
 # ─── Plotting / dataviz ─────────────────────────────────────────────────
 from .plotting import (
     compute_sample_range,
-    compute_density_based_range,
     compute_suffix_specific_range,
     compute_dataset_specific_range,
     plot_prior_distributions,
@@ -110,7 +108,6 @@ __all__ = [
     "logistic",
     "logistic_fixed_upper",
     "inverse_logistic_fixed_upper",
-    "generalized_logistic",
     "generalized_logistic_fixed_upper",
     "generalized_logistic_fixed_upper_multivariate",
     "inverse_generalized_logistic_fixed_upper_multivariate",
@@ -147,7 +144,6 @@ __all__ = [
     "regrid_curvilinear_to_latlon",
     # plotting
     "compute_sample_range",
-    "compute_density_based_range",
     "compute_suffix_specific_range",
     "compute_dataset_specific_range",
     "plot_prior_distributions",

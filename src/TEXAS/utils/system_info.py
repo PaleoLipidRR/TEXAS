@@ -15,7 +15,6 @@ import gc
 import tracemalloc
 import multiprocessing
 from datetime import datetime
-import json
 
 def get_cpu_info():
     """Get detailed CPU information"""
@@ -242,22 +241,6 @@ def print_system_summary():
     summary = generate_system_summary()
     print_summary(summary)
     return summary
-
-def save_system_summary(filepath=None):
-    """Save system summary to JSON file"""
-    from datetime import datetime
-
-    summary = generate_system_summary()
-
-    if filepath is None:
-        filepath = f"system_config_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-
-    with open(filepath, 'w', encoding="utf-8") as f:
-        json.dump(summary, f, indent=2)
-
-    print(f"✅ System configuration saved to: {filepath}")
-    return filepath
-
 
 def suggest_stan_sampling_kwargs() -> dict:
     """

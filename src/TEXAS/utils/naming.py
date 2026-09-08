@@ -86,7 +86,6 @@ __all__ = [
     "PROJECT",
     "encode_compset",
     "decode_compset",
-    "describe_compset",
     "case_from_attrs",
     "run_from_attrs",
     "parse_case",
@@ -94,7 +93,6 @@ __all__ = [
     "inv_relpath",
     "legacy_fwd_name",
     "legacy_invT_name",
-    "default_version",
     "resolve_posterior_path",
     "is_case_id",
     "encode_predictors",
@@ -221,16 +219,6 @@ _CASE_RE = re.compile(
 )
 
 
-def default_version() -> str:
-    """``v`` + the package version with separators dropped: 0.2.6 -> ``v026``."""
-    try:
-        from .. import __version__ as v
-    except Exception:  # pragma: no cover - package metadata unavailable
-        return "v000"
-    parts = re.findall(r"\d+", str(v))[:3]
-    return "v" + "".join(parts) if parts else "v000"
-
-
 # ---------------------------------------------------------------------------
 # Compset encoding
 # ---------------------------------------------------------------------------
@@ -303,13 +291,6 @@ def decode_compset(code: str) -> Dict[str, str]:
             raise ValueError(f"Unknown {axis} code {char!r} in compset {code!r}")
     return {"curve": _CURVE_LABEL[c], "training_set": _TRAIN_LABEL[t],
             "estimator": _EST_LABEL[e], "structure": _STRUCT_LABEL[s]}
-
-
-def describe_compset(code: str) -> str:
-    """One-line human-readable expansion, for logs and figure captions."""
-    d = decode_compset(code)
-    return (f"{code}: {d['curve']}, {d['training_set']}, "
-            f"{d['estimator']}, {d['structure']}")
 
 
 # ---------------------------------------------------------------------------
