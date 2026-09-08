@@ -187,7 +187,7 @@ zero and biases the reconstruction; the `predictor_missing` quality flag
 missing NO₃ also raises a `UserWarning` at call time. Use a temperature-only calibration
 (`tx.GHPU.sst.sri03.p0`) if that is what you want.
 
-**`temptype` is a label, not a modelling choice.** The reconstruction follows
+**`temptype` is a label, not a modeling choice.** The reconstruction follows
 whatever calibration it was given: the target is read from the posterior's own
 attrs, and `temptype` only names the metadata and the output files. It matters
 in exactly one case — when `fwd_posterior` is omitted, it chooses which default
@@ -215,7 +215,7 @@ The NO₃ correction applies only below a cutoff concentration: above it, sites
 are nutrient-replete and the term is switched off. `find_optimal_no3_threshold`
 and `find_optimal_no3_threshold_nointercept` search that cutoff against the
 residuals of a temperature-only fit. They differ in the criterion, and the
-choice is a modelling decision, not a tuning detail.
+choice is a modeling decision, not a tuning detail.
 
 **`find_optimal_no3_threshold`** takes the cutoff that maximises the *negative*
 correlation between log(NO₃) and the residuals.
@@ -223,7 +223,7 @@ correlation between log(NO₃) and the residuals.
 - `score_method="spearmanr"` (default) uses the most negative Spearman ρ. It is
   rank-based, robust to outliers, and is what the prior publication used.
 - `score_method="R_squared"` uses the highest no-intercept R² of
-  `RI_res = β·log(NO₃)` with β < 0. It penalises poor fit rather than rank order
+  `RI_res = β·log(NO₃)` with β < 0. It penalizes poor fit rather than rank order
   alone, and corresponds to a model whose correction is zero at NO₃ = 1.
 
 **`find_optimal_no3_threshold_nointercept`** instead maximises the no-intercept

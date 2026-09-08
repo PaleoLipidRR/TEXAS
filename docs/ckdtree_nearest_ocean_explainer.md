@@ -207,7 +207,7 @@ def get_nearest_valid_value(ds, target_lats, target_lons,
 
     # Step 4: build the KD-Tree from the ocean coordinates.
     #
-    # A KD-Tree ("K-Dimensional Tree") is a spatial index that organises
+    # A KD-Tree ("K-Dimensional Tree") is a spatial index that organizes
     # points by recursively splitting them along alternating axes:
     #
     #   Level 0 — split on LATITUDE  (north vs south)
@@ -299,7 +299,7 @@ print(target_lons.min(), target_lons.max())
 # must match the dataset convention
 ```
 
-### Fix: normalise to the same convention
+### Fix: normalize to the same convention
 
 Pick one convention and convert both sides before building the tree.
 

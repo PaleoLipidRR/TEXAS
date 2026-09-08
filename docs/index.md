@@ -41,7 +41,7 @@ For Docker, conda-lock, uv, and development installs see [Installation](installa
 
 ### Step 1 — Compute Scaled Ring Index
 
-Before prediction you need **Scaled Ring Index** (RI₀₋₃) values. Pass raw LC/MS peak areas or fractional abundances — the formula normalises by the six-GDGT total, so either works:
+Before prediction you need **Scaled Ring Index** (RI₀₋₃) values. Pass raw LC/MS peak areas or fractional abundances — the formula normalizes by the six-GDGT total, so either works:
 
 ```python
 import pandas as pd
