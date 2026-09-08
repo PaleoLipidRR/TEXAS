@@ -11,7 +11,25 @@ on:
       - "docs/**"
       - "src/TEXAS/**"   # autodoc reads docstrings from the source
       - ".github/workflows/docs.yml"
+  # Build (but do not publish) on PRs that touch the book. tests.yml is
+  # path-filtered to src/, tests/, pyproject.toml and environment.yml, so
+  # without this a docs-only PR runs NO checks at all -- and the build is the
+  # only thing that catches a deleted page, a broken _toc.yml entry or a dead
+  # cross-reference. Four such PRs merged unchecked on 2026-09-08.
+  pull_request:
+    paths:
+      - "docs/**"
+      - "src/TEXAS/**"
+      - ".github/workflows/docs.yml"
   workflow_dispatch:
+
+# gh-pages is force-pushed, so two deploys finishing together race for the ref
+# and one fails with "cannot lock ref". That happened on 2026-09-08 when two
+# PRs merged a minute apart. Serialize instead, and never cancel a deploy
+# midway -- a half-published site is worse than a queued one.
+concurrency:
+  group: gh-pages
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -55,7 +73,13 @@ jobs:
 
       # peaceiris adds .nojekyll so Sphinx's _static/_sources dirs serve;
       # force_orphan keeps gh-pages a single clean commit.
+      #
+      # PRs stop at the build above. Without this guard every PR would
+      # force-push gh-pages, publishing unmerged work to the live site and
+      # racing real deploys -- so the `if` is what makes the pull_request
+      # trigger safe, not an optimization.
       - name: Publish to gh-pages
+        if: github.event_name != 'pull_request'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
