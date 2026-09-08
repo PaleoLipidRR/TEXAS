@@ -185,7 +185,7 @@ INVERSE = {
         {
             "name": "Choose the model & patch the data",
             "note": "Model file depends on direct/ensemble sampling, which predictors are active, "
-                    "and the temperature constraint scheme.",
+                    "and whether the calibration is the T0-shift arm.",
             "nodes": [
                 "stan.invT._select_invT_stan_file",
                 "stan.utils.patch_optional_predictors",
@@ -316,10 +316,12 @@ EXPLAIN = {
         "fwd_cache_dir (where the forward posterior is read) are deliberately separate.",
     "stan.invT._select_invT_stan_file":
         "Picks the .stan file from the shape of the problem: which optional predictors are "
-        "active, and the temperature constraint scheme (unconstrained, "
-        "truncated_prior). truncated_prior is the one that keeps P50 unbiased near a lower "
-        "bound; hard_constraint was Jacobian-biased there and was archived in 2026-09, "
-        "along with reparameterized and soft, which never had Stan models.",
+        "active, and whether the calibration is the T0-shift arm. Only the unconstrained "
+        "inverse ships. truncated_prior was archived to archive/pre-submission/stan_models/ "
+        "on 2026-09-07 and hard_constraint to archive/submission-2026-04/stan_models/ in "
+        "2026-09; reparameterized and soft never had Stan models at all. Passing any of "
+        "them raises here, at the "
+        "argument, rather than failing later on a missing file.",
     "stan.invT.get_invT_post_quantiles":
         "Reduces draws to percentiles, with shape handling that differs by model family: ensemble "
         "models give t_est as (chain, draw, N, M) and must also reduce over M, marginal models give "

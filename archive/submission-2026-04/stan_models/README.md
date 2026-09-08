@@ -7,7 +7,7 @@ in the installed package.
 
 `pyproject.toml` declares package data as `stan_models/*.stan`, a non-recursive
 glob rooted at `src/TEXAS/stan_models/`. Nothing in this directory reaches the
-wheel. `src/TEXAS/stan_models/` now contains only the nine models the revised
+wheel. `src/TEXAS/stan_models/` now contains only the seven models the revised
 manuscript and the public API actually use.
 
 ## What moved, and why
@@ -23,7 +23,7 @@ manuscript and the public API actually use.
 | `invT_gen_logi_fixed_univ_marginal_hard_constraint.stan` | Hard lower bound on T. Jacobian-biased near the boundary; the truncated-prior formulation replaced it. Zero references anywhere in the repo. |
 | `invT_gen_logi_fixed_multiv_marginal_hard_constraint.stan` | Same. |
 
-## What still ships (`src/TEXAS/stan_models/`, 9 files)
+## What still ships (`src/TEXAS/stan_models/`, 7 files)
 
 | file | role |
 |---|---|
@@ -33,8 +33,11 @@ manuscript and the public API actually use.
 | `invT_gen_logi_fixed_multiv_marginal_unconstrained_t0shift.stan` | Production inverse. |
 | `invT_gen_logi_fixed_multiv_marginal_unconstrained.stan` | Multivariate inverse comparator. |
 | `invT_gen_logi_fixed_univ_marginal_unconstrained.stan` | Univariate inverse (quickstart, SI_code03). |
-| `invT_gen_logi_fixed_{univ,multiv}_marginal_truncated_prior.stan` | Reachable via `constraint_type="truncated_prior"`, and the subject of `docs/why_plugin_p50_differs.md`. |
 | `linear_model.stan` | Used by the SI preprocessing and analysis notebooks. |
+
+Two further models — `invT_gen_logi_fixed_{univ,multiv}_marginal_truncated_prior.stan`
+— were archived on 2026-09-07 to `archive/pre-submission/stan_models/`, not
+here, when `constraint_type` left the public API.
 
 ## How to run an archived model
 

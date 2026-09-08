@@ -36,7 +36,7 @@ Example
 from __future__ import annotations
 
 import warnings
-from typing import Dict, List, Literal, Optional, Sequence, Union, Any
+from typing import Dict, List, Optional, Sequence, Union, Any
 from pathlib import Path
 
 import numpy as np
@@ -162,8 +162,6 @@ def predict_T_from_proxyObs(
     iter_warmup: int = 500,
     iter_sampling: int = 1000,
     seed: int = 42,
-    constraint_type: Literal["unconstrained", "truncated_prior"] = "unconstrained",
-    min_temp: Optional[float] = None,
     threads_per_chain: Optional[int] = None,
     save_results: bool = False,
     save_draws: bool = False,
@@ -197,8 +195,6 @@ def predict_T_from_proxyObs(
         iter_warmup: Warmup iterations per chain. Default 500.
         iter_sampling: Sampling iterations per chain. Default 1000.
         seed: Random seed. Default 42.
-        constraint_type: ``"unconstrained"`` (default) or ``"truncated_prior"``, which bounds P5 at *min_temp* without biasing P50.
-        min_temp: Lower temperature bound (degC), e.g. -1.8. Required for ``"truncated_prior"``, and selects it when passed alone.
         threads_per_chain: Within-chain parallelism for ``reduce_sum`` models.
         save_results: Write the quantile ``.nc`` and results ``.npz``.
         save_draws: Also write the raw draws as ``{base}_draws.nc``.
@@ -338,8 +334,6 @@ def predict_T_from_proxyObs(
         fwd_cache_dir=fwd_cache_dir,
         threads_per_chain=threads_per_chain,
         model_type="direct",
-        constraint_type=constraint_type,
-        min_temp=min_temp,
         proxy_name=proxy_name,
     )
 

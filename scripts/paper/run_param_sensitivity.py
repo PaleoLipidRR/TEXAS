@@ -150,7 +150,6 @@ INVT_M_VALUES = [25, 50, 100, 200, 300, 500]
 INVT_N_SITES = 200
 INVT_N_BINS = 10
 INVT_PRIOR_SIGMA_T = 10.0
-INVT_CONSTRAINT = "unconstrained"
 
 # Drift is measured against the richest cell (largest budget x largest M) and
 # is in degrees, because that is the unit the reader cares about: 0.1 degC is
@@ -801,7 +800,6 @@ def run_invt_case(fwd_name, subset, proxy_col, iter_warmup, iter_sampling, M,
         iter_warmup        = iter_warmup,
         iter_sampling      = iter_sampling,
         seed               = seed,
-        constraint_type    = INVT_CONSTRAINT,
         save_results       = False,   # a tuning run is not a reconstruction
     )
     wall = time.time() - t_start

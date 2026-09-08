@@ -56,7 +56,6 @@ SHARED = {
     "INVT_N_SITES": True,
     "INVT_N_BINS": True,
     "INVT_PRIOR_SIGMA_T": True,
-    "INVT_CONSTRAINT": True,
     "INVT_CRITERIA": False,
 }
 

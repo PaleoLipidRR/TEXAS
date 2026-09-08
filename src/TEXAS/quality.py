@@ -16,9 +16,9 @@ cannot be reproduced at any temperature. Nothing errors: the Gaussian
 likelihood simply keeps improving as ``T`` decreases, with no interior maximum,
 and the only thing arresting the chain is the temperature prior. The sampler
 converges, R-hat is clean, and the reported median is a readout of
-``prior_mu_t`` and ``prior_sigma_t`` rather than a measurement. Under the
-default ``constraint_type="unconstrained"`` there is no lower bound on ``t_est``
-at all, so the value returned can be physically impossible. The same happens in
+``prior_mu_t`` and ``prior_sigma_t`` rather than a measurement. The shipped
+inverse models put no lower bound on ``t_est`` at all, so the value returned
+can be physically impossible. The same happens in
 mirror image above the upper asymptote.
 
 These rows do not announce themselves, which is why they need a flag rather

@@ -33,6 +33,16 @@ acceptance.
 - `TEXAS.utils.system_info.save_system_summary()` — wrote the system summary to
   a timestamped JSON file. `get_system_summary()` and `print_system_summary()`
   are kept; both are used.
+- `constraint_type=` and `min_temp=` on `predict_T_from_proxyObs`,
+  `predict_temperature_from_proxyObs` and `get_invT_posterior`. The inverse is
+  now unconstrained only, which is what the manuscript's reconstructions use.
+  The two models they selected —
+  `invT_gen_logi_fixed_{univ,multiv}_marginal_truncated_prior.stan` — moved to
+  `archive/pre-submission/stan_models/` and remain runnable by passing an
+  absolute path as `stan_model_path`. The wheel now ships 7 `.stan` files
+  instead of 9. `utils.naming.CONSTRAINT_CODES` is deliberately unchanged: it
+  is a name grammar, and case ids already on disk and on Zenodo carry the `t`
+  code.
 
 ### Changed
 

@@ -23,10 +23,13 @@ from TEXAS.utils.system_info import simple_memory_check, get_system_info, sugges
 from TEXAS.utils.paths import STAN_MODELS_DIR
 
 #: Constraint formulations that have a Stan model in ``src/TEXAS/stan_models/``.
-#: ``hard_constraint`` was archived (2026-09) to
-#: ``archive/submission-2026-04/stan_models/``; ``reparameterized`` and ``soft``
-#: appeared in the old type hints but were never implemented as Stan models.
-_SHIPPED_CONSTRAINTS = frozenset({"unconstrained", "truncated_prior"})
+#: Only the unconstrained inverse ships. ``truncated_prior`` was archived on
+#: 2026-09-07 to ``archive/pre-submission/stan_models/``, with the explainer
+#: page that was its only documentation; ``hard_constraint`` was archived in
+#: 2026-09 to ``archive/submission-2026-04/stan_models/``.
+#: ``reparameterized`` and ``soft`` appeared in old type hints but were never
+#: implemented as Stan models.
+_SHIPPED_CONSTRAINTS = frozenset({"unconstrained"})
 
 
 # Instantiate once
@@ -86,8 +89,6 @@ def get_invT_posterior(
     threads_per_chain: Optional[int] = None,
     stan_model_path: Optional[Union[str, Path]] = None,
     model_type: Literal["direct"] = "direct",
-    constraint_type: Literal["unconstrained", "truncated_prior"] = "unconstrained",
-    min_temp: Optional[float] = None,
     fwd_posterior: Optional[xr.Dataset] = None,
     fwd_cache_dir: Optional[Union[str, Path]] = None,
 ) -> xr.Dataset:
@@ -191,23 +192,6 @@ def get_invT_posterior(
 
     meta = sampler_kwargs.pop("_metadata", {})
 
-    # Auto-select truncated_prior when min_temp is given and the user hasn't
-    # explicitly chosen a different constraint type.
-    if min_temp is not None and constraint_type == "unconstrained":
-        constraint_type = "truncated_prior"
-        print(f"🔧 Auto-selected constraint_type='truncated_prior' (min_temp={min_temp})")
-
-    if constraint_type == "truncated_prior":
-        if min_temp is None:
-            raise ValueError(
-                f"min_temp must be provided when constraint_type='{constraint_type}'. "
-                "Example: min_temp=-1.8 for seawater freezing point."
-            )
-        data["min_temp"] = float(min_temp)
-    elif min_temp is not None:
-        print(f"⚠️  min_temp={min_temp} provided but constraint_type='{constraint_type}' — "
-              f"min_temp will be ignored.")
-
     # Select the Stan file first — threading is only useful for multiv models
     # that contain reduce_sum. Applying STAN_THREADS to univ models wastes cores.
     if stan_model_path:
@@ -221,15 +205,14 @@ def get_invT_posterior(
             data, predictor_usage,
             threads_per_chain=threads_per_chain,
             model_type=model_type,
-            constraint_type=constraint_type,
             no3ratio=no3ratio,
             bounded=meta.get("is_bounded", False))
         if not (STAN_MODELS_DIR / stan_file).exists():
             available = sorted(q.name for q in STAN_MODELS_DIR.glob("invT_*.stan"))
             hint = ""
             if "t0shift" in stan_file:
-                hint = ("\nThe T0-shift arm ships only the multiv/unconstrained "
-                        "variant (use predictors + constraint_type='unconstrained').")
+                hint = ("\nThe T0-shift arm ships only the multiv variant "
+                        "(pass predictors).")
             raise FileNotFoundError(
                 f"Selected invT model '{stan_file}' is not available in "
                 f"{STAN_MODELS_DIR}.{hint}\n"
@@ -363,7 +346,7 @@ def _select_invT_stan_file(
     predictor_usage: Dict[str, bool],
     threads_per_chain: Optional[int] = None,
     model_type: Literal["direct"] = "direct",
-    constraint_type: Literal["unconstrained", "truncated_prior"] = "unconstrained",
+    constraint_type: Literal["unconstrained"] = "unconstrained",
     no3ratio: bool = False,
     bounded: bool = False,
 ) -> str:
@@ -375,9 +358,9 @@ def _select_invT_stan_file(
             - "direct": marginal (direct-sampling) models.  The only mode that
               ships; the non-marginal "ensemble" models were archived to
               ``archive/submission-2026-04/stan_models/``.
-        constraint_type:
-            - "unconstrained": no temperature constraint (default)
-            - "truncated_prior": truncated Normal prior via inverse-CDF; P50 unbiased
+        constraint_type: Only ``"unconstrained"`` ships. Retained as a
+            parameter so a caller passing a withdrawn value gets an error that
+            names the archive, rather than a missing-file error at compile time.
 
     Raises:
         ValueError: if ``model_type`` or ``constraint_type`` names a variant that
@@ -397,11 +380,11 @@ def _select_invT_stan_file(
     if constraint_type not in _SHIPPED_CONSTRAINTS:
         raise ValueError(
             f"constraint_type={constraint_type!r} is not supported. "
-            f"Valid values: {sorted(_SHIPPED_CONSTRAINTS)}. "
-            f"'hard_constraint' was archived to archive/submission-2026-04/stan_models/ "
-            f"(the truncated_prior formulation replaced it -- see "
-            f"docs/why_plugin_p50_differs.md); 'reparameterized' and 'soft' were "
-            f"never implemented as Stan models."
+            f"The only shipped inverse formulation is 'unconstrained'. "
+            f"'truncated_prior' was archived to archive/pre-submission/stan_models/ "
+            f"and 'hard_constraint' to archive/submission-2026-04/stan_models/; "
+            f"either can be run by passing its absolute path as stan_model_path. "
+            f"'reparameterized' and 'soft' were never implemented as Stan models."
         )
     multiv = any(predictor_usage.values())
 
@@ -475,8 +458,6 @@ def predict_temperature_from_proxyObs(
     threads_per_chain: Optional[int] = None,
     stan_model_path: Optional[Union[str, Path]] = None,
     model_type: Literal["direct"] = "direct",
-    constraint_type: Literal["unconstrained", "truncated_prior"] = "unconstrained",
-    min_temp: Optional[float] = None,
     fwd_posterior: Optional[xr.Dataset] = None,
     proxy_name: Optional[str] = None,
     fwd_cache_dir: Optional[Union[str, Path]] = None,
@@ -521,8 +502,6 @@ def predict_temperature_from_proxyObs(
         threads_per_chain=threads_per_chain,
         stan_model_path=stan_model_path,
         model_type=model_type,
-        constraint_type=constraint_type,
-        min_temp=min_temp,
         fwd_posterior=fwd_posterior,
         proxy_name=proxy_name,
         fwd_cache_dir=fwd_cache_dir,

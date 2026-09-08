@@ -74,7 +74,6 @@ def main() -> int:
                 temptype=R.TEMPTYPE, proxy_name=col, predictors=preds or None,
                 config=InvTConfig(n_draws=M), chains=CHAINS,
                 iter_warmup=ITER_WARMUP, iter_sampling=ITER_SAMPLING, seed=SEED,
-                constraint_type=R.INVT_CONSTRAINT,
                 save_results=False,          # a tuning run is not a reconstruction
             )
             p16, p50, p84 = (np.asarray(res[k], float) for k in ("p16", "p50", "p84"))
