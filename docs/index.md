@@ -108,9 +108,10 @@ df_screened = df[df['TEXRI_cren3_mahalDist_low23ratio_outliers_manual'] == False
 
 ### Step 2 — Choose a calibration posterior
 
-**You can skip this step.** The full multivariate T₀-shift calibration ships
-inside the package, and is used whenever you do not name another one, so a
-reconstruction needs no download and no network access:
+**You can skip this step.** Four calibrations ship inside the package — the
+full multivariate T₀-shift fit and its thermal-only counterpart, each for both
+temperature targets — so a reconstruction needs no download and no network
+access. TEXAS picks between them from what you pass:
 
 ```python
 from TEXAS import predict_T_from_proxyObs
@@ -123,8 +124,26 @@ result = predict_T_from_proxyObs(          # fwd_posterior omitted →
 )
 ```
 
+If you supply **no** predictors, TEXAS uses the thermal-only calibration
+instead and warns that it has done so:
+
+```python
+result = predict_T_from_proxyObs(          # no predictors →
+    proxyObs=df["scaledRI_cren3"].values,  # tx.GHPU.sst.sri03.p0
+    prior_mu_t=15.0, prior_sigma_t=10.0,
+)
+```
+
+Read that warning rather than dismissing it. The thermal-only fit is a
+*different* calibration, not the multivariate one with its corrections switched
+off: the non-thermal effects are in the core-top data either way, and a
+univariate fit absorbs them into its thermal parameters. Its reconstructions
+will not match the ones the manuscript reports. Supplying one predictor but not
+the other raises instead, since that is more likely a mistake than a choice.
+
 Pass `temptype="thermoT"` to get the thermocline-integrated calibration
-instead; it ships too. Any other posterior is fetched once from
+instead; both the multivariate and thermal-only versions of it ship too. Any
+other posterior is fetched once from
 [Zenodo](https://doi.org/10.5281/zenodo.19666744) and cached:
 
 ```python

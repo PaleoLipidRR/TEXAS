@@ -183,9 +183,17 @@ how the correction is switched off.
 Supplying *nothing* is not the same as switching it off. An absent predictor
 sent to Stan is treated as zero, which asserts a ratio or concentration of
 zero and biases the reconstruction; the `predictor_missing` quality flag
-(below) catches this for both predictors, and a missing GDGT-2/3 ratio or
-missing NO₃ also raises a `UserWarning` at call time. Use a temperature-only calibration
-(`tx.GHPU.sst.sri03.p0`) if that is what you want.
+(below) catches this for both predictors.
+
+Since v0.3.3 the call itself guards against it. If the calibration you named
+declares a correction and you supply no values for it, `predict_T_from_proxyObs`
+raises a `ValueError` naming the ways out, rather than passing zeros to Stan —
+for the GDGT-2/3 ratio and for NO₃ alike. And if you name *no* calibration and
+supply *no* predictors, TEXAS selects the thermal-only calibration
+(`tx.GHPU.sst.sri03.p0`, which also ships in the wheel) and warns that it has
+done so. That fallback is a convenience, not an equivalence: as above, a
+thermal-only fit absorbs the non-thermal signal into its thermal parameters, so
+its reconstructions differ from the multivariate ones the manuscript reports.
 
 **`temptype` is a label, not a modeling choice.** The reconstruction follows
 whatever calibration it was given: the target is read from the posterior's own
