@@ -1102,7 +1102,14 @@ class MahalanobisOutlierDetector:
         X_valid = X.loc[valid_idx].to_numpy(dtype=float)
         
         # Fit PCA
-        from sklearn.decomposition import PCA
+        try:
+            from sklearn.decomposition import PCA
+        except ImportError as exc:
+            raise ImportError(
+                "plot_pca_projection() requires scikit-learn, which TEXAS does not "
+                "install by default. Install it with `pip install scikit-learn` or "
+                "`pip install \"texas-psm[dev]\"`."
+            ) from exc
         pca = PCA(n_components=n_components)
         X_pca = pca.fit_transform(X_valid)
         
