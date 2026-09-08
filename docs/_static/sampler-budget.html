@@ -535,7 +535,7 @@
   <div class="finding caution">
     <h3>Two defects the first Part 3 run exposed</h3>
     <p><strong>No inverse run has ever recorded its convergence.</strong> The invT path calls
-    <code>sample_from_model</code>, which returned draws without ever summarising the fit &mdash; so
+    <code>sample_from_model</code>, which returned draws without ever summarizing the fit &mdash; so
     all 35 cached reconstructions carry no R&#770;, no ESS, no divergence count. The loss is
     irreversible after the fact: the fit object goes out of scope, and the draws are
     reduced to quantiles before saving. Fixed, with tests.</p>
@@ -628,7 +628,7 @@
 </section>
 
 <footer>
-  Generated from <code>data/revision1/groupA/param_sensitivity/</code> by <code>docs/_scripts/build_sampler_budget.py</code> on 2026-09-08 17:24 UTC &middot; 81 forward fits, 13 inverse cells. Every figure on this page is read from the sweep output, so the page cannot drift from the run.
+  Generated from <code>data/revision1/groupA/param_sensitivity/</code> by <code>docs/_scripts/build_sampler_budget.py</code> on 2026-09-08 18:16 UTC &middot; 81 forward fits, 13 inverse cells. Every figure on this page is read from the sweep output, so the page cannot drift from the run.
 </footer>
 
 </div>

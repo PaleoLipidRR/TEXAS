@@ -91,7 +91,7 @@ df['TEXRI_cren3_mahalDist_low23ratio_outliers_manual'] = detector.detect_outlier
 n_out = int(df['TEXRI_cren3_mahalDist_low23ratio_outliers_manual'].sum())
 print(f"Screened out: {n_out} / {len(df)} samples")
 
-# Visualise — 90% confidence ellipse with inliers/outliers colour-coded
+# Visualize — 90% confidence ellipse with inliers/outliers color-coded
 fig, ax = plt.subplots(figsize=(5, 4))
 detector.plot_decision_boundary(df, ax=ax)
 ax.set_xlabel("TEX$_{86}$")
