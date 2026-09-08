@@ -363,6 +363,118 @@ byte-identical (md5 over every data var), +87 bytes of header on an 81 MB file.
 
 ---
 
+## HANDOFF — 2026-09-08: three of five finalization plans merged
+
+Written on the Linux desktop for a laptop pickup. Read this first.
+
+### Where things stand
+
+`main` is green: **583 passed, 15 skipped**, `ruff check .` clean, only `main`
+and `gh-pages` on the remote.
+
+| plan | state | PR |
+|---|---|---|
+| 01 repo hygiene | merged | #25 |
+| 02 kriged cache folder | merged | #27 |
+| 04 package API cleanup | merged | #28 |
+| 03 dependency audit | **not started** | 10 tasks |
+| 05 docs alignment | **not started** | 7 tasks |
+
+Plan 04 was run before 03, reversing the index order. That was checked, not
+assumed: nothing 04 removes appears in any notebook, and 04 edits no notebooks.
+
+### The plans do NOT arrive with a pull
+
+`docs/superpowers/` is gitignored. Extract from the scratch branch **without
+checking it out** — checking it out would drag the tree backward:
+
+```bash
+git fetch origin scratch/superpowers-plans
+git checkout origin/scratch/superpowers-plans -- docs/superpowers/
+```
+
+They land untracked, which is intended. Start from
+`docs/superpowers/plans/2026-09-07-00-INDEX.md`: it holds the execution order,
+the settled decisions, and every correction found so far.
+
+To refresh after editing a plan: cut `scratch/superpowers-plans` from current
+`main` again, re-add, force-push, re-extract.
+
+### Build an environment before anything else
+
+**Do not reuse the name `texas-env`.** A collision with an existing environment
+makes conda report a misleading matplotlib/matplotlib-base conflict that looks
+like a broken `environment.yml`. The file is fine.
+
+```bash
+conda env create -f environment.yml -n texas-env-laptop
+conda run -n texas-env-laptop pip install -e . --no-deps
+conda run -n texas-env-laptop pip install arviz pytest "jupyter-book<2" ruff build pyflakes
+```
+
+Measure the baseline before starting and record it. It is environment-dependent:
+where `esmpy` is present, two `tests/test_regrid.py` cases exercise the
+absent-esmpy fallback and skip instead of passing. Both counts are correct.
+Never use a bare `python`/`pytest` if a broken base conda env is on PATH.
+
+### Run the cache migration — it does not travel
+
+`data/cache/**` is gitignored, so the laptop still has kriged grids loose in the
+cache root. The loader reads them from there with a printed note, so nothing
+breaks, but tidy it:
+
+```bash
+python scripts/migrate_kriged_cache.py            # dry run, read the plan
+python scripts/migrate_kriged_cache.py --apply
+```
+
+It moves live grids, and renames rather than deletes a superseded grid that has
+no replacement.
+
+### Four search traps that cost real time here
+
+1. A path built with `/` operators does not match a grep for the slashed form.
+   One such reference broke a docs build silently.
+2. `--include=*.ext` cannot see extensionless files. A Dockerfile copying a
+   deleted directory survived three sweeps. Use
+   `git ls-files -z | xargs -0 grep -Iln <pattern>`.
+3. `git check-ignore` does not apply ignore rules to **tracked** files, so a
+   keep-list check using it is vacuous. Use `--no-index`.
+4. A name in a notebook's stored **output** is not a reference. Scanning code
+   cells only is what found a seventh unused export.
+
+### Plan text goes stale — ten defects came from the plans, not from execution
+
+Including stale line numbers that would have put an edit 65 lines off target,
+a premise about code that did not exist, and an instruction that would have
+permanently broken two tests. Verify every premise and every line number at the
+point of use. Implementers refusing a bad instruction is the system working.
+
+### Open decisions — mine, not the assistant's
+
+1. **A temperature-only default calibration.** With no predictors, the T0-shift
+   and additive parameterizations reduce to the identical curve, so the gap is
+   the estimator, not the parameterization. EIV covers three things and the
+   third — the proxy's own analytical error entering in quadrature — survives
+   into a univariate model, so the existing GHPU posteriors are not a drop-in
+   match. **Unresolved circularity objection:** a univariate EIV model would take
+   `R2_thermal` from a univariate non-EIV fit, i.e. a fit prior-informing its own
+   near-twin. Answer that before writing the model.
+2. **Bayesian R² / RMSE ranges for reviewer 3.** Feasible from saved draws, no
+   Stan change. But the median of per-draw R² is systematically **lower** than
+   the point R², so swapping it into a comparison table against other groups'
+   plug-in values would penalise TEXAS for a definitional change. Recommendation:
+   keep point estimates in the comparison, add the interval alongside, ship the
+   distributions in the `.nc`. Note the paired-RMSE table already reports lo/hi/p.
+
+### Smaller things left standing
+
+- `docs/why_plugin_p50_differs.md` still explains the truncated-prior models,
+  which are now archive-only. Plan 05 deletes the page.
+- `docs/stan_models_explanation_v2.md` is corrected but plan 05 replaces it.
+- `data_list_extreme_example_{boundedT,eiv}.pkl` survive in the posterior cache;
+  `SI_code03` with `MODEL_VARIANT="t0shift"` would look for a `_t0shift` name.
+
 ## Session — 2026-09-07: repo finalization, and six branches archived as tags
 
 Six unmerged remote branches and one local backup were tagged, the tags pushed
