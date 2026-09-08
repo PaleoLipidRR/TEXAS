@@ -457,7 +457,7 @@
   <div class="finding caution">
     <h3>Two defects the first Part 3 run exposed</h3>
     <p><strong>No inverse run has ever recorded its convergence.</strong> The invT path calls
-    <code>sample_from_model</code>, which returned draws without ever summarising the fit &mdash; so
+    <code>sample_from_model</code>, which returned draws without ever summarizing the fit &mdash; so
     all 35 cached reconstructions carry no R&#770;, no ESS, no divergence count. The loss is
     irreversible after the fact: the fit object goes out of scope, and the draws are
     reduced to quantiles before saving. Fixed, with tests.</p>

@@ -20,12 +20,20 @@ Searching `src/` and `notebooks/` turns up **no** function literally named
 is the *Stan* path; `models/logistics.py::inverse_generalized_logistic_fixed_upper`
 is the *plug-in* (invert one median curve) — neither is "gridT".
 
-The grid method exists as the **reference implementation embedded in the docs
+The grid method existed as the **reference implementation embedded in the docs
 teaching page** `docs/_static/why-plugin-p50-differs.html`:
 
-- the copy-pasteable **Python** version, `docs/_static/why-plugin-p50-differs.html:217-222`
+- the copy-pasteable **Python** version, `why-plugin-p50-differs.html:217-222`
 - the live **JS** version driving the sandbox, `posterior()` + `quantile()` at
-  `docs/_static/why-plugin-p50-differs.html:268-280`
+  `why-plugin-p50-differs.html:268-280`
+
+> **That page was removed at the 2026-09 repository finalization** — the
+> plug-in-vs-Bayesian P50 argument is not part of the revised manuscript, and the
+> truncated-prior inverse it demonstrated was archived to
+> `archive/submission-2026-04/stan_models/`. The line references below are to the
+> deleted file and are kept for provenance; both excerpts are quoted in full
+> here, so nothing needed to follow the argument is missing. Recover the original
+> page with `git log --diff-filter=D -- docs/_static/why-plugin-p50-differs.html`.
 
 Both are the same algorithm. Signature of the Python reference:
 

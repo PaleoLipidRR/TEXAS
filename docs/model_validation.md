@@ -2,7 +2,7 @@
 
 How well does a TEXAS calibration actually fit, and how do we know the
 generalized-logistic Bayesian model improves on existing TEX₈₆ calibrations?
-This page summarises the validation strategy used in the manuscript; the full
+This page summarizes the validation strategy used in the manuscript; the full
 analysis (with figures) lives in `notebooks/manuscripts/SI_code02_t0shift_TEXAS_analysis.ipynb`.
 
 Validation rests on three complementary checks:
@@ -20,7 +20,7 @@ Validation rests on three complementary checks:
 
 The forward model is evaluated on the coretop training set (N ≈ 1513) by
 predicting Scaled RI from in-situ SST and comparing to the observed proxy.
-RMSE is reported in Scaled RI units (the proxy is normalised to ~[0, 1]), so it
+RMSE is reported in Scaled RI units (the proxy is normalized to ~[0, 1]), so it
 is directly comparable across calibrations.
 
 | Calibration | Non-thermal terms | RMSE (Scaled RI) |

@@ -5,7 +5,6 @@ parts:
     chapters:
       - file: installation
       - file: api
-      - file: callmap
       - file: troubleshooting
   - caption: Tutorial
     chapters:
@@ -21,12 +20,13 @@ parts:
       - file: PSM
       - file: model_validation
       - file: sampler_budget
-      - file: stan_models_explanation_v2
+      - file: stan_models
       - file: marginalization_explainer
-      - file: why_plugin_p50_differs
       - file: reduce_sum_for_geologists
-      - file: Prior_Choice_Normal_vs_Cauchy
       - file: ckdtree_nearest_ocean_explainer
+  - caption: Developer
+    chapters:
+      - file: callmap
   - caption: Archive
     chapters:
       - file: preprint_additive_archive

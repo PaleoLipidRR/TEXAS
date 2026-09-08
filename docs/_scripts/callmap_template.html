@@ -523,7 +523,7 @@ const ARROWS = `<defs>
 </defs>`;
 
 /* A traced edge: a halo so it stays readable over whatever it crosses, the
-   coloured stroke, a dot at the caller end and an arrowhead at the callee. */
+   colored stroke, a dot at the caller end and an arrowhead at the callee. */
 function hotWire(e, incoming) {
   const p = wire(e.a, e.b);
   if (!p) return '';

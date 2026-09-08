@@ -139,7 +139,7 @@ def collect(results_dir: Path) -> dict | None:
             "multipliers": [float(m) for m in pivot.columns],
             "rows": [[None if pd.isna(v) else int(v) for v in row]
                      for row in pivot.to_numpy()],
-            # Latent count drives the panel's own colour scale.
+            # Latent count drives the panel's own color scale.
             "n_params": int(sub["n_rhat_gt_101"].max()),
         }
 

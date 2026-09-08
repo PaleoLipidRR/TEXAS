@@ -207,7 +207,7 @@ def get_nearest_valid_value(ds, target_lats, target_lons,
 
     # Step 4: build the KD-Tree from the ocean coordinates.
     #
-    # A KD-Tree ("K-Dimensional Tree") is a spatial index that organises
+    # A KD-Tree ("K-Dimensional Tree") is a spatial index that organizes
     # points by recursively splitting them along alternating axes:
     #
     #   Level 0 — split on LATITUDE  (north vs south)
@@ -299,7 +299,7 @@ print(target_lons.min(), target_lons.max())
 # must match the dataset convention
 ```
 
-### Fix: normalise to the same convention
+### Fix: normalize to the same convention
 
 Pick one convention and convert both sides before building the tree.
 
@@ -318,31 +318,6 @@ result = get_nearest_valid_value(ds, target_lats, target_lons_fixed)
 ```
 
 Or convert to 0–360 instead — either is fine, just be consistent.
-
-### Robust alternative: 3-D Cartesian tree
-
-Converting lat/lon to 3-D (x, y, z) on the unit sphere eliminates both problems — Euclidean distance in 3-D space is a monotone function of great-circle distance and has no seam:
-
-```python
-def latlon_to_xyz(lat, lon):
-    lat_r = np.radians(lat)
-    lon_r = np.radians(lon)
-    x = np.cos(lat_r) * np.cos(lon_r)
-    y = np.cos(lat_r) * np.sin(lon_r)
-    z = np.sin(lat_r)
-    return np.column_stack((x, y, z))
-
-# Build tree in 3-D
-ocean_xyz   = latlon_to_xyz(ocean_points[lat_dim].values,
-                             ocean_points[lon_dim].values)
-target_xyz  = latlon_to_xyz(target_lats, target_lons)
-
-tree = cKDTree(ocean_xyz)
-distances, indices = tree.query(target_xyz)
-# distances are now chord lengths (0–2), not degrees
-```
-
-This version is insensitive to longitude convention and works correctly across the date line and poles.
 
 ---
 

@@ -320,7 +320,7 @@ EXPLAIN = {
         "models give t_est as (chain, draw, N, M) and must also reduce over M, marginal models give "
         "(chain, draw, N).",
     "stan.utils.patch_optional_predictors":
-        "Defensive normalisation before Stan sees the data: makes sure gdgt23ratio and no3 arrays, "
+        "Defensive normalization before Stan sees the data: makes sure gdgt23ratio and no3 arrays, "
         "use_* flags and beta terms all exist with the right shapes, converts NaN to 0.0, and handles "
         "both single-group (N) and multi-group (N_crtp) key layouts. Some Stan models expect "
         "unsuffixed use_* flags as well, so it creates both.",
