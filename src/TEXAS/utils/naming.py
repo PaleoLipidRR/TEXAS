@@ -383,7 +383,7 @@ def _normalize_case(case: "CaseName") -> str:
     caller passed, which is what lets a legacy id resolve to a legacy file by
     exact path. That losslessness is wrong for *comparison*: a request spelled
     ``G23-N10`` and a file whose attrs encode to ``G23-N1p0`` describe the same
-    calibration and must match. Normalising both sides through the codec is the
+    calibration and must match. Normalizing both sides through the codec is the
     only comparison that survives a token rename in either direction.
     """
     try:

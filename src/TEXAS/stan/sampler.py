@@ -28,7 +28,7 @@ def _with_diagnostics(fit) -> xr.Dataset:
     to quantiles before saving, so a reconstruction that lost its diagnostics
     here can never have them recomputed from the saved file.
 
-    Diagnostics are advisory, so a failure to summarise must not lose a
+    Diagnostics are advisory, so a failure to summarize must not lose a
     completed fit -- the sampling is the expensive part.
     """
     ds = fit.draws_xr()
@@ -36,7 +36,7 @@ def _with_diagnostics(fit) -> xr.Dataset:
         for key, val in summarize_sampler_diagnostics(fit).items():
             ds.attrs[key] = val
     except Exception as exc:                                   # pragma: no cover
-        warnings.warn(f"could not summarise sampler diagnostics: {exc}",
+        warnings.warn(f"could not summarize sampler diagnostics: {exc}",
                       RuntimeWarning)
     return ds
 
@@ -73,7 +73,7 @@ class StanSampler:
 
     Wraps ``CmdStanModel.sample`` with the parts every TEXAS run needs: run
     metadata and prior strings attached to the result, convergence diagnostics
-    summarised into ``stan_diag_*`` attrs, and one automatic
+    summarized into ``stan_diag_*`` attrs, and one automatic
     recompile-and-retry when a cached binary turns out to be from another
     environment (CmdStan exit code 127, typically a TBB mismatch).
 

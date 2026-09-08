@@ -87,7 +87,7 @@ class MahalanobisOutlierDetector:
     def from_calibration(cls, confidence: float = 0.90) -> "MahalanobisOutlierDetector":
         """Return a detector fixed to TEXAS's published calibration domain.
 
-        Explicit form of the default behaviour: a detector on the standard
+        Explicit form of the default behavior: a detector on the standard
         features screens against this domain without being fitted at all.
 
         The ellipse is a property of the *calibration* -- Section 5.1 fits it to

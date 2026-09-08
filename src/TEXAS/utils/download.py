@@ -336,7 +336,7 @@ def _local_dest(dest_dir: Path, name: str) -> Path:
     Where a Zenodo posterior lands locally.
 
     The Zenodo record is a **flat** namespace -- it has to be, a DOI deposit has
-    no subdirectories -- but the local cache is organised by case directory. So
+    no subdirectories -- but the local cache is organized by case directory. So
     a registry key that is a case id is unpacked into ``<case>/<case>.fwd.nc``,
     giving one uniform local layout no matter whether a posterior was sampled
     here or downloaded. Legacy long-name keys (the v0.2.0 record's files) stay
