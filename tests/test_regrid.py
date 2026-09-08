@@ -1,7 +1,13 @@
 import numpy as np
 import pytest
 import xarray as xr
-from TEXAS.utils.regrid import _prepare_grids, _regrid_scipy, regrid_curvilinear_to_latlon, _esmf_available
+from TEXAS.utils.regrid import (
+    _prepare_grids,
+    _regrid_scipy,
+    regrid_curvilinear_to_latlon,
+    resolve_latlon_names,
+    _esmf_available,
+)
 
 
 def _curvilinear_ds():
@@ -90,3 +96,42 @@ def test_exported_at_top_level():
     import TEXAS
     assert hasattr(TEXAS, "regrid_curvilinear_to_latlon")
     assert "regrid_curvilinear_to_latlon" in TEXAS.__all__
+
+
+# ─── resolve_latlon_names ────────────────────────────────────────────────────
+
+def test_resolve_latlon_names_autodetects_curvilinear_spelling():
+    ds = _curvilinear_ds()
+    assert resolve_latlon_names(ds, None, None) == ("TLAT", "TLONG")
+
+
+def test_resolve_latlon_names_autodetects_woa_style_spelling():
+    ds = xr.Dataset(
+        {"no3": (("lat", "lon"), np.zeros((3, 4)))},
+        coords={"lat": [-10.0, 0.0, 10.0], "lon": [0.0, 90.0, 180.0, 270.0]},
+    )
+    assert resolve_latlon_names(ds, None, None) == ("lat", "lon")
+
+
+def test_resolve_latlon_names_explicit_override_wins_over_autodetect():
+    # Both spellings present; the explicit names must be the ones returned,
+    # not the auto-detected candidates that also match.
+    ds = xr.Dataset(
+        {"v": (("lat", "lon", "y", "x"), np.zeros((2, 2, 2, 2)))},
+        coords={
+            "lat": [0.0, 1.0], "lon": [0.0, 1.0],
+            "y": [0.0, 1.0], "x": [0.0, 1.0],
+        },
+    )
+    assert resolve_latlon_names(ds, "y", "x") == ("y", "x")
+
+
+def test_resolve_latlon_names_raises_when_nothing_matches_and_no_override():
+    ds = xr.Dataset(
+        {"v": (("y", "x"), np.zeros((2, 2)))},
+        coords={"y": [0.0, 1.0], "x": [0.0, 1.0]},
+    )
+    with pytest.raises(ValueError, match="Could not auto-detect"):
+        resolve_latlon_names(ds, None, None)
+    # Passing the actual names explicitly resolves it.
+    assert resolve_latlon_names(ds, "y", "x") == ("y", "x")

@@ -368,9 +368,12 @@ def _select_invT_stan_file(
             - "direct": marginal (direct-sampling) models.  The only mode that
               ships; the non-marginal "ensemble" models were archived to
               ``archive/submission-2026-04/stan_models/``.
-        constraint_type: Only ``"unconstrained"`` ships. Retained as a
-            parameter so a caller passing a withdrawn value gets an error that
-            names the archive, rather than a missing-file error at compile time.
+        constraint_type: Only ``"unconstrained"`` ships. No public entry
+            point exposes this parameter any more; it survives only as a
+            defensive check on this internal function, so an internal caller
+            that still passes a withdrawn value gets a ``ValueError`` naming
+            the archive here, rather than a missing-file error later at
+            compile time.
 
     Raises:
         ValueError: if ``model_type`` or ``constraint_type`` names a variant that
@@ -459,12 +462,14 @@ def _percentiles_from_posterior(posterior: xr.Dataset) -> Dict[str, np.ndarray]:
             ``t_est`` with a ``quantile`` coordinate on the [0, 1] scale.
 
     Returns:
-        One entry per quantile, keyed ``f"p{round(q * 100)}"`` (0.05 ->
-        ``"p5"``), each a float array of length N.
+        One entry per quantile, keyed ``f"p{q * 100:g}"`` (0.05 -> ``"p5"``,
+        matching the key convention used by
+        :func:`TEXAS.ensemble.generator.generate_ensemble`), each a float
+        array of length N.
 
     Raises:
         KeyError: if *posterior* has no ``t_est`` variable.
-        ValueError: if two quantiles round to the same key, which would make
+        ValueError: if two quantiles map to the same key, which would make
             one silently overwrite the other.
     """
     if "t_est" not in posterior:
@@ -474,7 +479,7 @@ def _percentiles_from_posterior(posterior: xr.Dataset) -> Dict[str, np.ndarray]:
         )
     t_est = posterior["t_est"]
     quantiles = [float(q) for q in np.atleast_1d(t_est["quantile"].values)]
-    keys = [f"p{round(q * 100)}" for q in quantiles]
+    keys = [f"p{q * 100:g}" for q in quantiles]
     if len(set(keys)) != len(quantiles):
         raise ValueError(
             f"quantiles {quantiles} do not map to distinct keys {keys}; "

@@ -172,22 +172,29 @@ def predict_T_from_proxyObs(
 ) -> Dict[str, Any]:
     """Reconstruct temperature from proxy observations, with full uncertainty.
 
-    Marginalises over M draws from the forward calibration posterior so calibration uncertainty propagates into the reconstruction. See :doc:`PSM` Section 8 for the default calibration, the NO3 resolution order, and what the quality flags mean.
+    Marginalises over M draws from the forward calibration posterior so
+    calibration uncertainty propagates into the reconstruction. See
+    :doc:`PSM` Section 8 for the default calibration, the NO3 resolution
+    order, and what the quality flags mean.
 
     Args:
         proxyObs: Observed proxy values, shape (N,) -- scaledRI, TEX86, ...
         prior_mu_t: Prior mean temperature (degC), scalar or shape (N,).
         prior_sigma_t: Prior temperature SD (degC); use ~10 when little is known.
-        fwd_posterior: Forward calibration: a case id/legacy name (str, loaded from the cache) or a pre-loaded ``xr.Dataset``. Omit for the bundled default calibration for *temptype*.
+        fwd_posterior: Forward calibration: a case id/legacy name (str,
+            loaded from the cache) or a pre-loaded ``xr.Dataset``. Omit for
+            the bundled default calibration for *temptype*.
         proxy_name: Proxy label. Inherited from the calibration when omitted.
-        temptype: ``"SST"`` or ``"thermoT"``; a label, except it picks the default calibration when *fwd_posterior* is omitted.
+        temptype: ``"SST"`` or ``"thermoT"``; a label, except it picks the
+            default calibration when *fwd_posterior* is omitted.
         site_name: Label for the metadata and output filenames.
         predictors: Non-thermal predictor arrays, e.g. ``{"gdgt23ratio": ..., "no3": ...}``.
         no3: Nitrate (umol/L), scalar or shape (N,). Overrides *predictors*.
         gdgt23ratio: GDGT-2/3 ratio, scalar or shape (N,). Overrides *predictors*.
         site_lat: Latitude(s) for a WOA23 NO3 lookup. Needs *site_lon*.
         site_lon: Longitude(s) for the same lookup.
-        no3_dataset: WOA23-derived ``(lat, lon)`` field; downloaded from Zenodo and cached if omitted.
+        no3_dataset: WOA23-derived ``(lat, lon)`` field; downloaded from
+            Zenodo and cached if omitted.
         no3_dataset_var: Variable to read from it. Default ``"no3_sf2tc_avg"``.
         flags: Attach ``result["flags"]``, one row per observation. Default True.
         tex86: TEX86 for the same samples; only ``outside_domain`` uses it.
@@ -201,10 +208,13 @@ def predict_T_from_proxyObs(
         save_draws: Also write the raw draws as ``{base}_draws.nc``.
         filename_tag: Extra tag(s) for the output filenames.
         cache_dir: Where outputs are written. Defaults to the invT cache.
-        fwd_cache_dir: Where a named *fwd_posterior* is read from; a different directory from *cache_dir*.
+        fwd_cache_dir: Where a named *fwd_posterior* is read from; a
+            different directory from *cache_dir*.
 
     Returns:
-        A dict with ``"proxyObs"``, ``"proxy_name"``, ``"metadata"``, one ``"pN"`` array per posterior quantile (``"p5"``, ``"p50"``, ...), and ``"flags"`` when *flags* is True.
+        A dict with ``"proxyObs"``, ``"proxy_name"``, ``"metadata"``, one
+        ``"pN"`` array per posterior quantile (``"p5"``, ``"p50"``, ...),
+        and ``"flags"`` when *flags* is True.
     """
     # ── Default calibration ──────────────────────────────────────────────────
     # Omitting fwd_posterior selects the full multivariate T0-shift calibration

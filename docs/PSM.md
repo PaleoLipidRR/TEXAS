@@ -183,9 +183,8 @@ how the correction is switched off.
 Supplying *nothing* is not the same as switching it off. An absent predictor
 sent to Stan is treated as zero, which asserts a ratio or concentration of
 zero and biases the reconstruction; the `predictor_missing` quality flag
-(below) catches this for both predictors, and a missing GDGT-2/3 ratio
-specifically also raises a `UserWarning` at call time (the corresponding NO₃
-warning does not yet exist). Use a temperature-only calibration
+(below) catches this for both predictors, and a missing GDGT-2/3 ratio or
+missing NO₃ also raises a `UserWarning` at call time. Use a temperature-only calibration
 (`tx.GHPU.sst.sri03.p0`) if that is what you want.
 
 **`temptype` is a label, not a modelling choice.** The reconstruction follows

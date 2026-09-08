@@ -46,13 +46,13 @@ def test_arrays_are_one_per_observation():
 def test_a_custom_quantile_set_is_honoured_not_rejected():
     """The old code raised KeyError on 0.01 for any set that omitted it."""
     out = _percentiles_from_posterior(_quantile_ds((0.025, 0.5, 0.975)))
-    assert set(out) == {"p2", "p50", "p98"}, out.keys()
+    assert set(out) == {"p2.5", "p50", "p97.5"}, out.keys()
 
 
 def test_colliding_keys_raise_rather_than_overwrite():
-    """0.005 and 0.0049 both round to p0; silently keeping one is the bug."""
+    """0.005 and 0.00499999999 both format to p0.5; silently keeping one is the bug."""
     with pytest.raises(ValueError, match="distinct keys"):
-        _percentiles_from_posterior(_quantile_ds((0.005, 0.0049, 0.5)))
+        _percentiles_from_posterior(_quantile_ds((0.005, 0.00499999999, 0.5)))
 
 
 def test_missing_t_est_is_a_clear_error():

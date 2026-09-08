@@ -84,7 +84,9 @@ Model names follow a naming convention: `{transform}_{curve}_{params}_{datasourc
 > `src/TEXAS/stan_models/` went from 17 `.stan` files to **9** — the models the
 > revised manuscript and the public API actually use. The other 8 moved to
 > **`archive/submission-2026-04/stan_models/`** at the repo root, with a README
-> naming each one and why. Nothing was deleted.
+> naming each one and why. Nothing was deleted. (A later pass, 2026-09-07,
+> archived the two `truncated_prior` inverse models when `constraint_type`
+> left the public API — see below — leaving **7** files shipped today.)
 >
 > Archived: `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv` (the initial
 > submission's `GHEA` production model, still the revision's comparison arm),
@@ -100,14 +102,17 @@ Model names follow a naming convention: `{transform}_{curve}_{params}_{datasourc
 > through `get_posterior()` — it builds `StanCompiler()` with no arguments.
 >
 > **`_select_invT_stan_file()` was narrowed to match.** `constraint_type` now
-> accepts only `"unconstrained"` and `"truncated_prior"`; `"hard_constraint"`
-> (archived) and `"reparameterized"` / `"soft"` (never implemented as Stan
-> models) raise `ValueError` naming the archive, instead of failing later with a
-> missing-file error. `model_type="ensemble"` likewise raises — it built names
-> that were archived back in April, so it had been broken since. Before this,
-> 40 combinations were constructible and only 9 resolved to a file. The three
-> that still don't are the T₀-shift arm's univariate and truncated-prior
-> variants, which never existed; the `FileNotFoundError` at `stan/invT.py`
+> accepts only `"unconstrained"` (as of 2026-09-07, `"truncated_prior"` was
+> archived too and is no longer accepted either — see the shipped-count note
+> above); `"hard_constraint"` (archived) and `"reparameterized"` / `"soft"` (never
+> implemented as Stan models) raise `ValueError` naming the archive, instead
+> of failing later with a missing-file error. `model_type` is no longer a
+> public parameter at all — `model_type="ensemble"` now raises `TypeError`
+> before reaching `_select_invT_stan_file`, whose own internal, non-public
+> `model_type` guard still raises `ValueError` for anything but `"direct"`.
+> Before this, 40 combinations were constructible and only 9 resolved to a
+> file. The three that still don't are the T₀-shift arm's univariate and
+> truncated-prior variants, which never existed; the `FileNotFoundError` at `stan/invT.py`
 > catches those and says so.
 >
 > **`utils/naming.py::CONSTRAINT_CODES` was deliberately left intact**, exactly

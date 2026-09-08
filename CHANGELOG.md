@@ -56,11 +56,13 @@ acceptance.
   `scaledRI_*` → `proxyObs_*` key translation in `auto_detect_predictors`.
   Deprecated since 0.1.x. (The `sigma_scaledRI_*` lookup in `build_invT_inputData`
   stays: it reads variable names inside older posteriors, not a keyword.)
-- `model_type=` on `predict_T_from_proxyObs`, `get_invT_posterior`,
-  `_select_invT_stan_file` and `sampler_invT_posterior`. Only `"direct"` has
-  existed since the ensemble models were archived. On `sampler_invT_posterior`
-  it was also a live bug: the value was forwarded into `CmdStanModel.sample`,
-  which has no such parameter, so any call that passed it raised `TypeError`.
+- `model_type=` on `predict_T_from_proxyObs`, `get_invT_posterior` and
+  `sampler_invT_posterior`. Only `"direct"` has existed since the ensemble
+  models were archived. On `sampler_invT_posterior` it was also a live bug:
+  the value was forwarded into `CmdStanModel.sample`, which has no such
+  parameter, so any call that passed it raised `TypeError`. (The internal
+  `_select_invT_stan_file` still accepts and validates `model_type`; it is
+  not part of the public API.)
 - `results_path=`, which went with `predict_temperature_from_proxyObs`. The
   `.npz` destination is now `cache_dir` + `filename_tag`, as it already was for
   the `.nc`.
