@@ -362,6 +362,7 @@ class TestPlotColumnsMapping:
         assert fig is not None and len(axs) >= 1
 
     def test_plot_pca_projection_columns_mapping(self):
+        pytest.importorskip("sklearn")
         det = self._fitted_detector()
         phys = self._physical_df()
         with pytest.raises(KeyError):
