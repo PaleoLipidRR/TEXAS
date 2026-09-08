@@ -43,8 +43,10 @@ maps = [
     "cartopy>=0.21",
     "regionmask>=0.9",
     "pykrige>=1.7",
-    "joblib"           # residual_maps.py parallelises halo kriging with it;
+    "joblib",          # residual_maps.py parallelizes halo kriging with it;
                        # it used to arrive transitively via scikit-learn
+    "shapely"          # residual_maps.py imports shapely.geometry inside the
+                       # cartopy guard; it used to arrive only via cartopy
 ]
 
 dev = [
@@ -60,6 +62,7 @@ dev = [
                     # culture/mesocosm .xlsx dataset (SI_code00)
   "scikit-learn",   # SI_code00: LinearRegression; SI_code02: LinearRegression
   "seaborn",        # SI_code00/SI_code03 notebook plotting
+  "shapely",        # SI_code00/02/03 call shapely.geometry.Point directly
   "baysparpy>=0.0.2",   # SI_code02/03: BAYSPAR TEX86 comparison (notebook-only; not used by TEXAS core)
   "baysplinepy>=0.0.1", # SI_code02/03: BAYSPLINE UK'37 comparison (notebook-only)
   "bayfox",
