@@ -8,7 +8,24 @@ means "manuscript under review", so the public API may change in a minor
 release. Every such change is listed below. `1.0.0` is reserved for paper
 acceptance.
 
-## [Unreleased]
+## [0.4.0] — 2026-09-09
+
+This is the release archived on Zenodo alongside the revised manuscript
+submission. It supersedes 0.3.2, which was published to PyPI but never
+archived. The version is a minor bump rather than a patch because the public
+API changed: see **Removed** below.
+
+### Added
+
+- A bundled thermal-only calibration, selected automatically when
+  `predict_T_from_proxyObs` is called with no optional predictors. Four
+  calibrations now ship with the wheel; `docs/` describes when each applies.
+- `TEXAS.utils.paths.KRIGED_CACHE_DIR` — kriged residual-map grids get their
+  own cache folder beside the two posterior caches instead of being written
+  loose into the cache root. `set_cache_dir()` repoints all three, and a grid
+  still sitting in the old location is read with a printed note.
+  `scripts/migrate_kriged_cache.py` moves an existing cache (per machine —
+  `data/cache/**` is gitignored).
 
 ### Removed
 
@@ -90,3 +107,16 @@ acceptance.
   four that stayed silent; omitting a predictor the calibration actually
   applies treats it as 0, which is not the same as switching the correction
   off.
+
+### Fixed
+
+- `shapely` is declared as a dependency. It was imported but undeclared, so a
+  clean install could fail at import. The invalid `channel_priority` key was
+  also dropped from `environment.yml`.
+- The kriged-grid cache no longer writes two copies of one grid: the
+  resolution token is formatted with `f"{krige_res:g}"`, so `krige_res=1` and
+  `krige_res=1.0` name the same 57 MB file rather than two.
+- `streamlit_app/config.py` was missing `DEFAULT_CSV_DIRS`.
+- Declared dependencies now match what the code actually imports; five
+  packages that were declared but unused were removed, and every notebook's
+  top-level imports are checked against the declared set.

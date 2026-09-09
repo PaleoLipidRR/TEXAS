@@ -355,7 +355,7 @@ def build_invT_inputData(
     # ═══════════════════════════════════════════════════════════════════════════
     # STEP 11: HANDLE NITRATE CUTOFF (Special case for NO3 predictor)
     # ═══════════════════════════════════════════════════════════════════════════
-    # NO3 uses a threshold model: correction only applies when NO3 > cutoff.
+    # NO3 uses a threshold model: correction only applies when 0 < NO3 < cutoff.
     # Priority: (1) forward posterior attrs, (2) InvTConfig, (3) default 0.0
     # ───────────────────────────────────────────────────────────────────────────
     if data.get("use_no3"):

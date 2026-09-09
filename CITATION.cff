@@ -19,8 +19,8 @@ authors:
     given-names: Gordon N.
     orcid: "https://orcid.org/0000-0002-0032-4668"
     affiliation: "School of Ocean and Earth Science, University of Southampton"
-version: 0.3.2
-date-released: "2026-09-02"
+version: 0.4.0
+date-released: "2026-09-09"
 license: MIT
 repository-code: "https://github.com/PaleoLipidRR/TEXAS"
 # Concept DOI of the SOFTWARE record (resolves to the latest release).
@@ -58,4 +58,4 @@ references:
     title: "TEXAS: A proxy system model for TEX86 paleothermometry"
     journal: "AGU Paleoceanography and Paleoclimatology"
     year: 2026
-    notes: "in prep"
+    notes: "in revision"

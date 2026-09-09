@@ -473,9 +473,15 @@ is what caught defect 2 above. All seven notebooks pass it now.
 - [ ] **`dist/` holds a stale wheel** — built 2026-08-27, 17 Stan models
       including archived ones, no univariate bundle. `rm -rf dist/ && python -m
       build` before any release.
-- [ ] **Phase C / v1.0.0 — deliberately deferred to acceptance** (decided
-      2026-09-08). Version stays **0.3.2** through review; do not bump, tag, or
-      publish before the paper is accepted. The Phase C checklist further down
+- [x] **v0.4.0 cut and published for resubmission** (2026-09-09, superseding
+      the 2026-09-08 "version stays 0.3.2 through review" decision). That
+      decision was made without noticing that Zenodo had received neither
+      v0.3.1 nor v0.3.2 — the concept DOI still resolved to v0.3.0, so the
+      manuscript's software citation did not match the archive. Publishing was
+      therefore forced by the citation, not optional. A minor bump rather than
+      a patch because the `[Unreleased]` API removals are minor-release changes
+      under this project's own stated convention. **v1.0.0 remains deferred to
+      acceptance.** The Phase C checklist further down
       this file is also **stale** and should not be worked from: `download.py`
       already defaults to `GHEB`, `ZENODO_RECORD_ID` is already `22131367`, the
       README/docs already label the `GHEA` rows as the preprint archive, and the
