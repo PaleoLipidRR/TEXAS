@@ -1,6 +1,9 @@
 {
   "name": "TEXAS Project Environment",
-  "image": "ghcr.io/paleolipidrr/texas:v0.2.1",
+  // Tags built by .github/workflows/docker.yml carry NO "v" prefix
+  // (docker/metadata-action {{version}} strips it), so ":v0.4.0" would 404.
+  // Only the pre-v0.2.5 tags are v-prefixed. Bump this on each release.
+  "image": "ghcr.io/paleolipidrr/texas:0.4.0",
   // To build from source instead (e.g. after editing the Dockerfile), replace
   // the "image" line above with:
   //   "build": { "dockerfile": "../docker/Dockerfile", "context": ".." },
