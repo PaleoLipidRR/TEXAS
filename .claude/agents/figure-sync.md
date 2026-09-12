@@ -15,9 +15,10 @@ Use `Bash` with `stat` (or `ls -l --time-style=+%s`) to get modification timesta
 ## Step 2 — collect notebook timestamps
 
 Get modification timestamps for:
-- `notebooks/manuscripts/SI_code00_PreProcessing.ipynb`
-- `notebooks/manuscripts/SI_code02_t0shift_TEXAS_analysis.ipynb`
-- `notebooks/manuscripts/SI_code03_paleo_showcases.ipynb` (if it exists)
+Glob `notebooks/manuscripts/*.ipynb` rather than hardcoding the list — the set
+grows between revisions. As of this writing it is `SI_code00_PreProcessing`,
+`SI_code01_t0shift_variance_partitioning`, `SI_code02_t0shift_TEXAS_analysis`,
+`SI_code02a_model_param_sensitivity_test`, and `SI_code03_paleo_showcases`.
 
 ## Step 3 — known figure-to-notebook mapping
 
@@ -37,8 +38,14 @@ Use this mapping to decide which notebook each figure belongs to:
 - `figS5_*` through `figS10_*`
 - Any figure with "posterior", "calibration", "scatter", "residual", "functional", or "prior" in the name
 
-### SI_code03_paleo_showcases.ipynb generates (if file exists):
+### SI_code03_paleo_showcases.ipynb generates:
 - Any figure with "paleo", "showcase", "GIG", "TasmanSea", "ODP", or "reconstruction" in the name
+
+### SI_code01_t0shift_variance_partitioning.ipynb generates:
+- Any figure with "variance", "partition", or "venn" in the name
+
+### SI_code02a_model_param_sensitivity_test.ipynb generates:
+- Any figure with "sensitivity", "budget", or "mcmc" in the name
 
 ### Unclassified:
 - Any figure that doesn't match the patterns above — report as UNKNOWN source.
@@ -75,5 +82,4 @@ Then print a one-line verdict:
 ## Notes
 
 - Do not read figure file contents — only check timestamps.
-- If `SI_code03_paleo_showcases.ipynb` does not exist, skip it silently.
 - Figures in `figures/manuscript/finalized/` with clearly exploratory names (e.g. `concept2_logistic_likelihood.*`, `variance_partition_venn.png`) are non-manuscript figures — mark them as SKIP and exclude from the staleness count.

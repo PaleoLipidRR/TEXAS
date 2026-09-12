@@ -6,10 +6,8 @@ allowed-tools: Read Glob Grep
 
 Audit all finalized SI notebooks in `notebooks/manuscripts/`. Check each one against every rule below and report PASS / FAIL / WARN per notebook per category.
 
-Target notebooks (read each):
-- `SI_code00_PreProcessing.ipynb`
-- `SI_code02_t0shift_TEXAS_analysis.ipynb`
-- `SI_code03_paleo_showcases.ipynb` (if present)
+Target notebooks: every `*.ipynb` under `notebooks/manuscripts/` — glob the
+directory rather than working from a fixed list, which goes stale each revision.
 
 ---
 
@@ -55,11 +53,10 @@ FAIL if any cell references Q parameter:
 
 WARN if any cell references a Stan model name that no longer exists as an active `.stan` file in `src/TEXAS/stan_models/`. Check against the list of files in that directory.
 
-Active forward models (verify these exist):
-`gen_logi_fixed_culmeso`, `gen_logi_fixed_culmesocore`, `gen_logi_fixed_hier_crtp_multiv`,
-`gen_logi_fixed_hier_crtp_multiv_priorApprox`, `gen_logi_fixed_hier_crtp_multiv_priorApprox_werr`,
-`gen_logi_fixed_hier_crtp_multiv_priorApprox_werr_ver2`, `gen_logi_fixed_hier_crtp_multiv_odr`,
-`gen_logi_fixed_hier_crtp_univ_priorApprox`.
+Build the active list by listing `src/TEXAS/stan_models/*.stan` at run time — do
+not compare against a roster written into this file, which rots every time models
+are pruned. A name that resolves only under `archive/` is a WARN, not a FAIL: an
+archived model still runs when passed as an absolute path.
 
 ## 5. Posterior file references
 

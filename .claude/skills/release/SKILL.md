@@ -38,7 +38,8 @@ Also check `src/TEXAS/__init__.py` for a `__version__` string and update it to m
 
 Read `CITATION.cff`. Update the `version:` field to `$ARGUMENTS`.
 Update the `date-released:` field to today's date in `YYYY-MM-DD` format.
-If `doi:` still contains `10.5281/zenodo.XXXXXXX` (placeholder), warn the user that the real Zenodo DOI must be filled in before submission.
+Leave `doi:` alone — it is the software *concept* DOI (`10.5281/zenodo.19671664`),
+which resolves to the newest version and must not be repointed per release.
 
 ## Step 4 — Update `CHANGELOG` or release notes (if present)
 
@@ -123,4 +124,5 @@ After completing, print:
 - [ ] Git tag `v$ARGUMENTS` created
 - [ ] Pushed to origin
 - [ ] PyPI upload: done / skipped
-- [ ] Zenodo DOI: filled in / still placeholder (warn if placeholder)
+- [ ] Zenodo archive minted for the new tag (the GitHub release fires the
+      webhook; if Zenodo was down, recreate the release to re-fire it)

@@ -48,12 +48,9 @@ FAIL if: asymptote is not `1.0`; Q appears; upper asymptote parameter is free wh
 
 ## 6. EIV / ODR specific (if applicable)
 
-If the model name contains `_werr` or `_odr` (delta-method EIV):
-- G23 variance contribution: `square(beta_G23_crtp) * square(sd_gdgt23ratio_crtp[i])`
-- NO3 variance contribution (delta method): `square(beta_NO3_crtp) * square(sd_no3_crtp[i] / (no3_crtp[i] * log(10)))`, applied only where `0 < no3_crtp[i] < no3_cutoff`
-- CV-gating index arrays (`N_g23`, `N_no3_valid`, `no3_valid_idx`, `N_no3_exact`, `no3_exact_idx`) should be present in the data block.
-
-If the model name contains `_werr_ver2` (latent-variable EIV):
+If the model name contains `_eiv` (latent-variable EIV — the only EIV form that
+ships; the delta-method `_werr` / `_odr` variants were consolidated away in
+v0.1.5 and live under `archive/`):
 - `sd_proxyObs` must be in data block (per-site RI analytical SE).
 - `R2_thermal` must be in data block.
 - `true_no3_crtp` must have `<lower=0, upper=no3_cutoff>`.
@@ -73,7 +70,8 @@ Confirm file name matches: `{transform}_{curve}_{params}_{datasources}_{variant}
 - curve: `gen_logi` / `logistic` / `linear`
 - params: `fixed` / `free`
 - datasources: `culmeso` / `culmesocore` / `crtp`
-- variant: `hier_crtp`, `multiv`, `priorApprox`, `werr`, `werr_ver2`, `odr`, etc.
+- variant: `hier_crtp`, `multiv`, `univ`, `priorApprox`, `eiv`, `t0shift`,
+  `marginal_unconstrained`, etc.
 
 ---
 

@@ -14,7 +14,7 @@ Run `git diff --name-only HEAD` and `git diff --name-only --cached` to get all m
 
 Run:
 ```bash
-cd /home/ronnie-rattan/Documents/GitHub/TEXAS && python -m pytest tests/ -q --tb=short 2>&1
+python -m pytest tests/ -q --tb=short 2>&1
 ```
 
 - PASS if exit code 0

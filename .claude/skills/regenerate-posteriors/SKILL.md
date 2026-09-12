@@ -17,16 +17,16 @@ If the directory is empty or missing, report that no posteriors are cached and s
 
 ## Step 2 — Check for staleness signals
 
-For each `.nc` file, try to read its metadata attributes with Python if possible:
+Read each file's metadata attributes:
 ```bash
 python -c "
 import xarray as xr, sys
-ds = xr.open_dataset('$FILE', engine='scipy')
+ds = xr.open_dataset('$FILE')
 attrs = dict(ds.attrs)
 vars_ = list(ds.data_vars)
 print('vars:', vars_[:10])
 print('model:', attrs.get('stan_model_name','?'))
-print('date:', attrs.get('run_date','?'))
+print('date:', attrs.get('run_time', attrs.get('run_timestamp','?')))
 "
 ```
 
@@ -37,39 +37,43 @@ Flag a posterior as **stale** if any of the following apply:
 | Data variables contain `Q_crtp` or `Q_culmeso` | Q parameter removed 2026-03-24; model now uses Q=1 fixed |
 | Data variables contain `beta0_gdgt23ratio_crtp` or `beta0_no3_crtp` | Old coefficient names; renamed to `beta_G23_crtp` / `beta_NO3_crtp` (2026-02-22) |
 | `stan_model_name` attr references a model file that no longer exists in `src/TEXAS/stan_models/` | Model was renamed or deleted |
-| `run_date` is before 2026-04-08 AND model is one of: `gen_logi_fixed_hier_crtp_multiv`, `gen_logi_fixed_hier_crtp_multiv_priorApprox`, `gen_logi_fixed_hier_crtp_univ_priorApprox`, `gen_logi_fixed_hier_crtp_multiv_priorApprox_werr`, `gen_logi_fixed_culmesocore` | sigma prior was `normal(0.01, 0.1)` before 2026-04-08; now `normal(0, 0.1)` |
+| `run_time` is before 2026-04-08 and the model is a coretop model | sigma prior was `normal(0.01, 0.1)` before 2026-04-08; now `normal(0, 0.1)` |
 
 ## Step 3 — Show regeneration calls
 
-For each stale posterior, show the appropriate regeneration call based on the filename pattern
-`{model}_{temptype}_{proxy_name}{suffix}.nc`.
+For each stale posterior, show the appropriate regeneration call. Names follow
+either the case layout (`<case>/<case>.fwd.nc`, the default since v0.2.6) or the
+legacy flat pattern `{model}_{temptype}_{proxy_name}{suffix}.nc`; both still
+resolve, so read the `stan_model_name` and `proxy_name` attrs rather than parsing
+the filename where you can.
 
 Reference pattern:
 ```python
 from TEXAS import build_fwd_data, get_posterior, save_posterior
 
-# Two-stage (priorApprox) models — need culmeso posterior first
+# Multivariate EIV (the production calibration)
 data = build_fwd_data(
     t_crtp=crtp_df["SST"].values,
     proxy_crtp=crtp_df["scaledRI"].values,
     gdgt23ratio_crtp=crtp_df["gdgt23ratio"].values,
     no3_crtp=crtp_df["no3"].values,
-    sd_proxyObs=crtp_df["scaledRI_se"].values,  # required for _werr_ver2
+    sd_proxyObs=crtp_df["scaledRI_se"].values,  # required for _eiv
     culmeso_posterior=culmeso_post,              # required for priorApprox
-    R2_thermal=0.74,                             # required for _werr_ver2 only
+    R2_thermal=0.74,                             # required for _eiv only
 )
-post, diag = get_posterior(data, "gen_logi_fixed_hier_crtp_multiv_priorApprox", temptype="SST", proxy_name="scaledRI")
+post, diag = get_posterior(
+    data, "gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift",
+    temptype="SST", proxy_name="scaledRI",
+)
 save_posterior(post)
 
-# Full hierarchical models (not priorApprox)
+# Univariate (thermal-only) — no non-thermal predictors
 data = build_fwd_data(
-    t_cul=cul_df["SST"].values,   proxy_cul=cul_df["scaledRI"].values,
-    t_meso=meso_df["SST"].values, proxy_meso=meso_df["scaledRI"].values,
-    t_crtp=crtp_df["SST"].values, proxy_crtp=crtp_df["scaledRI"].values,
-    gdgt23ratio_crtp=crtp_df["gdgt23ratio"].values,
-    no3_crtp=crtp_df["no3"].values,
+    t_crtp=crtp_df["SST"].values,
+    proxy_crtp=crtp_df["scaledRI"].values,
+    culmeso_posterior=culmeso_post,
 )
-post, diag = get_posterior(data, "gen_logi_fixed_hier_crtp_multiv", temptype="SST", proxy_name="scaledRI")
+post, diag = get_posterior(data, "gen_logi_fixed_hier_crtp_univ_priorApprox", temptype="SST", proxy_name="scaledRI")
 save_posterior(post)
 ```
 
