@@ -8,6 +8,70 @@ bottom; tick the boxes as you go.
 
 ---
 
+## HANDOFF — 2026-09-11 (desktop, Linux): container pin, tornado, and the `.claude` un-rot
+
+`main` @ `a7088af`, clean, pushed. Three commits, all small and independent:
+
+| commit | what |
+|---|---|
+| `4ef277a` | devcontainer unpinned from the stranded `texas:v0.2.1` image → `0.4.0` |
+| `2b097d5` | `uv.lock` tornado 6.5.7 → 6.5.8, clearing all three Dependabot alerts |
+| `a7088af` | `.claude/` agents + skills repaired against the current codebase |
+
+Also merged the `wip/notebooks-2026-09-10` notebook edits (fast-forward, no
+merge commit) and deleted the branch locally.
+
+### Do these on the other machine — they do not travel through git
+
+1. **Rebuild the dev container** (Ctrl+Shift+P → "Dev Containers: Rebuild
+   Container"). A plain reopen will not pick up the new pin: the old container
+   survives (`shutdownAction: none`) and `postCreateCommand` only fires on
+   create, which is exactly how a v0.2.1 install kept reappearing. Expect a
+   ~5 GB pull.
+2. **`docker pull ghcr.io/paleolipidrr/texas:latest`** before any
+   `docker compose up` — this box's copy was three versions stale at 0.3.2.
+3. **Check the cache migrations**, which are per-machine because
+   `data/cache/**` is gitignored: `scripts/migrate_cache_layout.py`,
+   `scripts/rename_cache_files.py`, `scripts/migrate_kriged_cache.py`. All are
+   dry-run by default — run the dry run and read the plan before `--apply`.
+
+### Watch out for
+
+- **Image tags built since v0.2.5 carry no `v` prefix.** `docker/metadata-action`
+  `{{version}}` strips it, so `:v0.4.0` 404s and `:0.4.0` works. Only the
+  pre-v0.2.5 tags are v-prefixed. Noted inline in `devcontainer.json`; bump the
+  pin by hand each release, nothing automates it.
+- **`download.py` pins a fixed Zenodo record, never the concept DOI**
+  (`ZENODO_RECORD_ID = "22131367"`, data v0.3.0 — currently also the newest).
+  Deliberate: an installed version must keep downloading the paper's files. A
+  data bump therefore needs the record id *and* any new filenames in
+  `POSTERIOR_REGISTRY` changed together, in a package release.
+- **The remote branch `wip/notebooks-2026-09-10` still exists** at the older
+  `4424b44`. `git push origin --delete wip/notebooks-2026-09-10` when ready.
+- An `nbstripout` pass over `SI_code03_paleo_showcases.ipynb` and
+  `quickstart_demo.ipynb` was discarded on purpose (outputs kept). Re-run it if
+  that was deliberate — cell sources were identical either way.
+
+### Open, not started
+
+**`CLAUDE.md` needs a history split.** A `/claude-api prompt-audit` over the
+whole prompt surface found *no* dated prompting patterns — no caps pressure
+language, no think-step-by-step, no prefill scaffolding. But 242 of its 473
+lines are dated migration blockquotes (~6-7k tokens auto-loaded every session).
+Every factual claim in it verified against the code, and much of the history is
+load-bearing (it explains why files on disk have inconsistent names), so the fix
+is a `CLAUDE.md` / `HISTORY.md` split, not deletion — current-state rules stay,
+chronology moves. Needs a judgment call on which facts are still live.
+
+The same audit's other 10 findings are already fixed in `a7088af`. Three skills
+could not run at all: `pre-commit` `cd`-ed to a nonexistent `/home/ronnie-rattan/`,
+and `regenerate-posteriors` used `engine='scipy'` (TypeError on our compressed
+netCDF4) plus a `run_date` attr no posterior carries. Where a file hardcoded a
+roster that rots — Stan models, the SI notebook list — it now lists the directory
+at run time. The skills are repaired but **unexercised**: running `/notebook-sync`
+once is the real check, and it now covers `SI_code01` and `SI_code02a`, which no
+skill was auditing before.
+
 ## Latest session — 2026-09-02: v0.3.1 — patch bump for post-0.3.0 fixes/features
 
 `pyproject.toml` and `CITATION.cff` (`version` + `date-released`) bumped
