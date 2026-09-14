@@ -325,7 +325,7 @@ def encode_predictors(use_gdgt23ratio: bool = False,
     >>> encode_predictors(True, False)
     'G23'
     >>> encode_predictors()
-    'none'
+    'p0'
 
     The nitrate token was ``N`` + cutoff x10 until 2026-08-23, so a cutoff of
     1.0 was written ``N10``. That is misreadable in the one way that matters:
@@ -624,7 +624,7 @@ def is_case_id(text: str) -> bool:
 
 def fwd_relpath(case: Union[CaseName, str]) -> Path:
     """
-    ``<case>/<case>.fwd.nc`` -- the forward posterior of a case.
+    ``<case>.fwd.nc`` -- the forward posterior of a case, flat in the cache root.
 
     The case is repeated in the leaf on purpose. CESM names data output for its
     case (``b.e12.B1850C5CN.f19_g16.iPETM09x.01.pop.h.1901-2000.climo.nc``) and
