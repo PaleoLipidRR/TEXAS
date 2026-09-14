@@ -1,0 +1,69 @@
+/* TEXAS branding — palette recreated from the AGU25 PP33D-1102 poster.
+   Colorblock wordmark: T brick-red, E ochre, X steel-blue, A pale-blue, S slate-teal.
+   Primary accent: steel-blue (the "X"). */
+
+:root {
+  --texas-red:   #A8383B;
+  --texas-ochre: #D29A33;
+  --texas-steel: #4E7390;
+  --texas-pale:  #7FA9C2;
+  --texas-slate: #2E4A55;
+
+  /* pydata / sphinx-book-theme accent variables (light mode) */
+  --pst-color-primary:        #4E7390;
+  --pst-color-primary-bg:     #e7eef3;
+  --pst-color-link:           #3E6680;
+  --pst-color-link-hover:     #A8383B;
+  --pst-color-accent:         #D29A33;
+  --pst-color-secondary:      #2E4A55;
+  --pst-color-secondary-highlight: #4E7390;
+}
+
+/* Dark mode: lift the steel-blue so it stays legible on dark backgrounds */
+html[data-theme="dark"] {
+  --pst-color-primary:    #7FA9C2;
+  --pst-color-link:       #9FC0D0;
+  --pst-color-link-hover: #D29A33;
+  --pst-color-accent:     #D29A33;
+}
+
+/* Logo sizing in the header */
+.navbar-brand img,
+img.logo__image {
+  height: 2.1rem;
+  width: auto;
+}
+
+/* Headings in the poster's slate-teal for an editorial feel */
+h1, h2, h3 {
+  color: var(--texas-slate);
+}
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3 {
+  color: #cfe0ea;
+}
+
+/* Accent bar under the page H1, echoing the colorblock wordmark */
+h1::after {
+  content: "";
+  display: block;
+  height: 4px;
+  width: 100%;
+  margin-top: 0.4rem;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--texas-red)   0%,  var(--texas-red)   20%,
+    var(--texas-ochre) 20%, var(--texas-ochre) 40%,
+    var(--texas-steel) 40%, var(--texas-steel) 60%,
+    var(--texas-pale)  60%, var(--texas-pale)  80%,
+    var(--texas-slate) 80%, var(--texas-slate) 100%
+  );
+}
+
+/* Inline code / API signatures pick up the steel-blue */
+code.literal,
+.sig-name {
+  color: var(--texas-slate);
+}
