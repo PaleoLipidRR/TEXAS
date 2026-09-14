@@ -65,8 +65,8 @@ def save_posterior(
         An explicit *run* wins over *filename_suffix* for the case path.  With
         ``overwrite=False`` an existing file raises ``FileExistsError``.
     layout : {"auto", "case", "legacy"}
-        Where to write.  ``"case"`` uses the CESM-style case directory
-        (``tx.v026.GHEB.sst.ri3.G23-N1p0/fwd.nc``); ``"legacy"`` uses the
+        Where to write.  ``"case"`` uses the flat CESM-style case name
+        (``tx.GHEB.sst.sri03.G23-N1p0.fwd.nc``); ``"legacy"`` uses the
         historical long flat filename; ``"auto"`` (default) prefers the case
         layout and falls back to legacy with a warning if no case id can be
         derived.  See :mod:`TEXAS.utils.naming`.

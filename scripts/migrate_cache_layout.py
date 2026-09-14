@@ -2,11 +2,12 @@
 """
 Migrate forward posteriors in the cache onto the current case layout.
 
-    <case>/<case>.fwd.nc
+    <case>.fwd.nc          (flat in the cache root, since 2026-08-12)
 
-Handles both sources: legacy flat files (``gen_logi_fixed_..._cren3.nc``) and
-case directories written before 2026-08-11, when the leaf was a bare ``fwd.nc``
-and the tokens were ``ri3`` / ``none`` instead of ``sri03`` / ``p0``.
+Handles all older sources: legacy long names (``gen_logi_fixed_..._cren3.nc``),
+case directories holding ``<case>/<case>.fwd.nc``, and case directories written
+before 2026-08-11, when the leaf was a bare ``fwd.nc`` and the tokens were
+``ri3`` / ``none`` instead of ``sri03`` / ``p0``.
 
 **Dry-run by default.** Nothing moves until you pass ``--apply``. It copies
 rather than moves, verifies each copy opens and carries the expected case, and
@@ -141,8 +142,10 @@ def main() -> int:
                 # path rather than the attrs. Asserting on the full id would
                 # reject every copy destined for .002 or beyond and then delete
                 # it, which is the worst possible outcome for a verify step.
+                # The case lives in the leaf (<case>.fwd.nc), not the parent:
+                # since the 2026-08-12 flattening the parent is the cache root.
                 got = case_from_attrs(dict(ds.attrs))
-                want = parse_case(dest.parent.name)
+                want = parse_case(dest.name.removesuffix(".fwd.nc"))
                 assert str(replace(got, run=want.run)) == str(want)
         except Exception as exc:
             dest.unlink(missing_ok=True)

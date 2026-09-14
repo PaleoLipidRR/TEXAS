@@ -210,13 +210,19 @@ for old caches and Zenodo downloads pinned to the v0.2.0 record.
 > with fixed dot-delimited positions, so tokens stay short:
 >
 > ```
-> tx.v026.GHEB.sst.sri03.G23-N1p0.001/                          <- the case
->     tx.v026.GHEB.sst.sri03.G23-N1p0.001.fwd.nc                <- forward posterior
->     tx.v026.GHEB.sst.sri03.G23-N1p0.001.inv.U1482.ud-050126.nc <- a reconstruction
+> tx.GHEB.sst.sri03.G23-N1p0.fwd.nc                <- forward posterior
+> tx.GHEB.sst.sri03.G23-N1p0.inv.U1482.ud-mod.nc   <- a reconstruction
 > ```
 >
-> Positions: project, version, **compset**, target temperature, proxy,
-> predictors, run/member. The 4-char compset encodes curve (`G` gen_logi_fixed,
+> > **Flattened 2026-08-12 (`0c96d361`).** The cache is flat: no case
+> > directory, no version token, no run/member. `fwd_relpath()` returns
+> > `<case>.fwd.nc` in the cache root, and a re-run overwrites the one
+> > canonical path. The older forms below — `tx.v026.…` versioned ids,
+> > `.001`/`.002` members, and `<case>/<case>.fwd.nc` or `<case>/fwd.nc`
+> > directories — still *parse and resolve*, but are no longer written.
+>
+> Positions: project, **compset**, target temperature, proxy, predictors (and,
+> in ids written before the flattening, version and run/member). The 4-char compset encodes curve (`G` gen_logi_fixed,
 > `L` logistic, `N` linear), training set (`H` hier_crtp, `C` culmeso,
 > `J` culmesocore, `T` crtp), estimator (`P` priorApprox, `E` priorApprox+EIV,
 > `D` full hierarchical), and predictor structure (`U` univariate, `A` additive
@@ -319,9 +325,9 @@ for old caches and Zenodo downloads pinned to the v0.2.0 record.
 > This is not free: the full path grows from 39 to 72 characters versus a bare
 > `fwd.nc`. What it buys is a leaf that is still self-identifying once detached,
 > and the leaf itself still drops ~100 → ~41 characters against the legacy name.
-> `download_posteriors()` unpacks a flat Zenodo file into its case directory
-> (`utils/download.py::_local_dest`) so the local cache has one uniform layout
-> whether a posterior was sampled here or downloaded.
+> `download_posteriors()` writes a Zenodo file under the same flat
+> `<case>.fwd.nc` name (`utils/download.py::_local_dest`), so the local cache
+> has one uniform layout whether a posterior was sampled here or downloaded.
 >
 > - **The case is the forward calibration.** An invT model name records the curve
 >   and constraint but not the training set or estimator, so a reconstruction is
@@ -329,9 +335,10 @@ for old caches and Zenodo downloads pinned to the v0.2.0 record.
 >   on the `fwd_case` / `fwd_posterior_name` attrs that `build_invT_inputData`
 >   now attaches — invT posteriors written before this carry no provenance and
 >   fall back to the legacy flat name automatically.
-> - **The run position** (`.001`) is CESM's ensemble-member field; `save_posterior`
->   maps `filename_suffix` (e.g. a `050126` date stamp) onto it, which is what
->   stops two refits of one configuration from colliding.
+> - **The run position** (`.001`) was CESM's ensemble-member field. Since the
+>   flattening `save_posterior(run="auto")` writes **no** member — one
+>   configuration, one path, a re-run replaces it. Pass `run=` only to keep a
+>   run deliberately apart.
 > - **Dual-read, write-new.** Nothing on disk was renamed. `load_posterior()`
 >   accepts *either* a case id or a legacy long name and finds the file under
 >   *either* layout (exact-path lookups first, attr-matching scan only as a
@@ -341,10 +348,9 @@ for old caches and Zenodo downloads pinned to the v0.2.0 record.
 >
 > **Status of the inverse half (audited 2026-08-11) — the forward side is wired,
 > the inverse side is only half-wired. Do not assume otherwise:**
-> - `naming.inv_relpath()` is the documented canonical inverse-name builder and
->   **nothing outside `tests/` calls it.** The production path is
->   `io._generate_filename_base()`, which reimplements a *different* leaf format
->   inline (no run number).
+> - ~~`naming.inv_relpath()` has no caller outside `tests/`.~~ Since fixed:
+>   `io._generate_filename_base()` now builds its leaf through `inv_relpath()`
+>   (`stan/io.py`, "The leaf comes from naming.inv_relpath()").
 > - `save_invT_posterior()` (`stan/io.py:269`, exported in `__all__`) is entirely
 >   case-unaware and **silently drops `proxy_name`**, so a `scaledRI` and a
 >   `TEX86` run of one site overwrite each other.
@@ -360,9 +366,9 @@ for old caches and Zenodo downloads pinned to the v0.2.0 record.
 
 #### Renaming an existing cache onto the case layout
 
-`scripts/migrate_cache_layout.py` converts forward posteriors — legacy flat
-files *and* case directories written before 2026-08-11 — onto
-`<case>/<case>.fwd.nc`.
+`scripts/migrate_cache_layout.py` converts forward posteriors — legacy long
+names *and* case directories (`<case>/<case>.fwd.nc`, `<case>/fwd.nc`) — onto
+the flat `<case>.fwd.nc` in the cache root.
 
 ```bash
 python scripts/migrate_cache_layout.py                  # dry run: print the plan
@@ -372,9 +378,12 @@ python scripts/migrate_cache_layout.py --cache /some/other/dir
 ```
 
 It is **dry-run by default**, copies before it deletes, re-opens every copy and
-checks the case id matches the directory, and **exits 1 without touching
-anything if two files claim one case id** — that guard is what makes it safe to
-run unattended.
+checks the case id in its attrs matches the leaf name, and **exits 1 without
+touching anything if two files claim one case id** — that guard is what makes it
+safe to run unattended. (Until `c396a2f` the check compared against the parent
+directory, which after the flattening is the cache root, so every `--apply`
+failed on its first copy.) When a clash is two separate runs, decide which to
+keep and move the other into `superseded/`, which the script never scans.
 
 **This is per-machine, and the plan will differ on each one.** `data/cache/**`
 is gitignored, so it does not travel with a clone: the Linux box and the
@@ -389,7 +398,7 @@ without a `fwd_case` attr the parent case is unrecoverable, and inventing one
 would record a guess as provenance. Leave them on the legacy dual-read path.
 
 **Nothing is lost if the leaf names are wrong** — `load_posterior()` reads
-legacy flat names, `<case>/fwd.nc`, and `<case>/<case>.fwd.nc` alike, and old
+legacy long names, flat `<case>.fwd.nc`, `<case>/fwd.nc`, and `<case>/<case>.fwd.nc` alike, and old
 `ri3` / `none` tokens still parse. Migration is a tidiness step, not a
 correctness one.
 
@@ -465,7 +474,7 @@ data = build_fwd_data(
     no3_crtp=crtp_df["no3"].values,  # no3_cutoff auto-calculated via Spearman if omitted
 )
 post, diag = get_posterior(data, "gen_logi_fixed_hier_crtp_multiv", temptype="SST", proxy_name="scaledRI")
-save_posterior(post)  # → <case_id>/<case_id>.fwd.nc (case layout, the default since v0.2.6)
+save_posterior(post)  # → <case_id>.fwd.nc, flat in the cache root (case layout, the default)
 
 # 2. Inverse reconstruction
 data_inv, kwargs = build_invT_inputData(proxyObs, prior_mu_t, prior_sigma_t, fwd_posterior_name="...")
