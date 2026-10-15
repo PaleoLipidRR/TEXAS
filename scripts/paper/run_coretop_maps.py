@@ -77,6 +77,25 @@ BATCH = 250
 #: prior_mu_t is per-site (the measured temperature); only the width is fixed.
 PRIOR_SIGMA_T = 10.0
 
+# Prior means that do not depend on the measured temperature, for checking how much of the
+# inverse skill the measured-temperature prior supplies (the same prior goes to BAYSPAR in
+# bayspar_prior_variants.py). "measured" is the published method and keeps the published file
+# names; the others write global_coretop_<prior>_bNN and their own manifest.
+#   latband  a smooth function of latitude alone, 30 cos^2(lat) - 1: ~29 degC at the equator,
+#            ~14 degC at 45 degrees, -1 degC at the poles (no steps at band edges)
+#   const15  15 degC everywhere: a bound with no geographic information at all
+PRIOR_MEANS = {
+    "measured": None,
+    "latband": lambda lat: 30.0 * np.cos(np.radians(lat)) ** 2 - 1.0,
+    "const15": lambda lat: np.full(len(lat), 15.0),
+}
+
+
+def prior_mean(prior: str, sub: pd.DataFrame, col: str) -> np.ndarray:
+    if prior == "measured":
+        return sub[col].to_numpy(dtype=float)
+    return np.asarray(PRIOR_MEANS[prior](sub["Latitude"].to_numpy(dtype=float)), dtype=float)
+
 # predictor set -> (use G23, use NO3)
 CONFIGS = [
     ("G23", True, False),
@@ -116,23 +135,26 @@ def fwd_case(arm: str, temptype: str, g23: bool, no3: bool) -> str:
     return str(case_from_attrs(attrs))
 
 
-def manifest_path(arm: str) -> Path:
-    return R.RESULTS_DIR / MANIFEST_BY_ARM[arm]
+def manifest_path(arm: str, prior: str = "measured") -> Path:
+    name = MANIFEST_BY_ARM[arm]
+    if prior != "measured":
+        name = name.replace(".csv", f"_prior-{prior}.csv")
+    return R.RESULTS_DIR / name
 
 
-def read_manifest(arm: str) -> pd.DataFrame:
-    p = manifest_path(arm)
+def read_manifest(arm: str, prior: str = "measured") -> pd.DataFrame:
+    p = manifest_path(arm, prior)
     return pd.read_csv(p) if p.exists() else pd.DataFrame()
 
 
-def record(arm: str, row: dict) -> None:
+def record(arm: str, row: dict, prior: str = "measured") -> None:
     R.RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    df = pd.concat([read_manifest(arm), pd.DataFrame([row])], ignore_index=True)
-    df.to_csv(manifest_path(arm), index=False)
+    df = pd.concat([read_manifest(arm, prior), pd.DataFrame([row])], ignore_index=True)
+    df.to_csv(manifest_path(arm, prior), index=False)
 
 
-def done_keys(arm: str) -> set:
-    df = read_manifest(arm)
+def done_keys(arm: str, prior: str = "measured") -> set:
+    df = read_manifest(arm, prior)
     if df.empty or "key" not in df:
         return set()
     return set(df[df.get("status", "ok") == "ok"]["key"])
@@ -148,6 +170,11 @@ def main(argv=None) -> int:
     ap.add_argument("--temptypes", nargs="+", choices=list(R.TEMPTYPES),
                     default=list(R.TEMPTYPES))
     ap.add_argument("--batch", type=int, default=BATCH)
+    ap.add_argument("--prior", choices=list(PRIOR_MEANS), default="measured",
+                    help="prior mean per site: the measured temperature (published), or one "
+                         "that ignores it (latband, const15); width stays PRIOR_SIGMA_T")
+    ap.add_argument("--cells", nargs="+", default=None,
+                    help="only these predictor sets (e.g. G23-N1p0; p0 for --arm univ)")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--force-lock", action="store_true")
     args = ap.parse_args(argv)
@@ -179,7 +206,7 @@ def main(argv=None) -> int:
           f"({len(starts)} per configuration)")
     R.log(f"budget {R.INV_WARMUP}/{R.INV_SAMPLING}, M={R.INV_M}, "
           f"{R.CHAINS} chains, seed {R.SEED}; "
-          f"prior N(measured T per site, {PRIOR_SIGMA_T})")
+          f"prior N({'measured T per site' if args.prior == 'measured' else args.prior}, {PRIOR_SIGMA_T})")
 
     todo = []
     # The thermal-only baseline is a single predictor-free configuration per
@@ -188,6 +215,9 @@ def main(argv=None) -> int:
     # own manifest rather than duplicated per arm. fig9/fig10 need it as the
     # "univ" layer, which is why it cannot simply be skipped.
     configs = [("p0", False, False)] if args.arm == "univ" else CONFIGS
+    if args.cells:
+        configs = [c for c in configs if c[0] in args.cells]
+    stem = "global_coretop" if args.prior == "measured" else f"global_coretop_{args.prior}"
     for tt in args.temptypes:
         for cell, g23, no3 in configs:
             case = fwd_case(args.arm, tt, g23, no3)
@@ -202,7 +232,7 @@ def main(argv=None) -> int:
     if args.dry_run or not todo:
         return 0
 
-    have = done_keys(args.arm)
+    have = done_keys(args.arm, args.prior)
     with R.single_instance(force=args.force_lock):
         R.STOP.install()
         for tt, cell, g23, no3, case in todo:
@@ -225,12 +255,12 @@ def main(argv=None) -> int:
                 t0 = time.time()
                 predict_T_from_proxyObs(
                     proxyObs=sub[R.PROXY].values,
-                    # per-site: the measured temperature for THIS target
-                    prior_mu_t=sub[col].to_numpy(dtype=float),
+                    # per-site: the measured temperature for THIS target (or --prior)
+                    prior_mu_t=prior_mean(args.prior, sub, col),
                     prior_sigma_t=PRIOR_SIGMA_T,
                     fwd_posterior=case,
                     predictors=preds,
-                    site_name=f"global_coretop_b{bi:02d}",
+                    site_name=f"{stem}_b{bi:02d}",
                     proxy_name=R.PROXY,
                     temptype=tag,
                     save_results=True,
@@ -241,12 +271,13 @@ def main(argv=None) -> int:
                 record(args.arm, dict(key=key, arm=args.arm, temptype=tt, cell=cell, batch=bi,
                             fwd_case=case, n_sites=len(sub),
                             iter_warmup=R.INV_WARMUP, M=R.INV_M,
-                            prior_mu_t="per-site", prior_sigma_t=PRIOR_SIGMA_T,
-                            wall_sec=wall, status="ok"))
+                            prior_mu_t="per-site" if args.prior == "measured" else args.prior,
+                            prior_sigma_t=PRIOR_SIGMA_T,
+                            wall_sec=wall, status="ok"), args.prior)
 
     R.log("")
     R.log(f"done in {timedelta(seconds=int(time.time() - t_start))}; "
-          f"manifest -> {manifest_path(args.arm)}")
+          f"manifest -> {manifest_path(args.arm, args.prior)}")
     return 0
 
 
