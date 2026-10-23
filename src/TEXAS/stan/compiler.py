@@ -267,21 +267,28 @@ class StanCompiler:
         build_path = self._build_path(stan_path)
         binary_path = build_path.with_suffix("")
 
-        # Auto-detect stale/incompatible binary (e.g. compiled on another OS)
+        # Auto-detect stale/incompatible binary (e.g. compiled on another OS).
+        # Probe with ``info``: CmdStan model executables accept it and exit 0,
+        # whereas ``--version`` is rejected (exit 1) by every healthy binary.
+        # A binary that genuinely cannot run here fails before argument
+        # parsing (exit 126/127 from a missing loader or shared library).
         if not force and binary_path.exists():
             try:
                 result = subprocess.run(
-                    [str(binary_path), "--version"],
+                    [str(binary_path), "info"],
                     capture_output=True,
                     timeout=10,
                 )
                 if result.returncode != 0:
+                    stderr = result.stderr.decode("utf-8", "replace").strip()
+                    detail = stderr.splitlines()[0] if stderr else "no stderr output"
                     warnings.warn(
                         f"Stan model '{binary_path.name}' was compiled for a different "
                         "environment (e.g. Docker or another OS) and cannot run here "
-                        "(exit code 127). The old binary has been removed and the model "
-                        "will be recompiled for your current setup — this is normal when "
-                        "switching between Docker and a local install.",
+                        f"(exit code {result.returncode}: {detail}). The old binary has "
+                        "been removed and the model will be recompiled for your current "
+                        "setup — this is normal when switching between Docker and a "
+                        "local install.",
                         RuntimeWarning,
                         stacklevel=3,
                     )
