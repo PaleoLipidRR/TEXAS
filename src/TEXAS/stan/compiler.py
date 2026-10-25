@@ -267,11 +267,19 @@ class StanCompiler:
         build_path = self._build_path(stan_path)
         binary_path = build_path.with_suffix("")
 
-        # Auto-detect stale/incompatible binary (e.g. compiled on another OS)
+        # Auto-detect stale/incompatible binary (e.g. compiled on another OS).
+        # The probe must be an argument CmdStan ACCEPTS. A CmdStan executable rejects
+        # "--version" -- "--version is either mistyped or misplaced. A method must be
+        # specified!", exit 1 -- however healthy it is, so probing with it condemned every
+        # binary, deleted it and dropped the in-memory cache below, and the model was
+        # recompiled on every get_model() call. "info" is the right probe: it exits 0 and
+        # prints the Stan version the binary was built against, which is what this check
+        # actually wants to know. A binary built elsewhere still fails to exec (126/127), so
+        # the Docker / other-OS case this was written for keeps working.
         if not force and binary_path.exists():
             try:
                 result = subprocess.run(
-                    [str(binary_path), "--version"],
+                    [str(binary_path), "info"],
                     capture_output=True,
                     timeout=10,
                 )
@@ -279,9 +287,9 @@ class StanCompiler:
                     warnings.warn(
                         f"Stan model '{binary_path.name}' was compiled for a different "
                         "environment (e.g. Docker or another OS) and cannot run here "
-                        "(exit code 127). The old binary has been removed and the model "
-                        "will be recompiled for your current setup — this is normal when "
-                        "switching between Docker and a local install.",
+                        f"(exit code {result.returncode}). The old binary has been removed "
+                        "and the model will be recompiled for your current setup — this is "
+                        "normal when switching between Docker and a local install.",
                         RuntimeWarning,
                         stacklevel=3,
                     )
