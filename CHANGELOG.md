@@ -9,6 +9,21 @@ release; every such change is listed below. `1.0.0` is the release that
 accompanies the accepted manuscript — the convention closes here, and from
 this point on `MAJOR.MINOR.PATCH` means what it usually does.
 
+## [1.0.1] — 2026-11-04
+
+### Fixed
+
+- `TEXAS.utils.download.ZENODO_RECORD_ID` still pointed at `22131367`
+  (the 0.4.0/v0.3.0 record, screened on the superseded 1,513-site set) in the
+  `1.0.0` wheel actually published to PyPI — the data-record repoint to
+  `23954718` (1,518 sites, matching this release's calibration set) was
+  committed to the repo after `1.0.0` had already been built and uploaded.
+  `download_posteriors()`/`download_all()` from a fresh `1.0.0` install would
+  silently fetch calibration data that doesn't match the accepted
+  manuscript's own reported statistics. `22131367` remains valid and
+  permanently accessible, so this was never a hard failure — just stale data
+  behind a version string that otherwise matches the paper.
+
 ## [1.0.0] — 2026-11-04
 
 This is the release that accompanies the accepted manuscript (the version of
