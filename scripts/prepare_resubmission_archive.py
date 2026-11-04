@@ -91,45 +91,34 @@ DATA_FILES = [
 # that weren't previously archived anywhere. Added 2026-11 so the Open
 # Research promise ("a fresh clone + the two Zenodo records reproduces every
 # figure") is actually true. See the README's own provenance table.
+#
+# 2026-11-04: narrowed to files with NO data traceable to another group's
+# publication, however permissively licensed or however much RR computation
+# sits on top -- the user's explicit call, overriding the earlier "co-author
+# product" / "CC-BY" / "transformative derivative" reasoning below. Cite,
+# don't re-host, everything that fails that test:
+#   - Tierney et al. 2022 PNAS PETM data assimilation (regridded) and
+#     Zhu et al. 2019 Science Advances iCESM1.2 PETM simulations (regridded
+#     to full depth) -- Fig. 12. Was EXTERNAL_FILES; now empty.
+#   - Muller et al. 2019 (EarthByte) plate-model files -- also Fig. 12,
+#     also was EXTERNAL_FILES.
+#   - Babila_SST_results_finalized_compiled.xlsx (BAYMAG posterior from
+#     Babila et al.'s Mg/Ca) and ODP1259_...Bornemann08_OBrien17compl.xlsx
+#     (merged from Bornemann 2008 + O'Brien 2017).
+#   - PhanTEX_GIG_df.csv, PhanTEX_v001_modified_032626.csv,
+#     PhanSST_v001_extendedRR_121025.csv -- aggregate many papers' data
+#     points under an RR schema, but every point still traces to another
+#     publication.
+# See the README's "Cited, not re-hosted" list for the full set.
+EXTERNAL_FILES: list[Path] = []
 
-# Fig. 12 (SI_code03): Tierney et al. 2022 PNAS PETM data assimilation,
-# regridded, + Zhu et al. 2019 Science iCESM1.2 PETM simulations, regridded
-# to full depth -- both co-author products. Plus the 2 small Muller et al.
-# 2019 plate-model files Fig. 12's paleogeography needs (the rest of that
-# model -- rotations for other times, polygon files -- stays a cite+fetch,
-# not re-hosted; these two are small enough to ship directly).
-EXTERNAL_FILES = [
-    REPO / "data/external/ncfiles/Tierney22_PNAS_PETMDA/PETMDA_OCN_annual_regridded.nc",
-    REPO / "data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM01x.nc",
-    REPO / "data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM03x.nc",
-    REPO / "data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM06x.nc",
-    REPO / "data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM09x.nc",
-    REPO / "data/external/paleoDEMS/pyGplates_files/PaleoDEMS_global_plate_model/Muller2019-Young2019-Cao2020_COBs.gpmlz",
-    REPO / "data/external/paleoDEMS/pyGplates_files/PaleoDEMS_global_plate_model/Muller2019-Young2019-Cao2020_CombinedRotations.rot",
-]
-
-# SI_code00 raw inputs (the ingredients behind combined_coretop_culture_mesocosm
-# already on the record) + genuine RR derivatives of published (CC-BY) sources
-# -- i.e. ones where real computation or multi-source merging happened, not a
-# re-hosted copy of one paper's own table. Checked file-by-file (not by
-# filename alone) 2026-11-03: Babila_SST_results_finalized_compiled.xlsx
-# carries BAYMAG Bayesian SST posteriors + Rhat, not raw Mg/Ca;
-# ODP1259_...Bornemann08_OBrien17compl.xlsx merges two papers plus an
-# age-model sheet; the three Phan* files share a schema with RR-generated
-# SampleIDs aggregating many sources. Deliberately NOT here, same reasoning
-# as Kim2010_coretop.xlsx: U1482_MgCa_SST.xlsx (its one sheet is literally
-# named "MgCa_Pei2021", just Age_ka/Mg_SST -- no RR-added column) and
-# ds07_TasmanSea_paleorecords.xlsx (each sheet reads like a straight
-# transcription of that site's own SI table). Cite, don't re-host, those
-# three -- see the README's provenance table.
+# this study only -- the global coretop TEX86 compilation and the
+# culture+mesocosm table, both first-party measurements with no data
+# traceable to another group's publication (the ingredients behind
+# combined_coretop_culture_mesocosm_rev20260210.csv, already in DATA_FILES).
 PUBLISHED_DATA_FILES = [
     REPO / "data/spreadsheets/ds01_updated_global_coretop_tex_revised_011226.csv",
     REPO / "data/spreadsheets/culture_mesocosm_combined_rev_092325.xlsx",
-    REPO / "data/spreadsheets/published_data/Babila_SST_results_finalized_compiled.xlsx",
-    REPO / "data/spreadsheets/published_data/ODP1259_d18O_planktic_Bornemann08_OBrien17compl.xlsx",
-    REPO / "data/spreadsheets/published_data/PhanTEX_GIG_df.csv",
-    REPO / "data/spreadsheets/published_data/PhanTEX_v001_modified_032626.csv",
-    REPO / "data/spreadsheets/published_data/PhanSST_v001_extendedRR_121025.csv",
 ]
 
 # Converted to csv at staging time, never shipped as the pickle itself --
@@ -187,17 +176,6 @@ def paleo_invt_files() -> list[Path]:
     return out
 
 
-def coretop_batch_files() -> list[Path]:
-    """The 42 raw per-batch coretop invT files SI_code02 actually globs.
-
-    The 6 compiled files (one concatenated .nc per configuration, built by
-    ``compile_coretop`` below) stay in the archive too, for users who just
-    want to read a reconstruction without caring how it was batched.
-    """
-    return [INVT_CACHE / f"{case}.inv.global_coretop_{b}.ud.nc"
-            for case in CORETOP_CONFIGS for b in CORETOP_BATCHES]
-
-
 def sensitivity_files() -> list[Path]:
     """param_sensitivity/ (Figs. S12, S18, S19) + the refit manifests/case
     ids SI_code02a reads directly as provenance -- data/revision1/ in the
@@ -251,8 +229,6 @@ def build_plan() -> tuple[list[tuple[Path, Path]], list[tuple[str, Path]],
     for rel in DRAWS_FILES:
         src = INVT_CACHE / rel
         copies.append((src, Path("posteriors/invT/paleo") / src.name))
-    for f in coretop_batch_files():
-        copies.append((f, Path("posteriors/invT/coretop/batches") / f.name))
     for f in DATA_FILES:
         copies.append((f, Path("data") / f.name))
     for f in EXTERNAL_FILES:
@@ -346,20 +322,20 @@ def main(argv=None) -> int:
         return 1
 
     n_paleo = sum(1 for _, d in copies if d.parts[:3] == ("posteriors", "invT", "paleo"))
-    n_batches = sum(1 for _, d in copies if d.parts[:3] == ("posteriors", "invT", "coretop")
-                    and d.parts[3:4] == ("batches",))
     n_external = sum(1 for _, d in copies if d.parts[:2] == ("data", "external"))
     n_published = (sum(1 for _, d in copies if d.parts[:2] == ("data", "published_data"))
                    + len(pickle_conversions))
     n_sensitivity = sum(1 for _, d in copies if d.parts[:2] == ("data", "revision1"))
     print(f"Archive: {archive}  (package version {version})")
     print(f"  forward posteriors : {len(FWD_CASES)}")
-    print(f"  coretop compiles   : {len(compiles)} (from {n_batches} batch files, "
-          f"which also ship individually)")
+    print(f"  coretop compiles   : {len(compiles)} (from {len(CORETOP_BATCHES) * len(CORETOP_CONFIGS)} "
+          f"batch files, not shipped individually)")
     print(f"  paleo invT files   : {n_paleo}")
     print(f"  data files         : {len(DATA_FILES)}")
-    print(f"  external files     : {n_external}  (Fig. 12 model grids + plate model)")
-    print(f"  published-data     : {n_published}  (RR-compiled derivatives of CC-BY sources)")
+    print(f"  external files     : {n_external}  (none -- Fig. 12's third-party model/plate "
+          f"grids are cited, not re-hosted)")
+    print(f"  published-data     : {n_published}  (first-party only -- no data traceable to "
+          f"another group's publication)")
     print(f"  sensitivity/refit  : {n_sensitivity}  (param_sensitivity + refit manifests)")
     print("  + MANIFEST.csv, README.md")
     if not args.apply:
@@ -508,11 +484,10 @@ lengths for every run are in `MANIFEST.csv`.
 ### posteriors/invT/coretop/ — global coretop reconstructions
 
 One compiled file per configuration (1518 sites; batches b01-b07
-concatenated). Row order matches `data/coretop_maps_sites.csv`.
-`posteriors/invT/coretop/batches/` additionally ships the 42 raw per-batch
-files these are concatenated from (what `notebooks/manuscripts/SI_code02`
-itself globs) — the compiled copies above are for anyone who just wants to
-read a reconstruction without caring how it was batched.
+concatenated). Row order matches `data/coretop_maps_sites.csv`. The raw
+per-batch files `notebooks/manuscripts/SI_code02` itself globs are not
+shipped separately — they carry no information the compiled file doesn't
+already have.
 
 ### posteriors/invT/paleo/ — paleo-site reconstructions
 
@@ -535,33 +510,46 @@ Note: `ocean_prop_ds` (`ds06_calculated_ocean_properties.nc`), used for the
 archive -- it's hosted on the companion GRL paper's own Zenodo record and
 downloaded from there directly (see `utils/download.py`).
 
-### data/external/ — first-party model/plate-model grids behind Fig. 12
+### data/external/ — empty; Fig. 12's model/plate-model grids are cited, not re-hosted
 
-| File | Source | Derivation |
-|---|---|---|
-| PETMDA_OCN_annual_regridded.nc | Tierney et al. 2022, PNAS (PETM data assimilation) | regridded with `TEXAS.utils.regrid` |
-| Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM0{{1,3,6,9}}x.nc | Zhu et al. 2019, Science (iCESM1.2 PETM simulations) | regridded to full depth with `TEXAS.utils.regrid` |
-| Muller2019-Young2019-Cao2020_COBs.gpmlz, ..._CombinedRotations.rot | Muller et al. 2019 (EarthByte plate model), CC-BY 4.0 | unmodified; re-hosted here (small) rather than linked, unlike the rest of that plate model |
+This folder is intentionally empty. Fig. 12 uses regridded copies of
+Tierney et al. 2022's PNAS PETM data-assimilation field and Zhu et al.
+2019's Science Advances iCESM1.2 PETM simulations, plus two files from the
+Müller et al. 2019 (EarthByte) plate-reconstruction model. All of that data
+traces to another group's publication — however permissively licensed
+(the Müller model is CC-BY 4.0) or however much regridding/computation sits
+on top — so none of it is re-hosted here. Cite the originals:
 
-### data/published_data/ — compiled inputs to the training database
+| Not re-hosted | Source (DOI) |
+|---|---|
+| PETM data-assimilation field | Tierney et al. 2022, *PNAS*, doi:10.1073/pnas.2205326119 |
+| iCESM1.2 Eocene PETM simulations | Zhu et al. 2019, *Science Advances*, doi:10.1126/sciadv.aax1874 |
+| Global plate reconstruction model | Müller et al. 2019 (EarthByte), CC-BY 4.0 |
 
-| File | Source | Derivation |
-|---|---|---|
-| ds01_updated_global_coretop_tex_revised_011226.csv, culture_mesocosm_combined_rev_092325.xlsx | this study | raw SI_code00 inputs behind `combined_coretop_culture_mesocosm_rev20260210.csv` above |
-| Babila_SST_results_finalized_compiled.xlsx | Babila et al., Mg/Ca measurements | BAYMAG Bayesian Mg/Ca-to-SST calibration run by the authors (posterior quantiles + Rhat, not raw ratios) |
-| ODP1259_d18O_planktic_Bornemann08_OBrien17compl.xlsx | Bornemann et al. 2008 + O'Brien et al. 2017 | merged by the authors onto one age model |
-| PhanTEX_GIG_df.csv, PhanTEX_v001_modified_032626.csv, PhanSST_v001_extendedRR_121025.csv | many published sources (see SI_code01-04 for per-site citations) | the authors' own Phanerozoic TEX86/SST compilation -- a standardized schema with author-assigned `SampleID`s aggregating many studies, not any one paper's table |
-| ols_tex_thermoT_thisStudy.csv | this study | the fitted TEX86-vs-thermoT linear regression's parameters (`coef_`, `intercept_`); shipped as csv, not the original pickle, since a pickle pins a library version |
+### data/published_data/ — first-party inputs only
 
-**Cited, not re-hosted** (unlike the rows above, these are a single published
-source's own table carried through essentially unmodified -- cite the
-original rather than re-publish it here): `Kim2010_coretop.xlsx` (Kim et al.
-2010's core-top TEX86/SST table; the comparison with that calibration is
-computed live in SI_code02, not baked into the file), `U1482_MgCa_SST.xlsx`
-(Pei et al. 2021's own Mg/Ca-SST series, via Tran et al. 2025), and
-`ds07_TasmanSea_paleorecords.xlsx` (DSDP591 + IODP U1510 Alkenone/GDGT data
-transcribed from each site's own publication). See SI_code02/SI_code03 for
-the exact citations.
+| File | Description |
+|---|---|
+| ds01_updated_global_coretop_tex_revised_011226.csv, culture_mesocosm_combined_rev_092325.xlsx | this study — raw SI_code00 inputs behind `combined_coretop_culture_mesocosm_rev20260210.csv` above |
+| ols_tex_thermoT_thisStudy.csv | this study — the fitted TEX86-vs-thermoT linear regression's parameters (`coef_`, `intercept_`); shipped as csv, not the original pickle, since a pickle pins a library version |
+
+**Cited, not re-hosted** — every one of these still traces to another
+group's publication, whether as an essentially unmodified table or as RR's
+own computed/merged/compiled product built on top of one:
+`Kim2010_coretop.xlsx` (Kim et al. 2010's core-top TEX86/SST table; the
+comparison with that calibration is computed live in SI_code02, not baked
+into the file), `U1482_MgCa_SST.xlsx` (Pei et al. 2021's own Mg/Ca-SST
+series, via Tran et al. 2025), `ds07_TasmanSea_paleorecords.xlsx` (DSDP591 +
+IODP U1510 Alkenone/GDGT data transcribed from each site's own publication),
+`Babila_SST_results_finalized_compiled.xlsx` (a BAYMAG Bayesian SST
+posterior computed from Babila et al. 2022's Mg/Ca, doi:10.1126/sciadv.abg1025),
+`ODP1259_d18O_planktic_Bornemann08_OBrien17compl.xlsx` (Bornemann et al.
+2008, doi:10.1126/science.1148777, merged with O'Brien et al. 2017,
+doi:10.1016/j.earscirev.2017.07.012, onto one age model), and
+`PhanTEX_GIG_df.csv`/`PhanTEX_v001_modified_032626.csv`/`PhanSST_v001_extendedRR_121025.csv`
+(RR's own Phanerozoic TEX86/SST compilation, but every point still traces to
+another published study — see SI_code01-04 for per-site citations). See
+SI_code02/SI_code03 for the exact citations.
 
 ### data/revision1/ — sampler-budget sensitivity + refit provenance
 

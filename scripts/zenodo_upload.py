@@ -9,9 +9,9 @@ The script:
   1. Creates a new draft version from the existing data record (RECORD_ID below)
   2. Deletes files inherited from the previous version (they stay on the old,
      permanently accessible version — nothing is lost)
-  3. Uploads the archive's forward posteriors, data/ + data/external/ +
-     data/published_data/ + data/revision1/ files, MANIFEST.csv and
-     README.md as individual flat files + a bundled invT ZIP
+  3. Uploads the archive's forward posteriors, data/ + data/published_data/ +
+     data/revision1/ files, MANIFEST.csv and README.md as individual flat
+     files + a bundled invT ZIP
   4. Updates the version metadata to the package version
   5. Leaves the record as a DRAFT (add --publish to publish immediately)
 
@@ -52,18 +52,23 @@ ARCHIVE_DIR = REPO / f"review_archive_v{VERSION}"
 # Expected archive shape — a mismatch means the staging script and this one
 # disagree, so stop rather than upload a partial record.
 EXPECTED_FORWARD = 9
-# 6 compiled coretop + 42 raw per-batch coretop files + 40 paleo (incl. the 2
-# full-draws files) = 88 today; a floor, not an exact match, so a future
-# addition doesn't need touching this constant.
-EXPECTED_INVT_MIN = 88
+# 6 compiled coretop + 40 paleo (incl. the 2 full-draws files) = 46 today;
+# a floor, not an exact match, so a future addition doesn't need touching
+# this constant. The 42 raw per-batch coretop files are not shipped — they
+# carry no information the compiled coretop files don't already have.
+EXPECTED_INVT_MIN = 46
 
 # Extra flat-file source directories added for the v1.0.0 data record (RESUME.md
-# section G): Fig. 12's model/plate-model grids, RR-compiled published-data
-# derivatives, and the sampler-budget-sensitivity + refit-provenance files.
-# All three stay collision-free against DATA_DIR and each other (checked in
-# collect_individual_files below) because every source file already has a
-# distinct name — nothing here was renamed to make it so.
-EXTRA_DATA_DIRS = ["data/external", "data/published_data", "data/revision1"]
+# section G): first-party published_data inputs + the sampler-budget-sensitivity
+# and refit-provenance files. Stay collision-free against DATA_DIR and each
+# other (checked in collect_individual_files below) because every source file
+# already has a distinct name — nothing here was renamed to make it so.
+#
+# "data/external" was dropped 2026-11-04: every file in it traced to another
+# group's publication (Tierney22/Zhu19 regridded grids, Muller19 plate model),
+# so none of it is re-hosted and prepare_resubmission_archive.py never creates
+# the directory now -- EXTRA_DATA_DIRS must not name a path that may not exist.
+EXTRA_DATA_DIRS = ["data/published_data", "data/revision1"]
 
 
 def collect_individual_files() -> dict[str, Path]:
@@ -101,11 +106,11 @@ def collect_individual_files() -> dict[str, Path]:
     return files
 
 
-# InvT posteriors bundled as a single ZIP for SI reproducibility. rglob picks
-# up posteriors/invT/coretop/batches/ (the 42 raw per-batch files) under the
-# coretop entry automatically -- they get the same "invT/coretop/" zip prefix
-# as the 6 compiled files, which is fine: download_invT_posteriors() discards
-# that prefix on unpack and keys only on each file's already-unique basename.
+# InvT posteriors bundled as a single ZIP for SI reproducibility: the 6
+# compiled coretop files + the 40 paleo files. Deliberately non-recursive
+# (glob, not rglob) so a stray posteriors/invT/coretop/batches/ directory --
+# the 42 raw per-batch files, redundant with the compiled coretop files --
+# is never silently swept in.
 INVT_ZIP_NAME = f"texas-psm-invT-posteriors-v{VERSION}.zip"
 INVT_DIRS = [
     ARCHIVE_DIR / "posteriors/invT/coretop",
@@ -196,7 +201,7 @@ def build_invt_zip(tmp_path: Path) -> Path:
     n = 0
     with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
         for d in INVT_DIRS:
-            for f in sorted(d.rglob("*.nc")):
+            for f in sorted(d.glob("*.nc")):
                 arcname = f"invT/{d.name}/{f.name}"
                 zf.write(f, arcname)
                 n += 1
