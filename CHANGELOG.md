@@ -3,12 +3,13 @@
 All notable changes to `texas-psm` are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-Versioning is semantic, with the pre-1.0 convention this project uses: `0.x`
-means "manuscript under review", so the public API may change in a minor
-release. Every such change is listed below. `1.0.0` is reserved for paper
-acceptance.
+Versioning is semantic. Releases before `1.0.0` used the convention `0.x`
+means "manuscript under review", so the public API could change in a minor
+release; every such change is listed below. `1.0.0` is the release that
+accompanies the accepted manuscript — the convention closes here, and from
+this point on `MAJOR.MINOR.PATCH` means what it usually does.
 
-## [Unreleased]
+## [1.0.0] — 2026-11-04
 
 This is the release that accompanies the accepted manuscript (the version of
 record, as its Open Research section promises). The calibration set and
