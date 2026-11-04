@@ -58,6 +58,12 @@ version carries the regenerated posteriors and reconstructions.
 
 ### Fixed
 
+- `MahalanobisOutlierDetector.plot_decision_boundary()` could silently clip
+  outlier points and the confidence ellipse itself out of the rendered plot.
+  `ax.autoscale(False)` was called with no preceding `ax.autoscale_view()`, so
+  it could freeze a stale view computed before the outlier scatter or the
+  ellipse patch registered — exactly the samples this method exists to make
+  visible.
 - `StanCompiler.get_model()` no longer deletes and recompiles every existing
   model binary at the start of each new Python session. Its "compiled for a
   different environment" probe ran `model --version`, which CmdStan model
