@@ -8,6 +8,17 @@ means "manuscript under review", so the public API may change in a minor
 release. Every such change is listed below. `1.0.0` is reserved for paper
 acceptance.
 
+## [Unreleased]
+
+### Fixed
+
+- `StanCompiler.get_model()` no longer deletes and recompiles every existing
+  model binary at the start of each new Python session. Its "compiled for a
+  different environment" probe ran `model --version`, which CmdStan model
+  executables reject with exit status 1, so every healthy binary failed it.
+  The probe now runs `model info`, and the `RuntimeWarning` reports the real
+  exit code and the first line of stderr instead of a hard-coded 127.
+
 ## [0.4.0] — 2026-09-09
 
 This is the release archived on Zenodo alongside the revised manuscript
