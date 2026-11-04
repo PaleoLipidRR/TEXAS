@@ -11,13 +11,15 @@ acceptance.
 ## [Unreleased]
 
 This is the release that accompanies the accepted manuscript (the version of
-record, as its Open Research section promises). It is cut against the
-calibration set and posteriors already on the data record
-(10.5281/zenodo.22131367): 1,513 gridded core-tops, 8 mesocosm and 55 culture
-experiments. A re-screen of that set on `scaledRI_cren3` instead of `scaledRI`
-(branch `fix/dm-screen-cren3`; 1,518 / 8 / 59) was deliberately **not** merged
-here, because the paper's counts and three-decimal statistics describe the
-published set; it is scheduled for 1.1.0 with a new data-record version.
+record, as its Open Research section promises). The calibration set and
+posteriors are screened on `scaledRI_cren3` rather than `scaledRI`
+(`fix/dm-screen-cren3`, merged into this release): 1,518 gridded core-tops, 8
+mesocosm and 59 culture experiments, up from the 1,513 / 8 / 55 set published
+on data record 10.5281/zenodo.22131367. Every parameter moves < 0.3 posterior
+SD; no one-decimal number changes, but the paper's own three-decimal
+statistics and sample counts describe this corrected set, not the earlier
+one — so it ships here rather than being deferred to 1.1.0. A new data-record
+version carries the regenerated posteriors and reconstructions.
 
 ### Changed
 
@@ -55,6 +57,12 @@ published set; it is scheduled for 1.1.0 with a new data-record version.
 
 ### Fixed
 
+- `StanCompiler.get_model()` no longer deletes and recompiles every existing
+  model binary at the start of each new Python session. Its "compiled for a
+  different environment" probe ran `model --version`, which CmdStan model
+  executables reject with exit status 1, so every healthy binary failed it.
+  The probe now runs `model info`, and the `RuntimeWarning` reports the real
+  exit code and the first line of stderr instead of a hard-coded 127.
 - Tabs and note boxes on the installation, quickstart and troubleshooting pages
   rendered as raw `===` and `!!!` text, left over from the mkdocs migration.
 - `texas-doctor` printed `CmdStan ?` for a conda-forge CmdStan, because the

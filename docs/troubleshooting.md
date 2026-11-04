@@ -50,8 +50,8 @@ export TEXAS_STAN_BUILD_DIR=/tmp/texas_stan
 
 **Symptom:**
 ```
-Stan model 'model_name' was compiled for a different environment (exit code 127).
-The old binary has been removed and the model will be recompiled...
+Stan model 'model_name' was compiled for a different environment (e.g. Docker or another OS)
+and cannot run here (exit code 127: <first line of stderr>). The old binary has been removed and the model will be recompiled...
 ```
 
 **This is expected and self-healing.** Stan binaries compiled inside Docker (Linux x86_64 ELF) cannot run on macOS, and vice versa. TEXAS detects this automatically, deletes the stale binary, and recompiles for the current environment. No action needed — sampling will proceed after a one-time recompilation.
