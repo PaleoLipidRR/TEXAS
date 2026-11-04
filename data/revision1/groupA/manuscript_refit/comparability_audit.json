@@ -8,7 +8,7 @@
     {
       "check": "culmeso refit by this runner",
       "ok": true,
-      "detail": "forward models recorded: ['culmeso', 'gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv', 'gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_boundedT', 'univ']"
+      "detail": "forward models recorded: ['culmeso', 'gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv', 'gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift', 'univ']"
     },
     {
       "check": "univariate refit for every target",
@@ -18,12 +18,12 @@
     {
       "check": "one forward budget",
       "ok": true,
-      "detail": "warmups=[np.int64(400)], samplings=[np.int64(1000)]"
+      "detail": "warmups=[400], samplings=[1000]"
     },
     {
       "check": "one inverse budget",
       "ok": true,
-      "detail": "warmups=[np.int64(500)], M=['300']"
+      "detail": "warmups=[500], M=['300']"
     },
     {
       "check": "both arms fitted for SST",
@@ -33,12 +33,12 @@
     {
       "check": "identical training rows for SST",
       "ok": true,
-      "detail": "n_obs=[np.int64(1513)]"
+      "detail": "n_obs=[1518]"
     },
     {
       "check": "identical R2_thermal for SST",
       "ok": true,
-      "detail": "r2=[np.float64(0.74558372475)]"
+      "detail": "r2=[0.7447480204999999]"
     },
     {
       "check": "both arms fitted for thermoT",
@@ -48,12 +48,12 @@
     {
       "check": "identical training rows for thermoT",
       "ok": true,
-      "detail": "n_obs=[np.int64(1513)]"
+      "detail": "n_obs=[1518]"
     },
     {
       "check": "identical R2_thermal for thermoT",
       "ok": true,
-      "detail": "r2=[np.float64(0.7571108695000001)]"
+      "detail": "r2=[0.7563104122500001]"
     },
     {
       "check": "every reconstruction is paired across arms",
@@ -62,8 +62,8 @@
     },
     {
       "check": "no forward posterior fails the strict R-hat gate",
-      "ok": true,
-      "detail": ""
+      "ok": false,
+      "detail": "eiv/thermoT max_rhat=1.01134 (check the calibration-parameter R-hat before treating this as a problem \u2014 the EIV models' latents dominate)"
     },
     {
       "check": "reconstructions used this run's calibrations",
@@ -76,14 +76,14 @@
       "detail": "0 stamped"
     }
   ],
-  "ok": true,
+  "ok": false,
   "case_ids": {
     "culmeso|cultureT": "tx.GCDU.cul.sri03.p0",
     "univ|SST": "tx.GHPU.sst.sri03.p0",
     "univ|thermoT": "tx.GHPU.thm.sri03.p0",
-    "eiv|SST": "tx.GHEA.sst.sri03.G23-N10",
-    "bnd|SST": "tx.GHEB.sst.sri03.G23-N10",
-    "eiv|thermoT": "tx.GHEA.thm.sri03.G23-N10",
-    "bnd|thermoT": "tx.GHEB.thm.sri03.G23-N10"
+    "eiv|SST": "tx.GHEA.sst.sri03.G23-N1p0",
+    "bnd|SST": "tx.GHEB.sst.sri03.G23-N1p0",
+    "eiv|thermoT": "tx.GHEA.thm.sri03.G23-N1p0",
+    "bnd|thermoT": "tx.GHEB.thm.sri03.G23-N1p0"
   }
 }

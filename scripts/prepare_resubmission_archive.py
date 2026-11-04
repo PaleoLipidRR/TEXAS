@@ -69,7 +69,7 @@ CORETOP_CONFIGS = [
     "tx.GHPU.thm.sri03.p0",
 ]
 CORETOP_BATCHES = [f"b{i:02d}" for i in range(1, 8)]
-CORETOP_N_SITES = 1513
+CORETOP_N_SITES = 1518
 
 # full-draws files behind the extreme-RI examples (Fig. 13)
 DRAWS_FILES = [
@@ -109,15 +109,24 @@ EXTERNAL_FILES = [
 ]
 
 # SI_code00 raw inputs (the ingredients behind combined_coretop_culture_mesocosm
-# already on the record) + RR-compiled derivatives of published (CC-BY) sources,
-# used across SI_code01-04. One provenance row each in the README.
+# already on the record) + genuine RR derivatives of published (CC-BY) sources
+# -- i.e. ones where real computation or multi-source merging happened, not a
+# re-hosted copy of one paper's own table. Checked file-by-file (not by
+# filename alone) 2026-11-03: Babila_SST_results_finalized_compiled.xlsx
+# carries BAYMAG Bayesian SST posteriors + Rhat, not raw Mg/Ca;
+# ODP1259_...Bornemann08_OBrien17compl.xlsx merges two papers plus an
+# age-model sheet; the three Phan* files share a schema with RR-generated
+# SampleIDs aggregating many sources. Deliberately NOT here, same reasoning
+# as Kim2010_coretop.xlsx: U1482_MgCa_SST.xlsx (its one sheet is literally
+# named "MgCa_Pei2021", just Age_ka/Mg_SST -- no RR-added column) and
+# ds07_TasmanSea_paleorecords.xlsx (each sheet reads like a straight
+# transcription of that site's own SI table). Cite, don't re-host, those
+# three -- see the README's provenance table.
 PUBLISHED_DATA_FILES = [
     REPO / "data/spreadsheets/ds01_updated_global_coretop_tex_revised_011226.csv",
     REPO / "data/spreadsheets/culture_mesocosm_combined_rev_092325.xlsx",
-    REPO / "data/spreadsheets/published_data/ds07_TasmanSea_paleorecords.xlsx",
     REPO / "data/spreadsheets/published_data/Babila_SST_results_finalized_compiled.xlsx",
     REPO / "data/spreadsheets/published_data/ODP1259_d18O_planktic_Bornemann08_OBrien17compl.xlsx",
-    REPO / "data/spreadsheets/published_data/U1482_MgCa_SST.xlsx",
     REPO / "data/spreadsheets/published_data/PhanTEX_GIG_df.csv",
     REPO / "data/spreadsheets/published_data/PhanTEX_v001_modified_032626.csv",
     REPO / "data/spreadsheets/published_data/PhanSST_v001_extendedRR_121025.csv",
@@ -498,7 +507,7 @@ lengths for every run are in `MANIFEST.csv`.
 
 ### posteriors/invT/coretop/ — global coretop reconstructions
 
-One compiled file per configuration (1513 sites; batches b01-b07
+One compiled file per configuration (1518 sites; batches b01-b07
 concatenated). Row order matches `data/coretop_maps_sites.csv`.
 `posteriors/invT/coretop/batches/` additionally ships the 42 raw per-batch
 files these are concatenated from (what `notebooks/manuscripts/SI_code02`
@@ -539,8 +548,20 @@ downloaded from there directly (see `utils/download.py`).
 | File | Source | Derivation |
 |---|---|---|
 | ds01_updated_global_coretop_tex_revised_011226.csv, culture_mesocosm_combined_rev_092325.xlsx | this study | raw SI_code00 inputs behind `combined_coretop_culture_mesocosm_rev20260210.csv` above |
-| ds07_TasmanSea_paleorecords.xlsx, Babila_SST_results_finalized_compiled.xlsx, ODP1259_d18O_planktic_Bornemann08_OBrien17compl.xlsx, U1482_MgCa_SST.xlsx, PhanTEX_GIG_df.csv, PhanTEX_v001_modified_032626.csv, PhanSST_v001_extendedRR_121025.csv | compiled by the authors from published (CC-BY) sources | see SI_code01-04 for per-source citations; compiled, not raw |
+| Babila_SST_results_finalized_compiled.xlsx | Babila et al., Mg/Ca measurements | BAYMAG Bayesian Mg/Ca-to-SST calibration run by the authors (posterior quantiles + Rhat, not raw ratios) |
+| ODP1259_d18O_planktic_Bornemann08_OBrien17compl.xlsx | Bornemann et al. 2008 + O'Brien et al. 2017 | merged by the authors onto one age model |
+| PhanTEX_GIG_df.csv, PhanTEX_v001_modified_032626.csv, PhanSST_v001_extendedRR_121025.csv | many published sources (see SI_code01-04 for per-site citations) | the authors' own Phanerozoic TEX86/SST compilation -- a standardized schema with author-assigned `SampleID`s aggregating many studies, not any one paper's table |
 | ols_tex_thermoT_thisStudy.csv | this study | the fitted TEX86-vs-thermoT linear regression's parameters (`coef_`, `intercept_`); shipped as csv, not the original pickle, since a pickle pins a library version |
+
+**Cited, not re-hosted** (unlike the rows above, these are a single published
+source's own table carried through essentially unmodified -- cite the
+original rather than re-publish it here): `Kim2010_coretop.xlsx` (Kim et al.
+2010's core-top TEX86/SST table; the comparison with that calibration is
+computed live in SI_code02, not baked into the file), `U1482_MgCa_SST.xlsx`
+(Pei et al. 2021's own Mg/Ca-SST series, via Tran et al. 2025), and
+`ds07_TasmanSea_paleorecords.xlsx` (DSDP591 + IODP U1510 Alkenone/GDGT data
+transcribed from each site's own publication). See SI_code02/SI_code03 for
+the exact citations.
 
 ### data/revision1/ — sampler-budget sensitivity + refit provenance
 
