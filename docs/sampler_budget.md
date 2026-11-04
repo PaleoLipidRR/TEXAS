@@ -2,7 +2,12 @@
 
 How many HMC iterations the TEXAS calibration actually needs, and how many the
 *inverse* model needs — which turns out to be a different question with a
-different answer.
+different answer. This is Text S3 and Figs. S18–S19 of the manuscript: the
+published fits use 4 chains × (400 warm-up + 1,000 sampling) iterations, and
+every budget that clears the convergence gates agrees with a long reference run
+to within 0.07 SD for every parameter. The inverse reconstructions use 300
+warm-up iterations with *M* = 300 forward draws for the global coretop maps and
+500 with *M* = 500 for the downcore records.
 
 The page below reports, for each model, the cheapest warmup/sampling budget that
 clears four convergence gates, together with the evidence behind it: the full
@@ -41,10 +46,11 @@ configurations drift apart.
 
 ## Why the page ships with its data
 
-`data/revision1/groupA/param_sensitivity/*.csv` is gitignored — the grid is
-several MB of run output and does not belong in the repository. So the build
-script keeps a compact `_static/sampler-budget.data.json` alongside the HTML,
-holding exactly the numbers the page displays. Both are tracked, which means:
+`data/revision1/groupA/param_sensitivity/*.csv` is tracked through Git LFS,
+so a clone without LFS objects (or a Zenodo zip of the repository, which carries
+only the LFS pointers) does not have the grid. So the build script keeps a
+compact `_static/sampler-budget.data.json` alongside the HTML, holding exactly
+the numbers the page displays. Both are plain tracked files, which means:
 
 - the report is readable from any clone, with no data and no rebuild;
 - `build_sampler_budget.py` reproduces it byte-for-byte from the snapshot on a

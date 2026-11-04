@@ -1,5 +1,3 @@
- > **Pre-release:** This software is under active development. APIs may change before v1.0.0 (first stable release at paper acceptance).
-
 # TEXAS — A proxy system model for TetraEther indeX of Ammonia oxidizerS
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -50,8 +48,8 @@ The γ coefficients are in **°C per predictor unit**, so a sample with a given 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PaleoLipidRR/TEXAS/blob/main/notebooks/quickstart_demo.ipynb)
 
 ```bash
-pip install texas-psm
-# or, with uv:  uv add texas-psm
+pip install texas-psm            # inside a virtual environment
+# or, with uv:  uv pip install texas-psm   (or `uv add texas-psm` in a uv project)
 ```
 
 > **Inverse reconstruction runs Stan**, so pip/uv users need CmdStan installed once — run `TEXAS.install_cmdstan()` (or the `texas-install-cmdstan` command), which installs the tested version and verifies the toolchain. Docker and conda-lock bundle it. The forward `predict_proxy_from_T` is pure Python and needs no CmdStan. See [Installation](docs/installation.md#cmdstan-install-discovery-and-verification).
@@ -83,7 +81,7 @@ result["p5"]    # 5th percentile
 result["p95"]   # 95th percentile
 ```
 
-For Docker, conda-lock, uv, and development installs, see [Installation](docs/installation.md).
+That is all you need to use TEXAS on your own data. To fork the repository or run the manuscript notebooks (`uv sync` from a clone, Docker, or conda), see [Installation](docs/installation.md).
 
 ---
 
@@ -168,7 +166,7 @@ result = predict_T_from_proxyObs(
     fwd_posterior="tx.GHEB.sst.sri03.G23-N1p0",   # the default; may be omitted
     temptype="SST",
     gdgt23ratio=df["gdgt23ratio"].values,
-    no3=df["no3"].values,           # or: site_lat=, site_lon=, no3_dataset= for WOA23 lookup
+    no3=df["no3"].values,           # or: site_lat=, site_lon= for a modern CMEMS nitrate lookup
 )
 
 # ── Pass a pre-loaded dataset (Colab / Google Drive) ──────────────────────────
@@ -197,7 +195,7 @@ notebooks/
   reviewer_response/ Analyses answering review comments, not cited in the paper
 streamlit_app/      Drag-and-drop web interface (Streamlit)
 docker/             Dockerfile and compose configuration
-docs/               Jupyter Book documentation source (guides, API, tutorial)
+docs/               Jupyter Book documentation source (guides, API, explainers)
 tests/              Unit tests
 ```
 
@@ -213,7 +211,7 @@ tests/              Unit tests
 | `download_posteriors(names, …)` | Download forward posteriors from Zenodo (with per-file size notice) |
 | `download_training_data(…)` | Download training CSVs + CMEMS NO₃ field from Zenodo |
 | `list_posteriors()` | Print and return `.nc` stems in the local cache |
-| `lookup_no3_from_woa(lat, lon, woa_dataset)` | WOA23 NO₃ climatology lookup at drill-site coordinates |
+| `lookup_modern_no3(lat, lon, ocean_dataset)` | Modern NO₃ at drill-site coordinates from the CMEMS nitrate climatology (`ocean_prop_ds`); `lookup_no3_from_woa` is a deprecated alias |
 | `build_fwd_data(t_cul, proxy_cul, …)` | Build validated Stan data dict for forward calibration |
 | `get_posterior(data, stan_file, temptype, proxy_name, …)` | Run forward calibration Stan sampling |
 | `save_posterior(ds)` / `load_posterior(name)` | Persist / load forward posterior as compressed NetCDF |
@@ -228,7 +226,7 @@ Full API reference: [https://paleolipidrr.github.io/TEXAS](https://paleolipidrr.
 
 If you use TEXAS in your research, please cite:
 
-> Rattanasriampaipong, R. et al. (in prep). *TEXAS: A proxy system model for TEX86 paleothermometry.* AGU Paleoceanography and Paleoclimatology.
+> Rattanasriampaipong, R., Tierney, J. E., Elling, F. J., & Inglis, G. N. (2026). *TEXAS: A proxy system model for TEX86 paleothermometry.* Paleoceanography and Paleoclimatology, in press.
 
 See [`CITATION.cff`](CITATION.cff) for machine-readable citation metadata.
 

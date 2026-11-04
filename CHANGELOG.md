@@ -8,6 +8,64 @@ means "manuscript under review", so the public API may change in a minor
 release. Every such change is listed below. `1.0.0` is reserved for paper
 acceptance.
 
+## [Unreleased]
+
+This is the release that accompanies the accepted manuscript (the version of
+record, as its Open Research section promises). It is cut against the
+calibration set and posteriors already on the data record
+(10.5281/zenodo.22131367): 1,513 gridded core-tops, 8 mesocosm and 55 culture
+experiments. A re-screen of that set on `scaledRI_cren3` instead of `scaledRI`
+(branch `fix/dm-screen-cren3`; 1,518 / 8 / 59) was deliberately **not** merged
+here, because the paper's counts and three-decimal statistics describe the
+published set; it is scheduled for 1.1.0 with a new data-record version.
+
+### Changed
+
+- The modern-nitrate lookup is now `lookup_modern_no3(lat, lon, ocean_dataset)`
+  (exported from `TEXAS` and `TEXAS.data`). Its predecessor
+  `lookup_no3_from_woa` was misnamed: the default `no3_sf2tc_avg` variable of
+  `ocean_prop_ds` is the **CMEMS** Global Ocean Biogeochemistry Hindcast
+  nitrate climatology (1993–2022) on the WOA23 grid, as the file's own
+  `history` attribute records; only the temperature variables are WOA23. Every
+  user-facing message, docstring and docs page that said "WOA23 nitrate lookup"
+  now says CMEMS, matching the manuscript's Appendix C ("the associated CMEMS
+  ocean nitrate product"). Behavior is unchanged.
+- `predict_T_from_proxyObs` no longer warns that a missing predictor "will be
+  treated as 0" when the calibration needs it. The inverse layer refuses to run
+  in that case (`ValueError`), so the warning now says that instead of
+  contradicting the error that follows it.
+
+- Documentation brought in line with the accepted manuscript: the model
+  validation page now quotes the published forward, inverse and regional
+  metrics and the calibration parameters (it still carried the initial
+  submission's additive-arm RMSE table and old figure numbers); the Stan models,
+  marginalization, sampler-budget and PSM pages no longer describe archived
+  variants as current; the quickstart's screening step uses the published
+  calibration ellipse (`from_calibration`) as Appendix C does. The cKDTree
+  explainer was removed from the book — it documented a preprocessing-notebook
+  helper the package does not expose.
+
+- The installation guide now recommends `pip` or `uv` from PyPI for users, and
+  presents `uv sync` from a clone, Docker and conda as the routes for forking the
+  repository or running the manuscript notebooks.
+
+- The unfinished five-module tutorial was removed from the documentation (four of
+  its modules were placeholders). Its one complete module is now the
+  "Calibration curve explorer" explainer, with an Open in Colab link.
+
+### Fixed
+
+- Tabs and note boxes on the installation, quickstart and troubleshooting pages
+  rendered as raw `===` and `!!!` text, left over from the mkdocs migration.
+- `texas-doctor` printed `CmdStan ?` for a conda-forge CmdStan, because the
+  version was read only from a `cmdstan-X.Y.Z` directory name. It now falls
+  back to the `CMDSTAN_VERSION` line of CmdStan's makefile.
+
+### Deprecated
+
+- `lookup_no3_from_woa` — alias of `lookup_modern_no3`; emits a
+  `DeprecationWarning`. Removal is not scheduled before 2.0.
+
 ## [0.4.0] — 2026-09-09
 
 This is the release archived on Zenodo alongside the revised manuscript
@@ -17,6 +75,13 @@ API changed: see **Removed** below.
 
 ### Added
 
+- **"From GDGTs to sea temperature"**, a new Explainers page: one Scaled RI built
+  into a temperature with an error bar, step by step, running entirely in the
+  browser. Readers can pick a sample from the manuscript's case studies or set
+  their own Scaled RI, GDGT-2/3, NO₃ and prior. It uses the bundled SST calibration
+  and the same 500 draws as a default `predict_T_from_proxyObs()` call, and shows
+  the package's stored output beside what it computes. `tests/test_gdgt_to_temperature_page.py`
+  keeps it in step with the package.
 - A bundled thermal-only calibration, selected automatically when
   `predict_T_from_proxyObs` is called with no optional predictors. Four
   calibrations now ship with the wheel; `docs/` describes when each applies.

@@ -11,6 +11,17 @@ import TEXAS
 from TEXAS.constants import RECOMMENDED_CMDSTAN_VERSION
 
 
+def test_version_from_makefile_reads_conda_forge_layout(tmp_path):
+    # conda-forge installs CmdStan at $CONDA_PREFIX/bin/cmdstan with no version
+    # in the path; the makefile is then the only place the version is written.
+    from TEXAS.utils.doctor import _version_from_makefile
+    (tmp_path / "makefile").write_text(
+        "# CmdStan makefile\nCMDSTAN_VERSION := 2.36.0\nO ?= 1\n", encoding="utf-8"
+    )
+    assert _version_from_makefile(tmp_path) == "2.36.0"
+    assert _version_from_makefile(tmp_path / "missing") is None
+
+
 def test_recommended_cmdstan_version_is_semver():
     assert isinstance(RECOMMENDED_CMDSTAN_VERSION, str)
     assert re.fullmatch(r"\d+\.\d+\.\d+", RECOMMENDED_CMDSTAN_VERSION)

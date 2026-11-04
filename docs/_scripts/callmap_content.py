@@ -44,7 +44,7 @@ FORWARD = {
                 "data.screening.MahalanobisOutlierDetector._resolve_features",
                 "data.filter.filter_stan_compatible",
                 "data.filter.ensure_numpy",
-                "data.ocean_lookup.lookup_no3_from_woa",
+                "data.ocean_lookup.lookup_modern_no3",
             ],
         },
         {
@@ -162,7 +162,7 @@ INVERSE = {
             "nodes": [
                 "predict.predict_T_from_proxyObs",
                 "predict.compute_scaledRI",
-                "data.ocean_lookup.lookup_no3_from_woa",
+                "data.ocean_lookup.lookup_modern_no3",
                 "stan.io.load_posterior",
             ],
         },
@@ -239,7 +239,7 @@ EXPLAIN = {
     "predict.predict_T_from_proxyObs":
         "The inverse half of the public API, and the function most paleo users actually call. It "
         "accepts proxy observations plus a temperature prior (mu, sigma), optionally resolves modern "
-        "NO3 from site coordinates against a WOA23-derived dataset, and delegates to "
+        "NO3 from site coordinates against the CMEMS nitrate climatology (ocean_prop_ds), and delegates to "
         "get_invT_posterior, reducing its quantiles to a p5/p50/p95 dict. prior_sigma_t should be "
         "diffuse (~10 degC) when you have little prior information.",
     "predict.compute_scaledRI":
@@ -382,8 +382,8 @@ EXPLAIN = {
         "detect_outliers(), which thresholds on Mahalanobis distance alone, this applies explicit "
         "per-variable bounds so domain knowledge (e.g. plausible SST or RI ranges) can override the "
         "purely statistical call.",
-    "data.ocean_lookup.lookup_no3_from_woa":
-        "Nearest-valid-cell lookup of modern nitrate from a WOA23-derived dataset given site lat/lon. "
+    "data.ocean_lookup.lookup_modern_no3":
+        "Lookup of modern nitrate from the CMEMS climatology in ocean_prop_ds given site lat/lon. "
         "Lets you run the NO3-corrected model on cores that have no measured nitrate.",
     "diagnostics.summarize_sampler_diagnostics":
         "Condenses divergences, R-hat, ESS and E-BFMI into a dict that gets attached to the posterior "

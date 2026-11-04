@@ -1,12 +1,12 @@
 # Why Marginalization Improves Inverse TEXAS Sampling
 
-This note explains why the new **marginal parameterization** of the inverse TEXAS models runs *much faster* and produces *cleaner posteriors* compared to the original "full latent" formulation. The goal is to make this clear for a scientific audience, without assuming a background in Bayesian computation.
+This note explains why the inverse TEXAS models **marginalize over the forward-calibration ensemble inside the likelihood** (manuscript Appendix B, Eqs. B2–B3) instead of sampling one temperature per observation *per calibration draw* — the "full latent" formulation that was tried first and is now archived. The marginal form runs much faster and gives cleaner posteriors. The goal is to make this clear for a scientific audience, without assuming a background in Bayesian computation.
 
 ---
 
 ## 1. The Two Approaches
 
-### (A) Original "Full Latent" Approach
+### (A) The "full latent" formulation (archived)
 - For each data point `n` (e.g., a core-top sample), and each forward-model draw `m` (the ensemble), we introduced an **explicit latent parameter**:
 
   ```
@@ -21,7 +21,7 @@ This note explains why the new **marginal parameterization** of the inverse TEXA
 
 ---
 
-### (B) Marginalized Approach
+### (B) The marginalized formulation (shipped)
 - Instead of sampling `t_est[n, m]` for every ensemble draw, we only keep a **single latent parameter per sample**:
 
   ```
@@ -106,13 +106,13 @@ Instead of sampling `t_est[n, m]` for all ensemble members, we sample only `t_es
 ## 4. Practical Impact
 
 - **Speed**:  
-  With marginalization, warmup and sampling progress much faster. For example, reaching iteration 1/700 may take ~2 minutes, compared to much slower in the full latent case.
+  Warm-up and sampling progress much faster, because each iteration moves `N` parameters instead of `N × M`.
 
 - **Stability**:  
   Fewer divergences, better adaptation of step sizes, and cleaner R̂ diagnostics.
 
 - **Scalability**:  
-  You can now afford larger ensembles (M=100, 200, …) without blowing up the parameter space.
+  Larger ensembles cost only likelihood evaluations, not parameters. The manuscript uses *M* = 300 for the global coretop reconstructions and *M* = 500 (the package default for a 4,000-draw posterior) for the downcore ones.
 
 ---
 
@@ -132,28 +132,32 @@ Marginalization trades a slightly more complex likelihood calculation for a **ma
 - The science is the same (we still respect ensemble variability).  
 - But computationally, the marginalized model is leaner, faster, and more robust.
 
-This is why the new inverse TEXAS marginal models are now the recommended default.
+This is why the three inverse Stan models shipped with TEXAS are all marginal, and why `predict_T_from_proxyObs` has no other path.
 
 ## 7. The deterministic point inverse, and when not to use it
 
-`TEXAS.inverse_generalized_logistic_fixed_upper_multivariate` inverts the
-forward curve for a **single** parameter set. It is not a reconstruction.
+`TEXAS.inverse_generalized_logistic_fixed_upper` inverts the forward curve for a
+**single** parameter set. It is not a reconstruction.
 
-The two non-thermal corrections are additive and independent of temperature, so
-the inversion subtracts them off and then inverts the thermal curve
-analytically:
+For the published T₀-shift calibration the nonthermal predictors shift the
+curve's location, so the point inverse is the thermal inverse evaluated at the
+shifted location:
 
 ```
-y_thermal = y − β_G23·gdgt23ratio − β_NO3·log10(no3)   [only where 0 < no3 < no3_cutoff]
-x         = t0 − ln(((1 − b) / (y_thermal − b))**v − 1) / k
+T0_eff = t0 + gamma_G23·gdgt23ratio + gamma_NO3·log10(no3)   [NO₃ term only where 0 < no3 < no3_cutoff]
+x      = T0_eff − ln(((1 − b) / (y − b))**v − 1) / k
 ```
 
-`gdgt23ratio` and `no3` may each be a scalar (applied to every sample) or an
-array broadcastable to `y`. They are additive predictors that must be supplied,
-not quantities solved for: pass the same covariate values that applied to those
+i.e. call `inverse_generalized_logistic_fixed_upper(y, t0=T0_eff, k=k, b=b, v=v)`
+with the sample's own predictor values folded into `t0`. (The companion
+`inverse_generalized_logistic_fixed_upper_multivariate` is the point inverse of
+the *additive* formulation of the initial submission — it subtracts
+`β_G23·gdgt23ratio + β_NO3·log10(no3)` from the response first — and is kept for
+the archived `GHEA` posteriors.) Predictors are inputs to be supplied, not
+quantities solved for: pass the same covariate values that applied to those
 observations.
 
-The thermal inverse is defined only for `b < y_thermal < 1`. Values outside that
+The thermal inverse is defined only for `b < y < 1`. Values outside that
 range are physically unreachable for the given parameters and come back as
 `np.nan`, with a single `RuntimeWarning` if any occur. That NaN is the honest
 answer, and it is the first reason this function is not a reconstruction: the

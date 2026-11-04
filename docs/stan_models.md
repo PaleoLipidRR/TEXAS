@@ -29,8 +29,8 @@ glob — so only these seven reach the wheel.
 | file | role |
 |---|---|
 | `gen_logi_fixed_culmeso.stan` | **Stage 1.** One generalized logistic fitted jointly to the culture and mesocosm data — the controlled experiments, which constrain the *shape* of the response. Its posterior mean and SD for `{t0, k, b, v}` are the hyperpriors every `priorApprox` model consumes, so this fit runs first. |
-| `gen_logi_fixed_hier_crtp_univ_priorApprox.stan` | **Stage 2, thermal only.** Coretop fit of the Scaled Ring Index against temperature with no non-thermal predictors. It is also the source of `R2_thermal`, which the EIV model requires **as data**. |
-| `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift.stan` | **The production calibration** (compset `GHEB`). Coretop fit with the G₂/₃ ratio and NO₃ entering as a shift of the curve's location parameter — the manuscript's **T₀-shift parameterization** — plus Bayesian errors-in-variables on those predictors and on the RI. Both bundled posteriors were fitted with it. |
+| `gen_logi_fixed_hier_crtp_univ_priorApprox.stan` | **Stage 2, thermal only** (compset `GHPU`). Coretop fit of the Scaled Ring Index against temperature with no non-thermal predictors; the two bundled thermal-only posteriors come from it. It is also the source of `R2_thermal`, which the EIV model requires **as data**. |
+| `gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift.stan` | **The production calibration** (compset `GHEB`). Coretop fit with the G₂/₃ ratio and NO₃ entering as a shift of the curve's location parameter — the manuscript's **T₀-shift parameterization** — plus Bayesian errors-in-variables on those predictors and on the RI. The two bundled multivariate posteriors (`tx.GHEB.sst/thm.sri03.G23-N1p0`) were fitted with it. |
 
 All three share the curve
 
@@ -60,7 +60,7 @@ is why the parameterization was adopted.
 | file | role |
 |---|---|
 | `invT_gen_logi_fixed_univ_marginal_unconstrained.stan` | Univariate inverse — proxy only, no predictors. Used by the quickstart and by `SI_code03`. |
-| `invT_gen_logi_fixed_multiv_marginal_unconstrained.stan` | Multivariate inverse for the additive (β-on-μ) forward arm, which the revision reports as the comparison arm. |
+| `invT_gen_logi_fixed_multiv_marginal_unconstrained.stan` | Multivariate inverse for the additive (β-on-μ) forward arm of the initial submission (compset `GHEA`). Kept so the posteriors on version 0.2.0 of the data record remain reconstructable; not used by the published analyses. |
 | `invT_gen_logi_fixed_multiv_marginal_unconstrained_t0shift.stan` | Multivariate inverse for the T₀-shift forward arm. **The production inverse.** |
 
 `predict_T_from_proxyObs()` selects among these for you: the univariate file when

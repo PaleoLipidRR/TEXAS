@@ -27,7 +27,7 @@ from .quality import compute_quality_flags
 from .data.builder import build_invT_inputData, build_fwd_data, InvTConfig
 
 # ─── Ocean property lookups ──────────────────────────────────────────────
-from .data.ocean_lookup import lookup_no3_from_woa, get_ocean_prop_ds
+from .data.ocean_lookup import lookup_modern_no3, lookup_no3_from_woa, get_ocean_prop_ds
 
 # ─── Pure-Python logistic helpers ───────────────────────────────────────
 from .models.logistics import (
@@ -128,7 +128,8 @@ __all__ = [
     "TRAINING_DATA_REGISTRY",
     "POSTERIOR_REGISTRY",
     # ocean property lookups
-    "lookup_no3_from_woa",
+    "lookup_modern_no3",
+    "lookup_no3_from_woa",  # deprecated alias
     "get_ocean_prop_ds",
     # cache configuration
     "set_cache_dir",

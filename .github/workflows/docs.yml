@@ -1,7 +1,7 @@
 name: Deploy docs
 
 # Builds the unified Jupyter Book in docs/ (Sphinx) — which now contains the
-# guide pages, the autodoc API reference, the explainers, AND the tutorial —
+# guide pages, the autodoc API reference and the explainers —
 # and publishes the single site to gh-pages.
 
 on:
@@ -67,6 +67,11 @@ jobs:
       # publishing an empty one.
       - name: Regenerate the sampler-budget report
         run: python docs/_scripts/build_sampler_budget.py
+
+      # Draws, Stan source and sampler defaults come from the installed package;
+      # the stored TEXAS runs come from the committed snapshot (CI has no CmdStan).
+      - name: Regenerate the GDGT-to-temperature walkthrough
+        run: python docs/_scripts/build_gdgt_to_temperature.py
 
       - name: Build the book
         run: jupyter-book build docs/

@@ -11,6 +11,9 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
@@ -98,6 +101,8 @@ TEXAS = ["stan_models/*.stan", "bundled_posteriors/*.nc", "data/calibration_doma
 
 [project.urls]
 "Homepage" = "https://github.com/PaleoLipidRR/TEXAS"
+"Documentation" = "https://paleolipidrr.github.io/TEXAS/"
+"Changelog" = "https://github.com/PaleoLipidRR/TEXAS/blob/main/CHANGELOG.md"
 "Bug Tracker" = "https://github.com/PaleoLipidRR/TEXAS/issues"
 
 [tool.conda-lock.dependencies]

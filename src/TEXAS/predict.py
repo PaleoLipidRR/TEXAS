@@ -50,7 +50,7 @@ from .data.builder import InvTConfig
 from .constants import (DEFAULT_FWD_POSTERIOR,
                         DEFAULT_FWD_POSTERIOR_UNIVARIATE,
                         GDGT23RATIO_KEY, NO3_KEY)
-from .data.ocean_lookup import lookup_no3_from_woa, get_ocean_prop_ds
+from .data.ocean_lookup import lookup_modern_no3, get_ocean_prop_ds
 
 
 def predict_proxy_from_T(
@@ -151,7 +151,7 @@ def predict_T_from_proxyObs(
     # ── Predictor shorthands (override anything in predictors dict) ───────
     no3: Optional[Union[float, np.ndarray]] = None,
     gdgt23ratio: Optional[Union[float, np.ndarray]] = None,
-    # ── Modern-ocean NO₃ lookup from WOA23-derived dataset ───────────────
+    # ── Modern-ocean NO₃ lookup from the CMEMS climatology (ocean_prop_ds) ──
     site_lat: Optional[Union[float, np.ndarray]] = None,
     site_lon: Optional[Union[float, np.ndarray]] = None,
     no3_dataset: Optional[xr.Dataset] = None,
@@ -193,10 +193,12 @@ def predict_T_from_proxyObs(
         predictors: Non-thermal predictor arrays, e.g. ``{"gdgt23ratio": ..., "no3": ...}``.
         no3: Nitrate (umol/L), scalar or shape (N,). Overrides *predictors*.
         gdgt23ratio: GDGT-2/3 ratio, scalar or shape (N,). Overrides *predictors*.
-        site_lat: Latitude(s) for a WOA23 NO3 lookup. Needs *site_lon*.
+        site_lat: Latitude(s) for a modern NO3 lookup in the CMEMS
+            nitrate climatology (``ocean_prop_ds``). Needs *site_lon*.
         site_lon: Longitude(s) for the same lookup.
-        no3_dataset: WOA23-derived ``(lat, lon)`` field; downloaded from
-            Zenodo and cached if omitted.
+        no3_dataset: The ``ocean_prop_ds`` ``(lat, lon)`` field (CMEMS
+            nitrate on the WOA23 grid); downloaded from Zenodo and cached
+            if omitted.
         no3_dataset_var: Variable to read from it. Default ``"no3_sf2tc_avg"``.
         flags: Attach ``result["flags"]``, one row per observation. Default True.
         tex86: TEX86 for the same samples; only ``outside_domain`` uses it.
@@ -250,7 +252,7 @@ def predict_T_from_proxyObs(
                 f"parameters rather than removing them. Reconstructions will "
                 f"differ from the manuscript's, which uses the multivariate "
                 f"calibration throughout. To use it, pass gdgt23ratio= and no3= "
-                f"(or site_lat=/site_lon= for a WOA23 nitrate lookup).",
+                f"(or site_lat=/site_lon= for a modern CMEMS nitrate lookup).",
                 UserWarning, stacklevel=2,
             )
             print(
@@ -273,7 +275,7 @@ def predict_T_from_proxyObs(
     if site_lat is not None or site_lon is not None:
         if site_lat is None or site_lon is None:
             raise ValueError(
-                "site_lat and site_lon must both be provided for a WOA23 lookup."
+                "site_lat and site_lon must both be provided for a modern NO3 lookup."
             )
         if no3_dataset is None:
             try:
@@ -281,25 +283,25 @@ def predict_T_from_proxyObs(
             except Exception as e:
                 raise ValueError(
                     "no3_dataset must be provided when using site_lat/site_lon, "
-                    "and the automatic download of the WOA23-derived "
+                    "and the automatic download of the "
                     f"ocean_prop_ds from Zenodo failed ({e}). Pass no3_dataset "
                     "explicitly (e.g. from your preprocessing notebook), or "
                     "retry with TEXAS.download_ocean_properties()."
                 ) from e
             print(
-                "🌊 no3_dataset not provided — downloaded/cached the WOA23 "
-                "ocean_prop_ds field from Zenodo."
+                "🌊 no3_dataset not provided — downloaded/cached the "
+                "ocean_prop_ds field (CMEMS nitrate climatology) from Zenodo."
             )
-        no3 = lookup_no3_from_woa(
+        no3 = lookup_modern_no3(
             lat=site_lat,
             lon=site_lon,
-            woa_dataset=no3_dataset,
+            ocean_dataset=no3_dataset,
             variable=no3_dataset_var,
         )
         _lat_repr = f"{site_lat}" if np.isscalar(site_lat) else f"array[{np.asarray(site_lat).size}]"
         _lon_repr = f"{site_lon}" if np.isscalar(site_lon) else f"array[{np.asarray(site_lon).size}]"
         _no3_repr = f"{float(no3):.3g}" if np.asarray(no3).ndim == 0 else f"array[{np.asarray(no3).size}], mean={float(np.nanmean(no3)):.3g}"
-        print(f"🌊 WOA23 NO₃ lookup: lat={_lat_repr}, lon={_lon_repr} → {_no3_repr} µmol/L")
+        print(f"🌊 CMEMS NO₃ lookup: lat={_lat_repr}, lon={_lon_repr} → {_no3_repr} µmol/L")
 
     if no3 is not None:
         predictors[NO3_KEY] = no3
@@ -337,11 +339,11 @@ def predict_T_from_proxyObs(
         if (predictors.get(GDGT23RATIO_KEY) is None
                 and _attrs.get(f"use_{GDGT23RATIO_KEY}", False)):
             warnings.warn(
-                "This calibration uses the GDGT-2/3 ratio, but none was supplied — "
-                "it will be treated as 0, which is not the same as switching the "
-                "correction off: it asserts a ratio of zero and biases the "
-                "reconstruction cold by roughly gamma_G23 x (true ratio) degC. "
-                "Pass gdgt23ratio=, or use a temperature-only calibration "
+                "This calibration uses the GDGT-2/3 ratio, but none was supplied. "
+                "The inverse model will refuse to run rather than treat it as 0 "
+                "(a ratio of zero is not the correction switched off; it would "
+                "bias the reconstruction cold by roughly gamma_G23 x (true ratio) "
+                "degC). Pass gdgt23ratio=, or use a temperature-only calibration "
                 "(e.g. 'tx.GHPU.sst.sri03.p0').",
                 UserWarning, stacklevel=2,
             )
@@ -357,11 +359,11 @@ def predict_T_from_proxyObs(
         if (predictors.get(NO3_KEY) is None
                 and _attrs.get(f"use_{NO3_KEY}", False)):
             warnings.warn(
-                "This calibration uses the NO₃ correction, but none was supplied — "
-                "it will be treated as 0, which is not the same as switching the "
-                "correction off: it asserts a nitrate of zero and biases the "
-                "reconstruction by roughly beta_NO3 x (true no3) degC. "
-                "Pass no3= (or site_lat=/site_lon= for a WOA23 lookup), or use a "
+                "This calibration uses the NO₃ correction, but none was supplied. "
+                "The inverse model will refuse to run rather than treat it as 0 "
+                "(a nitrate of zero is not the correction switched off; pass a "
+                "value above the cutoff, e.g. no3=10, for that). Pass no3= (or "
+                "site_lat=/site_lon= for a modern CMEMS nitrate lookup), or use a "
                 "temperature-only calibration (e.g. 'tx.GHPU.sst.sri03.p0').",
                 UserWarning, stacklevel=2,
             )

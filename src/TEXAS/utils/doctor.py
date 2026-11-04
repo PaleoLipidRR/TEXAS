@@ -85,12 +85,29 @@ def _cmdstan_info() -> dict:
 
     info["found"] = True
     info["path"] = str(path)
-    # CmdStan writes its version into a `make/local`-adjacent file; the
-    # directory name (cmdstan-X.Y.Z) is the most reliable source.
+    # A source install lives in a `cmdstan-X.Y.Z` directory, which is the most
+    # reliable source. A conda-forge CmdStan sits at `$CONDA_PREFIX/bin/cmdstan`
+    # with no version in the path, so fall back to the `CMDSTAN_VERSION := X.Y.Z`
+    # line of its top-level makefile; without this the report printed `?`.
     name = Path(path).name
     if name.startswith("cmdstan-"):
         info["version"] = name.replace("cmdstan-", "")
+    else:
+        info["version"] = _version_from_makefile(Path(path))
     return info
+
+
+def _version_from_makefile(cmdstan_dir: Path) -> str | None:
+    """Read ``CMDSTAN_VERSION := X.Y.Z`` from CmdStan's makefile, if present."""
+    makefile = cmdstan_dir / "makefile"
+    try:
+        for line in makefile.read_text(encoding="utf-8", errors="replace").splitlines():
+            key, sep, value = line.partition(":=")
+            if sep and key.strip() == "CMDSTAN_VERSION":
+                return value.strip() or None
+    except OSError:
+        pass
+    return None
 
 
 def _compiler_info() -> dict:

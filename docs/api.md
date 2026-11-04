@@ -44,7 +44,9 @@
 ### Per-observation quality flags
 
 Returned automatically as `result["flags"]`, and callable on its own against a
-saved reconstruction.
+saved reconstruction. What each column means, and how `posterior_prior_width_ratio`
+relates to the manuscript's *Resolved* diagnostic, is on the
+[PSM page](PSM.md#8-reconstructing-temperature-from-proxy-observations).
 
 ```{eval-rst}
 .. autofunction:: TEXAS.quality.compute_quality_flags
@@ -145,9 +147,10 @@ the ellipse onto the record, so the more unusual your data the less it flags.
    :members:
 ```
 
-### WOA23 NO₃ lookup
+### Modern NO₃ lookup
 
 ```{eval-rst}
+.. autofunction:: TEXAS.data.ocean_lookup.lookup_modern_no3
 .. autofunction:: TEXAS.data.ocean_lookup.lookup_no3_from_woa
 ```
 

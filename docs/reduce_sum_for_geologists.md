@@ -1,5 +1,5 @@
 # Understanding `reduce_sum` and `ll_chunk` in TEXAS-PSM
-## A visual guide for paleogeologists
+## A visual guide for users
 
 This note explains two important pieces of computational machinery used in the TEXAS
 inverse-temperature Stan models — `reduce_sum` and `ll_chunk` — using a small toy
@@ -33,7 +33,7 @@ For each sample n (1 to 100):
     Average the M likelihoods for sample n
 
 Total evaluations per step: 100 × 200 = 20,000
-Total evaluations (4 chains × 1,500 steps): 120,000,000
+Total evaluations (4 chains × 1,500 iterations, i.e. 500 warm-up + 1,000 sampling): 120,000,000
 ```
 
 That's a lot of repeated computation. If your computer has 8 CPU cores, why not use

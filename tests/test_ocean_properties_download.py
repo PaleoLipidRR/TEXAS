@@ -168,10 +168,10 @@ def test_get_ocean_prop_ds_downloads_and_opens(monkeypatch, tmp_path):
 # ─── predict_T_from_proxyObs wiring ─────────────────────────────────────────
 
 class _WiringReached(Exception):
-    """Sentinel raised once lookup_no3_from_woa receives the auto-downloaded ds."""
+    """Sentinel raised once lookup_modern_no3 receives the auto-downloaded ds."""
 
 
-def _fake_lookup_no3_from_woa(*, lat, lon, woa_dataset, variable):
+def _fake_lookup_modern_no3(*, lat, lon, ocean_dataset, variable):
     raise _WiringReached(f"reached with variable={variable!r}")
 
 
@@ -185,7 +185,7 @@ def test_predict_T_from_proxyObs_auto_downloads_when_no3_dataset_omitted(monkeyp
         return fake_ds
 
     monkeypatch.setattr(predict_mod, "get_ocean_prop_ds", _fake_get_ocean_prop_ds)
-    monkeypatch.setattr(predict_mod, "lookup_no3_from_woa", _fake_lookup_no3_from_woa)
+    monkeypatch.setattr(predict_mod, "lookup_modern_no3", _fake_lookup_modern_no3)
 
     with pytest.raises(_WiringReached):
         predict_mod.predict_T_from_proxyObs(
@@ -206,7 +206,7 @@ def test_predict_T_from_proxyObs_skips_download_when_no3_dataset_given(monkeypat
         raise AssertionError("must not auto-download when no3_dataset is given")
 
     monkeypatch.setattr(predict_mod, "get_ocean_prop_ds", _boom)
-    monkeypatch.setattr(predict_mod, "lookup_no3_from_woa", _fake_lookup_no3_from_woa)
+    monkeypatch.setattr(predict_mod, "lookup_modern_no3", _fake_lookup_modern_no3)
 
     with pytest.raises(_WiringReached):
         predict_mod.predict_T_from_proxyObs(

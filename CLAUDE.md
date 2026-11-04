@@ -35,7 +35,7 @@ CmdStan (≥ 2.23.0; TEXAS is developed against 2.36.0) must be installed and di
 # Run tests
 pytest
 
-# Build docs (unified Jupyter Book: guides + autodoc API + tutorial)
+# Build docs (unified Jupyter Book: guides + autodoc API + explainers)
 jupyter-book build docs/   # output in docs/_build/html/
 
 # Run Streamlit app (from streamlit_app/ directory)
@@ -441,14 +441,18 @@ Entry point: `streamlit_app/main.py`. Config (cache dir resolution, plot default
 
 The docs are a **single unified Jupyter Book** (Sphinx), migrated from
 mkdocs-material on 2026-05-30. `docs/_config.yml` + `docs/_toc.yml` define one
-book covering the guides, the autodoc API reference, the explainers, and the
-interactive tutorial (`docs/tutorial/`).
+book covering the guides, the autodoc API reference, and the explainers.
 
 - **Build**: `jupyter-book build docs/` (pin `jupyter-book<2` — v2/MyST does not
   read the `jb-book` `_toc.yml`/`_config.yml` format). Output in `docs/_build/html/`.
 - **API reference** (`docs/api.md`): Sphinx `autodoc` + `napoleon` (both Google
   and NumPy docstrings). Optional/heavy deps are mocked via `autodoc_mock_imports`
   in `_config.yml`, so a core install builds the API page.
+- **Browser walkthrough** (`docs/gdgts_to_temperature.md`): a self-contained page,
+  `docs/_static/gdgt-to-temperature.html`, built by
+  `docs/_scripts/build_gdgt_to_temperature.py`. Edit the template beside that script,
+  never the built page. After a calibration or inverse-model change, run it with
+  `--refresh-runs` (needs CmdStan); `tests/test_gdgt_to_temperature_page.py` fails until you do.
 - **Branding**: `docs/_static/texas_logo.svg` (colorblock TEXAS wordmark) +
   `docs/_static/custom.css` (steel-blue accent), derived from the AGU25 poster.
 - **Deploy**: `.github/workflows/docs.yml` builds the book and publishes

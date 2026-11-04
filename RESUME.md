@@ -8,6 +8,301 @@ bottom; tick the boxes as you go.
 
 ---
 
+## HANDOFF — 2026-11-03 (desktop, Linux): v1.0.0 pre-release audit — items for your review
+
+The paper came back "publish with very minor revisions". This section replaces
+the stale Phase C checklist further down. Everything under *Baseline* was
+verified today on this machine; everything under A–E is for you to decide or
+tick. Nothing was edited or committed by the audit itself.
+
+### Baseline (verified, nothing to do)
+
+| check | result |
+|---|---|
+| `main` @ `f9bfb38`; `v0.4.0` (`54acfce`) is an ancestor | 6 commits since the tag; `src/` differs from the tag **only in docstrings** (`stan/io.py`, `utils/download.py`, `utils/naming.py`) |
+| `pytest -q` (base miniforge, Python 3.12) | **611 passed, 15 skipped** |
+| `ruff check .` | clean; CI on `main` green (2026-09-14) |
+| `dist/` wheel | `0.4.0`, 7 `.stan`, 4 bundled posteriors — matches source; rebuilt anyway at 1.0.0 |
+| Zenodo software concept `19671664` | → record `22680773`, **v0.4.0**, 2026-09-09 |
+| Zenodo data concept `19666744` | → record `22131367`, **0.3.0**: 9 `tx.*.fwd.nc`, invT zip, 4 data files, MANIFEST, README |
+| `download.py` | `ZENODO_RECORD_ID = "22131367"`, 9 case-id entries, GHEA pinned to v0.2.0 — consistent with the record |
+| PyPI `texas-psm` | latest **0.4.0** |
+| notebook-sync rules over the 5 SI notebooks | pass (the `~/.cmdstan/...` strings are in cell *outputs* only) |
+| Git LFS | hydrated, 0 stubs; smudge filter is the plain one |
+| `docs.yml` `pull_request:` trigger | **done** — the 2026-09-08 "still open" item can be ticked |
+
+### A. Decisions only you can make (blocking)
+
+- [ ] **A1. The Scaled RI screening fix is unmerged: `fix/dm-screen-cren3`.**
+      Three commits (2026-10-15/16, 16 files). Finding: the finalized calibration
+      set was screened on `scaledRI` (crenarchaeol = 4 rings) while the paper,
+      the fits and `from_calibration()` use `scaledRI_cren3`. Its README
+      (`data/revision1/groupA/screening_fix/README.md`) says the branch was held
+      "until the revised manuscript comes back" — which is now. Merging means:
+      1513 → 1518 core-top cells, 55 → 59 culture, ~20 h of refits on another
+      machine, regenerated BAYSPAR predictions, re-run of SI_code01–04, a new
+      Zenodo *data* record version (and `download.py` record id + registry with
+      it), and three-decimal statistics in the text. Every parameter moves
+      < 0.3 posterior SD; no one-decimal number changes. **Recommendation:**
+      ship 1.0.0 against the calibration set that is published on `22131367`
+      (what the accepted manuscript describes), and merge the fix afterwards as
+      1.1.0 with data record 0.4.0 — a sample-count change is not a "very minor
+      revision". Either way, write the decision into `CHANGELOG.md` so the
+      branch is not rediscovered as a defect.
+- [ ] **A2. Two open PRs fix the same bug** — `StanCompiler` probes a compiled
+      binary with `--version`, which CmdStan rejects (exit 1), so every healthy
+      binary is deleted and recompiled in every new Python session (tens of
+      seconds per model; the quickstart output shows the spurious "exit code
+      127" warning). **#41** (`claude/jolly-goodall-biud4z`): green on all
+      checks, touches `compiler.py` + test + CHANGELOG + CLAUDE.md +
+      `docs/troubleshooting.md`. **#42** (`fix/stan-binary-probe`): same
+      `compiler.py` change, fails ruff with F841 (unused `model` in
+      `tests/test_stan_binary_probe.py:52`) and its two tests fail on `main` by
+      design. **Recommendation:** merge #41, close #42 as a duplicate. This is a
+      user-visible defect; merge it before 1.0.0.
+- [ ] **A3. 30 open Dependabot alerts, all in `uv.lock`** (none is a TEXAS
+      runtime dependency): Pillow < 13.0.0 (5 critical), certifi < 2026.10.18
+      (critical), tornado ≤ 6.5.8 / < 6.6, urllib3 < 2.8.0, jupyterlab ≤ 4.6.3,
+      nbconvert ≤ 7.17.1, setuptools < 84.1.0. Decide whether to
+      `uv lock --upgrade-package` these before tagging or ship with the
+      dev-stack alerts open. (The 2026-09-11 tornado bump cleared three; more
+      arrived since.)
+- [x] **A4. (2026-11-03: re-run from the editable install with a Step 6b quality-flags demo and a ninth, deliberately odd sample; outputs are current. Re-run once more after #41 merges to drop the spurious recompile warning in Step 5.)** Was: the one uncommitted change, `notebooks/quickstart_demo.ipynb`.
+      Re-executed outputs only (labels 0.3.2 → 0.4.0; cell sources identical;
+      reconstruction medians move at the MC floor). But it was run from the
+      **non-editable site-packages install** in `texas-env`, prints
+      `CmdStan ?`, and reproduces the A2 warning. Recommendation: re-run after
+      A2 merges and C1 is fixed, then commit; or `git checkout -- notebooks/quickstart_demo.ipynb`.
+
+### B. Wording and metadata that change at acceptance (mechanical; say the word)
+
+- [x] `README.md:1` — Pre-release banner deleted (2026-11-03, uncommitted).
+- [x] `README.md:231`, `docs/index.md:397` — citation now reads full author list, 2026, *Paleoceanography and Paleoclimatology*, in press. Add the DOI when assigned. (Was "(in prep)".) Needs
+      year + DOI once assigned. The journal title is *Paleoceanography and
+      Paleoclimatology*; "AGU" is the publisher, not part of the title.
+- [x] `CITATION.cff` — message, journal title, notes ("accepted"), and the Kiel/UCAR affiliations done 2026-11-03; **`version`, `date-released` and the article DOI are still to do** at the bump. Was: `message:` said "prepared to submit"; `references[0].notes: "in revision"`;
+      same journal-title fix; add the article `doi:` under `references` when
+      known; `version: 1.0.0`; `date-released`. Keep `doi:` as the software
+      concept DOI (the release skill already says so).
+- [ ] `.zenodo.json` — add the paper DOI as a `related_identifiers` entry
+      (`scheme: doi`, `relation: isSupplementTo`) when assigned; the two URL
+      entries stay.
+- [x] `CHANGELOG.md` — `[Unreleased]` drafted 2026-11-03 (A1 decision, CMEMS rename, doctor fix, warning reword); the release skill renames it to `[1.0.0]`. #41's own `[Unreleased]` block will conflict on merge — keep both. Was: there was **no `[Unreleased]` section**. Write
+      `## [1.0.0] — <date>`: #41 if merged, the docs/scripts fixes since 0.4.0,
+      the A1 decision, and close out the "0.x = manuscript under review"
+      convention stated in the header.
+- [x] `pyproject.toml` — classifiers (Production/Stable, Science/Research, Scientific/Engineering) and Documentation/Changelog URLs added 2026-11-03; verified in the wheel METADATA. Was: add `"Development Status :: 5 - Production/Stable"`
+      to `classifiers`; `[project.urls]` has no `Documentation`
+      (<https://paleolipidrr.github.io/TEXAS/>) or `Changelog` entry.
+- [x] `scripts/prepare_resubmission_archive.py:274` now writes "(revised manuscript, accepted)" (2026-11-03). Was: "(revised manuscript, in review)" into the archive README — only matters if it is re-run.
+- [ ] GitHub: **all five releases are flagged Pre-release**; v1.0.0 must be a
+      full release and "latest". The repo has **no topics and no homepage URL**
+      — set the homepage to the docs site.
+- [ ] `.devcontainer/devcontainer.json:6` pins `texas:0.4.0`. Bump to `1.0.0`
+      in a follow-up commit *after* `docker.yml` has built the tag (no `v`
+      prefix — see the 2026-09-11 note).
+
+### C. This machine's environment (not repo defects, but they shape what you see)
+
+- [x] **C1. (done 2026-11-03: `pip install -e . --no-deps` in texas-env; it now imports from `src/`.)** `texas-env` had `texas-psm` installed non-editable at
+      `site-packages/TEXAS` (0.4.0), and the base miniforge Python carries an
+      *editable* install whose metadata still says 0.3.2. The quickstart ran
+      against the former. `conda activate texas-env && pip install -e .` —
+      the memory rule, broken again.
+- [x] **C2. (fixed 2026-11-03, uncommitted: makefile fallback + test; texas-env now reports 2.36.0.)** `texas-doctor` printed `CmdStan ?` for the conda-forge CmdStan
+      because `utils/doctor.py:88-92` reads the version only from a
+      `cmdstan-X.Y.Z` directory name. `$CONDA_PREFIX/bin/cmdstan/makefile`
+      carries `CMDSTAN_VERSION := 2.36.0`; a two-line fallback fixes it.
+      Optional for 1.0.0, but it is what the published quickstart output shows.
+
+### D. Known gaps to carry into 1.0.0 deliberately (document rather than fix)
+
+- [ ] **D1. The five TEXAS-derived NetCDFs that `SI_code03` reads**
+      (`PETMDA_OCN_annual_regridded.nc` + four `Zhu19_..._iPETM0{1,3,6,9}x.nc`
+      under `data/external/ncfiles/`) are not in the repo, not on either Zenodo
+      record, not in `TRAINING_DATA_REGISTRY`, and **not on this machine**. A
+      fresh clone cannot run SI_code03 end to end. If A1 forces a new data
+      record anyway, add them then; otherwise say so in the Zenodo README.
+- [ ] **D2. Six remote branches besides `main`/`gh-pages`:** the two PR
+      branches, `fix/dm-screen-cren3` (A1), `claude/gridT-gui-exploratory`
+      (11 ahead, 2026-09-05), `revision/boundedT-si-figures` (2026-07-30),
+      `scratch/superpowers-plans` (2026-09-08). Archive as tags, as on
+      2026-09-07, or delete once A1/A2 are settled.
+
+### F. From the manuscript cross-check (2026-11-03, `main-final.tex` @ `207dbd5`)
+
+Full report: `AGU_PALO_TEXAS_PSM_draft/reports/final-check-2026-11-03.md`. The
+package-facing claims all hold against v0.4.0: every Appendix C call signature,
+the `InvTConfig` draw rule, the lone-predictor `ValueError`, the thermal-only
+auto-select warning, and every quoted posterior value match the bundled
+posteriors to the printed precision. **The manuscript's counts (1,513 / 8 / 55)
+and parameters are the published-screen calibration on Zenodo `22131367`**, which
+settles A1: ship 1.0.0 on that set. Items that land here rather than in Overleaf:
+
+- [ ] **F1.** Open Research promises "the version of record will be archived as
+      v1.0.0 upon publication" — the tag/release/Zenodo steps in E are now a
+      commitment the paper makes, not housekeeping.
+- [ ] **F2.** (Plan written: section G below.) D1 is now citable: the paper says every figure notebook runs
+      end to end from the archive. Either upload the five SI_code03 NetCDFs to
+      the data record before tagging, or accept the softened wording proposed in
+      the report.
+- [ ] **F3.** `CITATION.cff` affiliations: add Kiel for F.J.E. and UCAR for
+      R.R. to match the manuscript and `.zenodo.json` (fold into B).
+- [x] **F4.** `predict.py` warned that a missing predictor "will be treated
+      as 0" immediately before `stan/invT.py` raises for the same condition.
+      Reworded 2026-11-03 (uncommitted) to say the inverse model will refuse.
+- [x] **F8.** Tutorial removed 2026-11-03 (uncommitted): four stubs + intro deleted;
+      Module 3 → `docs/calibration_curve_explorer.ipynb` in Explainers. `main-final.tex`
+      no longer says "interactive tutorial", and the user decided it need not: no
+      Overleaf edit is needed for this item.
+- [x] **F9.** Ported 2026-11-03 (uncommitted): `docs/gdgts_to_temperature.md` embeds
+      `docs/_static/gdgt-to-temperature.html`, built by
+      `docs/_scripts/build_gdgt_to_temperature.py` from `gdgt_to_temperature_template.html`.
+      Uses the bundled GHEB SST posterior only, no gdgt-db data. Cut from the workspace page:
+      the gridT check, floor, censoring, site medians and the Stan-vs-grid database comparison.
+      Prior is the stated μ_T/σ_T, not the thermal-only curve. **Dropped a table column
+      the workspace page has:** a "likelihood only" median is undefined, because L(T)
+      levels off above zero on both plateaus, so the value only reports the axis limit
+      (−37.5 and +73.7 °C on a −100…120 °C axis). The workspace page carries the same
+      artifact, and its callout numbers should be rechecked there. Stored runs need
+      CmdStan: `--refresh-runs` after any calibration or model change. Author read of
+      the science wording still pending. The explorer notebook overlaps it now; keeping
+      both is the user's call.
+- [x] **F7.** Install guidance reorganized 2026-11-03 (uncommitted): pip/uv from
+      PyPI is the recommendation (`uv add` and `uv pip install` tested clean);
+      clone + `uv sync`, Docker and conda are the fork/notebook routes. `uv.lock` +
+      `pyproject.toml` alone fail (no `src/`). `===`/`!!!` mkdocs syntax that rendered
+      raw on the live site converted to MyST in installation/index/troubleshooting.
+      `installation.md` step 4 says the SI_code03 fields are "being added" to the
+      data record — **update it when section G lands.**
+- [x] **F6.** Docs site audited against `main-final.tex` (2026-11-03,
+      uncommitted): `model_validation.md` rewritten with the accepted numbers;
+      stale "comparison arm"/`_no3ratio`/"treated as zero"/gitignored-CSV
+      statements fixed in `stan_models.md`, `PSM.md`, `sampler_budget.md`;
+      `marginalization_explainer.md` §7 now gives the T₀-shift point inverse;
+      quickstart screening step matches Appendix C; `ckdtree_nearest_ocean_explainer.md`
+      removed from the book. `jupyter-book build` clean (texas-env-laptop).
+- [x] **F5.** The package called the modern-nitrate lookup a "WOA23" lookup
+      everywhere a user sees it, while Appendix C (correctly) says CMEMS — the
+      `ocean_prop_ds` file's own `history` attr records the nitrate as CMEMS and
+      only the temperature as WOA23. Fixed 2026-11-03 (uncommitted): renamed to
+      `lookup_modern_no3`, `lookup_no3_from_woa` kept as a deprecated alias, all
+      messages/docs/README/tests updated, `[Unreleased]` changelog entry added.
+      (Found by a second review session; verified here against the file attrs.)
+
+### G. PLAN — data record 0.4.0: every input behind every figure, on Zenodo (written 2026-11-03)
+
+**Goal.** Make the sentence in Appendix C and Open Research true as written:
+a fresh clone plus the two Zenodo records reproduces every manuscript figure.
+Today it is not, for three reasons found by walking every `read_*`/`open_*`
+call in the five `notebooks/manuscripts/SI_code*` notebooks:
+
+1. **Five first-party NetCDFs exist nowhere public and not on this machine**
+   (`data/external/ncfiles/Tierney22_PNAS_PETMDA/PETMDA_OCN_annual_regridded.nc`
+   and `Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/..._iPETM0{1,3,6,9}x.nc`,
+   ~16 MB; SI_code03, Fig. 12). They were untracked on 2026-09-07 and `data/external/`
+   does not exist on this box — **they are on the Windows box / laptop only.**
+   **Corrected 2026-11-03: not so.** All five were recovered from Git LFS using the
+   pointers at `401fc7f~1` and now sit in `data/external/` on this ThinkPad (gitignored,
+   each sha256 equal to its LFS oid). The two Muller 2019 plate files were copied from
+   `working-repo/data/paleoDEMS/`. No other machine is needed for them.
+2. **The software zip Zenodo builds from the GitHub release carries Git LFS
+   pointers, not bytes**, for the 19 LFS files under `data/spreadsheets/`
+   (57.7 MB) and the 12 under `data/revision1/groupA/param_sensitivity/`
+   (SI_code02a's inputs). Only 4 of those 31 are on the data record.
+3. **Eight inputs are untracked and unarchived**: the BAYSPAR coretop
+   predictions (`predT_bayspar_p16_p50_p84.csv`, `predT_bayspar_p50.csv`,
+   `predTEX_bayspar_p50.csv`, `TT15_coretop_data_bayspar.pkl`; SI_code02 Figs.
+   8–9, S13–S17), `Kim2010_coretop.xlsx`, and the 42 per-batch
+   `*.inv.global_coretop_b01..b07.ud.nc` files SI_code02 globs — the record
+   ships only the 6 *compiled* coretop reconstructions, which the notebook
+   does not read.
+
+Also found: the archive README's screening snippet
+(`MahalanobisOutlierDetector([...]).fit_predict`) no longer matches Appendix C
+(`from_calibration` + `transform` + `detect_outliers_manual`); refresh it.
+
+#### G1. What to add, by tier
+
+| tier | files | size | why / provenance line for the README |
+|---|---|---|---|
+| **1 — first-party, must add** | the 5 regridded model NetCDFs | 16 MB | derived with `TEXAS.utils.regrid` from Tierney et al. 2022 (PETM DA) and Zhu et al. 2019 (iCESM1.2); both co-author products — cite the originals, state the regridding |
+| 1 | BAYSPAR coretop predictions (3 csv + the pkl **converted to csv**) | 0.7 MB | produced by `scripts/paper/run_coretop_maps.py` / `baysparpy`; pickles rot — ship csv |
+| 1 | the 42 per-batch coretop invT files, added to the invT zip beside the 6 compiled | ~10 MB | what SI_code02 actually globs; compiled copies stay for users |
+| 1 | `param_sensitivity/` (12 csv + `recommended_budget.json`) and the 5 `manuscript_refit/*manifest.csv` + `case_ids.json` | 0.6 MB | SI_code02a (Figs. S12, S18, S19) and the MANIFEST provenance |
+| 1 | SI_code00 raw inputs: `ds01_updated_global_coretop_tex_revised_011226.csv`, `culture_mesocosm_combined_rev_092325.xlsx` | 0.7 MB | the inputs *behind* the combined CSV already on the record |
+| 1 | RR-compiled published-data tables: `ds07_TasmanSea_paleorecords.xlsx`, `Babila_SST_results_finalized_compiled.xlsx`, `ODP1259_d18O_planktic_Bornemann08_OBrien17compl.xlsx`, `U1482_MgCa_SST.xlsx`, `PhanTEX_GIG_df.csv`, `PhanTEX_v001_modified_032626.csv`, `PhanSST_v001_extendedRR_121025.csv`, `ols_tex_thermoT_thisStudy.pkl` (→ csv) | 47 MB (42 of it PhanSST-extended) | first-party *derivatives* of CC-BY sources; one provenance row each (source DOI, what was changed) |
+| **2 — third-party, public: cite + fetch, do not re-host** | WOA23 `woa23_decav91C0_t00_01/04.nc`, `woa23_all_n00_01.nc` (SI_code00 only) | ~150 MB | NOAA, public domain; add `download_woa23()` to `utils/download.py` with the three NCEI URLs already in SI_code00 cell 20 |
+| 2 | Müller et al. 2019 plate model (`..._COBs.gpmlz`, `..._CombinedRotations.rot`; Fig. 12 paleogeography only) | ? MB (not on this box) | EarthByte, CC-BY 4.0 — re-host the two files *if* small, else URL |
+| 2 | `Gaskell2022_pnas...sd01.xlsx`, `Kim2010_coretop.xlsx`, `Varma-etal_Co1010.csv`, NICOPP `nicopp-coretop-data.txt`, `tran2025-u1482-bio-sst.txt`, `tibbett2021biomarker.txt` | 6 MB | journal SI / PANGAEA / NCEI; the two NCEI files are already fetched live by URL — keep that; list the rest with source URLs and leave them in the repo as today |
+| 2 | `ds06_calculated_ocean_properties.nc` (ocean_prop_ds) | 20 MB | stays on the GRL record (`_GRL_PAPER_RECORD_ID`), unchanged |
+
+Net addition to the record: **~75 MB** → ~590 MB total. No Zenodo limit issue.
+The additive-model (`GHEA`) reconstructions SI_code03 compares in
+`figSI_variant_comparison_*` are not a manuscript figure; leave them out and
+say so in the README.
+
+#### G2. Mechanics, in order
+
+1. **Collect the missing bytes from the other machine**: `data/external/ncfiles/**`
+   (5 files), `data/external/paleoDEMS/**` (2 files), and confirm the 4
+   untracked BAYSPAR files there are byte-identical to the ones here (md5).
+   Record each md5 in `MANIFEST.csv`.
+2. **Extend `scripts/prepare_resubmission_archive.py`** (consider renaming it
+   `prepare_data_archive.py`): add `EXTERNAL_FILES`, `PUBLISHED_DATA_FILES`,
+   `SENSITIVITY_FILES` lists → `data/external/`, `data/published_data/`,
+   `data/revision1/` subfolders of the archive; convert the two pickles to csv
+   at staging time; add the 42 batch files to `posteriors/invT/coretop/batches/`;
+   write a **provenance table** (file, source DOI/URL, license, derivation)
+   into `README_TEMPLATE`; refresh the screening snippet; "Version 0.4.0
+   (accepted manuscript)". Keep the dry-run default and the re-open-every-.nc
+   verification.
+3. **Extend `utils/download.py`**: new `TRAINING_DATA_REGISTRY` entries for
+   every tier-1 file (keyed by stem); `download_invT_posteriors()` that unpacks
+   the zip into `INVT_CACHE_DIR` with the leaf names SI_code03 resolves;
+   `download_woa23()` for tier 2; `download_all(figures=True)` as the one-call
+   "everything the notebooks read". Tests: registry keys ↔ archive listing
+   (the Zenodo API file list makes this checkable offline from a fixture).
+4. **Make the notebooks read from the download locations**: SI_code00 cells
+   17/21/23/24/34 use `local_onedrive_path`; SI_code03 uses
+   `{local_github_path}/data/external/...`. Point both at
+   `TEXAS.utils.paths` (`DATA_DIR / "external" / ...`) so a clone that ran
+   `download_all(figures=True)` needs no path edits. `SI_code01` reads
+   `ds_frequentist_additive_vs_t0shift_summary.csv`, which does not exist here
+   (only the untracked `..._boundedT_summary.csv` does) — check whether that is
+   an output of the same notebook or a rename the 2026-08-21 pass missed.
+5. **Upload**: `prepare_... --apply` → `ZENODO_TOKEN=... scripts/zenodo_upload.py`
+   (draft) → put the printed draft id into `download.py::ZENODO_RECORD_ID` and
+   the new filenames into the registry → run `tests/` → **publish the draft and
+   tag v1.0.0 in the same sitting**, per the 2026-08-27 release-sequence note
+   (the record id must be in the tagged code). Data record version string:
+   `0.4.0`; software: `1.0.0`; `.zenodo.json`/README unchanged except the
+   record id.
+6. **Prove it**: on a clean clone (or the laptop), `pip install -e .`,
+   `TEXAS.download_all(figures=True)`, run SI_code01 → SI_code03 top to bottom
+   with `FORCE_RERUN=False`; diff the regenerated PDFs' page count/size against
+   `figures/manuscript/finalized/`. SI_code00 additionally needs
+   `download_woa23()`. Record the run in `MANIFEST.csv` as the reproduction check.
+7. **Then** the manuscript sentence can stand as written; if step 6 is not
+   done before the proofs, change it to "…archived with the software release
+   and the companion data record".
+
+**Effort estimate**: steps 2–3 are a day of code with tests; step 1 depends on
+reaching the other machine; step 6 is ~2 h of notebook wall-clock (no
+resampling — every posterior is read from the record).
+
+### E. Release sequence once A and B are done
+
+`/release 1.0.0` drives it (`.claude/skills/release/SKILL.md`). In order:
+merge #41 → settle A4 → B edits → `pip install -e .` in `texas-env` →
+`pytest -q` → `rm -rf dist && python -m build && twine check dist/*` →
+commit the bump → `git tag -a v1.0.0` → push `main`, then **`git push origin v1.0.0`
+only** (never `--tags`; `docker.yml` fires on every `v*`) → GitHub release,
+*not* pre-release → confirm a new version appeared under software concept
+`19671664` (if the webhook misfired, delete and recreate the release —
+`memory/project_zenodo_records.md`) → `twine upload dist/*` → bump the
+devcontainer pin. The data record stays `22131367` unless A1 or D1 changes it.
+
 ## HANDOFF — 2026-09-11 (desktop, Linux): container pin, tornado, and the `.claude` un-rot
 
 `main` @ `a7088af`, clean, pushed. Three commits, all small and independent:
@@ -422,8 +717,10 @@ byte-identical (md5 over every data var), +87 bytes of header on an 81 MB file.
 - **The SI notebooks were not re-run.** All 11 token edits were comments or
   docstrings, so no result changes; a re-run would re-sample every cached inverse
   (the invT cache key changed spelling) and rewrite tracked figures for nothing.
-- The `lookup_no3_from_woa` name and docstrings say WOA23, but its default
-  variable `no3_sf2tc_avg` is the **CMEMS** field. Decide which is authoritative.
+- ~~The `lookup_no3_from_woa` name and docstrings say WOA23, but its default
+  variable `no3_sf2tc_avg` is the **CMEMS** field. Decide which is authoritative.~~
+  **Resolved 2026-11-03:** CMEMS is authoritative (the file's `history` attr
+  says so); renamed to `lookup_modern_no3`, old name kept as a deprecated alias.
 
 ---
 
@@ -534,7 +831,7 @@ is what caught defect 2 above. All seven notebooks pass it now.
       a `pull_request:` block mirroring the existing `paths:` filter, deploy left
       push-only. *(An agent sandbox blocks edits to `.github/workflows/`; this
       needs a human.)*
-- [ ] **`dist/` holds a stale wheel** — built 2026-08-27, 17 Stan models
+- [x] **`dist/` rebuilt 2026-11-03 from the working tree (still versioned 0.4.0 until the bump; 7 Stan models, 4 bundled posteriors, twine check passed).** Was: `dist/` held a stale wheel — built 2026-08-27, 17 Stan models
       including archived ones, no univariate bundle. `rm -rf dist/ && python -m
       build` before any release.
 - [x] **v0.4.0 cut and published for resubmission** (2026-09-09, superseding

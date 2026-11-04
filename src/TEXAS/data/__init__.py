@@ -11,7 +11,7 @@ from .filter import (
 )
 
 from .screening import MahalanobisOutlierDetector
-from .ocean_lookup import lookup_no3_from_woa
+from .ocean_lookup import lookup_modern_no3, lookup_no3_from_woa
 
 __all__ = [
     "build_invT_inputData",
@@ -20,5 +20,6 @@ __all__ = [
     "filter_stan_compatible",
     "ensure_numpy",
     "MahalanobisOutlierDetector",
-    "lookup_no3_from_woa",
+    "lookup_modern_no3",
+    "lookup_no3_from_woa",  # deprecated alias
 ]

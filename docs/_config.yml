@@ -1,5 +1,5 @@
 # Unified TEXAS documentation — Jupyter Book (Sphinx).
-# Replaces the former mkdocs-material site; the tutorial is now a section here.
+# Replaces the former mkdocs-material site.
 
 title: TEXAS
 author: Ronnakrit Rattanasriampaipong
@@ -15,7 +15,7 @@ exclude_patterns:
   - "**.ipynb_checkpoints"
 
 execute:
-  execute_notebooks: "off"   # tutorial widgets need a live kernel; render as source
+  execute_notebooks: "off"   # the explorer's widgets need a live kernel; render as source
 
 html:
   use_issues_button: true

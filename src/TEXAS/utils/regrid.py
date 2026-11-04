@@ -21,7 +21,7 @@ def resolve_latlon_names(ds, lat_name=None, lon_name=None):
     """Resolve a dataset's latitude and longitude coordinate names.
 
     Grids in this project arrive under several spellings -- POP curvilinear
-    output as ``TLAT``/``TLONG``, the WOA23-derived fields as ``lat``/``lon``,
+    output as ``TLAT``/``TLONG``, the WOA23-gridded ocean-properties fields as ``lat``/``lon``,
     CMIP-style files as ``latitude``/``longitude`` -- so the names are detected
     rather than assumed. An explicit name always wins over detection.
 

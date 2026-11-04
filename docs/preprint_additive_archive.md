@@ -3,8 +3,8 @@
 ```{admonition} Archived material
 :class: warning
 This page preserves the **additive multivariate formulation** used in the
-initial submission (preprint) of the TEXAS manuscript and in the posteriors
-currently archived on Zenodo. The **revised manuscript supersedes it** with
+initial submission of the TEXAS manuscript and in the posteriors on
+version 0.2.0 of the Zenodo data record. The **revised manuscript supersedes it** with
 the [T₀-shift parameterization](index.md) (γ on the curve location T₀), which
 keeps predicted Scaled RI inside its physical bounds by construction. This
 page exists so readers arriving from the preprint, or working with the
@@ -48,8 +48,8 @@ locally β ≈ −γ·f′(T) where f′ is the calibration slope.
 
 ## The archived posteriors are this model
 
-The multivariate posteriors on the current Zenodo record are additive-arm
-fits — compset `GHEA` (`A` = additive):
+The multivariate posteriors on version 0.2.0 of the data record are
+additive-arm fits — compset `GHEA` (`A` = additive):
 
 | Case id | Legacy (archived) file name |
 |---|---|

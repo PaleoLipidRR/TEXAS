@@ -91,18 +91,23 @@ conda install -c conda-forge cmdstan=2.36.0
 
 **Fix — point TEXAS at an existing install.** Set `CMDSTAN` *before* importing TEXAS:
 
-=== "PowerShell (Windows)"
+````````{tab-set}
+```````{tab-item} PowerShell (Windows)
 
-    ```powershell
-    $env:CMDSTAN = "$HOME\.cmdstan\cmdstan-2.36.0"   # this session
-    setx CMDSTAN "$HOME\.cmdstan\cmdstan-2.36.0"      # persist (reopen terminal)
-    ```
 
-=== "bash / zsh (Linux, macOS, WSL2)"
+```powershell
+$env:CMDSTAN = "$HOME\.cmdstan\cmdstan-2.36.0"   # this session
+setx CMDSTAN "$HOME\.cmdstan\cmdstan-2.36.0"      # persist (reopen terminal)
+```
+```````
+```````{tab-item} bash / zsh (Linux, macOS, WSL2)
 
-    ```bash
-    export CMDSTAN=~/.cmdstan/cmdstan-2.36.0          # add to ~/.bashrc to persist
-    ```
+
+```bash
+export CMDSTAN=~/.cmdstan/cmdstan-2.36.0          # add to ~/.bashrc to persist
+```
+```````
+````````
 
 TEXAS searches, in order: `CMDSTAN` env var → `$CONDA_PREFIX/bin/cmdstan` →
 `<python prefix>/bin/cmdstan` → the highest `cmdstan-*` under `/opt/cmdstan/`, `~/.cmdstan/`,

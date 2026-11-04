@@ -173,22 +173,20 @@ them into the thermal parameters.
 
 **Which NO₃ value reaches Stan.** The resolution order is
 `site_lat`/`site_lon` lookup → an explicit `no3=` → `predictors["no3"]` →
-zeros. Passing `site_lat` and `site_lon` interpolates the WOA23-derived
-`ocean_prop_ds` field at those coordinates (downloaded and cached from Zenodo
+zeros. Passing `site_lat` and `site_lon` interpolates the `ocean_prop_ds`
+field (the CMEMS nitrate climatology on the WOA23 grid) at those coordinates (downloaded and cached from Zenodo
 on first use if `no3_dataset` is not supplied). A scalar `no3` broadcasts to
 every observation; a value above `no3_cutoff` — e.g. `no3=10.0` when the
 cutoff is 1.0 — puts every observation outside the correction window, which is
 how the correction is switched off.
 
-Supplying *nothing* is not the same as switching it off. An absent predictor
-sent to Stan is treated as zero, which asserts a ratio or concentration of
-zero and biases the reconstruction; the `predictor_missing` quality flag
-(below) catches this for both predictors.
-
-Since v0.3.3 the call itself guards against it. If the calibration you named
-declares a correction and you supply no values for it, `predict_T_from_proxyObs`
-raises a `ValueError` naming the ways out, rather than passing zeros to Stan —
-for the GDGT-2/3 ratio and for NO₃ alike. And if you name *no* calibration and
+Supplying *nothing* is not the same as switching it off. If the calibration you
+named declares a correction and you supply no values for it,
+`predict_T_from_proxyObs` raises a `ValueError` naming the ways out rather than
+passing zeros to Stan — for the GDGT-2/3 ratio and for NO₃ alike — because a
+zero would assert a ratio or concentration of zero and bias the reconstruction.
+The `predictor_missing` quality flag (below) marks the same condition on a
+reconstruction loaded back from disk. And if you name *no* calibration and
 supply *no* predictors, TEXAS selects the thermal-only calibration
 (`tx.GHPU.sst.sri03.p0`, which also ships in the wheel) and warns that it has
 done so. That fallback is a convenience, not an equivalence: as above, a
@@ -202,25 +200,56 @@ in exactly one case — when `fwd_posterior` is omitted, it chooses which defaul
 calibration is used. A `temptype` that contradicts the calibration raises a
 warning and is otherwise ignored.
 
-**Per-observation flags.** `result["flags"]` is a DataFrame with one row per
-observation, marking rows the reconstruction cannot support — above all, proxy
-values outside the calibration curve's attainable range, which return a
-converged, plausible-looking temperature that is really a readout of the prior.
-The published calibration-domain ellipse is two-dimensional (TEX₈₆ × Scaled RI),
-so the `outside_domain` check needs `tex86=` as well; without it that column is
-`pd.NA` rather than passing. Computing the flags costs no extra sampling. Filter
-with:
+**Per-observation quality flags.** The screening above and several further
+checks run with every reconstruction and come back as `result["flags"]`, a
+DataFrame with one row per sample (manuscript Appendix C2.8). Each column is a
+check that is passed, failed, or — when it could not be evaluated — `pd.NA`,
+never a pass. Computing them costs no extra sampling.
+
+| column | fires when |
+|---|---|
+| `outside_domain` | the sample lies outside the published 90 % χ² ellipse in TEX₈₆ × Scaled RI, with the same warm-end exception as the calibration screening (Section 5.1). Needs `tex86=`; `pd.NA` without it, or when the reconstruction's proxy is not `scaledRI_cren3`. |
+| `proxy_below_floor`, `proxy_above_ceiling` | the Scaled RI is below the curve's lower asymptote *b* or above 1 in more than half of the calibration draws. The curve cannot produce the observation, so the converged, plausible-looking temperature is a readout of the prior, not a measurement (Section 8.4). The graded companions `frac_draws_below_floor` / `frac_draws_above_ceiling` give the fraction of draws that rule the value out. |
+| `proxy_extrapolated` | the Scaled RI is outside the range of the calibration data. |
+| `predictor_extrapolated` | GDGT-2/3 or NO₃ is outside the range of the calibration data. |
+| `predictor_missing` | a predictor the calibration uses was not supplied. Reachable only when `compute_quality_flags` is called directly on a saved result: `predict_T_from_proxyObs` refuses that case before sampling (above). |
+| `prior_dominated` | the posterior 68 % half-width, (p84 − p16)/2, is ≥ 85 % of `prior_sigma_t` (the threshold is the `prior_dominated_ratio` keyword). |
+| `no3_correction_inactive` | advisory only: NO₃ is above the cutoff, so the nitrate term is off — usually deliberate (`no3=10`). Reported, but it does not count toward `any_flag`. |
+| `any_flag` | any evaluated defect column is True. `pd.NA` entries contribute nothing. |
+
+`posterior_prior_width_ratio` is the graded companion of `prior_dominated`:
+`1 − ratio²` is the per-sample share of the prior variance the proxy removed,
+the prior-referenced diagnostic the manuscript recommends (Section 8.4). The
+SI's prior-comparison table reports the record-level version of the same
+quantity, with the half-width averaged over the record first.
 
 ```python
-result = predict_T_from_proxyObs(ri, prior_mu_t=25, prior_sigma_t=10)
-keep = ~result["flags"]["any_flag"].to_numpy(dtype=bool)
+result = predict_T_from_proxyObs(
+    proxyObs=df["scaledRI_cren3"].values,
+    prior_mu_t=20.0, prior_sigma_t=10.0,
+    gdgt23ratio=df["gdgt23ratio"].values,
+    no3=10.0,                        # correction off
+    tex86=df["TEX86"].values,        # enables outside_domain
+)
+flags = result["flags"]
+resolved = 1 - flags["posterior_prior_width_ratio"] ** 2
+
+keep = ~flags["any_flag"].to_numpy(dtype=bool)   # NA never counts as a pass
 sst = result["p50"][keep]
 ```
+
+The quickstart notebook (`notebooks/quickstart_demo.ipynb`, Step 6b) runs this
+on a short record that includes one deliberately unreachable sample, so each
+flag can be seen firing before it is applied to real data.
 
 ## 9. Choosing the NO₃ cutoff
 
 The NO₃ correction applies only below a cutoff concentration: above it, sites
-are nutrient-replete and the term is switched off. `find_optimal_no3_threshold`
+are nutrient-replete and the term is switched off. The manuscript (Section 6.2)
+finds the strongest negative Spearman correlation between the thermal residuals
+and log₁₀[NO₃⁻] at 1.8 µmol/L and adopts **1.0 µmol/L** as the practical cutoff,
+because the correction is log-linear and passes through zero at NO₃ = 1; that is
+the value recorded in the published posteriors. `find_optimal_no3_threshold`
 and `find_optimal_no3_threshold_nointercept` search that cutoff against the
 residuals of a temperature-only fit. They differ in the criterion, and the
 choice is a modeling decision, not a tuning detail.
@@ -235,8 +264,9 @@ correlation between log(NO₃) and the residuals.
   alone, and corresponds to a model whose correction is zero at NO₃ = 1.
 
 **`find_optimal_no3_threshold_nointercept`** instead maximises the no-intercept
-R² of `RI_res = β·x`, matching the `_no3ratio` Stan formulation where the
-correction is exactly zero *at the threshold*.
+R² of `RI_res = β·x`, for a correction that is exactly zero *at the threshold*
+(a formulation explored during development; the shipped Stan models use the
+`log10` form, zero at NO₃ = 1).
 
 - `no3_mode="log10ratio"` (default) sets `x = log10(NO₃ / threshold)` — zero at
   the boundary.

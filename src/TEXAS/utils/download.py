@@ -169,7 +169,10 @@ TRAINING_DATA_REGISTRY: dict[str, dict] = {
         "filename": "cmems_no3_uncertainty_field.nc",
         "size_mb": 14,
     },
-    # WOA23-derived gridded ocean properties ("ocean_prop_ds" in the SI
+    # Gridded ocean properties ("ocean_prop_ds" in the SI notebooks): CMEMS
+    # nitrate climatology and WOA23 temperature on the WOA23 0.25-degree grid.
+    # (The file's own `history` attr records the split; the nitrate is NOT WOA23.)
+    # It is the dataset used by the SI
     # preprocessing notebooks). Unlike the other three entries this one is
     # also used at inference time — by predict_T_from_proxyObs(site_lat=,
     # site_lon=) — not only to re-run the SI notebooks from scratch, so it
@@ -359,8 +362,8 @@ def download_training_data(
     """Download GDGT training data files from Zenodo.
 
     Downloads the coretop/culture/mesocosm training CSVs, the CMEMS NO₃
-    uncertainty field used in the EIV calibration, and the WOA23-derived
-    ``ocean_prop_ds`` gridded ocean properties.  The CSVs and the CMEMS field
+    uncertainty field used in the EIV calibration, and the ``ocean_prop_ds``
+    gridded ocean properties (CMEMS nitrate, WOA23 temperature).  The CSVs and the CMEMS field
     are needed only to re-run the SI preprocessing and calibration notebooks
     from scratch and are NOT required for inverse temperature
     reconstructions — use :func:`download_posteriors` for that.
@@ -415,12 +418,12 @@ def download_ocean_properties(
     dest_dir: Optional[Path | str] = None,
     force: bool = False,
 ) -> Path:
-    """Download the WOA23-derived ``ocean_prop_ds`` field from Zenodo.
+    """Download the ``ocean_prop_ds`` ocean-properties field from Zenodo.
 
     This is the single file most users need for the ``site_lat``/``site_lon``
     NO₃ lookup in :func:`~TEXAS.predict.predict_T_from_proxyObs` — a ~20 MB
-    gridded ``(lat, lon)`` dataset of thermocline-depth-integrated WOA23
-    nitrate, previously only obtainable by running ``SI_code00_PreProcessing``
+    gridded ``(lat, lon)`` dataset of thermocline-depth-integrated CMEMS
+    nitrate (on the WOA23 grid, beside WOA23 temperature), previously only obtainable by running ``SI_code00_PreProcessing``
     locally. Downloading just this entry (rather than the full
     :func:`download_training_data`, which also fetches the ~17 MB of
     training CSVs and the CMEMS field) is why this has its own function.

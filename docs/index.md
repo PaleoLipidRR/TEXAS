@@ -10,6 +10,8 @@ TEXAS-PSM is a **Bayesian proxy system model (PSM)** for TEX86-based sea surface
 
 The result is a **posterior distribution of temperature** for each downcore sample, not just a point estimate with a fixed RMSE.
 
+To see how one measurement becomes that distribution, without installing anything, try [From GDGTs to sea temperature](gdgts_to_temperature.md).
+
 ---
 
 ## How it works
@@ -27,15 +29,15 @@ TEXAS uses a two-stage workflow:
 ### Install
 
 ```bash
-pip install texas-psm
-# or, with uv:  uv add texas-psm
+pip install texas-psm            # inside a virtual environment
+# or, with uv:  uv pip install texas-psm   (or `uv add texas-psm` in a uv project)
 ```
 
 Or open the interactive notebook in Google Colab — no installation needed:
 
 [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/PaleoLipidRR/TEXAS/blob/main/notebooks/quickstart_demo.ipynb)
 
-For Docker, conda-lock, uv, and development installs see [Installation](installation.md).
+That is all you need to use TEXAS on your own data. To fork the repository or run the manuscript notebooks (`uv sync` from a clone, Docker, or conda), see [Installation](installation.md).
 
 ---
 
@@ -55,54 +57,41 @@ df["scaledRI_cren3"] = compute_scaledRI(
 )
 ```
 
-!!! note "Which Ring Index convention?"
-    The canonical TEXAS posteriors are calibrated against **RI₀₋₃** (`cren_weight=3`, crenarchaeol and its regioisomer weighted 3). Pass `cren_weight=4` to reproduce the RI₀₋₄ convention of Zhang et al. (2016), but the canonical posteriors were **not** calibrated against that convention — the weight also sets the scale the index is expressed on, so the two are not interchangeable inputs.
+`````{admonition} Which Ring Index convention?
+:class: note
 
-    `cren_weight` was called `cren_rings` before 2026-08-21. The old keyword still works and warns.
+The canonical TEXAS posteriors are calibrated against **RI₀₋₃** (`cren_weight=3`, crenarchaeol and its regioisomer weighted 3). Pass `cren_weight=4` to reproduce the RI₀₋₄ convention of Zhang et al. (2016), but the canonical posteriors were **not** calibrated against that convention — the weight also sets the scale the index is expressed on, so the two are not interchangeable inputs.
+
+`cren_weight` was called `cren_rings` before 2026-08-21. The old keyword still works and warns.
+`````
 
 ---
 
 ### Step 1b — Screen your proxy data (recommended)
 
-Use Mahalanobis distance to flag samples that fall outside the modern coretop calibration domain before running the inverse reconstruction. The detector is fit on the **screened coretop training data** (low-G23 subset: `gdgt23ratio ≤ 5`) using `TEX86` and `scaledRI_cren3` as features. Samples in the paleo record whose distance exceeds the chi-squared threshold are flagged; `detect_outliers_manual()` additionally preserves warm end-member samples (high RI + high TEX86) that lie outside the ellipse.
+Use the Mahalanobis-distance criterion the calibration itself was built with (manuscript Section 5.1) to flag samples that fall outside the modern coretop calibration domain. `from_calibration()` loads the **published** 90 % χ² ellipse in TEX₈₆ × Scaled RI space — fitted on the low-G₂/₃ coretops (`gdgt23ratio ≤ 5`) — so nothing is downloaded and nothing is refit. A flagged sample is an extrapolation, not necessarily a bad sample: past assemblages may genuinely occupy a region with no modern analogue, so the recommendation is to flag and interpret with caution, not to exclude.
 
 ```python
-import pandas as pd
 import matplotlib.pyplot as plt
-import TEXAS
-from TEXAS.utils.paths import SPREADSHEETS_DIR
 from TEXAS.data import MahalanobisOutlierDetector
 
-# Download training data from Zenodo (~1.8 MB, skipped if already cached)
-TEXAS.download_training_data()
+cols = {"TEX86": "<your_tex86_column>", "scaledRI_cren3": "<your_scaled_RI_column>"}
 
-# Load combined dataset; keep coretop rows only
-combined_df = pd.read_csv(SPREADSHEETS_DIR / 'combined_coretop_culture_mesocosm_rev20260210.csv')
-coretop_df = combined_df[combined_df['datatype'] == 'coretop']
-
-# Fit on low-G23 coretops (gdgt23ratio ≤ 5 excludes ecology-dominated samples)
-detector = MahalanobisOutlierDetector(['TEX86', 'scaledRI_cren3'], confidence=0.9)
-detector.fit(coretop_df[coretop_df['gdgt23ratio'] <= 5])
-print(f"Fitted on {int((coretop_df['gdgt23ratio'] <= 5).sum())} coretop samples (gdgt23ratio ≤ 5)")
-print(f"Mahalanobis threshold (90% CI): {detector.threshold:.3f}")
-
-# Apply to your downcore data — requires TEX86 and scaledRI_cren3 columns
-df['TEXRI_cren3_mahalDist_low23ratio_outliers_manual'] = detector.detect_outliers_manual(df)
-n_out = int(df['TEXRI_cren3_mahalDist_low23ratio_outliers_manual'].sum())
-print(f"Screened out: {n_out} / {len(df)} samples")
+detector = MahalanobisOutlierDetector.from_calibration(confidence=0.90)
+df["mahal_dist"] = detector.transform(df, columns=cols)
+df["flagged"] = detector.detect_outliers_manual(df, columns=cols)   # keeps warm end-members (TEX86 ≥ 0.75 and Scaled RI ≥ 0.75)
+print(f"Flagged: {int(df['flagged'].sum())} / {len(df)} samples")
 
 # Visualize — 90% confidence ellipse with inliers/outliers color-coded
 fig, ax = plt.subplots(figsize=(5, 4))
 detector.plot_decision_boundary(df, ax=ax)
 ax.set_xlabel("TEX$_{86}$")
 ax.set_ylabel(r"Scaled RI$_{0-3}$")
-ax.set_title("Mahalanobis screening (90% CI)")
 plt.tight_layout()
 plt.show()
-
-# Keep only inliers
-df_screened = df[df['TEXRI_cren3_mahalDist_low23ratio_outliers_manual'] == False].reset_index(drop=True)
 ```
+
+Raising `confidence` (e.g. to 0.99) widens the ellipse so that only strong departures are flagged. The `outside_domain` column of `result["flags"]` applies the same criterion automatically when `tex86=` is passed to `predict_T_from_proxyObs`; the other quality flags (unattainable proxy values, extrapolated predictors, prior-dominated posteriors) are described on the [PSM page](PSM.md#8-reconstructing-temperature-from-proxy-observations) and demonstrated in the quickstart notebook.
 
 ---
 
@@ -268,70 +257,77 @@ forward side, `get_posterior(..., temptype=...)` is a real argument — that is
 where the target is decided.
 ```
 
-=== "Univariate"
+````````{tab-set}
+```````{tab-item} Univariate
 
-    ```python
-    from TEXAS import predict_T_from_proxyObs
 
-    result = predict_T_from_proxyObs(
-        proxyObs=df["scaledRI_cren3"].values,
-        prior_mu_t=15.0,        # prior mean temperature (°C) — geological estimate
-        prior_sigma_t=10.0,     # prior uncertainty (°C) — use wide prior if unsure
-        fwd_posterior="tx.GHPU.sst.sri03.p0",   # temperature-only calibration
-    )
-    result["p50"]   # median SST (°C), one value per sample
-    result["p5"]    # 5th percentile
-    result["p95"]   # 95th percentile
-    ```
+```python
+from TEXAS import predict_T_from_proxyObs
 
-=== "Multivariate (GDGT-2/3 + NO₃)"
+result = predict_T_from_proxyObs(
+    proxyObs=df["scaledRI_cren3"].values,
+    prior_mu_t=15.0,        # prior mean temperature (°C) — geological estimate
+    prior_sigma_t=10.0,     # prior uncertainty (°C) — use wide prior if unsure
+    fwd_posterior="tx.GHPU.sst.sri03.p0",   # temperature-only calibration
+)
+result["p50"]   # median SST (°C), one value per sample
+result["p5"]    # 5th percentile
+result["p95"]   # 95th percentile
+```
+```````
+```````{tab-item} Multivariate (GDGT-2/3 + NO₃)
 
-    ```python
-    result = predict_T_from_proxyObs(
-        proxyObs=df["scaledRI_cren3"].values,
-        prior_mu_t=15.0,
-        prior_sigma_t=10.0,
-        # fwd_posterior omitted → the bundled tx.GHEB.sst.sri03.G23-N1p0
-        gdgt23ratio=df["gdgt23ratio"].values,
-        no3=df["no3"].values,   # µmol/L; scalar or per-sample array
-    )
-    ```
 
-=== "NO₃ from WOA23 climatology"
+```python
+result = predict_T_from_proxyObs(
+    proxyObs=df["scaledRI_cren3"].values,
+    prior_mu_t=15.0,
+    prior_sigma_t=10.0,
+    # fwd_posterior omitted → the bundled tx.GHEB.sst.sri03.G23-N1p0
+    gdgt23ratio=df["gdgt23ratio"].values,
+    no3=df["no3"].values,   # µmol/L; scalar or per-sample array
+)
+```
+```````
+```````{tab-item} NO₃ from the CMEMS climatology
 
-    ```python
-    import xarray as xr
 
-    ocean_ds = xr.load_dataset("ocean_prop_ds.nc")  # WOA23-derived, from SI_code1
+```python
+import xarray as xr
 
-    result = predict_T_from_proxyObs(
-        proxyObs=df["scaledRI_cren3"].values,
-        prior_mu_t=15.0, prior_sigma_t=10.0,
-        gdgt23ratio=df["gdgt23ratio"].values,
-        site_lat=15.3, site_lon=-23.7,   # modern drill-site coordinates
-        no3_dataset=ocean_ds,
-    )
-    # Prints: WOA23 NO₃ lookup: lat=15.3, lon=-23.7 → 0.42 µmol/L
-    ```
+ocean_ds = xr.load_dataset("ocean_prop_ds.nc")  # CMEMS nitrate on the WOA23 grid, from SI_code00
 
-=== "Load from disk / Google Drive"
+result = predict_T_from_proxyObs(
+    proxyObs=df["scaledRI_cren3"].values,
+    prior_mu_t=15.0, prior_sigma_t=10.0,
+    gdgt23ratio=df["gdgt23ratio"].values,
+    site_lat=15.3, site_lon=-23.7,   # modern drill-site coordinates
+    no3_dataset=ocean_ds,
+)
+# Prints: CMEMS NO₃ lookup: lat=15.3, lon=-23.7 → 0.42 µmol/L
+```
+```````
+```````{tab-item} Load from disk / Google Drive
 
-    If you have a posterior `.nc` file locally or on Google Drive, pass it directly — no cache lookup, no download:
 
-    ```python
-    import xarray as xr
-    from TEXAS import predict_T_from_proxyObs
+If you have a posterior `.nc` file locally or on Google Drive, pass it directly — no cache lookup, no download:
 
-    # Colab: mount Google Drive first, then load
-    # (files downloaded straight from Zenodo keep the archived legacy name)
-    ds = xr.load_dataset("/content/drive/MyDrive/posteriors/gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc")
+```python
+import xarray as xr
+from TEXAS import predict_T_from_proxyObs
 
-    result = predict_T_from_proxyObs(
-        proxyObs=df["scaledRI_cren3"].values,
-        prior_mu_t=15.0, prior_sigma_t=10.0,
-        fwd_posterior=ds,    # xr.Dataset — skips all file I/O
-    )
-    ```
+# Colab: mount Google Drive first, then load
+# (files downloaded straight from Zenodo keep the archived legacy name)
+ds = xr.load_dataset("/content/drive/MyDrive/posteriors/gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc")
+
+result = predict_T_from_proxyObs(
+    proxyObs=df["scaledRI_cren3"].values,
+    prior_mu_t=15.0, prior_sigma_t=10.0,
+    fwd_posterior=ds,    # xr.Dataset — skips all file I/O
+)
+```
+```````
+````````
 
 ---
 
@@ -394,6 +390,6 @@ coretop fit with `gen_logi_fixed_hier_crtp_univ_priorApprox`.
 
 If you use TEXAS in published work, please cite:
 
-> Rattanasriampaipong, R. et al. (in prep). *TEXAS: A proxy system model for TEX86 paleothermometry.* AGU Paleoceanography and Paleoclimatology.
+> Rattanasriampaipong, R., Tierney, J. E., Elling, F. J., & Inglis, G. N. (2026). *TEXAS: A proxy system model for TEX86 paleothermometry.* Paleoceanography and Paleoclimatology, in press.
 
 See [`CITATION.cff`](https://github.com/PaleoLipidRR/TEXAS/blob/main/CITATION.cff) for machine-readable metadata.

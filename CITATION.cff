@@ -1,12 +1,12 @@
 cff-version: 1.2.0
 title: "texas-psm: a python package for TEXAS (A proxy system model for TetraEther indeX of Ammonia oxidizerS)"
-message: "The current version is used for data analysis alongside with a manuscript prepared to submit for publication at a peer-reviewed journal. If you use this software, please cite it using the metadata from this file."
+message: "If you use this software, please cite both the software (this file) and the accompanying article listed under references."
 type: software
 authors:
   - family-names: Rattanasriampaipong
     given-names: Ronnakrit
     orcid: "https://orcid.org/0000-0002-1425-8737"
-    affiliation: "Department of Geosciences, The University of Arizona"
+    affiliation: "Department of Geosciences, The University of Arizona; University Corporation for Atmospheric Research"
   - family-names: Tierney
     given-names: Jessica E.
     orcid: "https://orcid.org/0000-0002-9080-9289"
@@ -14,7 +14,7 @@ authors:
   - family-names: Elling
     given-names: Felix J.
     orcid: "https://orcid.org/0000-0003-0405-4033"
-    affiliation: "Institute of Earth Sciences, Heidelberg University"
+    affiliation: "Leibniz-Laboratory for Radiometric Dating and Isotope Research, Kiel University; Institute of Earth Sciences, Heidelberg University"
   - family-names: Inglis
     given-names: Gordon N.
     orcid: "https://orcid.org/0000-0002-0032-4668"
@@ -56,6 +56,6 @@ references:
         given-names: Gordon N.
         orcid: "https://orcid.org/0000-0002-0032-4668"
     title: "TEXAS: A proxy system model for TEX86 paleothermometry"
-    journal: "AGU Paleoceanography and Paleoclimatology"
+    journal: "Paleoceanography and Paleoclimatology"
     year: 2026
-    notes: "in revision"
+    notes: "accepted for publication; add the article DOI here once assigned"

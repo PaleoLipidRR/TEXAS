@@ -5,8 +5,9 @@ each of gdgt23ratio and no3. Three were wired up; the fourth -- the
 calibration uses NO3 but none was supplied -- was silent, which is the
 consequential gap: supplying an unused predictor is harmless (and already
 warns twice), but omitting one the calibration actually applies silently
-biases the reconstruction (NO3 is treated as 0, which is not the same as
-switching the correction off). This test locks in the missing warning,
+biases the reconstruction (a zero NO3 is not the same as switching the
+correction off; since then the inverse layer refuses to run in that case,
+and the warning says so). This test locks in the missing warning,
 mirroring the existing GDGT-2/3 counterpart in wording, severity (UserWarning)
 and category.
 """
@@ -89,7 +90,7 @@ def test_mirrors_the_gdgt23_missing_warning_wording(monkeypatch):
     assert len(no3_msgs) == 1
 
     gdgt_msg, no3_msg = gdgt_msgs[0], no3_msgs[0]
-    for phrase in ("treated as 0", "not the same as switching",
-                   "biases the reconstruction"):
+    for phrase in ("refuse to run", "rather than treat it as 0",
+                   "not the correction switched off"):
         assert phrase in gdgt_msg
         assert phrase in no3_msg
