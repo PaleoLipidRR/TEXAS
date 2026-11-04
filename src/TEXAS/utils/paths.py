@@ -268,6 +268,30 @@ def _resolve_spreadsheets_dir() -> Path:
 
 SPREADSHEETS_DIR = _resolve_spreadsheets_dir()
 
+# Large third-party/first-party source data (regridded model NetCDFs, plate
+# models, WOA23 climatologies) — inside the repo's gitignored data/external/
+# when running from a git checkout, otherwise ~/.texas/data/external/. Mirrors
+# _resolve_spreadsheets_dir() so TEXAS_DATA_DIR repoints both at once.
+def _resolve_external_dir() -> Path:
+    env = os.environ.get("TEXAS_DATA_DIR")
+    if env:
+        return Path(env) / "external"
+    cwd = Path.cwd()
+    try:
+        top = subprocess.check_output(
+            ["git", "rev-parse", "--show-toplevel"], cwd=str(cwd),
+            stderr=subprocess.DEVNULL,
+        ).decode().strip()
+        return Path(top) / "data" / "external"
+    except Exception:
+        pass
+    for parent in [cwd, *cwd.parents]:
+        if (parent / ".git").exists() or (parent / "pyproject.toml").exists():
+            return parent / "data" / "external"
+    return Path.home() / ".texas" / "data" / "external"
+
+EXTERNAL_DATA_DIR = _resolve_external_dir()
+
 
 def set_cache_dir(path: "str | Path") -> None:
     """Override TEXAS cache directories at runtime.

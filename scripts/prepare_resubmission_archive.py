@@ -87,12 +87,70 @@ DATA_FILES = [
     # companion GRL paper's own Zenodo record, so it's never uploaded here.
 ]
 
+# ── Tier 1 (RESUME.md section G): first-party inputs behind every figure ──
+# that weren't previously archived anywhere. Added 2026-11 so the Open
+# Research promise ("a fresh clone + the two Zenodo records reproduces every
+# figure") is actually true. See the README's own provenance table.
+
+# Fig. 12 (SI_code03): Tierney et al. 2022 PNAS PETM data assimilation,
+# regridded, + Zhu et al. 2019 Science iCESM1.2 PETM simulations, regridded
+# to full depth -- both co-author products. Plus the 2 small Muller et al.
+# 2019 plate-model files Fig. 12's paleogeography needs (the rest of that
+# model -- rotations for other times, polygon files -- stays a cite+fetch,
+# not re-hosted; these two are small enough to ship directly).
+EXTERNAL_FILES = [
+    REPO / "data/external/ncfiles/Tierney22_PNAS_PETMDA/PETMDA_OCN_annual_regridded.nc",
+    REPO / "data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM01x.nc",
+    REPO / "data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM03x.nc",
+    REPO / "data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM06x.nc",
+    REPO / "data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM09x.nc",
+    REPO / "data/external/paleoDEMS/pyGplates_files/PaleoDEMS_global_plate_model/Muller2019-Young2019-Cao2020_COBs.gpmlz",
+    REPO / "data/external/paleoDEMS/pyGplates_files/PaleoDEMS_global_plate_model/Muller2019-Young2019-Cao2020_CombinedRotations.rot",
+]
+
+# SI_code00 raw inputs (the ingredients behind combined_coretop_culture_mesocosm
+# already on the record) + RR-compiled derivatives of published (CC-BY) sources,
+# used across SI_code01-04. One provenance row each in the README.
+PUBLISHED_DATA_FILES = [
+    REPO / "data/spreadsheets/ds01_updated_global_coretop_tex_revised_011226.csv",
+    REPO / "data/spreadsheets/culture_mesocosm_combined_rev_092325.xlsx",
+    REPO / "data/spreadsheets/published_data/ds07_TasmanSea_paleorecords.xlsx",
+    REPO / "data/spreadsheets/published_data/Babila_SST_results_finalized_compiled.xlsx",
+    REPO / "data/spreadsheets/published_data/ODP1259_d18O_planktic_Bornemann08_OBrien17compl.xlsx",
+    REPO / "data/spreadsheets/published_data/U1482_MgCa_SST.xlsx",
+    REPO / "data/spreadsheets/published_data/PhanTEX_GIG_df.csv",
+    REPO / "data/spreadsheets/published_data/PhanTEX_v001_modified_032626.csv",
+    REPO / "data/spreadsheets/published_data/PhanSST_v001_extendedRR_121025.csv",
+]
+
+# Converted to csv at staging time, never shipped as the pickle itself --
+# pickles pin a library version (sklearn already warns loading this one
+# across a patch release) and "ship csv" is RESUME's own rule for this tier.
+PICKLE_FILES = [
+    REPO / "data/spreadsheets/ols_tex_thermoT_thisStudy.pkl",
+]
+
+PARAM_SENSITIVITY_DIR = REPO / "data/revision1/groupA/param_sensitivity"
+
+# The 5 run manifests + case_ids.json SI_code02a reads directly (Figs. S12,
+# S18, S19) -- shipped as their own files here, in addition to being folded
+# into the combined MANIFEST.csv below.
+REFIT_PROVENANCE_FILES = [
+    REFIT_DIR / "manifest.csv",
+    REFIT_DIR / "single_predictor_manifest.csv",
+    REFIT_DIR / "coretop_maps_t0shift_manifest.csv",
+    REFIT_DIR / "coretop_maps_univ_manifest.csv",
+    REFIT_DIR / "coretop_maps_eiv_manifest.csv",
+    REFIT_DIR / "case_ids.json",
+]
+
 # run manifests folded into MANIFEST.csv (source label -> path)
 RUN_MANIFESTS = {
     "forward_refit": REFIT_DIR / "manifest.csv",
     "forward_single_predictor": REFIT_DIR / "single_predictor_manifest.csv",
     "coretop_invT_t0shift": REFIT_DIR / "coretop_maps_t0shift_manifest.csv",
     "coretop_invT_univ": REFIT_DIR / "coretop_maps_univ_manifest.csv",
+    "coretop_invT_eiv": REFIT_DIR / "coretop_maps_eiv_manifest.csv",
 }
 
 
@@ -120,8 +178,60 @@ def paleo_invt_files() -> list[Path]:
     return out
 
 
-def build_plan() -> tuple[list[tuple[Path, Path]], list[tuple[str, Path]], Path]:
-    """Return (copies [(src, rel_dest)], compiles [(case, rel_dest)], archive)."""
+def coretop_batch_files() -> list[Path]:
+    """The 42 raw per-batch coretop invT files SI_code02 actually globs.
+
+    The 6 compiled files (one concatenated .nc per configuration, built by
+    ``compile_coretop`` below) stay in the archive too, for users who just
+    want to read a reconstruction without caring how it was batched.
+    """
+    return [INVT_CACHE / f"{case}.inv.global_coretop_{b}.ud.nc"
+            for case in CORETOP_CONFIGS for b in CORETOP_BATCHES]
+
+
+def sensitivity_files() -> list[Path]:
+    """param_sensitivity/ (Figs. S12, S18, S19) + the refit manifests/case
+    ids SI_code02a reads directly as provenance -- data/revision1/ in the
+    archive."""
+    out = sorted(PARAM_SENSITIVITY_DIR.glob("*")) if PARAM_SENSITIVITY_DIR.exists() else []
+    return [*out, *REFIT_PROVENANCE_FILES]
+
+
+def _pickle_to_csv(src: Path, dest: Path) -> None:
+    """Convert a pickled object to csv so the archive never ships a pickle.
+
+    Pickles pin a library version -- unpickling ``ols_tex_thermoT_thisStudy.pkl``
+    already warns across a scikit-learn patch release -- while csv does not
+    rot. Handles the two shapes seen in this repo: a pandas object (dumped
+    as-is) and a fitted scikit-learn estimator with ``coef_``/``intercept_``
+    (dumped as its fitted parameters, one row).
+    """
+    # Safe: these pickles are first-party repo artifacts this script's own
+    # author produced (sklearn fit results / DataFrames), never third-party
+    # or user-supplied input -- this is the one place they get unpickled,
+    # specifically to retire the pickle in favor of csv.
+    import pickle
+    import pandas as pd
+    with open(src, "rb") as f:
+        obj = pickle.load(f)
+    if isinstance(obj, (pd.DataFrame, pd.Series)):
+        obj.to_csv(dest, index=isinstance(obj, pd.Series))
+        return
+    if hasattr(obj, "coef_") and hasattr(obj, "intercept_"):
+        import numpy as np
+        row = {f"coef_{i}": float(c) for i, c in enumerate(np.atleast_1d(obj.coef_))}
+        row["intercept"] = float(np.ravel(obj.intercept_)[0])
+        row["model_class"] = type(obj).__name__
+        pd.DataFrame([row]).to_csv(dest, index=False)
+        return
+    raise TypeError(f"{src.name}: don't know how to convert a "
+                    f"{type(obj).__name__} to csv -- add a case to _pickle_to_csv")
+
+
+def build_plan() -> tuple[list[tuple[Path, Path]], list[tuple[str, Path]],
+                          list[tuple[Path, Path]], Path]:
+    """Return (copies [(src, rel_dest)], compiles [(case, rel_dest)],
+    pickle_conversions [(src_pkl, rel_dest_csv)], archive)."""
     archive = REPO / f"review_archive_v{_version()}"
     copies: list[tuple[Path, Path]] = []
     for case in FWD_CASES:
@@ -132,11 +242,21 @@ def build_plan() -> tuple[list[tuple[Path, Path]], list[tuple[str, Path]], Path]
     for rel in DRAWS_FILES:
         src = INVT_CACHE / rel
         copies.append((src, Path("posteriors/invT/paleo") / src.name))
+    for f in coretop_batch_files():
+        copies.append((f, Path("posteriors/invT/coretop/batches") / f.name))
     for f in DATA_FILES:
         copies.append((f, Path("data") / f.name))
+    for f in EXTERNAL_FILES:
+        copies.append((f, Path("data/external") / f.name))
+    for f in PUBLISHED_DATA_FILES:
+        copies.append((f, Path("data/published_data") / f.name))
+    for f in sensitivity_files():
+        copies.append((f, Path("data/revision1") / f.name))
+    pickle_conversions = [(f, Path("data/published_data") / f"{f.stem}.csv")
+                          for f in PICKLE_FILES]
     compiles = [(case, Path("posteriors/invT/coretop") / f"{case}.inv.global_coretop.ud.nc")
                 for case in CORETOP_CONFIGS]
-    return copies, compiles, archive
+    return copies, compiles, pickle_conversions, archive
 
 
 def compile_coretop(case: str, dest: Path) -> None:
@@ -205,14 +325,10 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
 
     version = _version()
-    copies, compiles, archive = build_plan()
+    copies, compiles, pickle_conversions, archive = build_plan()
 
     missing = [str(src) for src, _ in copies if not src.exists()]
-    for case in CORETOP_CONFIGS:
-        for b in CORETOP_BATCHES:
-            p = INVT_CACHE / f"{case}.inv.global_coretop_{b}.ud.nc"
-            if not p.exists():
-                missing.append(str(p))
+    missing += [str(src) for src, _ in pickle_conversions if not src.exists()]
     for path in RUN_MANIFESTS.values():
         if not path.exists():
             missing.append(str(path))
@@ -221,12 +337,21 @@ def main(argv=None) -> int:
         return 1
 
     n_paleo = sum(1 for _, d in copies if d.parts[:3] == ("posteriors", "invT", "paleo"))
+    n_batches = sum(1 for _, d in copies if d.parts[:3] == ("posteriors", "invT", "coretop")
+                    and d.parts[3:4] == ("batches",))
+    n_external = sum(1 for _, d in copies if d.parts[:2] == ("data", "external"))
+    n_published = (sum(1 for _, d in copies if d.parts[:2] == ("data", "published_data"))
+                   + len(pickle_conversions))
+    n_sensitivity = sum(1 for _, d in copies if d.parts[:2] == ("data", "revision1"))
     print(f"Archive: {archive}  (package version {version})")
     print(f"  forward posteriors : {len(FWD_CASES)}")
-    print(f"  coretop compiles   : {len(compiles)} (from "
-          f"{len(CORETOP_CONFIGS) * len(CORETOP_BATCHES)} batch files)")
+    print(f"  coretop compiles   : {len(compiles)} (from {n_batches} batch files, "
+          f"which also ship individually)")
     print(f"  paleo invT files   : {n_paleo}")
     print(f"  data files         : {len(DATA_FILES)}")
+    print(f"  external files     : {n_external}  (Fig. 12 model grids + plate model)")
+    print(f"  published-data     : {n_published}  (RR-compiled derivatives of CC-BY sources)")
+    print(f"  sensitivity/refit  : {n_sensitivity}  (param_sensitivity + refit manifests)")
     print("  + MANIFEST.csv, README.md")
     if not args.apply:
         print("\nDry run. Files that would be staged:")
@@ -235,6 +360,8 @@ def main(argv=None) -> int:
             print(f"  {mb:8.1f} MB  {rel}")
         for case, rel in compiles:
             print(f"  (compile)    {rel}")
+        for src, rel in pickle_conversions:
+            print(f"  (pkl->csv)   {rel}")
         print("\nRe-run with --apply to build.")
         return 0
 
@@ -248,6 +375,11 @@ def main(argv=None) -> int:
     for case, rel in compiles:
         compile_coretop(case, archive / rel)
         print(f"  compiled {rel}")
+    for src, rel in pickle_conversions:
+        dest = archive / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        _pickle_to_csv(src, dest)
+        print(f"  pkl->csv {rel}")
 
     n_rows = build_manifest(archive / "MANIFEST.csv")
     print(f"  wrote MANIFEST.csv ({n_rows} runs)")
@@ -261,7 +393,11 @@ def main(argv=None) -> int:
     for f in sorted(archive.rglob("*.nc")):
         with xr.open_dataset(f):
             pass
-    print("\nVerified: every .nc opens; forward files carry their case ids.")
+    for src, rel in pickle_conversions:
+        import pandas as pd
+        pd.read_csv(archive / rel)
+    print("\nVerified: every .nc opens; forward files carry their case ids; "
+          "every converted csv re-reads.")
     total = sum(f.stat().st_size for f in archive.rglob("*") if f.is_file())
     print(f"Archive ready: {archive}  ({total / 1_073_741_824:.2f} GB)")
     print("Next: ZENODO_TOKEN=<token> python scripts/zenodo_upload.py")
@@ -364,6 +500,10 @@ lengths for every run are in `MANIFEST.csv`.
 
 One compiled file per configuration (1513 sites; batches b01-b07
 concatenated). Row order matches `data/coretop_maps_sites.csv`.
+`posteriors/invT/coretop/batches/` additionally ships the 42 raw per-batch
+files these are concatenated from (what `notebooks/manuscripts/SI_code02`
+itself globs) — the compiled copies above are for anyone who just wants to
+read a reconstruction without caring how it was batched.
 
 ### posteriors/invT/paleo/ — paleo-site reconstructions
 
@@ -386,12 +526,35 @@ Note: `ocean_prop_ds` (`ds06_calculated_ocean_properties.nc`), used for the
 archive -- it's hosted on the companion GRL paper's own Zenodo record and
 downloaded from there directly (see `utils/download.py`).
 
+### data/external/ — first-party model/plate-model grids behind Fig. 12
+
+| File | Source | Derivation |
+|---|---|---|
+| PETMDA_OCN_annual_regridded.nc | Tierney et al. 2022, PNAS (PETM data assimilation) | regridded with `TEXAS.utils.regrid` |
+| Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM0{{1,3,6,9}}x.nc | Zhu et al. 2019, Science (iCESM1.2 PETM simulations) | regridded to full depth with `TEXAS.utils.regrid` |
+| Muller2019-Young2019-Cao2020_COBs.gpmlz, ..._CombinedRotations.rot | Muller et al. 2019 (EarthByte plate model), CC-BY 4.0 | unmodified; re-hosted here (small) rather than linked, unlike the rest of that plate model |
+
+### data/published_data/ — compiled inputs to the training database
+
+| File | Source | Derivation |
+|---|---|---|
+| ds01_updated_global_coretop_tex_revised_011226.csv, culture_mesocosm_combined_rev_092325.xlsx | this study | raw SI_code00 inputs behind `combined_coretop_culture_mesocosm_rev20260210.csv` above |
+| ds07_TasmanSea_paleorecords.xlsx, Babila_SST_results_finalized_compiled.xlsx, ODP1259_d18O_planktic_Bornemann08_OBrien17compl.xlsx, U1482_MgCa_SST.xlsx, PhanTEX_GIG_df.csv, PhanTEX_v001_modified_032626.csv, PhanSST_v001_extendedRR_121025.csv | compiled by the authors from published (CC-BY) sources | see SI_code01-04 for per-source citations; compiled, not raw |
+| ols_tex_thermoT_thisStudy.csv | this study | the fitted TEX86-vs-thermoT linear regression's parameters (`coef_`, `intercept_`); shipped as csv, not the original pickle, since a pickle pins a library version |
+
+### data/revision1/ — sampler-budget sensitivity + refit provenance
+
+`param_sensitivity/` contents (Figs. S12, S18, S19 — MCMC/invT budget grids,
+proxy-definition and parameter-comparison tables) plus the 5 run manifests
+and `case_ids.json` `notebooks/manuscripts/SI_code02a` reads directly, in
+addition to their being folded into `MANIFEST.csv` below.
+
 ### MANIFEST.csv
 
-The run log of the revision: one row per Stan run (117), giving the sampler
+The run log of the revision: one row per Stan run, giving the sampler
 budget (warm-up, sampling draws, and M forward draws for reconstructions),
 training size, wall-clock time, convergence diagnostics, and the output file
-the run produced. `source_manifest` names which of the four run manifests the
+the run produced. `source_manifest` names which of the five run manifests the
 row came from. This is the archive manifest referred to in SI Text S3.3, where
 warm-up length is recorded for runs whose posteriors predate that attribute.
 

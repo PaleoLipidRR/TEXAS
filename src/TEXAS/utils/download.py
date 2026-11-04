@@ -12,9 +12,12 @@ Usage
 -----
 >>> import TEXAS
 >>> TEXAS.download_all()               # everything: posteriors + training data
+>>> TEXAS.download_all(figures=True)   # + invT reconstructions + WOA23 (>1 GB)
 >>> TEXAS.download_posteriors()        # forward calibration posteriors only
 >>> TEXAS.download_training_data()     # training CSVs + NO₃ fields
 >>> TEXAS.download_ocean_properties()  # just the WOA23 ocean_prop_ds field
+>>> TEXAS.download_invT_posteriors()   # invT reconstructions behind SI_code02/03
+>>> TEXAS.download_woa23()             # WOA23 climatologies (>1 GB; SI_code00 only)
 
 Download a specific posterior:
 >>> TEXAS.download_posteriors(["tx.GHPU.sst.sri03.p0"])
@@ -45,6 +48,35 @@ _V020_RECORD_ID: str = "20032542"   # v0.2.0: initial-submission (additive) file
 # on the Zenodo record for the companion GRL paper, which is the canonical
 # source SI_code00_PreProcessing itself downloads it from.
 _GRL_PAPER_RECORD_ID: str = "14806962"
+
+# The invT reconstructions behind SI_code02/SI_code03 (compiled global-coretop
+# maps + every paleo-site reconstruction, including the two full-draws files
+# behind Fig. 13) ship as one zip rather than 46 individual Zenodo files.
+_INVT_ZIP_FILENAME: str = "texas-psm-invT-posteriors-v0.3.0.zip"
+
+# WOA23 (World Ocean Atlas) climatologies are public-domain NOAA/NCEI
+# products, fetched directly from NCEI rather than re-hosted on the TEXAS
+# record (SI_code00_PreProcessing's own source). Verified reachable
+# 2026-11-03; sizes are real Content-Length, not estimates -- the 0.25deg
+# temperature grid alone is >1 GB.
+_WOA23_BASE = "https://www.ncei.noaa.gov/thredds-ocean/fileServer/woa23/DATA"
+WOA23_FILES: dict[str, dict] = {
+    "temperature_0.25deg": {
+        "url": f"{_WOA23_BASE}/temperature/netcdf/decav91C0/0.25/woa23_decav91C0_t00_04.nc",
+        "dest": "woa23/temperature/woa23_decav91C0_t00_04.nc",
+        "size_mb": 1016,
+    },
+    "temperature_1deg": {
+        "url": f"{_WOA23_BASE}/temperature/netcdf/decav91C0/1.00/woa23_decav91C0_t00_01.nc",
+        "dest": "woa23/temperature/woa23_decav91C0_t00_01.nc",
+        "size_mb": 78,
+    },
+    "nitrate_1deg": {
+        "url": f"{_WOA23_BASE}/nitrate/netcdf/all/1.00/woa23_all_n00_01.nc",
+        "dest": "woa23/nitrate/woa23_all_n00_01.nc",
+        "size_mb": 45,
+    },
+}
 
 
 def _file_url(filename: str, record: Optional[str] = None) -> str:
@@ -195,12 +227,13 @@ def download_all(
     cache_dir: Optional[Path | str] = None,
     data_dir: Optional[Path | str] = None,
     force: bool = False,
+    figures: bool = False,
 ) -> None:
     """Download everything from Zenodo: forward posteriors + training data.
 
     Files are downloaded individually; already-cached files are skipped unless
     *force=True*.  Total download is ~490 MB (dominated by the six full EIV
-    multivariate posteriors at ~78–81 MB each).
+    multivariate posteriors at ~78–81 MB each) with the default ``figures=False``.
 
     Parameters
     ----------
@@ -211,9 +244,20 @@ def download_all(
         Destination for training data files.  Defaults to ``data/spreadsheets/``.
     force : bool
         Re-download files that already exist locally.
+    figures : bool
+        Also fetch what the ``notebooks/manuscripts/SI_code*`` figure
+        notebooks need beyond the default forward-posterior + training-CSV
+        set: the invT reconstructions behind SI_code02/SI_code03
+        (:func:`download_invT_posteriors`) and the WOA23 climatologies
+        SI_code00 reads (:func:`download_woa23`, **>1 GB**, skipped unless
+        this is set). Does not yet cover every external file those
+        notebooks read — see ``docs/`` for the current gaps.
     """
     download_posteriors(cache_dir=cache_dir, force=force)
     download_training_data(dest_dir=data_dir, force=force)
+    if figures:
+        download_invT_posteriors(force=force)
+        download_woa23(force=force)
 
 
 def download_posteriors(
@@ -461,3 +505,100 @@ def download_ocean_properties(
         out, entry["size_mb"], force=force,
     )
     return out
+
+
+def download_invT_posteriors(
+    cache_dir: Optional[Path | str] = None,
+    force: bool = False,
+) -> List[Path]:
+    """Download and unpack the invT reconstructions behind SI_code02/SI_code03.
+
+    Fetches ``texas-psm-invT-posteriors-v{N}.zip`` from the TEXAS Zenodo data
+    record — the compiled global-coretop reconstructions (SI_code02 Figs.
+    8–9, S13–S17) and every paleo-site reconstruction (SI_code03), including
+    the two full-draws files behind Fig. 13 — and unpacks it flat into the
+    invT posterior cache, the same layout :func:`~TEXAS.stan.io.save_invT_posterior`
+    writes locally: ``<case>.inv.<site>.ud[-<variant>].nc`` at the cache root,
+    ``_draws.nc`` files under ``draws/``. The zip's own ``invT/coretop/`` and
+    ``invT/paleo/`` prefixes are a Zenodo-side packaging detail, not part of
+    the local layout, and are discarded on unpack.
+
+    Parameters
+    ----------
+    cache_dir : Path or str, optional
+        Destination directory. Defaults to :data:`TEXAS.utils.paths.INVT_CACHE_DIR`.
+    force : bool
+        Re-download and re-unpack even if the zip is already cached.
+        Existing extracted files are always overwritten (the zip is the
+        source of truth for its own contents).
+
+    Returns
+    -------
+    list of Path
+        Local paths of every file extracted from the zip.
+    """
+    import zipfile
+
+    dest_dir = Path(cache_dir) if cache_dir else _paths.INVT_CACHE_DIR
+    dest_dir.mkdir(parents=True, exist_ok=True)
+
+    zip_path = dest_dir / _INVT_ZIP_FILENAME
+    _download_file(_file_url(_INVT_ZIP_FILENAME), zip_path, size_mb=4, force=force)
+
+    extracted: List[Path] = []
+    with zipfile.ZipFile(zip_path) as zf:
+        for member in zf.infolist():
+            if member.is_dir():
+                continue
+            name = Path(member.filename).name
+            out = (dest_dir / "draws" / name) if name.endswith("_draws.nc") \
+                else (dest_dir / name)
+            out.parent.mkdir(parents=True, exist_ok=True)
+            with zf.open(member) as src, open(out, "wb") as dst:
+                dst.write(src.read())
+            extracted.append(out)
+    print(f"  → unpacked {len(extracted)} file(s) into {dest_dir}")
+    return extracted
+
+
+def download_woa23(
+    dest_dir: Optional[Path | str] = None,
+    force: bool = False,
+) -> List[Path]:
+    """Download the WOA23 climatologies ``SI_code00_PreProcessing`` reads.
+
+    Fetches the three World Ocean Atlas 2023 files directly from NOAA/NCEI
+    (public domain — not re-hosted on the TEXAS Zenodo record):
+    0.25-degree and 1-degree annual-mean temperature, and 1-degree annual-mean
+    nitrate. **This is a >1 GB download** (the 0.25-degree temperature grid
+    alone is ~1 GB) — nothing calls this automatically; it's for reproducing
+    SI_code00 from scratch, not for inverse temperature reconstructions.
+
+    Parameters
+    ----------
+    dest_dir : Path or str, optional
+        Destination directory. Defaults to
+        ``TEXAS.utils.paths.EXTERNAL_DATA_DIR / "woa23"``.
+    force : bool
+        Re-download files that already exist locally.
+
+    Returns
+    -------
+    list of Path
+        Local paths of the three downloaded files.
+    """
+    dest = Path(dest_dir) if dest_dir else _paths.EXTERNAL_DATA_DIR
+    total_mb = sum(
+        e["size_mb"] for e in WOA23_FILES.values()
+        if force or not (dest / e["dest"]).exists()
+    )
+    if total_mb >= 5:
+        print(f"Downloading WOA23 climatologies — total ~{total_mb / 1024:.1f} GB "
+              "from NOAA/NCEI")
+
+    paths = []
+    for entry in WOA23_FILES.values():
+        out = dest / entry["dest"]
+        _download_file(entry["url"], out, entry["size_mb"], force=force)
+        paths.append(out)
+    return paths

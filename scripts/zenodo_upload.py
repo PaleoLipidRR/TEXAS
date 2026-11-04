@@ -9,7 +9,8 @@ The script:
   1. Creates a new draft version from the existing data record (RECORD_ID below)
   2. Deletes files inherited from the previous version (they stay on the old,
      permanently accessible version — nothing is lost)
-  3. Uploads the archive's forward posteriors, data files, MANIFEST.csv and
+  3. Uploads the archive's forward posteriors, data/ + data/external/ +
+     data/published_data/ + data/revision1/ files, MANIFEST.csv and
      README.md as individual flat files + a bundled invT ZIP
   4. Updates the version metadata to the package version
   5. Leaves the record as a DRAFT (add --publish to publish immediately)
@@ -36,10 +37,12 @@ from pathlib import Path
 import requests
 
 # ─── Configuration ─────────────────────────────────────────────────────────────
-RECORD_ID = "20032542"          # v0.2.0 (initial-submission) version of the data
-                                # record; the concept DOI 10.5281/zenodo.19666744
-                                # resolves to whichever version is newest — check
-                                # download.py::ZENODO_RECORD_ID for that id
+RECORD_ID = "22131367"          # v0.3.0, the current newest version of the data
+                                # record (concept DOI 10.5281/zenodo.19666744).
+                                # Zenodo's "create new version" call works from
+                                # any version in the chain, but keep this pointed
+                                # at the current one so it's never read as stale —
+                                # check download.py::ZENODO_RECORD_ID if in doubt.
 ZENODO_BASE = "https://zenodo.org/api"
 REPO = Path(__file__).resolve().parent.parent
 VERSION = re.search(r'^version = "(.+)"', (REPO / "pyproject.toml").read_text(),
@@ -49,15 +52,30 @@ ARCHIVE_DIR = REPO / f"review_archive_v{VERSION}"
 # Expected archive shape — a mismatch means the staging script and this one
 # disagree, so stop rather than upload a partial record.
 EXPECTED_FORWARD = 9
-EXPECTED_INVT_MIN = 40
+# 6 compiled coretop + 42 raw per-batch coretop files + 40 paleo (incl. the 2
+# full-draws files) = 88 today; a floor, not an exact match, so a future
+# addition doesn't need touching this constant.
+EXPECTED_INVT_MIN = 88
+
+# Extra flat-file source directories added for the v1.0.0 data record (RESUME.md
+# section G): Fig. 12's model/plate-model grids, RR-compiled published-data
+# derivatives, and the sampler-budget-sensitivity + refit-provenance files.
+# All three stay collision-free against DATA_DIR and each other (checked in
+# collect_individual_files below) because every source file already has a
+# distinct name — nothing here was renamed to make it so.
+EXTRA_DATA_DIRS = ["data/external", "data/published_data", "data/revision1"]
 
 
 def collect_individual_files() -> dict[str, Path]:
-    """Flat files: forward posteriors + data + MANIFEST.csv + README.md.
+    """Flat files: forward posteriors + data (+ the 3 EXTRA_DATA_DIRS) +
+    MANIFEST.csv + README.md.
 
     Forward-posterior filenames are the case ids ``download.py``'s
     POSTERIOR_REGISTRY points at; data filenames must match
-    TRAINING_DATA_REGISTRY.
+    TRAINING_DATA_REGISTRY. Zenodo's namespace is flat, so every source
+    directory collapses to its files' basenames -- a collision between any
+    two of them would silently overwrite one in the upload, so this stops
+    instead.
     """
     files: dict[str, Path] = {}
     fwd = sorted((ARCHIVE_DIR / "posteriors/forward").glob("*.nc"))
@@ -66,14 +84,28 @@ def collect_individual_files() -> dict[str, Path]:
                  f"found {len(fwd)} — re-run prepare_resubmission_archive.py")
     for f in fwd:
         files[f.name] = f
-    for f in sorted((ARCHIVE_DIR / "data").iterdir()):
-        files[f.name] = f
+    # EXTRA_DATA_DIRS are subdirectories *of* "data" (data/external etc.), so
+    # the plain "data" iteration must skip them -- not filter them out, or
+    # they'd upload as bogus directory entries.
+    for reldir in ["data", *EXTRA_DATA_DIRS]:
+        for f in sorted((ARCHIVE_DIR / reldir).iterdir()):
+            if not f.is_file():
+                continue
+            if f.name in files:
+                sys.exit(f"ERROR: {f} collides with {files[f.name]} -- both "
+                         "would upload under the same flat Zenodo filename "
+                         f"{f.name!r}. Rename one of them.")
+            files[f.name] = f
     for name in ("MANIFEST.csv", "README.md"):
         files[name] = ARCHIVE_DIR / name
     return files
 
 
-# InvT posteriors bundled as a single ZIP for SI reproducibility
+# InvT posteriors bundled as a single ZIP for SI reproducibility. rglob picks
+# up posteriors/invT/coretop/batches/ (the 42 raw per-batch files) under the
+# coretop entry automatically -- they get the same "invT/coretop/" zip prefix
+# as the 6 compiled files, which is fine: download_invT_posteriors() discards
+# that prefix on unpack and keys only on each file's already-unique basename.
 INVT_ZIP_NAME = f"texas-psm-invT-posteriors-v{VERSION}.zip"
 INVT_DIRS = [
     ARCHIVE_DIR / "posteriors/invT/coretop",

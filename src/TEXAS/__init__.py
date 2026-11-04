@@ -58,6 +58,7 @@ from .diagnostics import summarize_sampler_diagnostics, create_summary_table
 from .utils.download import (
     download_all, download_posteriors, POSTERIOR_REGISTRY,
     download_training_data, download_ocean_properties, TRAINING_DATA_REGISTRY,
+    download_invT_posteriors, download_woa23, WOA23_FILES,
 )
 
 # ─── Cache configuration ─────────────────────────────────────────────────
@@ -125,8 +126,11 @@ __all__ = [
     "download_posteriors",
     "download_training_data",
     "download_ocean_properties",
+    "download_invT_posteriors",
+    "download_woa23",
     "TRAINING_DATA_REGISTRY",
     "POSTERIOR_REGISTRY",
+    "WOA23_FILES",
     # ocean property lookups
     "lookup_modern_no3",
     "lookup_no3_from_woa",  # deprecated alias
