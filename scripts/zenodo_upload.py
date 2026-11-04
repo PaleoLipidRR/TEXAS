@@ -37,7 +37,7 @@ from pathlib import Path
 import requests
 
 # ─── Configuration ─────────────────────────────────────────────────────────────
-RECORD_ID = "22131367"          # v0.3.0, the current newest version of the data
+RECORD_ID = "23954718"          # v1.0.0, the current newest version of the data
                                 # record (concept DOI 10.5281/zenodo.19666744).
                                 # Zenodo's "create new version" call works from
                                 # any version in the chain, but keep this pointed
