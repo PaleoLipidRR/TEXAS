@@ -377,3 +377,36 @@ class TestPlotColumnsMapping:
             det.plot_corner(phys)
         fig, axs = det.plot_corner(phys, columns=self.MAPPING)
         assert fig is not None and axs is not None
+
+
+class TestPlotDecisionBoundaryAxisLimits:
+    """plot_decision_boundary's exception-rectangle code path freezes the view
+    with ax.autoscale(False) so the (deliberately huge) rectangle doesn't blow
+    the axes out to the rectangle's own size. That freeze must run AFTER the
+    view has accounted for every already-added artist (both scatters, the
+    ellipse) -- autoscale(False) alone can capture a stale view from before
+    the outlier scatter or the ellipse patch registered, silently clipping
+    them out of the frozen, final view.
+    """
+
+    def teardown_method(self, _method):
+        import matplotlib.pyplot as plt
+        plt.close("all")
+
+    def test_outlier_point_stays_within_final_axis_limits(self):
+        det = MahalanobisOutlierDetector.from_calibration(confidence=0.90)
+        # Reuses TestRecommendedScreeningCriterion.PROBE's cold outlier, far
+        # outside both the inlier cluster and the calibration ellipse.
+        probe = TestRecommendedScreeningCriterion.PROBE
+        ax, ellipse = det.plot_decision_boundary(probe)
+        xlim, ylim = ax.get_xlim(), ax.get_ylim()
+
+        cold = probe.loc["cold outlier"]
+        assert xlim[0] <= cold["TEX86"] <= xlim[1], (
+            f"cold outlier's TEX86={cold['TEX86']} falls outside the frozen "
+            f"xlim={xlim} -- plot_decision_boundary clipped it out of view"
+        )
+        assert ylim[0] <= cold["scaledRI_cren3"] <= ylim[1], (
+            f"cold outlier's scaledRI_cren3={cold['scaledRI_cren3']} falls "
+            f"outside the frozen ylim={ylim}"
+        )

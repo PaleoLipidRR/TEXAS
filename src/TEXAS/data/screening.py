@@ -811,6 +811,15 @@ class MahalanobisOutlierDetector:
                 if x_thresh is not None and y_thresh is not None:
                     # Freeze axis limits set by the data before adding the patch,
                     # so the large rectangle does not expand the axes to 1000.
+                    # autoscale_view() first: autoscale(False) alone can capture
+                    # a stale view that predates the outlier scatter or the
+                    # ellipse patch, silently clipping them out of the frozen
+                    # view. Do NOT call relim() here -- it does not support
+                    # Collection artists (what scatter() returns: see the
+                    # matplotlib docs for Axes.relim), so it would discard both
+                    # scatter calls' contribution to the data limits instead of
+                    # restoring it.
+                    ax.autoscale_view()
                     ax.autoscale(False)
                     xlim = ax.get_xlim()
                     ylim = ax.get_ylim()
