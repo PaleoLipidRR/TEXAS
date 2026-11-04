@@ -37,8 +37,10 @@ from . import paths as _paths
 
 # ─── Zenodo config ────────────────────────────────────────────────────────────
 # The current version of the data record (concept DOI 10.5281/zenodo.19666744),
-# pointing at the v0.3.0 deposit created by scripts/zenodo_upload.py.
-ZENODO_RECORD_ID: str = "22131367"
+# pointing at the v1.0.0 deposit created by scripts/zenodo_upload.py -- the
+# calibration set and posteriors behind the accepted manuscript (1,518 gridded
+# core-tops, 8 mesocosm, 59 culture experiments; scaledRI_cren3 screen).
+ZENODO_RECORD_ID: str = "23954718"
 
 # Registry entries may pin a different record ("record": "<id>"); files
 # without a pin are fetched from ZENODO_RECORD_ID.
@@ -52,7 +54,11 @@ _GRL_PAPER_RECORD_ID: str = "14806962"
 # The invT reconstructions behind SI_code02/SI_code03 (compiled global-coretop
 # maps + every paleo-site reconstruction, including the two full-draws files
 # behind Fig. 13) ship as one zip rather than 46 individual Zenodo files.
-_INVT_ZIP_FILENAME: str = "texas-psm-invT-posteriors-v0.3.0.zip"
+# Name is frozen at whatever pyproject.toml said when scripts/zenodo_upload.py
+# built it (0.4.0, before the 1.0.0 bump) -- it is a filename on a published
+# record, not a live version string, so it does NOT track ZENODO_RECORD_ID's
+# own v1.0.0. Verified against the record's actual file listing.
+_INVT_ZIP_FILENAME: str = "texas-psm-invT-posteriors-v0.4.0.zip"
 
 # WOA23 (World Ocean Atlas) climatologies are public-domain NOAA/NCEI
 # products, fetched directly from NCEI rather than re-hosted on the TEXAS
