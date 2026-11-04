@@ -1,0 +1,15 @@
+                      case       arm    n   bias  rmse  cov68  mean_w68
+     tx.GHEB.sst.sri03.G23  baseline 1513 -0.912 4.184  0.662     9.115
+     tx.GHEB.sst.sri03.G23 corrected 1518 -0.912 4.178  0.661     9.131
+tx.GHEB.sst.sri03.G23-N1p0  baseline 1513 -0.984 4.355  0.664     8.880
+tx.GHEB.sst.sri03.G23-N1p0 corrected 1518 -0.984 4.339  0.669     8.936
+     tx.GHEB.thm.sri03.G23  baseline 1513 -0.942 4.104  0.679     8.853
+     tx.GHEB.thm.sri03.G23 corrected 1518 -0.929 4.105  0.679     8.849
+tx.GHEB.thm.sri03.G23-N1p0  baseline 1513 -0.993 4.232  0.681     8.760
+tx.GHEB.thm.sri03.G23-N1p0 corrected 1518 -0.990 4.218  0.689     8.817
+
+                      case  shared  same_measured_T  only_baseline  only_corrected  dres_rms  dres_absmax  dw68_mean
+     tx.GHEB.sst.sri03.G23    1512             1512              1               6     0.131        0.628      0.027
+tx.GHEB.sst.sri03.G23-N1p0    1512             1512              1               6     0.133        0.655      0.066
+     tx.GHEB.thm.sri03.G23    1512             1512              1               6     0.133        0.619      0.007
+tx.GHEB.thm.sri03.G23-N1p0    1512             1512              1               6     0.127        0.708      0.067
