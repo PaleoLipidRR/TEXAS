@@ -58,8 +58,8 @@ EXPECTED_FORWARD = 9
 # carry no information the compiled coretop files don't already have.
 EXPECTED_INVT_MIN = 46
 
-# Extra flat-file source directories added for the v1.0.0 data record (RESUME.md
-# section G): first-party published_data inputs + the sampler-budget-sensitivity
+# Extra flat-file source directories added for the v1.0.0 data record:
+# first-party published_data inputs + the sampler-budget-sensitivity
 # and refit-provenance files. Stay collision-free against DATA_DIR and each
 # other (checked in collect_individual_files below) because every source file
 # already has a distinct name — nothing here was renamed to make it so.

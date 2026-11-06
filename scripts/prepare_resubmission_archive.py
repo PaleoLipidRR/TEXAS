@@ -87,7 +87,7 @@ DATA_FILES = [
     # companion GRL paper's own Zenodo record, so it's never uploaded here.
 ]
 
-# ── Tier 1 (RESUME.md section G): first-party inputs behind every figure ──
+# ── Tier 1: first-party inputs behind every figure ──
 # that weren't previously archived anywhere. Added 2026-11 so the Open
 # Research promise ("a fresh clone + the two Zenodo records reproduces every
 # figure") is actually true. See the README's own provenance table.
@@ -123,7 +123,7 @@ PUBLISHED_DATA_FILES = [
 
 # Converted to csv at staging time, never shipped as the pickle itself --
 # pickles pin a library version (sklearn already warns loading this one
-# across a patch release) and "ship csv" is RESUME's own rule for this tier.
+# across a patch release) and this tier is always shipped as csv.
 PICKLE_FILES = [
     REPO / "data/spreadsheets/ols_tex_thermoT_thisStudy.pkl",
 ]

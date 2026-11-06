@@ -16,7 +16,7 @@ only then removes the source (with ``--prune``).
 Inverse posteriors are deliberately NOT migrated. An invT model name records
 the curve and constraint but not the training set or estimator, so the parent
 case is not recoverable for any file lacking a ``fwd_case`` attr, and guessing
-one would record a guess as provenance. See Phase 5D in RESUME.md.
+one would record a guess as provenance.
 
     python scripts/migrate_cache_layout.py                 # show the plan
     python scripts/migrate_cache_layout.py --apply         # copy into place
