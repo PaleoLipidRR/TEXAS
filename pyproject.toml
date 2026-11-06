@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "texas-psm"
-version = "1.0.1"
+version = "1.0.2"
 authors = [{ name = "Ronnakrit Rattanasriampaipong", email = "rattanasriampaipong.r@gmail.com" }]
 description = "TEXAS: a Bayesian proxy system model for TEX86 (isoGDGT) paleothermometry"
 readme = "README.md"

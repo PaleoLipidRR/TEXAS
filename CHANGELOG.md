@@ -10,7 +10,35 @@ accompanies the revised manuscript (under review at *Paleoceanography and
 Paleoclimatology*) — the convention closes here, and from this point on
 `MAJOR.MINOR.PATCH` means what it usually does.
 
-## [Unreleased]
+## [1.0.2] — 2026-11-06
+
+### Fixed
+
+- **The bundled calibration posteriors now match the paper.** The four
+  posteriors shipped inside the wheel (`tx.GHEB.{sst,thm}.sri03.G23-N1p0`,
+  the defaults, and `tx.GHPU.{sst,thm}.sri03.p0`) were still the earlier
+  1,513-site fits, while 1.0.0's calibration set, the Zenodo data record
+  (10.5281/zenodo.19666744) and the manuscript use 1,518 gridded core-tops.
+  They are rebuilt from the current data record with
+  `scripts/make_bundled_posteriors.py`; e.g. the default SST calibration is
+  now T₀ = 34.7, k = 0.27, b = 0.412, ν = 3.9, as reported in the manuscript
+  (was T₀ = 34.8, ν = 4.0). Reconstructions with the default calibration
+  shift slightly (parameters move < 0.3 posterior SD). The browser walkthrough
+  docs page was re-run with the new defaults.
+- `inverse_logistic_fixed_upper` returned wrong temperatures whenever the
+  lower asymptote `b` was not 0 (it divided by `y` instead of `y − b`). It is
+  public but not used by the reconstruction path, which runs in Stan.
+- The paper is cited as the ESSOAr preprint, under review at
+  *Paleoceanography and Paleoclimatology* (README, docs, `CITATION.cff`);
+  earlier text called it accepted / in press.
+
+### Changed
+
+- Documentation, README and code comments aligned with the manuscript
+  (corrected forward-model direction in the metadata, manuscript
+  cross-references, posterior tables and sizes), comments rewritten in plain
+  language, `RESUME.md` and other internal notes removed from the repository,
+  and `CLAUDE.md` trimmed to a short contributor briefing.
 
 ### Removed
 
