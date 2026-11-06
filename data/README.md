@@ -140,9 +140,10 @@ public source are marked "author-only, not needed by any notebook" rather than
 left blank — that phrase means exactly what it says: nobody has to go find it.
 
 The regridded Tierney et al. (2022) PETMDA and Zhu et al. (2019) iPETM grids in
-table 3 are **not** on the TEXAS Zenodo data record. They are derived from other
-groups' published data, so TEXAS does not re-host them: obtain the originals
-from those publications (table 2) and regenerate them.
+table 3 are **not** on the TEXAS Zenodo data record. We do not re-host published
+datasets that this study used without significant reanalysis; these grids are
+regridded copies of published model output, so obtain the originals from those
+publications (table 2) and regenerate them.
 
 ### 1. Tracked training data (22 files)
 
@@ -239,8 +240,8 @@ properties, and CESM simulation output regridded to a common grid) that
 | `data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM06x.nc` | `SI_code03_paleo_showcases.ipynb` | not re-hosted; regenerate from the original (table 2) with the regridding cell in `SI_code03_paleo_showcases.ipynb` |
 | `data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM09x.nc` | `SI_code03_paleo_showcases.ipynb` | not re-hosted; regenerate from the original (table 2) with the regridding cell in `SI_code03_paleo_showcases.ipynb` |
 
-**The five regridded grids (~13 MB) are not re-hosted**, because they trace to
-other groups' publications (Tierney et al. 2022 PNAS PETMDA; Zhu et al. 2019
+**The five regridded grids (~13 MB) are not re-hosted**, because this study used
+these published datasets without significant reanalysis (Tierney et al. 2022 PNAS PETMDA; Zhu et al. 2019
 *Science* EoceneSim, [PANGAEA](https://doi.org/10.1594/PANGAEA.899208)). A fresh
 clone therefore cannot run `SI_code03_paleo_showcases.ipynb` end to end until
 you download the originals listed in table 2 and run that notebook's
