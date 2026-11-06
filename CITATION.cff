@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-title: "texas-psm: a python package for TEXAS (A proxy system model for TetraEther indeX of Ammonia oxidizerS)"
+title: "texas-psm: a Python package for TEXAS (TetraEther indeX of Ammonia oxidizerS), a proxy system model for TEX86 paleothermometry"
 message: "If you use this software, please cite both the software (this file) and the accompanying article listed under references."
 type: software
 authors:
@@ -29,9 +29,10 @@ doi: 10.5281/zenodo.19671664
 abstract: >
   TEXAS (texas-psm) is a Python package for Bayesian GDGT-temperature calibration
   using Stan. It implements a two-stage workflow: forward calibration of a
-  generalized logistic curve (Ring Index to temperature) using hierarchical
-  Bayesian Stan models, and inverse temperature reconstruction from new Ring Index
-  observations with full posterior uncertainty.
+  generalized logistic curve (temperature to Scaled Ring Index, with optional
+  GDGT-2/GDGT-3 and nitrate predictors) using hierarchical Bayesian Stan models,
+  and inverse temperature reconstruction from new Scaled Ring Index observations
+  with full posterior uncertainty.
 keywords:
   - paleoceanography
   - paleothermometry

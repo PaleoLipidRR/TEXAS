@@ -20,7 +20,7 @@ Validation rests on four complementary checks:
 4. **Sensitivity** — to the proxy definition and to the sampler budget.
 
 All of the coretop metrics are **in-sample**: they are computed on the gridded
-compilation the calibration was estimated from (1,513 cells), and the manuscript
+compilation the calibration was estimated from (1,518 cells), and the manuscript
 says so. The culture and mesocosm data constrain the warm end that the coretops
 never reach.
 
@@ -37,9 +37,9 @@ observation.
 | Linear | global calibration dataset | 0.70 | — |
 | Exponential (log₁₀) | global calibration dataset | 0.72 | — |
 | Top layer (`tx.GCDU.cul.sri03.p0`) | culture + mesocosm | 0.72 | 0.092 |
-| Bottom layer, temperature only (`tx.GHPU.sst.sri03.p0`) | 1,513 coretop cells | 0.75 | 0.058 |
-| Bottom layer, T + G₂/₃ (`tx.GHEB.sst.sri03.G23`) | 1,513 coretop cells | 0.77 | 0.054 |
-| **Bottom layer, T + G₂/₃ + NO₃** (`tx.GHEB.sst.sri03.G23-N1p0`, the published calibration) | 1,513 coretop cells | **0.80** | **0.051** |
+| Bottom layer, temperature only (`tx.GHPU.sst.sri03.p0`) | 1,518 coretop cells | 0.75 | 0.058 |
+| Bottom layer, T + G₂/₃ (`tx.GHEB.sst.sri03.G23`) | 1,518 coretop cells | 0.77 | 0.054 |
+| **Bottom layer, T + G₂/₃ + NO₃** (`tx.GHEB.sst.sri03.G23-N1p0`, the published calibration) | 1,518 coretop cells | **0.80** | **0.051** |
 
 *Manuscript Fig. 5d–f (functional forms), Fig. 6 (top layer), Fig. 7 (bottom
 layer) and Fig. S13 (all configurations).*
@@ -60,7 +60,7 @@ probability. σ_crtp is pure process noise: the per-site analytical error
 and combined in quadrature, so the implied total spread √(0.03² + 0.039²) ≈ 0.049
 matches the realized RMSE of 0.051. The prior scale for σ_crtp is set by the
 thermal-only fit's R² (≈ 0.75) — this is the only place that quantity enters
-the model, and the posterior is insensitive to it (Text S4).
+the model.
 
 You can reproduce a prediction-versus-observation comparison for any cached
 posterior with the public API:
@@ -116,7 +116,7 @@ compared with the observed SST. Global metrics, from Fig. 8:
 | TEX₈₆ᴴ (Kim et al., 2010) | 0.68 | 5.9 | — |
 | BAYSPAR (Tierney & Tingley, 2014) | 0.83 | 4.3 | 3.3 |
 | TEXAS, temperature only | **0.86** | **3.9** | 5.1 |
-| TEXAS, T + G₂/₃ | | | 3.9 |
+| TEXAS, T + G₂/₃ | 0.84 | 4.2 | 3.9 |
 | TEXAS, T + G₂/₃ + NO₃ | 0.82 | 4.3 | 3.8 |
 
 Two things to read from that table:
@@ -134,11 +134,11 @@ Two things to read from that table:
   40.9 °C (Fig. 7d).
 
 **By ocean basin** (Fig. S17; the 21 Natural Earth regions with ≥ 20 cells,
-1,283 of 1,513 sites): a TEXAS configuration has the lowest regional RMSE in 12
+1,286 of 1,518 sites): a TEXAS configuration has the lowest regional RMSE in 12
 of 21 regions, BAYSPAR in 7, the exponential calibration in 2. The full TEXAS
 model's regional RMSE spans 2.1–5.7 °C against 1.4–9.1 °C for BAYSPAR,
-2.1–9.7 °C linear and 1.3–12.7 °C exponential, and its spread across regions
-(1.1–1.2 °C) is about half BAYSPAR's (2.2 °C). That comparison is conservative
+2.1–9.7 °C linear and 1.3–12.7 °C exponential, and the standard deviation of regional RMSE across the 21
+regions (1.1–1.2 °C for the three TEXAS configurations) is about half BAYSPAR's (2.2 °C). That comparison is conservative
 for TEXAS, which uses one global calibration where BAYSPAR's coefficients vary
 by region.
 

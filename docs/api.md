@@ -9,8 +9,8 @@
 | [`predict_T_from_proxyObs`](#predict-t-from-proxy-observations) | Inverse: proxy → temperature with full uncertainty (runs Stan) |
 | [`compute_quality_flags`](#per-observation-quality-flags) | Flag reconstructed samples the calibration cannot support |
 | [`download_posteriors`](#download-posteriors) | Download forward posteriors from Zenodo |
-| [`download_training_data`](#download-training-data) | Download training CSVs + CMEMS NO₃ field |
-| [`list_posteriors`](#list-posteriors) | Print and return `.nc` stems in the local cache |
+| [`download_training_data`](#download-training-data) | Download training CSVs, CMEMS NO₃ uncertainty field + `ocean_prop_ds` |
+| [`list_posteriors`](#list-posteriors) | Print and return posterior names in the local cache and bundled with the package |
 | [`MahalanobisOutlierDetector`](#screen-a-record) | Flag samples outside the published calibration domain (no fitting required) |
 | [`InvTConfig`](#invt-configuration) | Control the number of forward draws *M* a reconstruction marginalises over |
 | [`build_fwd_data`](#build-forward-data) | Build validated Stan data dict for forward calibration |

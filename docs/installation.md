@@ -1,7 +1,8 @@
 # Installation
 
 **To use TEXAS on your own data, install the package from PyPI with pip or uv.** That
-is all most users need, and the four default calibrations come with it. You do not need
+is all most users need, and the four bundled calibrations (the two defaults and their
+thermal-only counterparts) come with it. You do not need
 to clone the repository, or to download `uv.lock` or `pyproject.toml`: those files only
 work inside a full checkout, for people forking the repository or running the manuscript
 notebooks.
@@ -387,7 +388,7 @@ docker compose version
 `````{admonition} Apple Silicon performance
 :class: warning
 
-The pre-built image is `linux/amd64`. On Apple Silicon it runs under QEMU emulation — Stan compilation and sampling will be noticeably slower. For repeated use, [Option A (pip or uv)](#option-a--pip-or-uv-recommended) with a native arm64 conda environment is faster.
+The pre-built image is `linux/amd64`. On Apple Silicon it runs under QEMU emulation — Stan compilation and sampling will be noticeably slower. For repeated use, [Option A (pip or uv)](#option-a--pip-or-uv-recommended) in a native arm64 Python environment is faster.
 `````
 
 `````{admonition} macOS — Docker permissions prompt
@@ -487,7 +488,7 @@ When you open a notebook for the first time in the Docker container, JupyterLab 
 | Docker image — base OS + system libs | ~300 MB | Docker's internal storage |
 | Docker image — conda env (Python stack + JupyterLab) | ~1.2 GB | Docker's internal storage |
 | Docker image — CmdStan 2.36.0 (compiled C++ toolchain) | ~400 MB | Docker's internal storage |
-| Posteriors downloaded from Zenodo | ~315 MB | `data/cache/` inside the clone |
+| Posteriors downloaded from Zenodo | ~475 MB | `data/cache/` inside the clone |
 | **Total** | **~2.8–3.5 GB** | |
 
 The Docker image is stored in Docker's internal storage — **not** inside the cloned repo folder. On Windows, Docker Desktop uses a VHDX virtual disk that grows over time. To reclaim space later: Docker Desktop → **Troubleshoot → Clean / Purge data**, or run:
@@ -501,7 +502,7 @@ Subsequent launches after the first pull start in seconds — no re-download nee
 
 ### Downloading posteriors
 
-The forward calibration posteriors (`.nc` files, ~560 MB) are stored on Zenodo and are not included in the Docker image or the repository. Download them once inside JupyterLab:
+The four bundled calibrations ship inside the package, so reconstructions work without a download. The full set of forward calibration posteriors (`.nc` files, ~475 MB) is stored on Zenodo and is not included in the Docker image or the repository. Download it once inside JupyterLab:
 
 ```python
 import TEXAS
@@ -659,7 +660,7 @@ import TEXAS
 TEXAS.download_all()          # forward posteriors + training CSVs → data/cache/, data/spreadsheets/
 ```
 
-### 4. External data (WOA23 + model fields) — manual, public sources
+### 4. External data (WOA23 + model fields) — public sources
 
 `data/external/` is gitignored, so these do **not** come with the clone:
 
@@ -667,11 +668,12 @@ TEXAS.download_all()          # forward posteriors + training CSVs → data/cach
   (2019) netCDFs and the paleoDEMS plate model, read by `SI_code03` for Fig. 12. They are
   being added to the Zenodo data record; until then that figure cannot be regenerated from
   public files alone.
-- **WOA23 climatology** — World Ocean Atlas 2023, decadal average `decav91C0`,
-  **temperature** and **nitrate**, 0.25° grid (files like `woa23_decav91C0_t00_04.nc`,
-  `woa23_decav91C0_n00_04.nc`). Download from NOAA NCEI
-  (<https://www.ncei.noaa.gov/products/world-ocean-atlas>) and place them so the notebook
-  paths resolve (see step 5): `…/WOA23/decav91C0/temperature/` and `…/nitrate/`.
+- **WOA23 climatology** — World Ocean Atlas 2023 annual means: **temperature**, decadal
+  average `decav91C0`, 0.25° and 1° (`woa23_decav91C0_t00_04.nc`,
+  `woa23_decav91C0_t00_01.nc`), and **nitrate**, all-years 1° (`woa23_all_n00_01.nc`).
+  `TEXAS.download_woa23()` fetches all three from NOAA NCEI (>1 GB) into `data/external/woa23/`;
+  or download them from <https://www.ncei.noaa.gov/products/world-ocean-atlas>. Place them so
+  the notebook paths resolve (see step 5): `…/WOA23/decav91C0/temperature/` and `…/nitrate/`.
 
 ### 5. Set the two path variables
 

@@ -18,11 +18,11 @@ Open a [GitHub issue](https://github.com/PaleoLipidRR/TEXAS/issues) with:
 
 ## Stan models
 
-Stan model files live in `src/TEXAS/stan_models/`. If you modify a `.stan` file, delete the compiled binary (same directory, no extension) so it is recompiled on next use.
+Stan model files live in `src/TEXAS/stan_models/`. Compiled binaries are cached in `~/.texas/stan_cache/` and are rebuilt automatically when the `.stan` source is newer than the cached copy, so no manual cleanup is needed. To force a rebuild, pass `force=True` to the compiler's `get_model()`.
 
 ## Code style
 
-- Python: follow existing conventions (no strict linter enforced yet).
+- Python: lint with [ruff](https://docs.astral.sh/ruff/) (config in `pyproject.toml`). CI runs `ruff check` on every pull request; run `pre-commit install` once after cloning to lint and format on commit.
 - Comments: only where the *why* is non-obvious — no docblock narration of what the code does.
 
 ## Questions

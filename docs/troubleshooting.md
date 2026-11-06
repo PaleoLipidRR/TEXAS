@@ -193,8 +193,8 @@ set, otherwise `data/cache/` inside a git checkout, otherwise `~/.texas/cache/`:
 
 | Directory | Holds | Rebuilt by |
 |---|---|---|
-| `TEXAS_posterior_cache/` | forward calibration posteriors (`.nc`) | `get_posterior()`, or `TEXAS.download_posteriors()` |
-| `TEXAS_invT_posterior_cache/` | inverse temperature reconstructions (`.nc`) | `predict_T_from_proxyObs()` |
+| `TEXAS_posterior_cache/` | forward calibration posteriors (`.nc`) | `get_posterior()` + `save_posterior()`, or `TEXAS.download_posteriors()` |
+| `TEXAS_invT_posterior_cache/` | inverse temperature reconstructions (`.nc`) | `predict_T_from_proxyObs(..., save_results=True)` |
 | `TEXAS_kriged_grids_cache/` | kriged residual-map grids (`.npz`) | `plot_residual_maps(..., recompute='auto')` |
 
 **Fix:** all three are caches — deleting any file costs only the time to

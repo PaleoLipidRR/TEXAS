@@ -6,8 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **TEXAS** (`texas-psm`) is a Python package for **Bayesian GDGT–temperature calibration** using Stan models. TEXAS stands for "TetraEther indeX of Ammonia oxidizerS" and it is a proxy system model for TEX86 paleothermometer; an organic proxy for past sea surface temperature reconstructions. It implements a two-stage workflow:
 
-1. **Forward calibration**: Fit a generalized logistic curve (Ring Index → temperature) using hierarchical Bayesian Stan models, producing posterior samples stored as `.nc` files.
-2. **Inverse temperature (invT) reconstruction**: Predict paleotemperatures from new Ring Index observations by marginalizing over M parameter sets sampled from the forward posterior.
+1. **Forward calibration**: Fit a generalized logistic curve (temperature → Scaled Ring Index, with optional G23/NO3 predictors shifting T₀) using hierarchical Bayesian Stan models, producing posterior samples stored as `.nc` files.
+2. **Inverse temperature (invT) reconstruction**: Predict paleotemperatures from new Scaled Ring Index observations by marginalizing over M parameter sets sampled from the forward posterior.
 
 The proxy system is TEX86/Ring Index (isoGDGT-based paleothermometers), with optional non-thermal predictors (GDGT-2/3 ratio, NO3).
 
@@ -80,7 +80,7 @@ Model names follow a naming convention: `{transform}_{curve}_{params}_{datasourc
 - **Data sources**: `culmeso` = culture+mesocosm; `culmesocore` = culture+mesocosm+coretop; `crtp` = coretop-only
 - **Variants**: `hier_crtp` = hierarchical coretop; `multiv` = multivariate (GDGT23/NO3); `priorApprox` = prior approximation; `werr` = delta-method EIV (heteroscedastic likelihood, no latent vars); `werr_ver2` = latent-variable EIV with quadrature RI error + process-noise separation (see below); `odr` = delta-method EIV in the full hierarchical (non-priorApprox) model; `marginal_*` = marginalized variants; `reduce_sum` = parallelized with `reduce_sum`
 
-> **Stan models pruned to the shipped set (2026-09-03, RESUME.md Phase B1)**:
+> **Stan models pruned to the shipped set (2026-09-03)**:
 > `src/TEXAS/stan_models/` went from 17 `.stan` files to **9** — the models the
 > revised manuscript and the public API actually use. The other 8 moved to
 > **`archive/submission-2026-04/stan_models/`** at the repo root, with a README
@@ -98,7 +98,7 @@ Model names follow a naming convention: `{transform}_{curve}_{params}_{datasourc
 > never reached the wheel — this is packaging-neutral. **To run an archived
 > model, pass an absolute path**: `StanCompiler.resolve_stan_path()` passes
 > absolute paths straight through, so `get_posterior(..., stan_file=str(abs_path))`
-> works. The `model_dir=` route named in RESUME.md Phase B does *not* exist
+> works. A `model_dir=` route does *not* exist
 > through `get_posterior()` — it builds `StanCompiler()` with no arguments.
 >
 > **`_select_invT_stan_file()` was narrowed to match.** `constraint_type` now
@@ -122,7 +122,7 @@ Model names follow a naming convention: `{transform}_{curve}_{params}_{datasourc
 >
 > No notebook breaks on its defaults — every one reads a cached or downloaded
 > posterior. `SI_code02a` recompiles the additive model only on a cold cache or
-> `FORCE_RERUN = True`. (RESUME.md's Phase B claim that only markdown and
+> `FORCE_RERUN = True`. (An earlier claim that only markdown and
 > commented-out code referenced it was checked and is wrong for `SI_code02a`,
 > whose cell 30 has a live `get_posterior(..., stan_file=...)` call.)
 > `tests/test_streamlit_params.py` now scans `archive/submission-2026-04/` too,
@@ -362,7 +362,7 @@ for old caches and Zenodo downloads pinned to the v0.2.0 record.
 >   passes a run explicitly, so a genuinely new fit never inherits a stale
 >   stamp.
 >
-> Tracked as Phase 5 in `RESUME.md` on `feat/revision1-validation-groupA`.
+> Tracked in the maintainer's private notes.
 
 #### Renaming an existing cache onto the case layout
 

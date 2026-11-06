@@ -95,8 +95,8 @@ $$
 
 ### 4.2 Priors
 
-- **From cultures** — tightly constrain curve shape parameters (\( T_0, k, v \)) for known archaeal clades.
-- **From core-tops** — set broader priors for environmental effects (\( \gamma_j \)).
+- **From cultures and mesocosms** — constrain the curve parameters (\( T_0, k, b, v \)); their posterior means and SDs become the hyperpriors for the core-top fit.
+- **From core-tops** — refine those curve parameters hierarchically and estimate the environmental effects (\( \gamma_j \)), with the predictors treated as errors-in-variables.
 
 Example prior for the temperature:
 
@@ -188,7 +188,8 @@ zero would assert a ratio or concentration of zero and bias the reconstruction.
 The `predictor_missing` quality flag (below) marks the same condition on a
 reconstruction loaded back from disk. And if you name *no* calibration and
 supply *no* predictors, TEXAS selects the thermal-only calibration
-(`tx.GHPU.sst.sri03.p0`, which also ships in the wheel) and warns that it has
+(`tx.GHPU.sst.sri03.p0`, or `tx.GHPU.thm.sri03.p0` for thermoT; both also ship
+in the wheel) and warns that it has
 done so. That fallback is a convenience, not an equivalence: as above, a
 thermal-only fit absorbs the non-thermal signal into its thermal parameters, so
 its reconstructions differ from the multivariate ones the manuscript reports.
@@ -219,7 +220,7 @@ never a pass. Computing them costs no extra sampling.
 
 `posterior_prior_width_ratio` is the graded companion of `prior_dominated`:
 `1 − ratio²` is the per-sample share of the prior variance the proxy removed,
-the prior-referenced diagnostic the manuscript recommends (Section 8.4). The
+the prior-referenced diagnostic the manuscript recommends (Appendix C2.8). The
 SI's prior-comparison table reports the record-level version of the same
 quantity, with the half-width averaged over the record first.
 
