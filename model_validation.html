@@ -1,0 +1,753 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Model validation &#8212; TEXAS</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=55c26ed414f5f8a31ebb" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=3c74b3bc" />
+    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css?v=9c3e77be" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.11b39860a7a0cbfd473a3ad8a317855267ff0bd372690045ca344a6b62be495e.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-thebe.css?v=4fa983c6" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css?v=e1f25cfb" />
+  
+  <!-- So that users can add custom icons -->
+  <script defer src="_static/scripts/fontawesome.js?digest=55c26ed414f5f8a31ebb"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb" />
+
+    <script src="_static/documentation_options.js?v=9eb32ce0"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=fab101a9"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="_static/togglebutton.js?v=b8b12719"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script async="async" src="_static/sphinx-thebe.js?v=c100c467"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"; const thebe_selector = ".thebe,.cell"; const thebe_selector_input = "pre"; const thebe_selector_output = ".output, .cell_output"</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'model_validation';</script>
+    <script>DOCUMENTATION_OPTIONS.search_as_you_type = false;</script>
+    <link rel="canonical" href="https://paleolipidrr.github.io/TEXAS/model_validation.html" />
+    <link rel="icon" href="_static/texas_logo.svg"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Sampler budget" href="sampler_budget.html" />
+    <link rel="prev" title="Calibration curve explorer" href="calibration_curve_explorer.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  
+    
+    <script src="_static/searchtools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="searchindex.js"></script>
+  
+  </head>
+  <body data-default-mode="">
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+  
+  
+  
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header id="pst-header" class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/texas_logo.svg" class="logo__image only-light" alt="TEXAS - Home"/>
+    <img src="_static/texas_logo.svg" class="logo__image only-dark pst-js-only" alt="TEXAS - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Explainers</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="gdgts_to_temperature.html">From GDGTs to sea temperature</a></li>
+<li class="toctree-l1"><a class="reference internal" href="PSM.html">TEXAS Proxy System Model — Bayesian Inference Workflow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="calibration_curve_explorer.html">Calibration curve explorer</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Model validation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sampler_budget.html">Sampler budget</a></li>
+<li class="toctree-l1"><a class="reference internal" href="stan_models.html">Stan models shipped with TEXAS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="marginalization_explainer.html">Why Marginalization Improves Inverse TEXAS Sampling</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reduce_sum_for_geologists.html">Understanding <code class="docutils literal notranslate"><span class="pre">reduce_sum</span></code> and <code class="docutils literal notranslate"><span class="pre">ll_chunk</span></code> in TEXAS-PSM</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Developer</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="callmap.html">Call map</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Archive</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="preprint_additive_archive.html">Archive — the preprint’s additive (β) formulation</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="Source repository"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/PaleoLipidRR/TEXAS/issues/new?title=Issue%20on%20page%20%2Fmodel_validation.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="Open an issue"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/model_validation.md" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.md</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button pst-navbar-icon"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm pst-navbar-icon" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Model validation</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#forward-calibration-performance">1. Forward calibration performance</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#residual-diagnostics">2. Residual diagnostics</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inverse-reconstruction-skill">3. Inverse reconstruction skill</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sensitivity">4. Sensitivity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="model-validation">
+<h1>Model validation<a class="headerlink" href="#model-validation" title="Link to this heading">#</a></h1>
+<p>How well does a TEXAS calibration fit, and how do we know the generalized-logistic Bayesian model improves on existing TEX₈₆ calibrations? This page summarizes the validation reported in the manuscript (Rattanasriampaipong et al., 2026, <em>Paleoceanography and Paleoclimatology</em>); the analysis itself, with every figure, is <code class="docutils literal notranslate"><span class="pre">notebooks/manuscripts/SI_code02_t0shift_TEXAS_analysis.ipynb</span></code>. Every number below is quoted from the revised manuscript (under review) and can be recomputed from the archived posteriors without refitting.</p>
+<p>Validation rests on four complementary checks:</p>
+<ol class="arabic simple">
+<li><p><strong>Forward calibration performance</strong> — how accurately the curve reproduces the observed proxy (R², RMSE in Scaled RI units).</p></li>
+<li><p><strong>Residual diagnostics</strong> — whether any <em>structure</em> remains in the residuals, against temperature and on a map.</p></li>
+<li><p><strong>Inverse reconstruction skill</strong> — how well the calibration recovers modern SST from the coretop proxy, globally and by ocean basin, against BAYSPAR and the linear and exponential TEX₈₆ calibrations.</p></li>
+<li><p><strong>Sensitivity</strong> — to the proxy definition and to the sampler budget.</p></li>
+</ol>
+<p>All of the coretop metrics are <strong>in-sample</strong>: they are computed on the gridded compilation the calibration was estimated from (1,518 cells), and the manuscript says so. The culture and mesocosm data constrain the warm end that the coretops never reach.</p>
+<hr class="docutils" />
+<section id="forward-calibration-performance">
+<h2>1. Forward calibration performance<a class="headerlink" href="#forward-calibration-performance" title="Link to this heading">#</a></h2>
+<p>Scaled RI is predicted from temperature (and, in the bottom layer, from the two nonthermal predictors), and the posterior-median prediction is compared with the observation.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Fit</p></th>
+<th class="head"><p>Data</p></th>
+<th class="head text-right"><p>R²_fwd</p></th>
+<th class="head text-right"><p>RMSE_fwd (Scaled RI)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Linear</p></td>
+<td><p>global calibration dataset</p></td>
+<td class="text-right"><p>0.70</p></td>
+<td class="text-right"><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p>Exponential (log₁₀)</p></td>
+<td><p>global calibration dataset</p></td>
+<td class="text-right"><p>0.72</p></td>
+<td class="text-right"><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p>Top layer (<code class="docutils literal notranslate"><span class="pre">tx.GCDU.cul.sri03.p0</span></code>)</p></td>
+<td><p>culture + mesocosm</p></td>
+<td class="text-right"><p>0.72</p></td>
+<td class="text-right"><p>0.092</p></td>
+</tr>
+<tr class="row-odd"><td><p>Bottom layer, temperature only (<code class="docutils literal notranslate"><span class="pre">tx.GHPU.sst.sri03.p0</span></code>)</p></td>
+<td><p>1,518 coretop cells</p></td>
+<td class="text-right"><p>0.75</p></td>
+<td class="text-right"><p>0.058</p></td>
+</tr>
+<tr class="row-even"><td><p>Bottom layer, T + G₂/₃ (<code class="docutils literal notranslate"><span class="pre">tx.GHEB.sst.sri03.G23</span></code>)</p></td>
+<td><p>1,518 coretop cells</p></td>
+<td class="text-right"><p>0.77</p></td>
+<td class="text-right"><p>0.054</p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Bottom layer, T + G₂/₃ + NO₃</strong> (<code class="docutils literal notranslate"><span class="pre">tx.GHEB.sst.sri03.G23-N1p0</span></code>, the published calibration)</p></td>
+<td><p>1,518 coretop cells</p></td>
+<td class="text-right"><p><strong>0.80</strong></p></td>
+<td class="text-right"><p><strong>0.051</strong></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p><em>Manuscript Fig. 5d–f (functional forms), Fig. 6 (top layer), Fig. 7 (bottom layer) and Fig. S13 (all configurations).</em></p>
+<p>The sigmoid’s R² is only slightly above the linear and exponential fits; what sets it apart is the residual structure (next section). Adding the nonthermal predictors raises R²_fwd from 0.75 to 0.80 and lowers RMSE from 0.058 to 0.051.</p>
+<p>The published SST calibration’s parameters (posterior median ± SD):</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head text-right"><p>T₀ (°C)</p></th>
+<th class="head text-right"><p>b</p></th>
+<th class="head text-right"><p>k</p></th>
+<th class="head text-right"><p>ν</p></th>
+<th class="head text-right"><p>γ_{G₂/₃} (°C per unit)</p></th>
+<th class="head text-right"><p>γ_{NO₃} (°C per log₁₀ unit)</p></th>
+<th class="head text-right"><p>σ_crtp</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td class="text-right"><p>34.8 ± 0.7</p></td>
+<td class="text-right"><p>0.412 ± 0.008</p></td>
+<td class="text-right"><p>0.28 ± 0.04</p></td>
+<td class="text-right"><p>4.0 ± 0.7</p></td>
+<td class="text-right"><p>0.63 ± 0.04</p></td>
+<td class="text-right"><p>2.79 ± 0.24</p></td>
+<td class="text-right"><p>0.0391 ± 0.0011</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Both γ coefficients are resolved away from zero with essentially full posterior probability. σ_crtp is pure process noise: the per-site analytical error (σ_meas = 0.03, the TEX₈₆ interlaboratory reproducibility) is carried separately and combined in quadrature, so the implied total spread √(0.03² + 0.039²) ≈ 0.049 matches the realized RMSE of 0.051. The prior scale for σ_crtp is set by the thermal-only fit’s R² (≈ 0.75) — this is the only place that quantity enters the model.</p>
+<p>You can reproduce a prediction-versus-observation comparison for any cached posterior with the public API:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">TEXAS</span><span class="w"> </span><span class="kn">import</span> <span class="n">predict_proxy_from_T</span>
+
+<span class="n">pred</span> <span class="o">=</span> <span class="n">predict_proxy_from_T</span><span class="p">(</span>
+    <span class="n">temperatures</span><span class="o">=</span><span class="n">coretop_df</span><span class="p">[</span><span class="s2">"SST"</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+    <span class="n">posterior</span><span class="o">=</span><span class="s2">"tx.GHPU.sst.sri03.p0"</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">rmse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">coretop_df</span><span class="p">[</span><span class="s2">"scaledRI_cren3"</span><span class="p">]</span> <span class="o">-</span> <span class="n">pred</span><span class="p">[</span><span class="s2">"p50"</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="residual-diagnostics">
+<h2>2. Residual diagnostics<a class="headerlink" href="#residual-diagnostics" title="Link to this heading">#</a></h2>
+<p>A lower RMSE is necessary but not sufficient: a good calibration should leave <strong>no systematic structure</strong> in its residuals.</p>
+<ul class="simple">
+<li><p><strong>Against temperature</strong> (Fig. 5d–f). The linear and exponential fits show pronounced structure at the warm end, where the proxy saturates; the sigmoid’s residuals show none across the full range.</p></li>
+<li><p><strong>Spatially</strong> (Fig. 8, Figs. S13, S14, S16). Residuals are kriged onto a map with <code class="docutils literal notranslate"><span class="pre">TEXAS.plotting.plot_residual_maps</span></code>. The linear and TEX₈₆ᴴ calibrations underpredict in polar waters and the Red Sea; BAYSPAR removes most of that but keeps an Arctic residual, because coretops above 70°N were excluded from its training set. The TEXAS univariate model already homogenizes the high latitudes; the nonthermal predictors then remove the Mediterranean and Red Sea warm biases (Red Sea inverse RMSE 6.9 → 2.2 °C). Fig. S16 shows which predictor acts where: G₂/₃ in the tropical Atlantic and subtropical Pacific gyres, NO₃ in the Red Sea and Mediterranean. Kriging six panels takes minutes, so the grids are cached under <code class="docutils literal notranslate"><span class="pre">data/cache/TEXAS_kriged_grids_cache/</span></code>; pass <code class="docutils literal notranslate"><span class="pre">recompute='auto'</span></code> to build a missing grid or <code class="docutils literal notranslate"><span class="pre">recompute=True</span></code> to re-krige.</p></li>
+</ul>
+<p>The attenuation-bias check behind the errors-in-variables treatment (OLS versus ODR slopes of the residuals against each predictor; Text S2, Fig. S11) is in <code class="docutils literal notranslate"><span class="pre">SI_code01_t0shift_variance_partitioning.ipynb</span></code>.</p>
+</section>
+<hr class="docutils" />
+<section id="inverse-reconstruction-skill">
+<h2>3. Inverse reconstruction skill<a class="headerlink" href="#inverse-reconstruction-skill" title="Link to this heading">#</a></h2>
+<p>Each coretop’s SST is reconstructed from its proxy values with a diffuse prior (<code class="docutils literal notranslate"><span class="pre">prior_mu_t</span></code> = the modern WOA23 SST at the site, <code class="docutils literal notranslate"><span class="pre">prior_sigma_t</span></code> = 10 °C) and compared with the observed SST. Global metrics, from Fig. 8:</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Calibration</p></th>
+<th class="head text-right"><p>R²_invT</p></th>
+<th class="head text-right"><p>RMSE_invT (°C)</p></th>
+<th class="head text-right"><p>median σ (°C)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Linear (Schouten et al., 2002)</p></td>
+<td class="text-right"><p>0.74</p></td>
+<td class="text-right"><p>5.3</p></td>
+<td class="text-right"><p>—</p></td>
+</tr>
+<tr class="row-odd"><td><p>TEX₈₆ᴴ (Kim et al., 2010)</p></td>
+<td class="text-right"><p>0.68</p></td>
+<td class="text-right"><p>5.9</p></td>
+<td class="text-right"><p>—</p></td>
+</tr>
+<tr class="row-even"><td><p>BAYSPAR (Tierney &amp; Tingley, 2014)</p></td>
+<td class="text-right"><p>0.83</p></td>
+<td class="text-right"><p>4.3</p></td>
+<td class="text-right"><p>3.3</p></td>
+</tr>
+<tr class="row-odd"><td><p>TEXAS, temperature only</p></td>
+<td class="text-right"><p><strong>0.86</strong></p></td>
+<td class="text-right"><p><strong>3.9</strong></p></td>
+<td class="text-right"><p>5.1</p></td>
+</tr>
+<tr class="row-even"><td><p>TEXAS, T + G₂/₃</p></td>
+<td class="text-right"><p>0.84</p></td>
+<td class="text-right"><p>4.2</p></td>
+<td class="text-right"><p>3.9</p></td>
+</tr>
+<tr class="row-odd"><td><p>TEXAS, T + G₂/₃ + NO₃</p></td>
+<td class="text-right"><p>0.82</p></td>
+<td class="text-right"><p>4.3</p></td>
+<td class="text-right"><p>3.8</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Two things to read from that table:</p>
+<ul class="simple">
+<li><p><strong>Adding predictors lowers forward error but not inverse error.</strong> Variance the temperature-only model assigns to T is redistributed among T, G₂/₃ and NO₃, and the predictors’ own measurement uncertainty propagates into the inverse. The full model’s global RMSE equals BAYSPAR’s and stays below the linear and exponential calibrations.</p></li>
+<li><p><strong>The posterior width tells the opposite story.</strong> The median 1σ half-width falls from 5.1 °C (temperature only) to 3.8 °C (full model); excluding sites poleward of 60° brings TEXAS and BAYSPAR to the same 3.1 °C (Fig. 9). The remaining high-latitude width is the sigmoid’s lower asymptote: with σ_meas = 0.03, inverse uncertainty exceeds ±5 °C below 7.1 °C and above 40.9 °C (Fig. 7d).</p></li>
+</ul>
+<p><strong>By ocean basin</strong> (Fig. S17; the 21 Natural Earth regions with ≥ 20 cells, 1,286 of 1,518 sites): a TEXAS configuration has the lowest regional RMSE in 12 of 21 regions, BAYSPAR in 7, the exponential calibration in 2. The full TEXAS model’s regional RMSE spans 2.1–5.7 °C against 1.4–9.1 °C for BAYSPAR, 2.1–9.7 °C linear and 1.3–12.7 °C exponential, and the standard deviation of regional RMSE across the 21 regions (1.1–1.2 °C for the three TEXAS configurations) is about half BAYSPAR’s (2.2 °C). That comparison is conservative for TEXAS, which uses one global calibration where BAYSPAR’s coefficients vary by region.</p>
+<p>Downcore applications with full posterior uncertainty are in <code class="docutils literal notranslate"><span class="pre">SI_code03_paleo_showcases.ipynb</span></code> (manuscript Section 8).</p>
+</section>
+<hr class="docutils" />
+<section id="sensitivity">
+<h2>4. Sensitivity<a class="headerlink" href="#sensitivity" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p><strong>Proxy definition</strong> (Fig. S12). Refitting with crenarchaeol counted as 4 or 5 rings instead of 3 moves none of the four response parameters outside its 68 % interval (T₀ = 34.8, 35.4, 35.7 °C) and leaves σ_crtp at 0.0391; R²_fwd falls monotonically from 0.803 to 0.785 and 0.772, which is why Scaled RI₀₋₃ is adopted. γ_{G₂/₃} is the sensitive coefficient (+20.5 % across conventions), so users of another ring convention should refit rather than transfer it.</p></li>
+<li><p><strong>Sampler budget</strong> (Text S3, Figs. S18–S19; the <a class="reference internal" href="sampler_budget.html"><span class="std std-doc">sampler budget</span></a> page). Every forward budget that clears the convergence gates agrees with a long reference run to within 0.07 SD for every parameter.</p></li>
+</ul>
+</section>
+<hr class="docutils" />
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Kim, J.-H., et al. (2010). New indices and calibrations derived from the distribution of crenarchaeal isoprenoid tetraether lipids. <em>GCA</em>, 74, 4639–4654.</p></li>
+<li><p>Tierney, J. E., &amp; Tingley, M. P. (2014). A Bayesian, spatially-varying calibration model for the TEX₈₆ proxy. <em>GCA</em>, 127, 83–106.</p></li>
+<li><p>Schouten, S., Hopmans, E. C., Schefuß, E., &amp; Sinninghe Damsté, J. S. (2002). Distributional variations in marine crenarchaeotal membrane lipids. <em>EPSL</em>, 204, 265–274.</p></li>
+</ul>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./."
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="calibration_curve_explorer.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">Calibration curve explorer</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="sampler_budget.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Sampler budget</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item"><div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav id="pst-page-toc-nav" class="page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="pst-show_toc_level nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#forward-calibration-performance">1. Forward calibration performance</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#residual-diagnostics">2. Residual diagnostics</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inverse-reconstruction-skill">3. Inverse reconstruction skill</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#sensitivity">4. Sensitivity</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#references">References</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Ronnakrit Rattanasriampaipong
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=55c26ed414f5f8a31ebb"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=55c26ed414f5f8a31ebb"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

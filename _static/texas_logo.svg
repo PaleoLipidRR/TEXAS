@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="340" height="72" viewBox="0 0 340 72" role="img" aria-label="TEXAS">
+  <title>TEXAS</title>
+  <!-- Colorblock wordmark recreated from the AGU25 PP33D-1102 poster -->
+  <g font-family="'Helvetica Neue', Arial, sans-serif" font-weight="800" font-size="46" text-anchor="middle">
+    <rect x="0"   y="0" width="64" height="72" rx="6" fill="#A8383B"/>
+    <text x="32"  y="52" fill="#ffffff">T</text>
+    <rect x="69"  y="0" width="64" height="72" rx="6" fill="#D29A33"/>
+    <text x="101" y="52" fill="#ffffff">E</text>
+    <rect x="138" y="0" width="64" height="72" rx="6" fill="#4E7390"/>
+    <text x="170" y="52" fill="#ffffff">X</text>
+    <rect x="207" y="0" width="64" height="72" rx="6" fill="#7FA9C2"/>
+    <text x="239" y="52" fill="#ffffff">A</text>
+    <rect x="276" y="0" width="64" height="72" rx="6" fill="#2E4A55"/>
+    <text x="308" y="52" fill="#ffffff">S</text>
+  </g>
+</svg>

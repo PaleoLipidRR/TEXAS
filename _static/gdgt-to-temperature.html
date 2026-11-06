@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>From GDGTs to sea temperature</title>
+<style>
+:root {
+  color-scheme: light;
+  --ground: #F3F6F6;
+  --surface: #FBFCFC;
+  --ink: #0F1B1E;
+  --ink-2: #45565A;
+  --muted: #74858A;
+  --hair: #DCE3E4;
+  --axis: #BCC7C9;
+  --accent: #0D5C63;
+  --accent-wash: rgba(13, 92, 99, 0.09);
+  --grid: #2a78d6;
+  --stan: #eb6834;
+  --cold: #1baf7a;
+  --grid-wash: rgba(42, 120, 214, 0.12);
+  --cold-wash: rgba(27, 175, 122, 0.22);
+  --shadow: 0 1px 2px rgba(15, 27, 30, 0.06), 0 8px 24px rgba(15, 27, 30, 0.05);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #0E1416;
+    --surface: #141B1E;
+    --ink: #EAF1F2;
+    --ink-2: #B6C4C6;
+    --muted: #7F9093;
+    --hair: #243034;
+    --axis: #3A4A50;
+    --accent: #5FC0C7;
+    --accent-wash: rgba(95, 192, 199, 0.12);
+    --grid: #3987e5;
+    --stan: #d95926;
+    --cold: #199e70;
+    --grid-wash: rgba(57, 135, 229, 0.16);
+    --cold-wash: rgba(25, 158, 112, 0.28);
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #0E1416;
+  --surface: #141B1E;
+  --ink: #EAF1F2;
+  --ink-2: #B6C4C6;
+  --muted: #7F9093;
+  --hair: #243034;
+  --axis: #3A4A50;
+  --accent: #5FC0C7;
+  --accent-wash: rgba(95, 192, 199, 0.12);
+  --grid: #3987e5;
+  --stan: #d95926;
+  --cold: #199e70;
+  --grid-wash: rgba(57, 135, 229, 0.16);
+  --cold-wash: rgba(25, 158, 112, 0.28);
+  --shadow: none;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font: 400 17px/1.6 "Source Sans 3", "Source Sans Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+  padding-inline: 20px;
+  padding-block: 0 72px;
+}
+.page { max-width: 920px; margin: 0 auto; }
+.prose { max-width: none; }   /* text runs as wide as the panels */
+h1, h2, h3 { font-family: "Newsreader", "Iowan Old Style", Georgia, serif; text-wrap: balance; color: var(--ink); }
+h1 { font-weight: 600; font-size: clamp(2.3rem, 5.2vw, 3.4rem); line-height: 1.04; letter-spacing: -0.015em; margin: 0; }
+h2 { font-weight: 600; font-size: 1.75rem; line-height: 1.15; margin: 0; }
+h3 { font-weight: 500; font-size: 1.2rem; margin: 0; }
+p { margin: 0; }
+.stack { display: grid; gap: 14px; }
+.mono, .eq, .num { font-family: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace; }
+.num { font-variant-numeric: tabular-nums; }
+a { color: var(--accent); }
+.label { font-size: 0.74rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+
+header.masthead { padding-block: 56px 28px; display: grid; gap: 18px; border-bottom: 1px solid var(--hair); }
+.deck { font-size: 1.22rem; line-height: 1.5; color: var(--ink-2); }
+.specline { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 0.86rem; color: var(--ink-2); }
+.specline span b { font-weight: 600; color: var(--ink); }
+
+/* the equation card: the one lifted object type on the page */
+.eq {
+  background: var(--surface);
+  border: 1px solid var(--hair);
+  border-radius: 6px;
+  padding: 14px 18px;
+  font-size: 0.93rem;
+  line-height: 1.9;
+  overflow-x: auto;
+  white-space: nowrap;
+  color: var(--ink);
+}
+.eq .note { color: var(--muted); font-family: "Source Sans 3", system-ui, sans-serif; font-size: 0.86rem; white-space: normal; display: block; line-height: 1.45; margin-top: 4px; }
+.eq i { font-style: italic; }
+details.maths { margin: 0; }
+details.maths > summary { cursor: pointer; font-size: 0.86rem; color: var(--accent); font-weight: 600; list-style: none; padding: 2px 0; }
+details.maths > summary::-webkit-details-marker { display: none; }
+details.maths > summary::before { content: "▸ "; }
+details.maths[open] > summary::before { content: "▾ "; }
+details.maths > .eq { margin-top: 6px; }
+.part { margin: 34px 0 -6px; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); }
+.part b { display: block; font-family: "Newsreader", Georgia, serif; font-size: 1.35rem; letter-spacing: 0; text-transform: none; color: var(--ink); margin-top: 2px; }
+sub, sup { font-size: 0.72em; }
+
+/* sample picker */
+.picker-wrap { position: sticky; top: 0; z-index: 5; background: var(--ground); padding-block: 14px; border-bottom: 1px solid var(--hair); }
+.picker { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.picker button {
+  font: inherit; text-align: left; cursor: pointer;
+  background: var(--surface); color: var(--ink);
+  border: 1px solid var(--hair); border-radius: 6px;
+  padding: 10px 12px; display: grid; gap: 2px;
+}
+.picker button:hover { border-color: var(--axis); }
+.picker button[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-wash); }
+.picker .role { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+.picker .what { font-weight: 600; font-size: 0.98rem; }
+.picker .meta { font-size: 0.8rem; color: var(--ink-2); font-family: "IBM Plex Mono", ui-monospace, monospace; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+section.step { padding-block: 46px 6px; display: grid; gap: 18px; }
+.step-head { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; align-items: baseline; }
+.step-no { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.9rem; color: var(--accent); border: 1px solid var(--accent); border-radius: 999px; padding: 1px 9px; }
+.fig { background: var(--surface); border: 1px solid var(--hair); border-radius: 8px; padding: 14px 14px 8px; box-shadow: var(--shadow); display: grid; gap: 8px; }
+.fig svg { width: 100%; height: auto; display: block; overflow: visible; }
+.fig figcaption { font-size: 0.86rem; color: var(--ink-2); line-height: 1.45; padding: 0 4px 6px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.84rem; color: var(--ink-2); padding: 0 4px; }
+.legend i { display: inline-block; width: 18px; height: 2px; vertical-align: middle; margin-right: 6px; border-radius: 2px; }
+.legend i.area { height: 10px; border-radius: 2px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+
+svg text { fill: var(--muted); font: 12px "Source Sans 3", system-ui, sans-serif; }
+svg .tick line, svg .gridline { stroke: var(--hair); stroke-width: 1; }
+svg .axis { stroke: var(--axis); stroke-width: 1; }
+svg .lbl { fill: var(--ink-2); font-size: 12.5px; }
+svg .lbl-strong { fill: var(--ink); font-size: 13px; font-weight: 600; }
+
+/* readouts */
+.readout { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 22px; padding: 4px 4px 2px; }
+.readout div { display: grid; gap: 0; }
+.readout .v { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 1.28rem; color: var(--ink); }
+.readout .k { font-size: 0.8rem; color: var(--ink-2); }
+.bigp { font-family: "Newsreader", Georgia, serif; font-weight: 600; font-size: 2.6rem; line-height: 1; color: var(--ink); }
+
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 0 4px; font-size: 0.9rem; color: var(--ink-2); }
+.controls input[type="range"] { flex: 1 1 220px; accent-color: var(--accent); }
+.seg { display: inline-flex; border: 1px solid var(--hair); border-radius: 6px; overflow: hidden; }
+.seg button { font: inherit; font-size: 0.9rem; padding: 5px 14px; border: 0; background: var(--surface); color: var(--ink-2); cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--hair); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--surface); }
+
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+.tablewrap { overflow-x: auto; }
+th, td { text-align: right; padding: 7px 10px; border-bottom: 1px solid var(--hair); font-variant-numeric: tabular-nums; }
+th:first-child, td:first-child { text-align: left; }
+th { font-size: 0.74rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+td { font-family: "IBM Plex Mono", ui-monospace, monospace; color: var(--ink); }
+td:first-child { font-family: "Source Sans 3", system-ui, sans-serif; color: var(--ink-2); }
+
+.callout { border-left: 3px solid var(--accent); padding: 4px 0 4px 16px; color: var(--ink-2); }
+.callout b { color: var(--ink); }
+
+#tip {
+  position: fixed; pointer-events: none; z-index: 20; display: none;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--axis); border-radius: 6px;
+  padding: 7px 10px; font-size: 0.82rem; line-height: 1.35; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14); max-width: 260px;
+}
+#tip .tv { font-family: "IBM Plex Mono", ui-monospace, monospace; font-weight: 500; }
+#tip .tk { color: var(--ink-2); }
+
+dl.gloss { display: grid; grid-template-columns: max-content 1fr; gap: 8px 18px; margin: 0; }
+dl.gloss dt { font-family: "IBM Plex Mono", ui-monospace, monospace; color: var(--ink); }
+dl.gloss dd { margin: 0; color: var(--ink-2); }
+footer { margin-top: 56px; padding-top: 18px; border-top: 1px solid var(--hair); font-size: 0.84rem; color: var(--muted); display: grid; gap: 6px; }
+
+@media (max-width: 680px) {
+  body { font-size: 16px; padding-inline: 16px; }
+  .picker { grid-template-columns: 1fr; }
+  .picker button { grid-template-columns: auto 1fr; gap: 0 10px; }
+  .picker .meta { grid-column: 1 / -1; }
+  .two { grid-template-columns: 1fr; }
+  .step-head { grid-template-columns: 1fr; }
+  .step-no { justify-self: start; }
+  .picker-wrap { position: static; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <div class="label">TEXAS · how one GDGT measurement becomes a sea-surface temperature</div>
+    <h1>From GDGTs to sea temperature</h1>
+    <p class="deck">A sediment sample gives us one number from its GDGT lipids, the <b>Scaled Ring Index</b> (Scaled&nbsp;RI): how many rings the archaea built into their membranes. TEXAS turns it into sea-surface temperature by asking a simple question, <em>which temperatures could have produced this ring index, and how likely is each?</em> The answer is not one number but a range of temperatures with their odds. This page builds that range step by step, for a sample from the published case studies or for values you set yourself, and shows how the computer does it.</p>
+    <p class="deck" style="font-size:1rem">The steps run in four parts: what the calibration says (1–2); from one measurement to a range of temperatures (3–5); how the computer finds that range (6–9); and where the proxy runs out of range and what a shortcut leaves out (10–12). Each equation is folded away under "the maths"; open it if you want it. The technical names for every idea are listed at the end. Everything runs in your browser, so nothing is sent anywhere and nothing needs installing.</p>
+    <div class="specline" id="specline"></div>
+  </header>
+
+  <nav class="toc" id="contents" aria-label="Contents"><details open><summary>Contents</summary><ol id="tocList"></ol></details></nav>
+  <a class="toc-top" href="#contents">Contents ↑</a>
+  <style>
+    nav.toc { margin: 18px 0 6px; padding: 12px 16px; border: 1px solid var(--hair); border-radius: 8px; background: var(--surface); font-size: 0.92rem; line-height: 1.5; }
+    nav.toc summary { cursor: pointer; font-weight: 600; color: var(--ink-2); }
+    nav.toc > details > ol { margin: 8px 0 2px; padding: 0; list-style: none; columns: 2 300px; column-gap: 32px; }
+    nav.toc li.grp { break-inside: avoid; margin: 4px 0 8px; }
+    nav.toc li.grp > span { display: block; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.74rem; letter-spacing: 0.05em; text-transform: uppercase; color: var(--accent); }
+    nav.toc li.grp > span a { color: inherit; }
+    nav.toc ol ol { margin: 2px 0 0; padding: 0; list-style: none; }
+    nav.toc ol ol li { margin: 1px 0; padding-left: 2.1em; text-indent: -2.1em; }
+    nav.toc .n { display: inline-block; width: 2.1em; text-indent: 0; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.8rem; color: var(--muted); }
+    nav.toc a, a.toc-top { text-decoration: none; color: var(--ink); }
+    nav.toc a:hover, a.toc-top:hover { color: var(--accent); text-decoration: underline; }
+    a.toc-top { position: fixed; right: 14px; bottom: 14px; z-index: 30; padding: 5px 11px; font-size: 0.78rem; border: 1px solid var(--hair); border-radius: 999px; background: var(--surface); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12); }
+    section.step, .part, nav.toc { scroll-margin-top: 150px; }   /* clear the sticky sample picker */
+    @media print { a.toc-top { display: none; } }
+    .picker { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+    .custom { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; margin-top: 10px; padding: 10px 12px; background: var(--surface); border: 1px solid var(--accent); border-radius: 6px; }
+    .custom[hidden] { display: none !important; }
+    .custom-field { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; color: var(--ink-2); }
+    .custom-field label { font-weight: 600; color: var(--ink); white-space: nowrap; }
+    .custom-field input[type="range"] { width: 180px; accent-color: var(--accent); }
+    .custom-field input[type="number"] { width: 5.5em; font: 500 0.9rem "IBM Plex Mono", ui-monospace, monospace; color: var(--ink); background: var(--ground); border: 1px solid var(--hair); border-radius: 4px; padding: 3px 6px; }
+    .custom-note { font-size: 0.82rem; color: var(--muted); flex-basis: 100%; }
+    table.terms th, table.terms td { text-align: left; font-family: "Source Sans 3", system-ui, sans-serif; color: var(--ink-2); vertical-align: top; }
+    table.terms td:nth-child(2) { color: var(--ink); font-weight: 600; }
+    .eq .line { display: block; }
+    pre.stancode { margin: 0 0 8px; padding: 10px 12px; max-height: 520px; overflow: auto; background: var(--ground); border: 1px solid var(--hair); border-radius: 6px; font: 0.78rem/1.5 "IBM Plex Mono", ui-monospace, monospace; color: var(--ink-2); }
+    pre.stancode .ln { display: block; white-space: pre; }
+    pre.stancode .cm { color: var(--muted); }
+    pre.stancode .kw { color: var(--accent); font-weight: 600; }
+    pre.stancode .hl { color: var(--ink); border-radius: 3px; }
+    pre.stancode .hl.s3, .sk.s3 { background: rgba(42, 120, 214, 0.16); }
+    pre.stancode .hl.s4, .sk.s4 { background: rgba(235, 104, 52, 0.18); }
+    pre.stancode .hl.s5, .sk.s5 { background: rgba(27, 175, 122, 0.20); }
+    pre.stancode .tag { float: right; font-family: "Source Sans 3", system-ui, sans-serif; font-size: 0.74rem; color: var(--ink-2); }
+    .sk { padding: 0 5px; border-radius: 3px; color: var(--ink); }
+    .custom button.reset { font: inherit; font-size: 0.85rem; padding: 4px 12px; border: 1px solid var(--hair); border-radius: 4px; background: var(--ground); color: var(--ink); cursor: pointer; }
+    .custom button.reset:hover { border-color: var(--accent); }
+        @media (max-width: 680px) { .custom-field input[type="range"] { width: 130px; } }
+  </style>
+  <div class="picker-wrap">
+    <div class="picker" id="picker" role="group" aria-label="Choose a sample"></div>
+    <div class="custom" id="customCard" hidden>
+      <div class="custom-field"><label for="customRi">Scaled RI</label><input id="customRi" type="range" min="0.10" max="0.99" step="0.005" value="0.60"><input id="customRiNum" type="number" min="0.10" max="0.99" step="0.005" value="0.60" aria-label="Scaled RI value"></div>
+      <div class="custom-field"><label for="customG23">GDGT-2/3</label><input id="customG23" type="number" min="0" max="100" step="0.1" value="5"></div>
+      <div class="custom-field"><label for="customNo3">NO₃ (μmol/L)</label><input id="customNo3" type="number" min="0" max="40" step="0.01" value="10"></div>
+      <div class="custom-field"><label for="customMu">Prior mean μ<sub>T</sub> (°C)</label><input id="customMu" type="number" min="-5" max="50" step="1" value="20"></div>
+      <div class="custom-field"><label for="customSd">Prior SD σ<sub>T</sub> (°C)</label><input id="customSd" type="number" min="2" max="20" step="1" value="10"></div>
+      <button type="button" class="reset" id="customReset">Reset to defaults</button>
+      <div class="custom-note" id="customNote"></div>
+    </div>
+  </div>
+
+  <div class="part">Part 1<b>What the calibration says</b></div>
+  <section class="step" id="s1">
+    <div class="step-head"><span class="step-no">1</span><h2>Ring index rises with temperature, along an S-curve</h2></div>
+    <div class="prose stack">
+      <p>Marine archaea add more rings to their GDGT membrane lipids in warmer water. That is the idea behind TEX₈₆ too. TEXAS uses the <b>Scaled Ring Index</b>, and learns how it depends on temperature in two layers: culture and mesocosm experiments set the shape of the response, and <b>coretops</b>, modern seafloor sediment under a known ocean, refine it.</p>
+      <p>Plotted against sea temperature, the ring index follows an <b>S-curve</b>. Between its two ends it is steep, so a small change in ring index means a clear change in temperature. At the cold end and the warm end it flattens: very different temperatures give almost the same ring index. Keep that in mind, because it is why cold and very warm samples come out uncertain later on. The slope changes all the way along the curve, so there is no single "degrees per unit of ring index" to quote.</p>
+      <p>Two other measured things slide the curve sideways: the GDGT-2/GDGT-3 ratio (which tracks the mix of shallow and deep archaeal ecotypes) and, at low concentrations, nitrate. They do not change its shape, only where along the temperature axis it sits. This is the <b>T₀-shift parameterization</b>, and because the shift happens inside the curve, the predicted ring index always stays between the curve's floor and 1.</p>
+    </div>
+    <details class="maths"><summary>The maths</summary>
+    <div class="eq">RI(<i>T</i>) = <i>b</i> + (1 − <i>b</i>) ÷ [ 1 + e<sup>−<i>k</i>·(<i>T</i> − <i>T</i><sub>0</sub>′)</sup> ]<sup>1/<i>ν</i></sup>
+      <span class="note"><b>b</b> is the floor the curve never drops below. <b>T₀</b> is the curve's location parameter: it sets where the curve sits on the temperature axis. <b>k</b> sets how steep it is. <b>ν</b> tilts the S so the two ends need not be mirror images. This is a generalized logistic (Richards) curve. T₀ is not the steepest point unless ν = 1: the steepest response is at T₀′ − ln(ν)/k, several degrees below T₀′.</span></div>
+    <div class="eq"><i>T</i><sub>0</sub>′ = <i>T</i><sub>0</sub> + γ<sub>G23</sub> × (GDGT-2/3) + γ<sub>NO₃</sub> × log<sub>10</sub>(NO₃)
+      <span class="note">The nitrate term counts only when NO₃ is below <span data-cut></span> μmol/L. Above that it is zero, which is why setting NO₃ to 10 switches the correction off.</span></div>
+    </details>
+    <figure class="fig" style="margin:0">
+      <svg id="f1" viewBox="0 0 880 380" role="img" aria-label="Calibration curves with the measured Scaled RI"></svg>
+      <div class="legend"><span><i style="background:var(--grid);opacity:.45"></i>60 of the <span data-m></span> calibration curves</span><span><i style="background:var(--grid)"></i>median curve</span><span><i style="background:var(--ink-2)"></i>this sample's measured RI</span></div>
+      <figcaption id="c1"></figcaption>
+    </figure>
+    <div class="readout" id="r1"></div>
+  </section>
+
+  <section class="step" id="s2">
+    <div class="step-head"><span class="step-no">2</span><h2>Not one curve, but many</h2></div>
+    <div class="prose stack">
+      <p>The coretop data scatter, so they do not pin down one exact S-curve. Many slightly different curves fit them about equally well. TEXAS keeps a large collection of those plausible curves instead of picking one, and a reconstruction uses <span class="num" data-m></span> of them (the faint lines in the figure above show some). Where they fan apart, the calibration itself is uncertain.</p>
+      <p>Even the best curve does not go through every coretop: real samples sit above and below it, because of seasonality, the depth the archaea live at, bioturbation and local ecology. That typical scatter around a curve is called <b>σ</b>. So there are two kinds of uncertainty, and both end up in a sample's error bars: <b>which curve is right</b> (the fan of curves) and <b>how far a single sample can stray from its curve</b> (σ).</p>
+    </div>
+  </section>
+
+  <div class="part">Part 2<b>From one measurement to a range of temperatures</b></div>
+  <section class="step" id="s3">
+    <div class="step-head"><span class="step-no">3</span><h2>Test one guessed temperature against one curve</h2></div>
+    <div class="prose stack">
+      <p>Now turn the question around. We measured a ring index in an old sample and want the temperature. So guess one: <em>if the sea had been 15&nbsp;°C, what ring index would this curve predict?</em> Compare that with what was measured. If the prediction lands close to the measurement, 15&nbsp;°C is a plausible answer; if it misses by a lot, it is not.</p>
+      <p>"Close" is judged against σ, the scatter of real coretops. A miss of one σ is ordinary, a miss of three σ is rare. Each guess gets a <b>score</b> that is highest for a perfect match and falls off smoothly as the miss grows. Statisticians call this score the <b>likelihood</b> of that temperature. Move the slider to try different guesses.</p>
+    </div>
+    <details class="maths"><summary>The maths</summary>
+    <div class="eq">score = (1/σ) × exp[ −½ × (miss ÷ σ)<sup>2</sup> ]
+      <span class="note">Dividing the miss by σ asks how many scatter-widths off the guess is. Squaring makes big misses count far more than small ones, and the exponential turns the result into a bell-shaped score that peaks at a perfect match. The leading 1/σ lets tightly-fitted curves count more than loose ones.</span></div>
+    </details>
+    <figure class="fig" style="margin:0">
+      <div class="controls"><label for="tslider">Candidate temperature</label><input id="tslider" type="range" min="-20" max="45" step="0.5"><span class="num" id="tval"></span></div>
+      <div class="two">
+        <svg id="f3a" viewBox="0 0 430 300" role="img" aria-label="One curve, the candidate temperature and the miss"></svg>
+        <svg id="f3b" viewBox="0 0 430 300" role="img" aria-label="That curve's score at every temperature"></svg>
+      </div>
+      <div class="tablewrap"><table id="t3"></table></div>
+      <figcaption>Left: one calibration draw (the one closest to the median curve), the candidate temperature, and the miss. The shaded bands are that draw's own scatter, ±1σ and ±2σ around the curve. The dark segment on the measured-RI line marks the temperatures where the measurement sits inside ±2σ. Right: sweeping the candidate across every temperature traces that curve's score. The bell is tall exactly over that same window and falls away outside it, so its width is set by σ. It carries no calibration uncertainty yet: that is the spread <em>between</em> the curves, added in step 4.</figcaption>
+    </figure>
+  </section>
+
+  <section class="step" id="s4">
+    <div class="step-head"><span class="step-no">4</span><h2>Let every curve vote</h2></div>
+    <div class="prose stack">
+      <p>Step 3 used one curve. But we do not know which of the <span data-m></span> curves is right, so score the same guessed temperature against <em>every</em> curve and take the average. Each curve puts its peak at a slightly different temperature; averaging them gives one combined score curve, <b>L(<i>T</i>)</b>, that is wider wherever the calibration curves disagree. This is how uncertainty in the calibration itself reaches a sample's error bars.</p>
+      <p>Look at the cold or warm end of the S-curve: there the curves fan apart and flatten, so their scores spread over a wide range of temperatures, and the average is broad. In the steep part they agree, and the average is narrow.</p>
+    </div>
+    <details class="maths"><summary>The maths</summary>
+    <div class="eq">L(<i>T</i>) = (1 / <span data-m></span>) × Σ<sub>curves</sub> score<sub>m</sub>(<i>T</i>)
+      <span class="note">Averaging over the curves is called marginalization: the calibration uncertainty is "integrated out". L(<i>T</i>) is the marginal likelihood.</span></div>
+    </details>
+    <figure class="fig" style="margin:0">
+      <svg id="f4" viewBox="0 0 880 320" role="img" aria-label="Individual curve scores and their average"></svg>
+      <div class="legend"><span><i style="background:var(--grid);opacity:.35"></i>score from 40 individual curves</span><span><i style="background:var(--ink)"></i>average over all curves, L(T)</span></div>
+    </figure>
+  </section>
+
+  <section class="step" id="s5">
+    <div class="step-head"><span class="step-no">5</span><h2>Add a broad starting expectation, the prior</h2></div>
+    <div class="prose stack">
+      <p>You also tell TEXAS what temperature you would expect before looking at the proxy: a mean <b>μ<sub>T</sub></b> and a standard deviation <b>σ<sub>T</sub></b>, in °C. This is the <b>prior</b>. It is an expectation the reconstruction starts from, not a constraint on the answer, and a deliberately wide one is the right choice when little is known about the site. The examples here use the priors from the published case studies: 20&nbsp;°C for the glacial–interglacial sites, 5&nbsp;°C for Prydz Bay and 40&nbsp;°C for the mid-Cretaceous, all with σ<sub>T</sub> = 10&nbsp;°C. Choose "Set your own values" to change them and watch what moves.</p>
+      <p>Where the ring index is informative, on the steep part of the curve, the measurement decides the answer and the prior hardly matters. Where the measurement says little, at the flat cold and warm ends, the score curve from step 4 is broad and the prior has real influence. That is a warning sign rather than a feature, and step 11 shows how TEXAS reports it. Multiplying the score curve by the prior gives the <b>posterior</b>: the final odds of every temperature for this sample.</p>
+      <p>A prior is not optional here. Because the curve levels off at both ends, the score from step 4 never falls to zero as temperature runs to very cold or very warm values. Without a prior those plateaus go on forever and there is no well-defined median at all.</p>
+    </div>
+    <details class="maths"><summary>The maths</summary>
+    <div class="eq"><span class="line">prior(<i>T</i>) = exp[ −½ × ((<i>T</i> − μ<sub>T</sub>) ÷ σ<sub>T</sub>)<sup>2</sup> ]</span><span class="line">posterior(<i>T</i>) ∝ L(<i>T</i>) × prior(<i>T</i>)</span>
+      <span class="note">∝ means "proportional to". The height only matters relative to itself, so it is scaled later.</span></div>
+    </details>
+    <figure class="fig" style="margin:0">
+      <svg id="f5" viewBox="0 0 880 320" role="img" aria-label="Likelihood, prior and posterior"></svg>
+      <div class="legend"><span><i style="background:var(--ink-2)"></i>likelihood L(T)</span><span><i style="background:var(--muted)"></i>prior</span><span><i class="area" style="background:var(--grid-wash);box-shadow:inset 0 -2px 0 var(--grid)"></i>posterior</span></div>
+      <figcaption id="c5"></figcaption>
+    </figure>
+  </section>
+
+  <div class="part">Part 3<b>How the computer finds that range</b></div>
+  <section class="step" id="sstan">
+    <div class="step-head"><span class="step-no">6</span><h2>Steps 3–5, written as a program for Stan</h2></div>
+    <div class="prose stack">
+      <p>Steps 3–5 are the whole recipe: score a guessed temperature against every curve, average, multiply by the prior. TEXAS hands that recipe to <b>Stan</b>, a widely used program for this kind of statistics. You write down how plausible any answer is, and Stan works out the range of answers for you. Below is the actual program TEXAS runs (<span class="mono" id="stanFile"></span>); the colored lines are steps 3, 4 and 5.</p>
+      <p>You do not need to read it all. The useful points: the program is given the measured ring index, the prior's mean and the <span data-m></span> calibration curves, all fixed. It has <b>one unknown per sample</b>, that sample's temperature (<code>t_est</code>), and nothing else. Every sample in a core is worked out on its own, so a 200-sample record is 200 separate small problems run side by side.</p>
+      <p>With one unknown you could simply try every temperature, and this page does exactly that to draw its curves. Stan is used because the same tool and the same diagnostics carry over to the forward calibration, which has too many unknowns for that.</p>
+    </div>
+    <figure class="fig" style="margin:0">
+      <div class="controls"><div class="seg" role="group" aria-label="Comments"><button id="stanBare" aria-pressed="true">code only</button><button id="stanFull" aria-pressed="false">with its comments</button></div></div>
+      <pre class="stancode" id="stanCode"></pre>
+      <figcaption>Marked lines: <span class="sk s3">step 3</span> one curve's score, <span class="sk s4">step 4</span> the average over the draws, <span class="sk s5">step 5</span> the prior. Everything else is bookkeeping (the shift of T₀ from GDGT-2/3 and NO₃ is the second equation of step 1).</figcaption>
+    </figure>
+  </section>
+
+  <section class="step" id="shmc">
+    <div class="step-head"><span class="step-no">7</span><h2>How Stan explores: a ball rolling in a valley</h2></div>
+    <div class="prose stack">
+      <p>Stan does not try every temperature. Instead it builds a long <b>list of temperatures</b> for the sample, choosing each one so that plausible temperatures appear often and implausible ones rarely. Draw a histogram of the list and you get the shape of the answer from step 5. The 16th and 84th percentiles of the list are the error bars a paper would quote.</p>
+      <p>To build the list, picture the posterior from step 5 turned upside down: a <b>valley</b>, deepest at the most likely temperature, with walls rising toward temperatures the ring index rules out. For a sample on the steep part of the curve the valley is narrow and steep. For a cold sample where the S-curve has flattened, it is wide with a flat floor.</p>
+      <p>Stan puts a ball in the valley, gives it a <b>random kick</b>, and lets it roll for a while without friction. Where it ends up is the next temperature on the list. Then a new random kick, and so on. Rolling downhill makes the ball spend more time near the valley floor; the kicks let it climb the walls now and then. Over thousands of kicks, the ball visits each temperature in proportion to how plausible it is.</p>
+      <p>The computer cannot roll the ball smoothly; it moves it in <b>small time steps</b>. Small steps follow the valley faithfully. Steps that are too large overshoot the walls and the simulated ball flies off: Stan calls that a <b>divergence</b> and prints a warning, because the list can then no longer be trusted. Try it below on your sample: raise the step size until the path breaks away.</p>
+    </div>
+    <details class="maths"><summary>The maths</summary>
+    <div class="eq"><span class="line"><i>U</i>(<i>T</i>) = −log posterior(<i>T</i>)       <i>H</i> = <i>U</i>(<i>T</i>) + ½ <i>p</i>² / <i>m</i></span><span class="line">leapfrog: <i>p</i> ← <i>p</i> − ½ε ∂<i>U</i>/∂<i>T</i>;  <i>T</i> ← <i>T</i> + ε <i>p</i>/<i>m</i>;  <i>p</i> ← <i>p</i> − ½ε ∂<i>U</i>/∂<i>T</i></span>
+      <span class="note">The ball's height is the potential energy U, its kick the momentum p. The leapfrog steps simulate the motion with step size ε. If the simulation were exact, the total energy H would stay constant and every end point would be accepted; the small error it makes sets the acceptance probability, min(1, e<sup>−ΔH</sup>). m, the "mass" (Stan's metric), is learned during warm-up from the spread of the draws, so one step size suits the valley's width. This is Hamiltonian Monte Carlo (HMC), a Markov chain Monte Carlo method.</span></div>
+    </details>
+    <figure class="fig" style="margin:0">
+      <div class="controls"><span>step size ε</span><input type="range" id="hmcEps" min="-2" max="1" step="0.05" value="-0.4"><span class="num" id="hmcEpsV"></span><span>steps L</span><input type="range" id="hmcL" min="1" max="60" step="1" value="16" style="flex:0 1 140px"><span class="num" id="hmcLV"></span>
+        <div class="seg" role="group" aria-label="HMC"><button id="hmcGo">one trajectory</button><button id="hmcReset">from the median</button></div></div>
+      <div class="readout" id="rhmc"></div>
+      <div class="two"><svg id="fhmc" viewBox="0 0 430 300" role="img" aria-label="Potential energy with the trajectory"></svg><svg id="fhmc2" viewBox="0 0 430 300" role="img" aria-label="Phase space: temperature against momentum"></svg></div>
+      <div class="legend"><span><i style="background:var(--ink-2)"></i>the valley (low = plausible temperature)</span><span><i style="background:var(--stan)"></i>this roll of the ball</span><span><i style="background:var(--muted)"></i>temperatures already on the list</span></div>
+      <figcaption>Left: the valley for your sample and the ball's path, one dot per time step. Right: the same roll drawn as temperature against the ball's speed. With small steps the path closes into a tidy loop (the ball's energy is conserved, as it should be); with large steps it spirals outward, which is a divergence. "Step size" sets how big each time step is; "steps" sets how long the ball rolls.</figcaption>
+    </figure>
+  </section>
+
+  <section class="step" id="schains">
+    <div class="step-head"><span class="step-no">8</span><h2>Four independent runs, and how we know they worked</h2></div>
+    <div class="prose stack">
+      <p>Stan sets the step size and the rolling time for you. It rolls the ball until it starts to turn back on itself, which is where the name <b>No-U-Turn Sampler</b> (NUTS) comes from. The first stretch of each run is <b>warm-up</b>: Stan uses it to tune its step size to the valley, and throws those temperatures away, like discarding the first injections while an instrument stabilizes.</p>
+      <p>By default TEXAS runs <span data-ch></span> separate <b>chains</b>, four balls started from different random temperatures, each with <span data-wu></span> warm-up and <span data-sa></span> kept steps: <span data-nd></span> temperatures per sample. Below, that run happens live in your browser, on your sample, using a small NUTS written for this page rather than Stan itself. Three numbers say whether to trust it:</p>
+      <ul>
+        <li><b>R̂</b> ("R-hat") compares the four chains, like replicate analyses of one sample. Near 1.00 means they agree; Stan warns above 1.01.</li>
+        <li><b>Effective sample size</b> (ESS): neighboring temperatures on the list are not independent (the ball moves continuously), much as closely spaced samples in a core are not independent records. ESS says how many truly independent temperatures the list is worth.</li>
+        <li><b>Monte Carlo error</b> (MCSE): because the answer comes from a finite list, each percentile carries a little sampling noise. This is its size: about a tenth of a degree for the median on the steep part of the curve, and more in the tails and at the flat ends.</li>
+      </ul>
+    </div>
+    <figure class="fig" style="margin:0">
+      <div class="controls"><div class="seg" role="group" aria-label="Run"><button id="nutsRun">run again (new seed)</button></div><div class="seg" role="group" aria-label="Warm-up on the histogram"><button id="nutsWu" aria-pressed="true">warm-up shown</button><button id="nutsWuOff" aria-pressed="false">kept draws only</button></div><span id="nutsStatus" class="num"></span></div>
+      <div class="readout" id="rnuts"></div>
+      <svg id="ftrace" viewBox="0 0 880 260" role="img" aria-label="Trace of four chains"></svg>
+      <svg id="fhist" viewBox="0 0 880 260" role="img" aria-label="Histogram of the draws against the exact posterior"></svg>
+      <div class="legend"><span><i class="area" style="background:var(--accent-wash)"></i>warm-up (thrown away)</span><span><i style="background:var(--stan)"></i>the list of temperatures (histogram)</span><span><i style="background:var(--accent)"></i>warm-up draws (outline, thrown away)</span><span><i style="background:var(--grid)"></i>the posterior from step 5</span></div>
+      <div class="tablewrap"><table id="tnuts"></table></div>
+      <figcaption id="cnuts"></figcaption>
+    </figure>
+  </section>
+
+  <section class="step" id="s6">
+    <div class="step-head"><span class="step-no">9</span><h2>Reading a temperature off the answer</h2></div>
+    <div class="prose stack">
+      <p>To read temperatures off a posterior, add it up from cold to warm, scaled so the total is 100%. The temperature where this running total passes 50% is the <b>reported temperature</b> (p50, the median). Where it passes 16% and 84% are the edges of the <b>68% range</b>, the error bar the manuscript reports; 5% and 95% give the 90% range. Stan's percentiles, read from its list, land on the same marks.</p>
+      <p>The curve below is the running total of the posterior this page computes directly, at every 0.05&nbsp;°C. The diamonds are what the real package returned for the same sample with its default settings, so you can see the two agree.</p>
+    </div>
+    <details class="maths"><summary>The maths</summary>
+    <div class="eq"><span class="line">p50: running total = 50%</span><span class="line">68% range: 16% → 84%</span><span class="line">90% range: 5% → 95%</span>
+      <span class="note">The running total is the cumulative distribution function (CDF); the ranges are credible intervals.</span></div>
+    </details>
+    <figure class="fig" style="margin:0">
+      <svg id="f6" viewBox="0 0 880 340" role="img" aria-label="Cumulative posterior with percentile crossings"></svg>
+      <div class="legend"><span><i style="background:var(--grid)"></i>this page: running total</span><span><i style="background:var(--stan)"></i>TEXAS, the same percentiles</span></div>
+      <div class="tablewrap"><table id="t6"></table></div>
+    </figure>
+  </section>
+
+  <div class="part">Part 4<b>When the proxy runs out of range, and shortcuts</b></div>
+  <section class="step" id="s7">
+    <div class="step-head"><span class="step-no">10</span><h2>Past the edges, the odds say more than the median</h2></div>
+    <div class="prose stack">
+      <p>The S-curve flattens at both ends. In very cold water the archaea's membranes already hold about as few rings as they can, and in very warm water about as many, so a further change in temperature barely changes the ring index. The manuscript puts numbers on where (Fig.&nbsp;7d): an analytical uncertainty of ±0.03 Scaled&nbsp;RI, the interlaboratory reproducibility of TEX₈₆, turns into more than ±5&nbsp;°C of temperature uncertainty <b>below <span data-lo></span>&nbsp;°C and above <span data-hi></span>&nbsp;°C</b>. Outside that window a sample's p50 can move a long way without meaning much.</p>
+      <p>A question the proxy <em>can</em> still answer is: <b>how likely is it that this sample was colder than <span data-lo></span>&nbsp;°C</b> (or warmer than <span data-hi></span>&nbsp;°C)? That is the share of the posterior lying past the edge, read straight off step 9's running total. Statisticians call it an <b>exceedance probability</b>. A sample may not pin down whether the water was 2 or 5&nbsp;°C, but it can still say "95% likely colder than <span data-lo></span>&nbsp;°C".</p>
+    </div>
+    <details class="maths"><summary>The maths</summary>
+    <div class="eq"><span class="line">P(<i>T</i> &lt; <span data-lo></span> °C) = running total at <span data-lo></span> °C</span><span class="line">P(<i>T</i> &gt; <span data-hi></span> °C) = 1 − running total at <span data-hi></span> °C</span>
+      <span class="note">Both come straight from step 9, and they stay meaningful exactly where p50 does not. Saving a reconstruction with <code>save_results=True, save_draws=True</code> lets you compute the same share from its own draws.</span></div>
+    </details>
+    <figure class="fig" style="margin:0">
+      <div class="controls"><span>Tail</span><div class="seg" role="group" aria-label="Which tail"><button id="tailLo" aria-pressed="true"></button><button id="tailHi" aria-pressed="false"></button></div><span class="bigp num" id="pbig"></span><span id="pbigk"></span></div>
+      <svg id="f7" viewBox="0 0 880 300" role="img" aria-label="Posterior with the tail beyond the edge shaded"></svg>
+      <div class="legend"><span><i class="area" style="background:var(--cold-wash);box-shadow:inset 0 -2px 0 var(--cold)"></i>posterior past the edge</span><span><i style="background:var(--grid)"></i>posterior</span></div>
+    </figure>
+    <div class="prose stack"><p id="p7text"></p></div>
+  </section>
+
+  <section class="step" id="sflags">
+    <div class="step-head"><span class="step-no">11</span><h2>What TEXAS flags for this sample</h2></div>
+    <div class="prose stack">
+      <p>A sampler can converge cleanly on an answer the data do not support. The clearest case is a Scaled&nbsp;RI below the curve's floor <i>b</i>: no temperature can reproduce it, the score keeps improving as the temperature falls, and only the prior stops the slide. R̂ stays clean and nothing errors. So <code>predict_T_from_proxyObs()</code> attaches one row of <b>quality flags</b> to every sample. The table below applies the same rules to your sample; try a Scaled&nbsp;RI of 0.20 under "Set your own values".</p>
+      <p>The last row is the one to read for prior influence: <b>how much of the prior's variance the proxy resolved</b>. Near 100% the measurement decided the answer. Near 0% you are mostly reading back what you put in as μ<sub>T</sub>. It does not replace the floor check: below the floor the score still slopes toward the cold, which narrows the posterior, so this number can look healthy for a temperature that means nothing.</p>
+    </div>
+    <details class="maths"><summary>The maths</summary>
+    <div class="eq"><span class="line">width ratio = ½ (p84 − p16) ÷ σ<sub>T</sub></span><span class="line">resolved = 1 − (width ratio)²</span>
+      <span class="note"><code>posterior_prior_width_ratio</code> is the package's column. <code>prior_dominated</code> fires at a ratio of <span data-pdr></span> or more, which is about <span data-pdv></span>% resolved or less. The manuscript's Resolved column uses the same idea, averaged over a whole record.</span></div>
+    </details>
+    <figure class="fig" style="margin:0">
+      <div class="tablewrap"><table class="terms" id="tflags"></table></div>
+      <figcaption id="cflags"></figcaption>
+    </figure>
+  </section>
+
+  <section class="step" id="plug">
+    <div class="step-head"><span class="step-no">12</span><h2>The quick formula, and what it leaves out</h2></div>
+    <div class="prose stack">
+      <p>Many TEX<sub>86</sub> calibrations are used the quick way: take one fitted calibration line, and solve it for temperature with algebra. One ring index in, one temperature out. This page calls that the <b>plug-in estimate</b> (statisticians: inverse calibration). For TEXAS it means taking the <b>middle value</b> of each calibration setting across the <span data-m></span> curves, treating the single curve they define as the truth, and solving it. It skips steps 2–5: no spread of curves, no scores, no prior, and no error bar.</p>
+      <p>Solving the S-curve for <i>T</i> means peeling it apart one layer at a time: take away the floor and rescale, undo the power, take away the 1, undo the exponential with a log, then divide by the steepness and add the location back.</p>
+    </div>
+    <details class="maths"><summary>The maths</summary>
+    <div class="eq"><span class="line"><i>T</i> = <i>T</i><sub>0</sub>′ − ln[ ((1 − <i>b</i>) ÷ (RI − <i>b</i>))<sup><i>ν</i></sup> − 1 ] ÷ <i>k</i></span><span class="line"><i>T</i><sub>0</sub>′ = <i>T</i><sub>0</sub> + γ<sub>G23</sub>·(GDGT-2/3) + γ<sub>NO₃</sub>·log<sub>10</sub>(NO₃)</span>
+      <span class="note">Every setting is the median over draws. There is no answer when RI is at or below the median floor <i>b</i> (<span id="medb"></span>): nothing on that one curve reaches so low. Because the T₀-shift form slides the curve instead of lifting it, GDGT-2/3 and NO₃ enter only through <i>T</i>₀′, and the RI part of the formula never changes.</span></div>
+    </details>
+    <figure class="fig" style="margin:0">
+      <svg id="f9" viewBox="0 0 880 300" role="img" aria-label="Posterior for this sample with the plug-in answer marked"></svg>
+      <div class="legend"><span><i class="area" style="background:var(--grid-wash);box-shadow:inset 0 -2px 0 var(--grid)"></i>posterior</span><span><i style="background:var(--ink)"></i>plug-in answer (one number, no range)</span></div>
+      <div class="readout" id="r9"></div>
+    </figure>
+    <div class="prose stack">
+      <p>On the steep part of the S-curve the quick formula and the full answer agree closely. Toward the flat ends they drift apart. To see which ingredient is responsible, add them back one at a time. <b>Per-curve</b> solves each of the <span data-m></span> curves separately and takes the middle answer: this puts back the calibration's uncertainty. <b>Full</b> is the posterior median, which also puts back the scatter of real samples around the curve (σ) and the prior. Those two cannot be separated here, for the reason step 5 gives. The table and chart recompute for the GDGT-2/3, NO₃ and prior of the sample you picked.</p>
+    </div>
+    <figure class="fig" style="margin:0">
+      <div class="tablewrap"><table id="t9"></table></div>
+      <svg id="f9b" viewBox="0 0 880 340" role="img" aria-label="Plug-in minus posterior median against Scaled RI"></svg>
+      <figcaption id="c9"></figcaption>
+    </figure>
+    <div class="callout" id="call9"></div>
+  </section>
+
+  <section class="step" id="terms">
+    <div class="step-head"><span class="step-no">·</span><h2>The same ideas, in the words papers use</h2></div>
+    <div class="prose stack"><p>This page uses everyday words so the method reads easily. Here is what each is called in the statistics and paleoclimate literature, for when you write it up or read a methods section.</p></div>
+    <div class="tablewrap"><table class="terms">
+      <tr><th>On this page</th><th>Usual term</th><th>What it means here</th></tr>
+      <tr><td>S-curve</td><td>Generalized logistic (Richards) curve</td><td>The calibration: mean Scaled RI as a function of temperature.</td></tr>
+      <tr><td>the many curves, calibration draws</td><td>Posterior draws (posterior samples)</td><td>Equally plausible calibration parameter sets from the forward fit.</td></tr>
+      <tr><td>σ, the scatter</td><td>Residual (process) noise, σ<sub>crtp</sub></td><td>Scatter of real samples around one curve.</td></tr>
+      <tr><td>the score of one curve</td><td>Likelihood</td><td>How probable the measured RI is at a candidate temperature, for one curve.</td></tr>
+      <tr><td>averaging the scores over curves</td><td>Marginal likelihood; marginalization (Monte Carlo integration)</td><td>Calibration uncertainty integrated out by averaging over posterior draws.</td></tr>
+      <tr><td>the prior "pulls harder"</td><td>Shrinkage toward the prior</td><td>Where the likelihood is broad, the posterior sits closer to μ<sub>T</sub>.</td></tr>
+      <tr><td>running total</td><td>Cumulative distribution function (CDF)</td><td>Percentiles are where it crosses 5, 16, 50, 84 and 95%.</td></tr>
+      <tr><td>p16–p84, p5–p95</td><td>68% and 90% credible intervals</td><td>Bayesian uncertainty ranges read off the CDF.</td></tr>
+      <tr><td>tail probability</td><td>Exceedance probability</td><td>P(T &lt; <span data-lo></span> °C) or P(T &gt; <span data-hi></span> °C).</td></tr>
+      <tr><td>Stan's sampler</td><td>Markov chain Monte Carlo (MCMC); No-U-Turn Sampler (NUTS), an adaptive Hamiltonian Monte Carlo</td><td>Draws samples from the posterior.</td></tr>
+      <tr><td>valley, kick, roll</td><td>Potential energy, momentum, Hamiltonian dynamics</td><td>U(T) = −log posterior; a momentum drawn from a normal; motion simulated by the leapfrog integrator.</td></tr>
+      <tr><td>ε, the step; m, the mass</td><td>Step size; (inverse) metric, or mass matrix</td><td>Both tuned during warm-up: ε by dual averaging to a target acceptance rate, m from the variance of the draws.</td></tr>
+      <tr><td>divergence</td><td>Divergent transition</td><td>The simulated energy blew up: the sampler could not follow the posterior there.</td></tr>
+      <tr><td>R̂, ESS, MCSE</td><td>Potential scale reduction factor; effective sample size; Monte Carlo standard error</td><td>Chains agree; how many independent draws the chain is worth; the sampling noise on an estimate.</td></tr>
+      <tr><td>plug-in</td><td>Plug-in point estimate; classical inverse-calibration estimator</td><td>Solve one fitted curve, at the posterior medians, for temperature. No uncertainty.</td></tr>
+      <tr><td>per-curve</td><td>Point inversion per posterior draw</td><td>The plug-in, repeated for every draw.</td></tr>
+      <tr><td>sliding the curve</td><td>T₀-shift parameterization (a location shift)</td><td>GDGT-2/3 and NO₃ move the curve's location along the temperature axis.</td></tr>
+    </table></div>
+  </section>
+
+  <section class="step" id="s9">
+    <div class="step-head"><span class="step-no">·</span><h2>Symbols in one place</h2></div>
+    <dl class="gloss">
+      <dt>RI</dt><dd>Scaled RI₀₋₃, the measured proxy value.</dd>
+      <dt>T</dt><dd>Candidate sea-surface temperature, °C.</dd>
+      <dt>b, k, T₀, ν</dt><dd>One calibration curve: floor, steepness, location and tilt.</dd>
+      <dt>γ<sub>G23</sub>, γ<sub>NO₃</sub></dt><dd>How far GDGT-2/3 and log₁₀(NO₃) slide T₀, in °C per unit.</dd>
+      <dt>σ</dt><dd>Scatter of real samples around one curve.</dd>
+      <dt>L(T)</dt><dd>Likelihood: the score averaged over all calibration draws.</dd>
+      <dt>μ<sub>T</sub>, σ<sub>T</sub></dt><dd>Prior mean and standard deviation of temperature, chosen by you (<code>prior_mu_t</code>, <code>prior_sigma_t</code>).</dd>
+      <dt>p5 … p95</dt><dd>Temperatures where the running posterior total crosses 5% … 95%.</dd>
+      <dt>P(T &lt; x)</dt><dd>The running total at x: the probability the temperature is colder than x.</dd>
+    </dl>
+  </section>
+
+  <footer id="foot"></footer>
+</div>
+<div id="tip" role="status"></div>
+
+<script id="data" type="application/json">{"meta":{"posterior":"tx.GHEB.sst.sri03.G23-N1p0","M":500,"cutoff":1.0,"T":[-100.0,120.0,4401],"thr_lo":7.1,"thr_hi":40.9,"prior_dominated_ratio":0.85,"ranges":{"proxy":[0.3283082077051926,0.8695202853618693],"g23":[0.7556675062972293,35.08333333333333],"no3":[0.0001824342325562,36.42815399169922]}},"ens":{"t0":[34.2921,35.1311,34.8034,34.4919,34.6574,33.6018,34.7174,35.2017,35.4185,34.7073,35.0157,34.5936,33.9417,34.0153,34.7539,33.7278,34.273,34.6205,34.1644,34.9191,34.5682,33.7575,33.7201,35.8376,34.8233,34.4864,33.9413,34.2166,34.2121,34.7015,33.7725,35.1398,34.1185,35.2585,34.2964,35.1104,34.9251,33.9239,34.5258,34.7254,34.7126,35.4099,34.1491,35.3921,34.0255,35.6086,34.7221,34.2279,33.0927,34.6485,34.3222,34.6485,33.9636,35.4117,34.0718,34.7073,34.7959,35.2347,34.1756,33.7117,35.8512,34.5027,35.5273,33.3949,35.1639,34.9614,33.9691,35.6307,31.4177,32.4312,35.0489,34.6782,33.3497,35.3812,31.2095,35.5404,33.9626,35.3595,34.7014,34.6215,34.7803,35.0701,33.3829,35.6446,34.6036,34.0643,34.9974,35.5942,34.6727,32.8237,35.29,35.3629,34.9908,35.3097,31.748,34.7867,35.4033,34.2862,35.0185,35.1055,34.2066,33.9764,32.227,34.9806,33.6893,34.4303,34.3944,34.3208,34.9885,35.1665,33.6469,35.2933,34.6328,33.7344,34.6061,35.3507,35.0099,34.302,33.5552,34.5317,33.6617,34.7572,34.2408,33.754,33.9408,35.611,35.1596,35.4327,35.9335,34.6944,35.322,34.7867,34.5801,33.5127,34.0206,35.1231,35.804,34.5672,33.7176,34.0227,34.7384,33.9339,34.307,34.8759,34.1608,33.4551,34.972,33.6067,34.686,34.074,34.2725,35.607,33.2959,32.6556,34.1834,34.5502,34.5575,34.6315,34.1264,34.425,34.1431,34.3176,34.4434,35.4003,35.635,35.8256,33.928,35.7549,35.3959,34.3321,34.6126,33.4757,35.078,35.4114,35.2697,33.5956,34.5799,35.0278,34.9953,33.7963,35.1517,33.8782,33.3022,33.98,33.928,34.0576,33.6023,33.5962,33.9712,35.105,35.4302,34.9017,35.1363,33.991,34.0852,34.9253,34.2131,34.5613,35.3808,34.3005,34.4396,33.1988,34.7476,34.3887,35.2051,34.1333,33.7887,35.3578,34.5502,35.5748,35.8344,35.0207,35.4185,34.8545,34.3236,35.3919,34.5672,34.3766,34.1679,34.0877,32.884,36.0279,34.213,35.0972,34.7821,34.4507,34.5307,33.5598,35.6997,34.2757,34.7948,33.9626,34.3733,34.4303,35.5115,34.1737,35.5346,34.3649,34.1071,34.9173,34.0091,34.1059,34.3029,34.8465,34.7403,34.6108,34.267,34.3854,34.9615,35.852,34.2322,35.5063,34.8771,34.8733,35.2348,34.9315,34.5526,34.3395,34.3029,35.8512,35.1246,35.4202,33.881,35.6908,35.531,34.457,34.1456,33.4502,34.8759,34.8842,34.0669,34.9037,34.5174,34.627,34.2791,33.1988,34.7904,32.6335,35.8966,34.714,34.5107,33.1946,35.7501,33.7836,34.4331,34.9974,33.9755,33.1399,34.7316,33.6588,34.6543,34.723,34.7028,34.961,34.3029,33.8588,35.4139,34.617,34.9923,33.754,34.9983,33.9764,35.3879,34.4924,35.6557,33.9523,35.3273,35.7041,34.3283,34.2794,34.002,35.5876,35.029,34.2249,35.3964,35.1098,34.2878,35.4864,31.9219,33.9571,34.4865,34.7436,34.1888,34.9407,34.872,34.5186,35.328,34.6335,35.292,35.3519,34.9907,34.4514,35.2813,36.1701,34.7493,35.5942,34.6514,33.6796,35.0762,34.4008,34.7885,34.8671,34.1468,35.1392,35.197,34.7402,35.5513,35.3837,34.1737,34.0887,35.168,34.6205,32.824,34.2907,34.9228,35.35,34.5092,35.2258,34.347,34.1562,34.2139,34.5203,34.9407,34.78,33.9151,35.3507,33.3328,34.9368,35.3277,34.217,35.6791,34.924,35.4695,35.7034,34.2918,35.3919,34.6853,34.7436,34.8842,34.5667,34.1257,34.3469,33.7385,35.5459,35.4934,34.1858,34.3068,34.0072,34.5219,35.4325,34.4186,34.4672,30.632,34.2754,34.3531,34.092,35.8661,36.3063,33.6326,32.9151,34.1746,34.9173,34.0168,32.4364,33.5713,34.3067,34.0236,34.9123,34.7572,34.5674,34.3506,34.5952,34.2737,35.0996,34.4055,35.0331,35.2855,34.7914,33.6023,34.8062,35.1665,34.8809,35.4332,34.0236,34.4057,33.9287,33.9726,35.5876,33.1866,35.635,33.6756,34.1185,34.1656,33.719,34.4513,33.9123,34.4345,34.4867,35.0835,34.3894,35.0764,34.9557,33.9636,36.2649,34.1232,34.4317,34.1724,34.8984,32.3905,35.2951,34.403,34.5872,33.3376,34.6441,35.0013,35.7034,34.3216,34.8219,35.1665,34.5094,34.6996,35.4094,34.2121,34.8657,35.5838,35.3845,35.1676,33.8288,35.0895,35.0571,34.8129,33.7278,33.8861,33.4757,35.2779,35.852,35.1234,35.3964,34.9907,35.7479,35.3876,35.5289,34.1321,34.5667,35.0603,34.8813,34.907,34.7528,35.1104,34.6017,34.9554,33.8578,35.1398,33.3742,34.9368,34.9139,34.0167,33.2495,34.3092,31.748],"k":[0.31436,0.25033,0.24766,0.31536,0.26141,0.2022,0.30422,0.28955,0.29913,0.31102,0.31604,0.27532,0.23028,0.28785,0.27564,0.22765,0.24795,0.26149,0.23543,0.31085,0.2519,0.30964,0.20002,0.36447,0.23486,0.23637,0.21937,0.18621,0.24145,0.25842,0.24521,0.28434,0.22038,0.25014,0.24192,0.27301,0.27338,0.22673,0.26747,0.27435,0.31425,0.23151,0.28315,0.2972,0.26022,0.23953,0.29349,0.27762,0.20769,0.24928,0.24352,0.24928,0.26926,0.27159,0.22499,0.23833,0.23148,0.31395,0.2707,0.26386,0.30969,0.25537,0.2546,0.23361,0.28036,0.28668,0.21842,0.32371,0.17454,0.19195,0.35276,0.28079,0.20064,0.26099,0.16481,0.29672,0.25012,0.26432,0.24888,0.25785,0.26034,0.24998,0.2375,0.25593,0.25676,0.2329,0.25948,0.29648,0.24266,0.18676,0.23696,0.21557,0.2679,0.22745,0.1856,0.28557,0.28272,0.20608,0.28263,0.26844,0.30849,0.23374,0.17242,0.2801,0.25177,0.26605,0.24145,0.27565,0.28956,0.41438,0.23296,0.33174,0.29169,0.1887,0.27748,0.29977,0.29061,0.3164,0.19235,0.23749,0.26449,0.23461,0.26344,0.23405,0.23193,0.29114,0.27413,0.28636,0.2482,0.29956,0.29514,0.25844,0.25941,0.2184,0.28068,0.27979,0.2818,0.31845,0.28116,0.2221,0.30075,0.26293,0.25532,0.25999,0.23726,0.25205,0.25934,0.23668,0.25357,0.31887,0.28322,0.31029,0.24266,0.1687,0.22414,0.28228,0.21827,0.33561,0.24577,0.26032,0.24904,0.2837,0.30095,0.28889,0.2732,0.29151,0.27582,0.31324,0.30553,0.25509,0.25127,0.23414,0.27377,0.24596,0.33639,0.23572,0.30907,0.25754,0.28532,0.22063,0.3098,0.26877,0.22004,0.28947,0.27582,0.29862,0.239,0.26831,0.21367,0.26698,0.29911,0.35485,0.28866,0.28497,0.25917,0.23393,0.19539,0.24574,0.28644,0.24625,0.27937,0.22193,0.21087,0.29285,0.31456,0.22454,0.24691,0.26485,0.28228,0.33801,0.3502,0.26886,0.31339,0.30439,0.35701,0.24939,0.31845,0.28553,0.25358,0.26253,0.19835,0.24577,0.28823,0.3314,0.29152,0.24334,0.3333,0.19047,0.2733,0.25334,0.24793,0.25012,0.25098,0.26605,0.34046,0.28363,0.24428,0.20547,0.21677,0.31908,0.27925,0.26144,0.26627,0.34274,0.25594,0.25984,0.22715,0.22256,0.24996,0.28983,0.25326,0.32014,0.2644,0.25497,0.31411,0.25186,0.25068,0.23172,0.26627,0.30969,0.30214,0.22469,0.27499,0.30028,0.32319,0.25905,0.2767,0.25374,0.25999,0.25167,0.1902,0.24773,0.31442,0.25721,0.25828,0.22193,0.29324,0.22597,0.28107,0.27992,0.23914,0.18979,0.3041,0.23463,0.22085,0.25948,0.2383,0.19056,0.30001,0.23793,0.32723,0.27627,0.29923,0.24707,0.26627,0.29729,0.30266,0.23046,0.30359,0.23405,0.22634,0.23374,0.28618,0.29035,0.31623,0.24702,0.33367,0.28451,0.24273,0.24792,0.24767,0.29568,0.27163,0.21732,0.30523,0.37131,0.24112,0.2425,0.18289,0.24103,0.273,0.24137,0.24203,0.32617,0.23085,0.22839,0.28897,0.2296,0.32097,0.32603,0.25704,0.22757,0.27947,0.28115,0.31539,0.29648,0.25664,0.21866,0.27754,0.2761,0.26059,0.31127,0.30144,0.30944,0.35461,0.31549,0.27091,0.22455,0.28363,0.34957,0.25661,0.26149,0.16943,0.29524,0.32042,0.25242,0.29353,0.31677,0.31173,0.26099,0.22321,0.25789,0.32617,0.29264,0.25935,0.29977,0.26379,0.28238,0.25768,0.28299,0.31111,0.36839,0.30767,0.28986,0.24113,0.24939,0.25255,0.25835,0.25167,0.29171,0.23676,0.24212,0.23591,0.3152,0.39152,0.23844,0.26996,0.23286,0.2635,0.27681,0.28258,0.25256,0.15805,0.29056,0.31841,0.2486,0.32864,0.25608,0.23097,0.19998,0.24824,0.31908,0.23707,0.17757,0.21033,0.2661,0.26975,0.24038,0.23461,0.30097,0.26302,0.24302,0.22028,0.30726,0.33623,0.2651,0.24555,0.27511,0.239,0.30479,0.41438,0.32099,0.31102,0.26975,0.22172,0.24403,0.23048,0.29568,0.23319,0.2732,0.19495,0.22038,0.25244,0.22268,0.21395,0.20922,0.26251,0.32267,0.27793,0.27829,0.25622,0.28948,0.26926,0.21689,0.28508,0.22294,0.26605,0.28789,0.17796,0.28966,0.27051,0.245,0.19662,0.30602,0.3216,0.28986,0.21429,0.30971,0.41438,0.28226,0.34665,0.28172,0.24145,0.32219,0.28219,0.29347,0.31249,0.24061,0.2884,0.25205,0.25581,0.22765,0.22934,0.23414,0.27756,0.28983,0.28387,0.30523,0.25704,0.33578,0.29617,0.30972,0.20426,0.29171,0.27298,0.25244,0.27208,0.25261,0.27301,0.2142,0.2421,0.235,0.28434,0.26148,0.29339,0.31771,0.24757,0.21712,0.23411,0.1856],"b":[0.41613,0.4095,0.40665,0.41474,0.41886,0.42304,0.40596,0.41754,0.41246,0.41612,0.40626,0.4147,0.40994,0.41464,0.41101,0.42055,0.42244,0.40203,0.41093,0.41573,0.41371,0.42785,0.42457,0.39842,0.40806,0.39975,0.41278,0.41904,0.42217,0.41099,0.42659,0.4204,0.40871,0.39485,0.41224,0.40218,0.40464,0.42226,0.42114,0.40785,0.40776,0.40216,0.41394,0.40461,0.41928,0.40209,0.40565,0.42236,0.42908,0.40231,0.41924,0.40231,0.42065,0.41009,0.41201,0.40712,0.41785,0.39435,0.41249,0.41992,0.40408,0.41555,0.41206,0.42723,0.40381,0.41801,0.41576,0.39889,0.42427,0.42008,0.41127,0.40464,0.41232,0.40581,0.42742,0.41262,0.4166,0.4041,0.4011,0.40456,0.40615,0.40428,0.4259,0.39891,0.4121,0.41583,0.41353,0.41124,0.4192,0.41808,0.40692,0.39479,0.41844,0.40515,0.42326,0.403,0.41773,0.42263,0.42622,0.40411,0.42799,0.42025,0.41756,0.41095,0.41885,0.41643,0.41653,0.41406,0.41267,0.41486,0.41871,0.40541,0.40673,0.41727,0.41168,0.40868,0.40134,0.42317,0.41509,0.40757,0.42863,0.41726,0.42439,0.42434,0.4101,0.40127,0.40185,0.40289,0.397,0.41097,0.4055,0.40337,0.40709,0.42425,0.41481,0.40277,0.40075,0.4119,0.41602,0.42083,0.40127,0.42701,0.41197,0.40979,0.4204,0.41875,0.41141,0.4164,0.407,0.42627,0.41289,0.4137,0.42486,0.42109,0.40399,0.40589,0.4115,0.41179,0.41796,0.41951,0.42546,0.41948,0.4052,0.40025,0.40183,0.39908,0.41912,0.40847,0.41123,0.41683,0.41812,0.41944,0.40834,0.40284,0.4078,0.42641,0.41622,0.40142,0.40601,0.41557,0.41545,0.40731,0.42472,0.4117,0.41912,0.41184,0.41833,0.4218,0.41771,0.41285,0.4162,0.40982,0.41313,0.43123,0.41512,0.39892,0.40349,0.40643,0.41025,0.41663,0.41154,0.4205,0.40857,0.40947,0.40658,0.42272,0.41658,0.40354,0.40589,0.40639,0.39698,0.408,0.40761,0.41045,0.41697,0.40096,0.4119,0.4207,0.42107,0.4185,0.42834,0.39951,0.41323,0.40242,0.41573,0.41204,0.42036,0.41678,0.40186,0.42393,0.41619,0.4166,0.41752,0.41643,0.40989,0.41335,0.41888,0.4092,0.42326,0.41334,0.42274,0.41879,0.40911,0.4084,0.41289,0.41473,0.41232,0.41693,0.39077,0.4087,0.41088,0.4064,0.40979,0.41875,0.40659,0.41719,0.40322,0.41015,0.40911,0.40408,0.40144,0.3951,0.41975,0.39684,0.40562,0.41208,0.42612,0.41948,0.40979,0.41391,0.40745,0.41318,0.41558,0.41083,0.41621,0.4205,0.41008,0.42287,0.39697,0.41207,0.41775,0.42132,0.40281,0.4256,0.41543,0.41353,0.4152,0.41835,0.42172,0.41856,0.41852,0.41145,0.42644,0.41729,0.40911,0.41665,0.40531,0.41325,0.41183,0.42434,0.40927,0.42025,0.40761,0.41766,0.40832,0.41636,0.41566,0.39913,0.41753,0.40966,0.42032,0.40011,0.40234,0.41227,0.40483,0.40927,0.41403,0.39559,0.42599,0.42109,0.42581,0.41976,0.42031,0.40688,0.41232,0.40695,0.40618,0.40906,0.40033,0.40916,0.41008,0.40908,0.41003,0.40265,0.41537,0.41124,0.40741,0.40988,0.41364,0.41649,0.41201,0.42118,0.41687,0.4095,0.41137,0.41978,0.40155,0.39692,0.41335,0.42493,0.41001,0.40203,0.41965,0.41777,0.41194,0.41098,0.41272,0.41048,0.41846,0.42846,0.41206,0.41046,0.40688,0.40839,0.42129,0.40868,0.42447,0.41118,0.40896,0.40463,0.40169,0.42209,0.41032,0.405,0.40301,0.40096,0.41278,0.40525,0.41391,0.40954,0.41301,0.41384,0.41238,0.41325,0.40997,0.41817,0.41583,0.41254,0.42172,0.40491,0.41884,0.4129,0.42588,0.41587,0.42433,0.42281,0.4015,0.39629,0.41967,0.41665,0.41507,0.41334,0.41463,0.42078,0.42467,0.40661,0.40653,0.3984,0.41726,0.42213,0.4218,0.40412,0.41193,0.41757,0.41794,0.40455,0.39764,0.41229,0.41833,0.40022,0.41486,0.40676,0.40631,0.40653,0.41258,0.41736,0.42114,0.40011,0.4271,0.40183,0.41431,0.40871,0.41695,0.41912,0.41596,0.41745,0.42019,0.41281,0.40118,0.4231,0.41093,0.40802,0.42065,0.39374,0.41144,0.40706,0.42902,0.41513,0.42333,0.40702,0.41698,0.40383,0.42361,0.41385,0.40834,0.405,0.40819,0.41011,0.41486,0.41647,0.41452,0.40156,0.42217,0.40892,0.40407,0.40256,0.41036,0.41778,0.40528,0.41519,0.4117,0.42055,0.41598,0.41944,0.40852,0.4087,0.39918,0.40483,0.41008,0.40963,0.39503,0.40215,0.40253,0.40954,0.40546,0.40508,0.40881,0.40578,0.40218,0.3985,0.40553,0.41553,0.4204,0.42414,0.41712,0.4103,0.41155,0.41622,0.42288,0.42326],"v":[4.37046,3.78219,3.72279,4.38096,3.60435,2.67341,4.54946,4.15701,4.41798,4.36749,4.76064,3.75978,3.2429,3.97164,4.06457,2.95174,3.226,3.92183,3.3339,4.45094,3.56615,3.93419,2.53819,6.05653,3.50097,3.58742,3.01778,2.53568,3.23922,3.69161,3.24128,3.92383,3.19966,3.99104,3.40927,4.20816,4.08817,3.00008,3.65489,4.00489,4.5472,3.63618,3.94314,4.58773,3.43385,3.73665,4.43034,3.66491,2.5501,3.73486,3.32078,3.73486,3.58849,4.04823,3.20135,3.46691,3.26103,5.10075,3.79888,3.493,4.82019,3.53376,3.82523,3.00658,4.20068,3.99726,2.98617,5.19608,2.071,2.44237,5.25535,4.28493,2.75577,4.02413,1.88817,4.4248,3.42668,4.12747,3.84219,3.95984,3.82403,3.70854,3.07642,4.10408,3.64001,3.24811,3.74569,4.3952,3.31316,2.39134,3.57139,3.50527,3.77217,3.50938,2.27463,4.30628,3.99985,2.79967,3.8679,4.08781,3.95705,3.09517,2.21351,4.07934,3.33019,3.68852,3.3328,3.77782,4.16941,5.91761,2.99664,5.05801,4.37923,2.55517,3.95315,4.69313,4.46844,4.24526,2.58096,3.47022,3.26662,3.32738,3.4554,3.03052,3.26209,4.61655,4.29859,4.45398,4.01992,4.3173,4.5228,3.9536,3.86605,2.803,3.87964,4.33586,4.49514,4.50981,3.78895,3.02789,4.58963,3.28878,3.66317,3.90049,3.18777,3.38899,3.7925,3.23495,3.73399,4.1535,3.86243,4.53752,3.08007,2.11563,3.28487,4.14168,3.09058,4.89978,3.37179,3.63416,3.31776,3.86693,4.4175,4.39252,4.25767,4.67062,3.7458,4.63277,4.5814,3.55586,3.50987,3.0945,4.05061,3.74962,4.93659,2.89288,4.40692,3.91291,4.22413,3.00663,4.54202,3.78638,2.75314,4.15353,3.7458,4.14453,3.15396,3.50941,2.89406,3.89395,4.32114,5.07031,4.28178,3.51467,3.59534,3.64074,2.82035,3.57303,4.24784,3.37489,3.96964,2.81513,3.15698,4.12054,4.78884,3.00135,3.32144,3.9984,4.14168,5.27195,5.82845,3.89518,4.65686,4.47852,4.99423,3.9136,4.50981,3.86882,3.44179,3.59853,2.43363,3.90141,3.97108,5.0909,4.10298,3.4482,4.54407,2.53311,4.26845,3.40307,3.52678,3.42668,3.48339,3.68852,5.17639,3.93912,3.48077,2.9991,2.91076,4.4922,3.71854,3.68564,3.82528,4.999,3.69467,3.67936,3.22445,3.06344,4.03625,4.47857,3.53976,4.79783,3.86604,3.63559,4.73458,3.55735,3.84731,3.3182,3.82528,4.82019,4.56114,3.47562,3.7073,4.89823,4.835,3.71046,3.67057,3.36368,3.90049,3.60717,2.76126,3.5351,4.40424,3.68732,3.62012,2.81513,4.2915,2.80189,4.53536,4.06282,3.32767,2.517,4.72984,2.97989,3.12492,3.74569,3.31136,2.546,4.05303,3.21188,4.59553,4.03765,3.97428,3.56823,3.82528,4.03171,4.71058,3.27177,4.40004,3.03052,3.36517,3.09517,4.23373,3.97302,4.81587,3.32648,4.85927,4.61805,3.32642,3.53257,3.24452,4.70717,4.16013,3.04193,4.61094,5.47683,3.39181,3.82899,2.16742,3.26754,3.68306,3.35293,3.25468,4.80368,3.29413,3.37492,4.40082,3.35772,4.94444,4.89781,3.80161,3.28667,4.15602,4.48489,4.54979,4.3952,3.69961,3.02148,3.93779,3.80136,3.77436,4.18953,4.12655,4.60065,5.20912,4.40901,4.32815,3.61664,3.93912,4.55425,3.88209,3.92183,2.15591,4.13245,4.71375,3.69487,4.07963,4.76424,4.25616,3.40665,3.13097,3.71179,4.80368,4.39249,3.50781,4.69313,3.33764,4.05632,3.87021,3.99682,4.82066,5.18916,4.6196,4.60959,3.59747,3.9136,3.7132,3.84791,3.60717,4.2706,3.32988,3.42651,3.26509,4.71366,5.8969,3.28007,3.82873,3.26407,3.5921,4.31036,3.78298,3.61741,1.81124,4.04454,4.33113,3.30551,5.28591,4.25353,3.01915,2.63612,3.33396,4.4922,3.29036,2.18632,2.63884,3.88566,3.85518,3.80678,3.32738,4.1143,3.49622,3.62466,3.1211,4.36476,4.70633,4.08011,3.89611,4.00384,3.15396,4.71832,5.91761,4.79131,4.76178,3.85518,3.08248,3.33374,3.0599,4.70717,2.87032,4.25767,2.71593,3.19966,3.41911,2.91497,2.93143,2.8311,3.60687,4.51377,4.42451,3.73449,3.69789,4.22117,3.58849,3.64694,4.12712,3.26631,3.50671,4.1472,2.17771,4.36186,3.67588,3.64642,2.5646,4.29519,4.84491,4.60959,3.06143,4.47848,5.91761,3.87235,4.96034,4.40003,3.23922,4.89047,4.41345,4.61659,4.67901,3.21473,4.32191,3.59284,3.69236,2.95174,3.13824,3.0945,4.19172,4.47857,4.34865,4.61094,3.80161,5.06425,4.78456,4.87955,2.99855,4.2706,4.06199,3.76968,3.98167,3.74954,4.20816,3.28344,3.6644,3.18174,3.92383,3.39197,4.15373,4.56561,3.46698,2.9109,3.19757,2.27463],"gG":[0.63616,0.6285,0.66693,0.63039,0.61363,0.6573,0.732,0.61118,0.64031,0.63178,0.64401,0.55382,0.67869,0.67521,0.58347,0.61205,0.56777,0.66184,0.68191,0.6599,0.61064,0.61473,0.54912,0.74332,0.62965,0.62084,0.65687,0.64036,0.60919,0.617,0.66999,0.58735,0.69378,0.657,0.56953,0.62872,0.65207,0.62719,0.6436,0.63602,0.6469,0.64436,0.67825,0.6183,0.5646,0.61822,0.70655,0.61549,0.62592,0.68154,0.6488,0.68154,0.64579,0.64109,0.69533,0.62458,0.61328,0.71013,0.68698,0.66216,0.58647,0.62086,0.65686,0.67708,0.55707,0.61977,0.65482,0.70714,0.67636,0.6999,0.68966,0.71703,0.69902,0.68295,0.67587,0.67666,0.66143,0.66101,0.71247,0.73639,0.59979,0.59289,0.69739,0.64719,0.58869,0.66253,0.62162,0.5735,0.60969,0.62884,0.61405,0.64561,0.61215,0.68237,0.74353,0.65507,0.55742,0.63762,0.61205,0.67756,0.62345,0.64766,0.66225,0.59208,0.67395,0.63321,0.62393,0.6021,0.64133,0.62277,0.58405,0.61116,0.71845,0.64022,0.65481,0.70931,0.66077,0.646,0.62136,0.66535,0.5803,0.63053,0.58945,0.62949,0.66556,0.65773,0.76065,0.63486,0.63779,0.63169,0.65399,0.68215,0.66956,0.65995,0.6716,0.67873,0.6258,0.65032,0.65842,0.65808,0.72223,0.5652,0.69118,0.70948,0.6251,0.6797,0.65302,0.69895,0.64583,0.69689,0.59545,0.58793,0.67942,0.61105,0.67538,0.65378,0.60803,0.66834,0.65111,0.6956,0.64521,0.63406,0.67722,0.53016,0.58196,0.62958,0.63622,0.54878,0.60634,0.67482,0.65404,0.6172,0.63435,0.61387,0.57756,0.53969,0.727,0.66893,0.6014,0.67415,0.63266,0.66351,0.61219,0.71589,0.63622,0.67286,0.65289,0.63674,0.63752,0.63067,0.57575,0.5789,0.68438,0.54922,0.70433,0.63432,0.59998,0.62274,0.60353,0.62695,0.6438,0.63021,0.65724,0.60566,0.68653,0.63712,0.6444,0.56389,0.65378,0.66156,0.66541,0.59209,0.56011,0.63932,0.68543,0.63304,0.65032,0.5968,0.6575,0.66007,0.62749,0.57313,0.65939,0.68158,0.58865,0.68814,0.60318,0.6463,0.60987,0.6397,0.62158,0.66143,0.66651,0.63321,0.62699,0.61669,0.56009,0.68723,0.59092,0.56295,0.63694,0.70241,0.64923,0.61567,0.65093,0.63738,0.64538,0.60491,0.70848,0.59197,0.64106,0.6149,0.68037,0.65293,0.63673,0.61203,0.73235,0.67605,0.64923,0.58647,0.58913,0.53941,0.63537,0.7181,0.53863,0.65585,0.68208,0.66159,0.70948,0.63396,0.63889,0.58448,0.63618,0.61901,0.67824,0.63021,0.64201,0.68151,0.60626,0.61375,0.61889,0.69601,0.62185,0.61375,0.662,0.62162,0.70463,0.7051,0.55015,0.70314,0.64774,0.68838,0.60162,0.64318,0.64923,0.64886,0.67711,0.65073,0.63215,0.62949,0.62499,0.64766,0.56233,0.58213,0.60849,0.64401,0.61028,0.66403,0.6062,0.62684,0.61174,0.64751,0.65748,0.64355,0.60397,0.63802,0.64853,0.61298,0.6655,0.63655,0.67048,0.62215,0.60181,0.62692,0.62741,0.66898,0.64987,0.64878,0.62842,0.61381,0.63151,0.64587,0.58797,0.62553,0.67985,0.5735,0.5783,0.65297,0.57095,0.65,0.62421,0.52317,0.65128,0.62684,0.64641,0.6429,0.62957,0.64641,0.61669,0.64755,0.66605,0.66184,0.60527,0.71864,0.68967,0.58743,0.58575,0.70351,0.62623,0.66791,0.63865,0.68283,0.62692,0.68616,0.67467,0.70931,0.65707,0.60157,0.61422,0.62721,0.61646,0.6243,0.6339,0.68829,0.69525,0.63304,0.7319,0.65674,0.63396,0.71452,0.6549,0.61101,0.63067,0.6288,0.65084,0.68447,0.66997,0.69506,0.61681,0.66674,0.56672,0.64175,0.72261,0.65705,0.67499,0.6553,0.66057,0.5996,0.62937,0.69093,0.5837,0.56295,0.64995,0.62243,0.55089,0.63462,0.65792,0.7082,0.63053,0.66503,0.5655,0.68038,0.63983,0.61222,0.65893,0.72554,0.61398,0.64685,0.65289,0.70281,0.62277,0.66268,0.65379,0.65792,0.60718,0.68643,0.64189,0.64751,0.65575,0.58196,0.6966,0.69378,0.60342,0.62267,0.56962,0.61367,0.6133,0.605,0.74424,0.6153,0.59321,0.63552,0.64579,0.67173,0.73382,0.65149,0.64647,0.64028,0.6629,0.63258,0.59444,0.65882,0.67302,0.57369,0.69658,0.68829,0.6232,0.598,0.62277,0.58255,0.62343,0.62916,0.60919,0.73126,0.64291,0.69201,0.68507,0.63397,0.64879,0.64784,0.57826,0.61205,0.66147,0.6172,0.66062,0.59197,0.64063,0.60397,0.63151,0.60031,0.68194,0.63816,0.6408,0.71452,0.56957,0.65109,0.66079,0.6569,0.62872,0.64699,0.65161,0.61155,0.58735,0.70716,0.65247,0.60674,0.64779,0.6865,0.65875,0.74353],"gN":[2.44264,2.6026,2.68179,2.5571,2.78788,3.06772,2.88211,2.98678,3.17697,2.54272,2.62554,2.86937,2.82295,2.19127,2.30865,2.85567,2.77274,2.60768,2.81656,2.80373,2.86768,2.28417,3.35555,2.70254,2.83346,2.43353,3.13025,3.28907,2.61535,2.95694,2.80349,3.18861,2.40791,2.82463,2.43887,2.80671,2.77615,3.08802,3.12623,2.77088,2.64848,3.36992,2.63712,2.74433,2.54401,3.07389,2.82772,2.82459,2.86197,2.87662,2.95492,2.87662,2.61456,3.02369,2.72925,2.91896,3.25308,2.52751,2.62254,2.41934,3.1667,3.03214,3.12138,2.28649,2.52013,3.18624,2.78562,3.31857,2.27903,2.48371,2.67269,2.55524,3.07896,2.90584,3.10205,3.14082,2.86711,3.0466,2.71426,2.66644,2.8249,2.95535,3.00448,2.98165,2.4516,2.56949,3.00871,2.76072,2.9708,2.80242,2.91016,2.58737,2.90486,3.25009,2.72352,2.57136,3.01178,2.91469,3.30009,2.82849,2.87007,3.00624,2.78801,2.61794,2.83696,2.99458,2.74706,2.6721,3.03642,2.85742,2.72287,2.35598,2.41398,3.09974,2.95571,2.7729,2.53216,2.88435,3.06457,2.84689,2.46342,2.91611,2.95109,2.71174,2.36848,3.00299,3.21296,2.67522,3.22554,2.72285,3.00639,2.5676,2.57604,3.05573,2.46361,2.73552,3.09998,2.60364,2.47439,2.84957,2.56259,2.67681,2.77808,2.99606,2.7882,2.34075,2.87739,2.74019,2.80497,2.79918,2.54007,2.83483,2.60302,3.27612,2.84998,2.42768,3.14785,2.21987,2.71172,2.79425,2.86459,2.53634,2.48862,2.53466,2.89662,2.71126,2.75198,2.92152,2.62141,2.85472,3.15166,2.30461,2.69352,3.42826,2.88699,2.93104,3.02829,3.28295,3.10403,2.75286,2.85667,2.27632,2.67321,2.59135,2.75198,2.77913,2.6023,2.41342,2.77868,2.79354,2.85739,2.73504,2.95814,2.78419,2.83948,2.66717,2.82739,2.68292,2.75004,2.84831,2.40833,2.48882,2.90476,2.32252,3.0514,2.53948,2.60985,2.77039,2.42768,2.72313,2.71195,3.16545,2.75217,2.87486,2.68938,2.78844,2.60364,2.65778,2.47888,2.6148,2.92193,3.22792,2.78888,2.9905,2.81534,2.98298,2.6287,2.81537,2.81162,2.82202,2.91456,2.86711,2.9547,2.99458,2.65481,2.69583,3.44249,3.25906,2.67905,2.87618,2.66008,2.47058,2.51742,2.62204,3.09343,3.0393,2.97886,2.60384,2.93974,3.0503,2.85793,2.94419,3.11949,3.09112,2.86543,3.05113,2.40512,2.68782,2.51742,3.1667,2.59443,3.0312,2.40905,3.09601,2.54262,2.52668,2.8732,2.67982,2.99606,2.9209,2.88347,2.96993,2.32016,2.81657,2.60245,2.48882,2.52834,2.49639,2.88321,2.5721,2.87366,2.94593,3.10131,2.80412,3.23645,3.00871,2.82941,3.13373,2.71137,2.81958,2.72072,2.66028,2.86037,2.98904,2.51742,2.60722,2.82662,2.8361,3.06579,2.71174,3.20798,3.00624,2.76727,2.61879,2.66468,2.6123,3.16941,2.99883,2.71365,2.64546,2.91738,2.84168,2.88799,3.1901,2.6638,2.5764,2.89349,3.05264,2.80794,2.32315,3.18947,2.96631,2.86664,2.7279,3.10182,2.69539,3.11366,2.65233,2.86136,2.3984,2.74988,2.99356,2.65783,3.14802,2.66578,2.76072,2.68148,2.40206,2.94122,3.0671,2.54886,2.88233,2.50968,2.87562,2.93016,2.68223,2.66623,2.71579,2.69583,2.6069,2.60075,2.60768,2.89492,2.84796,2.76225,2.9583,2.27904,2.75323,2.43822,2.96075,2.83817,2.53188,2.7279,2.73397,2.63707,2.7729,2.4289,2.79003,3.15115,2.47823,2.87869,2.53192,2.82331,2.70569,2.72912,2.78844,2.84011,2.62703,2.9209,2.85552,2.69132,2.61676,2.39645,3.06138,2.92233,2.96059,2.73553,2.75532,3.0261,2.82077,2.48484,2.72888,2.78474,2.57618,2.85636,3.00339,2.95958,3.12932,2.83043,2.94541,2.5249,2.87618,2.93712,2.71072,2.96876,2.35242,1.98035,2.62653,2.91611,2.86745,2.51244,3.05443,2.78447,2.93395,2.70179,3.12905,2.82853,2.51567,2.6023,2.46034,2.85742,2.49095,2.99149,1.98035,2.88662,2.79929,2.73704,2.84168,2.909,2.89662,2.89345,2.40791,2.76091,2.69917,3.17245,3.00015,2.76056,2.48147,2.99155,2.64368,3.14554,3.35163,2.61456,3.72257,2.5356,2.86275,2.45675,2.92097,3.1874,2.85955,2.80955,2.83163,3.02161,2.39169,2.97265,2.70569,2.85543,2.73974,2.85742,2.77213,2.75044,2.8691,2.61535,2.61961,2.86541,3.12694,2.78284,2.82154,2.86229,3.49476,2.36314,2.85567,2.74879,2.30461,3.13791,3.0503,2.7554,2.6638,2.74988,2.97495,2.63133,2.61029,2.86343,2.85552,2.57261,2.99688,2.94888,2.93201,2.80671,2.73262,2.92944,2.31514,3.18861,2.54776,2.84515,2.69733,2.51803,2.58075,2.63353,2.72352],"sig":[0.03802,0.04017,0.04131,0.04077,0.04158,0.03992,0.04053,0.03947,0.04187,0.03783,0.04027,0.04153,0.04003,0.03869,0.04019,0.04107,0.03836,0.04048,0.04113,0.03854,0.04008,0.039,0.04035,0.04007,0.03882,0.04097,0.03846,0.0369,0.04073,0.03989,0.03927,0.0386,0.03904,0.0387,0.03954,0.03918,0.03972,0.03843,0.03831,0.03924,0.03854,0.03973,0.03916,0.04085,0.03814,0.03969,0.04187,0.04014,0.03999,0.04013,0.03941,0.04013,0.03902,0.04002,0.03851,0.03735,0.03879,0.03946,0.0391,0.03877,0.03904,0.0399,0.03816,0.03925,0.04164,0.04125,0.0404,0.03941,0.03818,0.04035,0.03869,0.03825,0.03999,0.04084,0.03896,0.03967,0.04089,0.0386,0.03838,0.04006,0.04039,0.04112,0.03993,0.03985,0.03876,0.037,0.03999,0.03537,0.04095,0.04123,0.04026,0.04085,0.03851,0.04012,0.03926,0.03683,0.03857,0.03939,0.03935,0.03876,0.03857,0.03873,0.03971,0.04021,0.04105,0.03936,0.03694,0.041,0.03842,0.03882,0.03858,0.0394,0.04107,0.04033,0.0388,0.03847,0.04147,0.0408,0.03902,0.03981,0.04,0.03981,0.04056,0.03932,0.03878,0.03967,0.03996,0.03901,0.03895,0.03951,0.04193,0.0401,0.03785,0.03885,0.04002,0.04058,0.03876,0.0391,0.03884,0.03977,0.04007,0.03907,0.0401,0.03909,0.04062,0.03892,0.03862,0.0404,0.03927,0.03948,0.03934,0.03855,0.03985,0.03932,0.03735,0.03887,0.03973,0.04104,0.03955,0.03851,0.04014,0.03836,0.04125,0.04056,0.0411,0.03918,0.0407,0.03959,0.0388,0.03973,0.03907,0.03878,0.0407,0.04061,0.038,0.03984,0.0372,0.03924,0.03803,0.03936,0.04079,0.04266,0.03989,0.0392,0.0407,0.03928,0.03759,0.03975,0.03786,0.03953,0.03756,0.03844,0.04121,0.04203,0.04002,0.03775,0.03942,0.03951,0.03741,0.03871,0.0376,0.03941,0.04074,0.03773,0.03713,0.03937,0.04297,0.03837,0.03887,0.0398,0.03855,0.03818,0.03942,0.03933,0.03882,0.03853,0.0391,0.04002,0.03703,0.03961,0.03942,0.04043,0.04003,0.04092,0.03937,0.03997,0.04055,0.03841,0.03963,0.03966,0.04039,0.04089,0.03778,0.03936,0.03954,0.04061,0.038,0.04096,0.03828,0.04096,0.0394,0.0398,0.03847,0.04101,0.04153,0.03616,0.03953,0.04106,0.04101,0.03812,0.04017,0.04117,0.03597,0.03928,0.04055,0.03833,0.03858,0.04054,0.03847,0.03904,0.0391,0.03773,0.04046,0.04058,0.04027,0.03826,0.03863,0.03983,0.03909,0.03914,0.03936,0.0393,0.04015,0.0389,0.03771,0.03941,0.04063,0.03877,0.04015,0.03891,0.04065,0.04021,0.04149,0.03917,0.04024,0.03999,0.03827,0.04042,0.04082,0.03976,0.03916,0.03728,0.03973,0.03764,0.03847,0.04156,0.03937,0.04073,0.03799,0.03932,0.03872,0.03873,0.03599,0.0422,0.03813,0.03759,0.04089,0.03992,0.03805,0.03974,0.0391,0.0376,0.03741,0.03925,0.0408,0.03905,0.03732,0.04034,0.03827,0.0406,0.0412,0.03893,0.04008,0.04008,0.04204,0.0394,0.03935,0.0392,0.04243,0.04155,0.03861,0.03918,0.03943,0.03775,0.04055,0.03537,0.03989,0.03985,0.03841,0.04011,0.03949,0.04001,0.03627,0.03702,0.03777,0.03917,0.04013,0.03704,0.04061,0.04005,0.0391,0.04048,0.03986,0.0381,0.03988,0.03847,0.0394,0.04076,0.03701,0.0383,0.03634,0.03972,0.04008,0.0403,0.04041,0.03847,0.03965,0.04154,0.03973,0.0393,0.03776,0.03991,0.03921,0.03984,0.04067,0.03853,0.03926,0.04006,0.03914,0.04009,0.04133,0.03921,0.03907,0.042,0.03866,0.03954,0.04075,0.03861,0.04075,0.03987,0.03892,0.03953,0.03837,0.04135,0.04143,0.03955,0.03887,0.03904,0.03693,0.03991,0.03938,0.04096,0.04026,0.03925,0.04042,0.04071,0.03823,0.03837,0.03981,0.03716,0.0401,0.03984,0.03922,0.03879,0.03956,0.04028,0.03832,0.03887,0.03759,0.03737,0.03882,0.03963,0.03999,0.03823,0.03876,0.03909,0.03908,0.0376,0.0391,0.0411,0.04035,0.03904,0.03931,0.04009,0.03844,0.03935,0.03886,0.03922,0.03842,0.04079,0.03976,0.03889,0.03902,0.03892,0.03877,0.03924,0.04011,0.03831,0.03915,0.04079,0.03828,0.04002,0.04107,0.03903,0.03842,0.03984,0.03964,0.03979,0.03882,0.03876,0.04036,0.03953,0.04073,0.03824,0.03895,0.04045,0.03807,0.04066,0.03877,0.04059,0.03907,0.04107,0.03811,0.03878,0.03976,0.03812,0.04058,0.0408,0.03861,0.04039,0.03896,0.03973,0.03929,0.04009,0.04083,0.04131,0.03943,0.03897,0.03918,0.04085,0.04021,0.04118,0.0386,0.03869,0.03852,0.039,0.0399,0.04135,0.0401,0.03926]},"plugin":{"med":{"t0":34.6084,"k":0.2632,"b":0.4123,"v":3.8001,"gG":0.6412,"gN":2.8036}},"examples":[{"role":"steep part","record":"IODP U1482","age_label":"477 ka","source":"NW Australian margin, Section 8.2","ri":0.6628,"g23":5.985,"no3":2.727,"prior_mu":20.0,"prior_sigma":10.0,"stan":[21.219,23.143,25.759,27.883,29.288],"outside_domain":false},{"role":"low nitrate","record":"DSDP 591","age_label":"83 ka","source":"Tasman Sea, Section 8.1","ri":0.6267,"g23":6.795,"no3":0.576,"prior_mu":20.0,"prior_sigma":10.0,"stan":[17.724,19.977,23.17,25.784,27.335],"outside_domain":false},{"role":"cold end","record":"Co1010","age_label":"10.7 ka","source":"Prydz Bay, Section 8.4","ri":0.4363,"g23":0.98,"no3":10.0,"prior_mu":5.0,"prior_sigma":10.0,"stan":[-13.698,-8.771,-1.383,4.533,8.06],"outside_domain":false},{"role":"warm end","record":"ODP 1259","age_label":"91.9 Ma","source":"Demerara Rise, Section 8.4","ri":0.9368,"g23":1.804,"no3":10.0,"prior_mu":40.0,"prior_sigma":10.0,"stan":[35.214,37.022,40.801,48.283,54.663],"outside_domain":false}],"runs":{"IODP U1482":{"stan":[21.219,23.143,25.759,27.883,29.288],"outside_domain":false,"flags":{"proxy_below_floor":false,"proxy_above_ceiling":false,"proxy_extrapolated":false,"predictor_extrapolated":false,"no3_correction_inactive":true,"prior_dominated":false},"width_ratio":0.237},"DSDP 591":{"stan":[17.724,19.977,23.17,25.784,27.335],"outside_domain":false,"flags":{"proxy_below_floor":false,"proxy_above_ceiling":false,"proxy_extrapolated":false,"predictor_extrapolated":false,"no3_correction_inactive":false,"prior_dominated":false},"width_ratio":0.2903},"Co1010":{"stan":[-13.698,-8.771,-1.383,4.533,8.06],"outside_domain":false,"flags":{"proxy_below_floor":false,"proxy_above_ceiling":false,"proxy_extrapolated":false,"predictor_extrapolated":false,"no3_correction_inactive":true,"prior_dominated":false},"width_ratio":0.6652},"ODP 1259":{"stan":[35.214,37.022,40.801,48.283,54.663],"outside_domain":false,"flags":{"proxy_below_floor":false,"proxy_above_ceiling":false,"proxy_extrapolated":true,"predictor_extrapolated":false,"no3_correction_inactive":true,"prior_dominated":false},"width_ratio":0.563}},"stan":{"file":"invT_gen_logi_fixed_multiv_marginal_unconstrained_t0shift.stan","src":"// ===============================================================================\n// invT_gen_logi_fixed_multiv_marginal_unconstrained_t0shift.stan\n//\n// PURPOSE: Bayesian paleotemperature reconstruction from observed Scaled Ring\n//          Index values, with non-thermal predictors (G2/3 ratio, NO3) entering\n//          as a shift of the calibration curve's location parameter.\n//          This is the inverse of the forward calibration\n//          gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift.stan, and it\n//          must be paired with a posterior from that model.\n//\n// --- THE MEAN FUNCTION (paper Eq. 13) -----------------------------------------\n//   T0_eff = T0 + gamma_G23*g23 + gamma_NO3*log10(no3)\n//   mu     = b + (1-b) / (1 + exp(-k*(T - T0_eff)))^(1/v)\n//\n//   Because the predictors shift T0 rather than mu, mu stays inside (b, 1) for\n//   every finite gamma. The inverse therefore exists everywhere except for\n//   samples whose observed proxy genuinely falls outside the curve's range.\n//\n//   T0 is the curve's LOCATION parameter, not its inflection point; the steepest\n//   response sits at T0 - ln(v)/k.\n//\n// --- APPROACH: marginal (direct sampling) -------------------------------------\n//   The forward calibration leaves uncertainty in the curve parameters\n//   theta = {T0, k, b, v, gamma_G23, gamma_NO3, sigma}. This model marginalizes\n//   over it rather than re-estimating it: for each sample n the Normal\n//   likelihood is averaged over M draws from the forward posterior,\n//\n//     p(RI_n | T_n) ~= (1/M) Sum_m Normal(RI_n | mu(T_n; theta_m), sigma_m)\n//\n//   evaluated as a log-sum-exp (paper Appendix B, Eqs. B2-B3). The only free\n//   parameters here are the N temperatures t_est.\n//\n// CRITICAL: ALL PARAMETERS MUST USE THE SAME DRAW INDEX m. Mixing indices across\n//   parameters would break their posterior correlations and inflate calibration\n//   uncertainty. build_invT_inputData() enforces this on the Python side.\n//\n// --- DATA BLOCK ---------------------------------------------------------------\n//   gamma_G23 and gamma_NO3 are each length M, one value per forward-posterior\n//   draw, in degC per unit predictor (degC per log10 unit for NO3). Pass zeros\n//   for a predictor that is switched off. The NO3 term applies only where the\n//   observed value falls inside (0, no3_cutoff).\n//\n// --- PARALLELIZATION via reduce_sum -------------------------------------------\n//   The outer loop over N samples is the bottleneck; reduce_sum splits it into\n//   chunks processed on separate CPU threads. grainsize = 1 gives maximum\n//   parallelism, grainsize = N gives none. Requires STAN_THREADS=True and\n//   threads_per_chain > 1.\n//\n//   The per-sample Normal prior on T is computed INSIDE ll_chunk, not in the\n//   model block: because p(T_n | prior_mu_t_n) depends on n, each chunk must\n//   contribute the prior for its own subset. Summing across chunks is\n//   mathematically identical to a single non-parallel loop.\n//\n// --- TEMPERATURE CONSTRAINT: \"unconstrained\" ----------------------------------\n//   t_est has no lower bound, so reconstructions may fall below the seawater\n//   freezing point where the data drive them there.\n// ===============================================================================\n\nfunctions {\n  // --- ll_chunk: log-probability for a chunk of N observations --------------\n  // Called by reduce_sum for each parallel chunk of indices [start, end].\n  //\n  // Arguments:\n  //   slice_indices -- subarray of {1, 2, ..., N} for this chunk (used by\n  //                   reduce_sum to determine which observations to process;\n  //                   the function uses start/end to slice shared vectors)\n  //   start, end    -- first and last observation indices in this chunk\n  //   (remaining)   -- shared data passed through from the model block\n  //\n  // Returns: sum of (prior + likelihood) log-probabilities for this chunk.\n\n  real ll_chunk(array[] int slice_indices,\n                int start, int end,\n                vector proxyObs,\n                vector t_est, vector prior_mu_t, real prior_sigma_t,\n                int use_gd, int use_no3,\n                vector gd, vector no3, real no3_cutoff,\n                vector t0, vector k, vector b, vector v,\n                vector gamma_gd, vector gamma_no3, vector sigma) {\n\n    int M = rows(t0);\n    real lp = 0;\n    int n_chunk = end - start + 1;\n\n    // Extract the subset of vectors relevant to this chunk.\n    // segment(v, start, length) returns v[start : start+length-1].\n    vector[n_chunk] t_seg    = segment(t_est,      start, n_chunk);\n    vector[n_chunk] mu_seg   = segment(prior_mu_t, start, n_chunk);\n    vector[n_chunk] gd_seg   = segment(gd,         start, n_chunk);\n    vector[n_chunk] n3_seg   = segment(no3,        start, n_chunk);\n    vector[n_chunk] y_seg    = segment(proxyObs,   start, n_chunk);\n\n    // Prior contribution for this chunk: T_n ~ Normal(prior_mu_t_n, prior_sigma_t)\n    lp += normal_lpdf(t_seg | mu_seg, prior_sigma_t);\n\n    // Likelihood contribution: marginalize over M calibration draws for each n.\n    for (i in 1:n_chunk) {\n      vector[M] llk;  // Log-likelihood under each of the M calibration draws\n\n      for (m in 1:M) {\n        // The predictors shift the curve's location, not the response. Read it\n        // as: \"this community structure / nutrient level makes the curve turn\n        // over at a different temperature\", rather than \"it offsets the index\".\n        real t0_eff = t0[m];\n\n        // Ecology correction: gamma_{G2/3} degC per unit gdgt23ratio.\n        if (use_gd == 1)\n          t0_eff += gamma_gd[m] * gd_seg[i];\n\n        // NO3 correction: gamma_{NO3} degC per log10 unit, applied conditionally.\n        // logno3 = 0 when NO3 is outside the valid range, so no correction is\n        // applied -- the same gate the forward calibration was fitted under.\n        if (use_no3 == 1) {\n          real logno3 = 0.0;\n          if (n3_seg[i] > 0.0 && n3_seg[i] < no3_cutoff)\n            logno3 = log10(n3_seg[i] + 1e-9);  // small offset avoids log(0)\n          t0_eff += gamma_no3[m] * logno3;\n        }\n\n        // The Richards curve, evaluated against the shifted location t0_eff.\n        // Bounded in (b[m], 1) by construction for any finite t0_eff.\n        real mu = b[m] + (1 - b[m])\n            / pow(1 + exp(-k[m] * (t_seg[i] - t0_eff)), 1.0 / v[m]);\n\n        // Log-likelihood of the observed Scaled RI under this calibration draw.\n        llk[m] = normal_lpdf(y_seg[i] | mu, sigma[m]);\n      }\n\n      // Monte Carlo marginalization: log[(1/M) Sum_m exp(llk_m)] = log_sum_exp - log(M)\n      lp += log_sum_exp(llk) - log(M);\n    }\n    return lp;\n  }\n}\n\ndata {\n    // --- Proxy observations ---------------------------------------------------\n    int<lower=1> N;                    // Number of sediment samples\n    vector[N] proxyObs;                // Observed scaled Ring Index (in [0,1])\n\n    // --- Prior on paleotemperature ---------------------------------------------\n    vector[N] prior_mu_t;              // Prior mean temperature per sample (degC)\n    real<lower=0> prior_sigma_t;       // Prior SD, shared across samples (degC)\n\n    // --- Optional non-thermal predictors --------------------------------------\n    int<lower=0, upper=1> use_gdgt23ratio;\n    int<lower=0, upper=1> use_no3;\n    vector[N] gdgt23ratio;\n    vector[N] no3;\n    real<lower=0> no3_cutoff;          // MUST match the forward posterior's attrs\n\n    // --- Forward calibration posterior -- M draws (all same-index) -------------\n    // Each vector has length M. Row m is one complete self-consistent draw from\n    // the T0-shift (GHEB) forward posterior: {T0_m, k_m, b_m, nu_m, gamma_m, sigma_m}.\n    // All indexed by [m] in the inner loop to preserve parameter correlations.\n    int<lower=1> M;\n    vector[M] t0;\n    vector[M] k;\n    vector[M] b;\n    vector[M] v;\n    vector[M] gamma_G23;       // gamma_{G2/3} per draw, degC per unit (zeros if unused)\n    vector[M] gamma_NO3;       // gamma_{NO3} per draw, degC per log10 unit (zeros if unused)\n    vector[M] sigma_proxyObs;  // Residual calibration noise per draw\n\n    // --- Parallelism control ---------------------------------------------------\n    // grainsize: approximate number of samples per parallel chunk.\n    // Set to 1 for maximum parallelism; set to N to disable (single thread).\n    int<lower=1> grainsize;\n}\n\nparameters {\n    // One temperature per sample -- the ONLY parameter in this model.\n    // \"Unconstrained\" means no physical lower bound imposed on t_est.\n    vector[N] t_est;\n}\n\nmodel {\n    // Create an index array {1, 2, ..., N} that reduce_sum uses to partition\n    // the N observations into chunks for parallel processing.\n    array[N] int indices = linspaced_int_array(N, 1, N);\n\n    // Dispatch parallel computation across chunks.\n    // reduce_sum calls ll_chunk once per chunk and sums the results.\n    // The prior and likelihood are both computed inside ll_chunk.\n    target += reduce_sum(\n        ll_chunk, indices, grainsize,\n        proxyObs, t_est, prior_mu_t, prior_sigma_t,\n        use_gdgt23ratio, use_no3, gdgt23ratio, no3, no3_cutoff,\n        t0, k, b, v,\n        gamma_G23, gamma_NO3, sigma_proxyObs\n    );\n}\n","chains":4,"warmup":500,"sampling":1000,"seed":42,"adapt_delta":0.8,"max_treedepth":10}}</script>
+<script>
+(function () {
+  const D = JSON.parse(document.getElementById("data").textContent);
+  const E = D.ens, M = E.t0.length, CUT = D.meta.cutoff;
+  // the temperature axis this page evaluates on (from, to, points); plots show −20 to 60 °C of it
+  const [TG0, TG1, NT] = D.meta.T, DT = (TG1 - TG0) / (NT - 1), T = Array.from({ length: NT }, (_, i) => TG0 + i * DT);
+  const SHOWN = (t) => t % 4 === 0 && T[t] >= -20 - 1e-9 && T[t] <= 60 + 1e-9;   // the points the plots draw
+  const SVGNS = "http://www.w3.org/2000/svg";
+  const fmt = (x, n = 1) => (Math.abs(x) < 0.5 * Math.pow(10, -n) ? 0 : x).toFixed(n).replace("-", "−");
+  const css = (v) => `var(--${v})`;
+  const LO = D.meta.thr_lo, HI = D.meta.thr_hi;
+  let state = { ex: 0, tail: "lo", tcand: null };
+  const logNo3 = (no3) => (no3 > 0 && no3 < CUT ? Math.log10(no3 + 1e-9) : 0);   // the Stan model's gate
+
+  // ---------- the "Your sample" card: user-set Scaled RI, GDGT-2/3, NO3 and prior ----------
+  const CUSTOM = D.examples.length;          // picker index of the custom card
+  const CUSTOM_DEFAULTS = { ri: 0.6, g23: 5, no3: 10, mu: 20, sd: 10 };
+  const custom = { ...CUSTOM_DEFAULTS };
+  function exampleAt(i) {
+    if (i < CUSTOM) return D.examples[i];
+    return { role: "your sample", record: "Your sample", age_label: "set by you", custom: true,
+             ri: custom.ri, g23: custom.g23, no3: custom.no3, prior_mu: custom.mu, prior_sigma: custom.sd, stan: null, outside_domain: null };
+  }
+  const cacheKey = (i) => (i < CUSTOM ? `ex${i}` : `custom:${custom.ri}:${custom.g23}:${custom.no3}:${custom.mu}:${custom.sd}`);
+
+  // ---------- math: the same log density as the shipped Stan model, evaluated directly ----------
+  let cache = {}, cacheN = 0;
+  function compute(i) {
+    const key = cacheKey(i);
+    if (cache[key]) return cache[key];
+    const ex = exampleAt(i);
+    const logn = logNo3(ex.no3);
+    const L = new Float64Array(NT), t0e = new Float64Array(M);
+    const coarse = [];                 // every 4th point inside the plots' window, for drawing
+    for (let t = 0; t < NT; t++) if (SHOWN(t)) coarse.push(t);
+    const show = [];                   // 60 evenly spaced draws for drawing
+    for (let j = 0; j < 60; j++) show.push(Math.round((j * (M - 1)) / 59));
+    const curves = new Map(), scores = new Map();
+    for (let m = 0; m < M; m++) {
+      t0e[m] = E.t0[m] + E.gG[m] * ex.g23 + E.gN[m] * logn;
+      const keep = show.includes(m);
+      const cu = keep ? [] : null, sc = keep ? [] : null;
+      for (let t = 0; t < NT; t++) {
+        const mu = E.b[m] + (1 - E.b[m]) / Math.pow(1 + Math.exp(-E.k[m] * (T[t] - t0e[m])), 1 / E.v[m]);
+        const z = (ex.ri - mu) / E.sig[m];
+        const s = Math.exp(-0.5 * z * z) / E.sig[m];
+        L[t] += s;
+        if (keep && SHOWN(t)) { cu.push(mu); sc.push(s); }
+      }
+      if (keep) { curves.set(m, cu); scores.set(m, sc); }
+    }
+    for (let t = 0; t < NT; t++) L[t] /= M;
+    const prior = T.map((x) => Math.exp(-0.5 * Math.pow((x - ex.prior_mu) / ex.prior_sigma, 2)));
+    const post = T.map((_, t) => L[t] * prior[t]);
+    const cdf = new Float64Array(NT); let run = 0;
+    for (let t = 0; t < NT; t++) { run += post[t]; cdf[t] = run; }
+    for (let t = 0; t < NT; t++) cdf[t] /= run;
+    const q = (p) => { let j = 0; while (j < NT - 1 && cdf[j] < p) j++; if (j === 0) return T[0]; const c0 = cdf[j - 1], c1 = cdf[j]; return c1 > c0 ? T[j - 1] + ((p - c0) / (c1 - c0)) * DT : T[j]; };
+    const at = (x) => { const f = (x - TG0) / DT, j = Math.floor(f); return j < 0 ? 0 : j >= NT - 1 ? 1 : cdf[j] + (f - j) * (cdf[j + 1] - cdf[j]); };
+    // median curve over all draws, on the coarse points
+    const med = coarse.map((t) => {
+      const vals = new Float64Array(M);
+      for (let m = 0; m < M; m++) vals[m] = E.b[m] + (1 - E.b[m]) / Math.pow(1 + Math.exp(-E.k[m] * (T[t] - t0e[m])), 1 / E.v[m]);
+      vals.sort(); return (vals[(M >> 1) - 1] + vals[M >> 1]) / 2;
+    });
+    // the draw closest to the median curve, for step 3
+    let best = show[0], bestErr = Infinity;
+    for (const [m, cu] of curves) { let e = 0; for (let c = 0; c < cu.length; c++) e += Math.abs(cu[c] - med[c]); if (e < bestErr) { bestErr = e; best = m; } }
+    const meanG = E.gG.reduce((a, b) => a + b, 0) / M, meanN = E.gN.reduce((a, b) => a + b, 0) / M;
+    const steep = Array.from(t0e, (v, m) => v - Math.log(E.v[m]) / E.k[m]).sort((a, b) => a - b)[M >> 1];
+    const out = { ex, L, prior, post, cdf, q, at, coarse, curves, scores, med, best, logn, meanG, meanN, steep, pct: [5, 16, 50, 84, 95].map((p) => q(p / 100)) };
+    if (++cacheN > 24) { cache = {}; cacheN = 1; }     // slider moves would otherwise pile up
+    cache[key] = out; return out;
+  }
+
+  // ---------- tiny SVG helpers ----------
+  function el(tag, attrs, parent) { const n = document.createElementNS(SVGNS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; }
+  function txt(parent, x, y, s, attrs = {}) { const n = el("text", Object.assign({ x, y }, attrs), parent); n.textContent = s; return n; }
+  function scale(d0, d1, r0, r1) { const f = (x) => r0 + ((x - d0) / (d1 - d0)) * (r1 - r0); f.inv = (y) => d0 + ((y - r0) / (r1 - r0)) * (d1 - d0); return f; }
+  function frame(svg, W, H, pad, xd, yd, xt, yt, xl, yl) {
+    svg.replaceChildren();
+    const x = scale(xd[0], xd[1], pad.l, W - pad.r), y = scale(yd[0], yd[1], H - pad.b, pad.t);
+    for (const v of yt) { el("line", { class: "gridline", x1: pad.l, x2: W - pad.r, y1: y(v), y2: y(v) }, svg); txt(svg, pad.l - 8, y(v) + 4, typeof v === "number" ? yl(v) : v, { "text-anchor": "end" }); }
+    for (const v of xt) { el("line", { class: "axis", x1: x(v), x2: x(v), y1: H - pad.b, y2: H - pad.b + 5 }, svg); txt(svg, x(v), H - pad.b + 19, xl(v), { "text-anchor": "middle" }); }
+    el("line", { class: "axis", x1: pad.l, x2: W - pad.r, y1: H - pad.b, y2: H - pad.b }, svg);
+    return { x, y };
+  }
+  const path = (xs, ys, x, y) => xs.map((v, i) => `${i ? "L" : "M"}${x(v).toFixed(1)},${y(ys[i]).toFixed(1)}`).join("");
+  const tick10 = [-20, -10, 0, 10, 20, 30, 40, 50, 60];
+  const degC = (v) => `${fmt(v, 0)} °C`;
+
+  // ---------- header, picker, footer ----------
+  const ST = D.stan;
+  const specs = [["Calibration", D.meta.posterior], ["Calibration draws", M], ["Prior", "set per sample, μT and σT"], ["Stan", `NUTS, ${ST.chains} chains × (${ST.warmup} + ${ST.sampling.toLocaleString()})`]];
+  const sl = document.getElementById("specline");
+  for (const [k, v] of specs) { const s = document.createElement("span"); s.textContent = `${k} `; const b = document.createElement("b"); b.textContent = v; s.appendChild(b); sl.appendChild(s); }
+
+  const picker = document.getElementById("picker");
+  const card = document.getElementById("customCard");
+  function selectPick(i) {
+    state.ex = i; state.tcand = null;
+    picker.querySelectorAll("button").forEach((x, j) => x.setAttribute("aria-pressed", String(j === i)));
+    card.hidden = i !== CUSTOM;
+    const role = (D.examples[i] || {}).role;           // undefined for the custom card
+    if (role === "warm end") setTail("hi"); else if (role === "cold end") setTail("lo");
+    render();
+  }
+  function pickCard(i, role, what, meta) {
+    const b = document.createElement("button");
+    b.id = `pick${i}`; b.setAttribute("aria-pressed", String(i === 0));
+    const r = document.createElement("span"); r.className = "role"; r.textContent = role;
+    const w = document.createElement("span"); w.className = "what"; w.textContent = what;
+    const m = document.createElement("span"); m.className = "meta"; m.textContent = meta;
+    b.append(r, w, m);
+    b.addEventListener("click", () => selectPick(i));
+    picker.appendChild(b);
+    return w;
+  }
+  D.examples.forEach((ex, i) => pickCard(i, ex.role, `${ex.record} · ${fmt(ex.stan[2], 1)} °C`, `RI ${ex.ri.toFixed(3)} · ${ex.age_label}`));
+  const cw = pickCard(CUSTOM, "your sample", "Set your own values", "Scaled RI · GDGT-2/3 · NO₃ · prior");
+
+  const riRange = document.getElementById("customRi"), riNum = document.getElementById("customRiNum");
+  const g23In = document.getElementById("customG23"), no3In = document.getElementById("customNo3");
+  const muIn = document.getElementById("customMu"), sdIn = document.getElementById("customSd");
+  const clamp = (v, lo, hi, dflt) => (Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : dflt);
+  function customNote() {
+    cw.textContent = `RI ${custom.ri.toFixed(3)}`;
+    document.getElementById("customNote").textContent =
+      (logNo3(custom.no3) ? `NO₃ term active: log₁₀(${custom.no3}) = ${fmt(Math.log10(custom.no3 + 1e-9), 2)}. ` : `NO₃ term off (NO₃ = ${custom.no3}, not between 0 and ${CUT}). `) +
+      "Results are computed live in your browser; there is no TEXAS run to compare against for your values.";
+  }
+  let pending = false;
+  function customChanged() {
+    customNote();
+    if (state.ex !== CUSTOM || pending) return;
+    pending = true;
+    requestAnimationFrame(() => { pending = false; state.tcand = null; render(); });
+  }
+  riRange.addEventListener("input", () => { custom.ri = clamp(+riRange.value, 0.1, 0.99, 0.6); riNum.value = custom.ri.toFixed(3); customChanged(); });
+  riNum.addEventListener("change", () => { custom.ri = clamp(+riNum.value, 0.1, 0.99, 0.6); riNum.value = custom.ri.toFixed(3); riRange.value = custom.ri; customChanged(); });
+  g23In.addEventListener("change", () => { custom.g23 = clamp(+g23In.value, 0, 100, 5); g23In.value = custom.g23; customChanged(); });
+  no3In.addEventListener("change", () => { custom.no3 = clamp(+no3In.value, 0, 40, 10); no3In.value = custom.no3; customChanged(); });
+  muIn.addEventListener("change", () => { custom.mu = clamp(+muIn.value, -5, 50, 20); muIn.value = custom.mu; customChanged(); });
+  sdIn.addEventListener("change", () => { custom.sd = clamp(+sdIn.value, 2, 20, 10); sdIn.value = custom.sd; customChanged(); });
+  document.getElementById("customReset").addEventListener("click", () => {
+    Object.assign(custom, CUSTOM_DEFAULTS);
+    riRange.value = custom.ri; riNum.value = custom.ri.toFixed(3); g23In.value = custom.g23; no3In.value = custom.no3; muIn.value = custom.mu; sdIn.value = custom.sd;
+    customChanged();
+  });
+  customNote();
+
+  // the expensive panels run only once they are on screen, and again after the sample settles
+  function lazy(id, fn) {
+    let dirty = true, seen = false, timer = 0;
+    const run = () => { if (dirty && seen) { dirty = false; fn(); } };
+    new IntersectionObserver((es) => { seen = es[es.length - 1].isIntersecting; run(); }, { rootMargin: "300px" }).observe(document.getElementById(id));
+    return () => { dirty = true; clearTimeout(timer); timer = setTimeout(run, 250); };
+  }
+  function cells(id, rows) {
+    const r = document.getElementById(id); r.replaceChildren();
+    for (const [v, k] of rows) { const d = document.createElement("div"); const a = document.createElement("span"); a.className = "v"; a.textContent = v; const b = document.createElement("span"); b.className = "k"; b.textContent = k; d.append(a, b); r.appendChild(d); }
+  }
+
+  // ---------- step renderers ----------
+  function step1(C) {
+    const svg = document.getElementById("f1"), W = 880, H = 380, pad = { l: 52, r: 18, t: 16, b: 40 };
+    const { x, y } = frame(svg, W, H, pad, [-20, 60], [0, 1], tick10, [0, 0.2, 0.4, 0.6, 0.8, 1], degC, (v) => v.toFixed(1));
+    const xs = C.coarse.map((t) => T[t]);
+    for (const [, cu] of C.curves) el("path", { d: path(xs, cu, x, y), fill: "none", stroke: css("grid"), "stroke-width": 1, "stroke-opacity": 0.22 }, svg);
+    el("path", { d: path(xs, C.med, x, y), fill: "none", stroke: css("grid"), "stroke-width": 2.5, "stroke-linecap": "round" }, svg);
+    el("line", { x1: x(-20), x2: x(60), y1: y(C.ex.ri), y2: y(C.ex.ri), stroke: css("ink-2"), "stroke-width": 1.5 }, svg);
+    txt(svg, x(59), y(C.ex.ri) - 7, `measured RI = ${C.ex.ri.toFixed(3)}`, { class: "lbl-strong", "text-anchor": "end" });
+    txt(svg, pad.l + 8, pad.t + 14, "Scaled RI", { class: "lbl" });
+    const sh = C.meanG * C.ex.g23 + C.meanN * C.logn;
+    const signed = (v) => `${v > 0.005 ? "+" : ""}${fmt(v, 2)} °C`;
+    document.getElementById("c1").textContent = `Where the horizontal line crosses the curves is where this sample's temperature can sit. For ${C.ex.record} the 90% range runs from about ${fmt(C.pct[0], 0)} to ${fmt(C.pct[4], 0)} °C. The next steps turn those crossings into an honest range.`;
+    cells("r1", [
+      [fmt(C.ex.g23, 2), "GDGT-2/3 measured"],
+      [signed(C.meanG * C.ex.g23), "T₀ shift from GDGT-2/3"],
+      [C.logn ? signed(C.meanN * C.logn) : "0 °C", C.logn ? `T₀ shift from NO₃ = ${C.ex.no3.toFixed(2)}` : `NO₃ = ${C.ex.no3.toFixed(2)}, not below ${CUT}: no shift`],
+      [signed(sh), "total shift of T₀ (average draw)"],
+      [`${fmt(C.steep, 1)} °C`, "steepest response, T₀′ − ln(ν)/k (median draw)"],
+    ]);
+  }
+
+  function step3(C) {
+    const slider = document.getElementById("tslider");
+    if (state.tcand === null) state.tcand = Math.round(Math.max(-20, Math.min(45, C.pct[2])) * 2) / 2;
+    slider.value = state.tcand;
+    const Tc = state.tcand, m = C.best;
+    const mu = (Tv) => { const t0e = E.t0[m] + E.gG[m] * C.ex.g23 + E.gN[m] * C.logn; return E.b[m] + (1 - E.b[m]) / Math.pow(1 + Math.exp(-E.k[m] * (Tv - t0e)), 1 / E.v[m]); };
+    const s = E.sig[m], pred = mu(Tc), miss = C.ex.ri - pred, z = miss / s, score = Math.exp(-0.5 * z * z) / s, peak = 1 / s;
+    document.getElementById("tval").textContent = `${fmt(Tc, 1)} °C`;
+    // left: one curve
+    let svg = document.getElementById("f3a"), pad = { l: 46, r: 12, t: 22, b: 38 };
+    let F = frame(svg, 430, 300, pad, [-20, 60], [0, 1], [-20, 0, 20, 40, 60], [0, 0.5, 1], degC, (v) => v.toFixed(1));
+    const xs = C.coarse.map((t) => T[t]);
+    // this curve's own measurement scatter: bands at ±1σ and ±2σ, clipped to the 0–1 RI range
+    const band = (m) => path(xs, xs.map((Tv) => Math.min(1, mu(Tv) + m * s)), F.x, F.y)
+      + xs.slice().reverse().map((Tv) => `L${F.x(Tv).toFixed(1)},${F.y(Math.max(0, mu(Tv) - m * s)).toFixed(1)}`).join("") + "Z";
+    el("path", { d: band(2), fill: css("grid-wash"), stroke: "none" }, svg);
+    el("path", { d: band(1), fill: css("grid-wash"), stroke: "none" }, svg);
+    // the temperatures where the measured RI sits inside ±2σ of this curve: where the score is high
+    const in2 = xs.filter((Tv) => Math.abs(C.ex.ri - mu(Tv)) <= 2 * s);
+    const lo2 = in2.length ? in2[0] : null, hi2 = in2.length ? in2[in2.length - 1] : null;
+    if (lo2 !== null) {
+      el("line", { x1: F.x(lo2), x2: F.x(hi2), y1: F.y(C.ex.ri), y2: F.y(C.ex.ri), stroke: css("ink"), "stroke-width": 4, "stroke-linecap": "round" }, svg);
+    }
+    el("path", { d: path(xs, xs.map(mu), F.x, F.y), fill: "none", stroke: css("grid"), "stroke-width": 2 }, svg);
+    el("line", { x1: F.x(-20), x2: F.x(60), y1: F.y(C.ex.ri), y2: F.y(C.ex.ri), stroke: css("ink-2"), "stroke-width": 1 }, svg);
+    el("line", { x1: F.x(Tc), x2: F.x(Tc), y1: F.y(0), y2: F.y(1), stroke: css("axis"), "stroke-width": 1 }, svg);
+    el("line", { x1: F.x(Tc), x2: F.x(Tc), y1: F.y(pred), y2: F.y(C.ex.ri), stroke: css("stan"), "stroke-width": 3, "stroke-linecap": "round" }, svg);
+    el("circle", { cx: F.x(Tc), cy: F.y(pred), r: 5, fill: css("grid"), stroke: css("surface"), "stroke-width": 2 }, svg);
+    // above the dot, clear of the dark ±2σ segment that runs along the measured-RI line
+    txt(svg, F.x(Tc) + (Tc > 30 ? -8 : 8), Math.min(F.y(pred), F.y(C.ex.ri)) - 12, `miss ${fmt(miss, 3)}`, { class: "lbl-strong", "text-anchor": Tc > 30 ? "end" : "start" });
+    txt(svg, 12, 14, "one curve · RI", { class: "lbl" });
+    txt(svg, F.x(58), F.y(0.08), `bands: ±1σ, ±2σ (σ = ${s.toFixed(3)})`, { class: "lbl", "text-anchor": "end" });
+    // right: that curve's score over T
+    svg = document.getElementById("f3b");
+    const sc = xs.map((Tv) => { const zz = (C.ex.ri - mu(Tv)) / s; return Math.exp(-0.5 * zz * zz) / s; });
+    F = frame(svg, 430, 300, pad, [-20, 60], [0, peak * 1.08], [-20, 0, 20, 40, 60], [0, peak], degC, (v) => (v === 0 ? "0" : "1/σ"));
+    if (lo2 !== null) {
+      // same temperature window as the dark segment on the left: measured RI within ±2σ of the curve
+      el("rect", { x: F.x(lo2), y: F.y(peak * 1.08), width: Math.max(1, F.x(hi2) - F.x(lo2)), height: F.y(0) - F.y(peak * 1.08), fill: css("accent-wash"), stroke: "none" }, svg);
+      el("line", { x1: F.x(lo2), x2: F.x(hi2), y1: F.y(0), y2: F.y(0), stroke: css("ink"), "stroke-width": 4, "stroke-linecap": "round" }, svg);
+      txt(svg, F.x(hi2) + 6, F.y(peak * 0.35), `within ±2σ: ${fmt(lo2, 1)} to ${fmt(hi2, 1)} °C`, { class: "lbl", "text-anchor": hi2 > 35 ? "end" : "start", x: hi2 > 35 ? F.x(lo2) - 6 : F.x(hi2) + 6 });
+    }
+    el("path", { d: path(xs, sc, F.x, F.y) + `L${F.x(60)},${F.y(0)}L${F.x(-20)},${F.y(0)}Z`, fill: css("grid-wash"), stroke: "none" }, svg);
+    el("path", { d: path(xs, sc, F.x, F.y), fill: "none", stroke: css("grid"), "stroke-width": 2 }, svg);
+    el("line", { x1: F.x(Tc), x2: F.x(Tc), y1: F.y(0), y2: F.y(score), stroke: css("stan"), "stroke-width": 2 }, svg);
+    el("circle", { cx: F.x(Tc), cy: F.y(score), r: 5, fill: css("stan"), stroke: css("surface"), "stroke-width": 2 }, svg);
+    txt(svg, 12, 14, "that curve's score", { class: "lbl" });
+    const t3 = document.getElementById("t3"); t3.replaceChildren();
+    // σ must not go through the uppercase header style, or it renders as a capital Σ
+    const head = t3.insertRow(); ["", "curve predicts RI", "measured RI", "miss", "miss ÷ σ", "score (share of max)"].forEach((h) => { const th = document.createElement("th"); th.textContent = h; if (h.includes("σ")) { th.textContent = "Miss ÷ σ"; th.style.textTransform = "none"; } head.appendChild(th); });
+    const row = t3.insertRow();
+    [`at ${fmt(Tc, 1)} °C, σ = ${s.toFixed(3)}`, pred.toFixed(3), C.ex.ri.toFixed(3), fmt(miss, 3), fmt(z, 2), `${(score / peak).toFixed(2)}`].forEach((v) => { row.insertCell().textContent = v; });
+  }
+
+  function step4(C) {
+    const svg = document.getElementById("f4"), W = 880, H = 320, pad = { l: 52, r: 18, t: 16, b: 40 };
+    const xs = C.coarse.map((t) => T[t]);
+    const sub = [...C.scores.values()].filter((_, j) => j % 3 !== 2).slice(0, 40);
+    let ymax = 0; for (const s of sub) for (const v of s) ymax = Math.max(ymax, v);
+    const { x, y } = frame(svg, W, H, pad, [-20, 60], [0, ymax * 1.05], tick10, [0], degC, () => "0");
+    for (const s of sub) el("path", { d: path(xs, s, x, y), fill: "none", stroke: css("grid"), "stroke-width": 1, "stroke-opacity": 0.3 }, svg);
+    const Lc = C.coarse.map((t) => C.L[t]);
+    el("path", { d: path(xs, Lc, x, y), fill: "none", stroke: css("ink"), "stroke-width": 2.5 }, svg);
+    let jm = 0; Lc.forEach((v, j) => { if (v > Lc[jm]) jm = j; });
+    txt(svg, x(xs[jm]) + 10, y(Lc[jm]) - 8, "average, L(T)", { class: "lbl-strong" });
+    txt(svg, 14, pad.t + 4, "score (relative)", { class: "lbl" });
+  }
+
+  function norm(a) { let m = 0; for (const v of a) m = Math.max(m, v); return a.map((v) => v / m); }
+
+  function step5(C) {
+    const svg = document.getElementById("f5"), W = 880, H = 320, pad = { l: 52, r: 18, t: 16, b: 40 };
+    const { x, y } = frame(svg, W, H, pad, [-20, 60], [0, 1.08], tick10, [0, 0.5, 1], degC, (v) => (v === 1 ? "max" : v === 0 ? "0" : ""));
+    const xs = C.coarse.map((t) => T[t]);
+    const Ln = norm(C.coarse.map((t) => C.L[t])), Pn = norm(C.coarse.map((t) => C.prior[t])), Qn = norm(C.coarse.map((t) => C.post[t]));
+    el("path", { d: path(xs, Qn, x, y) + `L${x(60)},${y(0)}L${x(-20)},${y(0)}Z`, fill: css("grid-wash"), stroke: "none" }, svg);
+    el("path", { d: path(xs, Pn, x, y), fill: "none", stroke: css("muted"), "stroke-width": 2 }, svg);
+    el("path", { d: path(xs, Ln, x, y), fill: "none", stroke: css("ink-2"), "stroke-width": 1.5 }, svg);
+    el("path", { d: path(xs, Qn, x, y), fill: "none", stroke: css("grid"), "stroke-width": 2.5 }, svg);
+    txt(svg, x(C.ex.prior_mu), y(1.02) - 4, `prior mean μT = ${fmt(C.ex.prior_mu, 1)} °C, σT = ${fmt(C.ex.prior_sigma, 0)} °C`, { class: "lbl", "text-anchor": C.ex.prior_mu > 40 ? "end" : "middle" });
+    const shift = Math.abs(C.pct[2] - C.ex.prior_mu), ratio = (C.pct[3] - C.pct[1]) / 2 / C.ex.prior_sigma;
+    document.getElementById("c5").textContent = ratio < 0.5
+      ? `Here the likelihood is much narrower than the prior, so the posterior is almost the likelihood itself, even though its median sits about ${fmt(shift, 0)} °C from the prior mean. The measurement dominates, which is typical for the steep part of the S-curve.`
+      : `Here the likelihood is broad, so the posterior sits between it and the prior, with a width ${fmt(ratio * 100, 0)}% of the prior's. Where the curve is flat the prior pulls harder, which statisticians call shrinkage toward the prior.`;
+  }
+
+  function step6(C) {
+    const svg = document.getElementById("f6"), W = 880, H = 340, pad = { l: 52, r: 18, t: 16, b: 58 };
+    const stan = C.ex.stan;   // null for values set by the reader: no TEXAS run exists for them
+    const lo = Math.max(-40, Math.floor(Math.min(C.pct[0], stan ? stan[0] : C.pct[0]) / 10) * 10 - 10), hi = Math.min(80, Math.ceil(Math.max(C.pct[4], stan ? stan[4] : C.pct[4]) / 10) * 10 + 10);
+    const ticks = []; for (let v = lo; v <= hi; v += 10) ticks.push(v);
+    const { x, y } = frame(svg, W, H, pad, [lo, hi], [0, 1], ticks, [0, 0.05, 0.16, 0.5, 0.84, 0.95, 1], degC, (v) => `${Math.round(v * 100)}%`);
+    const idx = []; for (let t = 0; t < NT; t++) if (T[t] >= lo && T[t] <= hi && t % 2 === 0) idx.push(t);
+    el("path", { d: path(idx.map((t) => T[t]), idx.map((t) => C.cdf[t]), x, y), fill: "none", stroke: css("grid"), "stroke-width": 2.5 }, svg);
+    [5, 16, 50, 84, 95].forEach((p, j) => {
+      const tv = C.pct[j];
+      el("line", { x1: x(lo), x2: x(tv), y1: y(p / 100), y2: y(p / 100), stroke: css("axis"), "stroke-width": 1 }, svg);
+      el("circle", { cx: x(tv), cy: y(p / 100), r: p === 50 ? 6 : 4.5, fill: css("grid"), stroke: css("surface"), "stroke-width": 2 }, svg);
+      if (p === 50) txt(svg, x(tv) + 10, y(0.5) + 4, `p50 = ${fmt(tv, 2)} °C`, { class: "lbl-strong" });
+      if (!stan) return;   // TEXAS percentile as a diamond on its own row below the axis
+      const sx = x(Math.max(lo, Math.min(hi, stan[j]))), sy = H - pad.b + 36;
+      el("path", { d: `M${sx},${sy - 6}L${sx + 6},${sy}L${sx},${sy + 6}L${sx - 6},${sy}Z`, fill: css("stan"), stroke: css("surface"), "stroke-width": 1.5 }, svg);
+    });
+    txt(svg, pad.l - 8, H - pad.b + 40, stan ? "TEXAS" : "TEXAS: not run for your values", { "text-anchor": stan ? "end" : "start", class: "lbl", x: stan ? pad.l - 8 : pad.l });
+    const t6 = document.getElementById("t6"); t6.replaceChildren();
+    const h = t6.insertRow(); ["", "p5", "p16", "p50", "p84", "p95", "90% width"].forEach((s) => { const th = document.createElement("th"); th.textContent = s; h.appendChild(th); });
+    for (const [k, v] of [["this page", C.pct], ["TEXAS, predict_T_from_proxyObs", stan]]) {
+      const r = t6.insertRow(); r.insertCell().textContent = k;
+      if (!v) { const c = r.insertCell(); c.colSpan = 6; c.textContent = "not run: your values exist only on this page"; continue; }
+      v.forEach((z) => (r.insertCell().textContent = fmt(z, 2))); r.insertCell().textContent = fmt(v[4] - v[0], 2);
+    }
+  }
+
+  function step7(C) {
+    const warm = state.tail === "hi";
+    const thr = warm ? HI : LO, P = warm ? 1 - C.at(HI) : C.at(LO);
+    const word = warm ? `warmer than ${HI} °C` : `colder than ${LO} °C`;
+    const pstr = (p) => (p >= 0.999 ? "> 0.999" : p < 0.001 ? "< 0.001" : p.toFixed(3));
+    document.getElementById("pbig").textContent = pstr(P);
+    document.getElementById("pbigk").textContent = `probability ${C.ex.record} was ${word}`;
+    const svg = document.getElementById("f7"), W = 880, H = 300, pad = { l: 52, r: 18, t: 16, b: 40 };
+    const { x, y } = frame(svg, W, H, pad, [-20, 60], [0, 1.08], tick10, [0], degC, () => "0");
+    const xs = C.coarse.map((t) => T[t]), Qn = norm(C.coarse.map((t) => C.post[t]));
+    el("rect", { x: x(LO), y: y(1.08), width: x(HI) - x(LO), height: y(0) - y(1.08), fill: css("accent-wash"), stroke: "none" }, svg);
+    txt(svg, (x(LO) + x(HI)) / 2, y(1.08) + 14, `uncertainty under ±5 °C, ${LO}–${HI} °C (Fig. 7d)`, { class: "lbl", "text-anchor": "middle" });
+    const tail = xs.map((v, j) => [v, Qn[j]]).filter(([v]) => (warm ? v >= thr : v <= thr));
+    if (tail.length) {
+      const first = tail[0][0], last = tail[tail.length - 1][0];
+      el("path", { d: `M${x(first)},${y(0)}` + tail.map(([v, q]) => `L${x(v)},${y(q)}`).join("") + `L${x(last)},${y(0)}Z`, fill: css("cold-wash"), stroke: "none" }, svg);
+    }
+    el("path", { d: path(xs, Qn, x, y), fill: "none", stroke: css("grid"), "stroke-width": 2.5 }, svg);
+    el("line", { x1: x(thr), x2: x(thr), y1: y(0), y2: y(1.08), stroke: css("cold"), "stroke-width": 2 }, svg);
+    txt(svg, x(thr) + (warm ? 8 : -8), y(0.9), `${thr} °C`, { class: "lbl-strong", "text-anchor": warm ? "start" : "end" });
+    const ps = C.pct[2], beyond = warm ? ps > thr : ps < thr;
+    document.getElementById("p7text").textContent = beyond
+      ? `This sample's p50 is ${fmt(ps, 1)} °C, past the edge, so read it with care. The probability it was ${word} is ${P >= 0.999 ? "essentially 1" : P.toFixed(3)}, and that can be reported alongside it: the p50 says the proxy is near its limit, the probability says how confidently ${warm ? "warm" : "cold"} the sample is.`
+      : `This sample's p50 is ${fmt(ps, 1)} °C, inside the window, and ${(P * 100).toFixed(P < 0.01 ? 2 : 1)}% of its posterior sits ${warm ? "above" : "below"} ${thr} °C. ${P > 0.1 ? "A real share of the distribution already reaches past the edge, so quote the range as well as the median." : "Here the p50 and the probability tell the same story."}`;
+  }
+
+  // ---------- steps 6-8: the Stan program, Hamiltonian Monte Carlo, NUTS chains ----------
+  // The log posterior of one temperature and its slope: exactly what the Stan model block
+  // adds up for one sample (normal_lpdf of the prior + log_sum_exp of the M draws' normal_lpdf,
+  // minus log M), and its derivative, which HMC needs.
+  function makeLogp(ex) {
+    const logn = logNo3(ex.no3);
+    const t0e = new Float64Array(M), ll = new Float64Array(M), dl = new Float64Array(M);
+    for (let m = 0; m < M; m++) t0e[m] = E.t0[m] + E.gG[m] * ex.g23 + E.gN[m] * logn;
+    const y = ex.ri, mu0 = ex.prior_mu, PSD = ex.prior_sigma, LM = Math.log(M);
+    return (T) => {
+      let mx = -Infinity;
+      for (let m = 0; m < M; m++) {
+        const e = Math.exp(-E.k[m] * (T - t0e[m]));
+        let mu, dmu;
+        if (!Number.isFinite(e)) { mu = E.b[m]; dmu = 0; }
+        else { const base = 1 + e, p = Math.pow(base, -1 / E.v[m]); mu = E.b[m] + (1 - E.b[m]) * p; dmu = (1 - E.b[m]) * (p / base) * (E.k[m] * e) / E.v[m]; }
+        const s = E.sig[m], r = (y - mu) / s;
+        ll[m] = -0.5 * r * r - Math.log(s); dl[m] = (r / s) * dmu;
+        if (ll[m] > mx) mx = ll[m];
+      }
+      let sw = 0, g = 0;
+      for (let m = 0; m < M; m++) { const w = Math.exp(ll[m] - mx); sw += w; g += w * dl[m]; }
+      const z = (T - mu0) / PSD;
+      return [mx + Math.log(sw) - LM - 0.5 * z * z, g / sw - z / PSD];
+    };
+  }
+  function rng(seed) { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  const randn = (u) => Math.sqrt(-2 * Math.log(u() || 1e-300)) * Math.cos(2 * Math.PI * u());
+  const sdOf = (C) => Math.max(0.05, (C.pct[3] - C.pct[1]) / 2);
+
+  // step 6: the program, with steps 3-5 marked
+  let stanFull = false;
+  function stanListing() {
+    document.getElementById("stanFile").textContent = ST.file;
+    const MARK = [[/llk\[m\]\s*=\s*normal_lpdf\(y_seg/, "s3", "step 3: one curve's score"],
+                  [/log_sum_exp\(llk\)/, "s4", "step 4: average over the draws"],
+                  [/normal_lpdf\(t_seg/, "s5", "step 5: the prior"],
+                  [/vector\[N\]\s+t_est;/, "s0", "the only parameter: one T per sample"]];
+    const pre = document.getElementById("stanCode"); pre.replaceChildren();
+    let blank = 0;
+    for (const raw of ST.src.split("\n")) {
+      const full = /^\s*\/\//.test(raw), code = raw.replace(/\s*\/\/.*$/, "");
+      if (!stanFull && full) continue;
+      const line = stanFull ? raw : code;
+      if (!line.trim()) { if (blank++ || !stanFull && !pre.childNodes.length) continue; } else blank = 0;
+      const span = document.createElement("span"); span.className = "ln";
+      const mk = MARK.find(([re]) => re.test(raw));
+      if (mk && mk[1] !== "s0") span.classList.add("hl", mk[1]);
+      if (full) span.classList.add("cm");
+      const kw = /^(functions|data|parameters|model)\s*\{/.exec(line.trim());
+      if (kw) { const b = document.createElement("span"); b.className = "kw"; b.textContent = line; span.appendChild(b); }
+      else span.textContent = line;
+      if (mk) { const tg = document.createElement("span"); tg.className = "tag"; tg.textContent = `← ${mk[2]}`; span.appendChild(tg); }
+      pre.appendChild(span);
+    }
+  }
+
+  // step 7: one HMC trajectory, drawn step by step
+  const hmc = { T: null, key: null, past: [], timer: 0 };
+  function hmcEps() { return Math.pow(10, +document.getElementById("hmcEps").value); }
+  function hmcSetup(C) {
+    const key = cacheKey(state.ex);
+    if (hmc.key !== key) { hmc.key = key; hmc.T = C.pct[2]; hmc.past = []; }
+    document.getElementById("hmcEpsV").textContent = `${hmcEps().toFixed(2)} (≈ ${fmt(hmcEps() * sdOf(C), 2)} °C)`;
+    document.getElementById("hmcLV").textContent = document.getElementById("hmcL").value;
+    hmcDraw(C, null);
+  }
+  function hmcRun(C) {
+    clearTimeout(hmc.timer);
+    const lp = makeLogp(C.ex), minv = sdOf(C) ** 2, eps = hmcEps(), L = +document.getElementById("hmcL").value;
+    const u = rng((Date.now() & 0xffff) + 7);
+    let T = hmc.T, p = randn(u) / Math.sqrt(minv), [l, g] = lp(T);
+    const H0 = -l + 0.5 * p * p * minv, pts = [[T, p, H0]];
+    let div = false;
+    for (let i = 0; i < L; i++) {
+      p += 0.5 * eps * g; T += eps * minv * p; [l, g] = lp(T); p += 0.5 * eps * g;
+      const H = -l + 0.5 * p * p * minv; pts.push([T, p, H]);
+      if (!Number.isFinite(H) || H - H0 > 1000) { div = true; break; }
+    }
+    const dH = pts[pts.length - 1][2] - H0, acc = div ? 0 : Math.min(1, Math.exp(-dH)), ok = !div && u() < acc;
+    let k = 1;
+    const tick = () => {
+      hmcDraw(C, { pts: pts.slice(0, k + 1), H0, minv, done: k >= pts.length - 1, dH, acc, ok, div });
+      if (k < pts.length - 1) { k++; hmc.timer = setTimeout(tick, 40); }
+      else { hmc.past.push(pts[0][0]); if (ok) hmc.T = pts[pts.length - 1][0]; hmcDraw(C, { pts, H0, minv, done: true, dH, acc, ok, div }); }
+    };
+    tick();
+  }
+  function hmcDraw(C, tr) {
+    const lp = makeLogp(C.ex), sd = sdOf(C), c = C.pct[2];
+    // the view: the posterior's bulk, widened for the trajectory but never past ±8 sd, so a
+    // divergent one (which can fly off by thousands of degrees) is clipped and labelled instead
+    const tp = tr ? tr.pts.map((q) => q[0]).filter(Number.isFinite) : [];
+    const lo = Math.max(c - 8 * sd, Math.min(c - 4.5 * sd, ...tp)), hi = Math.min(c + 8 * sd, Math.max(c + 4.5 * sd, ...tp));
+    const span = [lo, hi];
+    const xs = []; for (let i = 0; i <= 160; i++) xs.push(span[0] + ((span[1] - span[0]) * i) / 160);
+    const U = xs.map((x) => -lp(x)[0]), Umin = Math.min(...U);
+    const Ur = U.map((v) => v - Umin), top = Math.min(40, Math.max(6, ...Ur.filter((v, i) => Math.abs(xs[i] - c) < 3.5 * sd)));
+    const ticks = []; const st = (span[1] - span[0]) > 30 ? 10 : (span[1] - span[0]) > 12 ? 5 : 2; for (let v = Math.ceil(span[0] / st) * st; v <= span[1]; v += st) ticks.push(v);
+    const s1 = document.getElementById("fhmc"), P = { l: 40, r: 10, t: 12, b: 36 };
+    const F = frame(s1, 430, 300, P, span, [0, top], ticks, [0, Math.round(top / 2), Math.round(top)], degC, (v) => String(v));
+    el("path", { d: path(xs, Ur.map((v) => Math.min(v, top)), F.x, F.y), fill: "none", stroke: css("ink-2"), "stroke-width": 2 }, s1);
+    for (const T0 of hmc.past.slice(-40)) el("circle", { cx: F.x(T0), cy: F.y(0) - 4, r: 2.5, fill: css("muted"), "fill-opacity": 0.6 }, s1);
+    txt(s1, P.l + 4, P.t + 10, "U(T) = −log posterior", { class: "lbl" });
+    const s2 = document.getElementById("fhmc2"), minv = sd * sd, pmax = 3.5 / Math.sqrt(minv);
+    const ps = tr ? tr.pts.map((q) => Math.abs(q[1])) : [];
+    const pm = Math.max(pmax, ...ps.filter(Number.isFinite).map((v) => Math.min(v, 6 * pmax)));
+    const F2 = frame(s2, 430, 300, P, span, [-pm, pm], ticks, [-pm, 0, pm], degC, (v) => (v === 0 ? "0" : ""));
+    txt(s2, P.l + 4, P.t + 10, "momentum p", { class: "lbl" });
+    if (!tr) { const T0 = hmc.T; el("circle", { cx: F.x(T0), cy: F.y(Math.min(top, -lp(T0)[0] - Umin)), r: 6, fill: css("stan") }, s1); hmcReadout(null); return; }
+    // the energy level of this trajectory, as a closed curve in phase space: p = ±sqrt(2(H0 − U)/minv)
+    const lvl = xs.map((x, i) => { const r = 2 * (tr.H0 - U[i]) / tr.minv; return r >= 0 ? Math.sqrt(r) : null; });
+    for (const sgn of [1, -1]) { let d = ""; xs.forEach((x, i) => { if (lvl[i] == null) { return; } d += `${d && lvl[i - 1] != null ? "L" : "M"}${F2.x(x).toFixed(1)},${F2.y(Math.max(-pm, Math.min(pm, sgn * lvl[i]))).toFixed(1)}`; }); if (d) el("path", { d, fill: "none", stroke: css("axis"), "stroke-width": 1.2, "stroke-dasharray": "3 3" }, s2); }
+    const col = tr.div ? css("cold") : css("stan");
+    const pts = tr.pts.filter((q) => Number.isFinite(q[0]) && Number.isFinite(q[1]));
+    el("path", { d: pts.map((q, i) => `${i ? "L" : "M"}${F.x(Math.max(span[0], Math.min(span[1], q[0]))).toFixed(1)},${F.y(Math.min(top, Math.max(0, -lp(q[0])[0] - Umin))).toFixed(1)}`).join(""), fill: "none", stroke: col, "stroke-width": 1.5 }, s1);
+    pts.forEach((q, i) => el("circle", { cx: F.x(Math.max(span[0], Math.min(span[1], q[0]))), cy: F.y(Math.min(top, Math.max(0, -lp(q[0])[0] - Umin))), r: i === 0 || i === pts.length - 1 ? 5 : 2.4, fill: col }, s1));
+    el("path", { d: pts.map((q, i) => `${i ? "L" : "M"}${F2.x(Math.max(span[0], Math.min(span[1], q[0]))).toFixed(1)},${F2.y(Math.max(-pm, Math.min(pm, q[1]))).toFixed(1)}`).join(""), fill: "none", stroke: col, "stroke-width": 1.5 }, s2);
+    pts.forEach((q, i) => el("circle", { cx: F2.x(Math.max(span[0], Math.min(span[1], q[0]))), cy: F2.y(Math.max(-pm, Math.min(pm, q[1]))), r: i === 0 || i === pts.length - 1 ? 4.5 : 2, fill: col }, s2));
+    const last = tr.pts[tr.pts.length - 1][0];
+    if (!(last >= span[0] && last <= span[1])) txt(s1, last > span[1] ? 430 - P.r - 4 : P.l + 4, P.t + 26, `flew off to ${Number.isFinite(last) ? fmt(last, 0) + " °C" : "infinity"} →`, { class: "lbl-strong", "text-anchor": last > span[1] ? "end" : "start" });
+    hmcReadout(tr);
+  }
+  function hmcReadout(tr) {
+    const r = document.getElementById("rhmc"); r.replaceChildren();
+    const rows = !tr ? [[`${fmt(hmc.T, 2)} °C`, "start: the current draw"], ["—", "press “one trajectory”"]]
+      : [[`${fmt(tr.pts[0][0], 2)} → ${fmt(tr.pts[tr.pts.length - 1][0], 2)} °C`, `${tr.pts.length - 1} leapfrog steps`],
+         [tr.div ? "diverged" : `${tr.dH >= 0 ? "+" : ""}${tr.dH.toFixed(3)}`, "ΔH, energy error"],
+         [tr.div ? "0" : tr.acc.toFixed(3), "acceptance, min(1, e^−ΔH)"],
+         [!tr.done ? "…" : tr.div ? "divergence: rejected" : tr.ok ? "accepted" : "rejected: stays put", "outcome"]];
+    rows.forEach(([v, k]) => { const d = document.createElement("div"); const a = document.createElement("span"); a.className = "v"; a.textContent = v; const b = document.createElement("span"); b.className = "k"; b.textContent = k; d.append(a, b); r.appendChild(d); });
+  }
+
+  // step 8: NUTS (Hoffman & Gelman 2014, the original slice version) with dual-averaging step
+  // size and Stan's warm-up windows for the metric: 75 iterations, then windows of 25, 50, 100
+  function nutsChain(lp, seed, nWarm, nSamp, delta, maxDepth) {
+    const u = rng(seed);
+    let T = -2 + 4 * u(), minv = 1, [l, g] = lp(T);     // Stan's default start: uniform(−2, 2)
+    const leap = (T0, p0, g0, e) => { let p = p0 + 0.5 * e * g0; const T1 = T0 + e * minv * p; const [l1, g1] = lp(T1); p += 0.5 * e * g1; return [T1, p, l1, g1]; };
+    // a first step size (Hoffman & Gelman 2014, Algorithm 4): double or halve it until one
+    // leapfrog step's acceptance crosses one half
+    const initEps = () => {
+      let e = 1; const p = randn(u) / Math.sqrt(minv), H0 = -l + 0.5 * p * p * minv;
+      const logr = (ee) => { const r = leap(T, p, g, ee), H = -r[2] + 0.5 * r[1] * r[1] * minv; return Number.isFinite(H) ? H0 - H : -Infinity; };
+      const a = logr(e) > Math.log(0.5) ? 1 : -1;
+      for (let i = 0; i < 60 && a * logr(e) > -a * Math.log(2); i++) e *= Math.pow(2, a);
+      return e;
+    };
+    let eps = initEps(), mu = Math.log(10 * eps), Hbar = 0, logEbar = 0, tAd = 0;
+    const ends = []; { let w = 75, s = 25; while (w + s <= nWarm - 50) { const nxt = w + 2 * s > nWarm - 50 ? nWarm - 50 : w + s; ends.push(nxt); w = nxt; s *= 2; } }
+    let winStart = 75, wsum = 0, wsq = 0, wn = 0;
+    const draws = new Float64Array(nWarm + nSamp); let divs = 0, depthSum = 0, grads = 0;
+    for (let it = 0; it < nWarm + nSamp; it++) {
+      const r0 = randn(u) / Math.sqrt(minv), joint0 = l - 0.5 * r0 * r0 * minv, logu = joint0 + Math.log(u() || 1e-300);
+      let Tm = T, Tp = T, rm = r0, rp = r0, gm = g, gp = g, Tn = T, ln = l, gn = g, n = 1, s = 1, depth = 0, aSum = 0, aN = 0, div = false;
+      const build = (Tb, rb, gb, v, j) => {
+        if (j === 0) {
+          const [T1, r1, l1, g1] = leap(Tb, rb, gb, v * eps); grads++;
+          const joint = l1 - 0.5 * r1 * r1 * minv, ok = Number.isFinite(joint);
+          const n1 = ok && logu <= joint ? 1 : 0, s1 = ok && logu < joint + 1000 ? 1 : 0;
+          if (!s1) div = true;
+          return { Tm: T1, rm: r1, gm: g1, Tp: T1, rp: r1, gp: g1, T: T1, l: l1, g: g1, n: n1, s: s1, a: ok ? Math.min(1, Math.exp(joint - joint0)) : 0, na: 1 };
+        }
+        const A = build(Tb, rb, gb, v, j - 1);
+        if (A.s) {
+          const B = v === -1 ? build(A.Tm, A.rm, A.gm, v, j - 1) : build(A.Tp, A.rp, A.gp, v, j - 1);
+          if (v === -1) { A.Tm = B.Tm; A.rm = B.rm; A.gm = B.gm; } else { A.Tp = B.Tp; A.rp = B.rp; A.gp = B.gp; }
+          if (A.n + B.n > 0 && u() < B.n / (A.n + B.n)) { A.T = B.T; A.l = B.l; A.g = B.g; }
+          A.a += B.a; A.na += B.na; A.n += B.n;
+          A.s = B.s && (A.Tp - A.Tm) * A.rm * minv >= 0 && (A.Tp - A.Tm) * A.rp * minv >= 0 ? 1 : 0;
+        }
+        return A;
+      };
+      while (s && depth < maxDepth) {
+        const v = u() < 0.5 ? -1 : 1;
+        const R = v === -1 ? build(Tm, rm, gm, v, depth) : build(Tp, rp, gp, v, depth);
+        if (v === -1) { Tm = R.Tm; rm = R.rm; gm = R.gm; } else { Tp = R.Tp; rp = R.rp; gp = R.gp; }
+        if (R.s && u() < R.n / n) { Tn = R.T; ln = R.l; gn = R.g; }
+        n += R.n; aSum += R.a; aN += R.na; depth++;
+        s = R.s && (Tp - Tm) * rm * minv >= 0 && (Tp - Tm) * rp * minv >= 0 ? 1 : 0;
+      }
+      T = Tn; l = ln; g = gn; draws[it] = T; depthSum += depth; if (div && it >= nWarm) divs++;
+      if (it < nWarm) {                                   // adaptation
+        tAd++; const w = 1 / (tAd + 10), acc = aN ? aSum / aN : 0;
+        Hbar = (1 - w) * Hbar + w * (delta - acc);
+        const logE = mu - (Math.sqrt(tAd) / 0.05) * Hbar, k = Math.pow(tAd, -0.75);
+        eps = Math.exp(logE); logEbar = k * logE + (1 - k) * logEbar;
+        if (it >= winStart && it < nWarm - 50) { wn++; wsum += T; wsq += T * T; }
+        if (ends.includes(it + 1)) {                       // end of a metric window: learn the mass, restart the step size
+          const vr = wn > 1 ? (wsq - wsum * wsum / wn) / (wn - 1) : 1;
+          minv = (wn / (wn + 5)) * vr + 1e-3 * (5 / (wn + 5));
+          winStart = it + 1; wsum = wsq = wn = 0;
+          eps = initEps(); mu = Math.log(10 * eps); Hbar = 0; logEbar = 0; tAd = 0;
+        }
+        if (it === nWarm - 1) eps = Math.exp(logEbar);
+      }
+    }
+    return { draws, divs, depth: depthSum / (nWarm + nSamp), eps, minv, grads };
+  }
+  // split R-hat (Gelman et al. 2013) and the multi-chain effective sample size with Geyer's
+  // initial monotone sequence (as Stan computes it, without the rank normalization)
+  function diagnostics(chains) {
+    const mean = (a) => a.reduce((x, y) => x + y, 0) / a.length;
+    const vr = (a) => { const m = mean(a); return a.reduce((x, y) => x + (y - m) ** 2, 0) / (a.length - 1); };
+    const halves = chains.flatMap((c) => [c.slice(0, c.length >> 1), c.slice(c.length >> 1)]);
+    const n = halves[0].length, W = mean(halves.map(vr)), B = n * vr(halves.map(mean));
+    const rhat = Math.sqrt((((n - 1) / n) * W + B / n) / W);
+    const N = chains[0].length, m = chains.length, Wc = mean(chains.map(vr)), Bc = N * vr(chains.map(mean)), vplus = ((N - 1) / N) * Wc + Bc / N;
+    const acov = (c, t) => { const mu = mean(c); let s = 0; for (let i = 0; i + t < c.length; i++) s += (c[i] - mu) * (c[i + t] - mu); return s / c.length; };
+    const rho = (t) => 1 - (Wc - mean(chains.map((c) => acov(c, t)))) / vplus;
+    let tau = -1, prev = Infinity;
+    for (let t = 0; t < N - 2; t += 2) { let P = rho(t) + rho(t + 1); if (P <= 0) break; P = Math.min(P, prev); prev = P; tau += 2 * P; }
+    return { rhat, ess: (m * N) / Math.max(tau, 1 / Math.log10(m * N)) };
+  }
+  const nuts = { token: 0, seed: ST.seed, wu: true, last: null };
+  function stepNuts(C) {
+    nuts.last = null; const tok = ++nuts.token, lp = makeLogp(C.ex), nW = ST.warmup, nS = ST.sampling, nC = ST.chains, out = [], t0 = performance.now();
+    const status = document.getElementById("nutsStatus");
+    const next = (k) => {
+      if (tok !== nuts.token) return;                    // a newer sample or run took over
+      if (k < nC) { status.textContent = `running chain ${k + 1} of ${nC}…`; setTimeout(() => { if (tok !== nuts.token) return; out.push(nutsChain(lp, nuts.seed * 1000 + k + 1, nW, nS, ST.adapt_delta, ST.max_treedepth)); next(k + 1); }, 15); return; }
+      status.textContent = `${nC} chains × (${nW} + ${nS}) in ${((performance.now() - t0) / 1000).toFixed(1)} s · seed ${nuts.seed}`;
+      nuts.last = out; nutsDraw(C, out);
+    };
+    next(0);
+  }
+  function nutsDraw(C, out) {
+    const nW = ST.warmup, kept = out.map((c) => Array.from(c.draws.slice(nW))), all = kept.flat().sort((a, b) => a - b);
+    const q = (p) => { const h = (all.length - 1) * p, i = Math.floor(h); return all[i] + (h - i) * ((all[Math.min(i + 1, all.length - 1)]) - all[i]); };
+    const pct = [0.05, 0.16, 0.5, 0.84, 0.95].map(q), dg = diagnostics(kept), divs = out.reduce((s, c) => s + c.divs, 0);
+    const dens = (x) => { const f = (x - TG0) / DT, j = Math.floor(f); if (j < 0 || j >= NT - 1) return 0; return (C.cdf[j + 1] - C.cdf[j]) / DT; };
+    const mcse = [0.05, 0.16, 0.5, 0.84, 0.95].map((p, i) => Math.sqrt((p * (1 - p)) / dg.ess) / Math.max(dens(C.pct[i]), 1e-9));
+    cells("rnuts", [[dg.rhat.toFixed(3), `R̂ (split, ${out.length} chains)`], [Math.round(dg.ess).toLocaleString(), `ESS of ${all.length.toLocaleString()} draws`],
+     [String(divs), "divergences after warm-up"], [`${(out.reduce((s, c) => s + c.eps, 0) / out.length).toFixed(2)}`, "step size ε after warm-up"],
+     [(out.reduce((s, c) => s + c.depth, 0) / out.length).toFixed(1), "mean tree depth (2^depth steps)"]]);
+    // trace
+    const sv = document.getElementById("ftrace"), P = { l: 52, r: 18, t: 14, b: 34 }, tot = nW + ST.sampling;
+    const allD = out.flatMap((c) => Array.from(c.draws)), ylo = Math.floor(Math.min(...allD, C.pct[0] - 3)), yhi = Math.ceil(Math.max(...allD, C.pct[4] + 3));
+    const yt = []; const ys = yhi - ylo > 40 ? 20 : yhi - ylo > 16 ? 10 : 5; for (let v = Math.ceil(ylo / ys) * ys; v <= yhi; v += ys) yt.push(v);
+    const F = frame(sv, 880, 260, P, [0, tot], [ylo, yhi], [0, nW, tot], yt, (v) => String(v), degC);
+    el("rect", { x: F.x(0), y: F.y(yhi), width: F.x(nW) - F.x(0), height: F.y(ylo) - F.y(yhi), fill: css("accent-wash") }, sv);
+    txt(sv, F.x(nW / 2), F.y(yhi) + 14, "warm-up: thrown away", { class: "lbl", "text-anchor": "middle" });
+    const cols = [css("stan"), css("grid"), css("accent"), css("ink-2")];
+    out.forEach((c, k) => { const xs = [], ys2 = []; for (let i = 0; i < tot; i += 2) { xs.push(i); ys2.push(c.draws[i]); } el("path", { d: path(xs, ys2, F.x, F.y), fill: "none", stroke: cols[k % 4], "stroke-width": 0.9, "stroke-opacity": 0.75 }, sv); });
+    txt(sv, 14, P.t + 4, "T (°C) · iteration →", { class: "lbl" });
+    // histogram against the posterior; warm-up draws (optional) show each chain's climb from its start
+    const wu = nuts.wu ? out.flatMap((c) => Array.from(c.draws.slice(0, nW))).sort((a, b) => a - b) : [];
+    const wq = (p) => wu[Math.round((wu.length - 1) * p)];
+    const sh = document.getElementById("fhist"), lo = Math.floor(Math.min(q(0.002), wu.length ? wq(0.002) : Infinity)) - 1, hi = Math.ceil(Math.max(q(0.998), wu.length ? wq(0.998) : -Infinity)) + 1, nb = 60, bw = (hi - lo) / nb, cnt = new Array(nb).fill(0), cw = new Array(nb).fill(0);
+    for (const v of all) { const i = Math.floor((v - lo) / bw); if (i >= 0 && i < nb) cnt[i]++; }
+    for (const v of wu) { const i = Math.floor((v - lo) / bw); if (i >= 0 && i < nb) cw[i]++; }
+    const hd = cnt.map((c) => c / (all.length * bw)), hw = cw.map((c) => (wu.length ? c / (wu.length * bw) : 0)), xs = []; for (let x = lo; x <= hi; x += bw / 4) xs.push(x);
+    const ex = xs.map(dens), top = Math.max(...hd, ...hw, ...ex) * 1.1;
+    const xt = []; const st = hi - lo > 40 ? 10 : hi - lo > 16 ? 5 : 2; for (let v = Math.ceil(lo / st) * st; v <= hi; v += st) xt.push(v);
+    const G = frame(sh, 880, 260, P, [lo, hi], [0, top], xt, [0], degC, () => "0");
+    cnt.forEach((c, i) => el("rect", { x: G.x(lo + i * bw) + 0.5, y: G.y(hd[i]), width: Math.max(0.5, G.x(lo + (i + 1) * bw) - G.x(lo + i * bw) - 1), height: G.y(0) - G.y(hd[i]), fill: css("stan"), "fill-opacity": 0.55 }, sh));
+    if (wu.length) { let d = `M${G.x(lo)},${G.y(0)}`; hw.forEach((h, i) => { d += `V${G.y(h)}H${G.x(lo + (i + 1) * bw)}`; }); el("path", { d: d + `V${G.y(0)}`, fill: "none", stroke: css("accent"), "stroke-width": 1.5 }, sh); }
+    el("path", { d: path(xs, ex, G.x, G.y), fill: "none", stroke: css("grid"), "stroke-width": 2.5 }, sh);
+    txt(sh, 14, P.t + 4, "density", { class: "lbl" });
+    // percentiles
+    const tb = document.getElementById("tnuts"); tb.replaceChildren();
+    const h = tb.insertRow(); ["", "p5", "p16", "p50", "p84", "p95"].forEach((s) => { const th = document.createElement("th"); th.textContent = s; h.appendChild(th); });
+    for (const [k, v] of [[`NUTS in your browser (${all.length.toLocaleString()} draws)`, pct], ["TEXAS, CmdStan", C.ex.stan], ["posterior computed directly (step 5)", C.pct], ["Monte Carlo error, ±1 MCSE (approx.)", mcse]]) {
+      const rw = tb.insertRow(); rw.insertCell().textContent = k;
+      if (!v) { const c = rw.insertCell(); c.colSpan = 5; c.textContent = "not run: your values exist only on this page"; continue; }
+      v.forEach((z) => (rw.insertCell().textContent = fmt(z, 2)));
+    }
+    const gap = pct[2] - C.pct[2];
+    document.getElementById("cnuts").textContent = `Top: the ${out.length} chains, started between −2 and 2 °C as Stan does, find the posterior within the warm-up. Bottom: the kept draws (orange) against the posterior from step 5 (blue)${nuts.wu ? ", with the warm-up draws as an outline: they include each chain's first steps, made before the step size was tuned, which is why they are thrown away" : ""}. This run's median is ${fmt(gap, 2)} °C from the direct one, against a Monte Carlo error of about ±${fmt(mcse[2], 2)} °C. `
+      + (Math.abs(gap) <= 2.5 * mcse[2] ? "That is within the sampling noise, as it should be." : "That is larger than the expected sampling noise for this run; run again with a new seed to see whether it repeats.")
+      + ` The tails (p5, p95) carry more Monte Carlo noise than the median.${divs ? ` ${divs} divergent transitions: Stan would warn here.` : ""}`;
+  }
+
+  // ---------- step 11: the same rules as TEXAS.quality.compute_quality_flags ----------
+  function stepFlags(C) {
+    const R = D.meta.ranges, ex = C.ex, n = M;
+    let below = 0; for (let m = 0; m < n; m++) if (ex.ri < E.b[m]) below++;
+    const fracB = below / n, ratio = (C.pct[3] - C.pct[1]) / 2 / ex.prior_sigma, resolved = Math.max(0, 1 - ratio * ratio);
+    const extrap = ex.ri < R.proxy[0] || ex.ri > R.proxy[1];
+    const pred = ex.g23 < R.g23[0] || ex.g23 > R.g23[1] || ex.no3 < R.no3[0] || ex.no3 > R.no3[1];
+    const inactive = !logNo3(ex.no3);
+    const yn = (b) => (b ? "FLAGGED" : "clear");
+    const rows = [
+      ["proxy_below_floor", yn(fracB > 0.5), `Scaled RI is below the floor b in ${(fracB * 100).toFixed(1)}% of the curves; flagged above 50%.`],
+      ["proxy_above_ceiling", yn(ex.ri > 1), "Scaled RI above the curve's ceiling of 1."],
+      ["proxy_extrapolated", yn(extrap), `Outside the coretop calibration's own range, ${R.proxy[0].toFixed(3)} to ${R.proxy[1].toFixed(3)}.`],
+      ["predictor_extrapolated", yn(pred), `GDGT-2/3 outside ${R.g23[0].toFixed(2)}–${R.g23[1].toFixed(2)} or NO₃ outside the calibration's range, up to ${R.no3[1].toFixed(1)} μmol/L.`],
+      ["outside_domain", ex.outside_domain === null ? "needs TEX₈₆" : yn(ex.outside_domain), "Outside the published TEX₈₆ × Scaled RI screening ellipse. Evaluated when you pass tex86=."],
+      ["prior_dominated", yn(ratio >= D.meta.prior_dominated_ratio), `Width ratio ${ratio.toFixed(2)}; flagged at ${D.meta.prior_dominated_ratio} or more.`],
+      ["no3_correction_inactive", inactive ? "advisory" : "clear", "NO₃ is outside the correction window. Reported, but does not count against the sample, because it is usually deliberate."],
+      ["prior variance resolved", `${(resolved * 100).toFixed(0)}%`, "How much of the prior's variance the proxy resolved, 1 − (width ratio)²."],
+    ];
+    const t = document.getElementById("tflags"); t.replaceChildren();
+    const h = t.insertRow(); ["Column", "This sample", "What it checks"].forEach((s) => { const th = document.createElement("th"); th.textContent = s; h.appendChild(th); });
+    for (const r of rows) { const w = t.insertRow(); r.forEach((v) => (w.insertCell().textContent = v)); }
+    const any = fracB > 0.5 || extrap || pred || ex.outside_domain === true || ratio >= D.meta.prior_dominated_ratio;
+    document.getElementById("cflags").textContent = `${ex.record}: any_flag would be ${any ? "True" : "False"} on these checks. A flag means look harder at this sample, not discard it. predictor_missing is not shown, because this page always has both predictors. ${ex.custom ? "Your values are checked on this page only." : "The real run's flags for this sample agree with this table."}`;
+  }
+
+  // ---------- step 12: the plug-in shortcut, and the ingredients added back one at a time ----------
+  // One curve at the median of each setting, solved for T; NaN at or below the floor b.
+  function invertCurve(ri, b, k, v, t0e) {
+    if (!(ri > b && ri < 1)) return NaN;
+    const inner = Math.pow((1 - b) / (ri - b), v) - 1;
+    return inner > 0 ? t0e - Math.log(inner) / k : NaN;
+  }
+  function plugin(ri, g23, no3) {
+    const P = D.plugin.med;
+    return invertCurve(ri, P.b, P.k, P.v, P.t0 + P.gG * g23 + P.gN * logNo3(no3));
+  }
+  const median = (a) => { const s = [...a].sort((x, y) => x - y), n = s.length; return n ? (n % 2 ? s[n >> 1] : (s[n / 2 - 1] + s[n / 2]) / 2) : NaN; };
+  // For one Scaled RI: plug-in, per-curve median, full posterior median. There is deliberately no
+  // likelihood-only median: L(T) levels off above zero on both plateaus, so it does not integrate,
+  // and any "median" of it would only report where the temperature axis happens to stop.
+  function ladder(ri, ex, Tc) {
+    const logn = logNo3(ex.no3), L = new Float64Array(Tc.length), per = [];
+    for (let m = 0; m < M; m++) {
+      const t0e = E.t0[m] + E.gG[m] * ex.g23 + E.gN[m] * logn, b = E.b[m], k = E.k[m], iv = 1 / E.v[m], s = E.sig[m];
+      const one = invertCurve(ri, b, k, E.v[m], t0e); if (Number.isFinite(one)) per.push(one);
+      for (let t = 0; t < Tc.length; t++) { const z = (ri - (b + (1 - b) / Math.pow(1 + Math.exp(-k * (Tc[t] - t0e)), iv))) / s; L[t] += Math.exp(-0.5 * z * z) / s; }
+    }
+    const pctl = (w) => { let tot = 0; for (let t = 0; t < Tc.length; t++) tot += w(t); let run = 0; for (let t = 0; t < Tc.length; t++) { const a = w(t); if (run + a >= tot / 2) return Tc[t] + ((tot / 2 - run) / (a || 1)) * (Tc[1] - Tc[0]) - (Tc[1] - Tc[0]); run += a; } return NaN; };
+    return { ri, plug: plugin(ri, ex.g23, ex.no3), per: per.length * 2 > M ? median(per) : NaN,
+             full: pctl((t) => L[t] * Math.exp(-0.5 * Math.pow((Tc[t] - ex.prior_mu) / ex.prior_sigma, 2))) };
+  }
+  const TC = Array.from({ length: 441 }, (_, i) => -100 + i * 0.5);
+  function stepSweep() {
+    const ex = exampleAt(state.ex), rows = []; for (let r = 42; r <= 99; r++) rows.push(ladder(r / 100, ex, TC));
+    const t9 = document.getElementById("t9"); t9.replaceChildren();
+    const head = t9.insertRow(); ["Scaled RI", "plug-in", "per-curve", "full"].forEach((h) => { const th = document.createElement("th"); th.textContent = h; head.appendChild(th); });
+    const show = (v) => (Number.isFinite(v) ? fmt(v, 1) : "no answer");
+    const at = (ri) => rows.find((r) => Math.abs(r.ri - ri) < 1e-6);
+    for (const ri of [0.45, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95]) { const r = at(ri), w = t9.insertRow(); [ri.toFixed(2), show(r.plug), show(r.per), show(r.full)].forEach((v) => (w.insertCell().textContent = v)); }
+    const svg = document.getElementById("f9b"), W = 880, H = 340, pad = { l: 52, r: 18, t: 16, b: 40 }, YL = 15;
+    const F = frame(svg, W, H, pad, [0.4, 1.0], [-YL, YL], [0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0], [-15, -10, -5, 0, 5, 10, 15], (v) => v.toFixed(1), (v) => `${v > 0 ? "+" : ""}${fmt(v, 0)}`);
+    el("line", { x1: F.x(0.4), x2: F.x(1), y1: F.y(0), y2: F.y(0), stroke: css("axis"), "stroke-width": 1.5 }, svg);
+    const bx = F.x(D.plugin.med.b);
+    el("line", { x1: bx, x2: bx, y1: F.y(-YL), y2: F.y(YL), stroke: css("ink-2"), "stroke-width": 1 }, svg);
+    txt(svg, bx + 6, F.y(YL) + 30, `median floor b = ${D.plugin.med.b}`, { class: "lbl" });
+    txt(svg, 14, pad.t + 4, "plug-in − full median (°C)", { class: "lbl" });
+    const ok = rows.filter((r) => Number.isFinite(r.plug) && Number.isFinite(r.full));
+    el("path", { d: path(ok.map((r) => r.ri), ok.map((r) => Math.max(-YL, Math.min(YL, r.plug - r.full))), F.x, F.y), fill: "none", stroke: css("grid"), "stroke-width": 2.5 }, svg);
+    document.getElementById("c9").textContent = `The gap between the plug-in and the full posterior median across Scaled RI, for GDGT-2/3 = ${fmt(ex.g23, 2)}, NO₃ = ${ex.no3} and a prior of ${fmt(ex.prior_mu, 0)} ± ${fmt(ex.prior_sigma, 0)} °C, clipped at ±${YL} °C. It is smallest on the steep part of the curve and grows where the curve flattens.`;
+    const step = (r) => `from a plug-in of ${show(r.plug)} °C, calibration spread moves the answer to ${show(r.per)} °C, and the scatter σ with the prior moves it to ${show(r.full)} °C`;
+    const call = document.getElementById("call9"); call.replaceChildren();
+    const b1 = document.createElement("b"); b1.textContent = "What the plug-in misses. ";
+    call.append(b1, document.createTextNode(`At Scaled RI 0.45, ${step(at(0.45))}. At 0.95, ${step(at(0.95))}. The plug-in also has no range, so it cannot give the tail probabilities of step 10, and it has nothing to say about how much the prior mattered.`));
+  }
+
+  function step9(C) {
+    const pT = plugin(C.ex.ri, C.ex.g23, C.ex.no3), P50 = C.pct[2], stan = C.ex.stan;
+    const svg = document.getElementById("f9"), W = 880, H = 300, pad = { l: 52, r: 18, t: 16, b: 40 };
+    const { x, y } = frame(svg, W, H, pad, [-20, 60], [0, 1.1], tick10, [0], degC, () => "0");
+    const xs = C.coarse.map((t) => T[t]), Qn = norm(C.coarse.map((t) => C.post[t]));
+    el("path", { d: path(xs, Qn, x, y) + `L${x(60)},${y(0)}L${x(-20)},${y(0)}Z`, fill: css("grid-wash"), stroke: "none" }, svg);
+    el("path", { d: path(xs, Qn, x, y), fill: "none", stroke: css("grid"), "stroke-width": 2.5 }, svg);
+    const p50x = x(Math.max(-20, Math.min(60, P50)));
+    el("line", { x1: p50x, x2: p50x, y1: y(0), y2: y(1), stroke: css("grid"), "stroke-width": 1.5 }, svg);
+    const pLeft = !Number.isFinite(pT) || pT >= P50;   // keep the label clear of the plug-in line
+    txt(svg, p50x + (pLeft ? -6 : 6), y(1.0) - 6, `posterior p50 ${fmt(P50, 1)} °C`, { class: "lbl", "text-anchor": pLeft ? "end" : "start" });
+    if (Number.isFinite(pT)) {
+      const px = x(Math.max(-20, Math.min(60, pT)));
+      el("line", { x1: px, x2: px, y1: y(0), y2: y(1.1), stroke: css("ink"), "stroke-width": 2.5 }, svg);
+      txt(svg, px + (pT > 40 ? -8 : 8), y(0.55), pT < -20 || pT > 60 ? `plug-in ${fmt(pT, 1)} °C (off the scale)` : `plug-in ${fmt(pT, 1)} °C`, { class: "lbl-strong", "text-anchor": pT > 40 ? "end" : "start" });
+    } else {
+      txt(svg, x(20), y(0.55), `plug-in: no answer (RI ${C.ex.ri.toFixed(3)} is at or below the median floor b = ${D.plugin.med.b})`, { class: "lbl-strong", "text-anchor": "middle" });
+    }
+    cells("r9", [[Number.isFinite(pT) ? `${fmt(pT, 2)} °C` : "none", "plug-in"], [`${fmt(P50, 2)} °C`, "posterior p50, this page"], [stan ? `${fmt(stan[2], 2)} °C` : "not run", "p50, TEXAS"],
+     [Number.isFinite(pT) ? `${pT - P50 > 0 ? "+" : ""}${fmt(pT - P50, 2)} °C` : "—", "plug-in − posterior"]]);
+  }
+
+  const nutsLater = lazy("schains", () => stepNuts(compute(state.ex)));
+  const sweepLater = lazy("plug", stepSweep);
+  function render() {
+    const C = compute(state.ex);
+    step1(C); step3(C); step4(C); step5(C); hmcSetup(C); step6(C); step7(C); stepFlags(C); step9(C);
+    nuts.token++; document.getElementById("nutsStatus").textContent = "queued…"; nutsLater(); sweepLater();
+  }
+
+  const setText = (attr, s) => document.querySelectorAll(`[${attr}]`).forEach((n) => (n.textContent = s));
+  document.getElementById("tslider").addEventListener("input", (e) => { state.tcand = +e.target.value; step3(compute(state.ex)); });
+  setText("data-m", String(M)); setText("data-cut", String(CUT));
+  setText("data-lo", String(LO)); setText("data-hi", String(HI));
+  setText("data-ch", String(ST.chains)); setText("data-wu", String(ST.warmup)); setText("data-sa", ST.sampling.toLocaleString());
+  setText("data-nd", (ST.chains * ST.sampling).toLocaleString());
+  setText("data-pdr", String(D.meta.prior_dominated_ratio));
+  setText("data-pdv", String(Math.round((1 - D.meta.prior_dominated_ratio ** 2) * 100)));
+  stanListing();
+  document.getElementById("stanBare").addEventListener("click", () => { stanFull = false; document.getElementById("stanBare").setAttribute("aria-pressed", "true"); document.getElementById("stanFull").setAttribute("aria-pressed", "false"); stanListing(); });
+  document.getElementById("stanFull").addEventListener("click", () => { stanFull = true; document.getElementById("stanFull").setAttribute("aria-pressed", "true"); document.getElementById("stanBare").setAttribute("aria-pressed", "false"); stanListing(); });
+  document.getElementById("hmcGo").addEventListener("click", () => hmcRun(compute(state.ex)));
+  document.getElementById("hmcReset").addEventListener("click", () => { const C = compute(state.ex); hmc.T = C.pct[2]; hmc.past = []; hmcDraw(C, null); });
+  for (const id of ["hmcEps", "hmcL"]) document.getElementById(id).addEventListener("input", () => hmcSetup(compute(state.ex)));
+  document.getElementById("nutsRun").addEventListener("click", () => { nuts.seed++; stepNuts(compute(state.ex)); });
+  const setWu = (on) => { nuts.wu = on; document.getElementById("nutsWu").setAttribute("aria-pressed", String(on)); document.getElementById("nutsWuOff").setAttribute("aria-pressed", String(!on)); if (nuts.last) nutsDraw(compute(state.ex), nuts.last); };
+  document.getElementById("nutsWu").addEventListener("click", () => setWu(true));
+  document.getElementById("nutsWuOff").addEventListener("click", () => setWu(false));
+  document.getElementById("tailLo").textContent = `Colder than ${LO} °C`;
+  document.getElementById("tailHi").textContent = `Warmer than ${HI} °C`;
+  function setTail(t) { state.tail = t; document.getElementById("tailLo").setAttribute("aria-pressed", String(t === "lo")); document.getElementById("tailHi").setAttribute("aria-pressed", String(t === "hi")); }
+  document.getElementById("tailLo").addEventListener("click", () => { setTail("lo"); step7(compute(state.ex)); });
+  document.getElementById("tailHi").addEventListener("click", () => { setTail("hi"); step7(compute(state.ex)); });
+  document.getElementById("medb").textContent = String(D.plugin.med.b);
+
+  const foot = document.getElementById("foot");
+  [`Calibration ${D.meta.posterior}, the published SST calibration bundled with TEXAS; ${M} draws selected as predict_T_from_proxyObs selects them by default; NO₃ cutoff ${CUT} μmol/L.`,
+   `Example samples: ${D.examples.map((e) => `${e.record} (${e.source})`).join("; ")}. The down-core data sources are listed in the manuscript's Open Research section.`,
+   `The TEXAS rows are predict_T_from_proxyObs output for these samples at its default settings, stored when this page was built. The ±5 °C window (${LO} and ${HI} °C) is from Fig. 7d of the manuscript.`,
+   "The curves are computed in your browser from the calibration draws, using the same log density as the Stan model shown in step 6. The live sampler in step 8 is a small NUTS written for this page, not Stan itself."].forEach((s) => { const p = document.createElement("p"); p.textContent = s; foot.appendChild(p); });
+
+  // ---------- contents: the parts and steps, read from the page's own headings ----------
+  (function contents() {
+    const top = document.getElementById("tocList"); let grp = null, k = 0;
+    const group = (label, href) => {
+      const li = document.createElement("li"), sp = document.createElement("span"), ol = document.createElement("ol");
+      li.className = "grp";
+      if (href) { const a = document.createElement("a"); a.href = href; a.textContent = label; sp.appendChild(a); } else sp.textContent = label;
+      li.append(sp, ol); top.appendChild(li); return ol;
+    };
+    for (const n of document.querySelectorAll(".part, section.step")) {
+      if (n.classList.contains("part")) { n.id = n.id || `part${++k}`; grp = group(`${n.firstChild.textContent.trim()} · ${n.querySelector("b").textContent}`, `#${n.id}`); continue; }
+      const no = n.querySelector(".step-no").textContent.trim(), h = n.querySelector("h2").textContent;
+      if (no === "·" && !(grp && grp.dataset.ref)) { grp = group("Reference"); grp.dataset.ref = "1"; }
+      const li = document.createElement("li"), num = document.createElement("span"), a = document.createElement("a");
+      num.className = "n"; num.textContent = no === "·" ? "" : no; a.href = `#${n.id}`; a.textContent = h;
+      li.append(num, a); (grp || group("")).appendChild(li);
+    }
+  })();
+  render();
+})();
+
+</script>
+</body>
+</html>
