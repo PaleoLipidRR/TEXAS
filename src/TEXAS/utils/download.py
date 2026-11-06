@@ -44,7 +44,7 @@ from . import paths as _paths
 # ─── Zenodo config ────────────────────────────────────────────────────────────
 # The current version of the data record (concept DOI 10.5281/zenodo.19666744),
 # pointing at the v1.0.0 deposit created by scripts/zenodo_upload.py -- the
-# calibration set and posteriors behind the accepted manuscript (1,518 gridded
+# calibration set and posteriors behind the revised manuscript (1,518 gridded
 # core-tops, 8 mesocosm, 59 culture experiments; scaledRI_cren3 screen).
 ZENODO_RECORD_ID: str = "23954718"
 
