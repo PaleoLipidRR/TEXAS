@@ -15,6 +15,7 @@ CASES = [("SST", "SST", "tx.GHEB.sst.sri03.G23"), ("SST", "SST", "tx.GHEB.sst.sr
 
 
 def load(root, case, n):
+    """Read the n core-top reconstructions of `case` from an arm's batched inverse-model files."""
     inv = root / "data/cache/TEXAS_invT_posterior_cache"
     nb = int(np.ceil(n / 250))
     return pd.concat([xr.open_dataset(inv / f"{case}.inv.global_coretop_b{b:02d}.ud.nc")["t_est"].to_pandas().T
