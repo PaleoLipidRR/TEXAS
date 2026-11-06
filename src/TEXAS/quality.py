@@ -7,15 +7,16 @@ once and describe the call. This module answers the other question: *which rows
 of my record should I trust?*
 
 The motivating case is a Scaled RI below the curve's lower asymptote ``b``. The
-inverse likelihood is Gaussian in ``mu``::
+inverse likelihood is Gaussian (normal) around ``mu``, the Scaled RI the
+calibration curve predicts at temperature ``T``::
 
     mu = b + (1 - b) / (1 + exp(-k*(T - T0)))^(1/v)          -> (b, 1)
 
 so as ``T`` falls, ``mu`` approaches ``b`` and stops. An observation below ``b``
 cannot be reproduced at any temperature. Nothing errors: the Gaussian
 likelihood simply keeps improving as ``T`` decreases, with no interior maximum,
-and the only thing arresting the chain is the temperature prior. The sampler
-converges, R-hat is clean, and the reported median is a readout of
+and the only thing stopping the sampler is the temperature prior. The sampler
+converges (its R-hat convergence check looks fine), and the reported median is a readout of
 ``prior_mu_t`` and ``prior_sigma_t`` rather than a measurement. The shipped
 inverse models put no lower bound on ``t_est`` at all, so the value returned
 can be physically impossible. The same happens in
@@ -353,7 +354,7 @@ def _domain_flag(
 ) -> "pd.arrays.BooleanArray":
     """Screen against the published calibration ellipse, when it applies.
 
-    Uses ``detect_outliers_manual``: the ellipse plus the manuscript's warm-end
+    Uses ``detect_outliers_manual``: the ellipse plus the paper's warm-end
     exception, which retains samples with TEX86 and Scaled RI both above 0.75
     because the calibration itself retains them. The bare ellipse would flag
     warm samples the calibration actually covers.

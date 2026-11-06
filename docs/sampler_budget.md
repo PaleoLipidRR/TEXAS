@@ -7,7 +7,7 @@ published fits use 4 chains × (400 warm-up + 1,000 sampling) iterations, and
 every budget that clears the convergence gates agrees with a long reference run
 to within 0.07 SD for every parameter. The inverse reconstructions use 300
 warm-up iterations with *M* = 300 forward draws for the global coretop maps and
-500 with *M* = 500 for the downcore records.
+500 warm-up iterations with *M* = 500 for the downcore records.
 
 The page below reports, for each model, the cheapest warmup/sampling budget that
 clears four convergence gates, together with the evidence behind it: the full

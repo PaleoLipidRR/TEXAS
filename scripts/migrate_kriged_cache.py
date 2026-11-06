@@ -26,8 +26,7 @@ Everything deleted is regenerable: pass ``recompute='auto'`` to
 ``plot_residual_maps`` and it re-kriges.
 
 THIS IS PER-MACHINE. ``data/cache/**`` is gitignored, so it does not travel
-with a clone -- run it on every box. See the "does not travel" table in
-RESUME.md.
+with a clone -- run it on every machine that holds a cache.
 
 **Dry-run by default.** Nothing moves or deletes until you pass ``--apply``.
 Moving is refused outright if a destination file already exists (never

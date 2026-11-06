@@ -58,15 +58,15 @@ EXPECTED_FORWARD = 9
 # carry no information the compiled coretop files don't already have.
 EXPECTED_INVT_MIN = 46
 
-# Extra flat-file source directories added for the v1.0.0 data record (RESUME.md
-# section G): first-party published_data inputs + the sampler-budget-sensitivity
+# Extra flat-file source directories added for the v1.0.0 data record:
+# first-party published_data inputs + the sampler-budget-sensitivity
 # and refit-provenance files. Stay collision-free against DATA_DIR and each
 # other (checked in collect_individual_files below) because every source file
 # already has a distinct name — nothing here was renamed to make it so.
 #
-# "data/external" was dropped 2026-11-04: every file in it traced to another
-# group's publication (Tierney22/Zhu19 regridded grids, Muller19 plate model),
-# so none of it is re-hosted and prepare_resubmission_archive.py never creates
+# "data/external" is not uploaded: it holds published datasets used without
+# significant reanalysis (Tierney22/Zhu19 regridded grids, Muller19 plate
+# model), which we cite rather than re-host, so prepare_resubmission_archive.py never creates
 # the directory now -- EXTRA_DATA_DIRS must not name a path that may not exist.
 EXTRA_DATA_DIRS = ["data/published_data", "data/revision1"]
 

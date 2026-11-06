@@ -114,3 +114,6 @@ tutorial/_build/
 # ── Streamlit ─────────────────────────────────────────────────────────────────
 .streamlit/
 !streamlit_app/.streamlit/
+
+# Private maintainer handoff notes; kept locally, not published.
+RESUME.md

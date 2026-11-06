@@ -1,4 +1,4 @@
-# TEXAS — A proxy system model for TetraEther indeX of Ammonia oxidizerS
+# TEXAS — TetraEther indeX of Ammonia oxidizerS: a proxy system model for TEX₈₆ paleothermometry
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
@@ -7,10 +7,14 @@
 
 **TEXAS-PSM** (`texas-psm`) is a Python package implementing a **Bayesian proxy
 system model** for the TEX86 paleothermometer. **TEXAS** is its sensor model —
-the calibration linking temperature to the index — while TEXAS-PSM is the whole
-chain around it: sensor, archive, observation, and the inversion back to
-temperature. The distribution name and the import already carry that split
-(`pip install texas-psm`, `import TEXAS`). It fits hierarchical generalized-logistic Stan models to isoGDGT proxy data (Scaled RI) for thermal responses — with optional non-thermal corrections for AOA ecology (GDGT-2/3 ratio) and nutrient effects (NO₃) — and reconstructs paleotemperatures from new sediment records with full posterior uncertainty.
+the calibration linking temperature to the index — while TEXAS-PSM is the
+framework around it: sensor, archive, and observation submodels, plus the
+inversion back to temperature. This release implements the sensor model and the
+inversion; the archive model is not yet implemented, and the observation model
+propagates analytical uncertainty only. The distribution name and the import
+reflect that split (`pip install texas-psm`, `import TEXAS`).
+
+The package fits hierarchical generalized-logistic Stan models that link temperature to an isoGDGT index (Scaled RI), with optional nonthermal predictors for AOA ecology (GDGT-2/GDGT-3 ratio) and nutrient availability (NO₃⁻). It then reconstructs paleotemperatures from new sediment records with full posterior uncertainty.
 
 <p align="center">
   <kbd><a href="docs/installation.md">📦 Installation</a></kbd> &nbsp;
@@ -27,17 +31,17 @@ TEXAS implements a two-stage workflow:
 
 | Stage | Description |
 |---|---|
-| **Forward calibration** | Fit a generalized logistic curve (Scaled RI → temperature) to culture, mesocosm, and/or coretop data using a hierarchical Bayesian Stan model. Outputs a compressed posterior `.nc` file. |
+| **Forward calibration** | Fit a generalized logistic curve (temperature → Scaled RI) to culture, mesocosm, and/or coretop data using a hierarchical Bayesian Stan model. Outputs a compressed posterior `.nc` file. |
 | **Inverse reconstruction (invT)** | Predict paleotemperatures from Scaled RI observations by marginalizing over posterior parameter draws. Returns a full posterior temperature distribution per sample. |
 
-Optional non-thermal predictors — the GDGT-2/GDGT-3 (G23) and NO₃ — enter **inside** the logistic, as a shift of the curve's location parameter T₀:
+Optional nonthermal predictors — the GDGT-2/GDGT-3 ratio (G23) and nitrate (NO₃⁻) — enter **inside** the logistic, as a shift of the curve's location parameter T₀:
 
 ```
 T₀_eff = T₀ + γ_{G23}·G23 + γ_{NO₃}·log₁₀(NO₃)
 Scaled RI = b + (1 − b) / (1 + exp(−k·(T − T₀_eff)))^(1/ν)
 ```
 
-The γ coefficients are in **°C per predictor unit**, so a sample with a given G23 behaves like water that is γ·G23 °C colder. Because the predictors translate the curve rather than adding an offset to the response, the predicted Scaled RI stays inside (b, 1) for any finite predictor value — the bound a ratio has by definition is reproduced by construction, with no truncation or clipping. They are fitted through an Error-in-Variables (EIV) Stan model that separates analytical measurement error from oceanographic process noise. Inverse models use `reduce_sum` for within-chain parallelism.
+The γ coefficients are in **°C per predictor unit**: a positive γ_{G23}·G23 shifts the curve to warmer temperatures, so the sample yields the Scaled RI of water γ_{G23}·G23 °C colder. Because the predictors shift the curve along the temperature axis rather than adding an offset to Scaled RI, predictions stay inside (b, 1) for any finite predictor value by construction, with no truncation or clipping. They are fitted through an Error-in-Variables (EIV) Stan model that separates analytical measurement error from oceanographic process noise. Inverse models use `reduce_sum` for within-chain parallelism.
 
 > **T₀ is the curve's location, not its inflection point.** The steepest response sits at `T₀ − ln(ν)/k`, roughly 4–5 °C below T₀ for the fitted ν. Because `dRI/dT` varies about sixfold across the calibrated range, there is no single thermal sensitivity to quote for this proxy.
 
@@ -57,8 +61,8 @@ pip install texas-psm            # inside a virtual environment
 ```python
 import TEXAS
 
-# Download pre-computed posteriors from Zenodo (~0.3 MB for univariate)
-TEXAS.download_posteriors(["tx.GHPU.sst.sri03.p0"])   # univariate SST calibration
+# The temperature-only (univariate) SST calibration ships with the package,
+# so no download is needed here. Other calibrations: TEXAS.download_posteriors().
 # Posterior names are CESM-style case ids (tx.<compset>.<temp>.<proxy>.<predictors>);
 # legacy long names (gen_logi_fixed_...) are also accepted everywhere. See
 # "How posterior files are named" in the docs quickstart.
@@ -71,7 +75,7 @@ result = TEXAS.predict_proxy_from_T(
 
 # Inverse: Scaled RI → temperature
 result = TEXAS.predict_T_from_proxyObs(
-    proxyObs=my_ri_array,
+    proxyObs=my_ri_array,          # your Scaled RI values (see compute_scaledRI below)
     prior_mu_t=15.0, prior_sigma_t=10.0,
     fwd_posterior="tx.GHPU.sst.sri03.p0",
     temptype="SST",
@@ -102,9 +106,11 @@ TEXAS.download_training_data()     # training CSVs + CMEMS NO₃ field
 Pass `names=` to download only what you need:
 
 ```python
-# Univariate SST posterior — ~0.3 MB
-TEXAS.download_posteriors(["tx.GHPU.sst.sri03.p0"])
+# Single-predictor SST calibration (G23 only) — ~78 MB
+TEXAS.download_posteriors(["tx.GHEB.sst.sri03.G23"])
 ```
+
+The default multivariate and temperature-only calibrations (`tx.GHEB.*.sri03.G23-N1p0`, `tx.GHPU.*.sri03.p0`, for both SST and thermocline temperature) ship inside the package and need no download.
 
 Load a posterior directly from disk (no cache lookup):
 
@@ -135,6 +141,7 @@ import xarray as xr
 from TEXAS import compute_scaledRI, predict_proxy_from_T, predict_T_from_proxyObs
 
 # ── Compute Scaled Ring Index from raw GDGT abundances ────────────────────────
+# df: a pandas DataFrame with one row per sample and the six isoGDGT columns
 df["scaledRI_cren3"] = compute_scaledRI(
     df["GDGT-0"], df["GDGT-1"], df["GDGT-2"], df["GDGT-3"],
     df["cren"],   df["cren_prime"],          # cren_weight=3 by default (RI₀₋₃)
@@ -156,7 +163,7 @@ result = predict_T_from_proxyObs(
     save_results=True,   # write quantile .nc + .npz to the invT cache dir
 )
 
-# ── Multivariate model with NO₃ and GDGT-2/3 correction ──────────────────────
+# ── Multivariate model with NO₃⁻ and GDGT-2/GDGT-3 predictors ────────────────
 # This is the default: omitting fwd_posterior selects the full multivariate
 # T₀-shift calibration, which ships inside the package — no download needed.
 # Pass temptype="thermoT" for the thermocline-integrated calibration.
@@ -228,7 +235,7 @@ If you use TEXAS in your research, please cite:
 
 > Rattanasriampaipong, R., Tierney, J. E., Elling, F. J., & Inglis, G. N. (2026). *TEXAS: A proxy system model for TEX86 paleothermometry.* Paleoceanography and Paleoclimatology, in press.
 
-See [`CITATION.cff`](CITATION.cff) for machine-readable citation metadata.
+and the software version you used (Zenodo concept DOI, which resolves to the latest release: [10.5281/zenodo.19671664](https://doi.org/10.5281/zenodo.19671664)). See [`CITATION.cff`](CITATION.cff) for machine-readable citation metadata.
 
 ---
 

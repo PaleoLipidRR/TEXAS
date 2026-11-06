@@ -329,14 +329,10 @@ def _auto_cache_path(
     """Default location of the kriged-grids cache for one figure.
 
     Both ``krige_res`` and ``max_dist_deg`` are formatted with ``:g``, so
-    ``krige_res=1`` and ``krige_res=1.0`` produce the same ``1deg`` token and
-    ``2.5`` keeps its decimal, and likewise ``10.0`` and ``10`` both give
-    ``10dmax`` while ``10.5`` and ``10.9`` no longer collide onto that same
-    ``10dmax`` the way ``int()`` used to collapse them — two genuinely
-    different search radii now get two different cache files instead of
-    silently sharing (and returning) the wrong grid. The unformatted f-string
-    this replaces wrote ``1deg`` and ``1.0deg`` as two names for one 57 MB
-    grid.
+    ``krige_res=1`` and ``krige_res=1.0`` produce the same ``1deg`` token,
+    ``10.0`` and ``10`` both give ``10dmax``, and fractional values keep their
+    decimals (``2.5deg``, ``10.5dmax``). Equal settings therefore share one
+    cache file, and different settings never do.
 
     ``KRIGED_CACHE_DIR`` is read from the module rather than from-imported so
     that :func:`TEXAS.set_cache_dir` takes effect without a reimport.
@@ -364,9 +360,9 @@ def _auto_cache_path(
 def _legacy_grids_cache(cache_path: Union[str, Path]) -> Optional[Path]:
     """The same cache leaf in the legacy cache root, if it is sitting there.
 
-    Kriged grids were written straight into ``CACHE_ROOT`` until 2026-09-07,
-    next to the two posterior directories. Reading them from there keeps a
-    machine whose files have not been moved yet working — the same never-fatal
+    Older versions wrote kriged grids straight into ``CACHE_ROOT``, next to
+    the two posterior directories. Reading them from there keeps a machine
+    whose files have not been moved yet working — the same never-fatal
     dual-read policy ``load_posterior`` uses for legacy posterior filenames.
     ``data/cache/**`` is gitignored, so this is genuinely per-machine:
     ``scripts/migrate_kriged_cache.py`` is what moves them.
@@ -790,8 +786,8 @@ def plot_residual_maps(
         ``kriged_grids_{res}deg_{dist}dmax_woa23_{temp_param}_{y_param}_{residual_tag}.npz``.
         The resolution token is formatted with ``:g``, so ``krige_res=1`` and
         ``krige_res=1.0`` name one file.  Caches both halo and true grids for
-        faster plotting.  A cache left in the old location (the cache root,
-        pre-2026-09-07) is still read, with a printed note.
+        faster plotting.  A cache left in the old location (the cache root)
+        is still read, with a printed note.
     recompute : bool or ``'auto'``
         - ``False``  : load grids from cache; raise ``FileNotFoundError`` if not found.
         - ``True``   : always re-krige and recompute grids, then overwrite the cache.

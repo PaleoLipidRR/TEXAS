@@ -22,10 +22,9 @@ from TEXAS.utils.system_info import simple_memory_check, get_system_info, sugges
 from TEXAS.utils.paths import STAN_MODELS_DIR
 
 #: Constraint formulations that have a Stan model in ``src/TEXAS/stan_models/``.
-#: Only the unconstrained inverse ships. ``truncated_prior`` was archived on
-#: 2026-09-07 to ``archive/pre-submission/stan_models/``, with the explainer
-#: page that was its only documentation; ``hard_constraint`` was archived in
-#: 2026-09 to ``archive/submission-2026-04/stan_models/``.
+#: Only the unconstrained inverse ships. The ``truncated_prior`` models are
+#: kept in ``archive/pre-submission/stan_models/`` and the ``hard_constraint``
+#: models in ``archive/submission-2026-04/stan_models/``.
 #: ``reparameterized`` and ``soft`` appeared in old type hints but were never
 #: implemented as Stan models.
 _SHIPPED_CONSTRAINTS = frozenset({"unconstrained"})
@@ -232,8 +231,9 @@ def get_invT_posterior(
 
     meta = sampler_kwargs.pop("_metadata", {})
 
-    # Select the Stan file first — threading is only useful for multiv models
-    # that contain reduce_sum. Applying STAN_THREADS to univ models wastes cores.
+    # Select the Stan file first: within-chain threading only helps models that
+    # contain reduce_sum (checked below), so the file must be known before the
+    # CPU settings are chosen.
     if stan_model_path:
         stan_file = Path(stan_model_path).name
         print(f"✅ Using specified Stan file: {stan_file}")
@@ -390,10 +390,9 @@ def _select_invT_stan_file(
               ships; the non-marginal "ensemble" models were archived to
               ``archive/submission-2026-04/stan_models/``.
         constraint_type: Only ``"unconstrained"`` ships. No public entry
-            point exposes this parameter any more; it survives only as a
-            defensive check on this internal function, so an internal caller
-            that still passes a withdrawn value gets a ``ValueError`` naming
-            the archive here, rather than a missing-file error later at
+            point exposes this parameter; it is kept as a defensive check, so
+            an internal caller passing an archived value gets a ``ValueError``
+            naming the archive here, rather than a missing-file error later at
             compile time.
 
     Raises:
@@ -473,10 +472,9 @@ def get_invT_post_quantiles(
 def _percentiles_from_posterior(posterior: xr.Dataset) -> Dict[str, np.ndarray]:
     """Reduce a quantile-summarized invT posterior to a ``{"pN": array}`` dict.
 
-    The keys follow the quantiles the dataset actually carries. The eleven that
-    used to be hard-coded here silently dropped ``p40`` and ``p60`` -- both of
-    which :func:`get_invT_post_quantiles` computes by default -- and raised
-    ``KeyError`` on any run that asked for a different quantile set.
+    The keys follow the quantiles the dataset actually carries (by default
+    the thirteen that :func:`get_invT_post_quantiles` computes, p1 to p99),
+    so a run with a different quantile set works too.
 
     Args:
         posterior: Output of :func:`get_invT_post_quantiles`. Must carry

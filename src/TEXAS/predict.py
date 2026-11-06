@@ -3,13 +3,14 @@
 High-level prediction API for the TEXAS proxy system model.
 
 Two functions mirror the two directions of the calibration workflow
-described in the manuscript:
+described in the paper:
 
-  predict_proxy_from_T  — forward:  T → proxy (Scaled RI, TEX86, …)  (pure Python, no Stan)
+  predict_proxy_from_T  — forward:  T (+ optional G₂/₃, NO₃) → proxy (Scaled RI, TEX86, …)
+                          (pure Python, no Stan)
   predict_T_from_proxyObs — inverse:  proxy → T  (runs Stan)
 
-Both return percentile summaries (p5 / p50 / p95 by default) and
-optionally the full ensemble / posterior.
+Both return percentile summaries: the forward function p5 / p50 / p95 by
+default, the inverse function thirteen percentiles from p1 to p99.
 
 Example
 -------
@@ -18,7 +19,7 @@ Example
 >>> # Forward: what Scaled RI does the calibration predict at 20–30 °C?
 >>> result = predict_proxy_from_T(
 ...     temperatures=np.linspace(20, 30, 50),
-...     posterior="gen_logi_fixed_hier_crtp_univ_priorApprox_thermoT_scaledRI_cren3",
+...     posterior="tx.GHPU.thm.sri03.p0",   # bundled, no download needed
 ... )
 >>> result["p50"]   # median calibration curve
 >>>
@@ -73,8 +74,10 @@ def predict_proxy_from_T(
     Samples `n_draws` self-consistent parameter sets from the forward
     calibration posterior (all parameters drawn from the same posterior
     index, preserving correlations) and evaluates the calibration curve
-    at each requested temperature.  Corresponds to the forward model
-    described in Eq. 1 / Eq. 6–7 of the manuscript.
+    at each requested temperature.  This is the forward model of the
+    paper: the generalized logistic curve of Eq. 9 and, for multivariate
+    calibrations, the T₀ shift of Eq. 13 (older additive posteriors add
+    their corrections to the curve instead).
 
     Parameters
     ----------
@@ -95,8 +98,8 @@ def predict_proxy_from_T(
         Random seed for reproducible draw sampling.
     gdgt23ratio : array-like, optional
         GDGT-2/GDGT-3 ratio values (one per temperature point).
-        Required only when the posterior was fitted with the multivariate
-        model (β_{G₂/₃} correction).
+        Required only when the posterior was fitted with a G₂/₃ term
+        (γ_{G₂/₃} in T₀-shift posteriors, β_{G₂/₃} in older additive ones).
     no3 : array-like, optional
         Nitrate concentration values (one per temperature point).
         Required only when the posterior was fitted with NO₃ correction.
@@ -184,8 +187,10 @@ def predict_T_from_proxyObs(
         prior_mu_t: Prior mean temperature (degC), scalar or shape (N,).
         prior_sigma_t: Prior temperature SD (degC); use ~10 when little is known.
         fwd_posterior: Forward calibration: a case id/legacy name (str,
-            loaded from the cache) or a pre-loaded ``xr.Dataset``. Omit for
-            the bundled default calibration for *temptype*.
+            loaded from the cache) or a pre-loaded ``xr.Dataset``. If
+            omitted, a bundled calibration for *temptype* is used: the
+            multivariate one (G23 + NO3) when any predictor is given,
+            otherwise the temperature-only one (with a warning).
         proxy_name: Proxy label. Inherited from the calibration when omitted.
         temptype: ``"SST"`` or ``"thermoT"``; a label, except it picks the
             default calibration when *fwd_posterior* is omitted.
@@ -323,7 +328,7 @@ def predict_T_from_proxyObs(
                 "gdgt23ratio was passed but the forward posterior has no GDGT-2/3 ratio "
                 "parameters (use_gdgt23ratio=False) — the predictor will be silently ignored. "
                 "To apply the GDGT-2/3 correction, use a multivariate posterior "
-                "(e.g. gen_logi_fixed_hier_crtp_multiv_priorApprox_*).",
+                "(e.g. the default 'tx.GHEB.sst.sri03.G23-N1p0').",
                 UserWarning, stacklevel=2,
             )
         _fwd_temptype = _attrs.get("temptype")
@@ -353,7 +358,7 @@ def predict_T_from_proxyObs(
                 "no3 was passed but the forward posterior has no NO₃ parameters "
                 "(use_no3=False) — the predictor will be silently ignored. "
                 "To apply the NO₃ correction, use a multivariate posterior "
-                "(e.g. gen_logi_fixed_hier_crtp_multiv_priorApprox_*).",
+                "(e.g. the default 'tx.GHEB.sst.sri03.G23-N1p0').",
                 UserWarning, stacklevel=2,
             )
         if (predictors.get(NO3_KEY) is None
@@ -391,9 +396,9 @@ def predict_T_from_proxyObs(
         fwd_cache_dir=fwd_cache_dir,
     )
 
-    # The metadata dict layer 2 used to build. The explicit keys come first so
-    # the posterior's own attrs win where they overlap -- the calibration is a
-    # better witness to its own name than the argument that requested it.
+    # Run metadata. The explicit keys come first so the posterior's own attrs
+    # win where they overlap -- the calibration is a better witness to its own
+    # name than the argument that requested it.
     _metadata = {
         "fwd_posterior_name": _fwd_name,
         "filename_tag": filename_tag,
@@ -406,9 +411,9 @@ def predict_T_from_proxyObs(
         **_percentiles_from_posterior(post_ds),
     }
 
-    # The .npz is written before the flags are attached, exactly as it was when
-    # this lived in stan/invT.py: _save_invT_results np.asarray()s every value,
-    # and a DataFrame is not that.
+    # The .npz is written before the flags are attached, because
+    # _save_invT_results converts every value with np.asarray() and the flags
+    # table (a DataFrame) cannot be stored that way.
     if save_results:
         _results_path = None
         if cache_dir is not None:
@@ -485,7 +490,7 @@ def compute_scaledRI(
 
     Notes
     -----
-    The formula is::
+    The formula (paper Eqs. 6 and 8 for the default ``cren_weight=3``) is::
 
         RI      = (1·GDGT1 + 2·GDGT2 + 3·GDGT3 + cren_weight·cren + cren_weight·cren')
                   / (GDGT0 + GDGT1 + GDGT2 + GDGT3 + cren + cren')
@@ -498,9 +503,9 @@ def compute_scaledRI(
     of the proxy's definition rather than a detail — a posterior calibrated at
     3 cannot read an index built at 4.
 
-    It was called ``cren_rings`` until 2026-08-21, which was misleading twice
-    over:
-    it named only the first job, and it implied a count of cyclic moieties.
+    The older name ``cren_rings`` is still accepted, with a deprecation
+    warning. It was misleading twice over: it named only the first job, and
+    it implied a count of cyclic moieties.
     Neither 3 nor 4 is that count. They are calibration conventions, which is
     why both are offered and why neither is "correct".
 

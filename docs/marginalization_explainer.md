@@ -89,7 +89,7 @@ Instead of sampling `t_est[n, m]` for all ensemble members, we sample only `t_es
 ### 3.1 Fewer Parameters
 - Full latent model: ~120,000 parameters.
 - Marginal model: ~1,200 parameters.
-- **Sampling speed scales badly with dimensionality.** By removing 100× more unknowns, the sampler spends far less time per iteration.
+- **Sampling speed scales badly with dimensionality.** By cutting the number of unknowns 100-fold, the sampler spends far less time per iteration.
 
 ### 3.2 Better Posterior Geometry
 - In the full latent model, `t_est[n, m]` are strongly correlated across `m`.  

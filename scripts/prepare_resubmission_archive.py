@@ -87,16 +87,14 @@ DATA_FILES = [
     # companion GRL paper's own Zenodo record, so it's never uploaded here.
 ]
 
-# ── Tier 1 (RESUME.md section G): first-party inputs behind every figure ──
+# ── Tier 1: first-party inputs behind every figure ──
 # that weren't previously archived anywhere. Added 2026-11 so the Open
 # Research promise ("a fresh clone + the two Zenodo records reproduces every
 # figure") is actually true. See the README's own provenance table.
 #
-# 2026-11-04: narrowed to files with NO data traceable to another group's
-# publication, however permissively licensed or however much RR computation
-# sits on top -- the user's explicit call, overriding the earlier "co-author
-# product" / "CC-BY" / "transformative derivative" reasoning below. Cite,
-# don't re-host, everything that fails that test:
+# Policy: we do not re-host published datasets that this study used without
+# significant reanalysis; those are cited and obtained from the original
+# source instead. Cited, not re-hosted:
 #   - Tierney et al. 2022 PNAS PETM data assimilation (regridded) and
 #     Zhu et al. 2019 Science Advances iCESM1.2 PETM simulations (regridded
 #     to full depth) -- Fig. 12. Was EXTERNAL_FILES; now empty.
@@ -106,15 +104,13 @@ DATA_FILES = [
 #     Babila et al.'s Mg/Ca) and ODP1259_...Bornemann08_OBrien17compl.xlsx
 #     (merged from Bornemann 2008 + O'Brien 2017).
 #   - PhanTEX_GIG_df.csv, PhanTEX_v001_modified_032626.csv,
-#     PhanSST_v001_extendedRR_121025.csv -- aggregate many papers' data
-#     points under an RR schema, but every point still traces to another
-#     publication.
+#     PhanSST_v001_extendedRR_121025.csv -- compilations of published data
+#     points, available from their original sources.
 # See the README's "Cited, not re-hosted" list for the full set.
 EXTERNAL_FILES: list[Path] = []
 
 # this study only -- the global coretop TEX86 compilation and the
-# culture+mesocosm table, both first-party measurements with no data
-# traceable to another group's publication (the ingredients behind
+# culture+mesocosm table, both produced by this study (the ingredients behind
 # combined_coretop_culture_mesocosm_rev20260210.csv, already in DATA_FILES).
 PUBLISHED_DATA_FILES = [
     REPO / "data/spreadsheets/ds01_updated_global_coretop_tex_revised_011226.csv",
@@ -123,7 +119,7 @@ PUBLISHED_DATA_FILES = [
 
 # Converted to csv at staging time, never shipped as the pickle itself --
 # pickles pin a library version (sklearn already warns loading this one
-# across a patch release) and "ship csv" is RESUME's own rule for this tier.
+# across a patch release) and this tier is always shipped as csv.
 PICKLE_FILES = [
     REPO / "data/spreadsheets/ols_tex_thermoT_thisStudy.pkl",
 ]
@@ -334,8 +330,8 @@ def main(argv=None) -> int:
     print(f"  data files         : {len(DATA_FILES)}")
     print(f"  external files     : {n_external}  (none -- Fig. 12's third-party model/plate "
           f"grids are cited, not re-hosted)")
-    print(f"  published-data     : {n_published}  (first-party only -- no data traceable to "
-          f"another group's publication)")
+    print(f"  published-data     : {n_published}  (produced by this study; published data "
+          f"used without significant reanalysis are cited, not re-hosted)")
     print(f"  sensitivity/refit  : {n_sensitivity}  (param_sensitivity + refit manifests)")
     print("  + MANIFEST.csv, README.md")
     if not args.apply:
@@ -515,10 +511,9 @@ downloaded from there directly (see `utils/download.py`).
 This folder is intentionally empty. Fig. 12 uses regridded copies of
 Tierney et al. 2022's PNAS PETM data-assimilation field and Zhu et al.
 2019's Science Advances iCESM1.2 PETM simulations, plus two files from the
-Müller et al. 2019 (EarthByte) plate-reconstruction model. All of that data
-traces to another group's publication — however permissively licensed
-(the Müller model is CC-BY 4.0) or however much regridding/computation sits
-on top — so none of it is re-hosted here. Cite the originals:
+Müller et al. 2019 (EarthByte) plate-reconstruction model. We do not
+re-host published datasets that this study used without significant
+reanalysis, so none of it is included here. Cite and obtain the originals:
 
 | Not re-hosted | Source (DOI) |
 |---|---|
@@ -533,9 +528,9 @@ on top — so none of it is re-hosted here. Cite the originals:
 | ds01_updated_global_coretop_tex_revised_011226.csv, culture_mesocosm_combined_rev_092325.xlsx | this study — raw SI_code00 inputs behind `combined_coretop_culture_mesocosm_rev20260210.csv` above |
 | ols_tex_thermoT_thisStudy.csv | this study — the fitted TEX86-vs-thermoT linear regression's parameters (`coef_`, `intercept_`); shipped as csv, not the original pickle, since a pickle pins a library version |
 
-**Cited, not re-hosted** — every one of these still traces to another
-group's publication, whether as an essentially unmodified table or as RR's
-own computed/merged/compiled product built on top of one:
+**Cited, not re-hosted** — published datasets that this study used without
+significant reanalysis (as published tables, or merged/compiled for use here);
+obtain them from the original sources:
 `Kim2010_coretop.xlsx` (Kim et al. 2010's core-top TEX86/SST table; the
 comparison with that calibration is computed live in SI_code02, not baked
 into the file), `U1482_MgCa_SST.xlsx` (Pei et al. 2021's own Mg/Ca-SST

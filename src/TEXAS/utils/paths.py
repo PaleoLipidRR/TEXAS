@@ -149,8 +149,8 @@ PROJECT_ROOT = get_project_root()
 REPO_ROOT = PROJECT_ROOT                      # back-compat alias
 STAN_MODELS_DIR = (PACKAGE_ROOT / "stan_models").resolve()
 
-# Superseded Stan models, kept in the repository for reproducibility but not
-# shipped in the wheel (`pyproject.toml` globs `stan_models/*.stan`, which is
+# Superseded Stan models of the initial submission, kept in the repository for
+# reproducibility but not shipped in the wheel (`pyproject.toml` globs `stan_models/*.stan`, which is
 # non-recursive). Only exists in a source checkout; None for a pip install, in
 # which case the resolver's archive fallback is simply inert.
 _archive = (PROJECT_ROOT / "archive" / "submission-2026-04" / "stan_models")
@@ -237,9 +237,8 @@ CACHE_ROOT = _resolve_cache_root()
 CACHE_DIR = CACHE_ROOT          # backward-compat alias
 POSTERIOR_CACHE_DIR = CACHE_ROOT / "TEXAS_posterior_cache"
 INVT_CACHE_DIR      = CACHE_ROOT / "TEXAS_invT_posterior_cache"
-# Kriged residual-map grids (.npz). Until 2026-09-07 these were written loose
-# into CACHE_ROOT, alongside the two posterior directories; residual_maps.py
-# still reads them from there as a fallback.
+# Kriged residual-map grids (.npz). Older versions wrote these loose into
+# CACHE_ROOT; residual_maps.py still reads them from there as a fallback.
 KRIGED_CACHE_DIR    = CACHE_ROOT / "TEXAS_kriged_grids_cache"
 
 # Training data spreadsheets — inside the repo when running from a git checkout,

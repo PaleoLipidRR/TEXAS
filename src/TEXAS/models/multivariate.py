@@ -47,10 +47,16 @@ def simple_logistic_fixed_upper_multivariate(
     no3_cutoff: float = 50.0
 ) -> np.ndarray:
     """
-    3-parameter logistic (upper asymptote fixed at 1) plus optional linear corrections.
-    y = b + (1 - b) / (1 + exp(-k*(x - inflection))) 
-        + beta_G23 * gdgt23ratio 
-        + beta_NO3 * log10(no3) [only where 0 < no3 < no3_cutoff]
+    3-parameter logistic (upper asymptote fixed at 1) plus optional additive corrections.
+
+    Forward direction: temperature ``x`` (°C) in, proxy value ``y`` (e.g.
+    Scaled RI) out::
+
+        y = b + (1 - b) / (1 + exp(-k*(x - t0)))
+            + beta_G23 * gdgt23ratio
+            + beta_NO3 * log10(no3)   [only where 0 < no3 < no3_cutoff]
+
+    ``x0`` is accepted as a legacy alias for ``t0``.
     """
     # Base logistic
     inf = t0 if t0 is not None else x0
@@ -90,12 +96,21 @@ def generalized_logistic_fixed_upper_multivariate(
 ) -> np.ndarray:
     """
     4-parameter generalized logistic (upper asymptote fixed at 1, Q fixed at 1)
-    plus optional corrections.
-    y = b + (1 - b) / (1 + exp(-k*(x - inf)))^(1/v)
-        + beta_G23 * gdgt23ratio
-        + beta_NO3 * log10(no3) [only where 0 < no3 < no3_cutoff]
+    plus optional additive corrections.
 
-    If v is None it defaults to 1.0 (reducing to the standard logistic).
+    Forward direction: temperature ``x`` (°C) in, proxy value ``y`` (e.g.
+    Scaled RI) out::
+
+        y = b + (1 - b) / (1 + exp(-k*(x - t0)))^(1/v)
+            + beta_G23 * gdgt23ratio
+            + beta_NO3 * log10(no3)   [only where 0 < no3 < no3_cutoff]
+
+    This is the additive form of the preprint-era posteriors. The published
+    calibrations use the T₀-shift form instead
+    (:func:`generalized_logistic_fixed_upper_t0shift`).
+
+    ``x0`` is accepted as a legacy alias for ``t0``. If v is None it defaults
+    to 1.0 (reducing to the standard logistic).
     """
     inf = t0 if t0 is not None else x0
     if inf is None:
@@ -139,9 +154,12 @@ def generalized_logistic_fixed_upper_t0shift(
     no3_cutoff: float = 50.0
 ) -> np.ndarray:
     """
-    Bounded-T counterpart of :func:`generalized_logistic_fixed_upper_multivariate`.
+    T₀-shift counterpart of :func:`generalized_logistic_fixed_upper_multivariate`
+    (paper Eq. 13; the form used by the published GHEB calibrations).
 
-    The corrections shift the curve's location parameter rather than the mean::
+    Forward direction: temperature ``x`` (°C) in, Scaled RI ``y`` out. The
+    non-thermal predictors shift the curve's location parameter rather than
+    adding to the result::
 
         t0_eff = t0 + gamma_G23 * gdgt23ratio
                     + gamma_NO3 * log10(no3)   [only where 0 < no3 < no3_cutoff]
@@ -149,14 +167,14 @@ def generalized_logistic_fixed_upper_t0shift(
 
     That keeps ``y`` inside ``(b, 1)`` for every finite predictor value, which is
     the entire point of the parameterisation — the additive form can push the
-    mean outside the proxy's range. Mirrors ``bounded_mu()`` in
+    curve outside the proxy's range. Mirrors ``bounded_mu()`` in
     ``gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv_t0shift.stan``, including
     the NO3 gate.
 
     One deliberate difference from the Stan model: there, the gate is applied to
     the OBSERVED nitrate while ``log10`` is taken of the LATENT (EIV) value. A
     plotted curve has only one nitrate array to work from, so it is used for
-    both — exactly as the additive Python function already does.
+    both — as the additive Python function does.
 
     **That difference is not cosmetic.** Fed this function's own convention, the
     per-draw ``mu_max`` sits ~0.1 above the ``mu_max`` Stan recorded in generated
@@ -210,9 +228,11 @@ def inverse_generalized_logistic_fixed_upper_multivariate(
 ) -> np.ndarray:
     """Invert :func:`generalized_logistic_fixed_upper_multivariate` for one parameter set.
 
-    Subtracts the two additive non-thermal corrections, then inverts the thermal
-    curve analytically. This is a deterministic **point** inverse, not a
-    reconstruction: see :doc:`marginalization_explainer` §7 for the algebra, the
+    Inverse direction: proxy value ``y`` in, temperature (°C) out. Subtracts the
+    two additive non-thermal corrections, then inverts the thermal curve
+    analytically. This is a deterministic **point** inverse for a single
+    parameter set, not a reconstruction with uncertainty: see Section 7 of the
+    :doc:`marginalization_explainer` docs page for the algebra, the
     NaN convention and why :func:`TEXAS.predict.predict_T_from_proxyObs` is what
     you want for paleotemperature.
 
@@ -306,7 +326,8 @@ def find_optimal_no3_threshold(
     Selects the ``no3_cutoff`` used by the multivariate models: points below it
     carry the NO3 correction, points above are nutrient-replete and excluded.
     The two scoring criteria and the three weighting schemes are different
-    modeling choices, not tuning knobs -- see :doc:`PSM` §9.
+    modeling choices, not tuning knobs -- see Section 9 ("Choosing the NO₃
+    cutoff") of the :doc:`PSM` docs page.
 
     Args:
         no3_values: Nitrate concentrations (umol/L).
@@ -429,10 +450,12 @@ def find_optimal_no3_threshold_nointercept(
 ):
     """Find the NO3 cutoff that maximises the no-intercept R2 of ``RI_res = beta * x``.
 
-    Matches the ``_no3ratio`` Stan formulation, where the correction is exactly
-    zero at the threshold boundary -- unlike :func:`find_optimal_no3_threshold`,
+    By default uses the centred form ``x = log10(no3 / threshold)``, in which
+    the correction is exactly zero at the cutoff (the ``_no3ratio`` model
+    variant; no Stan model of that form ships with the package) -- unlike :func:`find_optimal_no3_threshold`,
     which is Spearman-based and was used in the prior publication. The predictor
-    forms and the weighting schemes are explained in :doc:`PSM` §9.
+    forms and the weighting schemes are explained in Section 9 of the
+    :doc:`PSM` docs page.
 
     Args:
         no3_values: Nitrate concentrations (umol/L).
@@ -535,6 +558,6 @@ def find_optimal_no3_threshold_nointercept(
     return optimal, results
 
 
-# Legacy alias — the T0-shift model was called "bounded-T" before the
-# 2026-08-15 rename; keep the old callable name working.
+# Legacy alias: the T0-shift model was formerly called "bounded-T"; the old
+# function name still works.
 generalized_logistic_fixed_upper_bounded_t = generalized_logistic_fixed_upper_t0shift

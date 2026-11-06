@@ -31,9 +31,10 @@ Then open `docs/_build/html/index.html` in your browser.
 | `installation.md`, `troubleshooting.md` | Guide pages |
 | `api.md` | API reference — Sphinx `autodoc` from NumPy/Google docstrings |
 | `callmap.md` | Interactive call map — embeds the generated `_static/callmap.html` |
-| `_scripts/` | Call-map generator (excluded from the build; see below) |
+| `_scripts/` | Generators for the call map and the interactive explainer pages (excluded from the build; see below) |
 | `gdgts_to_temperature.md`, `PSM.md`, `calibration_curve_explorer.ipynb`, `model_validation.md`, `stan_models.md`, `sampler_budget.md` | Explainers |
 | `marginalization_explainer.md`, `reduce_sum_for_geologists.md` | Stan internals, plain-language |
+| `preprint_additive_archive.md` | Archive — the preprint's response-offset (additive) formulation |
 
 ## Call map
 

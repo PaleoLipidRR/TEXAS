@@ -13,7 +13,7 @@ Three things you can do with it:
 - **Search the whole package.** The *Every function* tab covers every function and method
   in `src/TEXAS`, grouped by module. Selecting one draws its callers and callees.
 - **Spot dead weight.** The *Loose ends* tab lists functions that nothing in the
-  repository calls — see [below](#how-the-graph-is-built).
+  repository calls — see [below](#loose-ends).
 
 ```{raw} html
 <p style="margin:1rem 0 0;">

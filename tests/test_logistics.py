@@ -305,3 +305,14 @@ def test_bounded_t_legacy_alias():
         generalized_logistic_fixed_upper_t0shift,
     )
     assert generalized_logistic_fixed_upper_bounded_t is generalized_logistic_fixed_upper_t0shift
+
+
+class TestInverseLogisticFixedUpper:
+    def test_roundtrip_with_nonzero_lower_asymptote(self):
+        """inverse(forward(x)) recovers x when b != 0 (regression: the inverse used y, not y - b)."""
+        from TEXAS.models.logistics import inverse_logistic_fixed_upper, logistic_fixed_upper
+
+        x = np.array([5.0, 15.0, 25.0, 35.0])
+        kw = dict(t0=20.0, k=0.2, b=0.4)
+        y = logistic_fixed_upper(x, **kw)
+        np.testing.assert_allclose(inverse_logistic_fixed_upper(y, **kw), x, rtol=1e-10)

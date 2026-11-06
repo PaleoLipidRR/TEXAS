@@ -2,11 +2,17 @@
 """
 Utilities for downloading data from the TEXAS Zenodo data record.
 
-Files are downloaded individually from Zenodo so you only fetch what you need.
-The full multivariate (EIV) posteriors are ~78–81 MB each — they carry the
-per-site latent variables; the wheel already bundles a latent-stripped copy of
-the default pair, so most reconstructions need no download at all. All other
-files are < 2 MB.  A size notice is printed before any download ≥ 5 MB.
+Files are downloaded one at a time, so you only fetch what you need. Most
+users need no download at all: the package already ships four forward
+calibration posteriors (posterior = the set of calibration-parameter values
+the fit found plausible, stored as MCMC draws): tx.GHEB.{sst,thm}.sri03.G23-N1p0
+and tx.GHPU.{sst,thm}.sri03.p0.
+
+The full multivariate (EIV) posteriors on Zenodo are ~78–81 MB each, because
+they also store the per-site latent (estimated "true") predictor values; the
+bundled copies leave those out. The other posteriors are < 1 MB and the
+training files are 1–20 MB. A size notice is printed before any download of
+5 MB or more.
 
 Usage
 -----
@@ -15,12 +21,12 @@ Usage
 >>> TEXAS.download_all(figures=True)   # + invT reconstructions + WOA23 (>1 GB)
 >>> TEXAS.download_posteriors()        # forward calibration posteriors only
 >>> TEXAS.download_training_data()     # training CSVs + NO₃ fields
->>> TEXAS.download_ocean_properties()  # just the WOA23 ocean_prop_ds field
+>>> TEXAS.download_ocean_properties()  # just the ocean_prop_ds field (CMEMS NO₃ + WOA23 T)
 >>> TEXAS.download_invT_posteriors()   # invT reconstructions behind SI_code02/03
 >>> TEXAS.download_woa23()             # WOA23 climatologies (>1 GB; SI_code00 only)
 
-Download a specific posterior:
->>> TEXAS.download_posteriors(["tx.GHPU.sst.sri03.p0"])
+Download a specific posterior that is not bundled:
+>>> TEXAS.download_posteriors(["tx.GHEB.sst.sri03.G23"])
 
 Docker/devcontainer users: run on the host machine — the container
 bind-mounts ``data/`` automatically.
@@ -53,18 +59,16 @@ _GRL_PAPER_RECORD_ID: str = "14806962"
 
 # The invT reconstructions behind SI_code02/SI_code03 (compiled global-coretop
 # maps + every paleo-site reconstruction, including the two full-draws files
-# behind Fig. 13) ship as one zip rather than 46 individual Zenodo files.
-# Name is frozen at whatever pyproject.toml said when scripts/zenodo_upload.py
-# built it (0.4.0, before the 1.0.0 bump) -- it is a filename on a published
-# record, not a live version string, so it does NOT track ZENODO_RECORD_ID's
-# own v1.0.0. Verified against the record's actual file listing.
+# behind paper Fig. 13) ship as one zip rather than 46 individual Zenodo files.
+# The "v0.4.0" in the name is part of a filename on the published record, not
+# the package version: it is the version the zip was built under and stays
+# fixed even though the record itself is v1.0.0.
 _INVT_ZIP_FILENAME: str = "texas-psm-invT-posteriors-v0.4.0.zip"
 
 # WOA23 (World Ocean Atlas) climatologies are public-domain NOAA/NCEI
 # products, fetched directly from NCEI rather than re-hosted on the TEXAS
-# record (SI_code00_PreProcessing's own source). Verified reachable
-# 2026-11-03; sizes are real Content-Length, not estimates -- the 0.25deg
-# temperature grid alone is >1 GB.
+# record (SI_code00_PreProcessing's own source). Sizes are the files' real
+# sizes, not estimates -- the 0.25-degree temperature grid alone is >1 GB.
 _WOA23_BASE = "https://www.ncei.noaa.gov/thredds-ocean/fileServer/woa23/DATA"
 WOA23_FILES: dict[str, dict] = {
     "temperature_0.25deg": {
@@ -129,11 +133,12 @@ def _download_file(url: str, dest: Path, size_mb: float, force: bool = False) ->
 # filename is the flat name on the Zenodo record (no subdirectory); an optional
 # "record" pins the entry to an older version of the record.
 #
-# From v0.3.0 the record carries the revised manuscript's refits under their
-# case ids (T₀-shift multivariate `GHEB`, thermal-only `GHPU`, culture+mesocosm
+# The current record holds the published calibrations under their case ids
+# (T₀-shift multivariate `GHEB`, temperature-only `GHPU`, culture+mesocosm
 # `GCDU`). The multivariate files are the COMPLETE archival copies, EIV per-site
-# latents included (~78–81 MB); the wheel bundles a 0.4 MB latent-stripped copy
-# of the default pair, so most users never need these downloads.
+# latents included (~78–81 MB). The package already bundles small copies of
+# tx.GHEB.{sst,thm}.sri03.G23-N1p0 (latents removed) and
+# tx.GHPU.{sst,thm}.sri03.p0, so most users never need these downloads.
 POSTERIOR_REGISTRY: dict[str, dict] = {
     # ── Default calibration: full multivariate T₀-shift (G₂/₃ + NO₃) ─────────
     "tx.GHEB.sst.sri03.G23-N1p0": {
@@ -238,8 +243,12 @@ def download_all(
     """Download everything from Zenodo: forward posteriors + training data.
 
     Files are downloaded individually; already-cached files are skipped unless
-    *force=True*.  Total download is ~490 MB (dominated by the six full EIV
-    multivariate posteriors at ~78–81 MB each) with the default ``figures=False``.
+    *force=True*.  With the default ``figures=False`` the total is ~510 MB:
+    ~475 MB for the nine current-record forward posteriors (almost all of it
+    the six full multivariate EIV posteriors, ~78–81 MB each) plus ~37 MB of
+    training data (:func:`download_training_data`). The superseded v0.2.0
+    posteriors are not included; request them by name with
+    :func:`download_posteriors`.
 
     Parameters
     ----------
@@ -294,9 +303,13 @@ def download_posteriors(
 
     Examples
     --------
-    Download only the univariate SST posterior (~0.3 MB):
+    Download the G₂/₃-only SST calibration (~78 MB):
 
-    >>> download_posteriors(["gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3"])
+    >>> download_posteriors(["tx.GHEB.sst.sri03.G23"])
+
+    The four bundled posteriors (tx.GHEB.{sst,thm}.sri03.G23-N1p0 and
+    tx.GHPU.{sst,thm}.sri03.p0) ship with the package and need no download;
+    the Zenodo copies of the GHEB pair are the complete archival versions.
     """
     # By default download only the current-record posteriors; superseded
     # entries pinned to an older record version must be asked for by name.
@@ -344,17 +357,18 @@ def download_posteriors(
 
 def _case_aliases() -> dict:
     """
-    Case-id aliases onto the registry's legacy keys.
+    Case-id aliases for the registry's legacy long-name keys.
 
-    Two names refer to one file and both must work. The **key** is what a user
-    asks for, and case ids are canonical from the resubmission on. The
-    **filename** is what exists on the published Zenodo record, which is a
-    frozen DOI carrying the legacy long names -- so it cannot change until a
-    new deposit is made, and inventing a case-named URL now would 404.
+    The current record already uses case-id filenames and keys. Only the
+    superseded posteriors on the old v0.2.0 record still carry legacy long
+    names (e.g. ``gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3``),
+    and those files cannot be renamed on a published record. This adds a
+    case-id key for each of them that points at the same file, so either name
+    can be requested.
 
     Built rather than hand-listed so it cannot fall out of step with the
-    registry, and failures are silent because an alias is a convenience: a
-    posterior this naming scheme cannot classify simply keeps its legacy key.
+    registry. Failures are silent because an alias is a convenience: a key
+    this naming scheme cannot classify simply keeps only its legacy name.
     """
     from .naming import case_from_attrs, legacy_fwd_name  # noqa: F401
     out = {}
@@ -388,8 +402,8 @@ def _local_dest(dest_dir: Path, name: str) -> Path:
     """
     Where a Zenodo posterior lands locally.
 
-    The Zenodo record is a **flat** namespace -- it has to be, a DOI deposit has
-    no subdirectories -- and since 2026-08-12 so is the local cache. A registry
+    The Zenodo record is a **flat** namespace -- a DOI deposit has no
+    subdirectories -- and so is the local cache. A registry
     key that is a case id lands at ``<case>.fwd.nc``, the same path
     ``save_posterior`` writes, giving one uniform local layout no matter whether
     a posterior was sampled here or downloaded. Legacy long-name keys (the
@@ -473,10 +487,9 @@ def download_ocean_properties(
     This is the single file most users need for the ``site_lat``/``site_lon``
     NO₃ lookup in :func:`~TEXAS.predict.predict_T_from_proxyObs` — a ~20 MB
     gridded ``(lat, lon)`` dataset of thermocline-depth-integrated CMEMS
-    nitrate (on the WOA23 grid, beside WOA23 temperature), previously only obtainable by running ``SI_code00_PreProcessing``
-    locally. Downloading just this entry (rather than the full
-    :func:`download_training_data`, which also fetches the ~17 MB of
-    training CSVs and the CMEMS field) is why this has its own function.
+    nitrate (on the WOA23 grid, beside WOA23 temperature). Downloading just this entry (rather than the full
+    :func:`download_training_data`, which also fetches ~17 MB of training
+    CSVs and the CMEMS field) is why this has its own function.
 
     Fetched from the Zenodo record for the companion GRL paper (not the
     TEXAS project's own record) — the same source ``SI_code00_PreProcessing``
@@ -520,9 +533,10 @@ def download_invT_posteriors(
     """Download and unpack the invT reconstructions behind SI_code02/SI_code03.
 
     Fetches ``texas-psm-invT-posteriors-v{N}.zip`` from the TEXAS Zenodo data
-    record — the compiled global-coretop reconstructions (SI_code02 Figs.
-    8–9, S13–S17) and every paleo-site reconstruction (SI_code03), including
-    the two full-draws files behind Fig. 13 — and unpacks it flat into the
+    record — the compiled global-coretop reconstructions (paper Figs. 8–9
+    and SI Figs. S13–S17, made by SI_code02) and every paleo-site
+    reconstruction (SI_code03), including the two full-draws files behind
+    paper Fig. 13 — and unpacks it flat into the
     invT posterior cache, the same layout :func:`~TEXAS.stan.io.save_invT_posterior`
     writes locally: ``<case>.inv.<site>.ud[-<variant>].nc`` at the cache root,
     ``_draws.nc`` files under ``draws/``. The zip's own ``invT/coretop/`` and

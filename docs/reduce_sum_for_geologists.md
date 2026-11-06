@@ -93,23 +93,23 @@ For sample n=2 (RI_obs = 0.68, T_proposed = 22.5°C):
    │  Step 1 – Prior                                          │
    │  Is T = 22.5°C consistent with our prior guess?         │
    │  prior_mu_t[2] = 20°C, prior_sigma_t = 10°C             │
-   │  → log N(22.5 | 20, 10) = −2.33                         │
+   │  → log N(22.5 | 20, 10) = −3.25                         │
    └──────────────────────────────────────────────────────────┘
 
    ┌──────────────────────────────────────────────────────────┐
    │  Step 2 – Likelihood under each calibration draw         │
    │                                                          │
-   │  Draw m=1: T₀=28, k=0.18, b=0.15, ν=0.9, σ=0.05        │
-   │    → expected RI = 0.65   → log N(0.68 | 0.65, 0.05)   │
-   │    → lp[1] = −1.58                                       │
+   │  Draw m=1: T₀=20, k=0.18, b=0.15, ν=0.9, σ=0.05        │
+   │    → expected RI = 0.64   → log N(0.68 | 0.64, 0.05)   │
+   │    → lp[1] = 1.76                                        │
    │                                                          │
-   │  Draw m=2: T₀=27, k=0.20, b=0.12, ν=1.1, σ=0.06        │
-   │    → expected RI = 0.67   → log N(0.68 | 0.67, 0.06)   │
-   │    → lp[2] = −1.39                                       │
+   │  Draw m=2: T₀=21, k=0.20, b=0.12, ν=1.1, σ=0.06        │
+   │    → expected RI = 0.65   → log N(0.68 | 0.65, 0.06)   │
+   │    → lp[2] = 1.77                                        │
    │                                                          │
-   │  Draw m=3: T₀=30, k=0.15, b=0.18, ν=0.8, σ=0.04        │
-   │    → expected RI = 0.60   → log N(0.68 | 0.60, 0.04)   │
-   │    → lp[3] = −3.13                                       │
+   │  Draw m=3: T₀=20, k=0.15, b=0.18, ν=0.8, σ=0.04        │
+   │    → expected RI = 0.61   → log N(0.68 | 0.61, 0.04)   │
+   │    → lp[3] = 0.77                                        │
    └──────────────────────────────────────────────────────────┘
 
    ┌──────────────────────────────────────────────────────────┐
@@ -117,14 +117,17 @@ For sample n=2 (RI_obs = 0.68, T_proposed = 22.5°C):
    │                                                          │
    │  We want:  log[ (1/3) × (e^lp[1] + e^lp[2] + e^lp[3]) ]│
    │          = log_sum_exp(lp) − log(3)                      │
-   │          = log_sum_exp(−1.58, −1.39, −3.13) − 1.10      │
-   │          ≈ −1.23                                         │
+   │          = log_sum_exp(1.76, 1.77, 0.77) − 1.10         │
+   │          ≈ 1.53                                          │
    │                                                          │
-   │  This is the marginalized likelihood for sample n=2.     │
+   │  This is the marginalized log-likelihood for sample n=2. │
    └──────────────────────────────────────────────────────────┘
 
    Contribution of sample n=2 to log-probability:
-       prior + likelihood = −2.33 + (−1.23) = −3.56
+       prior + likelihood = −3.25 + 1.53 = −1.72
+
+   (A log-likelihood can be positive: these are probability *densities*,
+   which exceed 1 when σ is small.)
 ```
 
 ---
@@ -141,13 +144,13 @@ estimated together and are correlated.
            ─────────────────────────────────────
            Draw │  T₀   │  k   │  b   │  σ
            ─────┼───────┼──────┼──────┼──────
-             1  │ 28.0  │ 0.18 │ 0.15 │ 0.05   ← always use ALL from row 1
-             2  │ 27.0  │ 0.20 │ 0.12 │ 0.06   ← always use ALL from row 2
-             3  │ 30.0  │ 0.15 │ 0.18 │ 0.04   ← always use ALL from row 3
+             1  │ 20.0  │ 0.18 │ 0.15 │ 0.05   ← always use ALL from row 1
+             2  │ 21.0  │ 0.20 │ 0.12 │ 0.06   ← always use ALL from row 2
+             3  │ 20.0  │ 0.15 │ 0.18 │ 0.04   ← always use ALL from row 3
 ```
 
 **What we do (correct ✅):**
-For draw m=1, use `T₀[1]=28.0`, `k[1]=0.18`, `b[1]=0.15`, `σ[1]=0.05` together.
+For draw m=1, use `T₀[1]=20.0`, `k[1]=0.18`, `b[1]=0.15`, `σ[1]=0.05` together.
 
 **What we must NOT do (wrong ❌):**
 Mix parameters from different rows — e.g., `T₀[1]` + `k[3]` + `b[2]`.
@@ -187,19 +190,19 @@ numbers in a safe range. The result is mathematically identical but numerically 
 
 Visually:
 ```
-lp = [−1.58, −1.39, −3.13]
+lp = [1.76, 1.77, 0.77]
                    │
                    ▼
-     shift by max = −1.39:  [−0.19, 0.00, −1.74]
+     shift by max = 1.77:  [−0.01, 0.00, −1.00]
                    │
                    ▼
-     exp:  [0.83, 1.00, 0.18]   ← safe numbers, no underflow
+     exp:  [0.99, 1.00, 0.37]   ← safe numbers, no underflow
                    │
                    ▼
-     sum:  2.01   →  log(2.01) = 0.70
+     sum:  2.36   →  log(2.36) = 0.86
                    │
                    ▼
-     shift back:  0.70 + (−1.39) − log(3) = −1.79
+     shift back:  0.86 + 1.77 − log(3) = 1.53
 ```
 
 ---
@@ -213,9 +216,9 @@ lp = [−1.58, −1.39, −3.13]
 
   Forward posterior (M=3 draws):
   ┌──────────────────────────────────────────────────────────┐
-  │  m=1: T₀=28  k=0.18  b=0.15  ν=0.9  σ=0.05            │
-  │  m=2: T₀=27  k=0.20  b=0.12  ν=1.1  σ=0.06            │
-  │  m=3: T₀=30  k=0.15  b=0.18  ν=0.8  σ=0.04            │
+  │  m=1: T₀=20  k=0.18  b=0.15  ν=0.9  σ=0.05            │
+  │  m=2: T₀=21  k=0.20  b=0.12  ν=1.1  σ=0.06            │
+  │  m=3: T₀=20  k=0.15  b=0.18  ν=0.8  σ=0.04            │
   └──────────────────────────────────────────────────────────┘
 
   Downcore samples:   n=1      n=2      n=3      n=4

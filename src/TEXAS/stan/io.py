@@ -54,7 +54,7 @@ def save_posterior(
     filename_suffix : str, optional
         Extra tag appended before ``.nc`` under the *legacy* layout, and the
         run/member token under the case layout.  Leading/trailing underscores
-        are stripped.  **Do not pass a date here.**  Filenames no longer carry
+        are stripped.  **Do not pass a date here.**  Filenames do not carry
         date stamps; the run date is recorded in the ``run_timestamp`` attr,
         where it survives a rename and does not have to be parsed back out of
         a path.  Prefer ``run=`` for an explicit member.
@@ -204,8 +204,8 @@ def load_posterior(
         fpath = candidate if candidate.exists() else None
 
     if fpath is None:
-        # The nitrate token was respelled (N10 -> N1p0) on 2026-08-23, and a
-        # name and the file it points at can sit on either side of that. This
+        # Older names write the nitrate cutoff as "N10" instead of "N1p0"; try
+        # the other spelling, since a name and its file may use different ones. This
         # covers the inverse cache and any leaf too specific to parse as a case
         # id -- an invT leaf carries a site and scenario after the case, so the
         # case-id machinery above never sees it.
@@ -235,8 +235,9 @@ def load_posterior(
             fpath = None
 
     if fpath is None:
-        # Case dirs hold "<case>.fwd.nc"; dirs written before 2026-08-11 hold a
-        # bare "fwd.nc". Either way the case id is the directory name.
+        # Older caches keep posteriors in case directories, as "<case>.fwd.nc"
+        # or, older still, a bare "fwd.nc". Either way the case id is the
+        # directory name.
         cased = sorted(indir.glob("*/*.fwd.nc")) + sorted(indir.glob("*/fwd.nc"))
         available = sorted(indir.glob("*.nc")) + cased
         available_str = "\n    ".join(
@@ -349,13 +350,9 @@ def save_invT_posterior(
     the internal save path uses, so a reconstruction lands in one place however
     it was produced.
 
-    This function used to build ``{site}_{model}_{temptype}.nc`` itself, which
-    omitted ``proxy_name``: a ``scaledRI`` and a ``TEX86`` reconstruction of one
-    site collided on a single path, and with the default ``overwrite=True`` the
-    second silently replaced the first. It was also case-unaware, so it could
-    not place a reconstruction inside its calibration's case directory. Nothing
-    on disk used that spelling -- every cached invT posterior came from the
-    internal path -- so unifying them changes no existing file.
+    Because that builder includes ``proxy_name``, a ``scaledRI`` and a
+    ``TEX86`` reconstruction of the same site get different files instead of
+    one overwriting the other.
     """
     if not isinstance(posterior, xr.Dataset):
         raise TypeError("posterior must be an xarray.Dataset")
@@ -402,11 +399,8 @@ def _generate_filename_base(
     # fall through to the legacy name below.
     #
     # The leaf comes from naming.inv_relpath() rather than being spelled out
-    # again here. This function used to reimplement it, which is how the two
-    # drifted: inv_relpath still described the pre-flattening <case>/<leaf>
-    # layout in its docstring while this branch had already gone flat, and only
-    # one of them was reachable from production. There is now one builder, so a
-    # change to the inverse naming scheme cannot land in half of it.
+    # again here, so there is one builder and a change to the inverse naming
+    # scheme cannot land in only half of the code.
     fwd_case = meta.get("fwd_case", "")
     if fwd_case:
         try:

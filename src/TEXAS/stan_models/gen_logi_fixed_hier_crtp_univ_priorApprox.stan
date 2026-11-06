@@ -8,9 +8,9 @@
 //          need to scale their process-noise prior.
 //
 // CALIBRATION CURVE - generalized logistic (Richards), upper asymptote fixed at
-// 1 and Q fixed at 1:
+// 1 and Q fixed at 1 (paper Eq. 9 with a = 1, Q = C = 1):
 //
-//   RI = b + (1 - b) / (1 + exp(-k * (T - T0)))^(1/nu)
+//   Scaled RI = b + (1 - b) / (1 + exp(-k * (T - T0)))^(1/nu)
 //
 // T0 is the curve's LOCATION parameter, not its inflection point. The steepest
 // response sits at T0 - ln(nu)/k, several degC below T0 for the fitted nu, and

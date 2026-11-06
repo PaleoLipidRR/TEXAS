@@ -1,14 +1,16 @@
 // ===============================================================================
 // invT_gen_logi_fixed_univ_marginal_unconstrained.stan
 //
-// PURPOSE: Bayesian paleotemperature reconstruction from observed Ring Index
-//          values (univariate - thermal signal only). Given proxyObs
+// PURPOSE: Bayesian paleotemperature reconstruction from observed Scaled Ring
+//          Index values (univariate - thermal signal only). Given proxyObs
 //          observations and a forward calibration posterior, infers the
 //          posterior distribution of temperature for each sample.
 //
 // APPROACH - "Marginal" (direct sampling):
-//   The forward calibration introduces uncertainty in the RI-T curve parameters
-//   theta = {T0, k, b, nu, sigma}. We marginalize (integrate) over this uncertainty:
+//   The forward calibration curve (temperature -> Scaled RI) is uncertain: its
+//   parameters theta = {T0, k, b, nu, sigma} are known only as a set of
+//   posterior draws. We average over (marginalize) this uncertainty
+//   (paper Appendix B, Eqs. B2-B3):
 //
 //     p(RI_obs | T) = integral p(RI_obs | T, theta) * p(theta | calib. data) dtheta
 //                   ~= (1/M) Sum_{m=1}^{M}  Normal(RI_obs | f(T; theta_m), sigma_m)
@@ -40,9 +42,12 @@
 //
 // TEMPERATURE CONSTRAINT: "unconstrained"
 //   t_est has no lower bound, so reconstructions may fall below the seawater
-//   freezing point where the data drive them there. Sibling files in this
-//   directory impose a lower bound instead ("_hard_constraint") or place a
-//   truncated-Normal prior on t_est ("_truncated_prior").
+//   freezing point where the data drive them there. This is the only
+//   constraint type shipped with the package. The older lower-bound
+//   ("_hard_constraint") and truncated-prior ("_truncated_prior") variants
+//   are not shipped; they are kept in the repository under
+//   archive/submission-2026-04/stan_models/ and archive/pre-submission/stan_models/
+//   and run only if passed by absolute path.
 // ===============================================================================
 
 functions {
@@ -83,7 +88,8 @@ functions {
       vector[M] llk;  // Log-likelihood under each of the M calibration draws
 
       for (m in 1:M) {
-        // Compute expected RI using the m-th calibration curve (Eq. 1).
+        // Expected Scaled RI at temperature t_seg[i] under the m-th calibration
+        // curve: the generalized logistic of paper Eq. 9 with a = 1, Q = C = 1.
         // ALL parameters use the same draw index [m] to preserve correlations.
         real mu = b[m] + (1 - b[m])
             / pow(1 + exp(-k[m] * (t_seg[i] - t0[m])), 1.0 / v[m]);

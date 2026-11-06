@@ -1,5 +1,5 @@
 """
-download_woa23() and download_invT_posteriors() (RESUME.md section G).
+download_woa23() and download_invT_posteriors().
 
 Network is always mocked here -- these never hit NCEI or Zenodo for real.
 """
@@ -105,7 +105,8 @@ def test_download_invt_posteriors_unpacks_flat_with_draws_subdir(monkeypatch, tm
     monkeypatch.setattr(download_mod.urllib.request, "urlopen", _fake_urlopen)
 
     paths = download_invT_posteriors(cache_dir=tmp_path)
-    names = {p.name: p for p in paths}
+    names = {p.name for p in paths}
+    assert "tx.GHEB.sst.sri03.G23-N1p0.inv.DSDP591.ud.nc" in names
 
     # coretop compiled + batch files land flat at the cache root, regardless
     # of their "coretop" vs "paleo" prefix inside the zip.

@@ -51,9 +51,9 @@ def extract_and_update_metadata(
     site_name : str, optional
       A label for this run (e.g. coretop site).
     version : str, optional
-      Deprecated and no longer written. Accepted so existing callers keep
-      working; read ``texas_version`` instead, which records the installed
-      package version rather than a literal passed at the call site.
+      Deprecated and ignored (not written). Accepted so existing callers
+      keep working; read ``texas_version`` instead, which records the
+      installed package version.
     suffixes : list of str, optional
       Which suffixes to scan for proxyObs_* and predictor_* arrays.
     direct_keys : list of str, optional
@@ -65,14 +65,12 @@ def extract_and_update_metadata(
     # 1) base metadata
     metadata: Dict[str, Any] = {
         "stan_model_name":      stan_filename,
-        # What produced the file, named as a reader would install it. It said
-        # "culRI-Bayesian" until 2026-08-23 -- the project's name years before
-        # it was TEXAS, carried forward on every posterior since.
+        # What produced the file, named as a reader would install it. (Older
+        # posteriors say "culRI-Bayesian", the project's earlier name.)
         "generated_by":         "texas-psm",
-        # The `version` attr is gone. It was this function's default argument,
-        # "1.0.0", in all 35 cached posteriors: nothing ever set it and nothing
-        # read it, so it recorded only that a default existed. `texas_version`
-        # below is the real package version and the one to read.
+        # The package version is recorded as `texas_version` below. (Older
+        # posteriors also carry a `version` attr that was always "1.0.0" and
+        # means nothing.)
         "run_time":             datetime.now().isoformat(),
         "run_duration (sec)":   None,
         "temptype":             None,    # sampler may fill this
@@ -130,18 +128,13 @@ def extract_and_update_metadata(
 
     # 6) when the run happened
     #
-    # This is the only record of it. Forward filenames used to carry a date
-    # stamp ("..._050126_eiv.nc") and nothing else wrote the date down, so
-    # dropping the stamp from the name would have lost it entirely. The attr
-    # is the right home for it regardless: a date belongs to the run, not to
-    # the path, and it survives a rename. Matches the ``run_timestamp`` the
-    # inverse path already records, so both halves agree on the key.
+    # This is the only record of the run date: filenames carry no date stamp.
+    # A date belongs to the run, not the path, and an attr survives a rename.
+    # The inverse path records the same ``run_timestamp`` key.
     metadata.setdefault("run_timestamp", datetime.now().isoformat(timespec="seconds"))
-    # The package version, recorded rather than encoded in the path. It used to
-    # be the "v026" position of the case id, where a docs-only release orphaned
-    # every existing name while a prior change without a release left two
-    # incompatible posteriors sharing one. As an attr it is simply the truth
-    # about what produced this file.
+    # The package version, recorded as an attr rather than in the file name,
+    # so a new release does not rename every existing posterior. (Older case
+    # ids carried a version token such as "v026"; they still parse.)
     try:
         from .. import __version__ as _texas_version
         metadata.setdefault("texas_version", str(_texas_version))
@@ -302,11 +295,3 @@ def extract_priors_from_stan(
             priors[param] = prior
 
     return priors
-
-# infer_use_flags_from_attrs was removed here on 2026-08-12 together with the
-# same-named function in stan/utils.py. Neither had a caller, and the two were
-# not equivalent -- this one omitted predictors whose use_* key was absent,
-# the other returned False for them -- so keeping both invited a future caller
-# to import whichever came to hand and get a different answer. Live code reads
-# the attrs directly; see ensemble/detection.py, which keys off attr presence
-# deliberately.

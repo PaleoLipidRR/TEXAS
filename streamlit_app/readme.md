@@ -9,6 +9,7 @@ streamlit_app/
 ├── main.py                 # Entry point - run with `streamlit run main.py`
 ├── config.py              # Configuration constants and settings
 ├── readme.md              # This file
+├── requirements.streamlit.txt # App-specific dependencies
 ├── utils/                 # Core utilities
 │   ├── pages_init.py      # Package marker (misnamed; not __init__.py)
 │   ├── data_processing.py # Data transformation functions
@@ -77,7 +78,7 @@ render them as tabs — see the note under Directory Structure above.
 ## Running the Application
 
 1. Ensure TEXAS is installed and importable
-2. Install required dependencies:
+2. From the `streamlit_app/` directory, install required dependencies:
    ```bash
    pip install -r requirements.streamlit.txt
    ```

@@ -18,30 +18,27 @@ stream, field, time range.
 
 TEXAS uses the same idea.  The **case** is the calibration identity::
 
-    tx . v026 . GHEB . sst . ri3 . G23-N1p0
-    |     |      |      |     |      |
-    |     |      |      |     |      +-- active predictors
-    |     |      |      |     +--------- proxy
-    |     |      |      +--------------- target temperature
-    |     |      +---------------------- compset (see below)
-    |     +----------------------------- calibration/package version
-    +----------------------------------- project
+    tx . GHEB . sst . sri03 . G23-N1p0
+    |     |      |      |       |
+    |     |      |      |       +-- active predictors (here G2/3 and NO3, cutoff 1.0)
+    |     |      |      +---------- proxy (Scaled RI, crenarchaeol weighted 3)
+    |     |      +----------------- target temperature (sst or thm = thermocline)
+    |     +------------------------ compset (see below)
+    +------------------------------ project
 
-and the case is a *directory*, so everything derived from one calibration
-lives together and individual filenames stay short::
+Files are stored flat (no subdirectories), and each file name starts with the
+case it belongs to::
 
-    tx.v026.GHEB.sst.ri3.G23-N1p0/
-        tx.v026.GHEB.sst.ri3.G23-N1p0.fwd.nc                  <- forward posterior
-        tx.v026.GHEB.sst.ri3.G23-N1p0.inv.U1482.ud-mod-001.nc <- a reconstruction
-        tx.v026.GHEB.sst.ri3.G23-N1p0.inv.MD98-2152.ud-n01-001.nc
+    tx.GHEB.sst.sri03.G23-N1p0.fwd.nc                   <- forward posterior
+    tx.GHEB.sst.sri03.G23-N1p0.inv.U1482.ud-mod.nc      <- a reconstruction
+    tx.GHEB.sst.sri03.G23-N1p0.inv.MD98-2152.ud-n01.nc
 
-Each leaf repeats the case, the way CESM names data output for its case
-(``b.e12.B1850C5CN.f19_g16.iPETM09x.01.pop.h.1901-2000.climo.nc``) rather than
-giving it a bare role name. Bare names belong to case *control* files that
-never leave the directory; a posterior does leave -- it gets copied around and
-published to a flat Zenodo namespace where many ``fwd.nc`` cannot coexist.
-The repetition is free: ``<case>/<case>.fwd.nc`` and ``<case>/fwd.nc`` are the
-same length, only the separator moves.
+Repeating the case in every name follows CESM, which names data output for
+its case (``b.e12.B1850C5CN.f19_g16.iPETM09x.01.pop.h.1901-2000.climo.nc``)
+rather than giving it a bare role name. A posterior gets copied around and
+published to Zenodo, whose namespace is flat, so many files called ``fwd.nc``
+could not coexist; a name that carries its case still identifies itself once
+detached.
 
 THE COMPSET CODE
 ----------------
@@ -70,8 +67,12 @@ BACKWARD COMPATIBILITY
 ----------------------
 Nothing here renames anything on disk.  :func:`legacy_fwd_name` and
 :func:`legacy_invT_name` reproduce the historical names exactly, and
-``TEXAS.stan.io.load_posterior`` tries both layouts, so existing caches,
-Zenodo downloads, and notebooks that pass long names keep working.
+``TEXAS.stan.io.load_posterior`` tries every layout, so existing caches,
+Zenodo downloads, and notebooks that pass long names keep working. Older
+spellings of a case id also still parse: a version token (``tx.v026.GHEB...``),
+a run/member token (``.001``), the proxy codes ``ri3``/``ri4``/``ri``, ``none``
+for no predictors, ``N10`` for a nitrate cutoff of 1.0, and case
+*directories* (``<case>/<case>.fwd.nc`` or ``<case>/fwd.nc``).
 """
 
 from __future__ import annotations
@@ -150,12 +151,9 @@ TEMPTYPE_DECODE = {"sst": "SST", "thm": "thermoT", "cul": "cultureT"}
 
 # Proxy codes read as: s=scaled, ri=Ring Index, NN=crenarchaeol ring count.
 # "cren3" means crenarchaeol weighted 3; cren_weight=4 reproduces the
-# RI(0-4) convention of Zhang et al. The bare "ri3" used before 2026-08-11 read
-# like "ring index variant 3", which is not what it means.
-#
-# TEXRI_cren3 previously shared the "ri3" code with scaledRI_cren3, so two
-# distinct proxies collapsed onto one case id and one would silently overwrite
-# the other. It now has its own code.
+# RI(0-4) convention of Zhang et al. Older case ids used the bare codes "ri3",
+# "ri4" and "ri"; they still parse (see PROXY_DECODE). TEXRI_cren3 has its own
+# code, "tri03", so it can never share a case id with scaledRI_cren3.
 #
 # scaledRI is the RI(0-4) convention itself, so it and scaledRI_cren4 describe
 # the same quantity under two spellings; both are listed because the training
@@ -166,13 +164,13 @@ PROXY_CODES = {"scaledRI_cren3": "sri03", "scaledRI_cren4": "sri04",
 PROXY_DECODE = {"sri03": "scaledRI_cren3", "sri04": "scaledRI_cren4",
                 "sri02": "scaledRI_cren2", "sri05": "scaledRI_cren5",
                 "sri": "scaledRI", "tex": "TEX86", "tri03": "TEXRI_cren3",
-                # pre-2026-08-11 codes, so existing case ids still parse
+                # older codes, so existing case ids still parse
                 "ri3": "scaledRI_cren3", "ri4": "scaledRI_cren4",
                 "ri": "scaledRI"}
 
 # Deliberately still lists every constraint that has ever named a file, including
-# the ones no longer selectable (``hard_constraint`` archived 2026-09;
-# ``reparameterized``/``soft`` never implemented).  This is a name *grammar*: the
+# the ones no longer selectable (``hard_constraint`` and ``truncated_prior``
+# are archived; ``reparameterized``/``soft`` were never implemented).  This is a name *grammar*: the
 # decoder has to keep parsing case ids of reconstructions already on disk and on
 # Zenodo, exactly as the compset decoder still parses the archived ``A`` and
 # ``culmesocore`` training sets.  Narrowing it would orphan those files.
@@ -191,23 +189,18 @@ KIND_DECODE = {v: k for k, v in KIND_CODES.items()}
 # compset.
 NO_PREDICTORS = "p0"
 
-#: Pre-2026-08-11 spelling, still accepted when parsing existing case ids.
+#: Older spelling, still accepted when parsing existing case ids.
 LEGACY_NO_PREDICTORS = "none"
 
 DEFAULT_RUN = "001"
 
-# Version and run are OPTIONAL on read and never written.
+# Version and run are OPTIONAL on read and not written by default.
 #
-# Both were dropped on 2026-08-12. The version was the pip version, which is
-# the wrong signal in both directions -- a docs-only release orphaned every
-# case id on disk, while a prior change without a release let two incompatible
-# posteriors share one identity. The run/member counter went with it: `.001`
-# beside `N1p0` reads as two numbers when only one is, and one canonical path
-# per configuration is what a cache should have. A re-run overwrites; callers
-# skip when the file is already there.
-#
-# They stay parseable because every case id written before that date carries
-# them, in the cache, in notebooks and in case_ids.json.
+# The package version is recorded in the posterior's `texas_version` attr
+# instead, so a new release does not rename existing files, and there is one
+# canonical path per configuration: a re-run overwrites it. Older case ids
+# carry both tokens (in caches, notebooks and case_ids.json), so they still
+# parse.
 _CASE_RE = re.compile(
     r"^(?P<project>[a-z]{2,4})\."
     r"(?:(?P<version>v[0-9a-z]+)\.)?"
@@ -327,12 +320,11 @@ def encode_predictors(use_gdgt23ratio: bool = False,
     >>> encode_predictors()
     'p0'
 
-    The nitrate token was ``N`` + cutoff x10 until 2026-08-23, so a cutoff of
-    1.0 was written ``N10``. That is misreadable in the one way that matters:
-    10 is also the value the documentation gives for *disabling* the nitrate
-    correction, so the token could be read as the opposite of what it means.
-    It is written ``N1p0`` now, and ``N10`` still parses (see
-    :func:`decode_predictors`), so every case id already on disk resolves.
+    The cutoff is written with ``p`` for the decimal point (``N1p0`` = 1.0
+    umol/L), because ``.`` separates the fields. Older ids wrote ``N`` +
+    cutoff x10 (``N10``), which was easy to misread as a cutoff of 10 -- the
+    value the documentation gives for *disabling* the nitrate correction.
+    ``N10`` still parses (see :func:`decode_predictors`).
     """
     parts = []
     if use_gdgt23ratio:
@@ -405,9 +397,8 @@ def decode_predictors(token: str) -> Dict[str, Any]:
             out["use_no3"] = True
             out["no3_cutoff"] = float(part[1:].replace("p", "."))
         elif re.fullmatch(r"N\d{2}", part):
-            # Legacy: N + cutoff x10, written until 2026-08-23. Kept on read so
-            # that case ids in existing caches, notebooks and case_ids.json
-            # keep resolving; never written.
+            # Legacy: N + cutoff x10 (N10 = 1.0). Read so that older case ids
+            # in caches, notebooks and case_ids.json keep resolving; never written.
             out["use_no3"] = True
             out["no3_cutoff"] = int(part[1:]) / 10.0
         elif part:
@@ -422,12 +413,14 @@ def decode_predictors(token: str) -> Dict[str, Any]:
 @dataclass(frozen=True)
 class CaseName:
     """
-    One calibration identity: ``tx.v026.GHEB.sst.ri3.G23-N1p0.001``.
+    One calibration identity, e.g. ``tx.GHEB.sst.sri03.G23-N1p0``.
 
-    The trailing *run* position is CESM's ensemble-member field.  It keeps two
-    refits of the same configuration -- a date-stamped rerun, a seed sweep, a
-    reviewer-requested repeat -- from colliding on one name.  It defaults to
-    ``001``, so a single run of a configuration reads cleanly.
+    Two optional positions exist for older ids: a *version* token after the
+    project (``tx.v026....``) and a trailing *run* token (CESM's
+    ensemble-member field, e.g. ``.001``), which can keep two refits of one
+    configuration apart. Both are rendered only when set. Note that building
+    a ``CaseName`` directly defaults *run* to ``001``; :func:`case_from_attrs`
+    and :func:`parse_case` leave it empty unless one is given.
     """
 
     compset: str
@@ -551,11 +544,10 @@ def case_from_attrs(attrs: Dict[str, Any], *, version: Optional[str] = None,
     ``use_gdgt23ratio``, ``use_no3`` and ``no3_cutoff`` -- exactly the fields
     ``save_posterior`` already relies on.
 
-    When *run* is omitted the token is recovered from the ``filename`` attr via
-    :func:`run_from_attrs`, falling back to ``001``. Pass *run* explicitly to
-    override -- ``save_posterior`` does, because a genuinely new fit should be
-    stamped with its own suffix rather than inheriting the one that happened to
-    be sitting in the attrs of a posterior loaded earlier.
+    Version and run are not filled in: when *version* / *run* are omitted the
+    case has neither, which is the canonical short form that gets written.
+    Pass them explicitly to rebuild an older id exactly (for example a run
+    token recovered with :func:`run_from_attrs`).
     """
     model = attrs.get("stan_model_name") or ""
     temptype = str(attrs.get("temptype", "") or "")
@@ -588,9 +580,11 @@ def case_from_attrs(attrs: Dict[str, Any], *, version: Optional[str] = None,
 
 
 def parse_case(text: str) -> CaseName:
-    """Parse ``tx.v026.GHEB.sst.ri3.G23-N1p0.001`` back into a :class:`CaseName`.
+    """Parse a case id such as ``tx.GHEB.sst.sri03.G23-N1p0`` into a :class:`CaseName`.
 
-    The run position may be omitted, in which case it defaults to ``001``.
+    Older ids with a version token and/or a trailing run token (e.g.
+    ``tx.v026.GHEB.sst.ri3.G23-N1p0.001``) also parse; when absent, version
+    and run are left empty. A trailing ``.nc`` is ignored.
     """
     s = str(text).strip().rstrip("/")
     if s.endswith(".nc"):
@@ -638,16 +632,13 @@ def fwd_relpath(case: Union[CaseName, str]) -> Path:
     'tx.GHEB.sst.sri03.G23-N1p0.fwd.nc'
     """
     c = str(case)
-    # Flat. The case directory was dropped on 2026-08-12: the leaf already
-    # carries the whole case id, so the directory only repeated it, doubled the
-    # path length, and gave the cache two layouts at once (some files flat,
-    # some nested) which was the thing that made it hard to read. Flat also
-    # matches Zenodo, whose namespace has no directories, and still groups a
-    # calibration with its reconstructions because they sort adjacent.
+    # Flat, no case directory: the leaf already carries the whole case id.
+    # Flat also matches Zenodo, whose namespace has no directories, and still
+    # groups a calibration with its reconstructions because they sort adjacent.
     return Path(f"{c}.fwd.nc")
 
 
-#: Pre-2026-08-11 leaf name, kept so existing caches still resolve.
+#: Leaf name used inside the oldest case directories, kept so those caches still resolve.
 LEGACY_FWD_LEAF = "fwd.nc"
 
 
@@ -723,8 +714,8 @@ def resolve_posterior_path(name: str, indir: Union[str, Path]) -> Optional[Path]
 
     1. ``indir/<name>.nc``                  -- historical flat layout, exact hit
     2. ``indir/<name>/<name>.fwd.nc``       -- case-directory layout, exact hit
-    3. ``indir/<name>/fwd.nc``              -- case dirs written before
-       2026-08-11, when the leaf was a bare ``fwd.nc``
+    3. ``indir/<name>/fwd.nc``              -- the oldest case directories,
+       where the leaf was a bare ``fwd.nc``
     4. *name* is a case id           -- scan flat ``.nc`` files and match the
        case computed from each file's attrs
     5. *name* is a legacy long name  -- scan case directories and match either
@@ -797,11 +788,9 @@ def resolve_posterior_path(name: str, indir: Union[str, Path]) -> Optional[Path]
         return None
 
     # name looks like a legacy long name -> hunt for the file whose attrs
-    # reproduce it. Both layouts are searched: flat `<case>.fwd.nc` files, and
-    # case directories from before the 2026-08-12 flattening. Searching only
-    # directories -- as this did -- means every legacy name stops resolving the
-    # moment the cache is flattened, and legacy names are exactly what
-    # SI_code2, SI_code3 and download.py still pass.
+    # reproduce it. Both layouts are searched: flat `<case>.fwd.nc` files and
+    # older case directories, because legacy names are still passed by some
+    # notebooks and by download.py's v0.2.0 registry entries.
     #
     # Descending, so that where several candidates reproduce one legacy name
     # (older members of the same calibration), the last one wins rather than
@@ -869,8 +858,8 @@ def legacy_invT_name(
     """Rebuild the pre-case-id inverse filename, byte-for-byte.
 
     Matches what ``io._generate_filename_base`` writes, so ``load_posterior``
-    can still find reconstructions saved before the CESM-style case layout
-    arrived (2026-08-09). Nothing new is named this way.
+    can still find reconstructions saved under the older long-name scheme.
+    Nothing new is named this way.
 
     Args:
         site: Site label; slugified into the name.

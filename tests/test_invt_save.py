@@ -9,7 +9,6 @@ entirely -- so a scaledRI and a TEX86 reconstruction of one site resolved to a
 single path and, with the default overwrite=True, the second silently
 destroyed the first.
 
-Tracked as Phase 5B in RESUME.md.
 """
 import numpy as np
 import pytest

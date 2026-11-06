@@ -6,7 +6,9 @@
 [![PyPI](https://img.shields.io/pypi/v/texas-psm)](https://pypi.org/project/texas-psm/)
 [![Zenodo](https://img.shields.io/badge/data-10.5281%2Fzenodo.19666744-blue.svg)](https://doi.org/10.5281/zenodo.19666744)
 
-TEXAS-PSM is a **Bayesian proxy system model (PSM)** for TEX86-based sea surface temperature (SST) reconstruction, built around the **TEXAS** sensor model. It fits hierarchical generalized-logistic Stan models to isoGDGT Ring Index data — with optional non-thermal corrections for GDGT-2/3 ratio (AOA ecology) and NO₃ (nutrient effect) — and reconstructs paleotemperatures with full posterior uncertainty.
+TEXAS-PSM is a **Bayesian proxy system model (PSM)** for isoGDGT-based (TEX₈₆-family) ocean temperature reconstruction, built around the **TEXAS** sensor model. TEXAS links temperature to the **Scaled Ring Index** (Scaled RI) through a hierarchical generalized-logistic (S-shaped) curve, fitted in Stan to culture, mesocosm, and coretop data. Two optional nonthermal predictors account for archaeal community structure (the GDGT-2/GDGT-3 ratio, G₂/₃) and nutrient availability (nitrate, NO₃⁻). The package reconstructs either sea surface temperature (SST) or surface-to-thermocline temperature (Thermo-T), with full posterior uncertainty.
+
+Of the three PSM submodels (sensor, archive, observation), this package implements the **sensor** and propagates **analytical** measurement uncertainty; sediment-archive effects (bioturbation, diagenesis) and age-model uncertainty are left to dedicated tools.
 
 The result is a **posterior distribution of temperature** for each downcore sample, not just a point estimate with a fixed RMSE.
 
@@ -18,7 +20,7 @@ To see how one measurement becomes that distribution, without installing anythin
 
 TEXAS uses a two-stage workflow:
 
-**Stage 1 — Forward calibration** fits a hierarchical Bayesian generalized logistic curve to modern culture, mesocosm, and coretop Ring Index–temperature data. The output is a posterior distribution of calibration parameters saved as a `.nc` file. Pre-computed posteriors are available on Zenodo — most users can skip this stage entirely.
+**Stage 1 — Forward calibration** fits a hierarchical Bayesian generalized logistic curve (temperature → Scaled RI) to modern culture, mesocosm, and coretop data. The output is a posterior distribution of calibration parameters saved as a `.nc` file. Pre-computed posteriors ship with the package (the defaults) or download from Zenodo — most users can skip this stage entirely.
 
 **Stage 2 — Inverse reconstruction** passes your downcore Scaled RI measurements through the forward posterior, marginalizing over all calibration parameter uncertainty, and returns a full temperature posterior per sample.
 
@@ -79,12 +81,12 @@ cols = {"TEX86": "<your_tex86_column>", "scaledRI_cren3": "<your_scaled_RI_colum
 
 detector = MahalanobisOutlierDetector.from_calibration(confidence=0.90)
 df["mahal_dist"] = detector.transform(df, columns=cols)
-df["flagged"] = detector.detect_outliers_manual(df, columns=cols)   # keeps warm end-members (TEX86 ≥ 0.75 and Scaled RI ≥ 0.75)
+df["flagged"] = detector.detect_outliers_manual(df, columns=cols)   # keeps warm end-members (TEX86 > 0.75 and Scaled RI > 0.75)
 print(f"Flagged: {int(df['flagged'].sum())} / {len(df)} samples")
 
 # Visualize — 90% confidence ellipse with inliers/outliers color-coded
 fig, ax = plt.subplots(figsize=(5, 4))
-detector.plot_decision_boundary(df, ax=ax)
+detector.plot_decision_boundary(df, ax=ax, columns=cols)
 ax.set_xlabel("TEX$_{86}$")
 ax.set_ylabel(r"Scaled RI$_{0-3}$")
 plt.tight_layout()
@@ -138,11 +140,12 @@ other posterior is fetched once from
 ```python
 import TEXAS
 
-# Univariate SST — the temperature-only calibration (<1 MB)
-TEXAS.download_posteriors(["tx.GHPU.sst.sri03.p0"])
+# Culture + mesocosm calibration (<1 MB)
+TEXAS.download_posteriors(["tx.GCDU.cul.sri03.p0"])
 
-# Everything in the current Zenodo record (~490 MB; the six
-# full multivariate posteriors are ~78-81 MB each)
+# Everything in the current Zenodo record (~510 MB: ~475 MB of posteriors,
+# of which the six T₀-shift posteriors with predictors are ~78-81 MB each,
+# plus ~37 MB of training data)
 TEXAS.download_all()
 
 # What you already have — bundled and downloaded alike
@@ -151,15 +154,21 @@ TEXAS.list_posteriors()
 
 Available forward posteriors:
 
-| Name (no `.nc`) | Model | Temperature | Size |
-|---|---|---|---|
-| `tx.GHEB.sst.sri03.G23-N1p0` | **T₀-shift multivariate coretop (default)** | SST | bundled |
-| `tx.GHEB.thm.sri03.G23-N1p0` | **T₀-shift multivariate coretop (default)** | Thermo T | bundled |
-| `tx.GCDU.cul.sri03.p0` | Culture + mesocosm | Culture T | <1 MB |
-| `tx.GHPU.sst.sri03.p0` | Univariate coretop | SST | <1 MB |
-| `tx.GHPU.thm.sri03.p0` | Univariate coretop | Thermo T | <1 MB |
-| `tx.GHEA.sst.sri03.G23-N1p0` | Response-offset multivariate coretop (preprint) | SST | ~78 MB |
-| `tx.GHEA.thm.sri03.G23-N1p0` | Response-offset multivariate coretop (preprint) | Thermo T | ~78 MB |
+| Name (no `.nc`) | Model | Predictors | Temperature | In package? | Zenodo size |
+|---|---|---|---|---|---|
+| `tx.GHEB.sst.sri03.G23-N1p0` | **T₀-shift coretop — the published calibration (default)** | G₂/₃ + NO₃⁻ | SST | **bundled** | ~78 MB |
+| `tx.GHEB.thm.sri03.G23-N1p0` | **T₀-shift coretop — the published calibration (default)** | G₂/₃ + NO₃⁻ | Thermo-T | **bundled** | ~78 MB |
+| `tx.GHPU.sst.sri03.p0` | Temperature-only coretop | none | SST | **bundled** | 0.3 MB |
+| `tx.GHPU.thm.sri03.p0` | Temperature-only coretop | none | Thermo-T | **bundled** | 0.3 MB |
+| `tx.GHEB.sst.sri03.G23` | T₀-shift coretop, single predictor | G₂/₃ | SST | download | ~78 MB |
+| `tx.GHEB.thm.sri03.G23` | T₀-shift coretop, single predictor | G₂/₃ | Thermo-T | download | ~78 MB |
+| `tx.GHEB.sst.sri03.N1p0` | T₀-shift coretop, single predictor | NO₃⁻ | SST | download | ~81 MB |
+| `tx.GHEB.thm.sri03.N1p0` | T₀-shift coretop, single predictor | NO₃⁻ | Thermo-T | download | ~81 MB |
+| `tx.GCDU.cul.sri03.p0` | Culture + mesocosm (the curve's top layer) | none | Culture T | download | 0.2 MB |
+| `tx.GHEA.sst.sri03.G23-N1p0` | Additive (response-offset) coretop — initial submission, superseded | G₂/₃ + NO₃⁻ | SST | download (v0.2.0 record) | ~78 MB |
+| `tx.GHEA.thm.sri03.G23-N1p0` | Additive (response-offset) coretop — initial submission, superseded | G₂/₃ + NO₃⁻ | Thermo-T | download (v0.2.0 record) | ~78 MB |
+
+“Bundled” posteriors are installed with `pip install texas-psm` and need no network access. The default needs **both** predictors and refuses to run if one is missing (a missing value is never treated as zero). To switch the nitrate term off, pass a value above the cutoff, e.g. `no3=10`. Use a single-predictor calibration when only one nonthermal predictor applies to your record.
 
 The bundled pair is the same posterior as the archived one with the
 error-in-variables model's per-site latent variables removed — everything the
@@ -173,8 +182,7 @@ initial submission's additive fits — carries the older names instead
 (e.g. `gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc`), and
 `download_posteriors()` still resolves those, pinned to that version, so
 preprint-era notebooks keep working. `load_posterior()` accepts **either**
-spelling, and downloads are unpacked into the case-directory layout shown
-below.
+spelling, and downloads are saved flat in the cache as `<case id>.fwd.nc`.
 
 #### How posterior files are named
 
@@ -317,8 +325,7 @@ import xarray as xr
 from TEXAS import predict_T_from_proxyObs
 
 # Colab: mount Google Drive first, then load
-# (files downloaded straight from Zenodo keep the archived legacy name)
-ds = xr.load_dataset("/content/drive/MyDrive/posteriors/gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc")
+ds = xr.load_dataset("/content/drive/MyDrive/posteriors/tx.GHPU.sst.sri03.p0.fwd.nc")
 
 result = predict_T_from_proxyObs(
     proxyObs=df["scaledRI_cren3"].values,

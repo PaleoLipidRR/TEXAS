@@ -5,6 +5,13 @@
 //          Index values, with non-thermal corrections (GDGT-2/3 ratio and/or
 //          NO3) applied on the response, parallelized via Stan's reduce_sum.
 //
+// WHICH CALIBRATION THIS IS FOR:
+//   This inverts the ADDITIVE multivariate calibration (compset letter "A",
+//   beta terms added to the Scaled RI response), the form used in the
+//   preprint. The published calibrations (GHEB) use the T0-shift form of
+//   paper Eq. 13 instead, which is inverted by the sibling file
+//   invT_gen_logi_fixed_multiv_marginal_unconstrained_t0shift.stan.
+//
 // MEAN FUNCTION:
 //   mu = b + beta_G23*g23 + beta_NO3*log10(no3) + (1-b)/(1+exp(-k*(T-T0)))^(1/v)
 //   beta carries Scaled-RI units per unit predictor. The NO3 term applies only
@@ -78,15 +85,16 @@ functions {
       vector[M] llk;  // Log-likelihood under each of the M calibration draws
 
       for (m in 1:M) {
-        // Base thermal term (Eq. 1): Richards curve evaluated at T = t_seg[i].
+        // Base thermal term: generalized logistic (paper Eq. 9 with a = 1,
+        // Q = C = 1) evaluated at T = t_seg[i].
         // Start with lower asymptote b[m], then add the sigmoid term.
         real lin = b[m];  // Will accumulate: b + corrections + sigmoid
 
-        // Ecology correction beta_{G2/3} * gdgt23ratio (Eq. 6)
+        // Ecology correction beta_{G2/3} * gdgt23ratio (additive form)
         if (use_gd == 1)
           lin += beta_gd[m] * gd_seg[i];
 
-        // NO3 correction beta_{NO3} * log10(NO3) (Eq. 7) - applied conditionally.
+        // NO3 correction beta_{NO3} * log10(NO3) (additive form) - applied conditionally.
         // logno3 = 0 when NO3 is outside the valid range, so no correction applied.
         if (use_no3 == 1) {
           real logno3 = 0.0;
@@ -101,7 +109,7 @@ functions {
         real mu = lin + (1 - b[m])
             / pow(1 + exp(-k[m] * (t_seg[i] - t0[m])), 1.0 / v[m]);
 
-        // Log-likelihood of the observed RI under this calibration draw.
+        // Log-likelihood of the observed Scaled RI under this calibration draw.
         llk[m] = normal_lpdf(y_seg[i] | mu, sigma[m]);
       }
 

@@ -1,14 +1,19 @@
 # TEXAS/data/builder.py
 """
-Data builder for inverse temperature (invT) models.
+Builds the input data for the Stan models, in both directions.
 
-This module bridges the FORWARD and INVERSE calibration models:
-  1. Loads posterior samples from a completed forward calibration
-  2. Randomly samples M parameter sets from that posterior
+``build_fwd_data`` assembles the training data for a FORWARD calibration
+(temperature, plus optional GDGT-2/3 and NO3 predictors → Scaled RI).
+
+``build_invT_inputData`` bridges the forward and INVERSE models:
+  1. Loads the posterior of a completed forward calibration (posterior = the
+     set of parameter values the calibration found plausible, stored as MCMC
+     draws)
+  2. Randomly picks M parameter sets (posterior draws) from that posterior
   3. Packages them as FIXED DATA for the inverse Stan model
 
-The inverse model then marginalizes over these M samples to predict
-temperature from observed Ring Index values.
+The inverse model then averages (marginalizes) over these M calibration
+curves to estimate temperature from observed proxy values (usually Scaled RI).
 """
 
 from typing import Dict, Optional, List, Union, Tuple, Any
@@ -45,12 +50,15 @@ class InvTConfig:
     of a reconstruction.
 
     Attributes:
-        mode: Historical artifact; only ``"ensemble"`` is supported.
+        mode: Must be ``"ensemble"`` (the only supported mode; kept for
+            backward compatibility).
         n_draws: M, the number of forward draws. ``None`` auto-selects
             ``min(500, max(100, available_draws // 4))`` -- for a typical
             4-chain x 1000-draw forward fit (4000 draws) this resolves to 500.
-            Pass ``n_draws=300`` explicitly to match the original publication's
-            budget (~5.8% Monte Carlo error) at lower cost.
+            The paper used this default (M = 500) for its downcore
+            reconstructions and ``n_draws=300`` (~5.8% Monte Carlo error) for
+            its global coretop analyses; pass a value explicitly to trade
+            accuracy for speed.
         seed: Seed for selecting those M draws, so a reconstruction is
             reproducible.
         no3_cutoff: Fallback NO3 cutoff (umol/L), used only when the forward
@@ -59,17 +67,17 @@ class InvTConfig:
         suffix: Force a forward parameter suffix (e.g. ``"crtp"``) instead of
             taking the highest-priority one present.
     """
-    mode: str = "ensemble"        # Only 'ensemble' is supported (historical artifact)
+    mode: str = "ensemble"        # Only 'ensemble' is supported
     n_draws: Optional[int] = None # Number of forward posterior samples (M).
                                   # None → auto: min(500, max(100, available_draws // 4)).
                                   # For a typical 4-chain/1000-sample forward fit (4000
                                   # draws) this resolves to M=500, which is what the
-                                  # published paleo reconstructions use.
+                                  # paper's downcore reconstructions use.
                                   # Larger M → better marginal likelihood approximation
                                   # (error ∝ 1/√M) but proportionally slower inference.
-                                  # The sampler-budget sweep (docs/sampler_budget.md)
-                                  # only tested M=300 and M=500 and recommends M=500;
-                                  # pass n_draws=... explicitly to try a smaller budget.
+                                  # The sampler-budget page (docs/sampler_budget.md)
+                                  # covers M=300 and M=500 only; pass n_draws=...
+                                  # explicitly to try a smaller budget.
     seed: int = 42                # For reproducible sampling of M draws
     no3_cutoff: Optional[float] = 0.0
     suffix: Optional[str] = None   # Force a specific fwd parameter suffix (e.g., 'crtp')
@@ -143,7 +151,8 @@ def build_invT_inputData(
     # Accept a pre-loaded Dataset (fwd_posterior) or load from the cache by name.
     # Expected structure: xr.Dataset with dims (chain, draw) and data_vars like:
     #   - t0_crtp, k_crtp, b_crtp, v_crtp, sigma_proxyObs_crtp
-    #   - beta_G23_crtp, beta_NO3_crtp (if multivariate)
+    #   - gamma_G23_crtp, gamma_NO3_crtp (T0-shift multivariate) or
+    #     beta_G23_crtp, beta_NO3_crtp (older additive multivariate)
     # ───────────────────────────────────────────────────────────────────────────
     if fwd_posterior is not None:
         post: xr.Dataset = fwd_posterior
@@ -192,7 +201,7 @@ def build_invT_inputData(
     # Forward models may produce parameters like:
     #   - t0_crtp, k_crtp (coretop-only calibration)
     #   - t0_culmesocore, k_culmesocore (culture+mesocosm+coretop)
-    # We prioritize higher-data combinations (crtp > culmesocore > culmes > ...)
+    # Priority order: crtp > culmesocore > culmes > meso > cul
     # ───────────────────────────────────────────────────────────────────────────
     PRIORITY_SUFFIXES = ["crtp", "culmesocore", "culmes", "meso", "cul"]
     used_suffix = config.suffix
@@ -227,8 +236,8 @@ def build_invT_inputData(
     if config.n_draws is None:
         # Auto-select M: use up to 25% of available draws, bounded [100, 500].
         # For typical runs (4 chains × 1000 = 4000 draws): 4000//4=1000, capped
-        # at 500 → M=500 (~4.5% Monte Carlo error). Use InvTConfig(n_draws=300)
-        # to match the publication default (M=300, ~5.8% error).
+        # at 500 → M=500 (~4.5% Monte Carlo error). The paper's global coretop
+        # analyses used InvTConfig(n_draws=300) (~5.8% error).
         M = min(500, max(100, total_available // 4))
         print(
             f"⚙️  Auto M={M} ({total_available} posterior draws available; "
@@ -278,9 +287,9 @@ def build_invT_inputData(
     # ═══════════════════════════════════════════════════════════════════════════
     # STEP 8: EXTRACT EXTRA PARAMETERS (v) IF PRESENT
     # ═══════════════════════════════════════════════════════════════════════════
-    # Generalized logistic models include v (shape) parameter. Q is fixed to 1
-    # in all active models and is no longer sampled or passed to invT Stan models.
-    # Standard logistic models also fix v=1 and don't include it in the posterior.
+    # Generalized logistic models include the v (shape) parameter. Q is fixed
+    # to 1 in every shipped model, so it is neither sampled nor passed on.
+    # Standard logistic models fix v=1 and don't include it in the posterior.
     # ───────────────────────────────────────────────────────────────────────────
     for p in _EXTRA_PARAMS:
         key = f"{p}_{used_suffix}"
@@ -291,12 +300,12 @@ def build_invT_inputData(
     # ═══════════════════════════════════════════════════════════════════════════
     # STEP 9: EXTRACT RESIDUAL ERROR PARAMETER
     # ═══════════════════════════════════════════════════════════════════════════
-    # sigma_proxyObs[m] = measurement/model error for calibration sample m
-    # If not available in posterior, use a default value.
+    # sigma_proxyObs[m] = residual calibration noise (Scaled RI units) in
+    # posterior draw m. If the posterior has none, use a default of 0.1.
     # ───────────────────────────────────────────────────────────────────────────
     sigma_key = f"sigma_proxyObs_{used_suffix}"
     if sigma_key not in P:
-        sigma_key = f"sigma_scaledRI_{used_suffix}"  # backward compat with old posteriors
+        sigma_key = f"sigma_scaledRI_{used_suffix}"  # older posteriors used this name
     if sigma_key in P:
         data["sigma_proxyObs"] = np.asarray(P[sigma_key].values, dtype=float)  # Shape: (M,)
         used_posts.append(sigma_key)
@@ -309,12 +318,12 @@ def build_invT_inputData(
     # ═══════════════════════════════════════════════════════════════════════════
     # If the forward model included environmental covariates (GDGT-2/3, NO3),
     # we need to:
-    #   1. Extract their coefficients (beta0) from the forward posterior
+    #   1. Extract their coefficients (beta_* or gamma_*) from the forward posterior
     #   2. Pass the observed predictor values for our N observations
     #   3. Set use_* flags so Stan knows to apply nonthermal corrections
     # ───────────────────────────────────────────────────────────────────────────
     predictor_usage = {}
-    # BoundedT forward models move the covariates inside the logistic (a shift of
+    # T0-shift forward models move the covariates inside the logistic (a shift of
     # the curve location T0) and name the slopes gamma_* instead of beta_*. Detect
     # by coefficient presence so it holds regardless of the model-name string.
     is_bounded = any(f"gamma_{n}_{used_suffix}" in P for n in ("G23", "NO3"))
@@ -337,10 +346,11 @@ def build_invT_inputData(
         data[pred] = arr  # Observed predictor values: shape (N,)
         data[f"use_{pred}"] = 1 if use_flag else 0  # Flag for Stan conditional logic
         
-        # Stan always expects beta_G23 and beta_NO3 as vector[M], even when the
-        # predictor is disabled (use_* = 0). Provide zeros when not used so the
+        # Stan always expects both coefficients (beta_G23/beta_NO3, or
+        # gamma_G23/gamma_NO3) as vector[M], even when the predictor is
+        # disabled (use_* = 0). Provide zeros when not used so the
         # data block dimensions match regardless of which predictors are active.
-        beta_name = coef_names[pred]                    # "beta_G23" or (bounded) "gamma_G23"
+        beta_name = coef_names[pred]                    # "beta_G23" or (T0-shift) "gamma_G23"
         if use_flag:
             # Extract the coefficient from forward posterior
             beta_key = f"{beta_name}_{used_suffix}"          # e.g., "beta_G23_crtp"
@@ -566,12 +576,15 @@ def build_fwd_data(
     """
     Build the Stan data dictionary for forward calibration models.
 
-    Handles all forward model variants:
-      - culmeso / Q1_culmeso / v1_culmeso  : pass t_cul, proxy_cul, t_meso, proxy_meso
-      - culmesocore                         : add t_crtp, proxy_crtp
-      - hier_crtp_multiv                    : add gdgt23ratio_crtp, no3_crtp
-      - hier_crtp_multiv_priorApprox        : add culmeso_posterior (extracts hyperpriors)
-      - hier_crtp_univ_priorApprox          : add culmeso_posterior (no predictors needed)
+    What to pass for each shipped forward model:
+      - gen_logi_fixed_culmeso (stage 1)   : t_cul, proxy_cul, t_meso, proxy_meso
+      - ..._hier_crtp_univ_priorApprox     : t_crtp, proxy_crtp + culmeso_posterior
+                                             (temperature only, no predictors)
+      - ..._hier_crtp_multiv_priorApprox_eiv_t0shift
+                                           : as above, plus gdgt23ratio_crtp, no3_crtp,
+                                             their per-site SEs, sd_proxyObs and R2_thermal
+
+    Archived models (e.g. culmesocore) take the same keyword arguments.
 
     Args:
         t_cul, proxy_cul:           Culture temperature and proxy arrays.
@@ -597,6 +610,12 @@ def build_fwd_data(
                                     internally by fitting a generalized logistic curve.
                                     Warning: Stan models use generalized logistic — residuals
                                     from other functional forms may shift the threshold.
+        sd_proxyObs:                Per-site analytical SE of the proxy (Scaled RI units).
+                                    Used by the _eiv model; defaults to 0.03 for every
+                                    site (Schouten et al. 2013).
+        R2_thermal:                 R² of a temperature-only coretop fit. Required by
+                                    the _eiv model, where it scales the process-noise
+                                    prior; omitted from the dict when not given.
         culmeso_posterior:          xr.Dataset from a completed culmeso forward run.
                                     Auto-extracts prior_mean_*/prior_sd_* hyperpriors and
                                     no3_cutoff (if saved in attrs).

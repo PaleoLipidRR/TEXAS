@@ -21,7 +21,7 @@ def generate_ensemble(
     gdgt23ratio: Optional[np.ndarray] = None,
     no3: Optional[np.ndarray] = None,
     no3_cutoff: Optional[float] = None,
-    # NEW authoritative hints from detector
+    # Hints from detect_model_and_params(); when given, they override the posterior attrs
     is_multivariate: Optional[bool] = None,
     use_gdgt23ratio_flag: Optional[bool] = None,
     use_no3_flag: Optional[bool] = None,
@@ -139,12 +139,10 @@ def generate_ensemble(
 
     # 6) package results
     #
-    # The key must not truncate. int(2.5) is 2, so a caller asking for the
-    # 2.5th percentile used to get a key it never named -- and asking for 2.5
-    # and 2.9 together silently collapsed both onto "p2", the second
-    # overwriting the first. ``:g`` keeps integers integral (5 -> "p5", so
-    # every existing caller is unaffected) while giving fractional percentiles
-    # the key they actually asked for (2.5 -> "p2.5").
+    # Keys are formatted with ``:g`` so they never truncate: whole percentiles
+    # keep integer keys (5 -> "p5") and fractional ones keep their decimals
+    # (2.5 -> "p2.5"). Truncating with int() would turn 2.5 and 2.9 both
+    # into "p2", with one silently overwriting the other.
     out: Dict[str, Any] = {"x_vals": x}
     for q in percentiles:
         out[f"p{q:g}"] = np.percentile(ensemble, q, axis=0)

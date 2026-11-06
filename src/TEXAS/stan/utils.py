@@ -3,30 +3,10 @@ from __future__ import annotations
 
 import numpy as np
 
-# Removed 2026-08-12, all four unreferenced by any caller in the package, the
-# SI notebooks, the scripts or the app:
-#
-#   check_tbb_env                   warned when TBB_CXX_TYPE was unset. The
-#                                   failure it guarded is handled properly now
-#                                   -- _windows_compile_path() fixes the
-#                                   toolchain up front and sample_from_model()
-#                                   recovers from the exit-127 mismatch.
-#   infer_optional_predictor_usage  superseded by auto_detect_predictors() in
-#                                   stan/sampler.py, which infers the same
-#                                   flags plus validation and legacy-key
-#                                   translation.
-#   infer_use_flags_from_attrs      existed HERE and in stan/metadata.py under
-#                                   one name with different behavior: this
-#                                   copy returned False for an absent use_*
-#                                   key, the other omitted the key entirely.
-#                                   Both were dead, so the divergence was a
-#                                   trap for whoever wired one up next rather
-#                                   than a live bug. Live code reads the attrs
-#                                   directly (ensemble/detection.py).
 
 def patch_optional_predictors(data: dict) -> dict:
     """
-    Ensure gdgt23ratio and no3 arrays/flags/betas exist with correct shapes.
+    Ensure gdgt23ratio and no3 arrays and their use_* flags exist with correct shapes.
     - Handles both single-group ("N") and multi-group keys ("N_crtp", etc.)
     - NaNs → 0.0
     - Creates group-level use_* flags and also UNSUFFIXED use_* flags expected by some Stan models
@@ -66,15 +46,9 @@ def patch_optional_predictors(data: dict) -> dict:
             # Remember if ANY group uses this predictor
             any_used[name] = any_used[name] or bool(out[use_key])
 
-            # NOTE: this used to also seed "beta0_<name><suffix>" containers
-            # (or mu_/std_ variants). Nothing consumed them: no .stan file in
-            # stan_models/ mentions beta0 at all, and the coefficient vectors
-            # the invT models actually declare are named beta_G23 / beta_NO3
-            # (gamma_G23 / gamma_NO3 under bounded-T) and are supplied by
-            # build_invT_inputData, not here. The names also predate the
-            # beta0_* -> beta_G23 rename. Dropped 2026-08-12: seeding a
-            # differently-named zero vector could only ever mask a real missing
-            # coefficient by looking like it had been handled.
+            # The coefficient vectors (beta_G23 / beta_NO3, or gamma_G23 /
+            # gamma_NO3 for T0-shift models) are supplied by
+            # build_invT_inputData, not here.
 
         # Group-level NO3 cutoff handling (only if that group uses no3)
         use_no3_key = f"use_no3{suffix}"

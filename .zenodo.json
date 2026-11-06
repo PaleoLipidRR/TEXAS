@@ -1,13 +1,13 @@
 {
   "title": "TEXAS: TetraEther indeX of Ammonia oxidizerS (texas-psm)",
-  "description": "<p>TEXAS (<code>texas-psm</code>) is a Python package using Bayesian calibration for marine GDGTs and environmental predictors using Stan. It implements a two-stage workflow:</p><ol><li><strong>Forward calibration</strong>: Fit a generalized logistic curve (Ring Index → temperature) to culture, mesocosm, and coretop isoGDGT data using hierarchical Bayesian Stan models. Outputs a compressed posterior <code>.nc</code> file.</li><li><strong>Inverse reconstruction (invT)</strong>: Predict paleotemperatures from new Ring Index observations by marginalising over posterior parameter draws. Returns a full posterior temperature distribution per sample.</li></ol><p>Optional non-thermal corrections for GDGT-2/3 ratio and NO₃ concentration are supported. The package ships the seven Stan models the manuscript runs: three forward calibrations, three marginal inverse models, and a linear reference. Superseded and exploratory models are kept in the repository's <code>archive/</code> directory rather than shipped.</p>",
+  "description": "<p>TEXAS (TetraEther indeX of Ammonia oxidizerS; <code>texas-psm</code>) is a Python package that implements a Bayesian proxy system model for TEX<sub>86</sub> paleothermometry, calibrating marine isoGDGT distributions against temperature and environmental predictors with Stan. It implements a two-stage workflow:</p><ol><li><strong>Forward calibration</strong>: Fit a generalized logistic curve (temperature → Scaled Ring Index) to culture, mesocosm, and coretop isoGDGT data using hierarchical Bayesian Stan models. Outputs a compressed posterior <code>.nc</code> file.</li><li><strong>Inverse reconstruction (invT)</strong>: Predict paleotemperatures from new Scaled Ring Index observations by marginalising over posterior parameter draws. Returns a full posterior temperature distribution per sample.</li></ol><p>Optional nonthermal predictors (GDGT-2/GDGT-3 ratio and nitrate concentration) are supported. The package ships the seven Stan models the manuscript runs: three forward calibrations, three marginal inverse models, and a linear reference. Superseded and exploratory models are kept in the repository's <code>archive/</code> directory rather than shipped.</p>",
   "upload_type": "software",
   "access_right": "open",
   "license": "MIT",
   "creators": [
     {
       "name": "Rattanasriampaipong, Ronnakrit",
-      "affiliation": "Department of Geosciences, The University of Arizona",
+      "affiliation": "Department of Geosciences, The University of Arizona; University Corporation for Atmospheric Research",
       "orcid": "0000-0002-1425-8737"
     },
     {
