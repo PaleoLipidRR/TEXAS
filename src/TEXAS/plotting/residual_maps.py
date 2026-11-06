@@ -19,6 +19,7 @@ Set env var KRIGE_N_JOBS to override parallelism (1 = serial).
 
 from __future__ import annotations
 
+import functools
 import os
 from pathlib import Path
 from typing import List, Optional, Sequence, Tuple, Union
@@ -55,13 +56,22 @@ import xarray as xr
 try:
     import regionmask
     _REGIONMASK_AVAILABLE = True
-    _OCEAN_BASINS_50 = regionmask.defined_regions.natural_earth_v5_0_0.ocean_basins_50
-    _REGION_NAME_TO_NUMBER = dict(zip(_OCEAN_BASINS_50.names, _OCEAN_BASINS_50.numbers))
 except ImportError:
     regionmask = None
     _REGIONMASK_AVAILABLE = False
-    _OCEAN_BASINS_50 = None
-    _REGION_NAME_TO_NUMBER = {}
+
+
+@functools.lru_cache(maxsize=1)
+def _ocean_basins():
+    """Natural Earth ocean-basin regions and a name -> region-number lookup.
+
+    Loaded on first use (when a residual map needs a basin mask), not at
+    import: reading this region set makes regionmask emit a UserWarning, which
+    used to appear on every ``import TEXAS``. The v5.0.0 set is kept so that
+    region masks, and therefore results, are unchanged.
+    """
+    basins = regionmask.defined_regions.natural_earth_v5_0_0.ocean_basins_50
+    return basins, dict(zip(basins.names, basins.numbers))
 
 # ── Gray color constants ──────────────────────────────────────────────────────
 # A light→dark grayscale ramp (white → black) used for land, borders, and text.
@@ -489,13 +499,14 @@ def _extent_mask(lons, lats, extent):
 def _regionmask_mask(lons, lats, region_name):
     if not _REGIONMASK_AVAILABLE:
         return None
-    if region_name not in _REGION_NAME_TO_NUMBER:
+    basins, name_to_number = _ocean_basins()
+    if region_name not in name_to_number:
         return None
 
     lon_xr = xr.DataArray(lons, dims='points')
     lat_xr = xr.DataArray(lats, dims='points')
-    region_ids = _OCEAN_BASINS_50.mask(lon_xr, lat_xr).values
-    return region_ids == _REGION_NAME_TO_NUMBER[region_name]
+    region_ids = basins.mask(lon_xr, lat_xr).values
+    return region_ids == name_to_number[region_name]
 
 
 # Pad (degrees) added around a zoom panel's visible window before trimming.
