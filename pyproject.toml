@@ -116,7 +116,7 @@ line-length = 100
 # `archive` is frozen historical material: superseded models, notebooks and
 # figures kept verbatim for the reproducibility record. Linting it would
 # demand edits to artifacts whose whole value is being unmodified.
-extend-exclude = ["notebooks", "streamlit_app", "docs", "docker", "build", "dist", "archive"]
+extend-exclude = ["notebooks", "docs", "docker", "build", "dist", "archive"]
 
 [tool.ruff.lint]
 # pyflakes (F) catches the real issues — undefined names, unused

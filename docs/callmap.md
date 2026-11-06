@@ -60,7 +60,7 @@ function.
 
 The *Loose ends* tab flags functions with no caller anywhere — cross-checked against
 every `__init__.py` export, the `[project.scripts]` entry points, and a name search
-across `notebooks/`, `streamlit_app/` and `tests/`. It separates two very different
+across `notebooks/` and `tests/`. It separates two very different
 cases:
 
 - **Nothing calls these** — no caller in the package *or* outside it. Each carries a

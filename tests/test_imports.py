@@ -54,7 +54,7 @@ def test_all_exports_importable():
 import pytest
 
 # §9.6 deletions (2026-09-07). These six had no caller anywhere in src/, tests/,
-# scripts/, streamlit_app/, notebooks/ or docs/ -- only their own re-export
+# scripts/, notebooks/ or docs/ -- only their own re-export
 # lines. Re-exporting one again would put an unused name back on the public
 # surface, which is what the audit was for.
 DELETED_TOP_LEVEL = ["generalized_logistic", "compute_density_based_range"]

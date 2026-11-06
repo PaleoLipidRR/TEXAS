@@ -315,7 +315,6 @@ def caller_corpus() -> dict[str, str]:
     """Text of everything outside the package that could call into it."""
     corpus: dict[str, str] = {}
     for sub, pats in (("notebooks", ("**/*.ipynb", "**/*.py")),
-                      ("streamlit_app", ("**/*.py",)),
                       ("tests", ("**/*.py",))):
         d = REPO / sub
         if not d.exists():
