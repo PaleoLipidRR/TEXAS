@@ -5,7 +5,7 @@ Bayesian model improves on existing TEX₈₆ calibrations? This page summarizes
 validation reported in the manuscript (Rattanasriampaipong et al., 2026,
 *Paleoceanography and Paleoclimatology*); the analysis itself, with every
 figure, is `notebooks/manuscripts/SI_code02_t0shift_TEXAS_analysis.ipynb`.
-Every number below is quoted from the accepted manuscript and can be recomputed
+Every number below is quoted from the revised manuscript (under review) and can be recomputed
 from the archived posteriors without refitting.
 
 Validation rests on four complementary checks:

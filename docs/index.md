@@ -397,6 +397,6 @@ coretop fit with `gen_logi_fixed_hier_crtp_univ_priorApprox`.
 
 If you use TEXAS in published work, please cite:
 
-> Rattanasriampaipong, R., Tierney, J. E., Elling, F. J., & Inglis, G. N. (2026). *TEXAS: A proxy system model for TEX86 paleothermometry.* Paleoceanography and Paleoclimatology, in press.
+> Rattanasriampaipong, R., Tierney, J. E., Elling, F. J., & Inglis, G. N. (2026). *TEXAS: A proxy system model for TEX86 paleothermometry.* ESS Open Archive (preprint). https://doi.org/10.22541/essoar.15002926/v1 — under review at *Paleoceanography and Paleoclimatology*.
 
 See [`CITATION.cff`](https://github.com/PaleoLipidRR/TEXAS/blob/main/CITATION.cff) for machine-readable metadata.
