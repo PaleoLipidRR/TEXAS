@@ -6,8 +6,9 @@ All notable changes to `texas-psm` are recorded here. The format follows
 Versioning is semantic. Releases before `1.0.0` used the convention `0.x`
 means "manuscript under review", so the public API could change in a minor
 release; every such change is listed below. `1.0.0` is the release that
-accompanies the accepted manuscript — the convention closes here, and from
-this point on `MAJOR.MINOR.PATCH` means what it usually does.
+accompanies the revised manuscript (under review at *Paleoceanography and
+Paleoclimatology*) — the convention closes here, and from this point on
+`MAJOR.MINOR.PATCH` means what it usually does.
 
 ## [Unreleased]
 
@@ -30,15 +31,15 @@ this point on `MAJOR.MINOR.PATCH` means what it usually does.
   `23954718` (1,518 sites, matching this release's calibration set) was
   committed to the repo after `1.0.0` had already been built and uploaded.
   `download_posteriors()`/`download_all()` from a fresh `1.0.0` install would
-  silently fetch calibration data that doesn't match the accepted
+  silently fetch calibration data that doesn't match the revised
   manuscript's own reported statistics. `22131367` remains valid and
   permanently accessible, so this was never a hard failure — just stale data
   behind a version string that otherwise matches the paper.
 
 ## [1.0.0] — 2026-11-04
 
-This is the release that accompanies the accepted manuscript (the version of
-record, as its Open Research section promises). The calibration set and
+This is the release that accompanies the revised manuscript (under review);
+its Open Research section cites this version. The calibration set and
 posteriors are screened on `scaledRI_cren3` rather than `scaledRI`
 (`fix/dm-screen-cren3`, merged into this release): 1,518 gridded core-tops, 8
 mesocosm and 59 culture experiments, up from the 1,513 / 8 / 55 set published
@@ -64,7 +65,7 @@ version carries the regenerated posteriors and reconstructions.
   in that case (`ValueError`), so the warning now says that instead of
   contradicting the error that follows it.
 
-- Documentation brought in line with the accepted manuscript: the model
+- Documentation brought in line with the revised manuscript: the model
   validation page now quotes the published forward, inverse and regional
   metrics and the calibration parameters (it still carried the initial
   submission's additive-arm RMSE table and old figure numbers); the Stan models,

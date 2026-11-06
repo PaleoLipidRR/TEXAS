@@ -57,6 +57,8 @@ references:
         given-names: Gordon N.
         orcid: "https://orcid.org/0000-0002-0032-4668"
     title: "TEXAS: A proxy system model for TEX86 paleothermometry"
-    journal: "Paleoceanography and Paleoclimatology"
+    journal: "ESS Open Archive"
     year: 2026
-    notes: "accepted for publication; add the article DOI here once assigned"
+    doi: 10.22541/essoar.15002926/v1
+    url: "https://doi.org/10.22541/essoar.15002926/v1"
+    notes: "Preprint; under review at Paleoceanography and Paleoclimatology. Replace with the journal article and its DOI once published."

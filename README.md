@@ -232,7 +232,7 @@ Full API reference: [https://paleolipidrr.github.io/TEXAS](https://paleolipidrr.
 
 If you use TEXAS in your research, please cite:
 
-> Rattanasriampaipong, R., Tierney, J. E., Elling, F. J., & Inglis, G. N. (2026). *TEXAS: A proxy system model for TEX86 paleothermometry.* Paleoceanography and Paleoclimatology, in press.
+> Rattanasriampaipong, R., Tierney, J. E., Elling, F. J., & Inglis, G. N. (2026). *TEXAS: A proxy system model for TEX86 paleothermometry.* ESS Open Archive (preprint). https://doi.org/10.22541/essoar.15002926/v1 — under review at *Paleoceanography and Paleoclimatology*.
 
 and the software version you used (Zenodo concept DOI, which resolves to the latest release: [10.5281/zenodo.19671664](https://doi.org/10.5281/zenodo.19671664)). See [`CITATION.cff`](CITATION.cff) for machine-readable citation metadata.
 

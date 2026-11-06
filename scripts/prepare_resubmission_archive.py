@@ -388,7 +388,7 @@ def main(argv=None) -> int:
 README_TEMPLATE = """\
 # TEXAS: GDGT calibration database and Bayesian posteriors
 
-**Version**: {version} (revised manuscript, accepted)
+**Version**: {version} (revised manuscript, under review)
 **Package**: `texas-psm` — https://github.com/PaleoLipidRR/TEXAS
 **Documentation and guides**: https://paleolipidrr.github.io/TEXAS/
 
