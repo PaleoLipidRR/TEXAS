@@ -1,11 +1,6 @@
 # Installation
 
-**To use TEXAS on your own data, install the package from PyPI with pip or uv.** That
-is all most users need, and the four bundled calibrations (the two defaults and their
-thermal-only counterparts) come with it. You do not need
-to clone the repository, or to download `uv.lock` or `pyproject.toml`: those files only
-work inside a full checkout, for people forking the repository or running the manuscript
-notebooks.
+**To use TEXAS on your own data, install the package from PyPI with pip or uv.** That is all most users need, and the four bundled calibrations (the two defaults and their thermal-only counterparts) come with it. You do not need to clone the repository, or to download `uv.lock` or `pyproject.toml`: those files only work inside a full checkout, for people forking the repository or running the manuscript notebooks.
 
 | You want to | Use | CmdStan |
 |---|---|---|
@@ -134,11 +129,7 @@ Your project gets its own `uv.lock`. TEXAS's `uv.lock` is not used here, and dow
 
 ### CmdStan: install, discovery, and verification
 
-CmdStan is the Stan C++ toolchain. It is **never a Python package** — pip/uv install
-`cmdstanpy` (the Python bindings), but the compiler itself is a separate directory
-(`cmdstan-X.Y.Z/`) containing `bin/stanc` and a `Makefile`. Every Stan model compiles
-to a native binary the first time it runs, so a working CmdStan **and** a C++ compiler
-must both be present.
+CmdStan is the Stan C++ toolchain. It is **never a Python package** — pip/uv install `cmdstanpy` (the Python bindings), but the compiler itself is a separate directory (`cmdstan-X.Y.Z/`) containing `bin/stanc` and a `Makefile`. Every Stan model compiles to a native binary the first time it runs, so a working CmdStan **and** a C++ compiler must both be present.
 
 #### The one-call install (pip / uv users)
 
@@ -155,16 +146,9 @@ Or from any shell (PowerShell, CMD, bash, zsh):
 texas-install-cmdstan        # add --version X.Y.Z or --overwrite as needed
 ```
 
-This installs the version TEXAS is tested against into `~/.cmdstan/`, points TEXAS at it,
-runs the [`texas-doctor`](#verify-the-whole-toolchain) check, and — unlike a bare
-`cmdstanpy.install_cmdstan()` — **repairs a broken/partial install in place** (see
-[Troubleshooting](troubleshooting.md#cmdstan-directory-exists-but-the-compiler-binaries-are-missing-or-unusable)).
-It is a no-op if a working CmdStan already resolves, and it steps aside for conda-managed
-installs. On Windows it also installs the RTools C++ compiler as part of the call. TEXAS
-never installs CmdStan automatically — you always call this yourself.
+This installs the version TEXAS is tested against into `~/.cmdstan/`, points TEXAS at it, runs the [`texas-doctor`](#verify-the-whole-toolchain) check, and — unlike a bare `cmdstanpy.install_cmdstan()` — **repairs a broken/partial install in place** (see [Troubleshooting](troubleshooting.md#cmdstan-directory-exists-but-the-compiler-binaries-are-missing-or-unusable)). It is a no-op if a working CmdStan already resolves, and it steps aside for conda-managed installs. On Windows it also installs the RTools C++ compiler as part of the call. TEXAS never installs CmdStan automatically — you always call this yourself.
 
-The manual routes below (`cmdstanpy.install_cmdstan()`, conda-forge `cmdstan`) remain fully
-supported; use them if you prefer to manage the version yourself.
+The manual routes below (`cmdstanpy.install_cmdstan()`, conda-forge `cmdstan`) remain fully supported; use them if you prefer to manage the version yourself.
 
 #### Where CmdStan lives
 
@@ -176,8 +160,7 @@ supported; use them if you prefer to manage the version yourself.
 
 #### How TEXAS discovers it
 
-`TEXAS.utils.paths.find_cmdstan()` searches, in order, and stops at the first directory
-that contains a runnable `bin/stanc` (`stanc.exe` on Windows):
+`TEXAS.utils.paths.find_cmdstan()` searches, in order, and stops at the first directory that contains a runnable `bin/stanc` (`stanc.exe` on Windows):
 
 | Priority | Location | Typical source |
 |---|---|---|
@@ -187,16 +170,11 @@ that contains a runnable `bin/stanc` (`stanc.exe` on Windows):
 | 4 | highest `cmdstan-*` in `/opt/cmdstan/`, `~/.cmdstan/`, `/usr/local/cmdstan/` | `install_cmdstan()` default (`~/.cmdstan/`) |
 | 5 | whatever `cmdstanpy` is already configured to use | prior `set_cmdstan_path()` |
 
-`set_cmdstan_path()` is always called on the winning path so cmdstanpy stays consistent.
-Any version **≥ 2.23.0** is accepted (2.23.0 introduced `reduce_sum`); across the
-well-known directories the **highest** installed version wins. If `CMDSTAN` is set but its
-`bin/stanc` is missing or unusable, TEXAS emits a `UserWarning` and continues down the
-list. If nothing is found, a `RuntimeError` is raised with install instructions.
+`set_cmdstan_path()` is always called on the winning path so cmdstanpy stays consistent. Any version **≥ 2.23.0** is accepted (2.23.0 introduced `reduce_sum`); across the well-known directories the **highest** installed version wins. If `CMDSTAN` is set but its `bin/stanc` is missing or unusable, TEXAS emits a `UserWarning` and continues down the list. If nothing is found, a `RuntimeError` is raised with install instructions.
 
 #### Setting `CMDSTAN` manually
 
-Use this to pin a specific install (e.g. the one `install_cmdstan()` created) instead of
-whatever conda manages. Set it **before** importing TEXAS.
+Use this to pin a specific install (e.g. the one `install_cmdstan()` created) instead of whatever conda manages. Set it **before** importing TEXAS.
 
 ````````{tab-set}
 ```````{tab-item} PowerShell (Windows)
@@ -234,18 +212,13 @@ echo %CMDSTAN%
 
 #### Verify the whole toolchain
 
-One command checks cmdstanpy, the CmdStan path/version, a C++ compiler, and the cache
-directories — and tells you exactly what is missing. It runs on every platform and shell
-(PowerShell, CMD, bash, zsh):
+One command checks cmdstanpy, the CmdStan path/version, a C++ compiler, and the cache directories — and tells you exactly what is missing. It runs on every platform and shell (PowerShell, CMD, bash, zsh):
 
 ```bash
 texas-doctor            # or:  python -c "import TEXAS; TEXAS.doctor()"
 ```
 
-A healthy machine prints `Stan sampling: READY`. If not, the report names the failure —
-including the case where `CMDSTAN` points at a directory whose `bin/stanc` was never built
-— and prints the exact fix for your platform. See
-[Troubleshooting → CmdStan](troubleshooting.md#cmdstan-not-found) for the failure modes.
+A healthy machine prints `Stan sampling: READY`. If not, the report names the failure — including the case where `CMDSTAN` points at a directory whose `bin/stanc` was never built — and prints the exact fix for your platform. See [Troubleshooting → CmdStan](troubleshooting.md#cmdstan-not-found) for the failure modes.
 
 ---
 
@@ -609,18 +582,13 @@ pip install -e .          # editable install — required for development
 
 > **Always use `pip install -e .`** (editable mode). A plain `pip install .` or `pip install texas-psm` puts a static copy in site-packages: `STAN_MODELS_DIR` will point there (no pre-compiled binaries), and any local code changes will be silently ignored by the running kernel. After cloning, or any time you find the wrong package version is active, re-run `pip install -e .` and restart your Jupyter kernel.
 
-The conda environment sets `CMDSTAN` automatically to the bundled CmdStan. To use a
-different install (e.g. one from `cmdstanpy.install_cmdstan()`), set `CMDSTAN` yourself —
-see [Setting `CMDSTAN` manually](#setting-cmdstan-manually) for PowerShell / bash / CMD
-syntax — then run `texas-doctor` to confirm it resolved.
+The conda environment sets `CMDSTAN` automatically to the bundled CmdStan. To use a different install (e.g. one from `cmdstanpy.install_cmdstan()`), set `CMDSTAN` yourself — see [Setting `CMDSTAN` manually](#setting-cmdstan-manually) for PowerShell / bash / CMD syntax — then run `texas-doctor` to confirm it resolved.
 
 ---
 
 ## Reproducing the manuscript notebooks on a new machine
 
-The SI notebooks (`notebooks/manuscripts/SI_code00`–`SI_code03`) need more than the package: the
-Stan toolchain, cached posteriors, and some external climatology/model data. Full
-checklist:
+The SI notebooks (`notebooks/manuscripts/SI_code00`–`SI_code03`) need more than the package: the Stan toolchain, cached posteriors, and some external climatology/model data. Full checklist:
 
 ### 1. Code + environment
 
@@ -629,12 +597,9 @@ git clone https://github.com/PaleoLipidRR/TEXAS.git
 cd TEXAS
 ```
 
-- **uv:** `uv sync --all-extras` (Option B). Newer stack (matplotlib 3.10, numpy 2,
-  ultraplot 2.x); the notebooks use the updated plotting syntax it needs.
+- **uv:** `uv sync --all-extras` (Option B). Newer stack (matplotlib 3.10, numpy 2, ultraplot 2.x); the notebooks use the updated plotting syntax it needs.
 - **Docker:** `docker compose up` (Option C). Everything is bundled.
-- **conda:** `conda env create -f environment.yml && conda activate texas-env && pip
-  install -e .` (Option E). This pins `matplotlib>=3.9,<3.11` and `python=3.10`, the
-  versions the notebooks were authored against.
+- **conda:** `conda env create -f environment.yml && conda activate texas-env && pip install -e .` (Option E). This pins `matplotlib>=3.9,<3.11` and `python=3.10`, the versions the notebooks were authored against.
 
 ### 2. CmdStan + environment check
 
@@ -650,8 +615,7 @@ Then verify everything at once:
 texas-doctor      # or: python -c "import TEXAS; TEXAS.doctor()"
 ```
 
-It reports cmdstanpy, the CmdStan path/version, a C++ compiler, and the cache dirs, and
-prints `Stan sampling: READY` when the machine is set up.
+It reports cmdstanpy, the CmdStan path/version, a C++ compiler, and the cache dirs, and prints `Stan sampling: READY` when the machine is set up.
 
 ### 3. Posteriors + training data (Zenodo)
 
@@ -664,21 +628,12 @@ TEXAS.download_all()          # forward posteriors + training CSVs → data/cach
 
 `data/external/` is gitignored, so these do **not** come with the clone:
 
-- **Regridded model fields and plate model** — the Tierney et al. (2022) and Zhu et al.
-  (2019) netCDFs and the paleoDEMS plate model, read by `SI_code03` for Fig. 12. They are
-  being added to the Zenodo data record; until then that figure cannot be regenerated from
-  public files alone.
-- **WOA23 climatology** — World Ocean Atlas 2023 annual means: **temperature**, decadal
-  average `decav91C0`, 0.25° and 1° (`woa23_decav91C0_t00_04.nc`,
-  `woa23_decav91C0_t00_01.nc`), and **nitrate**, all-years 1° (`woa23_all_n00_01.nc`).
-  `TEXAS.download_woa23()` fetches all three from NOAA NCEI (>1 GB) into `data/external/woa23/`;
-  or download them from <https://www.ncei.noaa.gov/products/world-ocean-atlas>. Place them so
-  the notebook paths resolve (see step 5): `…/WOA23/decav91C0/temperature/` and `…/nitrate/`.
+- **Regridded model fields and plate model** — the Tierney et al. (2022) and Zhu et al. (2019) netCDFs and the paleoDEMS plate model, read by `SI_code03` for Fig. 12. They are being added to the Zenodo data record; until then that figure cannot be regenerated from public files alone.
+- **WOA23 climatology** — World Ocean Atlas 2023 annual means: **temperature**, decadal average `decav91C0`, 0.25° and 1° (`woa23_decav91C0_t00_04.nc`, `woa23_decav91C0_t00_01.nc`), and **nitrate**, all-years 1° (`woa23_all_n00_01.nc`). `TEXAS.download_woa23()` fetches all three from NOAA NCEI (>1 GB) into `data/external/woa23/`; or download them from <https://www.ncei.noaa.gov/products/world-ocean-atlas>. Place them so the notebook paths resolve (see step 5): `…/WOA23/decav91C0/temperature/` and `…/nitrate/`.
 
 ### 5. Set the two path variables
 
-Each notebook's setup cell defines `local_github_path` and `local_onedrive_path`. Point
-them at your clone and at wherever you placed the WOA23 / external datasets:
+Each notebook's setup cell defines `local_github_path` and `local_onedrive_path`. Point them at your clone and at wherever you placed the WOA23 / external datasets:
 
 ```python
 from pathlib import Path
@@ -686,8 +641,7 @@ local_github_path   = Path.home() / "Documents/GitHub/TEXAS"   # your clone
 local_onedrive_path = Path.home() / "data/texas-external"      # where you put WOA23 etc.
 ```
 
-Under Docker these default to `/home/micromamba/app` and `/mnt/onedrive`; on a bare
-machine adjust as above.
+Under Docker these default to `/home/micromamba/app` and `/mnt/onedrive`; on a bare machine adjust as above.
 
 ### 6. Run
 

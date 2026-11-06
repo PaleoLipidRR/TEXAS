@@ -43,10 +43,7 @@
 
 ### Per-observation quality flags
 
-Returned automatically as `result["flags"]`, and callable on its own against a
-saved reconstruction. What each column means, and how `posterior_prior_width_ratio`
-relates to the manuscript's *Resolved* diagnostic, is on the
-[PSM page](PSM.md#8-reconstructing-temperature-from-proxy-observations).
+Returned automatically as `result["flags"]`, and callable on its own against a saved reconstruction. What each column means, and how `posterior_prior_width_ratio` relates to the manuscript's *Resolved* diagnostic, is on the [PSM page](PSM.md#8-reconstructing-temperature-from-proxy-observations).
 
 ```{eval-rst}
 .. autofunction:: TEXAS.quality.compute_quality_flags
@@ -92,15 +89,9 @@ relates to the manuscript's *Resolved* diagnostic, is on the
 
 ### Screen a record
 
-Flags samples lying outside the TEX₈₆–Scaled RI domain the calibration was
-trained on, using the same 90 % χ² Mahalanobis ellipse used to build the
-training set. A flagged sample is an extrapolation, not necessarily a bad
-measurement — the recommendation is to flag and interpret with caution rather
-than exclude.
+Flags samples lying outside the TEX₈₆–Scaled RI domain the calibration was trained on, using the same 90 % χ² Mahalanobis ellipse used to build the training set. A flagged sample is an extrapolation, not necessarily a bad measurement — the recommendation is to flag and interpret with caution rather than exclude.
 
-The ellipse is a fixed property of the published calibration (the core-top
-reference cluster of Section 5.1), so **nothing needs fitting** — an unfitted
-detector on the standard features adopts it automatically:
+The ellipse is a fixed property of the published calibration (the core-top reference cluster of Section 5.1), so **nothing needs fitting** — an unfitted detector on the standard features adopts it automatically:
 
 ```python
 from TEXAS.data import MahalanobisOutlierDetector
@@ -109,14 +100,9 @@ detector = MahalanobisOutlierDetector(["TEX86", "scaledRI_cren3"], confidence=0.
 df["flagged"] = detector.detect_outliers_manual(df)
 ```
 
-`detect_outliers_manual` is the manuscript's criterion: the ellipse **plus** the
-warm-end exception, so samples with TEX₈₆ > 0.75 and Scaled RI₀₋₃ > 0.75 are
-retained rather than flagged — the calibration retains them too (Section 5.1,
-Fig. 4). `detect_outliers` applies the bare ellipse and would flag warm samples
-the calibration actually covers.
+`detect_outliers_manual` is the manuscript's criterion: the ellipse **plus** the warm-end exception, so samples with TEX₈₆ > 0.75 and Scaled RI₀₋₃ > 0.75 are retained rather than flagged — the calibration retains them too (Section 5.1, Fig. 4). `detect_outliers` applies the bare ellipse and would flag warm samples the calibration actually covers.
 
-Do **not** call `fit()` or `fit_predict()` on your own record: that re-centres
-the ellipse onto the record, so the more unusual your data the less it flags.
+Do **not** call `fit()` or `fit_predict()` on your own record: that re-centres the ellipse onto the record, so the more unusual your data the less it flags.
 
 ```{eval-rst}
 .. autoclass:: TEXAS.data.screening.MahalanobisOutlierDetector

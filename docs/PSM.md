@@ -50,13 +50,7 @@ Where:
 - \( T \) = temperature.
 - \( X_j \) = additional predictors (e.g., GDGT-2/GDGT-3 ratio, nitrate concentration).
 - \( b \) = lower asymptote; the upper asymptote is **fixed at 1**; \( T_0 \) = curve location (the steepest response is at \( T_0 - \ln v / k \), not at \( T_0 \)), \( k \) = steepness, \( v \) = shape (curve asymmetry).
-- \( \gamma_j \) = coefficients for optional predictors, in °C per predictor
-  unit. They shift the curve's location **inside** the logistic (the
-  *T₀-shift parameterization*), so a sample with elevated predictors records
-  the Scaled RI of apparently colder water, and the predicted \( RI_{\text{scaled}} \)
-  stays confined to \( (b, 1) \) by construction. (An earlier formulation added
-  \( \beta_j X_j \) to the response instead; it is superseded because it can
-  push predictions outside the index's physical bounds.)
+- \( \gamma_j \) = coefficients for optional predictors, in °C per predictor unit. They shift the curve's location **inside** the logistic (the *T₀-shift parameterization*), so a sample with elevated predictors records the Scaled RI of apparently colder water, and the predicted \( RI_{\text{scaled}} \) stays confined to \( (b, 1) \) by construction. (An earlier formulation added \( \beta_j X_j \) to the response instead; it is superseded because it can push predictions outside the index's physical bounds.)
 - \( RI_{\text{scaled}} \) is normalized between 0 and 1 for comparability.
 
 **Forward Model Role:**  
@@ -159,53 +153,17 @@ $$
 
 ## 8. Reconstructing temperature from proxy observations
 
-`TEXAS.predict_T_from_proxyObs` is the inverse half of the API. Three things
-about how it is called are worth stating once here rather than in its
-docstring.
+`TEXAS.predict_T_from_proxyObs` is the inverse half of the API. Three things about how it is called are worth stating once here rather than in its docstring.
 
-**The default calibration.** Omitting `fwd_posterior` selects the full
-multivariate T₀-shift calibration for the requested target — `tx.GHEB.sst.sri03.G23-N1p0`
-for SST, `tx.GHEB.thm.sri03.G23-N1p0` for thermoT — both of which ship inside
-the wheel, so a reconstruction needs no download. That is the default because
-the non-thermal effects are present in the core-top data whether or not a user
-models them: a temperature-only calibration does not remove them, it absorbs
-them into the thermal parameters.
+**The default calibration.** Omitting `fwd_posterior` selects the full multivariate T₀-shift calibration for the requested target — `tx.GHEB.sst.sri03.G23-N1p0` for SST, `tx.GHEB.thm.sri03.G23-N1p0` for thermoT — both of which ship inside the wheel, so a reconstruction needs no download. That is the default because the non-thermal effects are present in the core-top data whether or not a user models them: a temperature-only calibration does not remove them, it absorbs them into the thermal parameters.
 
-**Which NO₃ value reaches Stan.** The resolution order is
-`site_lat`/`site_lon` lookup → an explicit `no3=` → `predictors["no3"]` →
-zeros. Passing `site_lat` and `site_lon` interpolates the `ocean_prop_ds`
-field (the CMEMS nitrate climatology on the WOA23 grid) at those coordinates (downloaded and cached from Zenodo
-on first use if `no3_dataset` is not supplied). A scalar `no3` broadcasts to
-every observation; a value above `no3_cutoff` — e.g. `no3=10.0` when the
-cutoff is 1.0 — puts every observation outside the correction window, which is
-how the correction is switched off.
+**Which NO₃ value reaches Stan.** The resolution order is `site_lat`/`site_lon` lookup → an explicit `no3=` → `predictors["no3"]` → zeros. Passing `site_lat` and `site_lon` interpolates the `ocean_prop_ds` field (the CMEMS nitrate climatology on the WOA23 grid) at those coordinates (downloaded and cached from Zenodo on first use if `no3_dataset` is not supplied). A scalar `no3` broadcasts to every observation; a value above `no3_cutoff` — e.g. `no3=10.0` when the cutoff is 1.0 — puts every observation outside the correction window, which is how the correction is switched off.
 
-Supplying *nothing* is not the same as switching it off. If the calibration you
-named declares a correction and you supply no values for it,
-`predict_T_from_proxyObs` raises a `ValueError` naming the ways out rather than
-passing zeros to Stan — for the GDGT-2/3 ratio and for NO₃ alike — because a
-zero would assert a ratio or concentration of zero and bias the reconstruction.
-The `predictor_missing` quality flag (below) marks the same condition on a
-reconstruction loaded back from disk. And if you name *no* calibration and
-supply *no* predictors, TEXAS selects the thermal-only calibration
-(`tx.GHPU.sst.sri03.p0`, or `tx.GHPU.thm.sri03.p0` for thermoT; both also ship
-in the wheel) and warns that it has
-done so. That fallback is a convenience, not an equivalence: as above, a
-thermal-only fit absorbs the non-thermal signal into its thermal parameters, so
-its reconstructions differ from the multivariate ones the manuscript reports.
+Supplying *nothing* is not the same as switching it off. If the calibration you named declares a correction and you supply no values for it, `predict_T_from_proxyObs` raises a `ValueError` naming the ways out rather than passing zeros to Stan — for the GDGT-2/3 ratio and for NO₃ alike — because a zero would assert a ratio or concentration of zero and bias the reconstruction. The `predictor_missing` quality flag (below) marks the same condition on a reconstruction loaded back from disk. And if you name *no* calibration and supply *no* predictors, TEXAS selects the thermal-only calibration (`tx.GHPU.sst.sri03.p0`, or `tx.GHPU.thm.sri03.p0` for thermoT; both also ship in the wheel) and warns that it has done so. That fallback is a convenience, not an equivalence: as above, a thermal-only fit absorbs the non-thermal signal into its thermal parameters, so its reconstructions differ from the multivariate ones the manuscript reports.
 
-**`temptype` is a label, not a modeling choice.** The reconstruction follows
-whatever calibration it was given: the target is read from the posterior's own
-attrs, and `temptype` only names the metadata and the output files. It matters
-in exactly one case — when `fwd_posterior` is omitted, it chooses which default
-calibration is used. A `temptype` that contradicts the calibration raises a
-warning and is otherwise ignored.
+**`temptype` is a label, not a modeling choice.** The reconstruction follows whatever calibration it was given: the target is read from the posterior's own attrs, and `temptype` only names the metadata and the output files. It matters in exactly one case — when `fwd_posterior` is omitted, it chooses which default calibration is used. A `temptype` that contradicts the calibration raises a warning and is otherwise ignored.
 
-**Per-observation quality flags.** The screening above and several further
-checks run with every reconstruction and come back as `result["flags"]`, a
-DataFrame with one row per sample (manuscript Appendix C2.8). Each column is a
-check that is passed, failed, or — when it could not be evaluated — `pd.NA`,
-never a pass. Computing them costs no extra sampling.
+**Per-observation quality flags.** The screening above and several further checks run with every reconstruction and come back as `result["flags"]`, a DataFrame with one row per sample (manuscript Appendix C2.8). Each column is a check that is passed, failed, or — when it could not be evaluated — `pd.NA`, never a pass. Computing them costs no extra sampling.
 
 | column | fires when |
 |---|---|
@@ -218,11 +176,7 @@ never a pass. Computing them costs no extra sampling.
 | `no3_correction_inactive` | advisory only: NO₃ is above the cutoff, so the nitrate term is off — usually deliberate (`no3=10`). Reported, but it does not count toward `any_flag`. |
 | `any_flag` | any evaluated defect column is True. `pd.NA` entries contribute nothing. |
 
-`posterior_prior_width_ratio` is the graded companion of `prior_dominated`:
-`1 − ratio²` is the per-sample share of the prior variance the proxy removed,
-the prior-referenced diagnostic the manuscript recommends (Appendix C2.8). The
-SI's prior-comparison table reports the record-level version of the same
-quantity, with the half-width averaged over the record first.
+`posterior_prior_width_ratio` is the graded companion of `prior_dominated`: `1 − ratio²` is the per-sample share of the prior variance the proxy removed, the prior-referenced diagnostic the manuscript recommends (Appendix C2.8). The SI's prior-comparison table reports the record-level version of the same quantity, with the half-width averaged over the record first.
 
 ```python
 result = predict_T_from_proxyObs(
@@ -239,57 +193,28 @@ keep = ~flags["any_flag"].to_numpy(dtype=bool)   # NA never counts as a pass
 sst = result["p50"][keep]
 ```
 
-The quickstart notebook (`notebooks/quickstart_demo.ipynb`, Step 6b) runs this
-on a short record that includes one deliberately unreachable sample, so each
-flag can be seen firing before it is applied to real data.
+The quickstart notebook (`notebooks/quickstart_demo.ipynb`, Step 6b) runs this on a short record that includes one deliberately unreachable sample, so each flag can be seen firing before it is applied to real data.
 
 ## 9. Choosing the NO₃ cutoff
 
-The NO₃ correction applies only below a cutoff concentration: above it, sites
-are nutrient-replete and the term is switched off. The manuscript (Section 6.2)
-finds the strongest negative Spearman correlation between the thermal residuals
-and log₁₀[NO₃⁻] at 1.8 µmol/L and adopts **1.0 µmol/L** as the practical cutoff,
-because the correction is log-linear and passes through zero at NO₃ = 1; that is
-the value recorded in the published posteriors. `find_optimal_no3_threshold`
-and `find_optimal_no3_threshold_nointercept` search that cutoff against the
-residuals of a temperature-only fit. They differ in the criterion, and the
-choice is a modeling decision, not a tuning detail.
+The NO₃ correction applies only below a cutoff concentration: above it, sites are nutrient-replete and the term is switched off. The manuscript (Section 6.2) finds the strongest negative Spearman correlation between the thermal residuals and log₁₀[NO₃⁻] at 1.8 µmol/L and adopts **1.0 µmol/L** as the practical cutoff, because the correction is log-linear and passes through zero at NO₃ = 1; that is the value recorded in the published posteriors. `find_optimal_no3_threshold` and `find_optimal_no3_threshold_nointercept` search that cutoff against the residuals of a temperature-only fit. They differ in the criterion, and the choice is a modeling decision, not a tuning detail.
 
-**`find_optimal_no3_threshold`** takes the cutoff that maximises the *negative*
-correlation between log(NO₃) and the residuals.
+**`find_optimal_no3_threshold`** takes the cutoff that maximises the *negative* correlation between log(NO₃) and the residuals.
 
-- `score_method="spearmanr"` (default) uses the most negative Spearman ρ. It is
-  rank-based, robust to outliers, and is what the prior publication used.
-- `score_method="R_squared"` uses the highest no-intercept R² of
-  `RI_res = β·log(NO₃)` with β < 0. It penalizes poor fit rather than rank order
-  alone, and corresponds to a model whose correction is zero at NO₃ = 1.
+- `score_method="spearmanr"` (default) uses the most negative Spearman ρ. It is rank-based, robust to outliers, and is what the prior publication used.
+- `score_method="R_squared"` uses the highest no-intercept R² of `RI_res = β·log(NO₃)` with β < 0. It penalizes poor fit rather than rank order alone, and corresponds to a model whose correction is zero at NO₃ = 1.
 
-**`find_optimal_no3_threshold_nointercept`** instead maximises the no-intercept
-R² of `RI_res = β·x`, for a correction that is exactly zero *at the threshold*
-(a formulation explored during development; the shipped Stan models use the
-`log10` form, zero at NO₃ = 1).
+**`find_optimal_no3_threshold_nointercept`** instead maximises the no-intercept R² of `RI_res = β·x`, for a correction that is exactly zero *at the threshold* (a formulation explored during development; the shipped Stan models use the `log10` form, zero at NO₃ = 1).
 
-- `no3_mode="log10ratio"` (default) sets `x = log10(NO₃ / threshold)` — zero at
-  the boundary.
-- `no3_mode="log10"` sets `x = log10(NO₃)` — zero at NO₃ = 1 regardless of the
-  threshold, which is the original Stan form. Use it to compare the
-  no-intercept criterion against the Spearman one while holding the predictor
-  fixed.
+- `no3_mode="log10ratio"` (default) sets `x = log10(NO₃ / threshold)` — zero at the boundary.
+- `no3_mode="log10"` sets `x = log10(NO₃)` — zero at NO₃ = 1 regardless of the threshold, which is the original Stan form. Use it to compare the no-intercept criterion against the Spearman one while holding the predictor fixed.
 
-**Asymmetric weighting** (`weight_method`, R²-based criteria only; Spearman
-takes no sample weights) exists because the two corrections have opposite
-expected signs.
+**Asymmetric weighting** (`weight_method`, R²-based criteria only; Spearman takes no sample weights) exists because the two corrections have opposite expected signs.
 
 - `"uniform"` — ordinary least squares.
-- `"positive_residuals"` — `wᵢ = max(resᵢ, ε)`. For the **NO₃** correction:
-  nutrient-limited sites are expected to have positive RI residuals (observed
-  RI above what temperature alone predicts).
-- `"negative_residuals"` — `wᵢ = max(−resᵢ, ε)`. For the **G₂/₃** correction:
-  deep-water, high-G₂/₃ sites are expected to have negative RI residuals.
+- `"positive_residuals"` — `wᵢ = max(resᵢ, ε)`. For the **NO₃** correction: nutrient-limited sites are expected to have positive RI residuals (observed RI above what temperature alone predicts).
+- `"negative_residuals"` — `wᵢ = max(−resᵢ, ε)`. For the **G₂/₃** correction: deep-water, high-G₂/₃ sites are expected to have negative RI residuals.
 
-In both weighted cases `ε = 0.001 · std(residuals)`, so off-direction points are
-suppressed but never fully excluded — which keeps the fit stable when nearly all
-residuals fall on one side.
+In both weighted cases `ε = 0.001 · std(residuals)`, so off-direction points are suppressed but never fully excluded — which keeps the fit stable when nearly all residuals fall on one side.
 
-`log_method` (`"log10"` or `"ln"`) sets the log base. `"log10"` matches the Stan
-models; `"ln"` is there to test sensitivity to that choice.
+`log_method` (`"log10"` or `"ln"`) sets the log base. `"log10"` matches the Stan models; `"ln"` is there to test sensitivity to that choice.

@@ -1,8 +1,6 @@
 # Data
 
-The `data/` folder is the bridge between Zenodo and the code.
-Everything downloads into it; notebooks and the package API read from it;
-the Docker container bind-mounts it from your host machine.
+The `data/` folder is the bridge between Zenodo and the code. Everything downloads into it; notebooks and the package API read from it; the Docker container bind-mounts it from your host machine.
 
 ```
 Zenodo data record (DOI: https://doi.org/10.5281/zenodo.19666744)
@@ -38,8 +36,7 @@ TEXAS.download_posteriors()
 TEXAS.download_training_data()
 ```
 
-Both functions are idempotent — running them again skips files already on disk.
-Use `force=True` to re-download.
+Both functions are idempotent — running them again skips files already on disk. Use `force=True` to re-download.
 
 ---
 
@@ -54,9 +51,7 @@ TEXAS.download_posteriors()
 TEXAS.download_training_data()
 ```
 
-The container bind-mounts `data/` from the host (`docker-compose.yml`),
-so the files you downloaded are automatically available inside JupyterLab
-at the same relative paths the notebooks expect — no path changes needed.
+The container bind-mounts `data/` from the host (`docker-compose.yml`), so the files you downloaded are automatically available inside JupyterLab at the same relative paths the notebooks expect — no path changes needed.
 
 ---
 
@@ -116,39 +111,25 @@ These are not hosted on the TEXAS Zenodo record — download them separately:
 
 **Data DOI**: https://doi.org/10.5281/zenodo.19666744
 
-This is the *concept DOI* — it always resolves to the newest deposited
-version, and every Zenodo reference to "the data record" in this file uses
-it. A dated, version-specific DOI (e.g. `zenodo.20032542`, the superseded
-v0.2.0 deposit — see `src/TEXAS/utils/download.py`) is used only for a
-particular frozen deposit, such as when pinning a download to files that
-were never migrated to the current record; none of the links below need
-that distinction.
+This is the *concept DOI* — it always resolves to the newest deposited version, and every Zenodo reference to "the data record" in this file uses it. A dated, version-specific DOI (e.g. `zenodo.20032542`, the superseded v0.2.0 deposit — see `src/TEXAS/utils/download.py`) is used only for a particular frozen deposit, such as when pinning a download to files that were never migrated to the current record; none of the links below need that distinction.
 
-You can also download files manually from the Zenodo record page
-and place them in the directories above.
+You can also download files manually from the Zenodo record page and place them in the directories above.
 
 ---
 
 ## Where every file lives
 
-Use this section to find where a file comes from when a notebook can't find
-it. Files fall into three groups:
+Use this section to find where a file comes from when a notebook can't find it. Files fall into three groups:
 
 1. **Training data** — included in the repository; nothing to download.
 2. **Published datasets** — download from the original source (links below).
-3. **Derived NetCDFs** — produced by the SI notebooks from published datasets
-   (WOA23 and the group 2 downloads).
+3. **Derived NetCDFs** — produced by the SI notebooks from published datasets (WOA23 and the group 2 downloads).
 
-The regridded Tierney et al. (2022) PETMDA and Zhu et al. (2019) iPETM grids in
-table 3 are **not** on the TEXAS Zenodo data record. We do not re-host published
-datasets that this study used without significant reanalysis; these grids are
-regridded copies of published model output, so obtain the originals from those
-publications (table 2) and regenerate them.
+The regridded Tierney et al. (2022) PETMDA and Zhu et al. (2019) iPETM grids in table 3 are **not** on the TEXAS Zenodo data record. We do not re-host published datasets that this study used without significant reanalysis; these grids are regridded copies of published model output, so obtain the originals from those publications (table 2) and regenerate them.
 
 ### 1. Training data in the repository (22 files)
 
-These come with the repository (via Git LFS), so no download is needed. A few
-are not used by the current notebooks and are kept for reference.
+These come with the repository (via Git LFS), so no download is needed. A few are not used by the current notebooks and are kept for reference.
 
 | filename | what reads it | where to get it |
 |---|---|---|
@@ -177,10 +158,7 @@ are not used by the current notebooks and are kept for reference.
 
 ### 2. Published datasets to download (14 files under `data/external/`)
 
-These are published datasets used by the SI notebooks. They are not hosted on
-the TEXAS Zenodo record; download them from the sources listed. Several are only
-needed to regenerate the regridded model grids in table 3, using the regridding
-cell in `SI_code03_paleo_showcases.ipynb` (commented out by default).
+These are published datasets used by the SI notebooks. They are not hosted on the TEXAS Zenodo record; download them from the sources listed. Several are only needed to regenerate the regridded model grids in table 3, using the regridding cell in `SI_code03_paleo_showcases.ipynb` (commented out by default).
 
 | filename | what reads it | where to get it |
 |---|---|---|
@@ -201,9 +179,7 @@ cell in `SI_code03_paleo_showcases.ipynb` (commented out by default).
 
 ### 3. Derived NetCDFs (6 files)
 
-These are outputs of this project's own preprocessing (WOA23-derived ocean
-properties, and CESM simulation output regridded to a common grid) that
-`SI_code00_PreProcessing.ipynb` and `SI_code03_paleo_showcases.ipynb` read back in.
+These are outputs of this project's own preprocessing (WOA23-derived ocean properties, and CESM simulation output regridded to a common grid) that `SI_code00_PreProcessing.ipynb` and `SI_code03_paleo_showcases.ipynb` read back in.
 
 | filename | what reads it | where to get it |
 |---|---|---|
@@ -214,9 +190,4 @@ properties, and CESM simulation output regridded to a common grid) that
 | `data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM06x.nc` | `SI_code03_paleo_showcases.ipynb` | not re-hosted; regenerate from the original (table 2) with the regridding cell in `SI_code03_paleo_showcases.ipynb` |
 | `data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM09x.nc` | `SI_code03_paleo_showcases.ipynb` | not re-hosted; regenerate from the original (table 2) with the regridding cell in `SI_code03_paleo_showcases.ipynb` |
 
-**The five regridded grids (~13 MB) are not re-hosted**, because this study used
-these published datasets without significant reanalysis (Tierney et al. 2022 PNAS PETMDA; Zhu et al. 2019
-*Science* EoceneSim, [PANGAEA](https://doi.org/10.1594/PANGAEA.899208)). A fresh
-clone therefore cannot run `SI_code03_paleo_showcases.ipynb` end to end until
-you download the originals listed in table 2 and run that notebook's
-(commented-out) regridding cell.
+**The five regridded grids (~13 MB) are not re-hosted**, because this study used these published datasets without significant reanalysis (Tierney et al. 2022 PNAS PETMDA; Zhu et al. 2019 *Science* EoceneSim, [PANGAEA](https://doi.org/10.1594/PANGAEA.899208)). A fresh clone therefore cannot run `SI_code03_paleo_showcases.ipynb` end to end until you download the originals listed in table 2 and run that notebook's (commented-out) regridding cell.

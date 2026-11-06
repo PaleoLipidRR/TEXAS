@@ -1,19 +1,13 @@
 # Understanding `reduce_sum` and `ll_chunk` in TEXAS-PSM
 ## A visual guide for users
 
-This note explains two important pieces of computational machinery used in the TEXAS
-inverse-temperature Stan models — `reduce_sum` and `ll_chunk` — using a small toy
-example you can trace by hand.
+This note explains two important pieces of computational machinery used in the TEXAS inverse-temperature Stan models — `reduce_sum` and `ll_chunk` — using a small toy example you can trace by hand.
 
 ---
 
 ## Background in one sentence
 
-When we reconstruct past temperatures from Ring Index (RI) values, the Stan model must
-evaluate — for every proposed temperature — how well it fits the data under every one of
-the M calibration curves drawn from the forward posterior. For large N (many downcore
-samples) and large M (many calibration draws), this gets expensive fast. `reduce_sum`
-and `ll_chunk` are how we split that work across CPU cores.
+When we reconstruct past temperatures from Ring Index (RI) values, the Stan model must evaluate — for every proposed temperature — how well it fits the data under every one of the M calibration curves drawn from the forward posterior. For large N (many downcore samples) and large M (many calibration draws), this gets expensive fast. `reduce_sum` and `ll_chunk` are how we split that work across CPU cores.
 
 ---
 
@@ -36,15 +30,13 @@ Total evaluations per step: 100 × 200 = 20,000
 Total evaluations (4 chains × 1,500 iterations, i.e. 500 warm-up + 1,000 sampling): 120,000,000
 ```
 
-That's a lot of repeated computation. If your computer has 8 CPU cores, why not use
-all of them at the same time?
+That's a lot of repeated computation. If your computer has 8 CPU cores, why not use all of them at the same time?
 
 ---
 
 ## 2. The Solution: Split N samples across CPU cores
 
-`reduce_sum` divides the N samples into **chunks** and assigns each chunk to a
-separate CPU core. All cores work simultaneously; their results are summed at the end.
+`reduce_sum` divides the N samples into **chunks** and assigns each chunk to a separate CPU core. All cores work simultaneously; their results are summed at the end.
 
 ```
                       N = 8 samples to process
@@ -69,15 +61,13 @@ Observations (n):     │ 1 │ 2 │ 3 │ 4 │ 5 │ 6 │ 7 │ 8 │
                          = total log-probability
 ```
 
-The `grainsize` parameter controls the chunk size. `grainsize = 1` makes the
-smallest possible chunks (maximum parallelism); larger values reduce overhead.
+The `grainsize` parameter controls the chunk size. `grainsize = 1` makes the smallest possible chunks (maximum parallelism); larger values reduce overhead.
 
 ---
 
 ## 3. What `ll_chunk` does inside each core
 
-`ll_chunk` is the function that processes one chunk of samples. For each sample `n`
-in the chunk, it:
+`ll_chunk` is the function that processes one chunk of samples. For each sample `n` in the chunk, it:
 
 1. Applies the **prior** on temperature: "how plausible is this T given our prior knowledge?"
 2. Loops over all **M calibration draws** and computes how well each curve predicts the observed RI
@@ -134,10 +124,7 @@ For sample n=2 (RI_obs = 0.68, T_proposed = 22.5°C):
 
 ## 4. Why the same draw index `m` matters
 
-Each calibration draw `m` represents **one self-consistent set of curve parameters**
-sampled together from the forward posterior. Think of it like a single geochemist's
-"best guess" for the entire calibration curve — all parameters in that guess were
-estimated together and are correlated.
+Each calibration draw `m` represents **one self-consistent set of curve parameters** sampled together from the forward posterior. Think of it like a single geochemist's "best guess" for the entire calibration curve — all parameters in that guess were estimated together and are correlated.
 
 ```
            Forward calibration posterior: 3 draws
@@ -149,15 +136,11 @@ estimated together and are correlated.
              3  │ 20.0  │ 0.15 │ 0.18 │ 0.04   ← always use ALL from row 3
 ```
 
-**What we do (correct ✅):**
-For draw m=1, use `T₀[1]=20.0`, `k[1]=0.18`, `b[1]=0.15`, `σ[1]=0.05` together.
+**What we do (correct ✅):** For draw m=1, use `T₀[1]=20.0`, `k[1]=0.18`, `b[1]=0.15`, `σ[1]=0.05` together.
 
-**What we must NOT do (wrong ❌):**
-Mix parameters from different rows — e.g., `T₀[1]` + `k[3]` + `b[2]`.
-This would break the correlations among parameters and overestimate uncertainty.
+**What we must NOT do (wrong ❌):** Mix parameters from different rows — e.g., `T₀[1]` + `k[3]` + `b[2]`. This would break the correlations among parameters and overestimate uncertainty.
 
-In the Stan code, this constraint is enforced because every parameter uses the
-same index `[m]` inside the inner loop:
+In the Stan code, this constraint is enforced because every parameter uses the same index `[m]` inside the inner loop:
 
 ```stan
 for (m in 1:M) {
@@ -172,8 +155,7 @@ for (m in 1:M) {
 
 ## 5. The log-sum-exp trick explained
 
-When averaging probabilities across M calibration draws, we work in **log-space** to
-avoid numerical underflow (very small probabilities becoming exactly zero in a computer).
+When averaging probabilities across M calibration draws, we work in **log-space** to avoid numerical underflow (very small probabilities becoming exactly zero in a computer).
 
 **The naive (unstable) way:**
 ```
@@ -185,8 +167,7 @@ If lp values are very negative (e.g., −300), `exp(−300) = 0` in floating-poi
 ```
 log_average_likelihood = log_sum_exp(lp[1], lp[2], lp[3]) − log(M)
 ```
-Stan's `log_sum_exp` shifts all values by the maximum before exponentiating, keeping
-numbers in a safe range. The result is mathematically identical but numerically stable.
+Stan's `log_sum_exp` shifts all values by the maximum before exponentiating, keeping numbers in a safe range. The result is mathematically identical but numerically stable.
 
 Visually:
 ```
@@ -249,8 +230,7 @@ lp = [1.76, 1.77, 0.77]
                (total log-posterior for this proposed T vector)
 ```
 
-Stan's HMC sampler repeats this for thousands of proposed temperature vectors until
-it has drawn enough samples from the posterior distribution of temperatures.
+Stan's HMC sampler repeats this for thousands of proposed temperature vectors until it has drawn enough samples from the posterior distribution of temperatures.
 
 ---
 
@@ -269,14 +249,10 @@ it has drawn enough samples from the posterior distribution of temperatures.
 
 ## 8. When does parallelism help?
 
-`reduce_sum` only speeds things up when compiled with `STAN_THREADS=True` and
-`threads_per_chain > 1`. Otherwise it runs sequentially (same result, no speedup).
+`reduce_sum` only speeds things up when compiled with `STAN_THREADS=True` and `threads_per_chain > 1`. Otherwise it runs sequentially (same result, no speedup).
 
-Rule of thumb: parallelism helps most when N is large (hundreds of samples) and
-the calibration integral (M loop) is expensive. For small reconstructions (N < 20),
-the overhead of parallelism may outweigh the benefit.
+Rule of thumb: parallelism helps most when N is large (hundreds of samples) and the calibration integral (M loop) is expensive. For small reconstructions (N < 20), the overhead of parallelism may outweigh the benefit.
 
 ---
 
-*See also: [Why marginalization improves inverse sampling](marginalization_explainer.md)
-and the [Stan models overview](stan_models.md).*
+*See also: [Why marginalization improves inverse sampling](marginalization_explainer.md) and the [Stan models overview](stan_models.md).*

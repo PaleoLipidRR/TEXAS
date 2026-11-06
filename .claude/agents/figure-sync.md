@@ -14,11 +14,7 @@ Use `Bash` with `stat` (or `ls -l --time-style=+%s`) to get modification timesta
 
 ## Step 2 — collect notebook timestamps
 
-Get modification timestamps for:
-Glob `notebooks/manuscripts/*.ipynb` rather than hardcoding the list — the set
-grows between revisions. As of this writing it is `SI_code00_PreProcessing`,
-`SI_code01_t0shift_variance_partitioning`, `SI_code02_t0shift_TEXAS_analysis`,
-`SI_code02a_model_param_sensitivity_test`, and `SI_code03_paleo_showcases`.
+Get modification timestamps for: Glob `notebooks/manuscripts/*.ipynb` rather than hardcoding the list — the set grows between revisions. As of this writing it is `SI_code00_PreProcessing`, `SI_code01_t0shift_variance_partitioning`, `SI_code02_t0shift_TEXAS_analysis`, `SI_code02a_model_param_sensitivity_test`, and `SI_code03_paleo_showcases`.
 
 ## Step 3 — known figure-to-notebook mapping
 

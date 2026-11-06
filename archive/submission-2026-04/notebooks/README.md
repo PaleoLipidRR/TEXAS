@@ -1,9 +1,6 @@
 # Superseded notebooks
 
-Initial-submission (preprint) versions kept for provenance. Both analyze the
-**additive** multivariate formulation (`GHEA`), which the revised manuscript
-replaces with the T₀-shift parameterization (`GHEB`); see
-`docs/preprint_additive_archive.md`.
+Initial-submission (preprint) versions kept for provenance. Both analyze the **additive** multivariate formulation (`GHEA`), which the revised manuscript replaces with the T₀-shift parameterization (`GHEB`); see `docs/preprint_additive_archive.md`.
 
 | Superseded | Replaced by |
 |---|---|

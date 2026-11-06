@@ -1,18 +1,8 @@
 # TEXAS — TetraEther indeX of Ammonia oxidizerS: a proxy system model for TEX₈₆ paleothermometry
 
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
-[![PyPI](https://img.shields.io/pypi/v/texas-psm.svg)](https://pypi.org/project/texas-psm/)
-[![Zenodo](https://img.shields.io/badge/data-10.5281%2Fzenodo.19666744-blue.svg)](https://doi.org/10.5281/zenodo.19666744)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/) [![PyPI](https://img.shields.io/pypi/v/texas-psm.svg)](https://pypi.org/project/texas-psm/) [![Zenodo](https://img.shields.io/badge/data-10.5281%2Fzenodo.19666744-blue.svg)](https://doi.org/10.5281/zenodo.19666744)
 
-**TEXAS-PSM** (`texas-psm`) is a Python package implementing a **Bayesian proxy
-system model** for the TEX86 paleothermometer. **TEXAS** is its sensor model —
-the calibration linking temperature to the index — while TEXAS-PSM is the
-framework around it: sensor, archive, and observation submodels, plus the
-inversion back to temperature. This release implements the sensor model and the
-inversion; the archive model is not yet implemented, and the observation model
-propagates analytical uncertainty only. The distribution name and the import
-reflect that split (`pip install texas-psm`, `import TEXAS`).
+**TEXAS-PSM** (`texas-psm`) is a Python package implementing a **Bayesian proxy system model** for the TEX86 paleothermometer. **TEXAS** is its sensor model — the calibration linking temperature to the index — while TEXAS-PSM is the framework around it: sensor, archive, and observation submodels, plus the inversion back to temperature. This release implements the sensor model and the inversion; the archive model is not yet implemented, and the observation model propagates analytical uncertainty only. The distribution name and the import reflect that split (`pip install texas-psm`, `import TEXAS`).
 
 The package fits hierarchical generalized-logistic Stan models that link temperature to an isoGDGT index (Scaled RI), with optional nonthermal predictors for AOA ecology (GDGT-2/GDGT-3 ratio) and nutrient availability (NO₃⁻). It then reconstructs paleotemperatures from new sediment records with full posterior uncertainty.
 
@@ -91,8 +81,7 @@ That is all you need to use TEXAS on your own data. To fork the repository or ru
 
 ## Data and posteriors
 
-Pre-computed posteriors and training data are hosted on Zenodo:
-**[https://doi.org/10.5281/zenodo.19666744](https://doi.org/10.5281/zenodo.19666744)**
+Pre-computed posteriors and training data are hosted on Zenodo: **[https://doi.org/10.5281/zenodo.19666744](https://doi.org/10.5281/zenodo.19666744)**
 
 ```python
 import TEXAS

@@ -6,8 +6,7 @@ allowed-tools: Read Glob Grep
 
 Audit all finalized SI notebooks in `notebooks/manuscripts/`. Check each one against every rule below and report PASS / FAIL / WARN per notebook per category.
 
-Target notebooks: every `*.ipynb` under `notebooks/manuscripts/` — glob the
-directory rather than working from a fixed list, which goes stale each revision.
+Target notebooks: every `*.ipynb` under `notebooks/manuscripts/` — glob the directory rather than working from a fixed list, which goes stale each revision.
 
 ---
 
@@ -53,10 +52,7 @@ FAIL if any cell references Q parameter:
 
 WARN if any cell references a Stan model name that no longer exists as an active `.stan` file in `src/TEXAS/stan_models/`. Check against the list of files in that directory.
 
-Build the active list by listing `src/TEXAS/stan_models/*.stan` at run time — do
-not compare against a roster written into this file, which rots every time models
-are pruned. A name that resolves only under `archive/` is a WARN, not a FAIL: an
-archived model still runs when passed as an absolute path.
+Build the active list by listing `src/TEXAS/stan_models/*.stan` at run time — do not compare against a roster written into this file, which rots every time models are pruned. A name that resolves only under `archive/` is a WARN, not a FAIL: an archived model still runs when passed as an absolute path.
 
 ## 5. Posterior file references
 

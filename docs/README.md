@@ -1,9 +1,6 @@
 # TEXAS Documentation
 
-This directory is the source for the TEXAS documentation site, built with
-[Jupyter Book](https://jupyterbook.org/) (Sphinx). It is a **single unified
-book** containing the guide pages, the auto-generated API reference, and the
-explainers.
+This directory is the source for the TEXAS documentation site, built with [Jupyter Book](https://jupyterbook.org/) (Sphinx). It is a **single unified book** containing the guide pages, the auto-generated API reference, and the explainers.
 
 ## Building the docs locally
 
@@ -17,8 +14,7 @@ jupyter-book build docs/
 
 Then open `docs/_build/html/index.html` in your browser.
 
-> The optional map-figure deps (cartopy, regionmask) are **mocked** during the
-> build (`autodoc_mock_imports` in `_config.yml`), so a core install is enough.
+> The optional map-figure deps (cartopy, regionmask) are **mocked** during the build (`autodoc_mock_imports` in `_config.yml`), so a core install is enough.
 
 ## Structure
 
@@ -38,29 +34,18 @@ Then open `docs/_build/html/index.html` in your browser.
 
 ## Call map
 
-`_static/callmap.html` is **generated**, not hand-edited. It extracts the call
-graph from `src/TEXAS` with an AST pass and merges it with the curated pipeline
-stages and explainers in `_scripts/callmap_content.py`:
+`_static/callmap.html` is **generated**, not hand-edited. It extracts the call graph from `src/TEXAS` with an AST pass and merges it with the curated pipeline stages and explainers in `_scripts/callmap_content.py`:
 
 ```bash
 python docs/_scripts/build_callmap.py     # → docs/_static/callmap.html
 ```
 
-CI runs this before every book build, and it **fails** if the curated content
-names a function that no longer exists — so a rename in `src/TEXAS` shows up as
-a build error instead of a hole in the map. Add stages, explainers and
-loose-end notes in `_scripts/callmap_content.py`; the page shell (styles and
-interaction) is `_scripts/callmap_template.html`.
+CI runs this before every book build, and it **fails** if the curated content names a function that no longer exists — so a rename in `src/TEXAS` shows up as a build error instead of a hole in the map. Add stages, explainers and loose-end notes in `_scripts/callmap_content.py`; the page shell (styles and interaction) is `_scripts/callmap_template.html`.
 
 ## Deployment
 
-`.github/workflows/docs.yml` builds the book and publishes
-`docs/_build/html/` to the `gh-pages` branch on every push to `main` that
-touches `docs/**` or `src/TEXAS/**`. Live at
-<https://paleolipidrr.github.io/TEXAS/>.
+`.github/workflows/docs.yml` builds the book and publishes `docs/_build/html/` to the `gh-pages` branch on every push to `main` that touches `docs/**` or `src/TEXAS/**`. Live at <https://paleolipidrr.github.io/TEXAS/>.
 
 ## Branding
 
-Palette and the colorblock **TEXAS** wordmark are derived from the AGU25
-PP33D-1102 poster. Edit `_static/custom.css` (CSS variables at the top) to
-adjust colors; `_static/texas_logo.svg` is the header logo.
+Palette and the colorblock **TEXAS** wordmark are derived from the AGU25 PP33D-1102 poster. Edit `_static/custom.css` (CSS variables at the top) to adjust colors; `_static/texas_logo.svg` is the header logo.

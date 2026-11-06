@@ -1,7 +1,6 @@
 # Archive
 
-Nothing here is deleted and nothing here ships in the wheel. Each sub-archive
-answers a different question about the project's history.
+Nothing here is deleted and nothing here ships in the wheel. Each sub-archive answers a different question about the project's history.
 
 | directory | what it holds | why it is not in the live tree |
 |---|---|---|
@@ -13,10 +12,7 @@ answers a different question about the project's history.
 
 ## Running an archived Stan model
 
-`pyproject.toml` globs `stan_models/*.stan` non-recursively, so nothing under
-`archive/` reaches the wheel. To run an archived model from a source checkout,
-pass an absolute path — `StanCompiler.resolve_stan_path()` passes absolute paths
-straight through:
+`pyproject.toml` globs `stan_models/*.stan` non-recursively, so nothing under `archive/` reaches the wheel. To run an archived model from a source checkout, pass an absolute path — `StanCompiler.resolve_stan_path()` passes absolute paths straight through:
 
 ```python
 from pathlib import Path
@@ -29,12 +25,6 @@ post, diag = get_posterior(data, "gen_logi_fixed_hier_crtp_multiv_priorApprox_ei
                            stan_file=str(stan_file))
 ```
 
-There is no `model_dir=` route through `get_posterior()`; it builds a
-`StanCompiler()` with no arguments.
+There is no `model_dir=` route through `get_posterior()`; it builds a `StanCompiler()` with no arguments.
 
-The `submission-2026-04/` models also still resolve by plain stem through
-`resolve_stan_path()`'s archive fallback (`STAN_ARCHIVE_DIR` points only at
-`archive/submission-2026-04/stan_models`), which is inert in a wheel install
-because `archive/` is not packaged. The 15 `pre-submission/stan_models/`
-models (and their 4 `pre_annotated/` variants) are **not** covered by that
-fallback and are reachable only by absolute path, as shown above.
+The `submission-2026-04/` models also still resolve by plain stem through `resolve_stan_path()`'s archive fallback (`STAN_ARCHIVE_DIR` points only at `archive/submission-2026-04/stan_models`), which is inert in a wheel install because `archive/` is not packaged. The 15 `pre-submission/stan_models/` models (and their 4 `pre_annotated/` variants) are **not** covered by that fallback and are reachable only by absolute path, as shown above.

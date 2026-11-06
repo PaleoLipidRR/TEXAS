@@ -1,14 +1,8 @@
 # Archived Stan models — initial submission (2026-04)
 
-These eight models were used during development and in the **initial submission**
-of the TEXAS manuscript. They are kept here, in the repository, so that every
-result the paper reports remains reproducible — but they are no longer shipped
-in the installed package.
+These eight models were used during development and in the **initial submission** of the TEXAS manuscript. They are kept here, in the repository, so that every result the paper reports remains reproducible — but they are no longer shipped in the installed package.
 
-`pyproject.toml` declares package data as `stan_models/*.stan`, a non-recursive
-glob rooted at `src/TEXAS/stan_models/`. Nothing in this directory reaches the
-wheel. `src/TEXAS/stan_models/` now contains only the seven models the revised
-manuscript and the public API actually use.
+`pyproject.toml` declares package data as `stan_models/*.stan`, a non-recursive glob rooted at `src/TEXAS/stan_models/`. Nothing in this directory reaches the wheel. `src/TEXAS/stan_models/` now contains only the seven models the revised manuscript and the public API actually use.
 
 ## What moved, and why
 
@@ -35,15 +29,11 @@ manuscript and the public API actually use.
 | `invT_gen_logi_fixed_univ_marginal_unconstrained.stan` | Univariate inverse (quickstart, SI_code03). |
 | `linear_model.stan` | Used by the SI preprocessing and analysis notebooks. |
 
-Two further models — `invT_gen_logi_fixed_{univ,multiv}_marginal_truncated_prior.stan`
-— were archived on 2026-09-07 to `archive/pre-submission/stan_models/`, not
-here, when `constraint_type` left the public API.
+Two further models — `invT_gen_logi_fixed_{univ,multiv}_marginal_truncated_prior.stan` — were archived on 2026-09-07 to `archive/pre-submission/stan_models/`, not here, when `constraint_type` left the public API.
 
 ## How to run an archived model
 
-`get_posterior()` constructs its `StanCompiler` without a `model_dir`, so these
-files are not on the default search path. `StanCompiler.resolve_stan_path()`
-does pass an **absolute** path straight through, however, so give it one:
+`get_posterior()` constructs its `StanCompiler` without a `model_dir`, so these files are not on the default search path. `StanCompiler.resolve_stan_path()` does pass an **absolute** path straight through, however, so give it one:
 
 ```python
 from pathlib import Path
@@ -59,9 +49,7 @@ post, diag = get_posterior(
 )
 ```
 
-The compiler copies the source into `STAN_BUILD_DIR` (`~/.texas/stan_cache/`)
-before compiling, so running from here writes no build artifacts into the
-repository.
+The compiler copies the source into `STAN_BUILD_DIR` (`~/.texas/stan_cache/`) before compiling, so running from here writes no build artifacts into the repository.
 
 Alternatively, construct the compiler directly:
 
@@ -72,31 +60,16 @@ compiler = StanCompiler(model_dir=ARCHIVE)
 
 ## Which notebooks are affected
 
-No notebook breaks on its **default** settings — every one of them reads a
-cached or downloaded posterior rather than recompiling. The archived models are
-only reached on a cold cache or an explicit re-run:
+No notebook breaks on its **default** settings — every one of them reads a cached or downloaded posterior rather than recompiling. The archived models are only reached on a cold cache or an explicit re-run:
 
-- `SI_code02a_model_param_sensitivity_test.ipynb` calls
-  `get_posterior(..., stan_file="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv")`
-  inside a `try: load_posterior(...) / except: refit` block. It compiles only
-  when the posterior is missing or `FORCE_RERUN = True`.
-- `SI_code02_t0shift_TEXAS_analysis.ipynb` names the same model as `EIV_STEM`,
-  a posterior-name stem used for loading.
-- `SI_code03_paleo_showcases.ipynb` loads both variants from cache
-  (`RUN_INVT = False` by default).
+- `SI_code02a_model_param_sensitivity_test.ipynb` calls `get_posterior(..., stan_file="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv")` inside a `try: load_posterior(...) / except: refit` block. It compiles only when the posterior is missing or `FORCE_RERUN = True`.
+- `SI_code02_t0shift_TEXAS_analysis.ipynb` names the same model as `EIV_STEM`, a posterior-name stem used for loading.
+- `SI_code03_paleo_showcases.ipynb` loads both variants from cache (`RUN_INVT = False` by default).
 
 To refit the additive arm, point those calls at the absolute path above.
 
-The additive posteriors themselves are also downloadable — see
-`TEXAS.download_posteriors()` and the `_eiv` entries in
-`src/TEXAS/utils/download.py` — which is the cheaper route if you need the
-results rather than the fit.
+The additive posteriors themselves are also downloadable — see `TEXAS.download_posteriors()` and the `_eiv` entries in `src/TEXAS/utils/download.py` — which is the cheaper route if you need the results rather than the fit.
 
 ## Earlier archives
 
-`archive/pre-submission/stan_models/` (15 `.stan` files) and its
-`pre_annotated/` subdirectory (4 `.stan` files) hold older material from
-before the initial submission — moved out of `src/TEXAS/stan_models/` in a
-later pass. Neither ships in the wheel either. See `archive/README.md` for
-what distinguishes all four sub-archives and how to run a model out of any
-of them.
+`archive/pre-submission/stan_models/` (15 `.stan` files) and its `pre_annotated/` subdirectory (4 `.stan` files) hold older material from before the initial submission — moved out of `src/TEXAS/stan_models/` in a later pass. Neither ships in the wheel either. See `archive/README.md` for what distinguishes all four sub-archives and how to run a model out of any of them.
