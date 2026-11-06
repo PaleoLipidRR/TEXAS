@@ -41,11 +41,7 @@ Flag a posterior as **stale** if any of the following apply:
 
 ## Step 3 — Show regeneration calls
 
-For each stale posterior, show the appropriate regeneration call. Names follow
-either the case layout (`<case>/<case>.fwd.nc`, the default since v0.2.6) or the
-legacy flat pattern `{model}_{temptype}_{proxy_name}{suffix}.nc`; both still
-resolve, so read the `stan_model_name` and `proxy_name` attrs rather than parsing
-the filename where you can.
+For each stale posterior, show the appropriate regeneration call. Names follow either the case layout (`<case>/<case>.fwd.nc`, the default since v0.2.6) or the legacy flat pattern `{model}_{temptype}_{proxy_name}{suffix}.nc`; both still resolve, so read the `stan_model_name` and `proxy_name` attrs rather than parsing the filename where you can.
 
 Reference pattern:
 ```python

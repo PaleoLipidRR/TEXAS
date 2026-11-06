@@ -60,19 +60,15 @@ and cannot run here (exit code 127: <first line of stderr>). The old binary has 
 
 ## CmdStan not found
 
-**Symptom:** `RuntimeError: No working CmdStan installation found`, or at import a
-`UserWarning: CmdStan not found — Stan sampling ... will not be available`.
+**Symptom:** `RuntimeError: No working CmdStan installation found`, or at import a `UserWarning: CmdStan not found — Stan sampling ... will not be available`.
 
-**First, diagnose.** `texas-doctor` reports cmdstanpy, the CmdStan path/version, the C++
-compiler, and — crucially — *why* discovery failed. It runs on every shell (PowerShell,
-CMD, bash, zsh):
+**First, diagnose.** `texas-doctor` reports cmdstanpy, the CmdStan path/version, the C++ compiler, and — crucially — *why* discovery failed. It runs on every shell (PowerShell, CMD, bash, zsh):
 
 ```bash
 texas-doctor            # or:  python -c "import TEXAS; TEXAS.doctor()"
 ```
 
-**Fix — one call (pip / uv):** installs the tested version, points TEXAS at it, and
-verifies:
+**Fix — one call (pip / uv):** installs the tested version, points TEXAS at it, and verifies:
 
 ```python
 import TEXAS
@@ -109,18 +105,13 @@ export CMDSTAN=~/.cmdstan/cmdstan-2.36.0          # add to ~/.bashrc to persist
 ```````
 ````````
 
-TEXAS searches, in order: `CMDSTAN` env var → `$CONDA_PREFIX/bin/cmdstan` →
-`<python prefix>/bin/cmdstan` → the highest `cmdstan-*` under `/opt/cmdstan/`, `~/.cmdstan/`,
-`/usr/local/cmdstan/` → cmdstanpy's configured default. Any version ≥ 2.23.0 is accepted.
-See [Installation → CmdStan](installation.md#cmdstan-install-discovery-and-verification).
+TEXAS searches, in order: `CMDSTAN` env var → `$CONDA_PREFIX/bin/cmdstan` → `<python prefix>/bin/cmdstan` → the highest `cmdstan-*` under `/opt/cmdstan/`, `~/.cmdstan/`, `/usr/local/cmdstan/` → cmdstanpy's configured default. Any version ≥ 2.23.0 is accepted. See [Installation → CmdStan](installation.md#cmdstan-install-discovery-and-verification).
 
 ---
 
 ## CmdStan directory exists but the compiler binaries are missing or unusable
 
-**Symptom:** `UserWarning: CMDSTAN env var points to '…/cmdstan-2.36.0' but no stanc binary
-was found there. Ignoring and searching standard paths.` — followed by *CmdStan not found*.
-`texas-doctor` reports it explicitly:
+**Symptom:** `UserWarning: CMDSTAN env var points to '…/cmdstan-2.36.0' but no stanc binary was found there. Ignoring and searching standard paths.` — followed by *CmdStan not found*. `texas-doctor` reports it explicitly:
 
 ```
 X   CmdStan           not found
@@ -128,17 +119,13 @@ X   CmdStan           not found
       the CmdStan C++ toolchain was never built there.
 ```
 
-**Cause:** `CMDSTAN` points at a directory that is not a *built* CmdStan. The most common
-reasons:
+**Cause:** `CMDSTAN` points at a directory that is not a *built* CmdStan. The most common reasons:
 
-- The download was interrupted, or only the sources were unpacked — `bin/stanc`
-  (`bin\stanc.exe` on Windows) was never compiled.
+- The download was interrupted, or only the sources were unpacked — `bin/stanc` (`bin\stanc.exe` on Windows) was never compiled.
 - The path is stale (points at a version that was deleted or moved).
-- Permissions: `bin/stanc` exists but is not executable (partial copy, restrictive ACLs, or
-  a binary copied from another machine).
+- Permissions: `bin/stanc` exists but is not executable (partial copy, restrictive ACLs, or a binary copied from another machine).
 
-**Fix — one call:** `TEXAS.install_cmdstan()` detects exactly this half-built state and
-reinstalls over it automatically (it sets `overwrite=True` for you):
+**Fix — one call:** `TEXAS.install_cmdstan()` detects exactly this half-built state and reinstalls over it automatically (it sets `overwrite=True` for you):
 
 ```python
 import TEXAS
@@ -157,39 +144,29 @@ python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.36.0', overwri
 
 Then re-run `texas-doctor` — it should print `Stan sampling: READY`.
 
-> A directory named `cmdstan-2.36.0` is **not** proof of a working install. TEXAS only
-> accepts a path whose `bin/stanc` both exists and is executable; anything else is skipped
-> with a warning so a broken `CMDSTAN` never silently shadows a good install further down
-> the search order.
+> A directory named `cmdstan-2.36.0` is **not** proof of a working install. TEXAS only accepts a path whose `bin/stanc` both exists and is executable; anything else is skipped with a warning so a broken `CMDSTAN` never silently shadows a good install further down the search order.
 
 ---
 
 ## Stan compilation fails with "compiler not found" / `make` errors
 
-**Symptom:** CmdStan is found, but the first model compile fails with a missing `g++`,
-`clang++`, `cl`, or `make`.
+**Symptom:** CmdStan is found, but the first model compile fails with a missing `g++`, `clang++`, `cl`, or `make`.
 
-**Cause:** Every Stan model compiles to a native binary, so a C++ toolchain must be on
-`PATH`. `texas-doctor` flags this as `✗ C++ compiler`.
+**Cause:** Every Stan model compiles to a native binary, so a C++ toolchain must be on `PATH`. `texas-doctor` flags this as `✗ C++ compiler`.
 
 **Fix:**
 
 - **Linux:** `sudo apt install build-essential`
 - **macOS:** `xcode-select --install`
-- **Windows:** `python -m cmdstanpy.install_cxx_toolchain` (installs the RTools
-  MinGW toolchain), or use the conda-forge `cmdstan` package, which ships a pre-built
-  compiler.
+- **Windows:** `python -m cmdstanpy.install_cxx_toolchain` (installs the RTools MinGW toolchain), or use the conda-forge `cmdstan` package, which ships a pre-built compiler.
 
 ---
 
 ## Where TEXAS caches things, and what is safe to delete
 
-**Symptom:** a figure or reconstruction spends minutes rebuilding something you
-are sure you already computed, or `data/cache/` has grown to gigabytes and you
-want to know what can go.
+**Symptom:** a figure or reconstruction spends minutes rebuilding something you are sure you already computed, or `data/cache/` has grown to gigabytes and you want to know what can go.
 
-**Cause:** TEXAS keeps three caches under one root — `TEXAS_CACHE_DIR` if it is
-set, otherwise `data/cache/` inside a git checkout, otherwise `~/.texas/cache/`:
+**Cause:** TEXAS keeps three caches under one root — `TEXAS_CACHE_DIR` if it is set, otherwise `data/cache/` inside a git checkout, otherwise `~/.texas/cache/`:
 
 | Directory | Holds | Rebuilt by |
 |---|---|---|
@@ -197,17 +174,14 @@ set, otherwise `data/cache/` inside a git checkout, otherwise `~/.texas/cache/`:
 | `TEXAS_invT_posterior_cache/` | inverse temperature reconstructions (`.nc`) | `predict_T_from_proxyObs(..., save_results=True)` |
 | `TEXAS_kriged_grids_cache/` | kriged residual-map grids (`.npz`) | `plot_residual_maps(..., recompute='auto')` |
 
-**Fix:** all three are caches — deleting any file costs only the time to
-recompute it. To move all three at once:
+**Fix:** all three are caches — deleting any file costs only the time to recompute it. To move all three at once:
 
 ```python
 import TEXAS
 TEXAS.set_cache_dir("/big/disk/texas-cache")   # or export TEXAS_CACHE_DIR
 ```
 
-**Kriged grids written before 2026-09-07** sit loose in the cache root instead
-of in `TEXAS_kriged_grids_cache/`. They are still read from there, with a
-printed note naming the old path. To tidy them up:
+**Kriged grids written before 2026-09-07** sit loose in the cache root instead of in `TEXAS_kriged_grids_cache/`. They are still read from there, with a printed note naming the old path. To tidy them up:
 
 ```bash
 python scripts/migrate_kriged_cache.py                        # dry run

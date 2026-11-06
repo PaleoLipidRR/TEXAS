@@ -1,257 +1,93 @@
 # Changelog
 
-All notable changes to `texas-psm` are recorded here. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+All notable changes to `texas-psm` are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-Versioning is semantic. Releases before `1.0.0` used the convention `0.x`
-means "manuscript under review", so the public API could change in a minor
-release; every such change is listed below. `1.0.0` is the release that
-accompanies the revised manuscript (under review at *Paleoceanography and
-Paleoclimatology*) — the convention closes here, and from this point on
-`MAJOR.MINOR.PATCH` means what it usually does.
+Versioning is semantic. Releases before `1.0.0` used the convention `0.x` means "manuscript under review", so the public API could change in a minor release; every such change is listed below. `1.0.0` is the release that accompanies the revised manuscript (under review at *Paleoceanography and Paleoclimatology*) — the convention closes here, and from this point on `MAJOR.MINOR.PATCH` means what it usually does.
 
 ## [1.0.2] — 2026-11-06
 
 ### Fixed
 
-- **The bundled calibration posteriors now match the paper.** The four
-  posteriors shipped inside the wheel (`tx.GHEB.{sst,thm}.sri03.G23-N1p0`,
-  the defaults, and `tx.GHPU.{sst,thm}.sri03.p0`) were still the earlier
-  1,513-site fits, while 1.0.0's calibration set, the Zenodo data record
-  (10.5281/zenodo.19666744) and the manuscript use 1,518 gridded core-tops.
-  They are rebuilt from the current data record with
-  `scripts/make_bundled_posteriors.py`; e.g. the default SST calibration is
-  now T₀ = 34.7, k = 0.27, b = 0.412, ν = 3.9, as reported in the manuscript
-  (was T₀ = 34.8, ν = 4.0). Reconstructions with the default calibration
-  shift slightly (parameters move < 0.3 posterior SD). The browser walkthrough
-  docs page was re-run with the new defaults.
-- `inverse_logistic_fixed_upper` returned wrong temperatures whenever the
-  lower asymptote `b` was not 0 (it divided by `y` instead of `y − b`). It is
-  public but not used by the reconstruction path, which runs in Stan.
-- The paper is cited as the ESSOAr preprint, under review at
-  *Paleoceanography and Paleoclimatology* (README, docs, `CITATION.cff`);
-  earlier text called it accepted / in press.
+- **The bundled calibration posteriors now match the paper.** The four posteriors shipped inside the wheel (`tx.GHEB.{sst,thm}.sri03.G23-N1p0`, the defaults, and `tx.GHPU.{sst,thm}.sri03.p0`) were still the earlier 1,513-site fits, while 1.0.0's calibration set, the Zenodo data record (10.5281/zenodo.19666744) and the manuscript use 1,518 gridded core-tops. They are rebuilt from the current data record with `scripts/make_bundled_posteriors.py`; e.g. the default SST calibration is now T₀ = 34.7, k = 0.27, b = 0.412, ν = 3.9, as reported in the manuscript (was T₀ = 34.8, ν = 4.0). Reconstructions with the default calibration shift slightly (parameters move < 0.3 posterior SD). The browser walkthrough docs page was re-run with the new defaults.
+- `inverse_logistic_fixed_upper` returned wrong temperatures whenever the lower asymptote `b` was not 0 (it divided by `y` instead of `y − b`). It is public but not used by the reconstruction path, which runs in Stan.
+- The paper is cited as the ESSOAr preprint, under review at *Paleoceanography and Paleoclimatology* (README, docs, `CITATION.cff`); earlier text called it accepted / in press.
 
 ### Changed
 
-- Documentation, README and code comments aligned with the manuscript
-  (corrected forward-model direction in the metadata, manuscript
-  cross-references, posterior tables and sizes), comments rewritten in plain
-  language, `RESUME.md` and other internal notes removed from the repository,
-  and `CLAUDE.md` trimmed to a short contributor briefing.
+- Documentation, README and code comments aligned with the manuscript (corrected forward-model direction in the metadata, manuscript cross-references, posterior tables and sizes), comments rewritten in plain language, `RESUME.md` and other internal notes removed from the repository, and `CLAUDE.md` trimmed to a short contributor briefing.
 
 ### Removed
 
-- The unfinished Streamlit app (`streamlit_app/`, only its posterior-explorer
-  page was wired up) moved to `archive/streamlit_app/`, with its Dockerfile;
-  the `app` service left `docker/docker-compose.yml`. To try TEXAS without
-  installing it, use the browser walkthrough in the docs ("From GDGTs to sea
-  temperature") or the Colab quickstart notebook. `tests/test_streamlit_params.py`
-  was retired with it.
+- The unfinished Streamlit app (`streamlit_app/`, only its posterior-explorer page was wired up) moved to `archive/streamlit_app/`, with its Dockerfile; the `app` service left `docker/docker-compose.yml`. To try TEXAS without installing it, use the browser walkthrough in the docs ("From GDGTs to sea temperature") or the Colab quickstart notebook. `tests/test_streamlit_params.py` was retired with it.
 
 ## [1.0.1] — 2026-11-04
 
 ### Fixed
 
-- `TEXAS.utils.download.ZENODO_RECORD_ID` still pointed at `22131367`
-  (the 0.4.0/v0.3.0 record, screened on the superseded 1,513-site set) in the
-  `1.0.0` wheel actually published to PyPI — the data-record repoint to
-  `23954718` (1,518 sites, matching this release's calibration set) was
-  committed to the repo after `1.0.0` had already been built and uploaded.
-  `download_posteriors()`/`download_all()` from a fresh `1.0.0` install would
-  silently fetch calibration data that doesn't match the revised
-  manuscript's own reported statistics. `22131367` remains valid and
-  permanently accessible, so this was never a hard failure — just stale data
-  behind a version string that otherwise matches the paper.
+- `TEXAS.utils.download.ZENODO_RECORD_ID` still pointed at `22131367` (the 0.4.0/v0.3.0 record, screened on the superseded 1,513-site set) in the `1.0.0` wheel actually published to PyPI — the data-record repoint to `23954718` (1,518 sites, matching this release's calibration set) was committed to the repo after `1.0.0` had already been built and uploaded. `download_posteriors()`/`download_all()` from a fresh `1.0.0` install would silently fetch calibration data that doesn't match the revised manuscript's own reported statistics. `22131367` remains valid and permanently accessible, so this was never a hard failure — just stale data behind a version string that otherwise matches the paper.
 
 ## [1.0.0] — 2026-11-04
 
-This is the release that accompanies the revised manuscript (under review);
-its Open Research section cites this version. The calibration set and
-posteriors are screened on `scaledRI_cren3` rather than `scaledRI`
-(`fix/dm-screen-cren3`, merged into this release): 1,518 gridded core-tops, 8
-mesocosm and 59 culture experiments, up from the 1,513 / 8 / 55 set published
-on data record 10.5281/zenodo.22131367. Every parameter moves < 0.3 posterior
-SD; no one-decimal number changes, but the paper's own three-decimal
-statistics and sample counts describe this corrected set, not the earlier
-one — so it ships here rather than being deferred to 1.1.0. A new data-record
-version carries the regenerated posteriors and reconstructions.
+This is the release that accompanies the revised manuscript (under review); its Open Research section cites this version. The calibration set and posteriors are screened on `scaledRI_cren3` rather than `scaledRI` (`fix/dm-screen-cren3`, merged into this release): 1,518 gridded core-tops, 8 mesocosm and 59 culture experiments, up from the 1,513 / 8 / 55 set published on data record 10.5281/zenodo.22131367. Every parameter moves < 0.3 posterior SD; no one-decimal number changes, but the paper's own three-decimal statistics and sample counts describe this corrected set, not the earlier one — so it ships here rather than being deferred to 1.1.0. A new data-record version carries the regenerated posteriors and reconstructions.
 
 ### Changed
 
-- The modern-nitrate lookup is now `lookup_modern_no3(lat, lon, ocean_dataset)`
-  (exported from `TEXAS` and `TEXAS.data`). Its predecessor
-  `lookup_no3_from_woa` was misnamed: the default `no3_sf2tc_avg` variable of
-  `ocean_prop_ds` is the **CMEMS** Global Ocean Biogeochemistry Hindcast
-  nitrate climatology (1993–2022) on the WOA23 grid, as the file's own
-  `history` attribute records; only the temperature variables are WOA23. Every
-  user-facing message, docstring and docs page that said "WOA23 nitrate lookup"
-  now says CMEMS, matching the manuscript's Appendix C ("the associated CMEMS
-  ocean nitrate product"). Behavior is unchanged.
-- `predict_T_from_proxyObs` no longer warns that a missing predictor "will be
-  treated as 0" when the calibration needs it. The inverse layer refuses to run
-  in that case (`ValueError`), so the warning now says that instead of
-  contradicting the error that follows it.
+- The modern-nitrate lookup is now `lookup_modern_no3(lat, lon, ocean_dataset)` (exported from `TEXAS` and `TEXAS.data`). Its predecessor `lookup_no3_from_woa` was misnamed: the default `no3_sf2tc_avg` variable of `ocean_prop_ds` is the **CMEMS** Global Ocean Biogeochemistry Hindcast nitrate climatology (1993–2022) on the WOA23 grid, as the file's own `history` attribute records; only the temperature variables are WOA23. Every user-facing message, docstring and docs page that said "WOA23 nitrate lookup" now says CMEMS, matching the manuscript's Appendix C ("the associated CMEMS ocean nitrate product"). Behavior is unchanged.
+- `predict_T_from_proxyObs` no longer warns that a missing predictor "will be treated as 0" when the calibration needs it. The inverse layer refuses to run in that case (`ValueError`), so the warning now says that instead of contradicting the error that follows it.
 
-- Documentation brought in line with the revised manuscript: the model
-  validation page now quotes the published forward, inverse and regional
-  metrics and the calibration parameters (it still carried the initial
-  submission's additive-arm RMSE table and old figure numbers); the Stan models,
-  marginalization, sampler-budget and PSM pages no longer describe archived
-  variants as current; the quickstart's screening step uses the published
-  calibration ellipse (`from_calibration`) as Appendix C does. The cKDTree
-  explainer was removed from the book — it documented a preprocessing-notebook
-  helper the package does not expose.
+- Documentation brought in line with the revised manuscript: the model validation page now quotes the published forward, inverse and regional metrics and the calibration parameters (it still carried the initial submission's additive-arm RMSE table and old figure numbers); the Stan models, marginalization, sampler-budget and PSM pages no longer describe archived variants as current; the quickstart's screening step uses the published calibration ellipse (`from_calibration`) as Appendix C does. The cKDTree explainer was removed from the book — it documented a preprocessing-notebook helper the package does not expose.
 
-- The installation guide now recommends `pip` or `uv` from PyPI for users, and
-  presents `uv sync` from a clone, Docker and conda as the routes for forking the
-  repository or running the manuscript notebooks.
+- The installation guide now recommends `pip` or `uv` from PyPI for users, and presents `uv sync` from a clone, Docker and conda as the routes for forking the repository or running the manuscript notebooks.
 
-- The unfinished five-module tutorial was removed from the documentation (four of
-  its modules were placeholders). Its one complete module is now the
-  "Calibration curve explorer" explainer, with an Open in Colab link.
+- The unfinished five-module tutorial was removed from the documentation (four of its modules were placeholders). Its one complete module is now the "Calibration curve explorer" explainer, with an Open in Colab link.
 
 ### Fixed
 
-- `MahalanobisOutlierDetector.plot_decision_boundary()` could silently clip
-  outlier points and the confidence ellipse itself out of the rendered plot.
-  `ax.autoscale(False)` was called with no preceding `ax.autoscale_view()`, so
-  it could freeze a stale view computed before the outlier scatter or the
-  ellipse patch registered — exactly the samples this method exists to make
-  visible.
-- `StanCompiler.get_model()` no longer deletes and recompiles every existing
-  model binary at the start of each new Python session. Its "compiled for a
-  different environment" probe ran `model --version`, which CmdStan model
-  executables reject with exit status 1, so every healthy binary failed it.
-  The probe now runs `model info`, and the `RuntimeWarning` reports the real
-  exit code and the first line of stderr instead of a hard-coded 127.
-- Tabs and note boxes on the installation, quickstart and troubleshooting pages
-  rendered as raw `===` and `!!!` text, left over from the mkdocs migration.
-- `texas-doctor` printed `CmdStan ?` for a conda-forge CmdStan, because the
-  version was read only from a `cmdstan-X.Y.Z` directory name. It now falls
-  back to the `CMDSTAN_VERSION` line of CmdStan's makefile.
+- `MahalanobisOutlierDetector.plot_decision_boundary()` could silently clip outlier points and the confidence ellipse itself out of the rendered plot. `ax.autoscale(False)` was called with no preceding `ax.autoscale_view()`, so it could freeze a stale view computed before the outlier scatter or the ellipse patch registered — exactly the samples this method exists to make visible.
+- `StanCompiler.get_model()` no longer deletes and recompiles every existing model binary at the start of each new Python session. Its "compiled for a different environment" probe ran `model --version`, which CmdStan model executables reject with exit status 1, so every healthy binary failed it. The probe now runs `model info`, and the `RuntimeWarning` reports the real exit code and the first line of stderr instead of a hard-coded 127.
+- Tabs and note boxes on the installation, quickstart and troubleshooting pages rendered as raw `===` and `!!!` text, left over from the mkdocs migration.
+- `texas-doctor` printed `CmdStan ?` for a conda-forge CmdStan, because the version was read only from a `cmdstan-X.Y.Z` directory name. It now falls back to the `CMDSTAN_VERSION` line of CmdStan's makefile.
 
 ### Deprecated
 
-- `lookup_no3_from_woa` — alias of `lookup_modern_no3`; emits a
-  `DeprecationWarning`. Removal is not scheduled before 2.0.
+- `lookup_no3_from_woa` — alias of `lookup_modern_no3`; emits a `DeprecationWarning`. Removal is not scheduled before 2.0.
 
 ## [0.4.0] — 2026-09-09
 
-This is the release archived on Zenodo alongside the revised manuscript
-submission. It supersedes 0.3.2, which was published to PyPI but never
-archived. The version is a minor bump rather than a patch because the public
-API changed: see **Removed** below.
+This is the release archived on Zenodo alongside the revised manuscript submission. It supersedes 0.3.2, which was published to PyPI but never archived. The version is a minor bump rather than a patch because the public API changed: see **Removed** below.
 
 ### Added
 
-- **"From GDGTs to sea temperature"**, a new Explainers page: one Scaled RI built
-  into a temperature with an error bar, step by step, running entirely in the
-  browser. Readers can pick a sample from the manuscript's case studies or set
-  their own Scaled RI, GDGT-2/3, NO₃ and prior. It uses the bundled SST calibration
-  and the same 500 draws as a default `predict_T_from_proxyObs()` call, and shows
-  the package's stored output beside what it computes. `tests/test_gdgt_to_temperature_page.py`
-  keeps it in step with the package.
-- A bundled thermal-only calibration, selected automatically when
-  `predict_T_from_proxyObs` is called with no optional predictors. Four
-  calibrations now ship with the wheel; `docs/` describes when each applies.
-- `TEXAS.utils.paths.KRIGED_CACHE_DIR` — kriged residual-map grids get their
-  own cache folder beside the two posterior caches instead of being written
-  loose into the cache root. `set_cache_dir()` repoints all three, and a grid
-  still sitting in the old location is read with a printed note.
-  `scripts/migrate_kriged_cache.py` moves an existing cache (per machine —
-  `data/cache/**` is gitignored).
+- **"From GDGTs to sea temperature"**, a new Explainers page: one Scaled RI built into a temperature with an error bar, step by step, running entirely in the browser. Readers can pick a sample from the manuscript's case studies or set their own Scaled RI, GDGT-2/3, NO₃ and prior. It uses the bundled SST calibration and the same 500 draws as a default `predict_T_from_proxyObs()` call, and shows the package's stored output beside what it computes. `tests/test_gdgt_to_temperature_page.py` keeps it in step with the package.
+- A bundled thermal-only calibration, selected automatically when `predict_T_from_proxyObs` is called with no optional predictors. Four calibrations now ship with the wheel; `docs/` describes when each applies.
+- `TEXAS.utils.paths.KRIGED_CACHE_DIR` — kriged residual-map grids get their own cache folder beside the two posterior caches instead of being written loose into the cache root. `set_cache_dir()` repoints all three, and a grid still sitting in the old location is read with a printed note. `scripts/migrate_kriged_cache.py` moves an existing cache (per machine — `data/cache/**` is gitignored).
 
 ### Removed
 
-- `TEXAS.generalized_logistic` — the free-upper-asymptote generalized logistic
-  (`b + (a - b) / (1 + Q·exp(-k(x - t0)))^(1/v)`). Every shipped Stan model is a
-  `_fixed_` upper-asymptote curve and the free-asymptote models live in
-  `archive/`, so nothing in the package, the notebooks, the scripts or the docs
-  called it. It was also the last Python function to take `Q`, which was dropped
-  from all Stan models in 2026-03. Use `generalized_logistic_fixed_upper`.
-- `TEXAS.compute_density_based_range` (and `TEXAS.plotting.range_utils.compute_density_based_range`)
-  — KDE-based axis range for prior/posterior plots. No caller; the plots use
-  `compute_sample_range` and the two suffix/dataset variants.
-- `TEXAS.utils.naming.default_version()` — built a `v026`-style token from the
-  pip version. The version position was dropped from written case ids on
-  2026-08-12 (it still *parses*, so old ids resolve), which left this with no
-  caller.
-- `TEXAS.utils.naming.describe_compset()` — one-line compset expansion.
-  `CaseName.describe()` covers the need and is the one that is used.
-- `TEXAS.utils.paths.get_repo_root()`, and its re-exports from `TEXAS.stan` and
-  `TEXAS.utils`. Superseded by `get_project_root()`, which has the pip-install
-  fallback to `~/.texas/`.
-- `TEXAS.utils.system_info.save_system_summary()` — wrote the system summary to
-  a timestamped JSON file. `get_system_summary()` and `print_system_summary()`
-  are kept; both are used.
-- `constraint_type=` and `min_temp=` on `predict_T_from_proxyObs`,
-  `predict_temperature_from_proxyObs` and `get_invT_posterior`. The inverse is
-  now unconstrained only, which is what the manuscript's reconstructions use.
-  The two models they selected —
-  `invT_gen_logi_fixed_{univ,multiv}_marginal_truncated_prior.stan` — moved to
-  `archive/pre-submission/stan_models/` and remain runnable by passing an
-  absolute path as `stan_model_path`. The wheel now ships 7 `.stan` files
-  instead of 9. `utils.naming.CONSTRAINT_CODES` is deliberately unchanged: it
-  is a name grammar, and case ids already on disk and on Zenodo carry the `t`
-  code.
-- `TEXAS.predict_temperature_from_proxyObs` / `TEXAS.stan.invT.predict_temperature_from_proxyObs`.
-  It was the pre-`predict.py` public entry point and had become a pass-through
-  with 27 hand-copied parameters: its only work was reshaping the posterior into
-  a percentile dict and optionally writing a `.npz`. Both moved into
-  `predict_T_from_proxyObs`, which is the drop-in replacement — pass the
-  calibration as `fwd_posterior=` (it takes a name or a Dataset) instead of
-  `fwd_posterior_name=`, and `flags=False` if you do not want the quality flags.
-- `use_opencl=` on `get_invT_posterior`. OpenCL support was deleted in 2026-05
-  and nothing read the `opencl_enabled` attr it set.
-- `scaledRI=` on `build_invT_inputData` and `get_invT_posterior`, and the
-  `scaledRI_*` → `proxyObs_*` key translation in `auto_detect_predictors`.
-  Deprecated since 0.1.x. (The `sigma_scaledRI_*` lookup in `build_invT_inputData`
-  stays: it reads variable names inside older posteriors, not a keyword.)
-- `model_type=` on `predict_T_from_proxyObs`, `get_invT_posterior` and
-  `sampler_invT_posterior`. Only `"direct"` has existed since the ensemble
-  models were archived. On `sampler_invT_posterior` it was also a live bug:
-  the value was forwarded into `CmdStanModel.sample`, which has no such
-  parameter, so any call that passed it raised `TypeError`. (The internal
-  `_select_invT_stan_file` still accepts and validates `model_type`; it is
-  not part of the public API.)
-- `results_path=`, which went with `predict_temperature_from_proxyObs`. The
-  `.npz` destination is now `cache_dir` + `filename_tag`, as it already was for
-  the `.nc`.
+- `TEXAS.generalized_logistic` — the free-upper-asymptote generalized logistic (`b + (a - b) / (1 + Q·exp(-k(x - t0)))^(1/v)`). Every shipped Stan model is a `_fixed_` upper-asymptote curve and the free-asymptote models live in `archive/`, so nothing in the package, the notebooks, the scripts or the docs called it. It was also the last Python function to take `Q`, which was dropped from all Stan models in 2026-03. Use `generalized_logistic_fixed_upper`.
+- `TEXAS.compute_density_based_range` (and `TEXAS.plotting.range_utils.compute_density_based_range`) — KDE-based axis range for prior/posterior plots. No caller; the plots use `compute_sample_range` and the two suffix/dataset variants.
+- `TEXAS.utils.naming.default_version()` — built a `v026`-style token from the pip version. The version position was dropped from written case ids on 2026-08-12 (it still *parses*, so old ids resolve), which left this with no caller.
+- `TEXAS.utils.naming.describe_compset()` — one-line compset expansion. `CaseName.describe()` covers the need and is the one that is used.
+- `TEXAS.utils.paths.get_repo_root()`, and its re-exports from `TEXAS.stan` and `TEXAS.utils`. Superseded by `get_project_root()`, which has the pip-install fallback to `~/.texas/`.
+- `TEXAS.utils.system_info.save_system_summary()` — wrote the system summary to a timestamped JSON file. `get_system_summary()` and `print_system_summary()` are kept; both are used.
+- `constraint_type=` and `min_temp=` on `predict_T_from_proxyObs`, `predict_temperature_from_proxyObs` and `get_invT_posterior`. The inverse is now unconstrained only, which is what the manuscript's reconstructions use. The two models they selected — `invT_gen_logi_fixed_{univ,multiv}_marginal_truncated_prior.stan` — moved to `archive/pre-submission/stan_models/` and remain runnable by passing an absolute path as `stan_model_path`. The wheel now ships 7 `.stan` files instead of 9. `utils.naming.CONSTRAINT_CODES` is deliberately unchanged: it is a name grammar, and case ids already on disk and on Zenodo carry the `t` code.
+- `TEXAS.predict_temperature_from_proxyObs` / `TEXAS.stan.invT.predict_temperature_from_proxyObs`. It was the pre-`predict.py` public entry point and had become a pass-through with 27 hand-copied parameters: its only work was reshaping the posterior into a percentile dict and optionally writing a `.npz`. Both moved into `predict_T_from_proxyObs`, which is the drop-in replacement — pass the calibration as `fwd_posterior=` (it takes a name or a Dataset) instead of `fwd_posterior_name=`, and `flags=False` if you do not want the quality flags.
+- `use_opencl=` on `get_invT_posterior`. OpenCL support was deleted in 2026-05 and nothing read the `opencl_enabled` attr it set.
+- `scaledRI=` on `build_invT_inputData` and `get_invT_posterior`, and the `scaledRI_*` → `proxyObs_*` key translation in `auto_detect_predictors`. Deprecated since 0.1.x. (The `sigma_scaledRI_*` lookup in `build_invT_inputData` stays: it reads variable names inside older posteriors, not a keyword.)
+- `model_type=` on `predict_T_from_proxyObs`, `get_invT_posterior` and `sampler_invT_posterior`. Only `"direct"` has existed since the ensemble models were archived. On `sampler_invT_posterior` it was also a live bug: the value was forwarded into `CmdStanModel.sample`, which has no such parameter, so any call that passed it raised `TypeError`. (The internal `_select_invT_stan_file` still accepts and validates `model_type`; it is not part of the public API.)
+- `results_path=`, which went with `predict_temperature_from_proxyObs`. The `.npz` destination is now `cache_dir` + `filename_tag`, as it already was for the `.nc`.
 
 ### Changed
 
-- The public API is now guarded. `tests/test_public_api_docs.py` asserts that
-  every name in `TEXAS.__all__` resolves, is referenced by at least one test or
-  notebook code cell, and (for functions and classes) carries a docstring of at
-  least three lines. `ruff`'s `D1` missing-docstring rules are enabled for
-  `src/TEXAS`, with `D100`/`D104` (module and package headers) deferred and
-  `D105`/`D107` (magic methods, `__init__`) excluded.
-- `get_invT_posterior`'s `save=True` is now `save_results=False`, matching
-  `predict_T_from_proxyObs`. One name and one default across both layers. The
-  function has no caller outside the package, so nothing silently stops saving.
-- `proxyObs`, `prior_mu_t` and `prior_sigma_t` are positional-required on
-  `get_invT_posterior` and `build_invT_inputData`. They were keyword arguments
-  defaulting to `None` that raised `TypeError` at runtime instead.
-- `predict_T_from_proxyObs` now returns a percentile key for every quantile the
-  posterior carries, derived rather than hard-coded — so `p40` and `p60`, which
-  were computed and discarded, are included.
-- `predict_T_from_proxyObs` now warns when a calibration uses the NO3
-  correction but no `no3=` was supplied, mirroring the existing GDGT-2/3
-  warning. NO3 was previously the one predictor/calibration combination of the
-  four that stayed silent; omitting a predictor the calibration actually
-  applies treats it as 0, which is not the same as switching the correction
-  off.
+- The public API is now guarded. `tests/test_public_api_docs.py` asserts that every name in `TEXAS.__all__` resolves, is referenced by at least one test or notebook code cell, and (for functions and classes) carries a docstring of at least three lines. `ruff`'s `D1` missing-docstring rules are enabled for `src/TEXAS`, with `D100`/`D104` (module and package headers) deferred and `D105`/`D107` (magic methods, `__init__`) excluded.
+- `get_invT_posterior`'s `save=True` is now `save_results=False`, matching `predict_T_from_proxyObs`. One name and one default across both layers. The function has no caller outside the package, so nothing silently stops saving.
+- `proxyObs`, `prior_mu_t` and `prior_sigma_t` are positional-required on `get_invT_posterior` and `build_invT_inputData`. They were keyword arguments defaulting to `None` that raised `TypeError` at runtime instead.
+- `predict_T_from_proxyObs` now returns a percentile key for every quantile the posterior carries, derived rather than hard-coded — so `p40` and `p60`, which were computed and discarded, are included.
+- `predict_T_from_proxyObs` now warns when a calibration uses the NO3 correction but no `no3=` was supplied, mirroring the existing GDGT-2/3 warning. NO3 was previously the one predictor/calibration combination of the four that stayed silent; omitting a predictor the calibration actually applies treats it as 0, which is not the same as switching the correction off.
 
 ### Fixed
 
-- `shapely` is declared as a dependency. It was imported but undeclared, so a
-  clean install could fail at import. The invalid `channel_priority` key was
-  also dropped from `environment.yml`.
-- The kriged-grid cache no longer writes two copies of one grid: the
-  resolution token is formatted with `f"{krige_res:g}"`, so `krige_res=1` and
-  `krige_res=1.0` name the same 57 MB file rather than two.
+- `shapely` is declared as a dependency. It was imported but undeclared, so a clean install could fail at import. The invalid `channel_priority` key was also dropped from `environment.yml`.
+- The kriged-grid cache no longer writes two copies of one grid: the resolution token is formatted with `f"{krige_res:g}"`, so `krige_res=1` and `krige_res=1.0` name the same 57 MB file rather than two.
 - `streamlit_app/config.py` was missing `DEFAULT_CSV_DIRS`.
-- Declared dependencies now match what the code actually imports; five
-  packages that were declared but unused were removed, and every notebook's
-  top-level imports are checked against the declared set.
+- Declared dependencies now match what the code actually imports; five packages that were declared but unused were removed, and every notebook's top-level imports are checked against the declared set.

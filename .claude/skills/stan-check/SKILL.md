@@ -5,8 +5,7 @@ allowed-tools: Read Glob Grep
 argument-hint: [path/to/model.stan]
 ---
 
-Read the Stan model at $ARGUMENTS (or ask the user which file if no argument given).
-If no path is given, list all `.stan` files in `src/TEXAS/stan_models/` and ask which one to check.
+Read the Stan model at $ARGUMENTS (or ask the user which file if no argument given). If no path is given, list all `.stan` files in `src/TEXAS/stan_models/` and ask which one to check.
 
 Audit the file against every rule below. Report each issue as FAIL or PASS. Group by category.
 
@@ -48,9 +47,7 @@ FAIL if: asymptote is not `1.0`; Q appears; upper asymptote parameter is free wh
 
 ## 6. EIV / ODR specific (if applicable)
 
-If the model name contains `_eiv` (latent-variable EIV — the only EIV form that
-ships; the delta-method `_werr` / `_odr` variants were consolidated away in
-v0.1.5 and live under `archive/`):
+If the model name contains `_eiv` (latent-variable EIV — the only EIV form that ships; the delta-method `_werr` / `_odr` variants were consolidated away in v0.1.5 and live under `archive/`):
 - `sd_proxyObs` must be in data block (per-site RI analytical SE).
 - `R2_thermal` must be in data block.
 - `true_no3_crtp` must have `<lower=0, upper=no3_cutoff>`.
@@ -70,8 +67,7 @@ Confirm file name matches: `{transform}_{curve}_{params}_{datasources}_{variant}
 - curve: `gen_logi` / `logistic` / `linear`
 - params: `fixed` / `free`
 - datasources: `culmeso` / `culmesocore` / `crtp`
-- variant: `hier_crtp`, `multiv`, `univ`, `priorApprox`, `eiv`, `t0shift`,
-  `marginal_unconstrained`, etc.
+- variant: `hier_crtp`, `multiv`, `univ`, `priorApprox`, `eiv`, `t0shift`, `marginal_unconstrained`, etc.
 
 ---
 

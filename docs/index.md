@@ -2,9 +2,7 @@
 
 **TetraEther indeX of Ammonia oxidizerS — Bayesian proxy system model for TEX86 paleothermometry**
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/PaleoLipidRR/TEXAS/blob/main/LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/texas-psm)](https://pypi.org/project/texas-psm/)
-[![Zenodo](https://img.shields.io/badge/data-10.5281%2Fzenodo.19666744-blue.svg)](https://doi.org/10.5281/zenodo.19666744)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/PaleoLipidRR/TEXAS/blob/main/LICENSE) [![PyPI](https://img.shields.io/pypi/v/texas-psm)](https://pypi.org/project/texas-psm/) [![Zenodo](https://img.shields.io/badge/data-10.5281%2Fzenodo.19666744-blue.svg)](https://doi.org/10.5281/zenodo.19666744)
 
 TEXAS-PSM is a **Bayesian proxy system model (PSM)** for isoGDGT-based (TEX₈₆-family) ocean temperature reconstruction, built around the **TEXAS** sensor model. TEXAS links temperature to the **Scaled Ring Index** (Scaled RI) through a hierarchical generalized-logistic (S-shaped) curve, fitted in Stan to culture, mesocosm, and coretop data. Two optional nonthermal predictors account for archaeal community structure (the GDGT-2/GDGT-3 ratio, G₂/₃) and nutrient availability (nitrate, NO₃⁻). The package reconstructs either sea surface temperature (SST) or surface-to-thermocline temperature (Thermo-T), with full posterior uncertainty.
 
@@ -99,10 +97,7 @@ Raising `confidence` (e.g. to 0.99) widens the ellipse so that only strong depar
 
 ### Step 2 — Choose a calibration posterior
 
-**You can skip this step.** Four calibrations ship inside the package — the
-full multivariate T₀-shift fit and its thermal-only counterpart, each for both
-temperature targets — so a reconstruction needs no download and no network
-access. TEXAS picks between them from what you pass:
+**You can skip this step.** Four calibrations ship inside the package — the full multivariate T₀-shift fit and its thermal-only counterpart, each for both temperature targets — so a reconstruction needs no download and no network access. TEXAS picks between them from what you pass:
 
 ```python
 from TEXAS import predict_T_from_proxyObs
@@ -115,8 +110,7 @@ result = predict_T_from_proxyObs(          # fwd_posterior omitted →
 )
 ```
 
-If you supply **no** predictors, TEXAS uses the thermal-only calibration
-instead and warns that it has done so:
+If you supply **no** predictors, TEXAS uses the thermal-only calibration instead and warns that it has done so:
 
 ```python
 result = predict_T_from_proxyObs(          # no predictors →
@@ -125,17 +119,9 @@ result = predict_T_from_proxyObs(          # no predictors →
 )
 ```
 
-Read that warning rather than dismissing it. The thermal-only fit is a
-*different* calibration, not the multivariate one with its corrections switched
-off: the non-thermal effects are in the core-top data either way, and a
-univariate fit absorbs them into its thermal parameters. Its reconstructions
-will not match the ones the manuscript reports. Supplying one predictor but not
-the other raises instead, since that is more likely a mistake than a choice.
+Read that warning rather than dismissing it. The thermal-only fit is a *different* calibration, not the multivariate one with its corrections switched off: the non-thermal effects are in the core-top data either way, and a univariate fit absorbs them into its thermal parameters. Its reconstructions will not match the ones the manuscript reports. Supplying one predictor but not the other raises instead, since that is more likely a mistake than a choice.
 
-Pass `temptype="thermoT"` to get the thermocline-integrated calibration
-instead; both the multivariate and thermal-only versions of it ship too. Any
-other posterior is fetched once from
-[Zenodo](https://doi.org/10.5281/zenodo.19666744) and cached:
+Pass `temptype="thermoT"` to get the thermocline-integrated calibration instead; both the multivariate and thermal-only versions of it ship too. Any other posterior is fetched once from [Zenodo](https://doi.org/10.5281/zenodo.19666744) and cached:
 
 ```python
 import TEXAS
@@ -170,24 +156,13 @@ Available forward posteriors:
 
 “Bundled” posteriors are installed with `pip install texas-psm` and need no network access. The default needs **both** predictors and refuses to run if one is missing (a missing value is never treated as zero). To switch the nitrate term off, pass a value above the cutoff, e.g. `no3=10`. Use a single-predictor calibration when only one nonthermal predictor applies to your record.
 
-The bundled pair is the same posterior as the archived one with the
-error-in-variables model's per-site latent variables removed — everything the
-forward and inverse models read is present and unmodified, which is what takes
-the file from ~80 MB to 0.37 MB. The complete versions, latents included, are
-archived on Zenodo with the release record that the paper cites.
+The bundled pair is the same posterior as the archived one with the error-in-variables model's per-site latent variables removed — everything the forward and inverse models read is present and unmodified, which is what takes the file from ~80 MB to 0.37 MB. The complete versions, latents included, are archived on Zenodo with the release record that the paper cites.
 
-From **v0.3.0** the Zenodo record's flat files are named by case id
-(`tx.GHPU.sst.sri03.p0.fwd.nc`). Version 0.2.0 of the record — the
-initial submission's additive fits — carries the older names instead
-(e.g. `gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc`), and
-`download_posteriors()` still resolves those, pinned to that version, so
-preprint-era notebooks keep working. `load_posterior()` accepts **either**
-spelling, and downloads are saved flat in the cache as `<case id>.fwd.nc`.
+From **v0.3.0** the Zenodo record's flat files are named by case id (`tx.GHPU.sst.sri03.p0.fwd.nc`). Version 0.2.0 of the record — the initial submission's additive fits — carries the older names instead (e.g. `gen_logi_fixed_hier_crtp_univ_priorApprox_SST_scaledRI_cren3.nc`), and `download_posteriors()` still resolves those, pinned to that version, so preprint-era notebooks keep working. `load_posterior()` accepts **either** spelling, and downloads are saved flat in the cache as `<case id>.fwd.nc`.
 
 #### How posterior files are named
 
-Posteriors use CESM-style **case ids**: fixed dot-delimited positions instead
-of ever-growing concatenated descriptions.
+Posteriors use CESM-style **case ids**: fixed dot-delimited positions instead of ever-growing concatenated descriptions.
 
 ```
 tx . GHEB . sst . sri03 . G23-N1p0 . fwd.nc
@@ -210,11 +185,7 @@ The four **compset** letters encode, in order:
 | Estimator | `P` priorApprox · `E` priorApprox + errors-in-variables · `D` full hierarchical |
 | Predictor structure | `U` univariate · `A` additive (β on the response, unbounded) · `B` bounded-by-construction (the **T₀-shift** structure: γ on T₀) |
 
-So `tx.GHEB.sst.sri03.G23-N1p0` is the published T₀-shift multivariate SST
-calibration, and `tx.GHPU.sst.sri03.p0` the univariate SST one. A date/run
-token may be appended to distinguish refits of the same configuration. Every
-function that takes a posterior name resolves case ids and legacy long names
-alike.
+So `tx.GHEB.sst.sri03.G23-N1p0` is the published T₀-shift multivariate SST calibration, and `tx.GHPU.sst.sri03.p0` the univariate SST one. A date/run token may be appended to distinguish refits of the same configuration. Every function that takes a posterior name resolves case ids and legacy long names alike.
 
 ```{note}
 **Two formulations of the non-thermal terms exist, and they are not
@@ -377,19 +348,14 @@ posterior, diagnostics = get_posterior(
 save_posterior(posterior)
 ```
 
-`..._eiv_t0shift` is the published calibration. The non-thermal predictors enter
-inside the logistic, shifting the curve's location parameter T₀ rather than adding
-an offset to the response:
+`..._eiv_t0shift` is the published calibration. The non-thermal predictors enter inside the logistic, shifting the curve's location parameter T₀ rather than adding an offset to the response:
 
 ```
 T₀_eff = T₀ + γ_{G₂/₃}·G₂/₃ + γ_{NO₃}·log₁₀(NO₃)
 Scaled RI = b + (1 − b) / (1 + exp(−k·(T − T₀_eff)))^(1/ν)
 ```
 
-so the fitted coefficients are `gamma_G23_crtp` and `gamma_NO3_crtp`, in °C per
-predictor unit, and the predicted Scaled RI is confined to (b, 1) by construction.
-`R2_thermal` must be supplied to this model — compute it from a thermal-only
-coretop fit with `gen_logi_fixed_hier_crtp_univ_priorApprox`.
+so the fitted coefficients are `gamma_G23_crtp` and `gamma_NO3_crtp`, in °C per predictor unit, and the predicted Scaled RI is confined to (b, 1) by construction. `R2_thermal` must be supplied to this model — compute it from a thermal-only coretop fit with `gen_logi_fixed_hier_crtp_univ_priorApprox`.
 
 ---
 

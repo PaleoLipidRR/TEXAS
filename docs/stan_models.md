@@ -1,14 +1,8 @@
 # Stan models shipped with TEXAS
 
-`src/TEXAS/stan_models/` holds **seven** `.stan` files: the three forward
-calibrations the revised manuscript fits, the three inverse (proxy → temperature)
-models it runs, and one straight-line reference model used in the SI figures.
-Everything else ever written for this project lives in
-`archive/submission-2026-04/stan_models/`, whose README names each retired file,
-says why it was retired, and shows how to run one by absolute path.
+`src/TEXAS/stan_models/` holds **seven** `.stan` files: the three forward calibrations the revised manuscript fits, the three inverse (proxy → temperature) models it runs, and one straight-line reference model used in the SI figures. Everything else ever written for this project lives in `archive/submission-2026-04/stan_models/`, whose README names each retired file, says why it was retired, and shows how to run one by absolute path.
 
-`pyproject.toml` declares package data as `stan_models/*.stan` — a non-recursive
-glob — so only these seven reach the wheel.
+`pyproject.toml` declares package data as `stan_models/*.stan` — a non-recursive glob — so only these seven reach the wheel.
 
 ## Naming convention
 
@@ -38,11 +32,7 @@ All three share the curve
 RI = b + (1 - b) / (1 + exp(-k * (T - T0)))^(1/v)
 ```
 
-with the upper asymptote fixed at 1 and Q fixed at 1. **T₀ is the curve's
-location parameter, not its inflection point.** The steepest response sits at
-`T0 - ln(v)/k`, several °C below T₀ for the fitted ν, and the slope varies
-severalfold across the sampled range — so there is no single thermal sensitivity
-to quote for this curve.
+with the upper asymptote fixed at 1 and Q fixed at 1. **T₀ is the curve's location parameter, not its inflection point.** The steepest response sits at `T0 - ln(v)/k`, several °C below T₀ for the fitted ν, and the slope varies severalfold across the sampled range — so there is no single thermal sensitivity to quote for this curve.
 
 In the T₀-shift model the predictors move T₀ rather than the mean:
 
@@ -51,9 +41,7 @@ T0_eff[i] = T0 + gamma_G23 * g23_true[i] + gamma_NO3 * log10(no3_true[i])
 mu[i]     = b + (1 - b) / (1 + exp(-k * (T[i] - T0_eff[i])))^(1/v)
 ```
 
-Because they act *inside* the logistic, `mu` stays within `(b, 1)` for any finite
-predictor value and any finite coefficient. That bounded-by-construction property
-is why the parameterization was adopted.
+Because they act *inside* the logistic, `mu` stays within `(b, 1)` for any finite predictor value and any finite coefficient. That bounded-by-construction property is why the parameterization was adopted.
 
 ## Inverse reconstruction
 
@@ -63,28 +51,17 @@ is why the parameterization was adopted.
 | `invT_gen_logi_fixed_multiv_marginal_unconstrained.stan` | Multivariate inverse for the additive (β-on-μ) forward arm of the initial submission (compset `GHEA`). Kept so the posteriors on version 0.2.0 of the data record remain reconstructable; not used by the published analyses. |
 | `invT_gen_logi_fixed_multiv_marginal_unconstrained_t0shift.stan` | Multivariate inverse for the T₀-shift forward arm. **The production inverse.** |
 
-`predict_T_from_proxyObs()` selects among these for you: the univariate file when
-no predictor arrays are supplied, a multivariate file when they are, and the
-`t0shift` file when the forward posterior being marginalized over was fitted with
-the T₀-shift parameterization.
+`predict_T_from_proxyObs()` selects among these for you: the univariate file when no predictor arrays are supplied, a multivariate file when they are, and the `t0shift` file when the forward posterior being marginalized over was fitted with the T₀-shift parameterization.
 
 ## Reference model
 
-`linear_model.stan` fits `proxy = slope · T + intercept` with both coefficients
-constrained non-negative. It is the straight-line form the sigmoid calibrations
-are compared against in the SI figures, and is used by the preprocessing and
-analysis notebooks. It is deliberately *not* a general-purpose linear regression.
+`linear_model.stan` fits `proxy = slope · T + intercept` with both coefficients constrained non-negative. It is the straight-line form the sigmoid calibrations are compared against in the SI figures, and is used by the preprocessing and analysis notebooks. It is deliberately *not* a general-purpose linear regression.
 
 ## How the marginal likelihood works
 
-The inverse question is: given an observed proxy value, what temperature produced
-it — allowing for the fact that the calibration curve is itself uncertain? TEXAS
-answers it by drawing `M` parameter sets from the forward posterior and
-integrating over them.
+The inverse question is: given an observed proxy value, what temperature produced it — allowing for the fact that the calibration curve is itself uncertain? TEXAS answers it by drawing `M` parameter sets from the forward posterior and integrating over them.
 
-The direct way would be to sample an `N × M` matrix of temperatures, one per
-observation per forward draw. The shipped models instead sample `N` temperatures
-and do that integral analytically inside the log-density:
+The direct way would be to sample an `N × M` matrix of temperatures, one per observation per forward draw. The shipped models instead sample `N` temperatures and do that integral analytically inside the log-density:
 
 ```stan
 for (n in 1:N) {
@@ -95,32 +72,18 @@ for (n in 1:N) {
 }
 ```
 
-`log_sum_exp(llk) - log(M)` **is** the marginalization — the log of the mean
-likelihood across the ensemble. It targets the same posterior as the matrix
-formulation from a parameter space two orders of magnitude smaller, with far
-better sampling geometry. Why the geometry matters, and what it does to the
-effective sample size, is worked through in
-[Why marginalization improves inverse TEXAS sampling](marginalization_explainer.md).
+`log_sum_exp(llk) - log(M)` **is** the marginalization — the log of the mean likelihood across the ensemble. It targets the same posterior as the matrix formulation from a parameter space two orders of magnitude smaller, with far better sampling geometry. Why the geometry matters, and what it does to the effective sample size, is worked through in [Why marginalization improves inverse TEXAS sampling](marginalization_explainer.md).
 
 ## How threading works
 
-All three inverse models wrap that observation loop in Stan's `reduce_sum`, which
-splits the `N` observations into chunks evaluated on separate CPU threads. The
-chunk size is the `grainsize` data variable:
+All three inverse models wrap that observation loop in Stan's `reduce_sum`, which splits the `N` observations into chunks evaluated on separate CPU threads. The chunk size is the `grainsize` data variable:
 
 - `grainsize = 1` → maximum parallelism (best on many cores)
 - `grainsize = N` → no parallelism, bit-for-bit the same result
 
-Threading is active only when the model is compiled with `STAN_THREADS=True` and
-run with `threads_per_chain > 1`; otherwise `reduce_sum` evaluates the same code
-sequentially. It pays off when `N` is large — hundreds of observations — and the
-`M` loop is expensive; below roughly `N = 20` the overhead can outweigh the gain.
-[Understanding `reduce_sum` and `ll_chunk`](reduce_sum_for_geologists.md) explains
-the mechanism without assuming any Stan.
+Threading is active only when the model is compiled with `STAN_THREADS=True` and run with `threads_per_chain > 1`; otherwise `reduce_sum` evaluates the same code sequentially. It pays off when `N` is large — hundreds of observations — and the `M` loop is expensive; below roughly `N = 20` the overhead can outweigh the gain. [Understanding `reduce_sum` and `ll_chunk`](reduce_sum_for_geologists.md) explains the mechanism without assuming any Stan.
 
-The forward calibrations are **not** threaded. Their cost is in the hierarchical
-structure and the latent EIV variables, not in one long independent loop, so
-there is nothing for `reduce_sum` to split.
+The forward calibrations are **not** threaded. Their cost is in the hierarchical structure and the latent EIV variables, not in one long independent loop, so there is nothing for `reduce_sum` to split.
 
 ## See also
 

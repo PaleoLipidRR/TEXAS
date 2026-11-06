@@ -75,15 +75,13 @@ For `combined_coretop_culture_mesocosm_rev*.csv`:
 
 ## 6. Duplicate coordinate check (coretop only)
 
-For coretop rows, check for exact duplicate `(Latitude, Longitude)` pairs.
-WARN if any duplicates found — print count and coordinates.
+For coretop rows, check for exact duplicate `(Latitude, Longitude)` pairs. WARN if any duplicates found — print count and coordinates.
 
 ---
 
 ## 7. Row count sanity
 
-WARN if either file has fewer than 100 rows (likely truncated or wrong file loaded).
-Print the final row count for each file.
+WARN if either file has fewer than 100 rows (likely truncated or wrong file loaded). Print the final row count for each file.
 
 ---
 

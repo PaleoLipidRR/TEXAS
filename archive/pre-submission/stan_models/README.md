@@ -1,20 +1,9 @@
 # Archived Stan models
 
-> **Superseded, 2026-09.** The counts and the "Active models" table below describe
-> the package as of 2026-04-16 and are no longer accurate: the `_werr`/`_odr`
-> variants named here were consolidated into a single `_eiv` model in v0.1.5, and
-> the package now ships 7 Stan models, not 23. The current split is documented in
-> [`archive/submission-2026-04/stan_models/README.md`](../../submission-2026-04/stan_models/README.md),
-> which is where the 8 models archived on 2026-09-03 went. The two
-> `truncated_prior` inverse models archived on 2026-09-07, when `constraint_type`
-> left the public API, landed in *this* directory instead (see below). This
-> directory holds older, pre-submission material and is kept for history.
-> Neither directory ships in the wheel (`pyproject.toml` globs
-> `stan_models/*.stan`, non-recursively).
+> **Superseded, 2026-09.** The counts and the "Active models" table below describe the package as of 2026-04-16 and are no longer accurate: the `_werr`/`_odr` variants named here were consolidated into a single `_eiv` model in v0.1.5, and the package now ships 7 Stan models, not 23. The current split is documented in [`archive/submission-2026-04/stan_models/README.md`](../../submission-2026-04/stan_models/README.md), which is where the 8 models archived on 2026-09-03 went. The two `truncated_prior` inverse models archived on 2026-09-07, when `constraint_type` left the public API, landed in *this* directory instead (see below). This directory holds older, pre-submission material and is kept for history. Neither directory ships in the wheel (`pyproject.toml` globs `stan_models/*.stan`, non-recursively).
 
 
-These models are archived because they are not used in the current TEXAS workflow
-and are not referenced by any Python code or SI notebooks.
+These models are archived because they are not used in the current TEXAS workflow and are not referenced by any Python code or SI notebooks.
 
 ## Why archived
 

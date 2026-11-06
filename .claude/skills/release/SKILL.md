@@ -36,16 +36,11 @@ Also check `src/TEXAS/__init__.py` for a `__version__` string and update it to m
 
 ## Step 3 — Update `CITATION.cff`
 
-Read `CITATION.cff`. Update the `version:` field to `$ARGUMENTS`.
-Update the `date-released:` field to today's date in `YYYY-MM-DD` format.
-Leave `doi:` alone — it is the software *concept* DOI (`10.5281/zenodo.19671664`),
-which resolves to the newest version and must not be repointed per release.
+Read `CITATION.cff`. Update the `version:` field to `$ARGUMENTS`. Update the `date-released:` field to today's date in `YYYY-MM-DD` format. Leave `doi:` alone — it is the software *concept* DOI (`10.5281/zenodo.19671664`), which resolves to the newest version and must not be repointed per release.
 
 ## Step 4 — Update `CHANGELOG` or release notes (if present)
 
-Check if `CHANGELOG.md` or `docs/changelog.md` exists. If so, prompt the user:
-"Do you want to add a changelog entry for $ARGUMENTS? (y/n)"
-If yes, read recent `git log --oneline` output and draft a short entry.
+Check if `CHANGELOG.md` or `docs/changelog.md` exists. If so, prompt the user: "Do you want to add a changelog entry for $ARGUMENTS? (y/n)" If yes, read recent `git log --oneline` output and draft a short entry.
 
 ## Step 5 — Build distribution
 
@@ -75,8 +70,7 @@ git add pyproject.toml CITATION.cff src/TEXAS/__init__.py
 git status
 ```
 
-Show the diff. Ask user to confirm before committing:
-"Ready to commit version bump to $ARGUMENTS. Proceed? (y/n)"
+Show the diff. Ask user to confirm before committing: "Ready to commit version bump to $ARGUMENTS. Proceed? (y/n)"
 
 ```bash
 git commit -m "chore: bump to v$ARGUMENTS"
@@ -84,8 +78,7 @@ git commit -m "chore: bump to v$ARGUMENTS"
 
 ## Step 8 — Tag the release
 
-**Confirm with user before tagging:**
-"Ready to create git tag v$ARGUMENTS. Proceed? (y/n)"
+**Confirm with user before tagging:** "Ready to create git tag v$ARGUMENTS. Proceed? (y/n)"
 
 ```bash
 git tag -a "v$ARGUMENTS" -m "Release v$ARGUMENTS"
@@ -94,8 +87,7 @@ git log --oneline -3
 
 ## Step 9 — Push to remote
 
-**Confirm with user before pushing:**
-"Ready to push commit + tag to origin. This cannot be undone easily. Proceed? (y/n)"
+**Confirm with user before pushing:** "Ready to push commit + tag to origin. This cannot be undone easily. Proceed? (y/n)"
 
 ```bash
 git push origin main
@@ -124,5 +116,4 @@ After completing, print:
 - [ ] Git tag `v$ARGUMENTS` created
 - [ ] Pushed to origin
 - [ ] PyPI upload: done / skipped
-- [ ] Zenodo archive minted for the new tag (the GitHub release fires the
-      webhook; if Zenodo was down, recreate the release to re-fire it)
+- [ ] Zenodo archive minted for the new tag (the GitHub release fires the webhook; if Zenodo was down, recreate the release to re-fire it)
