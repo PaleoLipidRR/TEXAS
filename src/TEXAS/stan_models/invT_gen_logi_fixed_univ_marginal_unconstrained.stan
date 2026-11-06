@@ -9,7 +9,7 @@
 // APPROACH - "Marginal" (direct sampling):
 //   The forward calibration curve (temperature -> Scaled RI) is uncertain: its
 //   parameters theta = {T0, k, b, nu, sigma} are known only as a set of
-//   posterior draws. We marginalize (average) over this uncertainty
+//   posterior draws. We average over (marginalize) this uncertainty
 //   (paper Appendix B, Eqs. B2-B3):
 //
 //     p(RI_obs | T) = integral p(RI_obs | T, theta) * p(theta | calib. data) dtheta

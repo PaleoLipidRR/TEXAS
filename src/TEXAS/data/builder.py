@@ -9,11 +9,11 @@ Builds the input data for the Stan models, in both directions.
   1. Loads the posterior of a completed forward calibration (posterior = the
      set of parameter values the calibration found plausible, stored as MCMC
      draws)
-  2. Randomly picks M parameter sets (draws) from that posterior
+  2. Randomly picks M parameter sets (posterior draws) from that posterior
   3. Packages them as FIXED DATA for the inverse Stan model
 
-The inverse model then averages over these M calibration curves to estimate
-temperature from observed proxy values (usually Scaled RI).
+The inverse model then averages (marginalizes) over these M calibration
+curves to estimate temperature from observed proxy values (usually Scaled RI).
 """
 
 from typing import Dict, Optional, List, Union, Tuple, Any
