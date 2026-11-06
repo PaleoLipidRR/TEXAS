@@ -90,7 +90,7 @@ def inverse_logistic_fixed_upper(y, t0=None, x0=None, k=None, b=None):
     if inflection is None or k is None or b is None:
         raise ValueError("Missing required parameters: t0 (or x0), k, b")
     y = np.asarray(y).squeeze()
-    return inflection + np.log((1 - b)/y - 1) / -k
+    return inflection + np.log((1 - b) / (y - b) - 1) / -k
 
 
 def generalized_logistic_fixed_upper(
