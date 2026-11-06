@@ -405,7 +405,7 @@ PIPELINES = [FORWARD, INVERSE]
 
 # ── Loose ends ───────────────────────────────────────────────────────────────
 # Notes for functions the reachability pass flags as unreferenced. The flag
-# itself is computed (nothing in src/, notebooks/, streamlit_app/ or tests/
+# itself is computed (nothing in src/, notebooks/ or tests/
 # calls them); these notes say what to do about it. Delete an entry once the
 # function is removed or wired up — the build fails on names that no longer
 # exist, so this list cannot silently rot.
@@ -431,8 +431,8 @@ LOOSE_ENDS = {
         "Registry write API. Nothing registers a calibration at runtime; the registry is populated "
         "statically and only CalibrationRegistry.get() is ever called.",
     "models.calibration.CalibrationRegistry.list_calibrations":
-        "Discovery helper for the registry. Never called — a natural fit for the Streamlit app or "
-        "the docs, if you want it exercised rather than removed.",
+        "Discovery helper for the registry. Never called — a natural fit for the docs, if you want "
+        "it exercised rather than removed.",
     "models.calibration.TEX86Calibration.predict_tex86":
         "The forward direction of the classical (non-Bayesian) calibrations. Only predict_sst() is "
         "used; this half of the pair has no caller.",

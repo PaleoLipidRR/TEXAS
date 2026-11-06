@@ -9,6 +9,17 @@ release; every such change is listed below. `1.0.0` is the release that
 accompanies the accepted manuscript — the convention closes here, and from
 this point on `MAJOR.MINOR.PATCH` means what it usually does.
 
+## [Unreleased]
+
+### Removed
+
+- The unfinished Streamlit app (`streamlit_app/`, only its posterior-explorer
+  page was wired up) moved to `archive/streamlit_app/`, with its Dockerfile;
+  the `app` service left `docker/docker-compose.yml`. To try TEXAS without
+  installing it, use the browser walkthrough in the docs ("From GDGTs to sea
+  temperature") or the Colab quickstart notebook. `tests/test_streamlit_params.py`
+  was retired with it.
+
 ## [1.0.1] — 2026-11-04
 
 ### Fixed

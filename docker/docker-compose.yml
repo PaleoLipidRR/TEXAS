@@ -1,19 +1,4 @@
 services:
-  app:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile.streamlit
-    container_name: texas_gui
-    ports:
-      - "8503:8501"    # host:container
-    environment:
-      TEXAS_INV_CACHE: "/app/data/cache/TEXAS_invT_posterior_cache"
-      TEXAS_FWD_CACHE: "/app/data/cache/TEXAS_posterior_cache"
-    volumes:
-      - ../data:/app/data:ro
-    restart: unless-stopped
-    profiles: ["app"]
-
   docs:
     build:
       context: ..

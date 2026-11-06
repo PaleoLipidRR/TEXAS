@@ -103,12 +103,11 @@ def _pyproject() -> dict:
 
 @needs_tomllib
 def test_core_deps_do_not_include_packages_the_package_never_imports():
-    """cmocean and plotly are notebook/Streamlit deps, not core runtime deps."""
+    """cmocean and plotly are notebook-only deps, not core runtime deps."""
     core = " ".join(_pyproject()["project"]["dependencies"])
     assert "cmocean" not in core, "cmocean belongs in the `plotting` extra"
     assert "plotly" not in core, (
-        "plotly is used only by streamlit_app/, which has its own "
-        "requirements.streamlit.txt"
+        "plotly is not imported by the package"
     )
 
 
@@ -206,7 +205,7 @@ def _dep_names() -> set[str]:
 
 
 def test_removed_conda_packages_stay_removed():
-    """Nothing in src/, scripts/, streamlit_app/ or any notebook imports these."""
+    """Nothing in src/, scripts/ or any notebook imports these."""
     names = _dep_names()
     for gone in _REMOVED_FROM_ENV:
         assert gone not in names, f"{gone} is back in environment.yml"

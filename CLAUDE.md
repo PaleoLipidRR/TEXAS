@@ -38,9 +38,6 @@ pytest
 # Build docs (unified Jupyter Book: guides + autodoc API + explainers)
 jupyter-book build docs/   # output in docs/_build/html/
 
-# Run Streamlit app (from streamlit_app/ directory)
-streamlit run main.py
-
 # Build Docker image (for isolated Stan compilation)
 docker compose up
 ```
@@ -125,11 +122,6 @@ Model names follow a naming convention: `{transform}_{curve}_{params}_{datasourc
 > `FORCE_RERUN = True`. (An earlier claim that only markdown and
 > commented-out code referenced it was checked and is wrong for `SI_code02a`,
 > whose cell 30 has a live `get_posterior(..., stan_file=...)` call.)
-> `tests/test_streamlit_params.py` now scans `archive/submission-2026-04/` too,
-> because the additive posteriors remain downloadable and the app still labels
-> `beta_G23_crtp` / `beta_NO3_crtp`; the two older archive dirs stay excluded,
-> since they declare the `Q_crtp` and `sigma_scaledRI_crtp` that test exists to
-> catch.
 >
 > Two more sub-archives were added later (2026-09-07): `archive/pre-submission/stan_models/`
 > (the 15 never-submitted development models plus 4 pre-annotated variants) and
@@ -423,14 +415,11 @@ This matters because `SI_code3_paleo_showcases.ipynb` and
 than migrating, update the notebooks to the case id.** Both behaviors are
 pinned by tests in `tests/test_naming.py`.
 
-### Streamlit app (`streamlit_app/`)
+### Streamlit app (archived)
 
-Three-tab GUI:
-1. **Predict**: upload CSV → run invT reconstruction
-2. **Explore**: upload NetCDF posterior → plot distributions
-3. **Compute**: run forward calibration in-browser (limited; heavy jobs should use notebooks)
-
-Entry point: `streamlit_app/main.py`. Config (cache dir resolution, plot defaults): `streamlit_app/config.py`.
+The unfinished Streamlit GUI lives in `archive/streamlit_app/` and is not
+maintained or tested. Point users to the docs' browser walkthrough or the
+Colab quickstart instead.
 
 ### Notebooks
 
