@@ -20,9 +20,9 @@ Zenodo data record (DOI: https://doi.org/10.5281/zenodo.19666744)
 
 | Goal | Files needed | How to get them |
 |------|-------------|-----------------|
-| Inverse temperature reconstruction only | Forward posteriors (`.nc`) | `TEXAS.download_posteriors()` |
+| Inverse temperature reconstruction only | Forward posteriors (`.nc`) | Nothing for the default calibrations — four posteriors ship with the package. Others: `TEXAS.download_posteriors()` |
 | Run SI analysis notebooks from scratch | Training CSVs + posteriors | `TEXAS.download_training_data()` + `TEXAS.download_posteriors()` |
-| Reproduce preprocessing (SI_code1) | Training CSVs | `TEXAS.download_training_data()` |
+| Reproduce preprocessing (`SI_code00_PreProcessing`) | Training CSVs | `TEXAS.download_training_data()` |
 
 ---
 
@@ -131,18 +131,18 @@ and place them in the directories above.
 
 ## Where every file lives
 
-97 data files left version control in the 2026-09-07 repo-hygiene pass (Tasks 7–8):
-22 training files stayed tracked (re-included in `.gitignore`, arriving via LFS with
-every clone), and 97 were untracked — 35 third-party originals and 6 TEXAS-derived
-NetCDFs under `data/external/`, plus 56 superseded spreadsheets. The four tables
-below cover all 119 files (22 + 97) so a fresh clone can tell, for any path a
-notebook opens, whether it needs fetching and where from. Files with no known
+22 training files are tracked in the repository (they arrive via LFS with every
+clone). Another 97 are not tracked — 35 third-party originals and 6
+TEXAS-derived NetCDFs under `data/external/`, plus 56 superseded spreadsheets.
+The four tables below cover all 119 files (22 + 97) so a fresh clone can tell,
+for any path a notebook opens, whether it needs fetching and where from. Files with no known
 public source are marked "author-only, not needed by any notebook" rather than
 left blank — that phrase means exactly what it says: nobody has to go find it.
 
-The derived NetCDFs in table 3 that still need hosting will live on the TEXAS
-Zenodo data record, DOI [10.5281/zenodo.19666744](https://doi.org/10.5281/zenodo.19666744),
-once uploaded at the v1.0.0 release (tracked in `RESUME.md`, Phase C).
+The regridded Tierney et al. (2022) PETMDA and Zhu et al. (2019) iPETM grids in
+table 3 are **not** on the TEXAS Zenodo data record. They are derived from other
+groups' published data, so TEXAS does not re-host them: obtain the originals
+from those publications (table 2) and regenerate them.
 
 ### 1. Tracked training data (22 files)
 
@@ -233,20 +233,21 @@ properties, and CESM simulation output regridded to a common grid) that
 | filename | what reads it | where to get it |
 |---|---|---|
 | `data/external/ncfiles/ds06_calculated_ocean_properties.nc` | `SI_code00_PreProcessing.ipynb`, `SI_code03_paleo_showcases.ipynb`, `notebooks/quickstart_extended.ipynb`, `src/TEXAS/data/ocean_lookup.py` (used at inference time by `predict_T_from_proxyObs`), `scripts/paper/run_manuscript_refits.py`, `scripts/prepare_resubmission_archive.py` | already served from the GRL paper's Zenodo record via `TRAINING_DATA_REGISTRY["ocean_prop_ds"]` (`TEXAS.download_ocean_properties()`); **no upload needed** |
-| `data/external/ncfiles/Tierney22_PNAS_PETMDA/PETMDA_OCN_annual_regridded.nc` | `SI_code03_paleo_showcases.ipynb` | **upload to the Zenodo data record at v1.0.0** |
-| `data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM01x.nc` | `SI_code03_paleo_showcases.ipynb` | **upload to the Zenodo data record at v1.0.0** |
-| `data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM03x.nc` | `SI_code03_paleo_showcases.ipynb` | **upload to the Zenodo data record at v1.0.0** |
-| `data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM06x.nc` | `SI_code03_paleo_showcases.ipynb` | **upload to the Zenodo data record at v1.0.0** |
-| `data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM09x.nc` | `SI_code03_paleo_showcases.ipynb` | **upload to the Zenodo data record at v1.0.0** |
+| `data/external/ncfiles/Tierney22_PNAS_PETMDA/PETMDA_OCN_annual_regridded.nc` | `SI_code03_paleo_showcases.ipynb` | not re-hosted; regenerate from the original (table 2) with the regridding cell in `SI_code03_paleo_showcases.ipynb` |
+| `data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM01x.nc` | `SI_code03_paleo_showcases.ipynb` | not re-hosted; regenerate from the original (table 2) with the regridding cell in `SI_code03_paleo_showcases.ipynb` |
+| `data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM03x.nc` | `SI_code03_paleo_showcases.ipynb` | not re-hosted; regenerate from the original (table 2) with the regridding cell in `SI_code03_paleo_showcases.ipynb` |
+| `data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM06x.nc` | `SI_code03_paleo_showcases.ipynb` | not re-hosted; regenerate from the original (table 2) with the regridding cell in `SI_code03_paleo_showcases.ipynb` |
+| `data/external/ncfiles/Zhu19_Science_EoceneSim/fullDepth_regridded_iPETM/Zhu19_Science_EoceneSim_fullDepth_regridded_iPETM09x.nc` | `SI_code03_paleo_showcases.ipynb` | not re-hosted; regenerate from the original (table 2) with the regridding cell in `SI_code03_paleo_showcases.ipynb` |
 
-**Five of these files, totalling ~13 MB, need the v1.0.0 upload** before a fresh
-clone can run `SI_code00_PreProcessing.ipynb` and `SI_code03_paleo_showcases.ipynb`
-end to end (see `RESUME.md`, Phase C). `ds04_gridded_coretop_tex_scaledRI.nc`
-(table 2) and `calculated_ocean_properties_seasonal.nc` (table 2) are
-deliberately dropped without an upload: their only reader is the ignored,
-locally-gitignored `notebooks/exploration/` directory, which does not exist
-in this working tree and so is not part of any shipped notebook's dependency
-chain.
+**The five regridded grids (~13 MB) are not re-hosted**, because they trace to
+other groups' publications (Tierney et al. 2022 PNAS PETMDA; Zhu et al. 2019
+*Science* EoceneSim, [PANGAEA](https://doi.org/10.1594/PANGAEA.899208)). A fresh
+clone therefore cannot run `SI_code03_paleo_showcases.ipynb` end to end until
+you download the originals listed in table 2 and run that notebook's
+(commented-out) regridding cell. `ds04_gridded_coretop_tex_scaledRI.nc`
+(table 2) and `calculated_ocean_properties_seasonal.nc` (table 2) are not
+hosted anywhere: their only reader is a local, gitignored
+`notebooks/exploration/` directory that is not part of the repository.
 
 ### 4. Superseded spreadsheets, not tracked (56 files)
 

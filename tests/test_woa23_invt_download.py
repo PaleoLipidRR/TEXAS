@@ -1,5 +1,5 @@
 """
-download_woa23() and download_invT_posteriors() (RESUME.md section G).
+download_woa23() and download_invT_posteriors().
 
 Network is always mocked here -- these never hit NCEI or Zenodo for real.
 """

@@ -81,10 +81,9 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
     has_gdz_any = ("use_gdgt23ratio" in attrs_)
     has_no3_any = ("use_no3" in attrs_)
 
-    # Additive (beta-on-mu) or bounded-T (gamma-on-T0)? Decided from the
-    # variables present, not from stan_model_name — this module has always
-    # inferred structure from data_vars, and a posterior renamed or downloaded
-    # from Zenodo still carries its parameters.
+    # Additive (beta added to the curve) or T0-shift (gamma shifts T0)? Decided
+    # from the variables present, not from stan_model_name, because a posterior
+    # that was renamed or downloaded from Zenodo still carries its parameters.
     is_bounded_t = any(v == "gamma_G23" or v.startswith("gamma_G23_")
                        or v == "gamma_NO3" or v.startswith("gamma_NO3_")
                        for v in vars_)
@@ -136,10 +135,10 @@ def detect_model_and_params(posterior_ds: xr.Dataset, suffix: str = None):
         if has_no3:
             params.append(coef_NO3)
 
-        # There is no simple-logistic bounded-T model: bounded-T exists only as
-        # the generalized curve. Raise rather than silently fitting the additive
-        # form to gamma coefficients, which would be wrong by a whole
-        # parameterisation and would look plausible.
+        # There is no simple-logistic T0-shift model: the T0-shift form exists
+        # only for the generalized curve. Raise rather than silently applying the
+        # additive form to gamma coefficients, which would be wrong by a whole
+        # parameterisation and would still look plausible.
         if is_bounded_t:
             raise ValueError(
                 "Bounded-T coefficients (gamma_*) found on a posterior with no "

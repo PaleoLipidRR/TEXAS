@@ -61,7 +61,7 @@ class MahalanobisOutlierDetector:
         self.threshold = None
         self.is_fitted = False
         
-    # Path to the frozen reference ellipse of manuscript Section 5.1, built by
+    # Path to the frozen reference ellipse of paper Section 5.1, built by
     # scripts/build_calibration_domain.py from the core-top reference cluster.
     _DOMAIN_FILE = "calibration_domain.json"
 
@@ -90,7 +90,7 @@ class MahalanobisOutlierDetector:
         Explicit form of the default behavior: a detector on the standard
         features screens against this domain without being fitted at all.
 
-        The ellipse is a property of the *calibration* -- Section 5.1 fits it to
+        The ellipse is a property of the *calibration* -- paper Section 5.1 fits it to
         core-top samples with GDGT-2/GDGT-3 <= 5 -- not of the data being
         screened. Fitting on your own record instead re-centres the ellipse onto
         that record, so the more unusual the record the less it flags: an
@@ -380,14 +380,14 @@ class MahalanobisOutlierDetector:
         on_unscorable: Literal['warn', 'raise', 'ignore'] = 'warn',
     ) -> pd.Series:
         """
-        Detect outliers using the manuscript's screening criterion.
+        Detect outliers using the paper's screening criterion.
 
         **This is the recommended call for screening a record.** It applies the
         calibration-domain ellipse and then restores the warm-end exception:
         samples with TEX86 > 0.75 *and* Scaled RI(0-3) > 0.75 are retained, not
-        flagged, because the calibration itself retains them (Section 5.1,
-        Fig. 4 -- "data with TEX86 and Scaled RI above 0.75 are retained in the
-        calibration dataset"). Screening with the bare ellipse instead
+        flagged, because the calibration itself retains them (paper Section
+        5.1 and the Fig. 4 caption: "data with TEX86 and Scaled RI above 0.75
+        are retained in the calibration dataset"). Screening with the bare ellipse instead
         (:meth:`detect_outliers`) would flag warm samples the calibration
         actually covers.
 

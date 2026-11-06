@@ -11,18 +11,19 @@ two sources, and its own ``history`` attribute records which is which: the
 nitrate variables (``no3_sf2tc_avg``, ``no3_tc``) are climatological annual
 means (1993–2022) of the **CMEMS Global Ocean Biogeochemistry Hindcast**, and
 the temperature variables are WOA23. So the default NO₃ lookup is a CMEMS
-value on the WOA23 0.25° grid — the "associated CMEMS ocean nitrate product"
-of the manuscript's Appendix C — not a WOA23 nitrate climatology. (The
-manuscript uses WOA23 nitrate only for the per-site NO₃ *uncertainty* of the
-EIV calibration, SI Text S2, which is a different file.) The function used to
-be called ``lookup_no3_from_woa`` for that reason; the name is kept as a
-deprecated alias.
+value on the WOA23 0.25° grid — the CMEMS-derived ocean-property field the
+paper's Appendix C (step C2.3) points users to — not a WOA23 nitrate
+climatology. (The paper uses WOA23 nitrate only for the per-site NO₃
+*uncertainty* of the errors-in-variables calibration, SI Text S2.2, which is a
+different file.) The old function name ``lookup_no3_from_woa`` is therefore
+misleading; it is still accepted as a deprecated alias.
 
 The ``ocean_prop_ds`` dataset is NOT bundled in the wheel —
 at ~20 MB it is too large for that (see ``tests/test_bundled_posteriors.py``'s
 5 MB ceiling) — but it is downloadable on demand from Zenodo via
 :func:`get_ocean_prop_ds`, which fetches and caches it automatically. It can
-also still be generated locally via the preprocessing notebook (SI_code0).
+also be generated locally with the preprocessing notebook
+(``SI_code00_PreProcessing``).
 Either way, pass the resulting xr.Dataset (with a ``(lat, lon)`` grid) to the
 functions here.
 """
@@ -154,8 +155,8 @@ def lookup_modern_no3(
     >>> result = predict_T_from_proxyObs(..., no3=no3_arr)
     """
     # ── Resolve the grid axes ─────────────────────────────────────────────────
-    # utils/regrid.py already knows the spellings these grids arrive under; the
-    # lookup used to hard-code "lat"/"lon" and fail on anything else.
+    # Accept any lat/lon spelling utils/regrid.py recognizes (e.g. "latitude"),
+    # not only "lat"/"lon".
     lat_name, lon_name = resolve_latlon_names(ocean_dataset, lat_name, lon_name)
     if lat_name not in ocean_dataset.dims or lon_name not in ocean_dataset.dims:
         raise ValueError(

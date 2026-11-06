@@ -7,7 +7,7 @@ RECOMMENDED_CMDSTAN_VERSION = "2.36.0"
 
 # Default forward calibration, by temperature target. These are the full
 # multivariate T0-shift calibrations (Scaled RI0-3, G23 + NO3), the
-# specification the manuscript uses for its reconstructions, and they ship
+# specification the paper uses for its reconstructions, and they ship
 # inside the wheel (see utils/paths.BUNDLED_POSTERIOR_DIR) so a reconstruction
 # needs no download. Used when predict_T_from_proxyObs is called without
 # fwd_posterior.
@@ -38,7 +38,9 @@ OPTIONAL_PREDICTORS = [GDGT23RATIO_KEY, NO3_KEY]
 # Suffixes for logistic model parameter variants
 DEFAULT_SUFFIXES = ["crtp", "culmesocore", "culmeso", "meso", "cul", "downcore"]
 
-# Maps predictor data-variable name → Stan/posterior coefficient name
+# Maps predictor data-variable name → Stan/posterior coefficient name for the
+# additive (beta) models. T0-shift posteriors use gamma_G23 / gamma_NO3 instead
+# (data/builder.py picks the right set).
 PREDICTOR_BETA_NAMES = {
     "gdgt23ratio": "beta_G23",
     "no3": "beta_NO3",

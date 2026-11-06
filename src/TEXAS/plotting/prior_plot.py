@@ -23,9 +23,9 @@ if TYPE_CHECKING:
 # in a different place, so each entry maps a group prefix to the posterior attr that
 # gates it and to the label used on the axis:
 #
-#   beta_*       parent model — additive shift of RI          (RI units per predictor unit)
-#   gamma_*      t0shift      — shift of the curve location T0 (°C per predictor unit)
-#   betaLogit_*  boundedCeil  — shift of the logit floor      (logit units per predictor unit)
+#   beta_*       additive (preprint) — added to Scaled RI   (Scaled RI units per predictor unit)
+#   gamma_*      t0shift (published) — shifts the curve location T0 (°C per predictor unit)
+#   betaLogit_*  boundedCeil (not shipped) — shifts the logit floor (logit units per predictor unit)
 #
 # To support a new parameterization, add its prefixes here — nothing else in this
 # module hardcodes coefficient names.
@@ -34,13 +34,12 @@ CORE_GROUPS: Sequence[str] = ("t0", "k", "b", "v", "a")
 # The observation-noise scales. Kept OUT of CORE_GROUPS and appended last in
 # DEFAULT_INCLUDE_GROUPS on purpose: panels are filled row-major, so adding a
 # group anywhere but the end shifts every later panel and silently invalidates
-# the index-based axis limits the manuscript figures set.
+# the index-based axis limits the paper's figures set.
 #
-# These were absent from the figures entirely until 2026-08-13, which is what a
-# reviewer noticed -- the noise terms are part of the probabilistic model
+# The noise terms are plotted because they are part of the probabilistic model
 # (sigma_proxyObs_cul / _meso for the culture+mesocosm layer, sigma_proxyObs_crtp
-# for the coretop layer), not ancillary diagnostics, and a parameter figure that
-# omits them is incomplete rather than merely terse.
+# for the coretop layer), not ancillary diagnostics: a parameter figure that
+# omits them is incomplete.
 NOISE_GROUPS: Sequence[str] = ("sigma_proxyObs",)
 
 PREDICTOR_GROUPS: Dict[str, Dict[str, str]] = {
@@ -192,7 +191,12 @@ def _format_stat(median: float, std: float) -> str:
     return f"{round(median, n_dec):{fmt}} ± {round(std, n_dec):{fmt}}"
 
 def _n_decimals(scale: float) -> int:
-    """Decimal places needed to show `scale` to 1–2 sig figs (GUM §7.2.6 rule)."""
+    """Decimal places needed to show `scale` to 1–2 significant figures.
+
+    Follows the rounding rule of the GUM (JCGM 100:2008, the Guide to the
+    Expression of Uncertainty in Measurement), clause 7.2.6 -- not a section
+    of the TEXAS paper.
+    """
     if not np.isfinite(scale) or scale <= 0:
         return 3
     mag = math.floor(math.log10(abs(scale)))

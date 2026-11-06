@@ -1,4 +1,4 @@
-# TEXAS/stan/sampler.py (Revised 08/18/2025)
+# TEXAS/stan/sampler.py
 
 import time
 import importlib.util

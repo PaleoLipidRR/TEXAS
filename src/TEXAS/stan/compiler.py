@@ -204,8 +204,8 @@ class StanCompiler:
 
         Otherwise the name is looked up in ``model_dir`` and, failing that, in
         ``STAN_ARCHIVE_DIR`` -- the superseded models kept in the repository but
-        not shipped in the wheel. That fallback is what keeps the manuscript's
-        additive-EIV comparison arm refittable by plain stem
+        not shipped in the wheel. That fallback is what keeps the preprint's
+        additive-EIV model refittable by plain stem
         (``stan_file="gen_logi_fixed_hier_crtp_multiv_priorApprox_eiv"``) from
         the SI notebooks and the refit scripts, without any caller having to
         build a path -- and, importantly, without an absolute path leaking into
