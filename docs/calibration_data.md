@@ -1,6 +1,6 @@
 # Calibration data
 
-The bundled TEXAS calibration was fitted to a global compilation of coretop, culture and mesocosm samples, screened with the Mahalanobis distance and gridded to 0.25° cells (manuscript Section 5). The explorer below plots every one of those samples: temperature against Scaled RI or TEX₈₆ beside a map of the coretop sites, in the manuscript's data-type colors. Hover a sample to find it in both panels, switch the axes between SST and Thermo-T, or color the points by GDGT-2/GDGT-3 or nitrate to see the nonthermal predictors TEXAS uses.
+The explorer below starts with the dataset the bundled TEXAS calibration was fitted to: coretop, culture and mesocosm samples, screened with the Mahalanobis distance and gridded to 0.25° cells (manuscript Section 5), in the manuscript's data-type colors. Buttons switch to the data and fitted curves of the calibrations before it: the original linear TEX₈₆ calibration (Schouten et al., 2002), TEX₈₆ᴴ (Kim et al., 2010) and BAYSPAR (Tierney & Tingley, 2014), with BAYSPAR's three regions from the manuscript's Fig. 1a. The table names the original study behind every TEXAS sample, linked to the paper, and which earlier calibrations also used it.
 
 ```{raw} html
 <p style="margin:1rem 0 0;">

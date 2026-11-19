@@ -39,6 +39,13 @@ REPO = HERE.parent.parent
 TEMPLATE = HERE / "calibration_data_template.html"
 OUT = HERE.parent / "_static" / "calibration-data.html"
 SNAPSHOT = HERE.parent / "_static" / "calibration-data.data.json"
+# Written by gdgt-db-workspace's analyses/texasdocs/export_calibration_data.py: the original
+# studies and "used by" of every sample, and the earlier calibrations' data and lines.
+PROVENANCE = HERE.parent / "_static" / "calibration-data.provenance.json"
+POSTERIORS = {"sst": "tx.GHEB.sst.sri03.G23-N1p0", "thm": "tx.GHEB.thm.sri03.G23-N1p0"}
+# Corrections to the TEXAS file applied on this page only (the CSV and Zenodo record are untouched)
+OVERRIDES = {("reference_name", "Elling et al. (2017) Environmnental Microbiology"):
+             "Elling et al. (2017) Environmental Microbiology"}
 CSV_NAME = "ds_gridded_screened_global_compilation_finalized.csv"
 POSTERIOR = "tx.GHEB.sst.sri03.G23-N1p0"
 TYPES = {"coretop": "c", "culture": "u", "mesocosm": "m"}
@@ -73,24 +80,45 @@ def _find_land(arg):
     return None
 
 
-def _land_path(shp):
-    """Natural Earth land polygons as one SVG path in degrees (x = lon, y = -lat)."""
+def _land_rings(shp):
+    """Natural Earth land polygons as rings of [lon, lat], for the page to project."""
     import shapefile  # pyshp
 
-    parts_out = []
+    rings = []
     for shape in shapefile.Reader(str(shp)).shapes():
         idx = list(shape.parts) + [len(shape.points)]
         for a, b in zip(idx[:-1], idx[1:]):
-            ring = shape.points[a:b]
             pts, last = [], None
-            for lon, lat in ring:
-                p = (round(lon, 1), round(-lat, 1))
+            for lon, lat in shape.points[a:b]:
+                p = [round(lon, 1), round(lat, 1)]
                 if p != last:
                     pts.append(p)
                     last = p
             if len(pts) >= 4:
-                parts_out.append("M" + "L".join(f"{x:g},{y:g}" for x, y in pts) + "Z")
-    return "".join(parts_out)
+                rings.append(pts)
+    return rings
+
+
+def _texas_curves(g23):
+    """Median and 5-95 % Scaled RI of each default posterior over temperature, at the coretops'
+    median GDGT-2/3 with the nitrate term off (NO3 above the cutoff)."""
+    import numpy as np
+    import xarray as xr
+    import TEXAS  # type: ignore
+
+    out = {}
+    T = np.arange(-4.0, 50.01, 0.5)
+    for key, case in POSTERIORS.items():
+        f = Path(TEXAS.__file__).parent / "bundled_posteriors" / f"{case}.fwd.nc"
+        with xr.open_dataset(f) as ds:
+            d = {v: ds[v].values.reshape(-1) for v in ("t0_crtp", "k_crtp", "b_crtp", "v_crtp", "gamma_G23_crtp")}
+        t0 = d["t0_crtp"] + d["gamma_G23_crtp"] * g23
+        ri = d["b_crtp"][:, None] + (1 - d["b_crtp"][:, None]) / (
+            1 + np.exp(-d["k_crtp"][:, None] * (T[None, :] - t0[:, None]))) ** (1 / d["v_crtp"][:, None])
+        q = np.percentile(ri, [5, 50, 95], axis=0)
+        out[key] = {"case": case, "T": T.round(2).tolist(), "lo": q[0].round(4).tolist(),
+                    "mid": q[1].round(4).tolist(), "hi": q[2].round(4).tolist()}
+    return {"g23": round(float(g23), 2), "curves": out}
 
 
 def _num(v, nd):
@@ -123,7 +151,30 @@ def build_snapshot(csv, land):
     import pandas as pd
 
     df = pd.read_csv(csv)
+    for (col, old), new in OVERRIDES.items():
+        n = int((df[col] == old).sum())
+        if n:
+            df.loc[df[col] == old, col] = new
+            print(f"override: {col} {old!r} -> {new!r} ({n} rows)")
     df = df[df["datatype"].isin(TYPES)].reset_index(drop=True)
+    prov = json.loads(PROVENANCE.read_text()) if PROVENANCE.is_file() else None
+    if prov:
+        n_c, n_l = int((df.datatype == "coretop").sum()), int((df.datatype != "coretop").sum())
+        if len(prov["cells"]) != n_c or len(prov["labs"]) != n_l:
+            sys.exit(f"{PROVENANCE.name} has {len(prov['cells'])} cells / {len(prov['labs'])} labs, "
+                     f"the CSV {n_c} / {n_l}: re-export it from gdgt-db-workspace")
+        it_c, it_l = iter(prov["cells"]), iter(prov["labs"])
+        studies_of, used_of = [], []
+        for t in df.datatype:
+            if t == "coretop":
+                c = next(it_c)
+                studies_of.append(c["s"])
+                used_of.append(c["u"])
+            else:
+                lab = next(it_l)
+                studies_of.append([lab] if lab else [])
+                used_of.append("")
+        df = df.assign(_s=studies_of, _u=used_of)
     n_crtp = _posterior_n_crtp()
     n_core = int((df["datatype"] == "coretop").sum())
     if n_crtp is not None and n_crtp != n_core:
@@ -143,20 +194,37 @@ def build_snapshot(csv, land):
             "ref": str(r.get("reference_name") or ""),
             "org": "" if pd.isna(r.get("organism_commonName")) else str(r.get("organism_commonName")),
             "reg": "" if pd.isna(r.get("regionName")) else str(r.get("regionName")),
+            **({"s": r["_s"], "u": r["_u"]} if prov else {}),
         })
 
-    refs = (df.groupby(["datatype", "reference_name"]).size().reset_index(name="n")
-              .sort_values(["datatype", "n"], ascending=[True, False]))
-    sources = [{"t": TYPES[r.datatype], "ref": r.reference_name, "n": int(r.n)} for r in refs.itertuples()]
+    sources = []
+    if prov:
+        agg = {}
+        for p_ in pts:
+            for sk in p_["s"]:
+                a = agg.setdefault(sk, {"key": sk, "n": 0, "t": set(), "u": set()})
+                a["n"] += 1
+                a["t"].add(p_["t"])
+                a["u"].update(p_["u"])
+        for a in agg.values():
+            st = prov["studies"].get(a["key"], {})
+            sources.append({"key": a["key"], "cite": st.get("cite", a["key"]), "doi": st.get("doi"),
+                            "year": st.get("year"), "n": a["n"], "t": "".join(sorted(a["t"], key="cumc".index)),
+                            "u": "".join(sorted(a["u"], key="LHB".index))})
+        sources.sort(key=lambda x: (-(x["year"] or 0), x["cite"]))
 
     return {
         "csv": CSV_NAME,
         "posterior": POSTERIOR,
         "n_crtp_posterior": n_crtp,
         "land_source": "Natural Earth 1:110m land (public domain)",
-        "land": _land_path(land) if land else "",
+        "land": _land_rings(land) if land else [],
         "points": pts,
         "sources": sources,
+        "texas": _texas_curves(df.loc[df.datatype == "coretop", "gdgt23ratio"].median()),
+        "legacy": ({k: prov[k] for k in ("schouten", "kim", "bayspar")} if prov else None),
+        "studies": (prov["studies"] if prov else {}),
+        "provenance": (prov["provenance"] if prov else None),
     }
 
 

@@ -7,102 +7,127 @@
 <style>
 :root {
   --ground: #F3F6F6; --surface: #FBFCFC; --ink: #0F1B1E; --ink-2: #45565A; --muted: #74858A;
-  --hair: #DCE3E4; --axis: #BCC7C9; --land: #E3E8E6; --sea: #F7FAFA; --focus: #0F1B1E;
-  /* manuscript data-type colors: open-color cyan9, yellow9, pink9 */
+  --hair: #DCE3E4; --axis: #BCC7C9; --land: #DDE3E1; --sea: #F4F8F8; --focus: #0F1B1E;
+  /* manuscript data-type colors (datatype_color_dict: open-color cyan9, yellow9, pink9) */
   --coretop: #0b7285; --culture: #e67700; --mesocosm: #a61e4d;
+  /* calibrations, as in the sensor-models table */
+  --linear: #B63D3D; --tex86h: #C9772A; --bayspar: #7A4486; --texas: #3D6386; --other: #9aa7aa;
+  /* BAYSPAR's three regions (manuscript Fig. 1a) */
+  --r1: #c92a2a; --r2: #1971c2; --r3: #2b8a3e;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --ground: #0E1416; --surface: #141B1E; --ink: #EAF1F2; --ink-2: #B6C4C6; --muted: #7F9093;
     --hair: #243034; --axis: #3A4A50; --land: #2A3438; --sea: #10181B; --focus: #EAF1F2;
     --coretop: #3bc9db; --culture: #ffc078; --mesocosm: #f783ac;
+    --linear: #E07A7A; --tex86h: #E8A35F; --bayspar: #B98AC6; --texas: #8FB3D1; --other: #5d6b6e;
+    --r1: #ff8787; --r2: #74c0fc; --r3: #8ce99a;
   }
 }
 :root[data-theme="dark"] {
   --ground: #0E1416; --surface: #141B1E; --ink: #EAF1F2; --ink-2: #B6C4C6; --muted: #7F9093;
   --hair: #243034; --axis: #3A4A50; --land: #2A3438; --sea: #10181B; --focus: #EAF1F2;
   --coretop: #3bc9db; --culture: #ffc078; --mesocosm: #f783ac;
+  --linear: #E07A7A; --tex86h: #E8A35F; --bayspar: #B98AC6; --texas: #8FB3D1; --other: #5d6b6e;
+  --r1: #ff8787; --r2: #74c0fc; --r3: #8ce99a;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--ground); color: var(--ink);
   font: 15px/1.5 "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif; }
+a { color: var(--texas); }
 .page { max-width: 1100px; margin: 0 auto; padding: 20px 16px 40px; }
 h1 { font-size: 1.5rem; margin: 0 0 4px; }
-h2 { font-size: 1.15rem; margin: 28px 0 8px; }
-.lede { color: var(--ink-2); margin: 0 0 16px; max-width: none; }
-.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 0 0 16px; }
+h2 { font-size: 1.15rem; margin: 28px 0 6px; }
+.lede { color: var(--ink-2); margin: 0 0 14px; }
+.cals { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0 0 12px; }
+.cal { text-align: left; border: 1px solid var(--hair); border-top: 4px solid var(--c); border-radius: 8px;
+  background: var(--surface); color: var(--ink); padding: 8px 12px; font: inherit; cursor: pointer; }
+.cal b { display: block; color: var(--c); font-size: 1.02rem; }
+.cal small { color: var(--ink-2); }
+.cal[aria-pressed="true"] { background: color-mix(in srgb, var(--c) 16%, var(--surface)); border-color: var(--c);
+  box-shadow: inset 0 0 0 1px var(--c); }
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 0 0 12px; }
 .card { background: var(--surface); border: 1px solid var(--hair); border-top: 4px solid var(--c, var(--ink-2));
-  border-radius: 8px; padding: 10px 12px; }
-.card .n { font-size: 1.7rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
-.card .l { color: var(--ink-2); font-size: 0.9rem; }
-.controls { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin: 0 0 10px; }
-.seg { display: inline-flex; border: 1px solid var(--hair); border-radius: 8px; overflow: hidden; }
-.seg button { border: 0; background: var(--surface); color: var(--ink-2); padding: 6px 12px; font: inherit;
-  font-size: 0.9rem; cursor: pointer; }
+  border-radius: 8px; padding: 8px 12px; }
+.card .n { font-size: 1.55rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.card .l { color: var(--ink-2); font-size: 0.88rem; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin: 0 0 10px; }
+.seg { display: inline-flex; border: 1px solid var(--hair); border-radius: 8px; overflow: hidden; vertical-align: middle; }
+.seg button { border: 0; background: var(--surface); color: var(--ink-2); padding: 5px 11px; font: inherit;
+  font-size: 0.88rem; cursor: pointer; }
 .seg button + button { border-left: 1px solid var(--hair); }
 .seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); font-weight: 600; }
-.ctl-label { font-size: 0.82rem; color: var(--muted); margin-right: 6px; text-transform: uppercase; letter-spacing: .06em; }
-.legend { display: flex; flex-wrap: wrap; gap: 8px; }
+.ctl-label { font-size: 0.78rem; color: var(--muted); margin-right: 6px; text-transform: uppercase; letter-spacing: .06em; }
+.toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; color: var(--ink-2); cursor: pointer; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 8px; margin: 0 0 10px; min-height: 30px; align-items: center; }
 .chip { display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid var(--c); border-radius: 999px;
-  padding: 3px 10px; background: color-mix(in srgb, var(--c) 14%, transparent); color: var(--ink);
-  font: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+  padding: 2px 10px; background: color-mix(in srgb, var(--c) 14%, transparent); color: var(--ink);
+  font: inherit; font-size: 0.86rem; font-weight: 600; }
+button.chip { cursor: pointer; }
 .chip .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.chip .dot.open { background: transparent; border: 1.5px solid var(--c); }
 .chip[aria-pressed="false"] { opacity: 0.4; background: transparent; }
-.chip:focus-visible, .seg button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.cal:focus-visible, .chip:focus-visible, .seg button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .panels { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 12px; }
-.panel { background: var(--surface); border: 1px solid var(--hair); border-radius: 10px; padding: 8px; position: relative; }
+.panel { background: var(--surface); border: 1px solid var(--hair); border-radius: 10px; padding: 8px; }
 .panel h3 { margin: 2px 6px 4px; font-size: 0.95rem; color: var(--ink-2); font-weight: 600; }
 svg { display: block; width: 100%; height: auto; }
-.axis line, .axis path { stroke: var(--axis); }
 .axis text { fill: var(--muted); font-size: 11px; }
 .axis-title { fill: var(--ink-2); font-size: 12.5px; font-weight: 600; }
 .gridline { stroke: var(--hair); }
 .pt { stroke: var(--surface); stroke-width: 0.6; }
 .pt.hl { stroke: var(--focus); stroke-width: 2; }
-.land { fill: var(--land); stroke: none; }
-.sea { fill: var(--sea); }
+.land { fill: var(--land); }
+.globe { fill: var(--sea); stroke: var(--axis); stroke-width: 0.8; }
 .colorbar text { fill: var(--muted); font-size: 11px; }
 .note { color: var(--muted); font-size: 0.85rem; margin: 6px 6px 2px; }
 .tip { position: fixed; pointer-events: none; z-index: 5; background: var(--surface); color: var(--ink);
   border: 1px solid var(--hair); border-radius: 8px; padding: 7px 10px; font-size: 0.85rem; line-height: 1.35;
-  box-shadow: 0 6px 18px rgba(0,0,0,.18); max-width: 300px; display: none; }
+  box-shadow: 0 6px 18px rgba(0,0,0,.18); max-width: 320px; display: none; }
 .tip b { display: block; }
 .tip .k { color: var(--muted); }
+.tablewrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
 th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--hair); vertical-align: top; }
-th { color: var(--ink-2); font-weight: 600; }
-td.n { text-align: right; font-variant-numeric: tabular-nums; width: 5em; }
-.tag { display: inline-block; border: 1.5px solid var(--c); border-radius: 999px; padding: 0 8px;
-  background: color-mix(in srgb, var(--c) 14%, transparent); font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
-.foot { color: var(--muted); font-size: 0.85rem; margin-top: 18px; }
+th { color: var(--ink-2); font-weight: 600; white-space: nowrap; }
+td.n { text-align: right; font-variant-numeric: tabular-nums; }
+tr.dim td { opacity: 0.35; }
+.tag { display: inline-block; margin: 1px 3px 1px 0; border: 1.5px solid var(--c); border-radius: 999px; padding: 0 8px;
+  background: color-mix(in srgb, var(--c) 14%, transparent); font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+.tag.sq { border-radius: 4px; }
+.foot { color: var(--muted); font-size: 0.84rem; margin-top: 16px; }
 @media (max-width: 820px) {
   .panels { grid-template-columns: 1fr; }
-  .cards { grid-template-columns: repeat(2, 1fr); }
+  .cards, .cals { grid-template-columns: repeat(2, 1fr); }
 }
 </style>
 </head>
 <body>
 <div class="page">
-  <h1>The global calibration dataset</h1>
-  <p class="lede">Every sample the bundled TEXAS calibration was fitted to, after Mahalanobis screening and gridding to 0.25° cells (manuscript Section 5). Hover a point to see the sample; it lights up in both panels. Click a data type to hide or show it.</p>
+  <h1>Calibration data, from the first TEX₈₆ line to TEXAS</h1>
+  <p class="lede">Pick a calibration to see the data it was fitted to and its fitted curve. TEXAS (the default) shows the global calibration dataset after Mahalanobis screening, gridded to 0.25° cells (manuscript Section 5). Hover a point to see the sample; it lights up in both panels.</p>
 
+  <div class="cals" id="cals" role="group" aria-label="Calibration"></div>
   <div class="cards" id="cards"></div>
 
-  <div class="controls">
-    <span><span class="ctl-label">x</span><span class="seg" id="ctl-x"></span></span>
-    <span><span class="ctl-label">y</span><span class="seg" id="ctl-y"></span></span>
-    <span><span class="ctl-label">color</span><span class="seg" id="ctl-c"></span></span>
-    <span class="legend" id="legend"></span>
+  <div class="controls" id="controls">
+    <span id="grp-x"><span class="ctl-label">x</span><span class="seg" id="ctl-x"></span></span>
+    <span id="grp-y"><span class="ctl-label">y</span><span class="seg" id="ctl-y"></span></span>
+    <span id="grp-c"><span class="ctl-label">color</span><span class="seg" id="ctl-c"></span></span>
+    <label class="toggle"><input type="checkbox" id="ctl-curve" checked> fitted curve</label>
   </div>
+  <div class="legend" id="legend"></div>
 
   <div class="panels">
-    <div class="panel"><h3 id="scatter-title"></h3><svg id="scatter" viewBox="0 0 560 420" role="img" aria-label="Scatter plot of the calibration data"></svg></div>
-    <div class="panel"><h3>Where the coretops are</h3><svg id="map" viewBox="0 0 640 340" role="img" aria-label="Map of coretop sites"></svg>
-      <p class="note">Cultures and mesocosms are laboratory and tank experiments, so they have no place on the map.</p></div>
+    <div class="panel"><h3 id="scatter-title"></h3><svg id="scatter" viewBox="0 0 560 420" role="img" aria-label="Scatter plot of the calibration data"></svg>
+      <p class="note" id="curve-note"></p></div>
+    <div class="panel"><h3 id="map-title"></h3><svg id="map" viewBox="0 0 640 340" role="img" aria-label="Map of the calibration sites"></svg>
+      <p class="note" id="map-note"></p></div>
   </div>
 
-  <h2>Where the data come from</h2>
-  <table id="sources"><thead><tr><th>Data type</th><th>Study</th><th class="n">Samples</th></tr></thead><tbody></tbody></table>
+  <h2>Where the TEXAS data come from</h2>
+  <p class="lede" id="table-lede">Every original study behind the TEXAS calibration dataset, with the earlier calibrations that also used its samples.</p>
+  <div class="tablewrap"><table id="sources"><thead><tr><th>Original study</th><th>Data type</th><th>Published</th><th>Used by</th><th class="n">TEXAS cells</th></tr></thead><tbody></tbody></table></div>
 
   <p class="foot" id="foot"></p>
 </div>
@@ -110,25 +135,6 @@ td.n { text-align: right; font-variant-numeric: tabular-nums; width: 5em; }
 
 <script>
 const D = /*__DATA__*/null;
-const TYPES = [
-  { k: "c", name: "Coretop", css: "--coretop" },
-  { k: "u", name: "Culture", css: "--culture" },
-  { k: "m", name: "Mesocosm", css: "--mesocosm" },
-];
-const X = [
-  { k: "sst", name: "SST", label: "Temperature (SST, °C)" },
-  { k: "thm", name: "Thermo-T", label: "Temperature (Thermo-T, °C)" },
-];
-const Y = [
-  { k: "ri", name: "Scaled RI", label: "Scaled RI" },
-  { k: "tex", name: "TEX₈₆", label: "TEX₈₆" },
-];
-const C = [
-  { k: "type", name: "Data type" },
-  { k: "g23", name: "GDGT-2/3", label: "GDGT-2/GDGT-3", log: true },
-  { k: "no3", name: "Nitrate", label: "NO₃⁻ (µmol/L)", log: true },
-];
-const state = { x: "sst", y: "ri", c: "type", show: { c: true, u: true, m: true }, hl: -1 };
 const NS = "http://www.w3.org/2000/svg";
 const $ = (id) => document.getElementById(id);
 const el = (tag, attrs = {}, parent) => {
@@ -138,13 +144,37 @@ const el = (tag, attrs = {}, parent) => {
   return e;
 };
 const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const fmt = (v, nd) => (v == null ? "—" : (+v).toFixed(nd));
+
+const TYPES = [
+  { k: "c", name: "Coretop", css: "--coretop" },
+  { k: "u", name: "Culture", css: "--culture" },
+  { k: "m", name: "Mesocosm", css: "--mesocosm" },
+];
+const CALS = [
+  { k: "texas", name: "TEXAS", sub: "Rattanasriampaipong et al. (2026)", css: "--texas" },
+  { k: "linear", name: "Original linear", sub: "Schouten et al. (2002)", css: "--linear" },
+  { k: "tex86h", name: "TEX₈₆ᴴ", sub: "Kim et al. (2010)", css: "--tex86h" },
+  { k: "bayspar", name: "BAYSPAR", sub: "Tierney & Tingley (2014)", css: "--bayspar" },
+];
+const USED = { L: { name: "Original linear", css: "--linear" }, H: { name: "TEX₈₆ᴴ", css: "--tex86h" },
+  B: { name: "BAYSPAR", css: "--bayspar" }, T: { name: "TEXAS", css: "--texas" } };
+const X = [{ k: "sst", name: "SST", label: "Temperature (SST, °C)" }, { k: "thm", name: "Thermo-T", label: "Temperature (Thermo-T, °C)" }];
+const Y = [{ k: "ri", name: "Scaled RI", label: "Scaled RI" }, { k: "tex", name: "TEX₈₆", label: "TEX₈₆" }];
+const C = [
+  { k: "type", name: "Data type" }, { k: "used", name: "First used by" }, { k: "year", name: "Published" },
+  { k: "g23", name: "GDGT-2/3", label: "GDGT-2/GDGT-3", log: true }, { k: "no3", name: "Nitrate", label: "NO₃⁻ (µmol/L)", log: true },
+];
+const REGION_CSS = ["--r1", "--r2", "--r3"];
+const state = { cal: "texas", x: "sst", y: "ri", c: "type", curve: true, show: { c: true, u: true, m: true }, hl: -1 };
 
 // Follow the docs site's light/dark switch when embedded (same origin); otherwise the system theme.
 function syncTheme() {
   try {
     const t = window.parent !== window && window.parent.document.documentElement.dataset.theme;
     if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
-  } catch (e) { /* not embedded, or another origin */ }
+  } catch (e) {}
 }
 syncTheme();
 try {
@@ -152,49 +182,71 @@ try {
     .observe(window.parent.document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 } catch (e) {}
 
-// Sequential palette for the GDGT-2/3 and nitrate modes (viridis stops).
+// ---- the four data sets as one list of points: {x, y, lat, lon, info, ...} -----------------------
+const studyOf = (k) => (D.studies && D.studies[k]) || { cite: k };
+const firstUsed = (u) => (u.includes("L") ? "L" : u.includes("H") ? "H" : u.includes("B") ? "B" : "T");
+function texasPoints() {
+  return D.points.map((p, i) => ({ ...p, i, x: p[state.x], y: p[state.y], first: firstUsed(p.u || ""),
+    year: p.s && p.s.length ? studyOf(p.s[0]).year : null }));
+}
+function legacyPoints() {
+  const L = D.legacy;
+  if (state.cal === "linear") return L.schouten.points.map(([sst, tex], i) => ({ i, x: sst, y: tex, lat: null, lon: null }));
+  if (state.cal === "tex86h") return L.kim.rows.map(([lat, lon, T, tex, inset], i) => ({ i, x: T, y: tex, lat, lon, inset }));
+  return L.bayspar.samples.map(([sst, tex, lat, lon], i) => ({ i, x: sst, y: tex, lat, lon, region: regionOf(lat, lon) }));
+}
+function regionOf(lat, lon) {
+  if (lat == null) return -1;
+  return D.legacy.bayspar.regions.findIndex((r) => Math.abs(lon - r.cell[0]) <= 10 && Math.abs(lat - r.cell[1]) <= 10);
+}
+let P = [];
+
+// ---- color ---------------------------------------------------------------------------------------
 const VIR = ["#440154", "#3b528b", "#21918c", "#5ec962", "#fde725"];
 function vir(t) {
   t = Math.max(0, Math.min(1, t));
-  const i = Math.min(VIR.length - 2, Math.floor(t * (VIR.length - 1)));
-  const f = t * (VIR.length - 1) - i;
+  const i = Math.min(VIR.length - 2, Math.floor(t * (VIR.length - 1))), f = t * (VIR.length - 1) - i;
   const a = VIR[i].match(/\w\w/g).map((h) => parseInt(h, 16)), b = VIR[i + 1].match(/\w\w/g).map((h) => parseInt(h, 16));
   return "rgb(" + a.map((v, j) => Math.round(v + (b[j] - v) * f)).join(",") + ")";
 }
-function quantile(arr, q) { const s = [...arr].sort((a, b) => a - b); return s[Math.floor(q * (s.length - 1))]; }
+const quant = (arr, q) => { const s = [...arr].sort((a, b) => a - b); return s[Math.floor(q * (s.length - 1))]; };
 function colorScale() {
-  const mode = C.find((c) => c.k === state.c);
-  if (mode.k === "type") {
-    const col = Object.fromEntries(TYPES.map((t) => [t.k, css(t.css)]));
-    return { fill: (p) => col[p.t], mode };
+  if (state.cal === "linear") return { fill: () => css("--linear") };
+  if (state.cal === "tex86h") return { fill: () => css("--tex86h") };
+  if (state.cal === "bayspar") return { fill: (p) => (p.region >= 0 ? css(REGION_CSS[p.region]) : css("--other")) };
+  if (state.c === "type") { const col = Object.fromEntries(TYPES.map((t) => [t.k, css(t.css)])); return { fill: (p) => col[p.t] }; }
+  if (state.c === "used") return { fill: (p) => css(USED[p.first].css) };
+  if (state.c === "year") {
+    const ys = P.map((p) => p.year).filter((v) => v), lo = Math.min(...ys), hi = Math.max(...ys);
+    return { fill: (p) => (p.year ? vir((p.year - lo) / (hi - lo)) : css("--muted")), bar: { lo, hi, label: "Year published", log: false } };
   }
-  const vals = D.points.map((p) => p[mode.k]).filter((v) => v > 0).map(Math.log10);
-  const lo = quantile(vals, 0.01), hi = quantile(vals, 0.99);
-  return { fill: (p) => (p[mode.k] > 0 ? vir((Math.log10(p[mode.k]) - lo) / (hi - lo)) : css("--muted")), mode, lo, hi };
+  const m = C.find((c) => c.k === state.c);
+  const vals = P.map((p) => p[m.k]).filter((v) => v > 0).map(Math.log10);
+  const lo = quant(vals, 0.01), hi = quant(vals, 0.99);
+  return { fill: (p) => (p[m.k] > 0 ? vir((Math.log10(p[m.k]) - lo) / (hi - lo)) : css("--muted")), bar: { lo, hi, label: m.label + " (log)", log: true } };
 }
 
+// ---- scatter -------------------------------------------------------------------------------------
 function niceTicks(lo, hi, n) {
-  const step0 = (hi - lo) / n, mag = Math.pow(10, Math.floor(Math.log10(step0)));
-  const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= step0);
+  const s0 = (hi - lo) / n, mag = Math.pow(10, Math.floor(Math.log10(s0)));
+  const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= s0);
   const out = [];
   for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(6));
   return out;
 }
-
 const scatter = $("scatter"), map = $("map");
 let sDots = [], mDots = [];
-
 function drawScatter(cs) {
   scatter.replaceChildren();
   const W = 560, H = 420, m = { l: 54, r: 14, t: 10, b: 46 };
-  const xs = X.find((x) => x.k === state.x), ys = Y.find((y) => y.k === state.y);
-  const xv = D.points.map((p) => p[state.x]).filter((v) => v != null);
-  const xlo = Math.floor(Math.min(...xv) / 5) * 5, xhi = Math.ceil(Math.max(...xv) / 5) * 5;
-  const ylo = 0.2, yhi = 1.0;
+  const texas = state.cal === "texas";
+  const xlab = texas ? X.find((x) => x.k === state.x).label : "Temperature (SST, °C)";
+  const ylab = texas ? Y.find((y) => y.k === state.y).label : "TEX₈₆";
+  const xlo = -5, xhi = 50, ylo = texas && state.y === "ri" ? 0.2 : 0.2, yhi = 1.0;
   const sx = (v) => m.l + (v - xlo) / (xhi - xlo) * (W - m.l - m.r);
   const sy = (v) => H - m.b - (v - ylo) / (yhi - ylo) * (H - m.t - m.b);
   const ax = el("g", { class: "axis" }, scatter);
-  for (const t of niceTicks(xlo, xhi, 8)) {
+  for (const t of niceTicks(xlo, xhi, 11)) {
     el("line", { x1: sx(t), x2: sx(t), y1: m.t, y2: H - m.b, class: "gridline" }, ax);
     el("text", { x: sx(t), y: H - m.b + 16, "text-anchor": "middle" }, ax).textContent = t;
   }
@@ -202,57 +254,146 @@ function drawScatter(cs) {
     el("line", { x1: m.l, x2: W - m.r, y1: sy(t), y2: sy(t), class: "gridline" }, ax);
     el("text", { x: m.l - 8, y: sy(t) + 4, "text-anchor": "end" }, ax).textContent = t.toFixed(1);
   }
-  el("text", { x: (m.l + W - m.r) / 2, y: H - 8, "text-anchor": "middle", class: "axis-title" }, scatter).textContent = xs.label;
-  el("text", { x: -(m.t + H - m.b) / 2, y: 14, transform: "rotate(-90)", "text-anchor": "middle", class: "axis-title" }, scatter).textContent = ys.label;
-  $("scatter-title").textContent = ys.name + " against " + xs.name;
+  el("text", { x: (m.l + W - m.r) / 2, y: H - 8, "text-anchor": "middle", class: "axis-title" }, scatter).textContent = xlab;
+  el("text", { x: -(m.t + H - m.b) / 2, y: 14, transform: "rotate(-90)", "text-anchor": "middle", class: "axis-title" }, scatter).textContent = ylab;
+  $("scatter-title").textContent = ylab + " against " + xlab.replace("Temperature (", "").replace(", °C)", "");
+  const clip = el("clipPath", { id: "plotclip" }, el("defs", {}, scatter));
+  el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b }, clip);
+  const curves = el("g", { "clip-path": "url(#plotclip)" });
+  const line = (pts, attrs) => el("path", { d: "M" + pts.map(([x, y]) => sx(x).toFixed(1) + "," + sy(y).toFixed(1)).join("L"), fill: "none", ...attrs }, curves);
+
+  // curves under the points for BAYSPAR's 80 faint lines, over them for the rest
+  let note = "";
+  if (state.curve) {
+    if (texas && state.y === "ri") {
+      const c = D.texas.curves[state.x];
+      const band = c.T.map((t, i) => [t, c.hi[i]]).concat(c.T.map((t, i) => [t, c.lo[i]]).reverse());
+      el("path", { d: "M" + band.map(([x, y]) => sx(x).toFixed(1) + "," + sy(y).toFixed(1)).join("L") + "Z", fill: css("--texas"), "fill-opacity": 0.18 }, curves);
+      line(c.T.map((t, i) => [t, c.mid[i]]), { stroke: css("--texas"), "stroke-width": 2.6 });
+      note = `TEXAS curve: posterior median and 90% band of ${c.case}, at the coretops' median GDGT-2/3 (${D.texas.g23}) with the nitrate term off.`;
+    } else if (texas) {
+      note = "The TEXAS curve is fitted in Scaled RI; switch y to Scaled RI to see it.";
+    } else if (state.cal === "linear") {
+      line([[-1, 0.015 * -1 + 0.28], [30, 0.015 * 30 + 0.28]], { stroke: css("--linear"), "stroke-width": 2.6 });
+      note = "TEX₈₆ = 0.015 SST + 0.28 (Schouten et al., 2002), drawn over its data range.";
+    } else if (state.cal === "tex86h") {
+      const pts = []; for (let t = 5; t <= 31; t += 0.5) pts.push([t, Math.pow(10, (t - 38.6) / 68.4)]);
+      line(pts, { stroke: css("--tex86h"), "stroke-width": 2.6 });
+      note = "SST = 68.4 log₁₀(TEX₈₆) + 38.6 (Kim et al., 2010), fitted to the filled points: no Red Sea, SST ≥ 5 °C.";
+    } else {
+      for (const [lo, la, a, b, t0, t1] of D.legacy.bayspar.cells)
+        line([[t0, a + b * t0], [t1, a + b * t1]], { stroke: css("--bayspar"), "stroke-opacity": 0.35, "stroke-width": 1.2 });
+      D.legacy.bayspar.regions.forEach((r, j) => line([[r.tmin, r.alpha + r.beta * r.tmin], [r.tmax, r.alpha + r.beta * r.tmax]],
+        { stroke: css(REGION_CSS[j]), "stroke-width": 3.2 }));
+      note = "BAYSPAR fits TEX₈₆ = α + β·SST in each 20° cell; all 80 cell lines are drawn faintly, with the three regions of manuscript Fig. 1a in color.";
+    }
+  }
+  $("curve-note").textContent = note;
+  if (state.cal === "bayspar") scatter.appendChild(curves);
   const g = el("g", {}, scatter);
-  sDots = D.points.map((p, i) => {
-    if (p[state.x] == null || p[state.y] == null || !state.show[p.t]) return null;
-    const r = p.t === "c" ? 3 : 4.6;
-    const d = el("circle", { cx: sx(p[state.x]), cy: sy(p[state.y]), r, class: "pt", fill: cs.fill(p),
-      "fill-opacity": p.t === "c" ? 0.72 : 0.95 }, g);
-    d.dataset.i = i;
-    return d;
-  });
+  sDots = [];
+  const order = state.cal === "bayspar" ? [...P].sort((a, b) => (a.region >= 0) - (b.region >= 0)) : P;
+  for (const p of order) {
+    if (p.x == null || p.y == null || (texas && !state.show[p.t])) continue;
+    const big = texas ? p.t !== "c" : state.cal === "linear" || p.region >= 0;
+    const open = state.cal === "tex86h" && !p.inset;
+    const d = el("circle", { cx: sx(p.x), cy: sy(p.y), r: big ? 4.4 : 3, class: "pt",
+      fill: open ? "none" : cs.fill(p), stroke: open ? cs.fill(p) : null, "stroke-width": open ? 1.2 : null,
+      "fill-opacity": big ? 0.95 : 0.72 }, g);
+    d.dataset.i = p.i;
+    sDots[p.i] = d;
+  }
+  if (state.cal !== "bayspar") scatter.appendChild(curves);
 }
 
+// ---- map: Eckert III ----------------------------------------------------------------------------
+const K = Math.sqrt(Math.PI * (4 + Math.PI)), XMAX = 4 * Math.PI / K, YMAX = 2 * Math.PI / K;
+const MW = 640, MH = 340, PAD = 10;
+const S = Math.min((MW - 2 * PAD) / (2 * XMAX), (MH - 2 * PAD) / (2 * YMAX));
+function eck3(lon, lat) {
+  const l = lon * Math.PI / 180, p = lat * Math.PI / 180;
+  const x = 2 / K * l * (1 + Math.sqrt(Math.max(0, 1 - 4 * p * p / (Math.PI * Math.PI))));
+  return [MW / 2 + x * S, MH / 2 - 4 / K * p * S];
+}
+const pathOf = (ring) => "M" + ring.map(([lo, la]) => eck3(lo, la).map((v) => v.toFixed(1)).join(",")).join("L") + "Z";
+let LANDPATH = null;
 function drawMap(cs) {
   map.replaceChildren();
-  const W = 640, H = 340, k = W / 360;
-  const proj = (lon, lat) => [(lon + 180) * k, (90 - lat) * (H / 180)];
-  el("rect", { x: 0, y: 0, width: W, height: H, class: "sea", rx: 6 }, map);
-  el("path", { d: D.land, class: "land", transform: `translate(${W / 2},${H / 2}) scale(${k},${H / 180})` }, map);
+  const edge = [];
+  for (let la = -90; la <= 90; la += 3) edge.push([180, la]);
+  for (let la = 90; la >= -90; la -= 3) edge.push([-180, la]);
+  el("path", { d: pathOf(edge), class: "globe" }, map);
+  if (!LANDPATH) LANDPATH = D.land.map(pathOf).join("");
+  el("path", { d: LANDPATH, class: "land" }, map);
+  const titles = { texas: "Where the TEXAS coretops are", linear: "Schouten et al. (2002)'s coretop sites",
+    tex86h: "Kim et al. (2010)'s coretops", bayspar: "BAYSPAR's coretops and its three highlighted cells" };
+  $("map-title").textContent = titles[state.cal];
+  const notes = { texas: "Cultures and mesocosms are laboratory and tank experiments, so they have no place on the map.",
+    linear: "Sites from gdgt-db; the 44 plotted points were read from the paper's Fig. 3b and carry no site, so the map is not linked to the plot.",
+    tex86h: "Open circles: samples outside the TEX₈₆ᴴ fitting set (Red Sea, or SST below 5 °C).",
+    bayspar: "Positions recovered from Tierney & Tingley (2015)'s table; a few samples could not be placed." };
+  $("map-note").textContent = notes[state.cal];
+  if (state.cal === "bayspar") {
+    D.legacy.bayspar.regions.forEach((r, j) => {
+      const [lo, la] = r.cell, box = [];
+      for (let t = -10; t <= 10; t += 2) box.push([lo + t, la - 10]);
+      for (let t = -10; t <= 10; t += 2) box.push([lo + 10, la + t]);
+      for (let t = 10; t >= -10; t -= 2) box.push([lo + t, la + 10]);
+      for (let t = 10; t >= -10; t -= 2) box.push([lo - 10, la + t]);
+      el("path", { d: pathOf(box), fill: "none", stroke: css(REGION_CSS[j]), "stroke-width": 2 }, map);
+    });
+  }
   const g = el("g", {}, map);
-  mDots = D.points.map((p, i) => {
-    if (p.lat == null || p.lon == null || !state.show[p.t]) return null;
-    const [x, y] = proj(p.lon, p.lat);
-    const d = el("circle", { cx: x, cy: y, r: p.t === "c" ? 2.4 : 3.6, class: "pt", fill: cs.fill(p),
-      "fill-opacity": 0.85 }, g);
-    d.dataset.i = i;
-    return d;
-  });
-  if (cs.mode.k !== "type") {   // colorbar
-    const cb = el("g", { class: "colorbar", transform: `translate(${W - 190},${H - 34})` }, map);
+  mDots = [];
+  if (state.cal === "linear") {
+    for (const [lat, lon] of D.legacy.schouten.sites) {
+      const [x, y] = eck3(lon, lat);
+      el("circle", { cx: x, cy: y, r: 3.6, class: "pt", fill: css("--linear") }, g);
+    }
+  } else {
+    for (const p of P) {
+      if (p.lat == null || p.lon == null || (state.cal === "texas" && !state.show[p.t])) continue;
+      const [x, y] = eck3(p.lon, p.lat);
+      const open = state.cal === "tex86h" && !p.inset;
+      const d = el("circle", { cx: x, cy: y, r: state.cal === "texas" && p.t === "c" ? 2.3 : 2.8, class: "pt",
+        fill: open ? "none" : cs.fill(p), stroke: open ? cs.fill(p) : null, "fill-opacity": 0.88 }, g);
+      d.dataset.i = p.i;
+      mDots[p.i] = d;
+    }
+  }
+  if (cs.bar) {
+    const cb = el("g", { class: "colorbar", transform: `translate(${MW - 200},${MH - 30})` }, map);
     const grad = el("linearGradient", { id: "cbg" }, el("defs", {}, map));
     VIR.forEach((c, i) => el("stop", { offset: i / (VIR.length - 1), "stop-color": c }, grad));
-    el("rect", { x: 0, y: 0, width: 170, height: 9, fill: "url(#cbg)", rx: 2 }, cb);
-    const fmt = (v) => { const x = Math.pow(10, v); return x < 1 ? x.toPrecision(1) : Math.round(x); };
-    el("text", { x: 0, y: 22 }, cb).textContent = fmt(cs.lo);
-    el("text", { x: 170, y: 22, "text-anchor": "end" }, cb).textContent = fmt(cs.hi);
-    el("text", { x: 85, y: 22, "text-anchor": "middle" }, cb).textContent = cs.mode.label + " (log)";
+    el("rect", { x: 0, y: 0, width: 180, height: 9, fill: "url(#cbg)", rx: 2 }, cb);
+    const f = (v) => (cs.bar.log ? (Math.pow(10, v) < 1 ? Math.pow(10, v).toPrecision(1) : Math.round(Math.pow(10, v))) : v);
+    el("text", { x: 0, y: 22 }, cb).textContent = f(cs.bar.lo);
+    el("text", { x: 180, y: 22, "text-anchor": "end" }, cb).textContent = f(cs.bar.hi);
+    el("text", { x: 90, y: 22, "text-anchor": "middle" }, cb).textContent = cs.bar.label;
   }
 }
 
+// ---- hover ----------------------------------------------------------------------------------------
 const tip = $("tip");
-function fmt(v, nd) { return v == null ? "—" : (+v).toFixed(nd); }
+function tipHtml(p) {
+  if (state.cal === "texas") {
+    const t = TYPES.find((t) => t.k === p.t);
+    const studies = (p.s || []).map((k) => studyOf(k).cite).join("; ");
+    const where = p.t === "c" ? (p.reg ? p.reg + " · " : "") + fmt(p.lat, 2) + "°, " + fmt(p.lon, 2) + "°" : p.org || "";
+    const used = (p.u || "").split("").map((c) => USED[c].name).join(", ");
+    return `<b>${t.name}${studies ? " · " + esc(studies) : ""}</b>` + (where ? `<span class="k">${esc(where)}</span><br>` : "") +
+      `SST ${fmt(p.sst, 1)} °C · Thermo-T ${fmt(p.thm, 1)} °C<br>Scaled RI ${fmt(p.ri, 3)} · TEX₈₆ ${fmt(p.tex, 3)}<br>` +
+      `GDGT-2/3 ${fmt(p.g23, 2)} · NO₃⁻ ${fmt(p.no3, 2)} µmol/L` + (used ? `<br><span class="k">Also used by ${esc(used)}</span>` : "");
+  }
+  const name = CALS.find((c) => c.k === state.cal).sub;
+  let extra = "";
+  if (state.cal === "tex86h") extra = p.inset ? "In the TEX₈₆ᴴ fitting set" : "Not in the TEX₈₆ᴴ fitting set";
+  if (state.cal === "bayspar" && p.region >= 0) extra = D.legacy.bayspar.regions[p.region].label + " cell";
+  return `<b>${esc(name)}</b>` + (p.lat != null ? `<span class="k">${fmt(p.lat, 2)}°, ${fmt(p.lon, 2)}°</span><br>` : "") +
+    `SST ${fmt(p.x, 1)} °C · TEX₈₆ ${fmt(p.y, 3)}` + (extra ? `<br><span class="k">${extra}</span>` : "");
+}
 function showTip(i, ev) {
-  const p = D.points[i], t = TYPES.find((t) => t.k === p.t);
-  const where = p.t === "c" ? (p.reg ? p.reg + " · " : "") + fmt(p.lat, 2) + "°, " + fmt(p.lon, 2) + "°" : (p.org || "");
-  tip.innerHTML = `<b>${t.name}${p.ref ? " · " + escapeHtml(p.ref) : ""}</b>` +
-    (where ? `<span class="k">${escapeHtml(where)}</span><br>` : "") +
-    `SST ${fmt(p.sst, 1)} °C · Thermo-T ${fmt(p.thm, 1)} °C<br>` +
-    `Scaled RI ${fmt(p.ri, 3)} · TEX₈₆ ${fmt(p.tex, 3)}<br>` +
-    `GDGT-2/3 ${fmt(p.g23, 2)} · NO₃⁻ ${fmt(p.no3, 2)} µmol/L`;
+  tip.innerHTML = tipHtml(P[i]);
   tip.style.display = "block";
   const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
   let x = ev.clientX + pad, y = ev.clientY + pad;
@@ -260,7 +401,6 @@ function showTip(i, ev) {
   if (y + h > innerHeight - 8) y = ev.clientY - h - pad;
   tip.style.left = x + "px"; tip.style.top = y + "px";
 }
-function escapeHtml(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 function highlight(i) {
   for (const set of [sDots, mDots]) {
     if (state.hl >= 0 && set[state.hl]) set[state.hl].classList.remove("hl");
@@ -278,6 +418,7 @@ for (const svg of [scatter, map]) {
   svg.addEventListener("mouseleave", () => { highlight(-1); tip.style.display = "none"; });
 }
 
+// ---- controls, cards, legend, table --------------------------------------------------------------
 function seg(id, opts, key) {
   const box = $(id);
   box.replaceChildren();
@@ -288,42 +429,83 @@ function seg(id, opts, key) {
     box.appendChild(b);
   }
 }
+function cals() {
+  $("cals").innerHTML = CALS.map((c) => `<button type="button" class="cal" data-k="${c.k}" aria-pressed="${state.cal === c.k}" style="--c:var(${c.css})"><b>${c.name}</b><small>${c.sub}</small></button>`).join("");
+  $("cals").querySelectorAll(".cal").forEach((b) => (b.onclick = () => { state.cal = b.dataset.k; state.hl = -1; cals(); drawAll(); }));
+}
 function legend() {
   const box = $("legend");
   box.replaceChildren();
-  if (state.c !== "type") return;
-  for (const t of TYPES) {
-    const n = D.points.filter((p) => p.t === t.k).length;
-    const b = document.createElement("button");
-    b.type = "button"; b.className = "chip"; b.style.setProperty("--c", `var(${t.css})`);
-    b.setAttribute("aria-pressed", state.show[t.k]);
-    b.innerHTML = `<span class="dot"></span>${t.name} <span style="font-weight:400">${n.toLocaleString()}</span>`;
-    b.onclick = () => { state.show[t.k] = !state.show[t.k]; legend(); drawAll(); };
-    box.appendChild(b);
+  const add = (html) => box.insertAdjacentHTML("beforeend", html);
+  if (state.cal === "texas" && state.c === "type") {
+    for (const t of TYPES) {
+      const n = D.points.filter((p) => p.t === t.k).length;
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "chip"; b.style.setProperty("--c", `var(${t.css})`);
+      b.setAttribute("aria-pressed", state.show[t.k]);
+      b.innerHTML = `<span class="dot"></span>${t.name} <span style="font-weight:400">${n.toLocaleString()}</span>`;
+      b.onclick = () => { state.show[t.k] = !state.show[t.k]; drawAll(); };
+      box.appendChild(b);
+    }
+  } else if (state.cal === "texas" && state.c === "used") {
+    for (const k of ["L", "H", "B", "T"]) {
+      const n = P.filter((p) => p.first === k).length;
+      add(`<span class="chip" style="--c:var(${USED[k].css})"><span class="dot"></span>${k === "T" ? "TEXAS only" : USED[k].name} <span style="font-weight:400">${n}</span></span>`);
+    }
+    add(`<span class="note" style="margin:0">Each sample is colored by the earliest calibration that used it.</span>`);
+  } else if (state.cal === "tex86h") {
+    add(`<span class="chip" style="--c:var(--tex86h)"><span class="dot"></span>In the fitting set</span><span class="chip" style="--c:var(--tex86h)"><span class="dot open"></span>Left out</span>`);
+  } else if (state.cal === "bayspar") {
+    D.legacy.bayspar.regions.forEach((r, j) => add(`<span class="chip" style="--c:var(${REGION_CSS[j]})"><span class="dot"></span>${r.label} <span style="font-weight:400">${r.n}</span></span>`));
+    add(`<span class="chip" style="--c:var(--other)"><span class="dot"></span>Other cells</span>`);
   }
 }
 function cards() {
-  const n = (k) => D.points.filter((p) => p.t === k).length;
-  const items = [
-    { n: D.points.length, l: "samples in total" },
-    ...TYPES.map((t) => ({ n: n(t.k), l: t.name.toLowerCase() + (t.k === "c" ? " grid cells" : " samples"), c: `var(${t.css})` })),
-  ];
-  $("cards").innerHTML = items.map((i) => `<div class="card" style="${i.c ? "--c:" + i.c : ""}"><div class="n">${i.n.toLocaleString()}</div><div class="l">${i.l}</div></div>`).join("");
+  let items;
+  if (state.cal === "texas") {
+    const n = (k) => D.points.filter((p) => p.t === k).length;
+    items = [{ n: D.points.length, l: "samples in total", c: "var(--texas)" },
+      ...TYPES.map((t) => ({ n: n(t.k), l: t.name.toLowerCase() + (t.k === "c" ? " grid cells" : " samples"), c: `var(${t.css})` }))];
+  } else if (state.cal === "linear") {
+    items = [{ n: P.length, l: "coretops in the fit", c: "var(--linear)" }, { n: D.legacy.schouten.sites.length, l: "sites mapped from gdgt-db", c: "var(--linear)" }];
+  } else if (state.cal === "tex86h") {
+    items = [{ n: P.length, l: "coretops in the annex", c: "var(--tex86h)" }, { n: P.filter((p) => p.inset).length, l: "in the TEX₈₆ᴴ fitting set", c: "var(--tex86h)" }];
+  } else {
+    items = [{ n: P.length, l: "calibration coretops", c: "var(--bayspar)" }, { n: D.legacy.bayspar.cells.length, l: "20° cells, each with its own line", c: "var(--bayspar)" },
+      ...D.legacy.bayspar.regions.slice(0, 2).map((r, j) => ({ n: r.n, l: r.label + " cell", c: `var(${REGION_CSS[j]})` }))];
+  }
+  $("cards").innerHTML = items.map((i) => `<div class="card" style="--c:${i.c}"><div class="n">${i.n.toLocaleString()}</div><div class="l">${i.l}</div></div>`).join("");
 }
-function sources() {
-  const tb = $("sources").querySelector("tbody");
-  tb.innerHTML = D.sources.map((s) => {
-    const t = TYPES.find((t) => t.k === s.t);
-    return `<tr><td><span class="tag" style="--c:var(${t.css})">${t.name}</span></td><td>${escapeHtml(s.ref)}</td><td class="n">${s.n}</td></tr>`;
+function table() {
+  const code = { texas: "T", linear: "L", tex86h: "H", bayspar: "B" }[state.cal];
+  $("sources").querySelector("tbody").innerHTML = D.sources.map((s) => {
+    const used = (s.u + "T").split("").map((c) => `<span class="tag sq" style="--c:var(${USED[c].css})">${USED[c].name}</span>`).join("");
+    const types = s.t.split("").map((k) => { const t = TYPES.find((t) => t.k === k); return `<span class="tag" style="--c:var(${t.css})">${t.name}</span>`; }).join("");
+    const cite = s.doi ? `<a href="https://doi.org/${esc(s.doi)}" target="_blank" rel="noopener">${esc(s.cite)}</a>` : esc(s.cite);
+    const dim = code !== "T" && !s.u.includes(code) ? ' class="dim"' : "";
+    return `<tr${dim}><td>${cite}</td><td>${types}</td><td>${s.year || "—"}</td><td>${used}</td><td class="n">${s.n}</td></tr>`;
   }).join("");
-  $("foot").textContent = `Data: ${D.csv} from the TEXAS training data (TEXAS.download_training_data()). ` +
-    (D.n_crtp_posterior ? `The coretop count matches N_crtp = ${D.n_crtp_posterior.toLocaleString()} in ${D.posterior}. ` : "") +
-    `Coastlines: ${D.land_source}.`;
+  $("table-lede").textContent = code === "T"
+    ? "Every original study behind the TEXAS calibration dataset, with the earlier calibrations that also used its samples. Links go to the paper."
+    : `Studies whose samples ${CALS.find((c) => c.k === state.cal).name} also used are shown in full; the rest are dimmed.`;
 }
-function drawAll() { const cs = colorScale(); drawScatter(cs); drawMap(cs); legend(); }
+function foot() {
+  const pv = D.provenance;
+  $("foot").textContent = `TEXAS data: ${D.csv} (TEXAS.download_training_data()); the coretop count matches N_crtp = ${(D.n_crtp_posterior || 0).toLocaleString()} in ${D.posterior}. ` +
+    (pv ? `Original studies and "used by" from gdgt-db (commit ${pv.gdgtdb_pin.slice(0, 8)}), matching each sample by place and TEX₈₆; DOIs are checked before they are linked. ` : "") +
+    `Earlier calibrations' data: Schouten et al. (2002) Fig. 3b (digitized), Kim et al. (2010) electronic annex, BAYSPAR's calibration files (Tierney & Tingley, 2014, 2015). Coastlines: ${D.land_source}; Eckert III projection.`;
+}
+function drawAll() {
+  P = state.cal === "texas" ? texasPoints() : legacyPoints();
+  const texas = state.cal === "texas";
+  for (const id of ["grp-x", "grp-y", "grp-c"]) $(id).style.display = texas ? "" : "none";
+  const cs = colorScale();
+  drawScatter(cs); drawMap(cs); legend(); cards(); table();
+}
 
 seg("ctl-x", X, "x"); seg("ctl-y", Y, "y"); seg("ctl-c", C, "c");
-cards(); sources(); drawAll();
+$("ctl-curve").onchange = (e) => { state.curve = e.target.checked; drawAll(); };
+cals(); foot(); drawAll();
 </script>
 </body>
 </html>
