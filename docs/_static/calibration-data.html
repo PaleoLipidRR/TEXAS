@@ -47,7 +47,11 @@ h2 { font-size: 1.15rem; margin: 28px 0 6px; }
 .cal[aria-pressed="true"] { background: color-mix(in srgb, var(--c) 16%, var(--surface)); border-color: var(--c);
   box-shadow: inset 0 0 0 1px var(--c); }
 .cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 0 0 12px; }
-.card.blank { visibility: hidden; }
+.card { position: relative; }
+.card:not(.on) .n, .card:not(.on) .l { opacity: 0.55; }
+.card.on { opacity: 1; background: color-mix(in srgb, var(--c) 10%, var(--surface)); }
+.card + .card::before { content: "→"; position: absolute; left: -10px; top: 50%; transform: translate(-50%, -50%);
+  color: var(--muted); font-size: 0.85rem; }
 .card { background: var(--surface); border: 1px solid var(--hair); border-top: 4px solid var(--c, var(--ink-2));
   border-radius: 8px; padding: 8px 12px; }
 .card .n { font-size: 1.55rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
@@ -113,6 +117,8 @@ tr.dim td { opacity: 0.35; }
   .panels { grid-template-columns: 1fr; }
   .cals { grid-template-columns: repeat(2, 1fr); }
   .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .card + .card::before { content: none; }
+  .card .l { height: 3.9em; -webkit-line-clamp: 3; }
   .srow.key { height: 98px; }
 }
 </style>
@@ -604,37 +610,38 @@ function legend() {
     add(`<span class="chip" style="--c:var(--bayspar)"><span class="dot"></span>SST calibration ${n}</span><span class="chip" style="--c:var(--bayspar)"><span class="dot open"></span>north of 70° N ${db.length - n}</span>`);
   }
 }
+// One count chain per calibration, always in the same order, from its own dataset to the TEXAS
+// grid cells; the step the plots show is highlighted.
 function cards() {
-  let items;
-  if (state.own) {
-    const col = `var(${CALS.find((c) => c.k === state.cal).css})`, n = O.filter((p) => p.inset).length;
-    items = state.cal === "linear"
-      ? [{ n: O.length, l: "coretops (Fig. 3b of the paper)", c: col }, { n: D.legacy.schouten.sites.length, l: "sites on the map", c: col }]
-      : [{ n: O.length, l: state.cal === "bayspar" ? "coretops in Tierney & Tingley (2015)'s database" : "coretops in Kim et al. (2010)'s annex", c: col },
-        { n, l: state.cal === "bayspar" ? "in the SST calibration (≤ 70° N)" : "in the TEX₈₆ᴴ fitting set", c: col },
-        { n: O.length - n, l: state.cal === "bayspar" ? "left out: north of 70° N" : "left out: Red Sea or SST below 5 °C", c: "var(--other)" }];
-  } else if (CODE[state.cal]) {
-    const name = CALS.find((c) => c.k === state.cal).name, all = state.data === "grid" ? D.points.length : D.screening.points.length;
-    items = [{ n: P.length, l: `of ${all.toLocaleString()} ${state.data === "grid" ? "TEXAS samples" : "compilation coretops"} also in ${name}`, c: `var(${CALS.find((c) => c.k === state.cal).css})` }];
-    if (state.data === "full")
-      items.push(...STATUS.map((s, j) => ({ n: P.filter((p) => p.status === j).length, l: s.name.toLowerCase(), c: `var(${s.css})` })));
-    else items.push({ n: P.filter((p) => p.t === "c").length, l: "coretop grid cells", c: "var(--coretop)" },
-      { n: D.points.length - P.length, l: "TEXAS samples it did not use (hidden)", c: "var(--other)" });
-  } else if (state.data === "full") {
-    const c = D.screening.counts;
-    items = [{ n: c.compilation, l: "coretops in the compilation", c: "var(--ink-2)" },
-      { n: c.low_abundance, l: "removed: low GDGT abundance", c: "var(--other)" },
-      { n: c.removed, l: `removed by D_M (${c.warm_end_kept} kept at the warm end)`, c: "var(--linear)" },
-      { n: c.kept, l: `kept, gridded into ${c.cells.toLocaleString()} cells`, c: "var(--coretop)" }];
+  const f = D.screening.fields, iu = f.indexOf("u"), is = f.indexOf("status");
+  const comp = D.screening.points, kept = (r) => r[is] === 0 || r[is] === 1;
+  const cells = (k) => D.points.filter((p) => p.t === "c" && (!k || (p.u || "").includes(k))).length;
+  let items, on;
+  const K = CODE[state.cal];
+  if (K) {
+    const col = `var(${CALS.find((c) => c.k === state.cal).css})`;
+    const match = comp.filter((r) => (r[iu] || "").includes(K));
+    const own = state.cal === "linear" ? [D.legacy.schouten.points.length, D.legacy.schouten.points.length]
+      : state.cal === "tex86h" ? [D.legacy.kim.rows.length, D.legacy.kim.rows.filter((r) => r[4]).length]
+      : [D.legacy.bayspar.database.length, D.legacy.bayspar.database.filter((r) => r[4]).length];
+    const src = { linear: "Schouten et al. (2002)", tex86h: "Kim et al. (2010)'s annex", bayspar: "Tierney & Tingley (2015)" }[state.cal];
+    const fit = { linear: "used in its fit (all of them)", tex86h: "in the TEX₈₆ᴴ fitting set", bayspar: "in its SST calibration (≤ 70° N)" }[state.cal];
+    items = [{ n: own[0], l: "coretops in " + src, c: col }, { n: own[1], l: fit, c: col },
+      { n: match.length, l: "match a coretop in the TEXAS compilation", t: "Same place (5 km) and TEX₈₆ (0.005); Schouten et al. by place only. A coretop can appear in more than one compilation.", c: "var(--ink-2)" },
+      { n: match.filter(kept).length, l: "of those pass TEXAS's screening", c: "var(--coretop)" },
+      { n: cells(K), l: "TEXAS grid cells they fall in", c: "var(--texas)" }];
+    on = { own: [0, 1], full: [2, 3], grid: [4] }[state.data];
   } else {
-    const n = (k) => D.points.filter((p) => p.t === k).length;
-    items = [{ n: D.points.length, l: "samples in the fit", c: "var(--texas)" },
-      ...TYPES.map((t) => ({ n: n(t.k), l: t.name.toLowerCase() + (t.k === "c" ? " grid cells" : " samples"), c: `var(${t.css})` }))];
+    const c = D.screening.counts, labs = D.points.length - cells();
+    items = [{ n: c.compilation, l: "coretops in the full compilation", c: "var(--ink-2)" },
+      { n: c.compilation - c.low_abundance, l: "with enough GDGTs to measure", c: "var(--ink-2)" },
+      { n: c.kept, l: `pass the D_M screening (${c.warm_end_kept} at the warm end)`, c: "var(--coretop)" },
+      { n: c.cells, l: "coretop grid cells (0.25°)", c: "var(--coretop)" },
+      { n: D.points.length, l: `in the fit, with ${labs} cultures and mesocosms`, c: "var(--texas)" }];
+    on = { full: [0, 1, 2], grid: [3, 4] }[state.data];
   }
-  while (items.length < 5) items.push(null);   // always five slots, so the layout never reflows
-  $("cards").innerHTML = items.map((i) => i
-    ? `<div class="card" style="--c:${i.c}"><div class="n">${i.n.toLocaleString()}</div><div class="l" title="${esc(i.l)}">${i.l}</div></div>`
-    : `<div class="card blank" aria-hidden="true"><div class="n">0</div><div class="l"></div></div>`).join("");
+  $("cards").innerHTML = items.map((i, j) => `<div class="card${on.includes(j) ? " on" : ""}" style="--c:${i.c}"${i.t ? ` title="${esc(i.t)}"` : ""}>` +
+    `<div class="n">${i.n.toLocaleString()}</div><div class="l">${i.l}</div></div>`).join("");
 }
 function table() {
   const code = { texas: "T", linear: "L", tex86h: "H", bayspar: "B", compare: "T" }[state.cal];
