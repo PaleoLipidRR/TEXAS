@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TEXAS Calibration Data</title>
+<style>
+:root {
+  --ground: #F3F6F6; --surface: #FBFCFC; --ink: #0F1B1E; --ink-2: #45565A; --muted: #74858A;
+  --hair: #DCE3E4; --axis: #BCC7C9; --land: #DDE3E1; --sea: #F4F8F8; --focus: #0F1B1E;
+  /* manuscript data-type colors (datatype_color_dict: open-color cyan9, yellow9, pink9) */
+  --coretop: #0b7285; --culture: #e67700; --mesocosm: #a61e4d;
+  /* calibrations, as in the sensor-models table */
+  --linear: #B63D3D; --tex86h: #C9772A; --bayspar: #7A4486; --texas: #3D6386; --other: #9aa7aa;
+  /* BAYSPAR's three regions (manuscript Fig. 1a) */
+  --r1: #c92a2a; --r2: #1971c2; --r3: #2b8a3e;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0E1416; --surface: #141B1E; --ink: #EAF1F2; --ink-2: #B6C4C6; --muted: #7F9093;
+    --hair: #243034; --axis: #3A4A50; --land: #2A3438; --sea: #10181B; --focus: #EAF1F2;
+    --coretop: #3bc9db; --culture: #ffc078; --mesocosm: #f783ac;
+    --linear: #E07A7A; --tex86h: #E8A35F; --bayspar: #B98AC6; --texas: #8FB3D1; --other: #5d6b6e;
+    --r1: #ff8787; --r2: #74c0fc; --r3: #8ce99a;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #0E1416; --surface: #141B1E; --ink: #EAF1F2; --ink-2: #B6C4C6; --muted: #7F9093;
+  --hair: #243034; --axis: #3A4A50; --land: #2A3438; --sea: #10181B; --focus: #EAF1F2;
+  --coretop: #3bc9db; --culture: #ffc078; --mesocosm: #f783ac;
+  --linear: #E07A7A; --tex86h: #E8A35F; --bayspar: #B98AC6; --texas: #8FB3D1; --other: #5d6b6e;
+  --r1: #ff8787; --r2: #74c0fc; --r3: #8ce99a;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink);
+  font: 15px/1.5 "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif; }
+a { color: var(--texas); }
+.page { max-width: 1100px; margin: 0 auto; padding: 20px 16px 40px; }
+h1 { font-size: 1.5rem; margin: 0 0 4px; }
+h2 { font-size: 1.15rem; margin: 28px 0 6px; }
+.lede { color: var(--ink-2); margin: 0 0 14px; }
+.cals { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 0 0 12px; }
+.cal { text-align: left; border: 1px solid var(--hair); border-top: 4px solid var(--c); border-radius: 8px;
+  background: var(--surface); color: var(--ink); padding: 8px 12px; font: inherit; cursor: pointer; }
+.cal b { display: block; color: var(--c); font-size: 1.02rem; }
+.cal small { color: var(--ink-2); }
+.cal[aria-pressed="true"] { background: color-mix(in srgb, var(--c) 16%, var(--surface)); border-color: var(--c);
+  box-shadow: inset 0 0 0 1px var(--c); }
+.cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 0 0 12px; }
+.card { position: relative; }
+.card:not(.on) .n, .card:not(.on) .l { opacity: 0.55; }
+.card.on { opacity: 1; background: color-mix(in srgb, var(--c) 10%, var(--surface)); }
+.card + .card::before { content: "→"; position: absolute; left: -10px; top: 50%; transform: translate(-50%, -50%);
+  color: var(--muted); font-size: 0.85rem; }
+.card { background: var(--surface); border: 1px solid var(--hair); border-top: 4px solid var(--c, var(--ink-2));
+  border-radius: 8px; padding: 8px 12px; }
+.card .n { font-size: 1.55rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.card .l { color: var(--ink-2); font-size: 0.88rem; line-height: 1.3; height: 2.6em; overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.settings { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; margin: 0 0 12px;
+  background: var(--surface); border: 1px solid var(--hair); border-radius: 10px; padding: 10px 14px; }
+.srow { display: flex; align-items: center; gap: 8px; height: 34px; white-space: nowrap; overflow-x: auto; overflow-y: hidden;
+  scrollbar-width: thin; }
+.srow .ctl-label.gap { margin-left: 18px; width: auto; }
+.srow.key { height: 66px; align-items: flex-start; overflow: hidden; }
+.srow .ctl-label { width: 3.6rem; flex: none; margin: 0; }
+.srow.key .ctl-label { padding-top: 6px; }
+.ctl-sub { font-size: 0.85rem; color: var(--muted); }
+.ctl-sub + .seg { margin-right: 6px; }
+.seg { display: inline-flex; border: 1px solid var(--hair); border-radius: 8px; overflow: hidden; vertical-align: middle; }
+.seg button { border: 0; background: var(--surface); color: var(--ink-2); padding: 5px 11px; font: inherit;
+  font-size: 0.88rem; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--hair); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); font-weight: 600; }
+.ctl-label { font-size: 0.78rem; color: var(--muted); margin-right: 6px; text-transform: uppercase; letter-spacing: .06em; }
+.toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; color: var(--ink-2); cursor: pointer; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 8px; align-content: flex-start; align-items: center;
+  height: 100%; overflow-y: auto; padding: 2px; flex: 1; min-width: 0; }
+.chip { display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid var(--c); border-radius: 999px;
+  padding: 2px 10px; background: color-mix(in srgb, var(--c) 14%, transparent); color: var(--ink);
+  font: inherit; font-size: 0.86rem; font-weight: 600; }
+button.chip { cursor: pointer; }
+.chip .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.chip .dot.open { background: transparent; border: 1.5px solid var(--c); }
+.chip[aria-pressed="false"] { opacity: 0.4; background: transparent; }
+.cal:focus-visible, .chip:focus-visible, .seg button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.panels { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 12px; }
+.panel { background: var(--surface); border: 1px solid var(--hair); border-radius: 10px; padding: 8px; }
+.panel h3 { margin: 2px 6px 4px; font-size: 0.95rem; color: var(--ink-2); font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+svg { display: block; width: 100%; height: auto; }
+.axis text { fill: var(--muted); font-size: 11px; }
+.axis-title { fill: var(--ink-2); font-size: 12.5px; font-weight: 600; }
+.gridline { stroke: var(--hair); }
+.pt { stroke: var(--surface); stroke-width: 0.6; }
+.pt.hl { stroke: var(--focus); stroke-width: 2; }
+.land { fill: var(--land); }
+.globe { fill: var(--sea); stroke: var(--axis); stroke-width: 0.8; }
+.colorbar text { fill: var(--muted); font-size: 11px; }
+.note { color: var(--muted); font-size: 0.85rem; margin: 6px 6px 2px; }
+.tip { position: fixed; pointer-events: none; z-index: 5; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--hair); border-radius: 8px; padding: 7px 10px; font-size: 0.85rem; line-height: 1.35;
+  box-shadow: 0 6px 18px rgba(0,0,0,.18); max-width: 320px; display: none; }
+.tip b { display: block; }
+.tip .k { color: var(--muted); }
+.tablewrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--hair); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; white-space: nowrap; }
+td.n { text-align: right; font-variant-numeric: tabular-nums; }
+tr.dim td { opacity: 0.35; }
+.tag { display: inline-block; margin: 1px 3px 1px 0; border: 1.5px solid var(--c); border-radius: 999px; padding: 0 8px;
+  background: color-mix(in srgb, var(--c) 14%, transparent); font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+.tag.sq { border-radius: 4px; }
+.foot { color: var(--muted); font-size: 0.84rem; margin-top: 16px; }
+@media (max-width: 820px) {
+  .panels { grid-template-columns: 1fr; }
+  .cals { grid-template-columns: repeat(2, 1fr); }
+  .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .card + .card::before { content: none; }
+  .card .l { height: 3.9em; -webkit-line-clamp: 3; }
+  .srow.key { height: 98px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Calibration data, from the first TEX₈₆ line to TEXAS</h1>
+  <p class="lede">The TEXAS calibration dataset with its fitted curve. Pick an earlier calibration to see its original dataset and fitted curve, or the TEXAS samples it shares, or compare all four curves. Switch the data to the full coretop compilation to see the Mahalanobis screening of manuscript Section 5. Hover a point to find it in both panels.</p>
+
+  <div class="cals" id="cals" role="group" aria-label="Calibration"></div>
+  <div class="cards" id="cards"></div>
+
+  <!-- Settings: every row is always present and has a fixed height, so the plots below never move. -->
+  <div class="settings" role="group" aria-label="Plot settings">
+    <div class="srow"><span class="ctl-label">Data</span><span class="seg" id="ctl-data"></span></div>
+    <div class="srow"><span class="ctl-label">Axes</span><span class="ctl-sub">x</span><span class="seg" id="ctl-x"></span><span class="ctl-sub">y</span><span class="seg" id="ctl-y"></span>
+      <span class="ctl-label gap">Color</span><span class="seg" id="ctl-c"></span></div>
+    <div class="srow"><span class="ctl-label">Show</span><label class="toggle"><input type="checkbox" id="ctl-curve" checked> fitted curve</label></div>
+    <div class="srow key"><span class="ctl-label">Key</span><div class="legend" id="legend"></div></div>
+  </div>
+
+  <div class="panels">
+    <div class="panel"><h3 id="scatter-title"></h3><svg id="scatter" viewBox="0 0 560 420" role="img" aria-label="Scatter plot of the calibration data"></svg>
+      <p class="note" id="curve-note"></p></div>
+    <div class="panel"><h3 id="map-title"></h3><svg id="map" viewBox="0 0 640 340" role="img" aria-label="Map of the calibration sites"></svg>
+      <p class="note" id="map-note"></p></div>
+  </div>
+
+  <h2>Where the TEXAS data come from</h2>
+  <p class="lede" id="table-lede">Every original study behind the TEXAS calibration dataset, with the earlier calibrations that also used its samples.</p>
+  <div class="tablewrap"><table id="sources"><thead><tr><th>Original study</th><th>Data type</th><th>Published</th><th>Used by</th><th class="n">TEXAS cells</th></tr></thead><tbody></tbody></table></div>
+
+  <p class="foot" id="foot"></p>
+</div>
+<div class="tip" id="tip" role="status"></div>
+
+<script>
+const D = /*__DATA__*/null;
+const NS = "http://www.w3.org/2000/svg";
+const $ = (id) => document.getElementById(id);
+const el = (tag, attrs = {}, parent) => {
+  const e = document.createElementNS(NS, tag);
+  for (const [a, v] of Object.entries(attrs)) if (v != null) e.setAttribute(a, v);
+  if (parent) parent.appendChild(e);
+  return e;
+};
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const fmt = (v, nd) => (v == null ? "—" : (+v).toFixed(nd));
+
+const TYPES = [
+  { k: "c", name: "Coretop", css: "--coretop" },
+  { k: "u", name: "Culture", css: "--culture" },
+  { k: "m", name: "Mesocosm", css: "--mesocosm" },
+];
+const CALS = [
+  { k: "texas", name: "TEXAS", sub: "Rattanasriampaipong et al. (2026)", css: "--texas" },
+  { k: "linear", name: "Original linear", sub: "Schouten et al. (2002)", css: "--linear" },
+  { k: "tex86h", name: "TEX₈₆ᴴ", sub: "Kim et al. (2010)", css: "--tex86h" },
+  { k: "bayspar", name: "BAYSPAR", sub: "Tierney & Tingley (2014)", css: "--bayspar" },
+  { k: "compare", name: "Compare curves", sub: "all four on one plot", css: "--ink-2" },
+];
+const CMP = [
+  { k: "T", name: "TEXAS", css: "--texas" }, { k: "L", name: "Original linear", css: "--linear" },
+  { k: "H", name: "TEX₈₆ᴴ", css: "--tex86h" }, { k: "B", name: "BAYSPAR (3 regions)", css: "--bayspar" },
+];
+const USED = { L: { name: "Original linear", css: "--linear" }, H: { name: "TEX₈₆ᴴ", css: "--tex86h" },
+  B: { name: "BAYSPAR", css: "--bayspar" }, T: { name: "TEXAS", css: "--texas" } };
+const DATA = [{ k: "grid", name: "Gridded (used in the fit)" }, { k: "full", name: "Full coretop compilation (D_M screening)" }];
+// for an earlier calibration: its own published data first, then the TEXAS samples it shares
+const DATA_CAL = [{ k: "own", name: "Its original dataset" }, { k: "grid", name: "TEXAS cells it shares" },
+  { k: "full", name: "Compilation samples it shares" }];
+const C_OWN = [{ k: "set", name: "Fitting set" }];
+const X = [{ k: "sst", name: "SST", label: "Temperature (SST, °C)" }, { k: "thm", name: "Thermo-T", label: "Temperature (Thermo-T, °C)" },
+  { k: "tex", name: "TEX₈₆", label: "TEX₈₆" }];
+const Y = [{ k: "ri", name: "Scaled RI", label: "Scaled RI" }, { k: "tex", name: "TEX₈₆", label: "TEX₈₆" }];
+const C_GRID = [
+  { k: "type", name: "Data type" }, { k: "used", name: "First used by" }, { k: "year", name: "Published" },
+  { k: "g23", name: "GDGT-2/3", label: "GDGT-2/GDGT-3", log: true }, { k: "no3", name: "Nitrate", label: "NO₃⁻ (µmol/L)", log: true },
+];
+const C_FULL = [{ k: "status", name: "D_M screening" }, { k: "g23", name: "GDGT-2/3", label: "GDGT-2/GDGT-3", log: true }];
+const STATUS = [
+  { name: "Kept: inside the ellipse", css: "--coretop" },
+  { name: "Kept: warm end (> 0.75)", css: "--tex86h" },
+  { name: "Removed: outside the ellipse", css: "--linear", open: true },
+  { name: "Removed: low abundance", css: "--other", open: true },
+];
+const REGION_CSS = ["--r1", "--r2", "--r3"];
+const OWN = { linear: "Schouten et al. (2002)", tex86h: "Kim et al. (2010)", bayspar: "BAYSPAR (Tierney & Tingley, 2015)" };
+const state = { cal: "texas", data: "grid", x: "sst", y: "ri", c: "type", curve: true, own: false,
+  show: { c: true, u: true, m: true }, cmp: { T: true, L: true, H: true, B: true }, hl: -1 };
+
+// Follow the docs site's light/dark switch when embedded (same origin); otherwise the system theme.
+function syncTheme() {
+  try {
+    const t = window.parent !== window && window.parent.document.documentElement.dataset.theme;
+    if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+  } catch (e) {}
+}
+syncTheme();
+try {
+  if (window.parent !== window) new MutationObserver(() => { syncTheme(); drawAll(); })
+    .observe(window.parent.document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+} catch (e) {}
+
+// ---- points --------------------------------------------------------------------------------------
+const studyOf = (k) => (D.studies && D.studies[k]) || { cite: k };
+const firstUsed = (u) => (u.includes("L") ? "L" : u.includes("H") ? "H" : u.includes("B") ? "B" : "T");
+const AX = (p, k) => (k === "sst" ? p.sst : k === "thm" ? p.thm : k === "tex" ? p.tex : p.ri);
+// The selected TEX86 calibration's code: only the samples it also used are shown.
+const CODE = { linear: "L", tex86h: "H", bayspar: "B" };
+const inCal = (p) => !CODE[state.cal] || (p.u || "").includes(CODE[state.cal]);
+function dataPoints() {
+  if (state.data === "own") return [];
+  let all;
+  if (state.data === "grid")
+    all = D.points.map((p, i) => ({ ...p, i, kind: "grid", first: firstUsed(p.u || ""),
+      year: p.s && p.s.length ? studyOf(p.s[0]).year : null }));
+  else {
+    const f = D.screening.fields;
+    all = D.screening.points.map((row, i) => {
+      const p = Object.fromEntries(f.map((k, j) => [k, row[j]]));
+      return { ...p, i, kind: "full", t: "c", thm: null, first: firstUsed(p.u || "") };
+    });
+  }
+  return all.filter(inCal);
+}
+// "the 690 TEXAS coretops BAYSPAR also used" for the notes
+function calScope() {
+  if (!CODE[state.cal] || state.data === "own") return "";
+  const name = CALS.find((c) => c.k === state.cal).name;
+  const how = state.cal === "linear" ? "matched by place: Schouten et al. (2002) list sites, not samples" : "matched by place and TEX₈₆";
+  return state.data === "grid"
+    ? `Showing the ${P.length.toLocaleString()} TEXAS grid cells holding a sample ${name} also used (${how}); cultures and mesocosms were not in it.`
+    : `Showing the ${P.length.toLocaleString()} compilation coretops ${name} also used (${how}).`;
+}
+function ownPoints() {
+  const L = D.legacy, off = 100000;
+  if (state.cal === "linear") return L.schouten.points.map(([sst, tex], i) => ({ i: off + i, kind: "own", sst, tex, lat: null, lon: null }));
+  if (state.cal === "tex86h") return L.kim.rows.map(([lat, lon, T, tex, inset], i) => ({ i: off + i, kind: "own", sst: T, tex, lat, lon, inset }));
+  if (state.cal === "bayspar") return L.bayspar.database.map(([lat, lon, sst, tex, inset], i) => ({ i: off + i, kind: "own", sst, tex, lat, lon, inset, region: inset ? regionOf(lat, lon) : -1 }));
+  return [];
+}
+function regionOf(lat, lon) {
+  if (lat == null) return -1;
+  return D.legacy.bayspar.regions.findIndex((r) => Math.abs(lon - r.cell[0]) <= 10 && Math.abs(lat - r.cell[1]) <= 10);
+}
+let P = [], O = [], BYI = new Map();
+
+// ---- color ---------------------------------------------------------------------------------------
+const VIR = ["#440154", "#3b528b", "#21918c", "#5ec962", "#fde725"];
+function vir(t) {
+  t = Math.max(0, Math.min(1, t));
+  const i = Math.min(VIR.length - 2, Math.floor(t * (VIR.length - 1))), f = t * (VIR.length - 1) - i;
+  const a = VIR[i].match(/\w\w/g).map((h) => parseInt(h, 16)), b = VIR[i + 1].match(/\w\w/g).map((h) => parseInt(h, 16));
+  return "rgb(" + a.map((v, j) => Math.round(v + (b[j] - v) * f)).join(",") + ")";
+}
+const quant = (arr, q) => { const s = [...arr].sort((a, b) => a - b); return s[Math.floor(q * (s.length - 1))]; };
+function colorScale() {
+  if (state.data === "own") return { fill: () => css("--other") };
+  if (state.data === "full" && state.c === "status") return { fill: (p) => css(STATUS[p.status].css), open: (p) => !!STATUS[p.status].open };
+  if (state.c === "type") { const col = Object.fromEntries(TYPES.map((t) => [t.k, css(t.css)])); return { fill: (p) => col[p.t] }; }
+  if (state.c === "used") return { fill: (p) => css(USED[p.first].css) };
+  if (state.c === "year") {
+    const ys = P.map((p) => p.year).filter((v) => v), lo = Math.min(...ys), hi = Math.max(...ys);
+    return { fill: (p) => (p.year ? vir((p.year - lo) / (hi - lo)) : css("--muted")), bar: { lo, hi, label: "Year published", log: false } };
+  }
+  const m = (state.data === "grid" ? C_GRID : C_FULL).find((c) => c.k === state.c);
+  const vals = P.map((p) => p[m.k]).filter((v) => v > 0).map(Math.log10);
+  const lo = quant(vals, 0.01), hi = quant(vals, 0.99);
+  return { fill: (p) => (p[m.k] > 0 ? vir((Math.log10(p[m.k]) - lo) / (hi - lo)) : css("--muted")), bar: { lo, hi, label: m.label + " (log)", log: true } };
+}
+const ownFill = (p) => (state.cal === "linear" ? css("--linear") : state.cal === "tex86h" ? css("--tex86h")
+  : p.region >= 0 ? css(REGION_CSS[p.region]) : css("--bayspar"));
+
+// ---- curves: each in its own space (TEX86 or Scaled RI) against SST; converted to the y axis ------
+function curveSet() {
+  const L = [], B = D.legacy.bayspar.regions;
+  const want = state.cal === "compare" ? state.cmp : { T: state.cal === "texas", L: state.cal === "linear", H: state.cal === "tex86h", B: state.cal === "bayspar" };
+  if (want.L) L.push({ space: "tex", f: (t) => 0.015 * t + 0.28, lo: -1, hi: 30, color: css("--linear") });
+  if (want.H) L.push({ space: "tex", f: (t) => Math.pow(10, (t - 38.6) / 68.4), lo: 5, hi: 31, color: css("--tex86h") });
+  if (want.B) B.forEach((r, j) => L.push({ space: "tex", f: (t) => r.alpha + r.beta * t, lo: r.tmin, hi: r.tmax, color: css(REGION_CSS[j]), w: 2.2 }));
+  return { texas: want.T, lines: L, bayAll: state.cal === "bayspar" };
+}
+
+// ---- scatter -------------------------------------------------------------------------------------
+function niceTicks(lo, hi, n) {
+  const s0 = (hi - lo) / n, mag = Math.pow(10, Math.floor(Math.log10(s0)));
+  const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= s0);
+  const out = [];
+  for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(6));
+  return out;
+}
+const scatter = $("scatter"), map = $("map");
+let sDots = new Map(), mDots = new Map();
+function dot(parent, x, y, r, fill, open, op, i) {
+  const d = el("circle", { cx: x, cy: y, r, class: "pt", fill: open ? "none" : fill, "fill-opacity": op }, parent);
+  if (open) { d.style.stroke = fill; d.style.strokeWidth = "1.4"; }
+  d.dataset.i = i;
+  return d;
+}
+function drawScatter(cs) {
+  scatter.replaceChildren();
+  const W = 560, H = 420, m = { l: 54, r: 14, t: 10, b: 46 };
+  const xT = state.x !== "tex";
+  const xs = X.find((x) => x.k === state.x), ys = Y.find((y) => y.k === state.y);
+  const [xlo, xhi] = xT ? [-5, 50] : [0.2, 1.0], [ylo, yhi] = [0.2, 1.0];
+  const sx = (v) => m.l + (v - xlo) / (xhi - xlo) * (W - m.l - m.r);
+  const sy = (v) => H - m.b - (v - ylo) / (yhi - ylo) * (H - m.t - m.b);
+  const ax = el("g", { class: "axis" }, scatter);
+  for (const t of niceTicks(xlo, xhi, xT ? 11 : 8)) {
+    el("line", { x1: sx(t), x2: sx(t), y1: m.t, y2: H - m.b, class: "gridline" }, ax);
+    el("text", { x: sx(t), y: H - m.b + 16, "text-anchor": "middle" }, ax).textContent = xT ? t : t.toFixed(1);
+  }
+  for (const t of niceTicks(ylo, yhi, 8)) {
+    el("line", { x1: m.l, x2: W - m.r, y1: sy(t), y2: sy(t), class: "gridline" }, ax);
+    el("text", { x: m.l - 8, y: sy(t) + 4, "text-anchor": "end" }, ax).textContent = t.toFixed(1);
+  }
+  el("text", { x: (m.l + W - m.r) / 2, y: H - 8, "text-anchor": "middle", class: "axis-title" }, scatter).textContent = xs.label;
+  el("text", { x: -(m.t + H - m.b) / 2, y: 14, transform: "rotate(-90)", "text-anchor": "middle", class: "axis-title" }, scatter).textContent = ys.label;
+  $("scatter-title").textContent = ys.name + " against " + xs.name;
+  const clip = el("clipPath", { id: "plotclip" }, el("defs", {}, scatter));
+  el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b }, clip);
+  const under = el("g", { "clip-path": "url(#plotclip)" }, scatter);
+  const gpts = el("g", {}, scatter), gown = el("g", {}, scatter);
+  const over = el("g", { "clip-path": "url(#plotclip)" }, scatter);
+  const path = (g, pts, attrs) => pts.length > 1 && el("path", { d: "M" + pts.map(([x, y]) => sx(x).toFixed(1) + "," + sy(y).toFixed(1)).join("L"), fill: "none", ...attrs }, g);
+
+  // points
+  sDots = new Map();
+  for (const p of P) {
+    const x = AX(p, state.x), y = AX(p, state.y);
+    if (x == null || y == null || (state.data === "grid" && !state.show[p.t])) continue;
+    const big = p.t !== "c";
+    sDots.set(p.i, dot(gpts, sx(x), sy(y), big ? 4.4 : 3, cs.fill(p), cs.open && cs.open(p), state.own ? 0.35 : big ? 0.95 : 0.72, p.i));
+  }
+  const notes = [];
+  if (calScope()) notes.push(calScope());
+  if (state.own && O.length) {
+    if (state.x === "sst" && state.y === "tex") {
+      for (const p of O) {
+        const open = state.cal !== "linear" && !p.inset;
+        sDots.set(p.i, dot(gown, sx(p.sst), sy(p.tex), 4, ownFill(p), open, 0.95, p.i));
+      }
+    } else notes.push(`${OWN[state.cal]}'s own data are SST and TEX₈₆ only: set x to SST and y to TEX₈₆ to see them.`);
+  }
+
+  // the screening ellipse and warm-end box, in TEX86 - Scaled RI space
+  if (state.data === "full" && state.x === "tex" && state.y === "ri") {
+    const e = D.screening.ellipse;
+    el("path", { d: "M" + e.map(([a, b]) => sx(a).toFixed(1) + "," + sy(b).toFixed(1)).join("L") + "Z", fill: "none",
+      stroke: css("--ink-2"), "stroke-width": 1.8, "stroke-dasharray": "6 4" }, over);
+    el("rect", { x: sx(0.75), y: sy(1.0), width: sx(1.0) - sx(0.75), height: sy(0.75) - sy(1.0), fill: css("--tex86h"), "fill-opacity": 0.08,
+      stroke: css("--tex86h"), "stroke-width": 1.2 }, under);
+    notes.push(`Dashed: the 90% Mahalanobis ellipse (D_M = ${D.screening.threshold}), fitted on the ${D.screening.n_reference.toLocaleString()} coretops with GDGT-2/3 ≤ 5. Shaded: TEX₈₆ and Scaled RI above 0.75, kept regardless (manuscript Fig. 4b).`);
+  } else if (state.data === "full") {
+    notes.push("Set x to TEX₈₆ and y to Scaled RI to see the screening ellipse (manuscript Fig. 4b).");
+  }
+
+  // curves, only against temperature
+  if (state.curve && xT) {
+    const cv = D.conv;
+    const toY = (v, space) => (space === state.y ? v : space === "tex" ? cv.a + cv.b * v : (v - cv.a) / cv.b);
+    const cs2 = curveSet();
+    if (cs2.bayAll) for (const [lo, la, a, b, t0, t1] of D.legacy.bayspar.cells)
+      path(under, [[t0, toY(a + b * t0, "tex")], [t1, toY(a + b * t1, "tex")]], { stroke: css("--bayspar"), "stroke-opacity": 0.3, "stroke-width": 1.1 });
+    if (cs2.texas) {
+      const c = D.texas.curves[state.x === "thm" ? "thm" : "sst"];
+      const band = c.T.map((t, i) => [t, toY(c.hi[i], "ri")]).concat(c.T.map((t, i) => [t, toY(c.lo[i], "ri")]).reverse());
+      el("path", { d: "M" + band.map(([x, y]) => sx(x).toFixed(1) + "," + sy(y).toFixed(1)).join("L") + "Z", fill: css("--texas"), "fill-opacity": 0.18 }, over);
+      path(over, c.T.map((t, i) => [t, toY(c.mid[i], "ri")]), { stroke: css("--texas"), "stroke-width": 3 });
+      notes.push(`TEXAS: posterior median and 90% band of ${c.case}, at the coretops' median GDGT-2/3 (${D.texas.g23}), nitrate term off.`);
+    }
+    for (const L of cs2.lines) {
+      const seg = (a, b) => { const out = []; for (let t = a; t <= b + 1e-9; t += 0.25) { const v = L.f(t); if (v > 0 && v <= 1) out.push([t, toY(v, "tex")]); } return out; };
+      const w = L.w || 2.6;
+      path(over, seg(-5, L.lo), { stroke: L.color, "stroke-width": w, "stroke-dasharray": "5 4", "stroke-opacity": 0.85 });
+      path(over, seg(L.lo, L.hi), { stroke: L.color, "stroke-width": w });
+      path(over, seg(L.hi, 50), { stroke: L.color, "stroke-width": w, "stroke-dasharray": "5 4", "stroke-opacity": 0.85 });
+    }
+    if (cs2.lines.length) notes.push("Earlier calibrations: solid over their own data, dashed where they extrapolate" +
+      (state.cal === "bayspar" ? "; the faint lines are BAYSPAR's other 20° cells" : "") + ".");
+    if (cs2.lines.length && state.y === "ri" || cs2.texas && state.y === "tex")
+      notes.push(`Curves fitted in the other index are converted with Scaled RI = ${cv.a} + ${cv.b} × TEX₈₆ (least squares over all ${cv.n.toLocaleString()} TEXAS samples, R² = ${cv.r2}), as in the cover figure.`);
+    if (cs2.lines.length && state.x === "thm") notes.push("The TEX₈₆ calibrations are against SST; they are drawn against Thermo-T only for comparison.");
+  } else if (state.curve && !xT) notes.push("Curves are drawn against temperature: set x to SST or Thermo-T.");
+  $("curve-note").textContent = notes.join(" ");
+}
+
+// ---- map: Eckert III ----------------------------------------------------------------------------
+const K = Math.sqrt(Math.PI * (4 + Math.PI)), XMAX = 4 * Math.PI / K, YMAX = 2 * Math.PI / K;
+const MW = 640, MH = 340, PAD = 10;
+const S = Math.min((MW - 2 * PAD) / (2 * XMAX), (MH - 2 * PAD) / (2 * YMAX));
+function eck3(lon, lat) {
+  const l = lon * Math.PI / 180, p = lat * Math.PI / 180;
+  const x = 2 / K * l * (1 + Math.sqrt(Math.max(0, 1 - 4 * p * p / (Math.PI * Math.PI))));
+  return [MW / 2 + x * S, MH / 2 - 4 / K * p * S];
+}
+const pathOf = (ring) => "M" + ring.map(([lo, la]) => eck3(lo, la).map((v) => v.toFixed(1)).join(",")).join("L") + "Z";
+let LANDPATH = null;
+function drawMap(cs) {
+  map.replaceChildren();
+  const edge = [];
+  for (let la = -90; la <= 90; la += 3) edge.push([180, la]);
+  for (let la = 90; la >= -90; la -= 3) edge.push([-180, la]);
+  el("path", { d: pathOf(edge), class: "globe" }, map);
+  if (!LANDPATH) LANDPATH = D.land.map(pathOf).join("");
+  el("path", { d: LANDPATH, class: "land" }, map);
+  if (state.cal === "bayspar" || (state.cal === "compare" && state.cmp.B)) {
+    D.legacy.bayspar.regions.forEach((r, j) => {
+      const [lo, la] = r.cell, box = [];
+      for (let t = -10; t <= 10; t += 2) box.push([lo + t, la - 10]);
+      for (let t = -10; t <= 10; t += 2) box.push([lo + 10, la + t]);
+      for (let t = 10; t >= -10; t -= 2) box.push([lo + t, la + 10]);
+      for (let t = 10; t >= -10; t -= 2) box.push([lo - 10, la + t]);
+      el("path", { d: pathOf(box), fill: "none", stroke: css(REGION_CSS[j]), "stroke-width": 2 }, map);
+    });
+  }
+  const g = el("g", {}, map);
+  mDots = new Map();
+  for (const p of P) {
+    if (p.lat == null || p.lon == null || (state.data === "grid" && !state.show[p.t])) continue;
+    const [x, y] = eck3(p.lon, p.lat);
+    mDots.set(p.i, dot(g, x, y, 2.3, cs.fill(p), cs.open && cs.open(p), state.own ? 0.3 : 0.88, p.i));
+  }
+  if (state.own) {
+    if (state.cal === "linear") {
+      for (const [lat, lon] of D.legacy.schouten.sites) { const [x, y] = eck3(lon, lat); dot(g, x, y, 3.4, css("--linear"), false, 0.95, -1); }
+    } else for (const p of O) {
+      if (p.lat == null) continue;
+      const [x, y] = eck3(p.lon, p.lat);
+      mDots.set(p.i, dot(g, x, y, 2.8, ownFill(p), state.cal !== "linear" && !p.inset, 0.95, p.i));
+    }
+  }
+  $("map-title").textContent = state.data === "own" ? OWN[state.cal] + ": original data" : (state.data === "grid" ? "TEXAS coretops (gridded)" : "The full coretop compilation") +
+    (CODE[state.cal] ? " used by " + CALS.find((c) => c.k === state.cal).name : "") +
+    (state.own && OWN[state.cal] ? ", with " + OWN[state.cal] : "");
+  const notes = [];
+  if (calScope()) notes.push(calScope());
+  if (state.data !== "own") notes.push(state.data === "grid" ? "Cultures and mesocosms are laboratory and tank experiments, so they have no place on the map." : "Each sample at its own position, before gridding.");
+  if (state.own && state.cal === "linear") notes.push("Schouten et al. (2002)'s sites are from gdgt-db; the plotted points were read from the paper's Fig. 3b and carry no site.");
+  if (state.own && state.cal === "tex86h") notes.push("Open circles: samples outside the TEX₈₆ᴴ fitting set (Red Sea, or SST below 5 °C).");
+  if (state.own && state.cal === "bayspar") notes.push("All 1,095 coretops of Tierney & Tingley (2015)'s database. BAYSPAR's SST calibration uses the 906 at or south of 70° N (filled); the 189 farther north (open circles) are left out of it. BAYSPAR's model files hold 903 of the 906.");
+  $("map-note").textContent = notes.join(" ");
+  if (cs.bar) {
+    const cb = el("g", { class: "colorbar", transform: `translate(${MW - 200},${MH - 30})` }, map);
+    const grad = el("linearGradient", { id: "cbg" }, el("defs", {}, map));
+    VIR.forEach((c, i) => el("stop", { offset: i / (VIR.length - 1), "stop-color": c }, grad));
+    el("rect", { x: 0, y: 0, width: 180, height: 9, fill: "url(#cbg)", rx: 2 }, cb);
+    const f = (v) => (cs.bar.log ? (Math.pow(10, v) < 1 ? Math.pow(10, v).toPrecision(1) : Math.round(Math.pow(10, v))) : v);
+    el("text", { x: 0, y: 22 }, cb).textContent = f(cs.bar.lo);
+    el("text", { x: 180, y: 22, "text-anchor": "end" }, cb).textContent = f(cs.bar.hi);
+    el("text", { x: 90, y: 22, "text-anchor": "middle" }, cb).textContent = cs.bar.label;
+  }
+}
+
+// ---- hover ----------------------------------------------------------------------------------------
+const tip = $("tip");
+function tipHtml(p) {
+  if (p.kind === "own") {
+    let extra = "";
+    if (state.cal === "tex86h") extra = p.inset ? "In the TEX₈₆ᴴ fitting set" : "Not in the TEX₈₆ᴴ fitting set";
+    if (state.cal === "bayspar") extra = !p.inset ? "North of 70° N: not in the SST calibration" : p.region >= 0 ? D.legacy.bayspar.regions[p.region].label + " cell" : "In the SST calibration";
+    return `<b>${esc(OWN[state.cal])}</b>` + (p.lat != null ? `<span class="k">${fmt(p.lat, 2)}°, ${fmt(p.lon, 2)}°</span><br>` : "") +
+      `SST ${fmt(p.sst, 1)} °C · TEX₈₆ ${fmt(p.tex, 3)}` + (extra ? `<br><span class="k">${extra}</span>` : "");
+  }
+  if (p.kind === "full")
+    return `<b>${STATUS[p.status].name}</b><span class="k">${fmt(p.lat, 2)}°, ${fmt(p.lon, 2)}°</span><br>` +
+      `SST ${fmt(p.sst, 1)} °C · TEX₈₆ ${fmt(p.tex, 3)} · Scaled RI ${fmt(p.ri, 3)}<br>GDGT-2/3 ${fmt(p.g23, 2)} · D_M ${fmt(p.dm, 2)}`;
+  const t = TYPES.find((t) => t.k === p.t);
+  const studies = (p.s || []).map((k) => studyOf(k).cite).join("; ");
+  const where = p.t === "c" ? (p.reg ? p.reg + " · " : "") + fmt(p.lat, 2) + "°, " + fmt(p.lon, 2) + "°" : p.org || "";
+  const used = (p.u || "").split("").filter(Boolean).map((c) => USED[c].name).join(", ");
+  return `<b>${t.name}${studies ? " · " + esc(studies) : ""}</b>` + (where ? `<span class="k">${esc(where)}</span><br>` : "") +
+    `SST ${fmt(p.sst, 1)} °C · Thermo-T ${fmt(p.thm, 1)} °C<br>Scaled RI ${fmt(p.ri, 3)} · TEX₈₆ ${fmt(p.tex, 3)}<br>` +
+    `GDGT-2/3 ${fmt(p.g23, 2)} · NO₃⁻ ${fmt(p.no3, 2)} µmol/L` + (used ? `<br><span class="k">Also used by ${esc(used)}</span>` : "");
+}
+function showTip(i, ev) {
+  const p = BYI.get(i);
+  if (!p) return;
+  tip.innerHTML = tipHtml(p);
+  tip.style.display = "block";
+  const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = ev.clientX + pad, y = ev.clientY + pad;
+  if (x + w > innerWidth - 8) x = ev.clientX - w - pad;
+  if (y + h > innerHeight - 8) y = ev.clientY - h - pad;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function highlight(i) {
+  for (const set of [sDots, mDots]) {
+    if (state.hl >= 0 && set.get(state.hl)) set.get(state.hl).classList.remove("hl");
+    const d = set.get(i);
+    if (i >= 0 && d) { d.classList.add("hl"); d.parentNode.appendChild(d); }
+  }
+  state.hl = i;
+}
+for (const svg of [scatter, map]) {
+  svg.addEventListener("mousemove", (ev) => {
+    const i = ev.target.dataset && ev.target.dataset.i;
+    if (i === undefined || +i < 0) { highlight(-1); tip.style.display = "none"; return; }
+    if (+i !== state.hl) highlight(+i);
+    showTip(+i, ev);
+  });
+  svg.addEventListener("mouseleave", () => { highlight(-1); tip.style.display = "none"; });
+}
+
+// ---- controls, cards, legend, table --------------------------------------------------------------
+function seg(id, opts, key) {
+  const box = $(id);
+  box.replaceChildren();
+  for (const o of opts) {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = o.name; b.setAttribute("aria-pressed", state[key] === o.k);
+    b.onclick = () => { state[key] = o.k; onChange(key); };
+    box.appendChild(b);
+  }
+}
+function setData(d) {
+  state.data = d;
+  state.c = d === "grid" ? "type" : d === "full" ? "status" : "set";
+  if (d === "own") { state.x = "sst"; state.y = "tex"; }
+  else if (d === "full") { state.x = "tex"; state.y = "ri"; }
+  else if (state.x === "tex") state.x = "sst";
+}
+function onChange(key) {
+  if (key === "data") setData(state.data);
+  if (state.data === "full" && state.x === "thm") state.x = "sst";
+  state.hl = -1;
+  drawAll();
+}
+function cals() {
+  $("cals").innerHTML = CALS.map((c) => `<button type="button" class="cal" data-k="${c.k}" aria-pressed="${state.cal === c.k}" style="--c:var(${c.css})"><b>${c.name}</b><small>${c.sub}</small></button>`).join("");
+  $("cals").querySelectorAll(".cal").forEach((b) => (b.onclick = () => {
+    state.cal = b.dataset.k;
+    // a TEX86 calibration opens on its own axes; TEXAS on Scaled RI
+    // an earlier calibration opens on its own published data; TEXAS on its gridded data and Scaled RI
+    if (CODE[state.cal]) setData("own");
+    else if (state.data === "own") setData("grid");
+    if (state.cal === "texas" && state.data === "grid") state.y = "ri";
+    state.hl = -1; drawAll();
+  }));
+}
+function legend() {
+  const box = $("legend");
+  box.replaceChildren();
+  const add = (html) => box.insertAdjacentHTML("beforeend", html);
+  if (state.data === "grid" && state.c === "type") {
+    for (const t of TYPES) {
+      const n = P.filter((p) => p.t === t.k).length;
+      if (!n && CODE[state.cal]) continue;
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "chip"; b.style.setProperty("--c", `var(${t.css})`);
+      b.setAttribute("aria-pressed", state.show[t.k]);
+      b.innerHTML = `<span class="dot"></span>${t.name} <span style="font-weight:400">${n.toLocaleString()}</span>`;
+      b.onclick = () => { state.show[t.k] = !state.show[t.k]; drawAll(); };
+      box.appendChild(b);
+    }
+  } else if (state.data === "grid" && state.c === "used") {
+    for (const k of ["L", "H", "B", "T"]) {
+      const n = P.filter((p) => p.first === k).length;
+      add(`<span class="chip" style="--c:var(${USED[k].css})"><span class="dot"></span>${k === "T" ? "TEXAS only" : USED[k].name} <span style="font-weight:400">${n}</span></span>`);
+    }
+  } else if (state.data === "full" && state.c === "status") {
+    STATUS.forEach((s, j) => {
+      const n = P.filter((p) => p.status === j).length;
+      add(`<span class="chip" style="--c:var(${s.css})"><span class="dot${s.open ? " open" : ""}"></span>${s.name} <span style="font-weight:400">${n}</span></span>`);
+    });
+  }
+  if (state.cal === "compare") {
+    for (const c of CMP) {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "chip"; b.style.setProperty("--c", `var(${c.css})`);
+      b.setAttribute("aria-pressed", state.cmp[c.k]);
+      b.innerHTML = `<span class="dot"></span>${c.name}`;
+      b.onclick = () => { state.cmp[c.k] = !state.cmp[c.k]; drawAll(); };
+      box.appendChild(b);
+    }
+  }
+  if ((state.cal === "bayspar" || (state.cal === "compare" && state.cmp.B)) && state.curve)
+    D.legacy.bayspar.regions.forEach((r, j) => add(`<span class="chip" style="--c:var(${REGION_CSS[j]})"><span class="dot"></span>BAYSPAR · ${r.label}</span>`));
+  if (state.own && state.cal === "linear")
+    add(`<span class="chip" style="--c:var(--linear)"><span class="dot"></span>Schouten et al. (2002) ${D.legacy.schouten.points.length}</span>`);
+  if (state.own && state.cal === "tex86h") {
+    const n = O.filter((p) => p.inset).length;
+    add(`<span class="chip" style="--c:var(--tex86h)"><span class="dot"></span>TEX₈₆ᴴ fitting set ${n}</span><span class="chip" style="--c:var(--tex86h)"><span class="dot open"></span>left out ${O.length - n}</span>`);
+  }
+  if (state.own && state.cal === "bayspar") {
+    const db = D.legacy.bayspar.database, n = db.filter((r) => r[4]).length;
+    add(`<span class="chip" style="--c:var(--bayspar)"><span class="dot"></span>SST calibration ${n}</span><span class="chip" style="--c:var(--bayspar)"><span class="dot open"></span>north of 70° N ${db.length - n}</span>`);
+  }
+}
+// One count chain per calibration, always in the same order, from its own dataset to the TEXAS
+// grid cells; the step the plots show is highlighted.
+function cards() {
+  const f = D.screening.fields, iu = f.indexOf("u"), is = f.indexOf("status");
+  const comp = D.screening.points, kept = (r) => r[is] === 0 || r[is] === 1;
+  const cells = (k) => D.points.filter((p) => p.t === "c" && (!k || (p.u || "").includes(k))).length;
+  let items, on;
+  const K = CODE[state.cal];
+  if (K) {
+    const col = `var(${CALS.find((c) => c.k === state.cal).css})`;
+    const match = comp.filter((r) => (r[iu] || "").includes(K));
+    const own = state.cal === "linear" ? [D.legacy.schouten.points.length, D.legacy.schouten.points.length]
+      : state.cal === "tex86h" ? [D.legacy.kim.rows.length, D.legacy.kim.rows.filter((r) => r[4]).length]
+      : [D.legacy.bayspar.database.length, D.legacy.bayspar.database.filter((r) => r[4]).length];
+    const src = { linear: "Schouten et al. (2002)", tex86h: "Kim et al. (2010)'s annex", bayspar: "Tierney & Tingley (2015)" }[state.cal];
+    const fit = { linear: "used in its fit (all of them)", tex86h: "in the TEX₈₆ᴴ fitting set", bayspar: "in its SST calibration (≤ 70° N)" }[state.cal];
+    items = [{ n: own[0], l: "coretops in " + src, c: col }, { n: own[1], l: fit, c: col },
+      { n: match.length, l: "match a coretop in the TEXAS compilation", t: "Same place (5 km) and TEX₈₆ (0.005); Schouten et al. by place only. A coretop can appear in more than one compilation.", c: "var(--ink-2)" },
+      { n: match.filter(kept).length, l: "of those pass TEXAS's screening", c: "var(--coretop)" },
+      { n: cells(K), l: "TEXAS grid cells they fall in", c: "var(--texas)" }];
+    on = { own: [0, 1], full: [2, 3], grid: [4] }[state.data];
+  } else {
+    const c = D.screening.counts, labs = D.points.length - cells();
+    items = [{ n: c.compilation, l: "coretops in the full compilation", c: "var(--ink-2)" },
+      { n: c.compilation - c.low_abundance, l: "with enough GDGTs to measure", c: "var(--ink-2)" },
+      { n: c.kept, l: `pass the D_M screening (${c.warm_end_kept} at the warm end)`, c: "var(--coretop)" },
+      { n: c.cells, l: "coretop grid cells (0.25°)", c: "var(--coretop)" },
+      { n: D.points.length, l: `in the fit, with ${labs} cultures and mesocosms`, c: "var(--texas)" }];
+    on = { full: [0, 1, 2], grid: [3, 4] }[state.data];
+  }
+  $("cards").innerHTML = items.map((i, j) => `<div class="card${on.includes(j) ? " on" : ""}" style="--c:${i.c}"${i.t ? ` title="${esc(i.t)}"` : ""}>` +
+    `<div class="n">${i.n.toLocaleString()}</div><div class="l">${i.l}</div></div>`).join("");
+}
+function table() {
+  const code = { texas: "T", linear: "L", tex86h: "H", bayspar: "B", compare: "T" }[state.cal];
+  $("sources").querySelector("tbody").innerHTML = D.sources.map((s) => {
+    const used = (s.u + "T").split("").map((c) => `<span class="tag sq" style="--c:var(${USED[c].css})">${USED[c].name}</span>`).join("");
+    const types = s.t.split("").map((k) => { const t = TYPES.find((t) => t.k === k); return `<span class="tag" style="--c:var(${t.css})">${t.name}</span>`; }).join("");
+    const cite = s.doi ? `<a href="https://doi.org/${esc(s.doi)}" target="_blank" rel="noopener">${esc(s.cite)}</a>` : esc(s.cite);
+    const dim = code !== "T" && !s.u.includes(code) ? ' class="dim"' : "";
+    return `<tr${dim}><td>${cite}</td><td>${types}</td><td>${s.year || "—"}</td><td>${used}</td><td class="n">${s.n}</td></tr>`;
+  }).join("");
+  $("table-lede").textContent = code === "T"
+    ? "Every original study behind the TEXAS calibration dataset, with the earlier calibrations that also used its samples. Links go to the paper."
+    : `Studies whose samples ${CALS.find((c) => c.k === state.cal).name} also used are shown in full; the rest are dimmed.`;
+}
+function foot() {
+  const pv = D.provenance;
+  $("foot").textContent = `TEXAS data: ${D.csv} (TEXAS.download_training_data()); the coretop count matches N_crtp = ${(D.n_crtp_posterior || 0).toLocaleString()} in ${D.posterior}. ` +
+    `The full compilation is re-screened here exactly as SI_code00 does, and regrids to the same cells. ` +
+    (pv ? `Original studies and "used by" from gdgt-db (commit ${pv.gdgtdb_pin.slice(0, 8)}), matching each sample by place and TEX₈₆; DOIs are checked before they are linked. ` : "") +
+    `Earlier calibrations' data: Schouten et al. (2002) Fig. 3b (digitized), Kim et al. (2010) electronic annex, BAYSPAR's calibration files (Tierney & Tingley, 2014, 2015). Coastlines: ${D.land_source}; Eckert III projection.`;
+}
+function drawAll() {
+  P = dataPoints();
+  state.own = state.data === "own";
+  O = state.own ? ownPoints() : [];
+  BYI = new Map([...P, ...O].map((p) => [p.i, p]));
+  seg("ctl-data", CODE[state.cal] ? DATA_CAL : DATA, "data");
+  seg("ctl-x", state.own ? X.filter((x) => x.k === "sst") : state.data === "full" ? X.filter((x) => x.k !== "thm") : X, "x");
+  seg("ctl-y", state.own ? Y.filter((y) => y.k === "tex") : Y, "y");
+  seg("ctl-c", state.own ? C_OWN : state.data === "grid" ? C_GRID : C_FULL, "c");
+  $("ctl-curve").checked = state.curve;
+  const cs = colorScale();
+  drawScatter(cs); drawMap(cs); legend(); cards(); table(); cals();
+}
+$("ctl-curve").onchange = (e) => { state.curve = e.target.checked; drawAll(); };
+foot(); drawAll();
+</script>
+</body>
+</html>

@@ -22,8 +22,14 @@ Chemistry encoded here
 
 What is NOT encoded: stereochemistry, and which end of a chain a ring sits at
 relative to the glycerols (regiochemistry). The ring placements in ``GDGTS`` are
-a drawing convention; edit them if you need a specific isomer. Crenarchaeol is
-not included because its cyclohexane ring needs its own geometry.
+a drawing convention; edit them if you need a specific isomer.
+
+Crenarchaeol carries a cyclohexane ring next to one of its four cyclopentane
+rings. Ring "6@11" draws it as a hexagon through C-11 to C-15 closed by the
+methyl carbon on C-15; its exact position is a drawing convention like the
+others. Cren' is a stereoisomer of crenarchaeol, so its two-dimensional
+skeleton is identical; ``to_svg(..., hex_fill=...)`` can mark the ring where
+the two differ.
 
 Use
 ---
@@ -39,25 +45,33 @@ import argparse
 import math
 from pathlib import Path
 
-# name -> (rings on chain A, rings on chain B). Ring names: "7", "7'", "3", "3'".
+# name -> (rings on chain A, rings on chain B). Ring names: "7", "7'", "3", "3'"
+# (cyclopentanes) and "6@11" (the cyclohexane of crenarchaeol).
 GDGTS = {
     "GDGT-0": ((), ()),
     "GDGT-1": (("7",), ()),
     "GDGT-2": (("7",), ("7'",)),
     "GDGT-3": (("7", "7'"), ("7",)),
     "GDGT-4": (("7", "7'"), ("7", "7'")),
+    "Cren": (("7", "6@11", "7'"), ("7", "7'")),
+    "Cren'": (("7", "6@11", "7'"), ("7", "7'")),
 }
+# file names for names that are awkward on disk
+FILE_NAMES = {"Cren'": "Cren-prime"}
 
 N_BACKBONE = 32
 METHYLS = (3, 7, 11, 15, 18, 22, 26, 30)
-# ring name -> (first backbone carbon of the ring, backbone carbon whose methyl closes it)
-RING_SITES = {"7": (7, 7), "7'": (23, 26), "3": (3, 3), "3'": (27, 30)}
+# ring name -> (first backbone carbon of the ring, backbone carbon whose methyl closes it,
+# ring size). A five-membered ring spans C(i)..C(i+3), a six-membered one C(i)..C(i+4).
+RING_SITES = {"7": (7, 7, 5), "7'": (23, 26, 5), "3": (3, 3, 5), "3'": (27, 30, 5),
+              "6@11": (11, 15, 6)}
 
 BOND = 1.0                                   # every length below is in bond lengths
 DX = BOND * math.cos(math.radians(30))       # horizontal advance per zigzag bond
 HALF = BOND * math.sin(math.radians(30)) / 2  # zigzag carbons sit at +/- HALF
 PHI = (1 + math.sqrt(5)) / 2                 # pentagon diagonal / side
-RING_DX = math.sqrt(PHI ** 2 - (2 * HALF) ** 2)   # horizontal span of a ring
+RING_DX = math.sqrt(PHI ** 2 - (2 * HALF) ** 2)   # horizontal span of a pentagon
+HEX_DX = math.sqrt(3) * BOND                 # horizontal span of a hexagon (C(i) to C(i+4))
 CHAIN_SEP = 3.4                              # distance between the two chain axes
 METHYL_LEN = 0.75
 LABEL_GAP = 0.33                             # bond is cut this far from an atom label
@@ -66,20 +80,47 @@ LABEL_GAP = 0.33                             # bond is cut this far from an atom
 def _chain(rings, total_dx):
     """Backbone of one biphytanyl chain, drawn left to right around y = 0.
 
-    Returns (open polylines, ring polygons, methyl stubs, first carbon, last carbon).
-    Odd-numbered carbons sit on the lower side of the zigzag.
+    Returns (open polylines, ring polygons, methyl stubs, first carbon, last carbon);
+    each polygon is (vertices, ring size). Odd-numbered carbons sit on the lower side
+    of the zigzag.
     """
-    sites = {RING_SITES[r][0]: RING_SITES[r][1] for r in rings}
-    n_zig = (N_BACKBONE - 1) - 3 * len(sites)
-    dx = (total_dx - len(sites) * RING_DX) / n_zig     # spread the slack evenly
+    sites = {RING_SITES[r][0]: RING_SITES[r][1:] for r in rings}
+    spans = {5: (3, RING_DX), 6: (4, HEX_DX)}          # bonds replaced, horizontal span
+    n_zig = (N_BACKBONE - 1) - sum(spans[size][0] for _, size in sites.values())
+    dx = (total_dx - sum(spans[size][1] for _, size in sites.values())) / n_zig
 
     pos, polygons, used_methyls = {}, [], set()
+    stub_dirs = {}          # methyl carbon -> unit direction, for methyls on a ring vertex
     lines, current = [], []
     x, i = 0.0, 1
     while i <= N_BACKBONE:
         level = -1 if i % 2 else 1
         pos[i] = (x, level * HALF)
         current.append(pos[i])
+        if i in sites and sites[i][1] == 6:
+            # Hexagon through C(i) .. C(i+4) plus the methyl carbon. C(i) and C(i+4)
+            # share a zigzag level; the four-bond path bulges toward the other chain,
+            # like the pentagons, and the methyl carbon closes it on the outer side.
+            s = -1                    # bulge downward, toward chain B, as the pentagons do
+            x0, y0 = x, level * HALF
+            cx, cy = x0 + HEX_DX / 2, y0 + s * 0.5
+            v = [(x0, y0), (x0, y0 + s), (cx, y0 + 1.5 * s), (x0 + HEX_DX, y0 + s),
+                 (x0 + HEX_DX, y0), (cx, y0 - s * 0.5)]
+            polygons.append((v, 6))
+            closing = sites[i][0]
+            used_methyls.add(closing)
+            # A ring carbon's own methyl goes into the open gap beside the ring: outward
+            # horizontally, mirrored vertically so it clears the bond to the chain.
+            for m, vert in ((i, v[0]), (i + 4, v[4])):
+                if m in METHYLS and m != closing:
+                    ox, oy = vert[0] - cx, -(vert[1] - cy)
+                    d = math.hypot(ox, oy)
+                    stub_dirs[m] = (ox / d, oy / d)
+            lines.append(current)
+            current = []
+            x += HEX_DX
+            i += 4
+            continue
         if i in sites:
             # Pentagon through C(i) .. C(i+3) plus the methyl carbon; C(i+3) lands on
             # the opposite zigzag level, exactly where it would be without the ring.
@@ -92,8 +133,8 @@ def _chain(rings, total_dx):
             apex = local(PHI / 2, math.sin(math.radians(36)))
             v1 = local((PHI - 1) / 2, -math.sin(math.radians(72)))
             v2 = local((PHI + 1) / 2, -math.sin(math.radians(72)))
-            polygons.append([v0, v1, v2, v3, apex])
-            used_methyls.add(sites[i])
+            polygons.append(([v0, v1, v2, v3, apex], 5))
+            used_methyls.add(sites[i][0])
             lines.append(current)
             current = []
             x += RING_DX
@@ -108,7 +149,8 @@ def _chain(rings, total_dx):
         if m in used_methyls:
             continue
         px, py = pos[m]
-        stubs.append([(px, py), (px, py + math.copysign(METHYL_LEN, py))])
+        ux, uy = stub_dirs.get(m, (0.0, math.copysign(1, py)))
+        stubs.append([(px, py), (px + ux * METHYL_LEN, py + uy * METHYL_LEN)])
     return lines, polygons, stubs, pos[1], pos[N_BACKBONE]
 
 
@@ -123,7 +165,8 @@ def geometry(name_or_rings, glycerol="parallel"):
     """Line work of one GDGT in bond-length units (y up).
 
     Returns a dict with ``lines`` (open polylines), ``rings`` (closed pentagons),
-    ``labels`` (x, y, text) and ``bbox`` (xmin, ymin, xmax, ymax).
+    ``labels`` (x, y, text), ``ring_sizes`` (5 or 6, one per ring) and ``bbox``
+    (xmin, ymin, xmax, ymax).
     """
     rings_a, rings_b = GDGTS[name_or_rings] if isinstance(name_or_rings, str) else name_or_rings
     if glycerol not in ("parallel", "antiparallel"):
@@ -131,12 +174,13 @@ def geometry(name_or_rings, glycerol="parallel"):
     total_dx = (N_BACKBONE - 1) * DX
     y_a, y_b = CHAIN_SEP / 2, -CHAIN_SEP / 2
 
-    lines, rings, labels, ends = [], [], [], {}
+    lines, rings, sizes, labels, ends = [], [], [], [], {}
     for key, ring_names, y0, flip in (("a", rings_a, y_a, 1), ("b", rings_b, y_b, -1)):
         chain_lines, polygons, stubs, first, last = _chain(ring_names, total_dx)
         place = lambda p: (p[0], y0 + flip * p[1])     # chain B is mirrored top to bottom
         lines += [[place(p) for p in line] for line in chain_lines + stubs]
-        rings += [[place(p) for p in poly] for poly in polygons]
+        rings += [[place(p) for p in poly] for poly, _ in polygons]
+        sizes += [size for _, size in polygons]
         ends[key] = (place(first), place(last))
 
     # Glycerols. Chain A ends on the sn-3 carbon, chain B on the sn-2 carbon, which
@@ -167,18 +211,19 @@ def geometry(name_or_rings, glycerol="parallel"):
     xs = [p[0] for line in lines + rings for p in line] + [l[0] for l in labels]
     ys = [p[1] for line in lines + rings for p in line] + [l[1] for l in labels]
     pad = 0.8
-    return {"lines": lines, "rings": rings, "labels": labels,
+    return {"lines": lines, "rings": rings, "ring_sizes": sizes, "labels": labels,
             "bbox": (min(xs) - pad, min(ys) - pad, max(xs) + pad, max(ys) + pad)}
 
 
 def to_svg(name_or_rings, path=None, *, glycerol="parallel", scale=16.0, color="#222222",
-           stroke_width=1.5, ring_fill="none", font_family="Helvetica, Arial, sans-serif",
-           font_size=None, background="none"):
+           stroke_width=1.5, ring_fill="none", hex_fill=None,
+           font_family="Helvetica, Arial, sans-serif", font_size=None, background="none"):
     """Return the molecule as an SVG string, and write it to ``path`` if given.
 
     scale        : pixels per bond length.
     stroke_width : line width in pixels.
     ring_fill    : fill color of the cyclopentane rings ("none" for outline only).
+    hex_fill     : fill color of a cyclohexane ring (default: same as ring_fill).
     font_size    : atom-label size in pixels (default 0.72 x scale).
     """
     geo = geometry(name_or_rings, glycerol)
@@ -197,8 +242,9 @@ def to_svg(name_or_rings, path=None, *, glycerol="parallel", scale=16.0, color="
         out.append(f'<rect width="100%" height="100%" fill="{background}"/>')
     out.append(f'<g fill="none" stroke="{color}" stroke-width="{stroke_width}" '
                f'stroke-linecap="round" stroke-linejoin="round">')
-    for ring in geo["rings"]:
-        out.append(f'<polygon class="ring" fill="{ring_fill}" points="{" ".join(pt(p) for p in ring)}"/>')
+    for ring, size in zip(geo["rings"], geo["ring_sizes"]):
+        fill, cls = (ring_fill, "ring") if size == 5 else (hex_fill or ring_fill, "ring ring6")
+        out.append(f'<polygon class="{cls}" fill="{fill}" points="{" ".join(pt(p) for p in ring)}"/>')
     for line in geo["lines"]:
         out.append(f'<polyline points="{" ".join(pt(p) for p in line)}"/>')
     out.append("</g>")
@@ -214,7 +260,7 @@ def to_svg(name_or_rings, path=None, *, glycerol="parallel", scale=16.0, color="
 
 
 def draw(ax, name_or_rings, *, glycerol="parallel", color="#222222", lw=1.2, ring_fill="none",
-         fontsize=7, font_family=None, zorder=3):
+         hex_fill=None, fontsize=7, font_family=None, zorder=3):
     """Draw the molecule on a matplotlib Axes and fit the view to it.
 
     The Axes should have equal aspect (``ax.set_aspect("equal")``) and normally
@@ -223,8 +269,9 @@ def draw(ax, name_or_rings, *, glycerol="parallel", color="#222222", lw=1.2, rin
     from matplotlib.patches import Polygon
 
     geo = geometry(name_or_rings, glycerol)
-    for ring in geo["rings"]:
-        ax.add_patch(Polygon(ring, closed=True, facecolor=ring_fill, edgecolor=color,
+    for ring, size in zip(geo["rings"], geo["ring_sizes"]):
+        fill = ring_fill if size == 5 else (hex_fill or ring_fill)
+        ax.add_patch(Polygon(ring, closed=True, facecolor=fill, edgecolor=color,
                              linewidth=lw, joinstyle="round", zorder=zorder))
     for line in geo["lines"]:
         ax.plot([p[0] for p in line], [p[1] for p in line], color=color, lw=lw,
@@ -248,6 +295,7 @@ def main(argv=None):
     parser.add_argument("--color", default="#222222")
     parser.add_argument("--stroke-width", type=float, default=1.5)
     parser.add_argument("--ring-fill", default="none", help="fill color of the rings")
+    parser.add_argument("--hex-fill", default=None, help="fill color of a cyclohexane ring")
     parser.add_argument("--font-family", default="Helvetica, Arial, sans-serif")
     parser.add_argument("--font-size", type=float, default=None, help="atom-label size in pixels")
     args = parser.parse_args(argv)
@@ -255,9 +303,9 @@ def main(argv=None):
     outdir = Path(args.outdir)
     outdir.mkdir(parents=True, exist_ok=True)
     for name in args.names:
-        target = outdir / f"{name}.svg"
+        target = outdir / f"{FILE_NAMES.get(name, name)}.svg"
         to_svg(name, target, glycerol=args.glycerol, scale=args.scale, color=args.color,
-               stroke_width=args.stroke_width, ring_fill=args.ring_fill,
+               stroke_width=args.stroke_width, ring_fill=args.ring_fill, hex_fill=args.hex_fill,
                font_family=args.font_family, font_size=args.font_size)
         print("wrote", target)
 
