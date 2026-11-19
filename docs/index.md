@@ -43,14 +43,12 @@ TEXAS-PSM links four components through three submodels, after Figure 2 of the m
 <a class="psm-leg psm-c-purple" href="sensor_models.html#sensor-bayspar"><b>BAYSPAR</b><small>Tierney &amp; Tingley (2014)</small></a>
 </span>
 </div>
-<p class="psm-note">Existing models link SST to coretop GDGTs via <a href="sensor_models.html#psm-sensor"><b class="psm-tex">TEX<sub>86</sub></b></a></p>
-<div class="psm-varrow" aria-hidden="true"></div>
-<a class="psm-box psm-c-blue psm-texas" href="sensor_models.html#sensor-texas"><span class="psm-head">TEXAS (this study)</span><span class="psm-body">Scaled Ring Index on a generalized logistic curve; nonthermal predictors shift its location T<sub>0</sub></span></a>
-<div class="psm-varrow" aria-hidden="true"></div>
-<p class="psm-resid">Unexplained variance in GDGT distributions (i.e., proxy residuals)</p>
-<div class="psm-branches">
-<a class="psm-branch psm-c-teal" href="sensor_models.html#sensor-aoa"><span class="psm-elbow" aria-hidden="true"></span><span class="psm-pill">AOA ecology</span><span class="psm-via">link via <b>GDGT-2/GDGT-3</b></span></a>
-<a class="psm-branch psm-c-green" href="sensor_models.html#sensor-nutrient"><span class="psm-elbow" aria-hidden="true"></span><span class="psm-pill">Nutrient level</span><span class="psm-via">link via <b>surface ocean nitrate levels</b></span></a>
+<div class="psm-flow">
+<span class="psm-trunk psm-t-arrow" aria-hidden="true"></span><p class="psm-cap">Existing models link SST to coretop GDGTs via <a href="sensor_models.html#psm-sensor"><b class="psm-tex">TEX<sub>86</sub></b></a></p>
+<span class="psm-trunk psm-t-line" aria-hidden="true"></span><a class="psm-box psm-c-blue psm-texas" href="sensor_models.html#sensor-texas"><span class="psm-head">TEXAS (this study)</span><span class="psm-body">Scaled Ring Index on a generalized logistic curve; nonthermal predictors shift its location T<sub>0</sub></span></a>
+<span class="psm-trunk psm-t-arrow" aria-hidden="true"></span><p class="psm-cap psm-cap-strong">Unexplained variance in GDGT distributions (i.e., proxy residuals)</p>
+<span class="psm-trunk psm-t-tee" aria-hidden="true"></span><a class="psm-branch psm-c-teal" href="sensor_models.html#sensor-aoa"><span class="psm-pill">AOA ecology</span><span class="psm-via">link via <b>GDGT-2/GDGT-3</b></span></a>
+<span class="psm-trunk psm-t-end" aria-hidden="true"></span><a class="psm-branch psm-c-green" href="sensor_models.html#sensor-nutrient"><span class="psm-pill">Nutrient level</span><span class="psm-via">link via <b>surface ocean nitrate levels</b></span></a>
 </div>
 </div>
 

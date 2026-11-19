@@ -178,12 +178,8 @@ a.psm-leg small { color: var(--psm-accent); opacity: 0.9; }
 html[data-theme="dark"] .psm-tex { color: #E07A7A; }
 
 /* Panel b, flow down to TEXAS and the two nonthermal links */
-.psm-note { margin: 0.6rem 0 0; text-align: center; font-weight: 600; color: var(--pst-color-text-muted); }
 
-a.psm-texas { max-width: 30rem; margin: 0 auto; }
 a.psm-texas .psm-head { font-size: 1.1rem; }
-.psm-resid { margin: 0 0 0.4rem; text-align: center; font-weight: 700; }
-.psm-branches { display: flex; flex-direction: column; gap: 0.5rem; max-width: 34rem; margin: 0 auto; }
 a.psm-branch { display: flex; align-items: center; gap: 0.6rem; padding: 0.2rem 0.4rem; border-radius: 6px; color: var(--pst-color-text-base); }
 
 .psm-pill { padding: 0.15rem 0.6rem; background: var(--psm-tint); font-weight: 700; border: 1px solid var(--psm-accent); }
@@ -271,28 +267,84 @@ html[data-theme="dark"] .psm-schematic { --psm-flow: #9ca3af; }
   border-style: solid; border-width: 10px 0 10px 15px;
   border-color: transparent transparent transparent var(--psm-flow);
 }
-.psm-varrow {
-  position: relative; width: var(--psm-shaft); height: 1.5rem;
-  margin: 0.25rem auto 1.05rem; border-radius: 3px 3px 0 0; background: var(--psm-flow);
-}
-.psm-varrow::after {
-  content: ""; position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
-  border-style: solid; border-width: 15px 10px 0 10px;
-  border-color: var(--psm-flow) transparent transparent transparent;
-}
-/* Branch: an elbow from the trunk that ends in an arrowhead at the pill */
-.psm-elbow {
-  position: relative; flex: none; width: 2.4rem; height: 1.5rem; margin: -1.2rem 14px 0 0;
-  border-left: var(--psm-shaft) solid var(--psm-flow);
-  border-bottom: var(--psm-shaft) solid var(--psm-flow);
-  border-bottom-left-radius: 8px;
-}
-.psm-elbow::after {
-  content: ""; position: absolute; right: -15px; bottom: calc(-1 * var(--psm-shaft) / 2 - 9px);
-  border-style: solid; border-width: 9px 0 9px 14px;
-  border-color: transparent transparent transparent var(--psm-flow);
-}
 /* Panel a brackets: match the shaft weight and use a solid head */
 .psm-bracket { border-width: var(--psm-shaft); border-radius: 0 0 10px 10px; }
 .psm-bracket::after { right: -13px; top: -14px; border-width: 0 10px 15px 10px; border-style: solid;
   border-color: transparent transparent var(--psm-line) transparent; }
+
+/* Panel b, lower half: one vertical trunk (middle column) with captions to its
+   right; the two nonthermal links branch off the same trunk. */
+.psm-flow { display: grid; grid-template-columns: 1fr 3rem 1fr; align-items: center; margin-top: 0.4rem; }
+.psm-trunk {
+  grid-column: 2; align-self: stretch; position: relative; min-height: 2.8rem;
+  background-image: linear-gradient(var(--psm-flow), var(--psm-flow)), linear-gradient(var(--psm-flow), var(--psm-flow));
+  background-repeat: no-repeat;
+}
+.psm-t-arrow { background-size: var(--psm-shaft) calc(100% - 14px), 0 0; background-position: center top, 0 0; }
+.psm-t-arrow::after {        /* head pointing down */
+  content: ""; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  border-style: solid; border-width: 15px 10px 0 10px;
+  border-color: var(--psm-flow) transparent transparent transparent;
+}
+.psm-t-tee { background-size: var(--psm-shaft) 100%, calc(50% - 2px) var(--psm-shaft); background-position: center top, right center; }
+.psm-t-end { background-size: var(--psm-shaft) calc(50% + 3px), calc(50% - 2px) var(--psm-shaft); background-position: center top, right center; }
+.psm-t-tee::after, .psm-t-end::after {   /* head pointing right, into the pill */
+  content: ""; position: absolute; right: -13px; top: 50%; transform: translateY(-50%);
+  border-style: solid; border-width: 9px 0 9px 14px;
+  border-color: transparent transparent transparent var(--psm-flow);
+}
+.psm-cap { grid-column: 3; margin: 0; padding-left: 0.6rem; font-weight: 600; color: var(--pst-color-text-muted); }
+.psm-cap-strong { color: var(--pst-color-text-base); font-weight: 700; }
+.psm-flow > a.psm-texas { grid-column: 1 / -1; justify-self: center; width: min(30rem, 100%); }
+.psm-flow > a.psm-branch { grid-column: 3; justify-self: start; margin-left: 14px; }
+@media (max-width: 760px) {
+  .psm-flow { grid-template-columns: 0 2.4rem 1fr; }
+}
+
+/* Calibration-data chips use the manuscript's data-type colors
+   (datatype_color_dict in the SI notebooks: open-color cyan9, yellow9, pink9) */
+.chip-coretop  { --chip: #0b7285; }
+.chip-culture  { --chip: #e67700; }
+.chip-mesocosm { --chip: #a61e4d; }
+html[data-theme="dark"] .chip-coretop  { --chip: #3bc9db; }
+html[data-theme="dark"] .chip-culture  { --chip: #ffc078; }
+html[data-theme="dark"] .chip-mesocosm { --chip: #f783ac; }
+
+/* Schematic: text size and spacing, balanced together. Labels are larger and
+   the flow rows get more air, so nothing in the diagram reads as fine print. */
+.psm-schematic { padding: 1.3rem 1.5rem 1.6rem; font-size: 1rem; }
+.psm-panel { font-size: 1.05rem; margin-bottom: 1rem; }
+.psm-panel ~ .psm-panel { margin-top: 1.9rem; padding-top: 1.5rem; }
+.psm-head { font-size: 1.02rem; padding: 0.4rem 0.5rem; }
+.psm-body { font-size: 0.93rem; line-height: 1.45; padding: 0.55rem 0.6rem 0.65rem; }
+a.psm-sub { font-size: 0.95rem; margin-top: 0.45rem; }
+.psm-bracket { height: 1.6rem; }
+.psm-b-top { gap: 1.2rem; }
+.psm-big { font-size: 1.15rem; }
+.psm-gdgts { gap: 0.15rem !important; }
+.psm-gdgt { grid-template-columns: 6rem 1fr; }
+.psm-gdgt-name { font-size: 0.88rem; }
+.psm-gdgt-name small { font-size: 0.78rem; }
+.psm-gdgt-svg { max-width: 17rem; }
+a.psm-leg b { font-size: 1.08rem; }
+a.psm-leg small { font-size: 0.86rem; }
+.psm-legend { gap: 0.6rem; }
+.psm-flow { margin-top: 0.8rem; row-gap: 0.15rem; }
+.psm-trunk { min-height: 3.2rem; }
+.psm-t-tee, .psm-t-end { min-height: 2.9rem; }
+.psm-cap { font-size: 1rem; line-height: 1.4; padding-left: 0.8rem; }
+.psm-flow > a.psm-texas { width: min(32rem, 100%); }
+a.psm-texas .psm-head { font-size: 1.15rem; }
+a.psm-texas .psm-body { font-size: 0.95rem; }
+.psm-flow > a.psm-branch { margin-left: 16px; }
+.psm-pill { white-space: nowrap; font-size: 1rem; padding: 0.25rem 0.75rem; }
+.psm-via { font-size: 0.98rem; }
+
+/* Flow layout, as in Figure 2: the trunk runs down the left third and
+   everything it feeds sits to its right, so captions have room for one line */
+.psm-flow { grid-template-columns: minmax(0, 0.42fr) 3rem minmax(0, 1.58fr); }
+.psm-t-line { background-size: var(--psm-shaft) 100%, 0 0; background-position: center top, 0 0; }
+.psm-flow > a.psm-texas { grid-column: 3; justify-self: start; width: min(30rem, 100%); margin: 0.35rem 0 0.35rem 0.8rem; }
+@media (max-width: 760px) {
+  .psm-flow { grid-template-columns: 0 2.4rem minmax(0, 1fr); }
+}
