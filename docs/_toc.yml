@@ -9,13 +9,19 @@ parts:
   - caption: Explainers
     chapters:
       - file: gdgts_to_temperature
-      - file: PSM
+      - file: sensor_models
+        title: TEXAS-PSM framework & sensor models
+        sections:
+          - file: PSM
+            title: Bayesian inference workflow
       - file: calibration_curve_explorer
       - file: model_validation
-      - file: sampler_budget
       - file: stan_models
-      - file: marginalization_explainer
-      - file: reduce_sum_for_geologists
+        title: "Under the hood: Stan models"
+        sections:
+          - file: marginalization_explainer
+          - file: reduce_sum_for_geologists
+          - file: sampler_budget
   - caption: Developer
     chapters:
       - file: callmap

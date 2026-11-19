@@ -73,3 +73,130 @@ code.literal,
 .sig-name {
   color: var(--texas-teal);
 }
+
+/* TEXAS-PSM framework schematic on the home page (index.md), after Figure 2
+   of the manuscript. Every box, label and legend entry is a link; colors come
+   from --psm-accent so each card can take its own. */
+.psm-schematic {
+  margin: 1.2rem 0 1.6rem;
+  padding: 1rem 1.2rem 1.3rem;
+  border: 1px solid var(--pst-color-border);
+  border-radius: 10px;
+  background: var(--pst-color-surface);
+  color: var(--pst-color-text-base);
+}
+.psm-schematic a, .psm-schematic a:hover { text-decoration: none; }
+.psm-panel { margin: 0.2rem 0 0.8rem; font-weight: 700; }
+.psm-panel ~ .psm-panel { margin-top: 1.6rem; padding-top: 1.2rem; border-top: 1px solid var(--pst-color-border); }
+.psm-panel-letter { display: inline-block; min-width: 1.3em; font-size: 1.6em; line-height: 1; vertical-align: -0.1em; }
+
+.psm-c-env    { --psm-accent: #AC8A3A; --psm-tint: #E9D9A8; }
+.psm-c-gray   { --psm-accent: #5f6368; --psm-tint: #D9DADC; }
+.psm-c-red    { --psm-accent: var(--texas-red); }
+.psm-c-ochre  { --psm-accent: #C9772A; }
+.psm-c-purple { --psm-accent: var(--texas-purple); }
+.psm-c-blue   { --psm-accent: var(--texas-blue); --psm-tint: #D3E0EC; }
+.psm-c-teal   { --psm-accent: #2B7F8E; --psm-tint: #8FD3DD; }
+.psm-c-green  { --psm-accent: #3F7F3A; --psm-tint: #9ED69A; }
+html[data-theme="dark"] .psm-c-env    { --psm-tint: #4a4026; }
+html[data-theme="dark"] .psm-c-gray   { --psm-tint: #3a3c40; }
+html[data-theme="dark"] .psm-c-blue   { --psm-tint: #263646; }
+html[data-theme="dark"] .psm-c-red    { --psm-accent: #E07A7A; }
+html[data-theme="dark"] .psm-c-ochre  { --psm-accent: #E8A35F; }
+html[data-theme="dark"] .psm-c-purple { --psm-accent: #B98AC6; }
+html[data-theme="dark"] .psm-c-teal   { --psm-tint: #24555d; }
+html[data-theme="dark"] .psm-c-green  { --psm-tint: #2f4f2c; }
+
+/* Boxes: a solid header bar over a tinted body, as in the figure */
+a.psm-box {
+  display: flex; flex-direction: column;
+  border-radius: 4px; overflow: hidden;
+  background: var(--psm-tint, var(--pst-color-background));
+  color: var(--pst-color-text-base);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+a.psm-box:hover, a.psm-box:focus-visible,
+a.psm-plain:hover, a.psm-plain:focus-visible,
+a.psm-leg:hover, a.psm-leg:focus-visible,
+a.psm-branch:hover, a.psm-branch:focus-visible,
+a.psm-sub:hover, a.psm-sub:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  color: var(--pst-color-text-base);
+}
+.psm-schematic a:focus-visible { outline: 2px solid var(--pst-color-primary); outline-offset: 2px; }
+.psm-head { padding: 0.3rem 0.5rem; background: var(--psm-accent); color: #fff; font-weight: 700; text-align: center; }
+.psm-body { padding: 0.45rem 0.55rem 0.55rem; font-size: 0.86rem; line-height: 1.35; text-align: center; }
+.psm-tag {
+  display: block; width: fit-content; margin: 0.4rem auto 0;
+  padding: 0 0.45rem; border-radius: 999px; font-size: 0.7rem; font-style: italic;
+  border: 1px solid currentColor; opacity: 0.75;
+}
+
+/* Panel a: four boxes on an 8-column grid; each bracket runs from the middle
+   of one box to the middle of the next, with its submodel name below. */
+.psm-a { display: grid; grid-template-columns: repeat(8, 1fr); column-gap: 0.7rem; row-gap: 0; }
+.psm-a > a.psm-box { grid-row: 1; }
+.psm-bracket {
+  grid-row: 2; height: 1.4rem; margin: 0 0.9rem;
+  border: 4px solid var(--psm-line); border-top: 0;
+  border-radius: 0 0 6px 6px; position: relative;
+}
+.psm-bracket::after {  /* arrowhead pointing up into the next box */
+  content: ""; position: absolute; right: -9px; top: -6px;
+  border: 7px solid transparent; border-bottom: 9px solid var(--psm-line); border-top: 0;
+}
+.psm-br-env  { --psm-line: #6b4f1d; }
+.psm-br-gray { --psm-line: #4a4d52; }
+html[data-theme="dark"] .psm-br-env  { --psm-line: #D9A869; }
+html[data-theme="dark"] .psm-br-gray { --psm-line: #9ca3af; }
+a.psm-sub {
+  grid-row: 3; justify-self: center; margin-top: 0.3rem; padding: 0.1rem 0.6rem;
+  font-size: 0.9rem; color: var(--pst-color-text-base); border-radius: 4px;
+}
+a.psm-sub-on { font-weight: 700; border: 1px solid var(--pst-color-border); border-top: 0; background: var(--pst-color-background); }
+
+/* Panel b, top row: thermometer -> GDGT structures, legend at the right */
+.psm-b-top { display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: 0.9rem; }
+a.psm-plain { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; padding: 0.4rem; border-radius: 8px; color: var(--pst-color-text-base); }
+.psm-thermo { width: 2.6rem; height: auto; }
+.psm-big { font-weight: 700; font-size: 1.1rem; }
+.psm-hflow { font-size: 1.6rem; color: var(--pst-color-text-muted); }
+.psm-gdgts { align-items: stretch !important; }
+.psm-gdgt { display: grid; grid-template-columns: 4.2rem 1fr; align-items: center; }
+.psm-gdgt-name { font-size: 0.78rem; font-weight: 600; color: var(--texas-purple); }
+html[data-theme="dark"] .psm-gdgt-name { color: #B98AC6; }
+.psm-gdgt-svg { width: 100%; max-width: 15rem; height: auto; }
+.psm-cren { font-size: 0.78rem; font-weight: 600; color: var(--pst-color-text-muted); text-align: center; }
+.psm-gdgts .psm-big { text-align: center; }
+.psm-legend { display: flex; flex-direction: column; gap: 0.35rem; }
+a.psm-leg { display: flex; flex-direction: column; padding: 0.15rem 0.4rem; border-radius: 4px; line-height: 1.2; color: var(--pst-color-text-base); }
+a.psm-leg b { color: var(--psm-accent); font-size: 1.02rem; }
+a.psm-leg small { color: var(--psm-accent); opacity: 0.9; }
+.psm-tex { color: var(--texas-red); }
+html[data-theme="dark"] .psm-tex { color: #E07A7A; }
+
+/* Panel b, flow down to TEXAS and the two nonthermal links */
+.psm-note { margin: 0.6rem 0 0; text-align: center; font-weight: 600; color: var(--pst-color-text-muted); }
+.psm-down { text-align: center; font-size: 1.6rem; line-height: 1.2; color: var(--pst-color-text-muted); }
+a.psm-texas { max-width: 30rem; margin: 0 auto; }
+a.psm-texas .psm-head { font-size: 1.1rem; }
+.psm-resid { margin: 0 0 0.4rem; text-align: center; font-weight: 700; }
+.psm-branches { display: flex; flex-direction: column; gap: 0.5rem; max-width: 34rem; margin: 0 auto; }
+a.psm-branch { display: flex; align-items: center; gap: 0.6rem; padding: 0.2rem 0.4rem; border-radius: 6px; color: var(--pst-color-text-base); }
+.psm-elbow { width: 1.8rem; height: 1.1rem; border-left: 4px solid var(--pst-color-text-muted); border-bottom: 4px solid var(--pst-color-text-muted); margin-top: -1rem; flex: none; }
+.psm-pill { padding: 0.15rem 0.6rem; background: var(--psm-tint); font-weight: 700; border: 1px solid var(--psm-accent); }
+.psm-via { font-weight: 600; }
+.psm-via b { color: var(--psm-accent); }
+html[data-theme="dark"] .psm-via b { filter: brightness(1.6); }
+
+/* Narrow screens: boxes in two columns without brackets; panel b stacks */
+@media (max-width: 760px) {
+  .psm-a { grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .psm-a > a.psm-box { grid-column: auto !important; grid-row: auto; }
+  .psm-bracket { display: none; }
+  a.psm-sub { grid-column: auto !important; grid-row: auto; justify-self: stretch; text-align: center; }
+  .psm-b-top { grid-template-columns: 1fr; justify-items: center; }
+  .psm-hflow { transform: rotate(90deg); }
+  .psm-legend { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+}
