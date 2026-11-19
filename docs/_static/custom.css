@@ -1,30 +1,36 @@
-/* TEXAS branding — palette recreated from the AGU25 PP33D-1102 poster.
-   Colorblock wordmark: T brick-red, E ochre, X steel-blue, A pale-blue, S slate-teal.
-   Primary accent: steel-blue (the "X"). */
+/* TEXAS branding — the five colors of the colorblock wordmark, as on the journal
+   cover design (notebooks/cover_PALO.ipynb, C_TILES) and in texas_logo.svg:
+   T red, E ochre, X purple, A blue, S teal. Change all three places together.
+   Primary accent: blue (the "A"). */
 
 :root {
-  --texas-red:   #A8383B;
-  --texas-ochre: #D29A33;
-  --texas-steel: #4E7390;
-  --texas-pale:  #7FA9C2;
-  --texas-slate: #2E4A55;
-
-  /* pydata / sphinx-book-theme accent variables (light mode) */
-  --pst-color-primary:        #4E7390;
-  --pst-color-primary-bg:     #e7eef3;
-  --pst-color-link:           #3E6680;
-  --pst-color-link-hover:     #A8383B;
-  --pst-color-accent:         #D29A33;
-  --pst-color-secondary:      #2E4A55;
-  --pst-color-secondary-highlight: #4E7390;
+  --texas-red:    #B63D3D;
+  --texas-ochre:  #AC753A;
+  --texas-purple: #7A4486;
+  --texas-blue:   #3D6386;
+  --texas-teal:   #245058;
 }
 
-/* Dark mode: lift the steel-blue so it stays legible on dark backgrounds */
+/* pydata / sphinx-book-theme accent variables (light mode). The theme sets these
+   on html[data-theme="light"], which outranks :root, so they are set on the same
+   selector here; this file loads after the theme's and therefore wins. */
+html[data-theme="light"],
+html:not([data-theme]) {
+  --pst-color-primary:        #3D6386;
+  --pst-color-primary-bg:     #e6edf3;
+  --pst-color-link:           #3D6386;
+  --pst-color-link-hover:     #B63D3D;
+  --pst-color-accent:         #AC753A;
+  --pst-color-secondary:      #245058;
+  --pst-color-secondary-highlight: #7A4486;
+}
+
+/* Dark mode: lighter tints of the blue and ochre so they stay legible on dark backgrounds */
 html[data-theme="dark"] {
-  --pst-color-primary:    #7FA9C2;
-  --pst-color-link:       #9FC0D0;
-  --pst-color-link-hover: #D29A33;
-  --pst-color-accent:     #D29A33;
+  --pst-color-primary:    #8FB3D1;
+  --pst-color-link:       #A9C6DE;
+  --pst-color-link-hover: #D9A869;
+  --pst-color-accent:     #D9A869;
 }
 
 /* Logo sizing in the header */
@@ -34,9 +40,9 @@ img.logo__image {
   width: auto;
 }
 
-/* Headings in the poster's slate-teal for an editorial feel */
+/* Headings in the wordmark's teal for an editorial feel */
 h1, h2, h3 {
-  color: var(--texas-slate);
+  color: var(--texas-teal);
 }
 html[data-theme="dark"] h1,
 html[data-theme="dark"] h2,
@@ -54,16 +60,16 @@ h1::after {
   border-radius: 2px;
   background: linear-gradient(
     to right,
-    var(--texas-red)   0%,  var(--texas-red)   20%,
-    var(--texas-ochre) 20%, var(--texas-ochre) 40%,
-    var(--texas-steel) 40%, var(--texas-steel) 60%,
-    var(--texas-pale)  60%, var(--texas-pale)  80%,
-    var(--texas-slate) 80%, var(--texas-slate) 100%
+    var(--texas-red)    0%,  var(--texas-red)    20%,
+    var(--texas-ochre)  20%, var(--texas-ochre)  40%,
+    var(--texas-purple) 40%, var(--texas-purple) 60%,
+    var(--texas-blue)   60%, var(--texas-blue)   80%,
+    var(--texas-teal)   80%, var(--texas-teal)   100%
   );
 }
 
-/* Inline code / API signatures pick up the steel-blue */
+/* Inline code / API signatures pick up the teal */
 code.literal,
 .sig-name {
-  color: var(--texas-slate);
+  color: var(--texas-teal);
 }
