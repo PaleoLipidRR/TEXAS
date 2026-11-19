@@ -206,15 +206,31 @@ try {
 const studyOf = (k) => (D.studies && D.studies[k]) || { cite: k };
 const firstUsed = (u) => (u.includes("L") ? "L" : u.includes("H") ? "H" : u.includes("B") ? "B" : "T");
 const AX = (p, k) => (k === "sst" ? p.sst : k === "thm" ? p.thm : k === "tex" ? p.tex : p.ri);
+// The selected TEX86 calibration's code: only the samples it also used are shown.
+const CODE = { linear: "L", tex86h: "H", bayspar: "B" };
+const inCal = (p) => !CODE[state.cal] || (p.u || "").includes(CODE[state.cal]);
 function dataPoints() {
+  let all;
   if (state.data === "grid")
-    return D.points.map((p, i) => ({ ...p, i, kind: "grid", first: firstUsed(p.u || ""),
+    all = D.points.map((p, i) => ({ ...p, i, kind: "grid", first: firstUsed(p.u || ""),
       year: p.s && p.s.length ? studyOf(p.s[0]).year : null }));
-  const f = D.screening.fields;
-  return D.screening.points.map((row, i) => {
-    const p = Object.fromEntries(f.map((k, j) => [k, row[j]]));
-    return { ...p, i, kind: "full", t: "c", thm: null };
-  });
+  else {
+    const f = D.screening.fields;
+    all = D.screening.points.map((row, i) => {
+      const p = Object.fromEntries(f.map((k, j) => [k, row[j]]));
+      return { ...p, i, kind: "full", t: "c", thm: null, first: firstUsed(p.u || "") };
+    });
+  }
+  return all.filter(inCal);
+}
+// "the 690 TEXAS coretops BAYSPAR also used" for the notes
+function calScope() {
+  if (!CODE[state.cal]) return "";
+  const name = CALS.find((c) => c.k === state.cal).name;
+  const how = state.cal === "linear" ? "matched by place: Schouten et al. (2002) list sites, not samples" : "matched by place and TEX₈₆";
+  return state.data === "grid"
+    ? `Showing the ${P.length.toLocaleString()} TEXAS grid cells holding a sample ${name} also used (${how}); cultures and mesocosms were not in it.`
+    : `Showing the ${P.length.toLocaleString()} compilation coretops ${name} also used (${how}).`;
 }
 function ownPoints() {
   const L = D.legacy, off = 100000;
@@ -316,6 +332,7 @@ function drawScatter(cs) {
     sDots.set(p.i, dot(gpts, sx(x), sy(y), big ? 4.4 : 3, cs.fill(p), cs.open && cs.open(p), state.own ? 0.35 : big ? 0.95 : 0.72, p.i));
   }
   const notes = [];
+  if (calScope()) notes.push(calScope());
   if (state.own && O.length) {
     if (state.x === "sst" && state.y === "tex") {
       for (const p of O) {
@@ -413,8 +430,10 @@ function drawMap(cs) {
     }
   }
   $("map-title").textContent = (state.data === "grid" ? "TEXAS coretops (gridded)" : "The full coretop compilation") +
+    (CODE[state.cal] ? " used by " + CALS.find((c) => c.k === state.cal).name : "") +
     (state.own && OWN[state.cal] ? ", with " + OWN[state.cal] : "");
   const notes = [];
+  if (calScope()) notes.push(calScope());
   notes.push(state.data === "grid" ? "Cultures and mesocosms are laboratory and tank experiments, so they have no place on the map." : "Each sample at its own position, before gridding.");
   if (state.own && state.cal === "linear") notes.push("Schouten et al. (2002)'s sites are from gdgt-db; the plotted points were read from the paper's Fig. 3b and carry no site.");
   if (state.own && state.cal === "tex86h") notes.push("Open circles: samples outside the TEX₈₆ᴴ fitting set (Red Sea, or SST below 5 °C).");
@@ -519,7 +538,8 @@ function legend() {
   const add = (html) => box.insertAdjacentHTML("beforeend", html);
   if (state.data === "grid" && state.c === "type") {
     for (const t of TYPES) {
-      const n = D.points.filter((p) => p.t === t.k).length;
+      const n = P.filter((p) => p.t === t.k).length;
+      if (!n && CODE[state.cal]) continue;
       const b = document.createElement("button");
       b.type = "button"; b.className = "chip"; b.style.setProperty("--c", `var(${t.css})`);
       b.setAttribute("aria-pressed", state.show[t.k]);
@@ -555,7 +575,14 @@ function legend() {
 }
 function cards() {
   let items;
-  if (state.data === "full") {
+  if (CODE[state.cal]) {
+    const name = CALS.find((c) => c.k === state.cal).name, all = state.data === "grid" ? D.points.length : D.screening.points.length;
+    items = [{ n: P.length, l: `of ${all.toLocaleString()} ${state.data === "grid" ? "TEXAS samples" : "compilation coretops"} also in ${name}`, c: `var(${CALS.find((c) => c.k === state.cal).css})` }];
+    if (state.data === "full")
+      items.push(...STATUS.map((s, j) => ({ n: P.filter((p) => p.status === j).length, l: s.name.toLowerCase(), c: `var(${s.css})` })));
+    else items.push({ n: P.filter((p) => p.t === "c").length, l: "coretop grid cells", c: "var(--coretop)" },
+      { n: D.points.length - P.length, l: "TEXAS samples it did not use (hidden)", c: "var(--other)" });
+  } else if (state.data === "full") {
     const c = D.screening.counts;
     items = [{ n: c.compilation, l: "coretops in the compilation", c: "var(--ink-2)" },
       { n: c.low_abundance, l: "removed: low GDGT abundance", c: "var(--other)" },

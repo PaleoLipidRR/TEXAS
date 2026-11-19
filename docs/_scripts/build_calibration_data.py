@@ -181,6 +181,20 @@ def _screening(csv_dir, grid):
                        "removed": int((removed & ~low).sum()), "kept": int(kept.sum()), "cells": int(len(cells))}}
 
 
+def _with_used(scr, prov):
+    """Add each compilation sample's "used by" flags (L, H, B) from the gdgt-db-workspace export,
+    which lists the full compilation's coretops in file order."""
+    if not scr or not prov or "full_used" not in prov:
+        return scr
+    if len(prov["full_used"]) != len(scr["points"]):
+        sys.exit(f"{PROVENANCE.name} has {len(prov['full_used'])} compilation samples, "
+                 f"the CSV {len(scr['points'])}: re-export it from gdgt-db-workspace")
+    for row, u in zip(scr["points"], prov["full_used"]):
+        row.append(u)
+    scr["fields"].append("u")
+    return scr
+
+
 def _num(v, nd):
     try:
         f = float(v)
@@ -283,7 +297,7 @@ def build_snapshot(csv, land):
         "sources": sources,
         "texas": _texas_curves(df.loc[df.datatype == "coretop", "gdgt23ratio"].median()),
         "conv": _tex_to_ri(df),
-        "screening": _screening(Path(csv).parent, df),
+        "screening": _with_used(_screening(Path(csv).parent, df), prov),
         "legacy": ({k: prov[k] for k in ("schouten", "kim", "bayspar")} if prov else None),
         "studies": (prov["studies"] if prov else {}),
         "provenance": (prov["provenance"] if prov else None),
