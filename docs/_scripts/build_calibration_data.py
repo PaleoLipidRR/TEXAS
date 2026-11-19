@@ -121,6 +121,66 @@ def _texas_curves(g23):
     return {"g23": round(float(g23), 2), "curves": out}
 
 
+def _tex_to_ri(df):
+    """Scaled RI = a + b TEX86, ordinary least squares over every row of the TEXAS file: the
+    conversion the cover figure (notebooks/cover_PALO.ipynb) uses to put the TEX86 calibrations
+    on the Scaled RI axis."""
+    import numpy as np
+
+    both = df.dropna(subset=["TEX86", "scaledRI_cren3"])
+    b, a = np.polyfit(both["TEX86"], both["scaledRI_cren3"], 1)
+    r = np.corrcoef(both["TEX86"], both["scaledRI_cren3"])[0, 1]
+    return {"a": round(float(a), 4), "b": round(float(b), 4), "r2": round(float(r * r), 3), "n": int(len(both))}
+
+
+def _screening(csv_dir, grid):
+    """Every coretop of the full compilation and what the Mahalanobis screening did to it, as
+    SI_code00 (cells 52 and 55) runs it: MahalanobisOutlierDetector on TEX86 and Scaled RI
+    (cren = 3 rings), 90 %, fitted on coretops with GDGT-2/3 <= 5; samples with TEX86 and
+    Scaled RI above 0.75 are kept regardless; low-abundance samples are dropped first. The kept
+    samples must regrid to the published cells, or the build stops."""
+    import numpy as np
+    import pandas as pd
+    from TEXAS.data import MahalanobisOutlierDetector  # type: ignore
+
+    f = csv_dir / "combined_coretop_culture_mesocosm_rev20260210.csv"
+    if not f.is_file():
+        return None
+    raw = pd.read_csv(f, low_memory=False)
+    core = raw[raw.datatype == "coretop"].copy()
+    fit = core[(core.lowAbundanceFlag == False) & (core.gdgt23ratio <= 5)]  # noqa: E712
+    det = MahalanobisOutlierDetector(["TEX86", "scaledRI_cren3"], confidence=0.9)
+    det.fit(fit)
+    dm = np.asarray(det.transform(core), float)
+    outside = np.asarray(det.detect_outliers(core), bool)
+    removed = np.asarray(det.detect_outliers_manual(core), bool)
+    low = core.lowAbundanceFlag.fillna(False).astype(bool).to_numpy()
+    kept = ~removed & ~low
+
+    cells = grid[grid.datatype == "coretop"]
+    key = set(zip(core.match_lat_04deg[kept].round(4), core.match_lon_04deg[kept].round(4)))
+    if key != set(zip(cells.match_lat_04deg.round(4), cells.match_lon_04deg.round(4))):
+        sys.exit("the re-run screening does not regrid to the published cells")
+
+    # the 90 % ellipse: (x - mu)' S^-1 (x - mu) = threshold^2
+    cov = np.linalg.inv(det.inv_cov)
+    w, v = np.linalg.eigh(cov)
+    th = np.linspace(0, 2 * np.pi, 121)
+    ell = det.mean_vec[:, None] + v @ (np.sqrt(w)[:, None] * det.threshold * np.vstack([np.cos(th), np.sin(th)]))
+
+    # status: 0 kept inside, 1 kept by the warm-end rule, 2 removed (outside), 3 low abundance
+    status = np.where(low, 3, np.where(removed, 2, np.where(outside, 1, 0)))
+    pts = [[_num(a, 3), _num(b, 3), _num(c, 4), _num(d, 4), _num(e, 2), _num(g, 2), int(st), _num(m, 2)]
+           for a, b, c, d, e, g, st, m in zip(core.Latitude, core.Longitude, core.TEX86, core.scaledRI_cren3,
+                                             core.SST, core.gdgt23ratio, status, dm)]
+    return {"points": pts, "fields": ["lat", "lon", "tex", "ri", "sst", "g23", "status", "dm"],
+            "ellipse": ell.T.round(4).tolist(), "threshold": round(float(det.threshold), 3),
+            "confidence": 0.9, "n_reference": int(len(fit)),
+            "counts": {"compilation": int(len(core)), "low_abundance": int(low.sum()),
+                       "outside": int((outside & ~low).sum()), "warm_end_kept": int((outside & ~removed & ~low).sum()),
+                       "removed": int((removed & ~low).sum()), "kept": int(kept.sum()), "cells": int(len(cells))}}
+
+
 def _num(v, nd):
     try:
         f = float(v)
@@ -222,6 +282,8 @@ def build_snapshot(csv, land):
         "points": pts,
         "sources": sources,
         "texas": _texas_curves(df.loc[df.datatype == "coretop", "gdgt23ratio"].median()),
+        "conv": _tex_to_ri(df),
+        "screening": _screening(Path(csv).parent, df),
         "legacy": ({k: prov[k] for k in ("schouten", "kim", "bayspar")} if prov else None),
         "studies": (prov["studies"] if prov else {}),
         "provenance": (prov["provenance"] if prov else None),

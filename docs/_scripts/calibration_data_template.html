@@ -39,7 +39,7 @@ a { color: var(--texas); }
 h1 { font-size: 1.5rem; margin: 0 0 4px; }
 h2 { font-size: 1.15rem; margin: 28px 0 6px; }
 .lede { color: var(--ink-2); margin: 0 0 14px; }
-.cals { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0 0 12px; }
+.cals { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin: 0 0 12px; }
 .cal { text-align: left; border: 1px solid var(--hair); border-top: 4px solid var(--c); border-radius: 8px;
   background: var(--surface); color: var(--ink); padding: 8px 12px; font: inherit; cursor: pointer; }
 .cal b { display: block; color: var(--c); font-size: 1.02rem; }
@@ -105,16 +105,20 @@ tr.dim td { opacity: 0.35; }
 <body>
 <div class="page">
   <h1>Calibration data, from the first TEX₈₆ line to TEXAS</h1>
-  <p class="lede">Pick a calibration to see the data it was fitted to and its fitted curve. TEXAS (the default) shows the global calibration dataset after Mahalanobis screening, gridded to 0.25° cells (manuscript Section 5). Hover a point to see the sample; it lights up in both panels.</p>
+  <p class="lede">The TEXAS calibration dataset with its fitted curve. Pick an earlier calibration to draw its curve on the same plot (TEX₈₆ calibrations open on the TEX₈₆ axis), or compare them all. Switch the data to the full coretop compilation to see the Mahalanobis screening of manuscript Section 5. Hover a point to find it in both panels.</p>
 
   <div class="cals" id="cals" role="group" aria-label="Calibration"></div>
   <div class="cards" id="cards"></div>
 
   <div class="controls" id="controls">
+    <span><span class="ctl-label">data</span><span class="seg" id="ctl-data"></span></span>
+  </div>
+  <div class="controls">
     <span id="grp-x"><span class="ctl-label">x</span><span class="seg" id="ctl-x"></span></span>
     <span id="grp-y"><span class="ctl-label">y</span><span class="seg" id="ctl-y"></span></span>
     <span id="grp-c"><span class="ctl-label">color</span><span class="seg" id="ctl-c"></span></span>
     <label class="toggle"><input type="checkbox" id="ctl-curve" checked> fitted curve</label>
+    <label class="toggle" id="grp-own"><input type="checkbox" id="ctl-own"> <span id="own-label"></span></label>
   </div>
   <div class="legend" id="legend"></div>
 
@@ -139,7 +143,7 @@ const NS = "http://www.w3.org/2000/svg";
 const $ = (id) => document.getElementById(id);
 const el = (tag, attrs = {}, parent) => {
   const e = document.createElementNS(NS, tag);
-  for (const [a, v] of Object.entries(attrs)) e.setAttribute(a, v);
+  for (const [a, v] of Object.entries(attrs)) if (v != null) e.setAttribute(a, v);
   if (parent) parent.appendChild(e);
   return e;
 };
@@ -157,17 +161,33 @@ const CALS = [
   { k: "linear", name: "Original linear", sub: "Schouten et al. (2002)", css: "--linear" },
   { k: "tex86h", name: "TEX₈₆ᴴ", sub: "Kim et al. (2010)", css: "--tex86h" },
   { k: "bayspar", name: "BAYSPAR", sub: "Tierney & Tingley (2014)", css: "--bayspar" },
+  { k: "compare", name: "Compare curves", sub: "all four on one plot", css: "--ink-2" },
+];
+const CMP = [
+  { k: "T", name: "TEXAS", css: "--texas" }, { k: "L", name: "Original linear", css: "--linear" },
+  { k: "H", name: "TEX₈₆ᴴ", css: "--tex86h" }, { k: "B", name: "BAYSPAR (3 regions)", css: "--bayspar" },
 ];
 const USED = { L: { name: "Original linear", css: "--linear" }, H: { name: "TEX₈₆ᴴ", css: "--tex86h" },
   B: { name: "BAYSPAR", css: "--bayspar" }, T: { name: "TEXAS", css: "--texas" } };
-const X = [{ k: "sst", name: "SST", label: "Temperature (SST, °C)" }, { k: "thm", name: "Thermo-T", label: "Temperature (Thermo-T, °C)" }];
+const DATA = [{ k: "grid", name: "Gridded (used in the fit)" }, { k: "full", name: "Full coretop compilation (D_M screening)" }];
+const X = [{ k: "sst", name: "SST", label: "Temperature (SST, °C)" }, { k: "thm", name: "Thermo-T", label: "Temperature (Thermo-T, °C)" },
+  { k: "tex", name: "TEX₈₆", label: "TEX₈₆" }];
 const Y = [{ k: "ri", name: "Scaled RI", label: "Scaled RI" }, { k: "tex", name: "TEX₈₆", label: "TEX₈₆" }];
-const C = [
+const C_GRID = [
   { k: "type", name: "Data type" }, { k: "used", name: "First used by" }, { k: "year", name: "Published" },
   { k: "g23", name: "GDGT-2/3", label: "GDGT-2/GDGT-3", log: true }, { k: "no3", name: "Nitrate", label: "NO₃⁻ (µmol/L)", log: true },
 ];
+const C_FULL = [{ k: "status", name: "D_M screening" }, { k: "g23", name: "GDGT-2/3", label: "GDGT-2/GDGT-3", log: true }];
+const STATUS = [
+  { name: "Kept: inside the 90% ellipse", css: "--coretop" },
+  { name: "Kept: warm end (TEX₈₆ and Scaled RI > 0.75)", css: "--tex86h" },
+  { name: "Removed: outside the ellipse", css: "--linear", open: true },
+  { name: "Removed: low GDGT abundance", css: "--other", open: true },
+];
 const REGION_CSS = ["--r1", "--r2", "--r3"];
-const state = { cal: "texas", x: "sst", y: "ri", c: "type", curve: true, show: { c: true, u: true, m: true }, hl: -1 };
+const OWN = { linear: "Schouten et al. (2002)", tex86h: "Kim et al. (2010)", bayspar: "BAYSPAR (Tierney & Tingley, 2015)" };
+const state = { cal: "texas", data: "grid", x: "sst", y: "ri", c: "type", curve: true, own: false,
+  show: { c: true, u: true, m: true }, cmp: { T: true, L: true, H: true, B: true }, hl: -1 };
 
 // Follow the docs site's light/dark switch when embedded (same origin); otherwise the system theme.
 function syncTheme() {
@@ -182,24 +202,32 @@ try {
     .observe(window.parent.document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 } catch (e) {}
 
-// ---- the four data sets as one list of points: {x, y, lat, lon, info, ...} -----------------------
+// ---- points --------------------------------------------------------------------------------------
 const studyOf = (k) => (D.studies && D.studies[k]) || { cite: k };
 const firstUsed = (u) => (u.includes("L") ? "L" : u.includes("H") ? "H" : u.includes("B") ? "B" : "T");
-function texasPoints() {
-  return D.points.map((p, i) => ({ ...p, i, x: p[state.x], y: p[state.y], first: firstUsed(p.u || ""),
-    year: p.s && p.s.length ? studyOf(p.s[0]).year : null }));
+const AX = (p, k) => (k === "sst" ? p.sst : k === "thm" ? p.thm : k === "tex" ? p.tex : p.ri);
+function dataPoints() {
+  if (state.data === "grid")
+    return D.points.map((p, i) => ({ ...p, i, kind: "grid", first: firstUsed(p.u || ""),
+      year: p.s && p.s.length ? studyOf(p.s[0]).year : null }));
+  const f = D.screening.fields;
+  return D.screening.points.map((row, i) => {
+    const p = Object.fromEntries(f.map((k, j) => [k, row[j]]));
+    return { ...p, i, kind: "full", t: "c", thm: null };
+  });
 }
-function legacyPoints() {
-  const L = D.legacy;
-  if (state.cal === "linear") return L.schouten.points.map(([sst, tex], i) => ({ i, x: sst, y: tex, lat: null, lon: null }));
-  if (state.cal === "tex86h") return L.kim.rows.map(([lat, lon, T, tex, inset], i) => ({ i, x: T, y: tex, lat, lon, inset }));
-  return L.bayspar.samples.map(([sst, tex, lat, lon], i) => ({ i, x: sst, y: tex, lat, lon, region: regionOf(lat, lon) }));
+function ownPoints() {
+  const L = D.legacy, off = 100000;
+  if (state.cal === "linear") return L.schouten.points.map(([sst, tex], i) => ({ i: off + i, kind: "own", sst, tex, lat: null, lon: null }));
+  if (state.cal === "tex86h") return L.kim.rows.map(([lat, lon, T, tex, inset], i) => ({ i: off + i, kind: "own", sst: T, tex, lat, lon, inset }));
+  if (state.cal === "bayspar") return L.bayspar.samples.map(([sst, tex, lat, lon], i) => ({ i: off + i, kind: "own", sst, tex, lat, lon, region: regionOf(lat, lon) }));
+  return [];
 }
 function regionOf(lat, lon) {
   if (lat == null) return -1;
   return D.legacy.bayspar.regions.findIndex((r) => Math.abs(lon - r.cell[0]) <= 10 && Math.abs(lat - r.cell[1]) <= 10);
 }
-let P = [];
+let P = [], O = [], BYI = new Map();
 
 // ---- color ---------------------------------------------------------------------------------------
 const VIR = ["#440154", "#3b528b", "#21918c", "#5ec962", "#fde725"];
@@ -211,19 +239,29 @@ function vir(t) {
 }
 const quant = (arr, q) => { const s = [...arr].sort((a, b) => a - b); return s[Math.floor(q * (s.length - 1))]; };
 function colorScale() {
-  if (state.cal === "linear") return { fill: () => css("--linear") };
-  if (state.cal === "tex86h") return { fill: () => css("--tex86h") };
-  if (state.cal === "bayspar") return { fill: (p) => (p.region >= 0 ? css(REGION_CSS[p.region]) : css("--other")) };
+  if (state.data === "full" && state.c === "status") return { fill: (p) => css(STATUS[p.status].css), open: (p) => !!STATUS[p.status].open };
   if (state.c === "type") { const col = Object.fromEntries(TYPES.map((t) => [t.k, css(t.css)])); return { fill: (p) => col[p.t] }; }
   if (state.c === "used") return { fill: (p) => css(USED[p.first].css) };
   if (state.c === "year") {
     const ys = P.map((p) => p.year).filter((v) => v), lo = Math.min(...ys), hi = Math.max(...ys);
     return { fill: (p) => (p.year ? vir((p.year - lo) / (hi - lo)) : css("--muted")), bar: { lo, hi, label: "Year published", log: false } };
   }
-  const m = C.find((c) => c.k === state.c);
+  const m = (state.data === "grid" ? C_GRID : C_FULL).find((c) => c.k === state.c);
   const vals = P.map((p) => p[m.k]).filter((v) => v > 0).map(Math.log10);
   const lo = quant(vals, 0.01), hi = quant(vals, 0.99);
   return { fill: (p) => (p[m.k] > 0 ? vir((Math.log10(p[m.k]) - lo) / (hi - lo)) : css("--muted")), bar: { lo, hi, label: m.label + " (log)", log: true } };
+}
+const ownFill = (p) => (state.cal === "linear" ? css("--linear") : state.cal === "tex86h" ? css("--tex86h")
+  : p.region >= 0 ? css(REGION_CSS[p.region]) : css("--bayspar"));
+
+// ---- curves: each in its own space (TEX86 or Scaled RI) against SST; converted to the y axis ------
+function curveSet() {
+  const L = [], B = D.legacy.bayspar.regions;
+  const want = state.cal === "compare" ? state.cmp : { T: state.cal === "texas", L: state.cal === "linear", H: state.cal === "tex86h", B: state.cal === "bayspar" };
+  if (want.L) L.push({ space: "tex", f: (t) => 0.015 * t + 0.28, lo: -1, hi: 30, color: css("--linear") });
+  if (want.H) L.push({ space: "tex", f: (t) => Math.pow(10, (t - 38.6) / 68.4), lo: 5, hi: 31, color: css("--tex86h") });
+  if (want.B) B.forEach((r, j) => L.push({ space: "tex", f: (t) => r.alpha + r.beta * t, lo: r.tmin, hi: r.tmax, color: css(REGION_CSS[j]), w: 2.2 }));
+  return { texas: want.T, lines: L, bayAll: state.cal === "bayspar" };
 }
 
 // ---- scatter -------------------------------------------------------------------------------------
@@ -235,75 +273,98 @@ function niceTicks(lo, hi, n) {
   return out;
 }
 const scatter = $("scatter"), map = $("map");
-let sDots = [], mDots = [];
+let sDots = new Map(), mDots = new Map();
+function dot(parent, x, y, r, fill, open, op, i) {
+  const d = el("circle", { cx: x, cy: y, r, class: "pt", fill: open ? "none" : fill, "fill-opacity": op }, parent);
+  if (open) { d.style.stroke = fill; d.style.strokeWidth = "1.4"; }
+  d.dataset.i = i;
+  return d;
+}
 function drawScatter(cs) {
   scatter.replaceChildren();
   const W = 560, H = 420, m = { l: 54, r: 14, t: 10, b: 46 };
-  const texas = state.cal === "texas";
-  const xlab = texas ? X.find((x) => x.k === state.x).label : "Temperature (SST, °C)";
-  const ylab = texas ? Y.find((y) => y.k === state.y).label : "TEX₈₆";
-  const xlo = -5, xhi = 50, ylo = texas && state.y === "ri" ? 0.2 : 0.2, yhi = 1.0;
+  const xT = state.x !== "tex";
+  const xs = X.find((x) => x.k === state.x), ys = Y.find((y) => y.k === state.y);
+  const [xlo, xhi] = xT ? [-5, 50] : [0.2, 1.0], [ylo, yhi] = [0.2, 1.0];
   const sx = (v) => m.l + (v - xlo) / (xhi - xlo) * (W - m.l - m.r);
   const sy = (v) => H - m.b - (v - ylo) / (yhi - ylo) * (H - m.t - m.b);
   const ax = el("g", { class: "axis" }, scatter);
-  for (const t of niceTicks(xlo, xhi, 11)) {
+  for (const t of niceTicks(xlo, xhi, xT ? 11 : 8)) {
     el("line", { x1: sx(t), x2: sx(t), y1: m.t, y2: H - m.b, class: "gridline" }, ax);
-    el("text", { x: sx(t), y: H - m.b + 16, "text-anchor": "middle" }, ax).textContent = t;
+    el("text", { x: sx(t), y: H - m.b + 16, "text-anchor": "middle" }, ax).textContent = xT ? t : t.toFixed(1);
   }
   for (const t of niceTicks(ylo, yhi, 8)) {
     el("line", { x1: m.l, x2: W - m.r, y1: sy(t), y2: sy(t), class: "gridline" }, ax);
     el("text", { x: m.l - 8, y: sy(t) + 4, "text-anchor": "end" }, ax).textContent = t.toFixed(1);
   }
-  el("text", { x: (m.l + W - m.r) / 2, y: H - 8, "text-anchor": "middle", class: "axis-title" }, scatter).textContent = xlab;
-  el("text", { x: -(m.t + H - m.b) / 2, y: 14, transform: "rotate(-90)", "text-anchor": "middle", class: "axis-title" }, scatter).textContent = ylab;
-  $("scatter-title").textContent = ylab + " against " + xlab.replace("Temperature (", "").replace(", °C)", "");
+  el("text", { x: (m.l + W - m.r) / 2, y: H - 8, "text-anchor": "middle", class: "axis-title" }, scatter).textContent = xs.label;
+  el("text", { x: -(m.t + H - m.b) / 2, y: 14, transform: "rotate(-90)", "text-anchor": "middle", class: "axis-title" }, scatter).textContent = ys.label;
+  $("scatter-title").textContent = ys.name + " against " + xs.name;
   const clip = el("clipPath", { id: "plotclip" }, el("defs", {}, scatter));
   el("rect", { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b }, clip);
-  const curves = el("g", { "clip-path": "url(#plotclip)" });
-  const line = (pts, attrs) => el("path", { d: "M" + pts.map(([x, y]) => sx(x).toFixed(1) + "," + sy(y).toFixed(1)).join("L"), fill: "none", ...attrs }, curves);
+  const under = el("g", { "clip-path": "url(#plotclip)" }, scatter);
+  const gpts = el("g", {}, scatter), gown = el("g", {}, scatter);
+  const over = el("g", { "clip-path": "url(#plotclip)" }, scatter);
+  const path = (g, pts, attrs) => pts.length > 1 && el("path", { d: "M" + pts.map(([x, y]) => sx(x).toFixed(1) + "," + sy(y).toFixed(1)).join("L"), fill: "none", ...attrs }, g);
 
-  // curves under the points for BAYSPAR's 80 faint lines, over them for the rest
-  let note = "";
-  if (state.curve) {
-    if (texas && state.y === "ri") {
-      const c = D.texas.curves[state.x];
-      const band = c.T.map((t, i) => [t, c.hi[i]]).concat(c.T.map((t, i) => [t, c.lo[i]]).reverse());
-      el("path", { d: "M" + band.map(([x, y]) => sx(x).toFixed(1) + "," + sy(y).toFixed(1)).join("L") + "Z", fill: css("--texas"), "fill-opacity": 0.18 }, curves);
-      line(c.T.map((t, i) => [t, c.mid[i]]), { stroke: css("--texas"), "stroke-width": 2.6 });
-      note = `TEXAS curve: posterior median and 90% band of ${c.case}, at the coretops' median GDGT-2/3 (${D.texas.g23}) with the nitrate term off.`;
-    } else if (texas) {
-      note = "The TEXAS curve is fitted in Scaled RI; switch y to Scaled RI to see it.";
-    } else if (state.cal === "linear") {
-      line([[-1, 0.015 * -1 + 0.28], [30, 0.015 * 30 + 0.28]], { stroke: css("--linear"), "stroke-width": 2.6 });
-      note = "TEX₈₆ = 0.015 SST + 0.28 (Schouten et al., 2002), drawn over its data range.";
-    } else if (state.cal === "tex86h") {
-      const pts = []; for (let t = 5; t <= 31; t += 0.5) pts.push([t, Math.pow(10, (t - 38.6) / 68.4)]);
-      line(pts, { stroke: css("--tex86h"), "stroke-width": 2.6 });
-      note = "SST = 68.4 log₁₀(TEX₈₆) + 38.6 (Kim et al., 2010), fitted to the filled points: no Red Sea, SST ≥ 5 °C.";
-    } else {
-      for (const [lo, la, a, b, t0, t1] of D.legacy.bayspar.cells)
-        line([[t0, a + b * t0], [t1, a + b * t1]], { stroke: css("--bayspar"), "stroke-opacity": 0.35, "stroke-width": 1.2 });
-      D.legacy.bayspar.regions.forEach((r, j) => line([[r.tmin, r.alpha + r.beta * r.tmin], [r.tmax, r.alpha + r.beta * r.tmax]],
-        { stroke: css(REGION_CSS[j]), "stroke-width": 3.2 }));
-      note = "BAYSPAR fits TEX₈₆ = α + β·SST in each 20° cell; all 80 cell lines are drawn faintly, with the three regions of manuscript Fig. 1a in color.";
+  // points
+  sDots = new Map();
+  for (const p of P) {
+    const x = AX(p, state.x), y = AX(p, state.y);
+    if (x == null || y == null || (state.data === "grid" && !state.show[p.t])) continue;
+    const big = p.t !== "c";
+    sDots.set(p.i, dot(gpts, sx(x), sy(y), big ? 4.4 : 3, cs.fill(p), cs.open && cs.open(p), state.own ? 0.35 : big ? 0.95 : 0.72, p.i));
+  }
+  const notes = [];
+  if (state.own && O.length) {
+    if (state.x === "sst" && state.y === "tex") {
+      for (const p of O) {
+        const open = state.cal === "tex86h" && !p.inset;
+        sDots.set(p.i, dot(gown, sx(p.sst), sy(p.tex), 4, ownFill(p), open, 0.95, p.i));
+      }
+    } else notes.push(`${OWN[state.cal]}'s own data are SST and TEX₈₆ only: set x to SST and y to TEX₈₆ to see them.`);
+  }
+
+  // the screening ellipse and warm-end box, in TEX86 - Scaled RI space
+  if (state.data === "full" && state.x === "tex" && state.y === "ri") {
+    const e = D.screening.ellipse;
+    el("path", { d: "M" + e.map(([a, b]) => sx(a).toFixed(1) + "," + sy(b).toFixed(1)).join("L") + "Z", fill: "none",
+      stroke: css("--ink-2"), "stroke-width": 1.8, "stroke-dasharray": "6 4" }, over);
+    el("rect", { x: sx(0.75), y: sy(1.0), width: sx(1.0) - sx(0.75), height: sy(0.75) - sy(1.0), fill: css("--tex86h"), "fill-opacity": 0.08,
+      stroke: css("--tex86h"), "stroke-width": 1.2 }, under);
+    notes.push(`Dashed: the 90% Mahalanobis ellipse (D_M = ${D.screening.threshold}), fitted on the ${D.screening.n_reference.toLocaleString()} coretops with GDGT-2/3 ≤ 5. Shaded: TEX₈₆ and Scaled RI above 0.75, kept regardless (manuscript Fig. 4b).`);
+  } else if (state.data === "full") {
+    notes.push("Set x to TEX₈₆ and y to Scaled RI to see the screening ellipse (manuscript Fig. 4b).");
+  }
+
+  // curves, only against temperature
+  if (state.curve && xT) {
+    const cv = D.conv;
+    const toY = (v, space) => (space === state.y ? v : space === "tex" ? cv.a + cv.b * v : (v - cv.a) / cv.b);
+    const cs2 = curveSet();
+    if (cs2.bayAll) for (const [lo, la, a, b, t0, t1] of D.legacy.bayspar.cells)
+      path(under, [[t0, toY(a + b * t0, "tex")], [t1, toY(a + b * t1, "tex")]], { stroke: css("--bayspar"), "stroke-opacity": 0.3, "stroke-width": 1.1 });
+    if (cs2.texas) {
+      const c = D.texas.curves[state.x === "thm" ? "thm" : "sst"];
+      const band = c.T.map((t, i) => [t, toY(c.hi[i], "ri")]).concat(c.T.map((t, i) => [t, toY(c.lo[i], "ri")]).reverse());
+      el("path", { d: "M" + band.map(([x, y]) => sx(x).toFixed(1) + "," + sy(y).toFixed(1)).join("L") + "Z", fill: css("--texas"), "fill-opacity": 0.18 }, over);
+      path(over, c.T.map((t, i) => [t, toY(c.mid[i], "ri")]), { stroke: css("--texas"), "stroke-width": 3 });
+      notes.push(`TEXAS: posterior median and 90% band of ${c.case}, at the coretops' median GDGT-2/3 (${D.texas.g23}), nitrate term off.`);
     }
-  }
-  $("curve-note").textContent = note;
-  if (state.cal === "bayspar") scatter.appendChild(curves);
-  const g = el("g", {}, scatter);
-  sDots = [];
-  const order = state.cal === "bayspar" ? [...P].sort((a, b) => (a.region >= 0) - (b.region >= 0)) : P;
-  for (const p of order) {
-    if (p.x == null || p.y == null || (texas && !state.show[p.t])) continue;
-    const big = texas ? p.t !== "c" : state.cal === "linear" || p.region >= 0;
-    const open = state.cal === "tex86h" && !p.inset;
-    const d = el("circle", { cx: sx(p.x), cy: sy(p.y), r: big ? 4.4 : 3, class: "pt",
-      fill: open ? "none" : cs.fill(p), stroke: open ? cs.fill(p) : null, "stroke-width": open ? 1.2 : null,
-      "fill-opacity": big ? 0.95 : 0.72 }, g);
-    d.dataset.i = p.i;
-    sDots[p.i] = d;
-  }
-  if (state.cal !== "bayspar") scatter.appendChild(curves);
+    for (const L of cs2.lines) {
+      const seg = (a, b) => { const out = []; for (let t = a; t <= b + 1e-9; t += 0.25) { const v = L.f(t); if (v > 0 && v <= 1) out.push([t, toY(v, "tex")]); } return out; };
+      const w = L.w || 2.6;
+      path(over, seg(-5, L.lo), { stroke: L.color, "stroke-width": w, "stroke-dasharray": "5 4", "stroke-opacity": 0.85 });
+      path(over, seg(L.lo, L.hi), { stroke: L.color, "stroke-width": w });
+      path(over, seg(L.hi, 50), { stroke: L.color, "stroke-width": w, "stroke-dasharray": "5 4", "stroke-opacity": 0.85 });
+    }
+    if (cs2.lines.length) notes.push("Earlier calibrations: solid over their own data, dashed where they extrapolate" +
+      (state.cal === "bayspar" ? "; the faint lines are BAYSPAR's other 20° cells" : "") + ".");
+    if (cs2.lines.length && state.y === "ri" || cs2.texas && state.y === "tex")
+      notes.push(`Curves fitted in the other index are converted with Scaled RI = ${cv.a} + ${cv.b} × TEX₈₆ (least squares over all ${cv.n.toLocaleString()} TEXAS samples, R² = ${cv.r2}), as in the cover figure.`);
+    if (cs2.lines.length && state.x === "thm") notes.push("The TEX₈₆ calibrations are against SST; they are drawn against Thermo-T only for comparison.");
+  } else if (state.curve && !xT) notes.push("Curves are drawn against temperature: set x to SST or Thermo-T.");
+  $("curve-note").textContent = notes.join(" ");
 }
 
 // ---- map: Eckert III ----------------------------------------------------------------------------
@@ -325,15 +386,7 @@ function drawMap(cs) {
   el("path", { d: pathOf(edge), class: "globe" }, map);
   if (!LANDPATH) LANDPATH = D.land.map(pathOf).join("");
   el("path", { d: LANDPATH, class: "land" }, map);
-  const titles = { texas: "Where the TEXAS coretops are", linear: "Schouten et al. (2002)'s coretop sites",
-    tex86h: "Kim et al. (2010)'s coretops", bayspar: "BAYSPAR's coretops and its three highlighted cells" };
-  $("map-title").textContent = titles[state.cal];
-  const notes = { texas: "Cultures and mesocosms are laboratory and tank experiments, so they have no place on the map.",
-    linear: "Sites from gdgt-db; the 44 plotted points were read from the paper's Fig. 3b and carry no site, so the map is not linked to the plot.",
-    tex86h: "Open circles: samples outside the TEX₈₆ᴴ fitting set (Red Sea, or SST below 5 °C).",
-    bayspar: "Positions recovered from Tierney & Tingley (2015)'s table; a few samples could not be placed." };
-  $("map-note").textContent = notes[state.cal];
-  if (state.cal === "bayspar") {
+  if (state.cal === "bayspar" || (state.cal === "compare" && state.cmp.B)) {
     D.legacy.bayspar.regions.forEach((r, j) => {
       const [lo, la] = r.cell, box = [];
       for (let t = -10; t <= 10; t += 2) box.push([lo + t, la - 10]);
@@ -344,23 +397,29 @@ function drawMap(cs) {
     });
   }
   const g = el("g", {}, map);
-  mDots = [];
-  if (state.cal === "linear") {
-    for (const [lat, lon] of D.legacy.schouten.sites) {
-      const [x, y] = eck3(lon, lat);
-      el("circle", { cx: x, cy: y, r: 3.6, class: "pt", fill: css("--linear") }, g);
-    }
-  } else {
-    for (const p of P) {
-      if (p.lat == null || p.lon == null || (state.cal === "texas" && !state.show[p.t])) continue;
+  mDots = new Map();
+  for (const p of P) {
+    if (p.lat == null || p.lon == null || (state.data === "grid" && !state.show[p.t])) continue;
+    const [x, y] = eck3(p.lon, p.lat);
+    mDots.set(p.i, dot(g, x, y, 2.3, cs.fill(p), cs.open && cs.open(p), state.own ? 0.3 : 0.88, p.i));
+  }
+  if (state.own) {
+    if (state.cal === "linear") {
+      for (const [lat, lon] of D.legacy.schouten.sites) { const [x, y] = eck3(lon, lat); dot(g, x, y, 3.4, css("--linear"), false, 0.95, -1); }
+    } else for (const p of O) {
+      if (p.lat == null) continue;
       const [x, y] = eck3(p.lon, p.lat);
-      const open = state.cal === "tex86h" && !p.inset;
-      const d = el("circle", { cx: x, cy: y, r: state.cal === "texas" && p.t === "c" ? 2.3 : 2.8, class: "pt",
-        fill: open ? "none" : cs.fill(p), stroke: open ? cs.fill(p) : null, "fill-opacity": 0.88 }, g);
-      d.dataset.i = p.i;
-      mDots[p.i] = d;
+      mDots.set(p.i, dot(g, x, y, 2.8, ownFill(p), state.cal === "tex86h" && !p.inset, 0.95, p.i));
     }
   }
+  $("map-title").textContent = (state.data === "grid" ? "TEXAS coretops (gridded)" : "The full coretop compilation") +
+    (state.own && OWN[state.cal] ? ", with " + OWN[state.cal] : "");
+  const notes = [];
+  notes.push(state.data === "grid" ? "Cultures and mesocosms are laboratory and tank experiments, so they have no place on the map." : "Each sample at its own position, before gridding.");
+  if (state.own && state.cal === "linear") notes.push("Schouten et al. (2002)'s sites are from gdgt-db; the plotted points were read from the paper's Fig. 3b and carry no site.");
+  if (state.own && state.cal === "tex86h") notes.push("Open circles: samples outside the TEX₈₆ᴴ fitting set (Red Sea, or SST below 5 °C).");
+  if (state.own && state.cal === "bayspar") notes.push("BAYSPAR's SST calibration uses the coretops of Tierney & Tingley (2015)'s database south of 70° N: 906 of its 1,095. Its model files hold 903, shown here; 8 could not be placed on the map.");
+  $("map-note").textContent = notes.join(" ");
   if (cs.bar) {
     const cb = el("g", { class: "colorbar", transform: `translate(${MW - 200},${MH - 30})` }, map);
     const grad = el("linearGradient", { id: "cbg" }, el("defs", {}, map));
@@ -376,24 +435,28 @@ function drawMap(cs) {
 // ---- hover ----------------------------------------------------------------------------------------
 const tip = $("tip");
 function tipHtml(p) {
-  if (state.cal === "texas") {
-    const t = TYPES.find((t) => t.k === p.t);
-    const studies = (p.s || []).map((k) => studyOf(k).cite).join("; ");
-    const where = p.t === "c" ? (p.reg ? p.reg + " · " : "") + fmt(p.lat, 2) + "°, " + fmt(p.lon, 2) + "°" : p.org || "";
-    const used = (p.u || "").split("").map((c) => USED[c].name).join(", ");
-    return `<b>${t.name}${studies ? " · " + esc(studies) : ""}</b>` + (where ? `<span class="k">${esc(where)}</span><br>` : "") +
-      `SST ${fmt(p.sst, 1)} °C · Thermo-T ${fmt(p.thm, 1)} °C<br>Scaled RI ${fmt(p.ri, 3)} · TEX₈₆ ${fmt(p.tex, 3)}<br>` +
-      `GDGT-2/3 ${fmt(p.g23, 2)} · NO₃⁻ ${fmt(p.no3, 2)} µmol/L` + (used ? `<br><span class="k">Also used by ${esc(used)}</span>` : "");
+  if (p.kind === "own") {
+    let extra = "";
+    if (state.cal === "tex86h") extra = p.inset ? "In the TEX₈₆ᴴ fitting set" : "Not in the TEX₈₆ᴴ fitting set";
+    if (state.cal === "bayspar" && p.region >= 0) extra = D.legacy.bayspar.regions[p.region].label + " cell";
+    return `<b>${esc(OWN[state.cal])}</b>` + (p.lat != null ? `<span class="k">${fmt(p.lat, 2)}°, ${fmt(p.lon, 2)}°</span><br>` : "") +
+      `SST ${fmt(p.sst, 1)} °C · TEX₈₆ ${fmt(p.tex, 3)}` + (extra ? `<br><span class="k">${extra}</span>` : "");
   }
-  const name = CALS.find((c) => c.k === state.cal).sub;
-  let extra = "";
-  if (state.cal === "tex86h") extra = p.inset ? "In the TEX₈₆ᴴ fitting set" : "Not in the TEX₈₆ᴴ fitting set";
-  if (state.cal === "bayspar" && p.region >= 0) extra = D.legacy.bayspar.regions[p.region].label + " cell";
-  return `<b>${esc(name)}</b>` + (p.lat != null ? `<span class="k">${fmt(p.lat, 2)}°, ${fmt(p.lon, 2)}°</span><br>` : "") +
-    `SST ${fmt(p.x, 1)} °C · TEX₈₆ ${fmt(p.y, 3)}` + (extra ? `<br><span class="k">${extra}</span>` : "");
+  if (p.kind === "full")
+    return `<b>${STATUS[p.status].name}</b><span class="k">${fmt(p.lat, 2)}°, ${fmt(p.lon, 2)}°</span><br>` +
+      `SST ${fmt(p.sst, 1)} °C · TEX₈₆ ${fmt(p.tex, 3)} · Scaled RI ${fmt(p.ri, 3)}<br>GDGT-2/3 ${fmt(p.g23, 2)} · D_M ${fmt(p.dm, 2)}`;
+  const t = TYPES.find((t) => t.k === p.t);
+  const studies = (p.s || []).map((k) => studyOf(k).cite).join("; ");
+  const where = p.t === "c" ? (p.reg ? p.reg + " · " : "") + fmt(p.lat, 2) + "°, " + fmt(p.lon, 2) + "°" : p.org || "";
+  const used = (p.u || "").split("").filter(Boolean).map((c) => USED[c].name).join(", ");
+  return `<b>${t.name}${studies ? " · " + esc(studies) : ""}</b>` + (where ? `<span class="k">${esc(where)}</span><br>` : "") +
+    `SST ${fmt(p.sst, 1)} °C · Thermo-T ${fmt(p.thm, 1)} °C<br>Scaled RI ${fmt(p.ri, 3)} · TEX₈₆ ${fmt(p.tex, 3)}<br>` +
+    `GDGT-2/3 ${fmt(p.g23, 2)} · NO₃⁻ ${fmt(p.no3, 2)} µmol/L` + (used ? `<br><span class="k">Also used by ${esc(used)}</span>` : "");
 }
 function showTip(i, ev) {
-  tip.innerHTML = tipHtml(P[i]);
+  const p = BYI.get(i);
+  if (!p) return;
+  tip.innerHTML = tipHtml(p);
   tip.style.display = "block";
   const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
   let x = ev.clientX + pad, y = ev.clientY + pad;
@@ -403,15 +466,16 @@ function showTip(i, ev) {
 }
 function highlight(i) {
   for (const set of [sDots, mDots]) {
-    if (state.hl >= 0 && set[state.hl]) set[state.hl].classList.remove("hl");
-    if (i >= 0 && set[i]) { set[i].classList.add("hl"); set[i].parentNode.appendChild(set[i]); }
+    if (state.hl >= 0 && set.get(state.hl)) set.get(state.hl).classList.remove("hl");
+    const d = set.get(i);
+    if (i >= 0 && d) { d.classList.add("hl"); d.parentNode.appendChild(d); }
   }
   state.hl = i;
 }
 for (const svg of [scatter, map]) {
   svg.addEventListener("mousemove", (ev) => {
     const i = ev.target.dataset && ev.target.dataset.i;
-    if (i === undefined) { highlight(-1); tip.style.display = "none"; return; }
+    if (i === undefined || +i < 0) { highlight(-1); tip.style.display = "none"; return; }
     if (+i !== state.hl) highlight(+i);
     showTip(+i, ev);
   });
@@ -425,19 +489,35 @@ function seg(id, opts, key) {
   for (const o of opts) {
     const b = document.createElement("button");
     b.type = "button"; b.textContent = o.name; b.setAttribute("aria-pressed", state[key] === o.k);
-    b.onclick = () => { state[key] = o.k; seg(id, opts, key); drawAll(); };
+    b.onclick = () => { state[key] = o.k; onChange(key); };
     box.appendChild(b);
   }
 }
+function onChange(key) {
+  if (key === "data") {
+    state.c = state.data === "grid" ? "type" : "status";
+    if (state.data === "full") { state.x = "tex"; state.y = "ri"; } else if (state.x === "tex") state.x = "sst";
+  }
+  if (state.data === "full" && state.x === "thm") state.x = "sst";
+  state.hl = -1;
+  drawAll();
+}
 function cals() {
   $("cals").innerHTML = CALS.map((c) => `<button type="button" class="cal" data-k="${c.k}" aria-pressed="${state.cal === c.k}" style="--c:var(${c.css})"><b>${c.name}</b><small>${c.sub}</small></button>`).join("");
-  $("cals").querySelectorAll(".cal").forEach((b) => (b.onclick = () => { state.cal = b.dataset.k; state.hl = -1; cals(); drawAll(); }));
+  $("cals").querySelectorAll(".cal").forEach((b) => (b.onclick = () => {
+    state.cal = b.dataset.k;
+    // a TEX86 calibration opens on its own axes; TEXAS on Scaled RI
+    if (["linear", "tex86h", "bayspar"].includes(state.cal)) { state.y = "tex"; if (state.x === "tex") state.x = "sst"; }
+    if (state.cal === "texas") state.y = "ri";
+    if (!OWN[state.cal]) state.own = false;
+    state.hl = -1; drawAll();
+  }));
 }
 function legend() {
   const box = $("legend");
   box.replaceChildren();
   const add = (html) => box.insertAdjacentHTML("beforeend", html);
-  if (state.cal === "texas" && state.c === "type") {
+  if (state.data === "grid" && state.c === "type") {
     for (const t of TYPES) {
       const n = D.points.filter((p) => p.t === t.k).length;
       const b = document.createElement("button");
@@ -447,37 +527,49 @@ function legend() {
       b.onclick = () => { state.show[t.k] = !state.show[t.k]; drawAll(); };
       box.appendChild(b);
     }
-  } else if (state.cal === "texas" && state.c === "used") {
+  } else if (state.data === "grid" && state.c === "used") {
     for (const k of ["L", "H", "B", "T"]) {
       const n = P.filter((p) => p.first === k).length;
       add(`<span class="chip" style="--c:var(${USED[k].css})"><span class="dot"></span>${k === "T" ? "TEXAS only" : USED[k].name} <span style="font-weight:400">${n}</span></span>`);
     }
-    add(`<span class="note" style="margin:0">Each sample is colored by the earliest calibration that used it.</span>`);
-  } else if (state.cal === "tex86h") {
-    add(`<span class="chip" style="--c:var(--tex86h)"><span class="dot"></span>In the fitting set</span><span class="chip" style="--c:var(--tex86h)"><span class="dot open"></span>Left out</span>`);
-  } else if (state.cal === "bayspar") {
-    D.legacy.bayspar.regions.forEach((r, j) => add(`<span class="chip" style="--c:var(${REGION_CSS[j]})"><span class="dot"></span>${r.label} <span style="font-weight:400">${r.n}</span></span>`));
-    add(`<span class="chip" style="--c:var(--other)"><span class="dot"></span>Other cells</span>`);
+  } else if (state.data === "full" && state.c === "status") {
+    STATUS.forEach((s, j) => {
+      const n = P.filter((p) => p.status === j).length;
+      add(`<span class="chip" style="--c:var(${s.css})"><span class="dot${s.open ? " open" : ""}"></span>${s.name} <span style="font-weight:400">${n}</span></span>`);
+    });
   }
+  if (state.cal === "compare") {
+    for (const c of CMP) {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "chip"; b.style.setProperty("--c", `var(${c.css})`);
+      b.setAttribute("aria-pressed", state.cmp[c.k]);
+      b.innerHTML = `<span class="dot"></span>${c.name}`;
+      b.onclick = () => { state.cmp[c.k] = !state.cmp[c.k]; drawAll(); };
+      box.appendChild(b);
+    }
+  }
+  if ((state.cal === "bayspar" || (state.cal === "compare" && state.cmp.B)) && state.curve)
+    D.legacy.bayspar.regions.forEach((r, j) => add(`<span class="chip" style="--c:var(${REGION_CSS[j]})"><span class="dot"></span>BAYSPAR · ${r.label}</span>`));
+  if (state.own && state.cal === "tex86h")
+    add(`<span class="chip" style="--c:var(--tex86h)"><span class="dot"></span>Kim: in the fitting set</span><span class="chip" style="--c:var(--tex86h)"><span class="dot open"></span>Kim: left out</span>`);
 }
 function cards() {
   let items;
-  if (state.cal === "texas") {
-    const n = (k) => D.points.filter((p) => p.t === k).length;
-    items = [{ n: D.points.length, l: "samples in total", c: "var(--texas)" },
-      ...TYPES.map((t) => ({ n: n(t.k), l: t.name.toLowerCase() + (t.k === "c" ? " grid cells" : " samples"), c: `var(${t.css})` }))];
-  } else if (state.cal === "linear") {
-    items = [{ n: P.length, l: "coretops in the fit", c: "var(--linear)" }, { n: D.legacy.schouten.sites.length, l: "sites mapped from gdgt-db", c: "var(--linear)" }];
-  } else if (state.cal === "tex86h") {
-    items = [{ n: P.length, l: "coretops in the annex", c: "var(--tex86h)" }, { n: P.filter((p) => p.inset).length, l: "in the TEX₈₆ᴴ fitting set", c: "var(--tex86h)" }];
+  if (state.data === "full") {
+    const c = D.screening.counts;
+    items = [{ n: c.compilation, l: "coretops in the compilation", c: "var(--ink-2)" },
+      { n: c.low_abundance, l: "removed: low GDGT abundance", c: "var(--other)" },
+      { n: c.removed, l: `removed by D_M (${c.warm_end_kept} kept at the warm end)`, c: "var(--linear)" },
+      { n: c.kept, l: `kept, gridded into ${c.cells.toLocaleString()} cells`, c: "var(--coretop)" }];
   } else {
-    items = [{ n: P.length, l: "calibration coretops", c: "var(--bayspar)" }, { n: D.legacy.bayspar.cells.length, l: "20° cells, each with its own line", c: "var(--bayspar)" },
-      ...D.legacy.bayspar.regions.slice(0, 2).map((r, j) => ({ n: r.n, l: r.label + " cell", c: `var(${REGION_CSS[j]})` }))];
+    const n = (k) => D.points.filter((p) => p.t === k).length;
+    items = [{ n: D.points.length, l: "samples in the fit", c: "var(--texas)" },
+      ...TYPES.map((t) => ({ n: n(t.k), l: t.name.toLowerCase() + (t.k === "c" ? " grid cells" : " samples"), c: `var(${t.css})` }))];
   }
   $("cards").innerHTML = items.map((i) => `<div class="card" style="--c:${i.c}"><div class="n">${i.n.toLocaleString()}</div><div class="l">${i.l}</div></div>`).join("");
 }
 function table() {
-  const code = { texas: "T", linear: "L", tex86h: "H", bayspar: "B" }[state.cal];
+  const code = { texas: "T", linear: "L", tex86h: "H", bayspar: "B", compare: "T" }[state.cal];
   $("sources").querySelector("tbody").innerHTML = D.sources.map((s) => {
     const used = (s.u + "T").split("").map((c) => `<span class="tag sq" style="--c:var(${USED[c].css})">${USED[c].name}</span>`).join("");
     const types = s.t.split("").map((k) => { const t = TYPES.find((t) => t.k === k); return `<span class="tag" style="--c:var(${t.css})">${t.name}</span>`; }).join("");
@@ -492,20 +584,28 @@ function table() {
 function foot() {
   const pv = D.provenance;
   $("foot").textContent = `TEXAS data: ${D.csv} (TEXAS.download_training_data()); the coretop count matches N_crtp = ${(D.n_crtp_posterior || 0).toLocaleString()} in ${D.posterior}. ` +
+    `The full compilation is re-screened here exactly as SI_code00 does, and regrids to the same cells. ` +
     (pv ? `Original studies and "used by" from gdgt-db (commit ${pv.gdgtdb_pin.slice(0, 8)}), matching each sample by place and TEX₈₆; DOIs are checked before they are linked. ` : "") +
     `Earlier calibrations' data: Schouten et al. (2002) Fig. 3b (digitized), Kim et al. (2010) electronic annex, BAYSPAR's calibration files (Tierney & Tingley, 2014, 2015). Coastlines: ${D.land_source}; Eckert III projection.`;
 }
 function drawAll() {
-  P = state.cal === "texas" ? texasPoints() : legacyPoints();
-  const texas = state.cal === "texas";
-  for (const id of ["grp-x", "grp-y", "grp-c"]) $(id).style.display = texas ? "" : "none";
+  P = dataPoints();
+  O = state.own ? ownPoints() : [];
+  BYI = new Map([...P, ...O].map((p) => [p.i, p]));
+  seg("ctl-data", DATA, "data");
+  seg("ctl-x", state.data === "full" ? X.filter((x) => x.k !== "thm") : X, "x");
+  seg("ctl-y", Y, "y");
+  seg("ctl-c", state.data === "grid" ? C_GRID : C_FULL, "c");
+  $("grp-own").style.display = OWN[state.cal] ? "" : "none";
+  $("own-label").textContent = "show " + (OWN[state.cal] || "") + "'s own data";
+  $("ctl-own").checked = state.own;
+  $("ctl-curve").checked = state.curve;
   const cs = colorScale();
-  drawScatter(cs); drawMap(cs); legend(); cards(); table();
+  drawScatter(cs); drawMap(cs); legend(); cards(); table(); cals();
 }
-
-seg("ctl-x", X, "x"); seg("ctl-y", Y, "y"); seg("ctl-c", C, "c");
 $("ctl-curve").onchange = (e) => { state.curve = e.target.checked; drawAll(); };
-cals(); foot(); drawAll();
+$("ctl-own").onchange = (e) => { state.own = e.target.checked; if (state.own) { state.x = "sst"; state.y = "tex"; } drawAll(); };
+foot(); drawAll();
 </script>
 </body>
 </html>
