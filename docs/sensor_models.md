@@ -21,11 +21,12 @@ The sensor model describes how archaea adjust their membrane lipids, the isopren
 | --- | --- | --- | --- | --- |
 | **Reference** | Schouten et al. (2002) | Kim et al. (2010) | Tierney & Tingley (2014) | Rattanasriampaipong et al. (2026) |
 | **Paper** | <a class="paper-btn" href="https://doi.org/10.1016/S0012-821X(02)00979-2" target="_blank" rel="noopener">Paper &#8599;</a> | <a class="paper-btn" href="https://doi.org/10.1016/j.gca.2010.05.027" target="_blank" rel="noopener">Paper &#8599;</a> | <a class="paper-btn" href="https://doi.org/10.1016/j.gca.2013.11.026" target="_blank" rel="noopener">Paper &#8599;</a> | <a class="paper-btn" href="https://doi.org/10.22541/essoar.15002926/v3" target="_blank" rel="noopener">Preprint &#8599;</a> |
-| **GDGT index** | TEX₈₆ | log₁₀(TEX₈₆) | TEX₈₆ | Scaled RI (RI₀₋₃ / 3), all six isoGDGTs |
+| **GDGT index** | <span class="chip chip-index">TEX₈₆</span> | <span class="chip chip-index">TEX₈₆ᴴ = log₁₀(TEX₈₆)</span> | <span class="chip chip-index">TEX₈₆</span> | <span class="chip chip-index">Scaled RI = RI₀₋₃ / 3</span><br><small>all six isoGDGTs</small> |
 | **Shape of the response** | Straight line | Straight line in TEX₈₆ᴴ, so exponential in TEX₈₆ | Straight line whose slope, intercept and error vary by 20° × 20° grid box | Generalized logistic (S-shaped), bounded between b and 1 |
-| **Environmental predictors** | SST | SST | SST or subsurface temperature | SST or Thermo-T, plus [GDGT-2/GDGT-3](sensor-aoa) and [nitrate](sensor-nutrient) shifting T₀ |
-| **Calibration data** | Coretops | Coretops | Coretops | Cultures and mesocosms (curve-shape priors) and coretops |
-| **Uncertainty** | One fixed calibration error | One fixed calibration error | Bayesian posterior, varies by region | Hierarchical Bayesian posterior; predictors and proxy treated as uncertain measurements |
+| **Temperature target** | <span class="chip chip-temp">SST</span> | <span class="chip chip-temp">SST</span> | <span class="chip chip-temp">SST</span> <span class="chip chip-temp">SubT</span> | <span class="chip chip-temp">SST</span> <span class="chip chip-temp">Thermo-T</span> |
+| **Nonthermal predictors** | — | — | — | <a href="#sensor-aoa"><span class="chip chip-pred">G₂/₃</span></a> <a href="#sensor-nutrient"><span class="chip chip-pred">NO₃⁻</span></a><br><small>shift the curve location T₀</small> |
+| **Calibration data** | <span class="chip chip-data">Coretop</span> | <span class="chip chip-data">Coretop</span> | <span class="chip chip-data">Coretop</span> | <span class="chip chip-data">Culture</span> <span class="chip chip-data">Mesocosm</span> <span class="chip chip-data">Coretop</span><br><small>cultures and mesocosms set the curve-shape priors</small> |
+| **Uncertainty** | <span class="chip chip-unc">Fixed calibration error</span> | <span class="chip chip-unc">Fixed calibration error</span> | <span class="chip chip-unc">Bayesian</span> <span class="chip chip-unc">Spatially varying</span> | <span class="chip chip-unc">Bayesian</span> <span class="chip chip-unc">Hierarchical</span> <span class="chip chip-unc">Errors-in-variables</span> |
 | **In TEXAS** | `CalibrationRegistry.get("schouten02")` | `CalibrationRegistry.get("kim2010_tex86H")` | `BAYSPARCalibration` (needs `baysparpy`) | `predict_T_from_proxyObs` |
 :::
 

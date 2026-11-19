@@ -227,3 +227,33 @@ html[data-theme="dark"] .sig-name {
 .sensor-summary th:first-child, .sensor-summary td:first-child { width: 17%; }
 .sensor-summary td, .sensor-summary th { white-space: normal; vertical-align: top; }
 .sensor-summary code, .sensor-summary code span.pre { white-space: normal; overflow-wrap: anywhere; }
+
+/* Chips for categorical values in the sensor-model table:
+   data = calibration data, temp = temperature target, pred = nonthermal
+   predictor, index = GDGT index, unc = how uncertainty is treated */
+.chip {
+  --chip: #6b7280;
+  display: inline-block;
+  margin: 0.1rem 0.15rem 0.1rem 0;
+  padding: 0.05rem 0.5rem;
+  border: 1px solid var(--chip);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--chip) 14%, transparent);
+  color: var(--pst-color-text-base);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.chip-data  { --chip: var(--texas-ochre); }
+.chip-temp  { --chip: var(--texas-red); }
+.chip-pred  { --chip: #2B7F8E; }
+.chip-index { --chip: var(--texas-purple); border-radius: 4px; }
+.chip-unc   { --chip: var(--texas-blue); border-radius: 4px; }
+html[data-theme="dark"] .chip-data  { --chip: #D9A869; }
+html[data-theme="dark"] .chip-temp  { --chip: #E07A7A; }
+html[data-theme="dark"] .chip-pred  { --chip: #6CC0CC; }
+html[data-theme="dark"] .chip-index { --chip: #B98AC6; }
+html[data-theme="dark"] .chip-unc   { --chip: #8FB3D1; }
+.sensor-summary a:has(> .chip) { text-decoration: none; }
+.sensor-summary small { color: var(--pst-color-text-muted); }
