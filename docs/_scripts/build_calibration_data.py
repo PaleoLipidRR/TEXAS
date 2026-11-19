@@ -119,6 +119,7 @@ def _posterior_n_crtp():
 
 
 def build_snapshot(csv, land):
+    """Read the CSV (and the coastlines) into the dict the page embeds."""
     import pandas as pd
 
     df = pd.read_csv(csv)
@@ -160,6 +161,7 @@ def build_snapshot(csv, land):
 
 
 def main(argv=None):
+    """Rebuild the snapshot when the CSV is present, then write the page from it."""
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--csv", help=f"path to {CSV_NAME}")
     ap.add_argument("--land", help="path to Natural Earth ne_110m_land.shp")
