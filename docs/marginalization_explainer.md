@@ -79,8 +79,7 @@ model {
 }
 ```
 
-**Key change:**  
-Instead of sampling `t_est[n, m]` for all ensemble members, we sample only `t_est[n]` and analytically average over ensemble members.
+**Key change:** Instead of sampling `t_est[n, m]` for all ensemble members, we sample only `t_est[n]` and analytically average over ensemble members.
 
 ---
 
@@ -105,14 +104,11 @@ Instead of sampling `t_est[n, m]` for all ensemble members, we sample only `t_es
 
 ## 4. Practical Impact
 
-- **Speed**:  
-  Warm-up and sampling progress much faster, because each iteration moves `N` parameters instead of `N × M`.
+- **Speed**: Warm-up and sampling progress much faster, because each iteration moves `N` parameters instead of `N × M`.
 
-- **Stability**:  
-  Fewer divergences, better adaptation of step sizes, and cleaner R̂ diagnostics.
+- **Stability**: Fewer divergences, better adaptation of step sizes, and cleaner R̂ diagnostics.
 
-- **Scalability**:  
-  Larger ensembles cost only likelihood evaluations, not parameters. The manuscript uses *M* = 300 for the global coretop reconstructions and *M* = 500 (the package default for a 4,000-draw posterior) for the downcore ones.
+- **Scalability**: Larger ensembles cost only likelihood evaluations, not parameters. The manuscript uses *M* = 300 for the global coretop reconstructions and *M* = 500 (the package default for a 4,000-draw posterior) for the downcore ones.
 
 ---
 

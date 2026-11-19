@@ -53,8 +53,7 @@ Where:
 - \( \gamma_j \) = coefficients for optional predictors, in °C per predictor unit. They shift the curve's location **inside** the logistic (the *T₀-shift parameterization*), so a sample with elevated predictors records the Scaled RI of apparently colder water, and the predicted \( RI_{\text{scaled}} \) stays confined to \( (b, 1) \) by construction. (An earlier formulation added \( \beta_j X_j \) to the response instead; it is superseded because it can push predictions outside the index's physical bounds.)
 - \( RI_{\text{scaled}} \) is normalized between 0 and 1 for comparability.
 
-**Forward Model Role:**  
-Given **true environmental conditions**, the model produces a distribution of possible GDGT-based proxy values, including natural variability and measurement noise.
+**Forward Model Role:** Given **true environmental conditions**, the model produces a distribution of possible GDGT-based proxy values, including natural variability and measurement noise.
 
 ---
 

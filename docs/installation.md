@@ -40,15 +40,13 @@ source .venv/bin/activate
 pip install texas-psm
 ```
 
-**Step 3 — install CmdStan** (required before *sampling*; the one-call helper
-installs the tested version and verifies it):
+**Step 3 — install CmdStan** (required before *sampling*; the one-call helper installs the tested version and verifies it):
 
 ```bash
 texas-install-cmdstan          # or, in Python: TEXAS.install_cmdstan()
 ```
 
-Prefer to manage it manually? The equivalent low-level call is
-`TBB_CXX_TYPE=gcc python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.36.0')"`.
+Prefer to manage it manually? The equivalent low-level call is `TBB_CXX_TYPE=gcc python -c "import cmdstanpy; cmdstanpy.install_cmdstan(version='2.36.0')"`.
 ```````
 ```````{tab-item} Windows (native Anaconda Prompt)
 
@@ -91,10 +89,7 @@ import TEXAS
 TEXAS.install_cmdstan()      # installs CmdStan to /root/.cmdstan and verifies
 ```
 
-Colab runtimes are **ephemeral** — `/root/.cmdstan` is wiped when the runtime
-resets or disconnects, so re-run `TEXAS.install_cmdstan()` once per new session.
-It compiles CmdStan (~2–5 min) using Colab's preinstalled `g++`/`make`, and sets
-`TBB_CXX_TYPE=gcc` for you.
+Colab runtimes are **ephemeral** — `/root/.cmdstan` is wiped when the runtime resets or disconnects, so re-run `TEXAS.install_cmdstan()` once per new session. It compiles CmdStan (~2–5 min) using Colab's preinstalled `g++`/`make`, and sets `TBB_CXX_TYPE=gcc` for you.
 ```````
 ````````
 
@@ -327,8 +322,7 @@ During setup, ensure **"Use the WSL 2 based engine"** is selected.
 
 **3 — Enable WSL2 integration:**
 
-Open Docker Desktop → **Settings → Resources → WSL Integration**
-→ enable integration for your distro (e.g. Ubuntu).
+Open Docker Desktop → **Settings → Resources → WSL Integration** → enable integration for your distro (e.g. Ubuntu).
 
 **4 — Verify from WSL2 terminal:**
 
