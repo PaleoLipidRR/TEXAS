@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TEXAS Calibration Data</title>
+<style>
+:root {
+  --ground: #F3F6F6; --surface: #FBFCFC; --ink: #0F1B1E; --ink-2: #45565A; --muted: #74858A;
+  --hair: #DCE3E4; --axis: #BCC7C9; --land: #E3E8E6; --sea: #F7FAFA; --focus: #0F1B1E;
+  /* manuscript data-type colors: open-color cyan9, yellow9, pink9 */
+  --coretop: #0b7285; --culture: #e67700; --mesocosm: #a61e4d;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground: #0E1416; --surface: #141B1E; --ink: #EAF1F2; --ink-2: #B6C4C6; --muted: #7F9093;
+    --hair: #243034; --axis: #3A4A50; --land: #2A3438; --sea: #10181B; --focus: #EAF1F2;
+    --coretop: #3bc9db; --culture: #ffc078; --mesocosm: #f783ac;
+  }
+}
+:root[data-theme="dark"] {
+  --ground: #0E1416; --surface: #141B1E; --ink: #EAF1F2; --ink-2: #B6C4C6; --muted: #7F9093;
+  --hair: #243034; --axis: #3A4A50; --land: #2A3438; --sea: #10181B; --focus: #EAF1F2;
+  --coretop: #3bc9db; --culture: #ffc078; --mesocosm: #f783ac;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink);
+  font: 15px/1.5 "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif; }
+.page { max-width: 1100px; margin: 0 auto; padding: 20px 16px 40px; }
+h1 { font-size: 1.5rem; margin: 0 0 4px; }
+h2 { font-size: 1.15rem; margin: 28px 0 8px; }
+.lede { color: var(--ink-2); margin: 0 0 16px; max-width: none; }
+.cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 0 0 16px; }
+.card { background: var(--surface); border: 1px solid var(--hair); border-top: 4px solid var(--c, var(--ink-2));
+  border-radius: 8px; padding: 10px 12px; }
+.card .n { font-size: 1.7rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.card .l { color: var(--ink-2); font-size: 0.9rem; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; margin: 0 0 10px; }
+.seg { display: inline-flex; border: 1px solid var(--hair); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: var(--surface); color: var(--ink-2); padding: 6px 12px; font: inherit;
+  font-size: 0.9rem; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--hair); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); font-weight: 600; }
+.ctl-label { font-size: 0.82rem; color: var(--muted); margin-right: 6px; text-transform: uppercase; letter-spacing: .06em; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid var(--c); border-radius: 999px;
+  padding: 3px 10px; background: color-mix(in srgb, var(--c) 14%, transparent); color: var(--ink);
+  font: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+.chip .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.chip[aria-pressed="false"] { opacity: 0.4; background: transparent; }
+.chip:focus-visible, .seg button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.panels { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 12px; }
+.panel { background: var(--surface); border: 1px solid var(--hair); border-radius: 10px; padding: 8px; position: relative; }
+.panel h3 { margin: 2px 6px 4px; font-size: 0.95rem; color: var(--ink-2); font-weight: 600; }
+svg { display: block; width: 100%; height: auto; }
+.axis line, .axis path { stroke: var(--axis); }
+.axis text { fill: var(--muted); font-size: 11px; }
+.axis-title { fill: var(--ink-2); font-size: 12.5px; font-weight: 600; }
+.gridline { stroke: var(--hair); }
+.pt { stroke: var(--surface); stroke-width: 0.6; }
+.pt.hl { stroke: var(--focus); stroke-width: 2; }
+.land { fill: var(--land); stroke: none; }
+.sea { fill: var(--sea); }
+.colorbar text { fill: var(--muted); font-size: 11px; }
+.note { color: var(--muted); font-size: 0.85rem; margin: 6px 6px 2px; }
+.tip { position: fixed; pointer-events: none; z-index: 5; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--hair); border-radius: 8px; padding: 7px 10px; font-size: 0.85rem; line-height: 1.35;
+  box-shadow: 0 6px 18px rgba(0,0,0,.18); max-width: 300px; display: none; }
+.tip b { display: block; }
+.tip .k { color: var(--muted); }
+table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--hair); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; }
+td.n { text-align: right; font-variant-numeric: tabular-nums; width: 5em; }
+.tag { display: inline-block; border: 1.5px solid var(--c); border-radius: 999px; padding: 0 8px;
+  background: color-mix(in srgb, var(--c) 14%, transparent); font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
+.foot { color: var(--muted); font-size: 0.85rem; margin-top: 18px; }
+@media (max-width: 820px) {
+  .panels { grid-template-columns: 1fr; }
+  .cards { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>The global calibration dataset</h1>
+  <p class="lede">Every sample the bundled TEXAS calibration was fitted to, after Mahalanobis screening and gridding to 0.25° cells (manuscript Section 5). Hover a point to see the sample; it lights up in both panels. Click a data type to hide or show it.</p>
+
+  <div class="cards" id="cards"></div>
+
+  <div class="controls">
+    <span><span class="ctl-label">x</span><span class="seg" id="ctl-x"></span></span>
+    <span><span class="ctl-label">y</span><span class="seg" id="ctl-y"></span></span>
+    <span><span class="ctl-label">color</span><span class="seg" id="ctl-c"></span></span>
+    <span class="legend" id="legend"></span>
+  </div>
+
+  <div class="panels">
+    <div class="panel"><h3 id="scatter-title"></h3><svg id="scatter" viewBox="0 0 560 420" role="img" aria-label="Scatter plot of the calibration data"></svg></div>
+    <div class="panel"><h3>Where the coretops are</h3><svg id="map" viewBox="0 0 640 340" role="img" aria-label="Map of coretop sites"></svg>
+      <p class="note">Cultures and mesocosms are laboratory and tank experiments, so they have no place on the map.</p></div>
+  </div>
+
+  <h2>Where the data come from</h2>
+  <table id="sources"><thead><tr><th>Data type</th><th>Study</th><th class="n">Samples</th></tr></thead><tbody></tbody></table>
+
+  <p class="foot" id="foot"></p>
+</div>
+<div class="tip" id="tip" role="status"></div>
+
+<script>
+const D = /*__DATA__*/null;
+const TYPES = [
+  { k: "c", name: "Coretop", css: "--coretop" },
+  { k: "u", name: "Culture", css: "--culture" },
+  { k: "m", name: "Mesocosm", css: "--mesocosm" },
+];
+const X = [
+  { k: "sst", name: "SST", label: "Temperature (SST, °C)" },
+  { k: "thm", name: "Thermo-T", label: "Temperature (Thermo-T, °C)" },
+];
+const Y = [
+  { k: "ri", name: "Scaled RI", label: "Scaled RI" },
+  { k: "tex", name: "TEX₈₆", label: "TEX₈₆" },
+];
+const C = [
+  { k: "type", name: "Data type" },
+  { k: "g23", name: "GDGT-2/3", label: "GDGT-2/GDGT-3", log: true },
+  { k: "no3", name: "Nitrate", label: "NO₃⁻ (µmol/L)", log: true },
+];
+const state = { x: "sst", y: "ri", c: "type", show: { c: true, u: true, m: true }, hl: -1 };
+const NS = "http://www.w3.org/2000/svg";
+const $ = (id) => document.getElementById(id);
+const el = (tag, attrs = {}, parent) => {
+  const e = document.createElementNS(NS, tag);
+  for (const [a, v] of Object.entries(attrs)) e.setAttribute(a, v);
+  if (parent) parent.appendChild(e);
+  return e;
+};
+const css = (v) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+// Follow the docs site's light/dark switch when embedded (same origin); otherwise the system theme.
+function syncTheme() {
+  try {
+    const t = window.parent !== window && window.parent.document.documentElement.dataset.theme;
+    if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+  } catch (e) { /* not embedded, or another origin */ }
+}
+syncTheme();
+try {
+  if (window.parent !== window) new MutationObserver(() => { syncTheme(); drawAll(); })
+    .observe(window.parent.document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+} catch (e) {}
+
+// Sequential palette for the GDGT-2/3 and nitrate modes (viridis stops).
+const VIR = ["#440154", "#3b528b", "#21918c", "#5ec962", "#fde725"];
+function vir(t) {
+  t = Math.max(0, Math.min(1, t));
+  const i = Math.min(VIR.length - 2, Math.floor(t * (VIR.length - 1)));
+  const f = t * (VIR.length - 1) - i;
+  const a = VIR[i].match(/\w\w/g).map((h) => parseInt(h, 16)), b = VIR[i + 1].match(/\w\w/g).map((h) => parseInt(h, 16));
+  return "rgb(" + a.map((v, j) => Math.round(v + (b[j] - v) * f)).join(",") + ")";
+}
+function quantile(arr, q) { const s = [...arr].sort((a, b) => a - b); return s[Math.floor(q * (s.length - 1))]; }
+function colorScale() {
+  const mode = C.find((c) => c.k === state.c);
+  if (mode.k === "type") {
+    const col = Object.fromEntries(TYPES.map((t) => [t.k, css(t.css)]));
+    return { fill: (p) => col[p.t], mode };
+  }
+  const vals = D.points.map((p) => p[mode.k]).filter((v) => v > 0).map(Math.log10);
+  const lo = quantile(vals, 0.01), hi = quantile(vals, 0.99);
+  return { fill: (p) => (p[mode.k] > 0 ? vir((Math.log10(p[mode.k]) - lo) / (hi - lo)) : css("--muted")), mode, lo, hi };
+}
+
+function niceTicks(lo, hi, n) {
+  const step0 = (hi - lo) / n, mag = Math.pow(10, Math.floor(Math.log10(step0)));
+  const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= step0);
+  const out = [];
+  for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(+v.toFixed(6));
+  return out;
+}
+
+const scatter = $("scatter"), map = $("map");
+let sDots = [], mDots = [];
+
+function drawScatter(cs) {
+  scatter.replaceChildren();
+  const W = 560, H = 420, m = { l: 54, r: 14, t: 10, b: 46 };
+  const xs = X.find((x) => x.k === state.x), ys = Y.find((y) => y.k === state.y);
+  const xv = D.points.map((p) => p[state.x]).filter((v) => v != null);
+  const xlo = Math.floor(Math.min(...xv) / 5) * 5, xhi = Math.ceil(Math.max(...xv) / 5) * 5;
+  const ylo = 0.2, yhi = 1.0;
+  const sx = (v) => m.l + (v - xlo) / (xhi - xlo) * (W - m.l - m.r);
+  const sy = (v) => H - m.b - (v - ylo) / (yhi - ylo) * (H - m.t - m.b);
+  const ax = el("g", { class: "axis" }, scatter);
+  for (const t of niceTicks(xlo, xhi, 8)) {
+    el("line", { x1: sx(t), x2: sx(t), y1: m.t, y2: H - m.b, class: "gridline" }, ax);
+    el("text", { x: sx(t), y: H - m.b + 16, "text-anchor": "middle" }, ax).textContent = t;
+  }
+  for (const t of niceTicks(ylo, yhi, 8)) {
+    el("line", { x1: m.l, x2: W - m.r, y1: sy(t), y2: sy(t), class: "gridline" }, ax);
+    el("text", { x: m.l - 8, y: sy(t) + 4, "text-anchor": "end" }, ax).textContent = t.toFixed(1);
+  }
+  el("text", { x: (m.l + W - m.r) / 2, y: H - 8, "text-anchor": "middle", class: "axis-title" }, scatter).textContent = xs.label;
+  el("text", { x: -(m.t + H - m.b) / 2, y: 14, transform: "rotate(-90)", "text-anchor": "middle", class: "axis-title" }, scatter).textContent = ys.label;
+  $("scatter-title").textContent = ys.name + " against " + xs.name;
+  const g = el("g", {}, scatter);
+  sDots = D.points.map((p, i) => {
+    if (p[state.x] == null || p[state.y] == null || !state.show[p.t]) return null;
+    const r = p.t === "c" ? 3 : 4.6;
+    const d = el("circle", { cx: sx(p[state.x]), cy: sy(p[state.y]), r, class: "pt", fill: cs.fill(p),
+      "fill-opacity": p.t === "c" ? 0.72 : 0.95 }, g);
+    d.dataset.i = i;
+    return d;
+  });
+}
+
+function drawMap(cs) {
+  map.replaceChildren();
+  const W = 640, H = 340, k = W / 360;
+  const proj = (lon, lat) => [(lon + 180) * k, (90 - lat) * (H / 180)];
+  el("rect", { x: 0, y: 0, width: W, height: H, class: "sea", rx: 6 }, map);
+  el("path", { d: D.land, class: "land", transform: `translate(${W / 2},${H / 2}) scale(${k},${H / 180})` }, map);
+  const g = el("g", {}, map);
+  mDots = D.points.map((p, i) => {
+    if (p.lat == null || p.lon == null || !state.show[p.t]) return null;
+    const [x, y] = proj(p.lon, p.lat);
+    const d = el("circle", { cx: x, cy: y, r: p.t === "c" ? 2.4 : 3.6, class: "pt", fill: cs.fill(p),
+      "fill-opacity": 0.85 }, g);
+    d.dataset.i = i;
+    return d;
+  });
+  if (cs.mode.k !== "type") {   // colorbar
+    const cb = el("g", { class: "colorbar", transform: `translate(${W - 190},${H - 34})` }, map);
+    const grad = el("linearGradient", { id: "cbg" }, el("defs", {}, map));
+    VIR.forEach((c, i) => el("stop", { offset: i / (VIR.length - 1), "stop-color": c }, grad));
+    el("rect", { x: 0, y: 0, width: 170, height: 9, fill: "url(#cbg)", rx: 2 }, cb);
+    const fmt = (v) => { const x = Math.pow(10, v); return x < 1 ? x.toPrecision(1) : Math.round(x); };
+    el("text", { x: 0, y: 22 }, cb).textContent = fmt(cs.lo);
+    el("text", { x: 170, y: 22, "text-anchor": "end" }, cb).textContent = fmt(cs.hi);
+    el("text", { x: 85, y: 22, "text-anchor": "middle" }, cb).textContent = cs.mode.label + " (log)";
+  }
+}
+
+const tip = $("tip");
+function fmt(v, nd) { return v == null ? "—" : (+v).toFixed(nd); }
+function showTip(i, ev) {
+  const p = D.points[i], t = TYPES.find((t) => t.k === p.t);
+  const where = p.t === "c" ? (p.reg ? p.reg + " · " : "") + fmt(p.lat, 2) + "°, " + fmt(p.lon, 2) + "°" : (p.org || "");
+  tip.innerHTML = `<b>${t.name}${p.ref ? " · " + escapeHtml(p.ref) : ""}</b>` +
+    (where ? `<span class="k">${escapeHtml(where)}</span><br>` : "") +
+    `SST ${fmt(p.sst, 1)} °C · Thermo-T ${fmt(p.thm, 1)} °C<br>` +
+    `Scaled RI ${fmt(p.ri, 3)} · TEX₈₆ ${fmt(p.tex, 3)}<br>` +
+    `GDGT-2/3 ${fmt(p.g23, 2)} · NO₃⁻ ${fmt(p.no3, 2)} µmol/L`;
+  tip.style.display = "block";
+  const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = ev.clientX + pad, y = ev.clientY + pad;
+  if (x + w > innerWidth - 8) x = ev.clientX - w - pad;
+  if (y + h > innerHeight - 8) y = ev.clientY - h - pad;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function escapeHtml(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function highlight(i) {
+  for (const set of [sDots, mDots]) {
+    if (state.hl >= 0 && set[state.hl]) set[state.hl].classList.remove("hl");
+    if (i >= 0 && set[i]) { set[i].classList.add("hl"); set[i].parentNode.appendChild(set[i]); }
+  }
+  state.hl = i;
+}
+for (const svg of [scatter, map]) {
+  svg.addEventListener("mousemove", (ev) => {
+    const i = ev.target.dataset && ev.target.dataset.i;
+    if (i === undefined) { highlight(-1); tip.style.display = "none"; return; }
+    if (+i !== state.hl) highlight(+i);
+    showTip(+i, ev);
+  });
+  svg.addEventListener("mouseleave", () => { highlight(-1); tip.style.display = "none"; });
+}
+
+function seg(id, opts, key) {
+  const box = $(id);
+  box.replaceChildren();
+  for (const o of opts) {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = o.name; b.setAttribute("aria-pressed", state[key] === o.k);
+    b.onclick = () => { state[key] = o.k; seg(id, opts, key); drawAll(); };
+    box.appendChild(b);
+  }
+}
+function legend() {
+  const box = $("legend");
+  box.replaceChildren();
+  if (state.c !== "type") return;
+  for (const t of TYPES) {
+    const n = D.points.filter((p) => p.t === t.k).length;
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chip"; b.style.setProperty("--c", `var(${t.css})`);
+    b.setAttribute("aria-pressed", state.show[t.k]);
+    b.innerHTML = `<span class="dot"></span>${t.name} <span style="font-weight:400">${n.toLocaleString()}</span>`;
+    b.onclick = () => { state.show[t.k] = !state.show[t.k]; legend(); drawAll(); };
+    box.appendChild(b);
+  }
+}
+function cards() {
+  const n = (k) => D.points.filter((p) => p.t === k).length;
+  const items = [
+    { n: D.points.length, l: "samples in total" },
+    ...TYPES.map((t) => ({ n: n(t.k), l: t.name.toLowerCase() + (t.k === "c" ? " grid cells" : " samples"), c: `var(${t.css})` })),
+  ];
+  $("cards").innerHTML = items.map((i) => `<div class="card" style="${i.c ? "--c:" + i.c : ""}"><div class="n">${i.n.toLocaleString()}</div><div class="l">${i.l}</div></div>`).join("");
+}
+function sources() {
+  const tb = $("sources").querySelector("tbody");
+  tb.innerHTML = D.sources.map((s) => {
+    const t = TYPES.find((t) => t.k === s.t);
+    return `<tr><td><span class="tag" style="--c:var(${t.css})">${t.name}</span></td><td>${escapeHtml(s.ref)}</td><td class="n">${s.n}</td></tr>`;
+  }).join("");
+  $("foot").textContent = `Data: ${D.csv} from the TEXAS training data (TEXAS.download_training_data()). ` +
+    (D.n_crtp_posterior ? `The coretop count matches N_crtp = ${D.n_crtp_posterior.toLocaleString()} in ${D.posterior}. ` : "") +
+    `Coastlines: ${D.land_source}.`;
+}
+function drawAll() { const cs = colorScale(); drawScatter(cs); drawMap(cs); legend(); }
+
+seg("ctl-x", X, "x"); seg("ctl-y", Y, "y"); seg("ctl-c", C, "c");
+cards(); sources(); drawAll();
+</script>
+</body>
+</html>
