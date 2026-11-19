@@ -75,7 +75,11 @@ where $\mathbf{x}$ is the grid box. To reconstruct, BAYSPAR combines this relati
 TEXAS replaces TEX₈₆ with the **Scaled Ring Index**, which keeps all six isoGDGTs and counts crenarchaeol as three rings (Eqs. 6 and 8 of the manuscript):
 
 $$
-\mathrm{RI}_{0\text{–}3} = \frac{[\text{GDGT-1}] + 2[\text{GDGT-2}] + 3[\text{GDGT-3}] + 3[\text{Cren}] + 3[\text{Cren}']}{[\text{GDGT-0}] + [\text{GDGT-1}] + [\text{GDGT-2}] + [\text{GDGT-3}] + [\text{Cren}] + [\text{Cren}']}, \qquad \text{Scaled RI} = \frac{\mathrm{RI}_{0\text{–}3}}{3}
+\mathrm{RI}_{0\text{–}3} = \frac{[\text{GDGT-1}] + 2[\text{GDGT-2}] + 3[\text{GDGT-3}] + 3[\text{Cren}] + 3[\text{Cren}']}{[\text{GDGT-0}] + [\text{GDGT-1}] + [\text{GDGT-2}] + [\text{GDGT-3}] + [\text{Cren}] + [\text{Cren}']}
+$$
+
+$$
+\text{Scaled RI} = \frac{\mathrm{RI}_{0\text{–}3}}{3}
 $$
 
 Scaled RI follows a generalized logistic (S-shaped) curve in temperature, bounded below by $b$ and above by 1. The two nonthermal predictors shift the curve's location $T_0$ along the temperature axis without changing its shape, the *T₀-shift parameterization* (Eq. 13 of the manuscript):
