@@ -200,3 +200,30 @@ html[data-theme="dark"] .psm-via b { filter: brightness(1.6); }
   .psm-hflow { transform: rotate(90deg); }
   .psm-legend { flex-direction: row; flex-wrap: wrap; justify-content: center; }
 }
+
+/* "Paper" buttons in the sensor-model summary table (sensor_models.md) */
+a.paper-btn {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 6px;
+  background: var(--pst-color-primary);
+  color: var(--pst-color-background) !important;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none !important;
+}
+a.paper-btn:hover, a.paper-btn:focus-visible { background: var(--texas-red); color: #fff !important; }
+
+/* Dark mode: the teal used for inline code is too dark on a dark background */
+html[data-theme="dark"] code.literal,
+html[data-theme="dark"] .sig-name {
+  color: #7CC4CF;
+}
+
+/* Sensor-model summary table (sensor_models.md): fit the page width, let long
+   code wrap, keep the attribute column narrow */
+.sensor-summary table { width: 100%; table-layout: fixed; }
+.sensor-summary th:first-child, .sensor-summary td:first-child { width: 17%; }
+.sensor-summary td, .sensor-summary th { white-space: normal; vertical-align: top; }
+.sensor-summary code, .sensor-summary code span.pre { white-space: normal; overflow-wrap: anywhere; }
