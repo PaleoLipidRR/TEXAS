@@ -122,6 +122,7 @@ tr.dim td { opacity: 0.35; }
   .srow.key { height: 98px; }
 }
 </style>
+<script defer src="consent.js"></script>
 </head>
 <body>
 <div class="page">
@@ -412,29 +413,44 @@ function drawScatter(cs) {
 const K = Math.sqrt(Math.PI * (4 + Math.PI)), XMAX = 4 * Math.PI / K, YMAX = 2 * Math.PI / K;
 const MW = 640, MH = 340, PAD = 10;
 const S = Math.min((MW - 2 * PAD) / (2 * XMAX), (MH - 2 * PAD) / (2 * YMAX));
-function eck3(lon, lat) {
-  const l = lon * Math.PI / 180, p = lat * Math.PI / 180;
+// Centered on 150 deg E (Pacific in the middle, as in the cover animation), so the map's edge runs
+// along 30 deg W. Positions are projected by their longitude east of the center, d in [-180, 180).
+const LON0 = 150;
+const rel = (lon) => ((((lon - LON0) % 360) + 540) % 360) - 180;
+function eckRel(d, lat) {
+  const l = d * Math.PI / 180, p = lat * Math.PI / 180;
   const x = 2 / K * l * (1 + Math.sqrt(Math.max(0, 1 - 4 * p * p / (Math.PI * Math.PI))));
   return [MW / 2 + x * S, MH / 2 - 4 / K * p * S];
 }
-const pathOf = (ring) => "M" + ring.map(([lo, la]) => eck3(lo, la).map((v) => v.toFixed(1)).join(",")).join("L") + "Z";
+const eck3 = (lon, lat) => eckRel(rel(lon), lat);
+// A ring of [d, lat] is drawn as is; anything past d = +-180 falls outside the globe and is clipped.
+const pathRel = (ring) => "M" + ring.map(([d, la]) => eckRel(d, la).map((v) => v.toFixed(1)).join(",")).join("L") + "Z";
 let LANDPATH = null;
 function drawMap(cs) {
   map.replaceChildren();
   const edge = [];
   for (let la = -90; la <= 90; la += 3) edge.push([180, la]);
   for (let la = 90; la >= -90; la -= 3) edge.push([-180, la]);
-  el("path", { d: pathOf(edge), class: "globe" }, map);
-  if (!LANDPATH) LANDPATH = D.land.map(pathOf).join("");
-  el("path", { d: LANDPATH, class: "land" }, map);
+  const clip = el("clipPath", { id: "map-clip" }, el("defs", {}, map));
+  el("path", { d: pathRel(edge) }, clip);
+  el("path", { d: pathRel(edge), class: "globe" }, map);
+  const inside = el("g", { "clip-path": "url(#map-clip)" }, map);
+  // The coastline rings are split at 180 deg; shifted by -LON0 they span d in [-330, 30], so each is
+  // drawn twice (as is and 360 deg east) and the clip keeps the part on the globe.
+  if (!LANDPATH) LANDPATH = D.land.map((ring) => [0, 360].map((o) => pathRel(ring.map(([lo, la]) => [lo - LON0 + o, la]))).join("")).join("");
+  el("path", { d: LANDPATH, class: "land" }, inside);
   if (state.cal === "bayspar" || (state.cal === "compare" && state.cmp.B)) {
     D.legacy.bayspar.regions.forEach((r, j) => {
-      const [lo, la] = r.cell, box = [];
-      for (let t = -10; t <= 10; t += 2) box.push([lo + t, la - 10]);
-      for (let t = -10; t <= 10; t += 2) box.push([lo + 10, la + t]);
-      for (let t = 10; t >= -10; t -= 2) box.push([lo + t, la + 10]);
-      for (let t = 10; t >= -10; t -= 2) box.push([lo - 10, la + t]);
-      el("path", { d: pathOf(box), fill: "none", stroke: css(REGION_CSS[j]), "stroke-width": 2 }, map);
+      const [lo, la] = r.cell, dc = rel(lo);
+      for (const o of [-360, 0, 360]) {
+        if (Math.abs(dc + o) - 10 >= 180) continue;
+        const box = [];
+        for (let t = -10; t <= 10; t += 2) box.push([dc + o + t, la - 10]);
+        for (let t = -10; t <= 10; t += 2) box.push([dc + o + 10, la + t]);
+        for (let t = 10; t >= -10; t -= 2) box.push([dc + o + t, la + 10]);
+        for (let t = 10; t >= -10; t -= 2) box.push([dc + o - 10, la + t]);
+        el("path", { d: pathRel(box), fill: "none", stroke: css(REGION_CSS[j]), "stroke-width": 2 }, inside);
+      }
     });
   }
   const g = el("g", {}, map);
@@ -661,7 +677,7 @@ function foot() {
   $("foot").textContent = `TEXAS data: ${D.csv} (TEXAS.download_training_data()); the coretop count matches N_crtp = ${(D.n_crtp_posterior || 0).toLocaleString()} in ${D.posterior}. ` +
     `The full compilation is re-screened here exactly as SI_code00 does, and regrids to the same cells. ` +
     (pv ? `Original studies and "used by" from gdgt-db (commit ${pv.gdgtdb_pin.slice(0, 8)}), matching each sample by place and TEX₈₆; DOIs are checked before they are linked. ` : "") +
-    `Earlier calibrations' data: Schouten et al. (2002) Fig. 3b (digitized), Kim et al. (2010) electronic annex, BAYSPAR's calibration files (Tierney & Tingley, 2014, 2015). Coastlines: ${D.land_source}; Eckert III projection.`;
+    `Earlier calibrations' data: Schouten et al. (2002) Fig. 3b (digitized), Kim et al. (2010) electronic annex, BAYSPAR's calibration files (Tierney & Tingley, 2014, 2015). Coastlines: ${D.land_source}; Eckert III projection centered on 150° E.`;
 }
 function drawAll() {
   P = dataPoints();

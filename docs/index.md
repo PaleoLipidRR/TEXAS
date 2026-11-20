@@ -51,6 +51,7 @@ TEXAS-PSM links four components through three submodels, after Figure 2 of the m
 <span class="psm-trunk psm-t-end" aria-hidden="true"></span><a class="psm-branch psm-c-green" href="sensor_models.html#sensor-nutrient"><span class="psm-pill">Nutrient level</span><span class="psm-via">link via <b>surface ocean nitrate levels</b></span></a>
 </div>
 </div>
+<p class="psm-footnote">The GDGT drawings show how the atoms are connected, not their stereochemistry. Cren′ has the same connectivity as crenarchaeol; its blue ring marks the ring whose stereochemistry differs.</p>
 
 ---
 
