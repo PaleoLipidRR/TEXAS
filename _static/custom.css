@@ -1,0 +1,351 @@
+/* TEXAS branding — the five colors of the colorblock wordmark, as on the journal
+   cover design (notebooks/cover_PALO.ipynb, C_TILES) and in texas_logo.svg:
+   T red, E ochre, X purple, A blue, S teal. Change all three places together.
+   Primary accent: blue (the "A"). */
+
+:root {
+  --texas-red:    #B63D3D;
+  --texas-ochre:  #AC753A;
+  --texas-purple: #7A4486;
+  --texas-blue:   #3D6386;
+  --texas-teal:   #245058;
+}
+
+/* pydata / sphinx-book-theme accent variables (light mode). The theme sets these
+   on html[data-theme="light"], which outranks :root, so they are set on the same
+   selector here; this file loads after the theme's and therefore wins. */
+html[data-theme="light"],
+html:not([data-theme]) {
+  --pst-color-primary:        #3D6386;
+  --pst-color-primary-bg:     #e6edf3;
+  --pst-color-link:           #3D6386;
+  --pst-color-link-hover:     #B63D3D;
+  --pst-color-accent:         #AC753A;
+  --pst-color-secondary:      #245058;
+  --pst-color-secondary-highlight: #7A4486;
+}
+
+/* Dark mode: lighter tints of the blue and ochre so they stay legible on dark backgrounds */
+html[data-theme="dark"] {
+  --pst-color-primary:    #8FB3D1;
+  --pst-color-link:       #A9C6DE;
+  --pst-color-link-hover: #D9A869;
+  --pst-color-accent:     #D9A869;
+}
+
+/* Logo sizing in the header */
+.navbar-brand img,
+img.logo__image {
+  height: 2.1rem;
+  width: auto;
+}
+
+/* Headings in the wordmark's teal for an editorial feel */
+h1, h2, h3 {
+  color: var(--texas-teal);
+}
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3 {
+  color: #cfe0ea;
+}
+
+/* Accent bar under the page H1, echoing the colorblock wordmark */
+h1::after {
+  content: "";
+  display: block;
+  height: 4px;
+  width: 100%;
+  margin-top: 0.4rem;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--texas-red)    0%,  var(--texas-red)    20%,
+    var(--texas-ochre)  20%, var(--texas-ochre)  40%,
+    var(--texas-purple) 40%, var(--texas-purple) 60%,
+    var(--texas-blue)   60%, var(--texas-blue)   80%,
+    var(--texas-teal)   80%, var(--texas-teal)   100%
+  );
+}
+
+/* Inline code / API signatures pick up the teal */
+code.literal,
+.sig-name {
+  color: var(--texas-teal);
+}
+
+/* TEXAS-PSM framework schematic on the home page (index.md), after Figure 2
+   of the manuscript. Every box, label and legend entry is a link; colors come
+   from --psm-accent so each card can take its own. */
+.psm-schematic {
+  margin: 1.2rem 0 1.6rem;
+  padding: 1rem 1.2rem 1.3rem;
+  border: 1px solid var(--pst-color-border);
+  border-radius: 10px;
+  background: var(--pst-color-surface);
+  color: var(--pst-color-text-base);
+}
+.psm-schematic a, .psm-schematic a:hover { text-decoration: none; }
+.psm-panel { margin: 0.2rem 0 0.8rem; font-weight: 700; }
+.psm-panel ~ .psm-panel { margin-top: 1.6rem; padding-top: 1.2rem; border-top: 1px solid var(--pst-color-border); }
+.psm-panel-letter { display: inline-block; min-width: 1.3em; font-size: 1.6em; line-height: 1; vertical-align: -0.1em; }
+
+.psm-c-env    { --psm-accent: #AC8A3A; --psm-tint: #E9D9A8; }
+.psm-c-gray   { --psm-accent: #5f6368; --psm-tint: #D9DADC; }
+.psm-c-red    { --psm-accent: var(--texas-red); }
+.psm-c-ochre  { --psm-accent: #C9772A; }
+.psm-c-purple { --psm-accent: var(--texas-purple); }
+.psm-c-blue   { --psm-accent: var(--texas-blue); --psm-tint: #D3E0EC; }
+.psm-c-teal   { --psm-accent: #2B7F8E; --psm-tint: #8FD3DD; }
+.psm-c-green  { --psm-accent: #3F7F3A; --psm-tint: #9ED69A; }
+html[data-theme="dark"] .psm-c-env    { --psm-tint: #4a4026; }
+html[data-theme="dark"] .psm-c-gray   { --psm-tint: #3a3c40; }
+html[data-theme="dark"] .psm-c-blue   { --psm-tint: #263646; }
+html[data-theme="dark"] .psm-c-red    { --psm-accent: #E07A7A; }
+html[data-theme="dark"] .psm-c-ochre  { --psm-accent: #E8A35F; }
+html[data-theme="dark"] .psm-c-purple { --psm-accent: #B98AC6; }
+html[data-theme="dark"] .psm-c-teal   { --psm-tint: #24555d; }
+html[data-theme="dark"] .psm-c-green  { --psm-tint: #2f4f2c; }
+
+/* Boxes: a solid header bar over a tinted body, as in the figure */
+a.psm-box {
+  display: flex; flex-direction: column;
+  border-radius: 4px; overflow: hidden;
+  background: var(--psm-tint, var(--pst-color-background));
+  color: var(--pst-color-text-base);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+a.psm-box:hover, a.psm-box:focus-visible,
+a.psm-plain:hover, a.psm-plain:focus-visible,
+a.psm-leg:hover, a.psm-leg:focus-visible,
+a.psm-branch:hover, a.psm-branch:focus-visible,
+a.psm-sub:hover, a.psm-sub:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  color: var(--pst-color-text-base);
+}
+.psm-schematic a:focus-visible { outline: 2px solid var(--pst-color-primary); outline-offset: 2px; }
+.psm-head { padding: 0.3rem 0.5rem; background: var(--psm-accent); color: #fff; font-weight: 700; text-align: center; }
+.psm-body { padding: 0.45rem 0.55rem 0.55rem; font-size: 0.86rem; line-height: 1.35; text-align: center; }
+.psm-tag {
+  display: block; width: fit-content; margin: 0.4rem auto 0;
+  padding: 0 0.45rem; border-radius: 999px; font-size: 0.7rem; font-style: italic;
+  border: 1px solid currentColor; opacity: 0.75;
+}
+
+/* Panel a: four boxes on an 8-column grid; each bracket runs from the middle
+   of one box to the middle of the next, with its submodel name below. */
+.psm-a { display: grid; grid-template-columns: repeat(8, 1fr); column-gap: 0.7rem; row-gap: 0; }
+.psm-a > a.psm-box { grid-row: 1; }
+.psm-bracket {
+  grid-row: 2; height: 1.4rem; margin: 0 0.9rem;
+  border: 4px solid var(--psm-line); border-top: 0;
+  border-radius: 0 0 6px 6px; position: relative;
+}
+.psm-bracket::after {  /* arrowhead pointing up into the next box */
+  content: ""; position: absolute; right: -9px; top: -6px;
+  border: 7px solid transparent; border-bottom: 9px solid var(--psm-line); border-top: 0;
+}
+.psm-br-env  { --psm-line: #6b4f1d; }
+.psm-br-gray { --psm-line: #4a4d52; }
+html[data-theme="dark"] .psm-br-env  { --psm-line: #D9A869; }
+html[data-theme="dark"] .psm-br-gray { --psm-line: #9ca3af; }
+a.psm-sub {
+  grid-row: 3; justify-self: center; margin-top: 0.3rem; padding: 0.1rem 0.6rem;
+  font-size: 0.9rem; color: var(--pst-color-text-base); border-radius: 4px;
+}
+a.psm-sub-on { font-weight: 700; border: 1px solid var(--pst-color-border); border-top: 0; background: var(--pst-color-background); }
+
+/* Panel b, top row: thermometer -> GDGT structures, legend at the right */
+.psm-b-top { display: grid; grid-template-columns: auto auto 1fr auto; align-items: center; gap: 0.9rem; }
+a.psm-plain { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; padding: 0.4rem; border-radius: 8px; color: var(--pst-color-text-base); }
+.psm-thermo { width: 2.6rem; height: auto; }
+.psm-big { font-weight: 700; font-size: 1.1rem; }
+
+.psm-gdgts { align-items: stretch !important; }
+.psm-gdgt { display: grid; grid-template-columns: 5.6rem 1fr; align-items: center; }
+.psm-gdgt-name { font-size: 0.78rem; font-weight: 600; line-height: 1.1; color: var(--texas-purple); }
+.psm-gdgt-name small { display: block; font-weight: 400; font-style: italic; color: var(--pst-color-text-muted); }
+html[data-theme="dark"] .psm-gdgt-name { color: #B98AC6; }
+.psm-gdgt-svg { width: 100%; max-width: 15rem; height: auto; }
+.psm-cren { font-size: 0.78rem; font-weight: 600; color: var(--pst-color-text-muted); text-align: center; }
+.psm-gdgts .psm-big { text-align: center; }
+.psm-legend { display: flex; flex-direction: column; gap: 0.35rem; }
+a.psm-leg { display: flex; flex-direction: column; padding: 0.15rem 0.4rem; border-radius: 4px; line-height: 1.2; color: var(--pst-color-text-base); }
+a.psm-leg b { color: var(--psm-accent); font-size: 1.02rem; }
+a.psm-leg small { color: var(--psm-accent); opacity: 0.9; }
+.psm-tex { color: var(--texas-red); }
+html[data-theme="dark"] .psm-tex { color: #E07A7A; }
+
+/* Panel b, flow down to TEXAS and the two nonthermal links */
+
+a.psm-texas .psm-head { font-size: 1.1rem; }
+a.psm-branch { display: flex; align-items: center; gap: 0.6rem; padding: 0.2rem 0.4rem; border-radius: 6px; color: var(--pst-color-text-base); }
+
+.psm-pill { padding: 0.15rem 0.6rem; background: var(--psm-tint); font-weight: 700; border: 1px solid var(--psm-accent); }
+.psm-via { font-weight: 600; }
+.psm-via b { color: var(--psm-accent); }
+html[data-theme="dark"] .psm-via b { filter: brightness(1.6); }
+
+/* Narrow screens: boxes in two columns without brackets; panel b stacks */
+@media (max-width: 760px) {
+  .psm-a { grid-template-columns: 1fr 1fr; gap: 0.6rem; }
+  .psm-a > a.psm-box { grid-column: auto !important; grid-row: auto; }
+  .psm-bracket { display: none; }
+  a.psm-sub { grid-column: auto !important; grid-row: auto; justify-self: stretch; text-align: center; }
+  .psm-b-top { grid-template-columns: 1fr; justify-items: center; }
+  .psm-harrow { transform: rotate(90deg); margin: 0.6rem 0; }
+  .psm-legend { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+}
+
+/* "Paper" buttons in the sensor-model summary table (sensor_models.md) */
+a.paper-btn {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 6px;
+  background: var(--pst-color-primary);
+  color: var(--pst-color-background) !important;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none !important;
+}
+a.paper-btn:hover, a.paper-btn:focus-visible { background: var(--texas-red); color: #fff !important; }
+
+/* Dark mode: the teal used for inline code is too dark on a dark background */
+html[data-theme="dark"] code.literal,
+html[data-theme="dark"] .sig-name {
+  color: #7CC4CF;
+}
+
+/* Sensor-model summary table (sensor_models.md): fit the page width, let long
+   code wrap, keep the attribute column narrow */
+.sensor-summary table { width: 100%; table-layout: fixed; }
+.sensor-summary th:first-child, .sensor-summary td:first-child { width: 17%; }
+.sensor-summary td, .sensor-summary th { white-space: normal; vertical-align: top; }
+.sensor-summary code, .sensor-summary code span.pre { white-space: normal; overflow-wrap: anywhere; }
+
+/* Chips for categorical values in the sensor-model table:
+   data = calibration data, temp = temperature target, pred = nonthermal
+   predictor, index = GDGT index, unc = how uncertainty is treated */
+.chip {
+  --chip: #6b7280;
+  display: inline-block;
+  margin: 0.1rem 0.15rem 0.1rem 0;
+  padding: 0.05rem 0.5rem;
+  border: 1px solid var(--chip);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--chip) 14%, transparent);
+  color: var(--pst-color-text-base);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+.chip-data  { --chip: var(--texas-ochre); }
+.chip-temp  { --chip: var(--texas-red); }
+.chip-pred  { --chip: #2B7F8E; }
+.chip-index { --chip: var(--texas-purple); border-radius: 4px; }
+.chip-unc   { --chip: var(--texas-blue); border-radius: 4px; }
+html[data-theme="dark"] .chip-data  { --chip: #D9A869; }
+html[data-theme="dark"] .chip-temp  { --chip: #E07A7A; }
+html[data-theme="dark"] .chip-pred  { --chip: #6CC0CC; }
+html[data-theme="dark"] .chip-index { --chip: #B98AC6; }
+html[data-theme="dark"] .chip-unc   { --chip: #8FB3D1; }
+.sensor-summary a:has(> .chip) { text-decoration: none; }
+.sensor-summary small { color: var(--pst-color-text-muted); }
+
+/* Schematic arrows, drawn like Figure 2: a thick gray shaft with a solid head */
+.psm-schematic { --psm-flow: #8a8d91; --psm-shaft: 6px; }
+html[data-theme="dark"] .psm-schematic { --psm-flow: #9ca3af; }
+.psm-harrow {
+  position: relative; width: 3rem; height: var(--psm-shaft);
+  margin-right: 8px; border-radius: 3px 0 0 3px; background: var(--psm-flow);
+}
+.psm-harrow::after {
+  content: ""; position: absolute; right: -14px; top: 50%; transform: translateY(-50%);
+  border-style: solid; border-width: 10px 0 10px 15px;
+  border-color: transparent transparent transparent var(--psm-flow);
+}
+/* Panel a brackets: match the shaft weight and use a solid head */
+.psm-bracket { border-width: var(--psm-shaft); border-radius: 0 0 10px 10px; }
+.psm-bracket::after { right: -13px; top: -14px; border-width: 0 10px 15px 10px; border-style: solid;
+  border-color: transparent transparent var(--psm-line) transparent; }
+
+/* Panel b, lower half: one vertical trunk (middle column) with captions to its
+   right; the two nonthermal links branch off the same trunk. */
+.psm-flow { display: grid; grid-template-columns: 1fr 3rem 1fr; align-items: center; margin-top: 0.4rem; }
+.psm-trunk {
+  grid-column: 2; align-self: stretch; position: relative; min-height: 2.8rem;
+  background-image: linear-gradient(var(--psm-flow), var(--psm-flow)), linear-gradient(var(--psm-flow), var(--psm-flow));
+  background-repeat: no-repeat;
+}
+.psm-t-arrow { background-size: var(--psm-shaft) calc(100% - 14px), 0 0; background-position: center top, 0 0; }
+.psm-t-arrow::after {        /* head pointing down */
+  content: ""; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+  border-style: solid; border-width: 15px 10px 0 10px;
+  border-color: var(--psm-flow) transparent transparent transparent;
+}
+.psm-t-tee { background-size: var(--psm-shaft) 100%, calc(50% - 2px) var(--psm-shaft); background-position: center top, right center; }
+.psm-t-end { background-size: var(--psm-shaft) calc(50% + 3px), calc(50% - 2px) var(--psm-shaft); background-position: center top, right center; }
+.psm-t-tee::after, .psm-t-end::after {   /* head pointing right, into the pill */
+  content: ""; position: absolute; right: -13px; top: 50%; transform: translateY(-50%);
+  border-style: solid; border-width: 9px 0 9px 14px;
+  border-color: transparent transparent transparent var(--psm-flow);
+}
+.psm-cap { grid-column: 3; margin: 0; padding-left: 0.6rem; font-weight: 600; color: var(--pst-color-text-muted); }
+.psm-cap-strong { color: var(--pst-color-text-base); font-weight: 700; }
+.psm-footnote { margin: 0.6rem 0 0; font-size: 0.85rem; color: var(--pst-color-text-muted); }
+.psm-flow > a.psm-texas { grid-column: 1 / -1; justify-self: center; width: min(30rem, 100%); }
+.psm-flow > a.psm-branch { grid-column: 3; justify-self: start; margin-left: 14px; }
+@media (max-width: 760px) {
+  .psm-flow { grid-template-columns: 0 2.4rem 1fr; }
+}
+
+/* Calibration-data chips use the manuscript's data-type colors
+   (datatype_color_dict in the SI notebooks: open-color cyan9, yellow9, pink9) */
+.chip-coretop  { --chip: #0b7285; }
+.chip-culture  { --chip: #e67700; }
+.chip-mesocosm { --chip: #a61e4d; }
+html[data-theme="dark"] .chip-coretop  { --chip: #3bc9db; }
+html[data-theme="dark"] .chip-culture  { --chip: #ffc078; }
+html[data-theme="dark"] .chip-mesocosm { --chip: #f783ac; }
+
+/* Schematic: text size and spacing, balanced together. Labels are larger and
+   the flow rows get more air, so nothing in the diagram reads as fine print. */
+.psm-schematic { padding: 1.3rem 1.5rem 1.6rem; font-size: 1rem; }
+.psm-panel { font-size: 1.05rem; margin-bottom: 1rem; }
+.psm-panel ~ .psm-panel { margin-top: 1.9rem; padding-top: 1.5rem; }
+.psm-head { font-size: 1.02rem; padding: 0.4rem 0.5rem; }
+.psm-body { font-size: 0.93rem; line-height: 1.45; padding: 0.55rem 0.6rem 0.65rem; }
+a.psm-sub { font-size: 0.95rem; margin-top: 0.45rem; }
+.psm-bracket { height: 1.6rem; }
+.psm-b-top { gap: 1.2rem; }
+.psm-big { font-size: 1.15rem; }
+.psm-gdgts { gap: 0.15rem !important; }
+.psm-gdgt { grid-template-columns: 6rem 1fr; }
+.psm-gdgt-name { font-size: 0.88rem; }
+.psm-gdgt-name small { font-size: 0.78rem; }
+.psm-gdgt-svg { max-width: 17rem; }
+a.psm-leg b { font-size: 1.08rem; }
+a.psm-leg small { font-size: 0.86rem; }
+.psm-legend { gap: 0.6rem; }
+.psm-flow { margin-top: 0.8rem; row-gap: 0.15rem; }
+.psm-trunk { min-height: 3.2rem; }
+.psm-t-tee, .psm-t-end { min-height: 2.9rem; }
+.psm-cap { font-size: 1rem; line-height: 1.4; padding-left: 0.8rem; }
+.psm-flow > a.psm-texas { width: min(32rem, 100%); }
+a.psm-texas .psm-head { font-size: 1.15rem; }
+a.psm-texas .psm-body { font-size: 0.95rem; }
+.psm-flow > a.psm-branch { margin-left: 16px; }
+.psm-pill { white-space: nowrap; font-size: 1rem; padding: 0.25rem 0.75rem; }
+.psm-via { font-size: 0.98rem; }
+
+/* Flow layout, as in Figure 2: the trunk runs down the left third and
+   everything it feeds sits to its right, so captions have room for one line */
+.psm-flow { grid-template-columns: minmax(0, 0.42fr) 3rem minmax(0, 1.58fr); }
+.psm-t-line { background-size: var(--psm-shaft) 100%, 0 0; background-position: center top, 0 0; }
+.psm-flow > a.psm-texas { grid-column: 3; justify-self: start; width: min(30rem, 100%); margin: 0.35rem 0 0.35rem 0.8rem; }
+@media (max-width: 760px) {
+  .psm-flow { grid-template-columns: 0 2.4rem minmax(0, 1fr); }
+}
