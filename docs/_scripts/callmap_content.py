@@ -358,8 +358,8 @@ EXPLAIN = {
         "data-rich parameter set available in a posterior is the one used.",
     "models.logistics.generalized_logistic_fixed_upper":
         "The forward calibration curve itself: a generalized logistic in temperature with a fixed "
-        "upper asymptote. Since the Q asymmetry parameter was dropped, Q = 1 and the inflection point "
-        "sits at t0.",
+        "upper asymptote. With the Q asymmetry parameter fixed at 1, t0 is the curve's location, not "
+        "its inflection point: the steepest response sits at t0 - ln(v)/k, several degrees C below t0.",
     "models.logistics.inverse_generalized_logistic_fixed_upper":
         "Closed-form inversion of the calibration curve. Useful for point estimates and plotting, but "
         "it is not the inverse reconstruction: that is Bayesian and lives in stan/invT.py.",

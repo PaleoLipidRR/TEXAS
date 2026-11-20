@@ -20,8 +20,7 @@ Three things you can do with it:
 ```
 
 ```{tip}
-The map has its own light/dark toggle in the top-right. It follows your operating
-system's theme by default, so it may not match this site's theme until you flip it.
+The map has its own light/dark toggle in the top-right. It follows your operating system's theme by default, so it may not match this site's theme until you flip it.
 ```
 
 ## How the graph is built

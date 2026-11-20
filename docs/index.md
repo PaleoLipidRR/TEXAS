@@ -228,19 +228,9 @@ The four **compset** letters encode, in order:
 So `tx.GHEB.sst.sri03.G23-N1p0` is the published T₀-shift multivariate SST calibration, and `tx.GHPU.sst.sri03.p0` the univariate SST one. A date/run token may be appended to distinguish refits of the same configuration. Every function that takes a posterior name resolves case ids and legacy long names alike.
 
 ```{note}
-**Two formulations of the non-thermal terms exist, and they are not
-interchangeable.** The current calibration — the bundled `GHEB` pair — applies
-G₂/₃ and NO₃ *inside* the logistic, as a shift of the curve location T₀ in °C
-(`gamma_G23_crtp` / `gamma_NO3_crtp`), so the predicted Scaled RI stays inside
-its bounds for any predictor value. The `GHEA` posteriors on Zenodo are the
-preprint's response-offset formulation (`beta_G23_crtp` / `beta_NO3_crtp`, in
-Scaled-RI units per predictor unit); they are kept for reproducing the preprint
-and are documented on the [preprint archive page](preprint_additive_archive.md).
+**Two formulations of the non-thermal terms exist, and they are not interchangeable.** The current calibration — the bundled `GHEB` pair — applies G₂/₃ and NO₃ *inside* the logistic, as a shift of the curve location T₀ in °C (`gamma_G23_crtp` / `gamma_NO3_crtp`), so the predicted Scaled RI stays inside its bounds for any predictor value. The `GHEA` posteriors on Zenodo are the preprint's response-offset formulation (`beta_G23_crtp` / `beta_NO3_crtp`, in Scaled-RI units per predictor unit); they are kept for reproducing the preprint and are documented on the [preprint archive page](preprint_additive_archive.md).
 
-You do not have to choose between them by hand: TEXAS reads which formulation a
-posterior uses from the coefficients it carries and selects the matching inverse
-model. The univariate and culture/mesocosm posteriors are unaffected either way —
-they have no non-thermal predictors.
+You do not have to choose between them by hand: TEXAS reads which formulation a posterior uses from the coefficients it carries and selects the matching inverse model. The univariate and culture/mesocosm posteriors are unaffected either way — they have no non-thermal predictors.
 ```
 
 ---
@@ -267,13 +257,7 @@ result["p95"]   # 95th percentile
 ### Step 4 — Inverse reconstruction (proxy → temperature)
 
 ```{note}
-`temptype=` is optional here. It does not change the reconstruction, which
-follows whichever calibration you supply — the target is read from that
-posterior's own attributes, and a `temptype` that contradicts it warns. It
-matters in exactly one case: when `fwd_posterior` is omitted, it picks which
-bundled calibration is used, `"SST"` (the default) or `"thermoT"`. On the
-forward side, `get_posterior(..., temptype=...)` is a real argument — that is
-where the target is decided.
+`temptype=` is optional here. It does not change the reconstruction, which follows whichever calibration you supply — the target is read from that posterior's own attributes, and a `temptype` that contradicts it warns. It matters in exactly one case: when `fwd_posterior` is omitted, it picks which bundled calibration is used, `"SST"` (the default) or `"thermoT"`. On the forward side, `get_posterior(..., temptype=...)` is a real argument — that is where the target is decided.
 ```
 
 ````````{tab-set}

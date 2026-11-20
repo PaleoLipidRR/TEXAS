@@ -25,18 +25,18 @@ P(\theta \mid D) = \frac{P(D \mid \theta) \, P(\theta)}{P(D)}
 $$
 
 Where:
-- \( \theta \) = parameters we want to estimate (e.g., S-curve shape parameters, nutrient effect coefficients).
-- \( D \) = observed data (e.g., GDGT fractions, Ring Index values).
-- \( P(\theta \mid D) \) = **posterior** — our updated beliefs about parameters given the data.
-- \( P(D \mid \theta) \) = **likelihood** — how well a given set of parameters explains the data.
-- \( P(\theta) \) = **prior** — what we believed about parameters before seeing the data.
-- \( P(D) \) = **evidence** — a normalization constant ensuring probabilities sum to 1.
+- $\theta$ = parameters we want to estimate (e.g., S-curve shape parameters, nutrient effect coefficients).
+- $D$ = observed data (e.g., GDGT fractions, Ring Index values).
+- $P(\theta \mid D)$ = **posterior** — our updated beliefs about parameters given the data.
+- $P(D \mid \theta)$ = **likelihood** — how well a given set of parameters explains the data.
+- $P(\theta)$ = **prior** — what we believed about parameters before seeing the data.
+- $P(D)$ = **evidence** — a normalization constant ensuring probabilities sum to 1.
 
 ---
 
 ## 3. Forward Model (Environmental Variables → Proxy Values)
 
-The forward model predicts **scaled Ring Index** (\( RI_{\text{scaled}} \)) from environmental predictors.
+The forward model predicts **scaled Ring Index** ($RI_{\text{scaled}}$) from environmental predictors.
 
 Example for a **generalized logistic forward model**:
 
@@ -47,14 +47,13 @@ RI_{\text{scaled}}(T, X) = b + \frac{1 - b}{\left( 1 + e^{-k (T - T_{0,\text{eff
 $$
 
 Where:
-- \( T \) = temperature.
-- \( X_j \) = additional predictors (e.g., GDGT-2/GDGT-3 ratio, nitrate concentration).
-- \( b \) = lower asymptote; the upper asymptote is **fixed at 1**; \( T_0 \) = curve location (the steepest response is at \( T_0 - \ln v / k \), not at \( T_0 \)), \( k \) = steepness, \( v \) = shape (curve asymmetry).
-- \( \gamma_j \) = coefficients for optional predictors, in °C per predictor unit. They shift the curve's location **inside** the logistic (the *T₀-shift parameterization*), so a sample with elevated predictors records the Scaled RI of apparently colder water, and the predicted \( RI_{\text{scaled}} \) stays confined to \( (b, 1) \) by construction. (An earlier formulation added \( \beta_j X_j \) to the response instead; it is superseded because it can push predictions outside the index's physical bounds.)
-- \( RI_{\text{scaled}} \) is normalized between 0 and 1 for comparability.
+- $T$ = temperature.
+- $X_j$ = additional predictors (e.g., GDGT-2/GDGT-3 ratio, nitrate concentration).
+- $b$ = lower asymptote; the upper asymptote is **fixed at 1**; $T_0$ = curve location (the steepest response is at $T_0 - \ln v / k$, not at $T_0$), $k$ = steepness, $v$ = shape (curve asymmetry).
+- $\gamma_j$ = coefficients for optional predictors, in °C per predictor unit. They shift the curve's location **inside** the logistic (the *T₀-shift parameterization*), so a sample with elevated predictors records the Scaled RI of apparently colder water, and the predicted $RI_{\text{scaled}}$ stays confined to $(b, 1)$ by construction. (An earlier formulation added $\beta_j X_j$ to the response instead; it is superseded because it can push predictions outside the index's physical bounds.)
+- $RI_{\text{scaled}}$ is normalized between 0 and 1 for comparability.
 
-**Forward Model Role:**  
-Given **true environmental conditions**, the model produces a distribution of possible GDGT-based proxy values, including natural variability and measurement noise.
+**Forward Model Role:** Given **true environmental conditions**, the model produces a distribution of possible GDGT-based proxy values, including natural variability and measurement noise.
 
 ---
 
@@ -68,9 +67,9 @@ $$
 P(T \mid RI_{\text{obs}}) \propto P(RI_{\text{obs}} \mid T) \, P(T)
 $$
 
-- \( P(T) \) — **prior temperature distribution** (e.g., from regional climate models, modern analogs, or culture constraints).
-- \( P(RI_{\text{obs}} \mid T) \) — **likelihood** from the forward model.
-- The result \( P(T \mid RI_{\text{obs}}) \) is the **posterior** distribution of temperatures consistent with the observation.
+- $P(T)$ — **prior temperature distribution** (e.g., from regional climate models, modern analogs, or culture constraints).
+- $P(RI_{\text{obs}} \mid T)$ — **likelihood** from the forward model.
+- The result $P(T \mid RI_{\text{obs}})$ is the **posterior** distribution of temperatures consistent with the observation.
 
 ---
 
@@ -82,15 +81,15 @@ $$
 P(RI_{\text{obs}} \mid T, \theta) = \mathcal{N} \left( RI_{\text{obs}} \,\middle|\, RI_{\text{pred}}(T, X; \theta), \sigma_{RI} \right)
 $$
 
-- \( RI_{\text{pred}} \) — forward model prediction.
-- \( \sigma_{RI} \) — residual standard deviation (accounts for unmodeled variability).
+- $RI_{\text{pred}}$ — forward model prediction.
+- $\sigma_{RI}$ — residual standard deviation (accounts for unmodeled variability).
 
 ---
 
 ### 4.2 Priors
 
-- **From cultures and mesocosms** — constrain the curve parameters (\( T_0, k, b, v \)); their posterior means and SDs become the hyperpriors for the core-top fit.
-- **From core-tops** — refine those curve parameters hierarchically and estimate the environmental effects (\( \gamma_j \)), with the predictors treated as errors-in-variables.
+- **From cultures and mesocosms** — constrain the curve parameters ($T_0, k, b, v$); their posterior means and SDs become the hyperpriors for the core-top fit.
+- **From core-tops** — refine those curve parameters hierarchically and estimate the environmental effects ($\gamma_j$), with the predictors treated as errors-in-variables.
 
 Example prior for the temperature:
 
@@ -98,7 +97,7 @@ $$
 T \sim \mathcal{N}(\mu_T, \sigma_T)
 $$
 
-Where \(\mu_T\) and \(\sigma_T\) come from prior knowledge (e.g., modern climatology).
+Where $\mu_T$ and $\sigma_T$ come from prior knowledge (e.g., modern climatology).
 
 ---
 
