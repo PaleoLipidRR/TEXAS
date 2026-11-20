@@ -295,6 +295,7 @@ html[data-theme="dark"] .psm-schematic { --psm-flow: #9ca3af; }
 }
 .psm-cap { grid-column: 3; margin: 0; padding-left: 0.6rem; font-weight: 600; color: var(--pst-color-text-muted); }
 .psm-cap-strong { color: var(--pst-color-text-base); font-weight: 700; }
+.psm-footnote { margin: 0.6rem 0 0; font-size: 0.85rem; color: var(--pst-color-text-muted); }
 .psm-flow > a.psm-texas { grid-column: 1 / -1; justify-self: center; width: min(30rem, 100%); }
 .psm-flow > a.psm-branch { grid-column: 3; justify-self: start; margin-left: 14px; }
 @media (max-width: 760px) {

@@ -45,6 +45,9 @@ sphinx:
   config:
     html_css_files:
       - custom.css
+    # Cookie consent + Google Analytics, shared with the root site (loads the tag only after consent)
+    html_js_files:
+      - consent.js
     html_favicon: _static/texas_logo.svg
     # Generate #slug anchors for H1–H3 so in-page table links resolve
     # 4, not 3: installation.md links to two of its own #### headings

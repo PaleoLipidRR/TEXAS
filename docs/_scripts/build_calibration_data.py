@@ -43,9 +43,6 @@ SNAPSHOT = HERE.parent / "_static" / "calibration-data.data.json"
 # studies and "used by" of every sample, and the earlier calibrations' data and lines.
 PROVENANCE = HERE.parent / "_static" / "calibration-data.provenance.json"
 POSTERIORS = {"sst": "tx.GHEB.sst.sri03.G23-N1p0", "thm": "tx.GHEB.thm.sri03.G23-N1p0"}
-# Corrections to the TEXAS file applied on this page only (the CSV and Zenodo record are untouched)
-OVERRIDES = {("reference_name", "Elling et al. (2017) Environmnental Microbiology"):
-             "Elling et al. (2017) Environmental Microbiology"}
 CSV_NAME = "ds_gridded_screened_global_compilation_finalized.csv"
 POSTERIOR = "tx.GHEB.sst.sri03.G23-N1p0"
 TYPES = {"coretop": "c", "culture": "u", "mesocosm": "m"}
@@ -225,11 +222,6 @@ def build_snapshot(csv, land):
     import pandas as pd
 
     df = pd.read_csv(csv)
-    for (col, old), new in OVERRIDES.items():
-        n = int((df[col] == old).sum())
-        if n:
-            df.loc[df[col] == old, col] = new
-            print(f"override: {col} {old!r} -> {new!r} ({n} rows)")
     df = df[df["datatype"].isin(TYPES)].reset_index(drop=True)
     prov = json.loads(PROVENANCE.read_text()) if PROVENANCE.is_file() else None
     if prov:
