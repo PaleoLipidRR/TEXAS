@@ -25,7 +25,7 @@
   });
 
   // The two tag scripts stay inert (type text/plain) until CookieConsent enables the
-  // "analytics" category; onChange turns storage back off if a visitor withdraws consent.
+  // "analytics" category; withdrawing consent reloads the page without them.
   function blocked(attrs, text) {
     var s = document.createElement("script");
     s.type = "text/plain";
@@ -53,15 +53,20 @@
   js.onload = run;
   document.head.appendChild(js);
 
-  function updateConsentMode(consentData) {
-    var categories = consentData.categories || consentData;
-    if (!categories || typeof categories !== "object") return;
+  // vanilla-cookieconsent v3 passes its callbacks a wrapper ({cookie, changedCategories, ...}),
+  // so ask the library itself which categories are accepted.
+  function analyticsAccepted() {
+    return window.CookieConsent.acceptedCategory("analytics");
+  }
+  function updateConsentMode() {
+    var ok = analyticsAccepted();
     window.gtag("consent", "update", {
-      analytics_storage: categories.analytics ? "granted" : "denied",
+      analytics_storage: ok ? "granted" : "denied",
       ad_storage: "denied",
       functionality_storage: "denied",
       personalization_storage: "denied",
     });
+    return ok;
   }
 
   function run() {
@@ -112,8 +117,9 @@
           },
         },
       },
-      onFirstConsent: function (d) { updateConsentMode(d); },
-      onChange: function (d) { updateConsentMode(d); },
+      onFirstConsent: function () { updateConsentMode(); },
+      // Withdrawing consent reloads the page, so a Google tag that already loaded stops running.
+      onChange: function () { if (!updateConsentMode()) window.location.reload(); },
     });
   }
 })();
